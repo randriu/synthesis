@@ -1,0 +1,17 @@
+dtmc
+
+const int X;
+const int Y;
+
+module m
+
+	stage: [0..4] init 0;
+	res: [0..2] init 0;
+
+    [] stage = 0 -> 1: (stage'=X);
+    [] stage = 1 -> 0.5: (stage'=4) + 0.5: (stage'=Y);
+    [] stage = 2 -> 0.5: (stage'=X+1) + 0.5: (stage'=Y+1);
+    [] stage = 3 -> 0.5: (stage'=4) & (res'=1) + 0.5: (stage'=4) & (res'=2);
+    [] stage = 4 -> true;
+
+endmodule

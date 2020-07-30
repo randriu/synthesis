@@ -1,0 +1,82 @@
+#
+# General config
+#
+branches:
+  only:
+  - master
+sudo: required
+dist: trusty
+language: generic
+
+# Enable docker support
+services:
+- docker
+
+notifications:
+  email:
+    on_failure: always
+    on_success: change
+    recipients:
+    - secure: "NF6+Do0ilkXJPorS2Y3SiBCxhAzqZpmvNJlUDQk2Uix9hewxCQYcPf9u+wEOgiLDVhDXYWK2jk7qtmw5WYqzU9+anPqKoBOc2/F+VCSDwHlZQRpJ9FcgjHJR+ZB0qBNeRI3fCMar6I5vKqmn91uCigo+XP8t3DPAwtTmltlfShf7tEii/tWXsB6wPgM55RsSCkYdssm2DrfrFQX4+OitYVITlRI5OyTthEHxQghnwOpy0Zb36QpDp7auTVrJcDRzG7ammpJ+q+jilXopwl5qrpopj5iBLY7xaOeR2MPyNJm/LW+SsQ+HFfBuBV81+nUNjZ7hUzpitbS2n6rYlg5PH3Iv6BkrHfFYpFykVaODhlVvsI5sqT2VE4QOTNn6EZsBTVejCgsAyNM/mcxeBzE6rEg1D+kyhjmwxfPna3NOvnEKILOPAWApN/IqQmwJ88nkblS2TYR0fCNeyMFkzL2t3rhTRoFbf0iyxVxPZd+IRqzYo+nA3xYxlh9JXdtakl6JhWarg72mKL0I8keofgZ+Y2wUAbSBg6w8xOuJE6LMYMu/kKTrhTAOS7qTejJoU6eo5E12RwKLmaDepgVC6coOr+OKdSH8y2xNNmAXAzajI8eGCXLk6k0YjENpGGlZYlXYq34gAx28coxgvQSRP7n7QRAS+X1uhdfxLt8wqoDIv+4="
+#
+# Configurations
+#
+jobs:
+  include:
+    # Docker stormpy master
+    - os: linux
+      compiler: gcc
+      env: TASK=Test CONFIG=Stormpy DOCKER=stormpy:travis PYTHON=python3
+      script:
+        travis/build.sh
+      deploy:
+        - provider: script
+          skip_cleanup: true
+          script: bash travis/deploy_docker.sh dynasty
+    # Docker stormpy master in debug mode
+    - os: linux
+      compiler: gcc
+      env: TASK=Test CONFIG=Stormpy DOCKER=stormpy:travis-debug PYTHON=python3
+      script:
+        travis/build.sh
+      deploy:
+        - provider: script
+          skip_cleanup: true
+          script: bash travis/deploy_docker.sh dynasty
+    # Docker stormpy latest release
+    - os: linux
+      compiler: gcc
+      env: TASK=Test CONFIG=Stormpy DOCKER=stormpy:1.3.0 PYTHON=python3
+      script:
+        travis/build.sh
+    # Docker stormpy latest release in debug mode
+    - os: linux
+      compiler: gcc
+      env: TASK=Test CONFIG=Stormpy DOCKER=stormpy:1.3.0-debug PYTHON=python3
+      script:
+        travis/build.sh
+    # Docker Storm master with pip
+    - os: linux
+      compiler: gcc
+      env: TASK=Test CONFIG=Pip DOCKER=storm:travis PYTHON=python3
+      script:
+        travis/build.sh
+    # Docker Storm master in debug mode with pip
+    - os: linux
+      compiler: gcc
+      env: TASK=Test CONFIG=Pip DOCKER=storm:travis-debug PYTHON=python3
+      script:
+        travis/build.sh
+
+
+  allow_failures:
+  # Allow failures of stable versions as new features might have been added
+    - os: linux
+      env: TASK=Test CONFIG=Stormpy DOCKER=stormpy:1.3.0 PYTHON=python3
+    - os: linux
+      env: TASK=Test CONFIG=Stormpy DOCKER=stormpy:1.3.0-debug PYTHON=python3
+  # Allow failures of pip installation for now
+    - os: linux
+      env: TASK=Test CONFIG=Pip DOCKER=storm:travis PYTHON=python3
+    - os: linux
+      env: TASK=Test CONFIG=Pip DOCKER=storm:travis-debug PYTHON=python3
