@@ -1,0 +1,39 @@
+Metadata-Version: 2.1
+Name: stormpy
+Version: 1.6.0
+Summary: stormpy - Python Bindings for Storm
+Home-page: https://github.com/moves-rwth/stormpy/
+Author: M. Volk
+Author-email: matthias.volk@cs.rwth-aachen.de
+Maintainer: S. Junges
+Maintainer-email: sebastian.junges@cs.rwth-aachen.de
+License: UNKNOWN
+Project-URL: Documentation, https://moves-rwth.github.io/stormpy/
+Project-URL: Source, https://github.com/moves-rwth/stormpy/
+Project-URL: Bug reports, https://github.com/moves-rwth/stormpy/issues
+Description: Stormpy - Python bindings for Storm
+        ===================================
+        
+        [![Build Status](https://travis-ci.org/moves-rwth/stormpy.svg?branch=master)](https://travis-ci.org/moves-rwth/stormpy)
+        [![GitHub release](https://img.shields.io/github/release/moves-rwth/stormpy.svg)](https://github.com/moves-rwth/stormpy/releases/)
+        
+        Python bindings for [Storm](https://github.com/moves-rwth/storm/), created using [PyBind11](http://pybind11.readthedocs.io/en/stable/intro.html).
+        
+        For more information, please check the [documentation](https://moves-rwth.github.io/stormpy/).
+        
+        
+        ### Dependencies
+        
+        Stormpy depends on [pycarl](https://github.com/moves-rwth/pycarl/).
+        
+        ### Authors
+        
+        - Sebastian Junges
+        - Matthias Volk
+        
+Platform: UNKNOWN
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3
+Description-Content-Type: text/markdown
