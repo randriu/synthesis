@@ -1,0 +1,10 @@
+.idea/
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+
+*.out
+*.log
+*egg-info/
+*.jani
