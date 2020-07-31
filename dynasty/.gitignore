@@ -7,3 +7,6 @@ __pycache__/
 *.out
 *.log
 *egg-info/
+
+*.jani
+build/

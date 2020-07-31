@@ -2,15 +2,15 @@
 
 # basic settings
 model=maze-safety
-cmax=50
+cmax=10
 primary_method=research
 
 regime=0
 
 # hybrid method parameters
-threshold=0.18
+threshold=0.350
 cegar_iters_limit=1
-cegis_expanded_per_iter=70
+cegis_expanded_per_iter=50
 
 # explore parameters
 t_min=0.82

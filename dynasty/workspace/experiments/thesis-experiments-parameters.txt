@@ -1,7 +1,7 @@
 -----
 maze (CMAX=50)
 
-holes: 20
+holes: 10
 family members: 1048576
 MDP states: 9244 
 

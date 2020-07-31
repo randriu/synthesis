@@ -469,13 +469,13 @@ class Research():
         stats = []
         
         if regime == 0:
+            stats.append(self.run_algorithm(CEGISChecker))
+            stats.append(self.run_algorithm(CEGARChecker))
+            # stats.append(self.run_algorithm(IntegratedChecker))
+        elif regime == 1:
             # stats.append(self.run_algorithm(CEGISChecker))
             # stats.append(self.run_algorithm(CEGARChecker))
             stats.append(self.run_algorithm(IntegratedChecker))
-        elif regime == 1:
-            stats.append(self.run_algorithm(CEGISChecker))
-            # stats.append(self.run_algorithm(CEGARChecker))
-            # stats.append(self.run_algorithm(IntegratedChecker))
         elif regime in [2,3]:
             stats.append(self.run_algorithm(IntegratedChecker))
         else:
