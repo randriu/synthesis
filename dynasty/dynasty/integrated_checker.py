@@ -1,23 +1,5 @@
 # author: Roman Andriushchenko
 
-# ------------------------------------------------------------------------------
-# list of modified files
-
-#~ "storm/src/storm/storage/sparse/StateValuations.h"
-#+ "storm/src/storm/research/*"
-
-#~ "stormpy/src/mod_core.cpp"
-#+ "stormpy/src/core/research.*"
-
-#~ "dynasty/dynasty/cli.py"
-#~ "dynasty/dynasty/family_checkers/familychecker.py"
-#~ "dynasty/dynasty/model_handling/mdp_handling.py"
-#+ "dynasty/Makefile"
-#+ "dynasty/workspace/"
-#+ "dynasty/dynasty/integrated_checker.py"
-
-# ------------------------------------------------------------------------------
-
 import z3
 
 import stormpy
