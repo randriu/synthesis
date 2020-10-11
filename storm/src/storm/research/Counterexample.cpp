@@ -143,7 +143,8 @@ namespace storm {
 
         template <typename ValueType, typename StateType>
         storm::storage::FlatSet<std::string> Counterexample<ValueType,StateType>::constructViaHoles (
-            storm::models::sparse::Dtmc<ValueType> const& dtmc
+            storm::models::sparse::Dtmc<ValueType> const& dtmc,
+            bool use_mdp_bounds
         ) {
 
             this->total.start();
@@ -165,6 +166,7 @@ namespace storm {
             std::vector<bool> dtmc_target(dtmc_states+2, false);
             std::vector<std::set<std::string>> dtmc_holes(dtmc_states);
             storm::storage::sparse::StateValuations const& dtmc_state_valuations = dtmc.getStateValuations();
+            double default_bound = this->formula_safety ? 0 : 1;
             for(StateType state = 0; state < dtmc_states; state++) {
                 // storm::storage::sparse::StateValuations::StateValuation const& key =  dtmc_state_valuations.getValuation(state);
                 std::string const& key = dtmc_state_valuations.toString(state,false);
@@ -173,7 +175,8 @@ namespace storm {
                 auto search = this->mdp_info.find(key);
                 assert(search != this->mdp_info.end());
                 auto info = search->second;
-                dtmc_bound[state] = info.first;
+                // dtmc_bound[state] = info.first;
+                dtmc_bound[state] = use_mdp_bounds ? info.first : default_bound;
                 dtmc_target[state] = info.second;
 
                 /*auto search_bound = this->mdp_bound.find(key);
@@ -466,7 +469,6 @@ namespace storm {
                 std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(sub_dtmc, task);
                 storm::modelchecker::ExplicitQualitativeCheckResult & result = result_ptr->asExplicitQualitativeCheckResult();
                 bool satisfied = result[state2index[initial_state]];
-                this->subchains_checked++;
                 this->model_checking.stop();
                 if(!satisfied) {
                     // CE obtained
@@ -476,6 +478,7 @@ namespace storm {
             }
             // Check that a CE has been actually obtained
             assert(current_round <= rounds_total);
+            this->subchains_checked = current_round+1;
 
             // Return a set of critical holes
             this->other.start();
@@ -773,5 +776,4 @@ namespace storm {
 
     } // namespace research
 } // namespace storm
-
 

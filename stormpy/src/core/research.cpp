@@ -47,7 +47,7 @@ void define_research(py::module& m) {
             "construct_via_holes",
             &storm::research::Counterexample<>::constructViaHoles,
             "Construct a counterexample to a given DTMC via holes exploration.",
-            py::arg("dtmc")
+            py::arg("dtmc"), py::arg("use_bounds")
         )
         .def_property_readonly(
             "stats",

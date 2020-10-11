@@ -60,11 +60,14 @@ namespace storm {
             /*!
              * Construct a minimal counterexample to a given DTMC via hole exploration.
              * @param dtmc A DTMC refuting the safety formula. It is assumed that the state space of the DTMC is topologically ordered.
+             * @param use_mdp_bounds If true, mdp bounds will be used for CE construction.
              * @return A set of critical holes.
              */
             storm::storage::FlatSet<std::string> constructViaHoles(
-                storm::models::sparse::Dtmc<ValueType> const& dtmc
+                storm::models::sparse::Dtmc<ValueType> const& dtmc,
+                bool use_mdp_bounds
                 );
+
 
             /*!
              * @return A profiling vector.

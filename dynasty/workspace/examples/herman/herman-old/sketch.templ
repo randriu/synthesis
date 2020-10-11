@@ -4,8 +4,8 @@
 // the procotol is synchronous with no nondeterminism (a DTMC)
 dtmc
 
-const int CMAX;
-const double THRESHOLD;
+const int CMAX; //+
+const double THRESHOLD; //+
 
 const double pFair = 0.5;
 const double pUnfairLow = 0.25;
@@ -36,15 +36,14 @@ endmodule
 
 module controller
     round : [0..5] init 1;
-    syncs : [0..CMAX] init 0;
+    syncs : [0..CMAX] init 0; //+
 
     [step1] round = 1 -> (round'=2);
     [step2] round = 2 -> (round'=3);
     [step3] round = 3 -> (round'=4);
     [step4] round = 4 -> (round'=5);
     [step5] round = 5 -> (round'=0);
-    // [sync] round = 0 -> (round'=1);
-    [sync] round = 0 -> (round'=1) & (syncs'=min(syncs+1,CMAX));
+    [sync] round = 0 -> (round'=1) & (syncs'=min(syncs+1,CMAX)); //+
 
 endmodule
 

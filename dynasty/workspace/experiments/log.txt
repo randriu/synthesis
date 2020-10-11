@@ -1,0 +1,97 @@
+
+> T = 0.733
+This is Dynasty version 0.1.0.
+
+
+
+
+IntegratedChecker
+2020-10-11 20:41:06,417 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from workspace/examples/pole-safety/sketch.templ with constants CMAX=5,THRESHOLD=0.733
+2020-10-11 20:41:06,423 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2020-10-11 20:41:06,424 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants 'CMAX=5,THRESHOLD=0.733'
+2020-10-11 20:41:06,426 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants 'CMAX=5,THRESHOLD=0.733'
+2020-10-11 20:41:06,427 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2020-10-11 20:41:06,427 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M11', 'M12', 'M13', 'M14', 'M15', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M33', 'M34', 'M35', 'M41', 'M42', 'M43', 'M44', 'M45', 'M51', 'M52', 'M53', 'M54', 'M55']
+2020-10-11 20:41:06,427 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants 'CMAX=5,THRESHOLD=0.733'
+2020-10-11 20:41:06,431 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions{M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3]}
+2020-10-11 20:41:06,431 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 1327104
+2020-10-11 20:41:06,491 MainThread - dynasty.jani.jani_quotient_builder - INFO - Running feasibility synthesis.
+2020-10-11 20:41:06,511 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M11
+2020-10-11 20:41:06,526 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M12
+2020-10-11 20:41:06,543 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M14
+2020-10-11 20:41:06,563 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M15
+2020-10-11 20:41:06,582 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M21
+2020-10-11 20:41:06,602 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M22
+2020-10-11 20:41:06,620 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M23
+2020-10-11 20:41:06,642 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M24
+2020-10-11 20:41:06,659 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M25
+2020-10-11 20:41:06,674 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M32
+2020-10-11 20:41:06,690 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M33
+2020-10-11 20:41:06,708 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M34
+2020-10-11 20:41:06,725 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M42
+2020-10-11 20:41:06,744 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M43
+2020-10-11 20:41:06,761 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M44
+2020-10-11 20:41:06,778 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M51
+2020-10-11 20:41:06,793 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Automaton strategy has constant M55
+2020-10-11 20:41:06,798 MainThread - dynasty.jani.jani_quotient_builder - INFO - Family members: 1327104.
+2020-10-11 20:41:06,799 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Current number of problems: 1
+2020-10-11 20:41:06,799 MainThread - dynasty.jani.jani_quotient_builder - INFO - Analysing subfamily of size 1327104.
+2020-10-11 20:41:06,799 MainThread - dynasty.jani.jani_quotient_builder - INFO - CEGAR iteration 1.
+2020-10-11 20:41:06,799 MainThread - dynasty.jani.jani_quotient_builder - INFO - CEGAR: iteration 1, analysing option HoleOptions{M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3]}.
+2020-10-11 20:41:06,799 MainThread - dynasty.jani.jani_quotient_builder - INFO - Construct Jani Model with HoleOptions{M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3]} options and set() as remember
+2020-10-11 20:41:06,801 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Reconstructing automaton strategy
+2020-10-11 20:41:06,930 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Done rewriting strategy
+2020-10-11 20:41:06,930 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Replacing automata...
+2020-10-11 20:41:06,930 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Number of colors: 40
+2020-10-11 20:41:06,931 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Removing constants...
+2020-10-11 20:41:06,931 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Write to output_1.jani
+2020-10-11 20:41:06,934 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - done writing file.
+0: [0, 4294967296, 8589934592, 12884901888, 17179869184, 21474836480, 21474836481, 21474836482, 21474836483, 21474836484, 21474836485, 21474836486, 21474836487, 25769803776, 25769803777, 25769803778, 25769803779, 25769803783, 25769803789, 25769803793, 25769803806, 25769803809, 25769803814, 25769803820, 25769803825, 25769803828, 30064771072, 30064771073, 30064771074, 30064771075, 30064771076, 34359738368, ],22: [25769803780, ],27: [25769803781, ],40: [25769803782, ],37: [25769803784, ],36: [25769803785, ],34: [25769803786, ],32: [25769803787, ],30: [25769803788, ],26: [25769803790, ],20: [25769803791, ],17: [25769803792, ],13: [25769803794, ],12: [25769803795, ],1: [25769803796, ],11: [25769803797, ],10: [25769803798, ],9: [25769803799, ],8: [25769803800, ],24: [25769803801, ],28: [25769803802, ],7: [25769803803, ],5: [25769803804, ],21: [25769803805, ],39: [25769803807, ],38: [25769803808, ],35: [25769803810, ],33: [25769803811, ],31: [25769803812, ],29: [25769803813, ],25: [25769803815, ],19: [25769803816, ],15: [25769803817, ],16: [25769803818, ],14: [25769803819, ],6: [25769803821, ],2: [25769803822, ],3: [25769803823, ],4: [25769803824, ],23: [25769803826, ],18: [25769803827, ]
+2020-10-11 20:41:06,940 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Run analysis of property with index 0
+2020-10-11 20:41:06,940 MainThread - dynasty.model_handling.mdp_handling - INFO - Build model...
+2020-10-11 20:41:07,096 MainThread - dynasty.model_handling.mdp_handling - INFO - done. Model has 17497 states, 20881 actions and 52896 transitions
+2020-10-11 20:41:07,098 MainThread - dynasty.model_handling.mdp_handling - INFO - Start checking direction 1: Pmin=? [F (((((x = 0) | (y = 0)) | (x = 6)) | (y = 6)) & (count < 5))]
+2020-10-11 20:41:07,105 MainThread - dynasty.model_handling.mdp_handling - INFO - Start checking direction 2: Pmax=? [F (((((x = 0) | (y = 0)) | (x = 6)) | (y = 6)) & (count < 5))]
+2020-10-11 20:41:07,114 MainThread - dynasty.model_handling.mdp_handling - INFO - Done Checking. Result for initial state is: 0.7312996713063079 -- 0.8218032410134285
+2020-10-11 20:41:07,114 MainThread - dynasty.jani.quotient_container - DEBUG - Absolute minimum: 0.7312996713063079, Absolute maximum 0.8218032410134285, threshold: 0.733
+2020-10-11 20:41:07,114 MainThread - dynasty.jani.quotient_container - DEBUG - Threshold is between
+2020-10-11 20:41:07,114 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Undecided.
+2020-10-11 20:41:07,114 MainThread - dynasty.jani.quotient_container - DEBUG - Compute full colors
+2020-10-11 20:41:09,070 MainThread - dynasty.jani.quotient_container - INFO - Compute colors in the scheduler...
+2020-10-11 20:41:09,070 MainThread - dynasty.jani.quotient_container - INFO - Applying scheduler...
+2020-10-11 20:41:09,093 MainThread - dynasty.jani.quotient_container - DEBUG - Collect hole counts...
+2020-10-11 20:41:09,169 MainThread - dynasty.jani.quotient_container - DEBUG - Selected holes in scheduler: OrderedDict([('M11', Counter({0: 37, 1: 8})), ('M12', Counter({0: 64, 1: 16})), ('M14', Counter({0: 72})), ('M15', Counter({0: 24})), ('M21', Counter({0: 52, 1: 20})), ('M22', Counter({1: 24, 0: 24})), ('M23', Counter({2: 44, 0: 44, 1: 4})), ('M24', Counter({0: 48})), ('M25', Counter({0: 72})), ('M32', Counter({2: 52, 1: 32, 0: 4})), ('M33', Counter({3: 42, 1: 42, 0: 12})), ('M34', Counter({1: 48, 0: 36, 2: 12})), ('M42', Counter({0: 26, 1: 22})), ('M43', Counter({0: 38, 2: 28, 1: 26})), ('M44', Counter({0: 38, 1: 10})), ('M51', Counter({0: 24, 1: 24})), ('M55', Counter({0: 24, 1: 24}))])
+2020-10-11 20:41:09,169 MainThread - dynasty.jani.quotient_container - DEBUG - Check for inconsistent options...
+2020-10-11 20:41:09,169 MainThread - dynasty.jani.quotient_container - DEBUG - Inconsistent options: OrderedDict([('M11', (0.37, 0, 2)), ('M12', (0.64, 0, 2)), ('M21', (0.52, 0, 2)), ('M22', (0.24, 1, 2)), ('M23', (0.44, 2, 3)), ('M32', (0.52, 2, 3)), ('M33', (0.42, 3, 3)), ('M34', (0.48, 1, 3)), ('M42', (0.26, 0, 2)), ('M43', (0.38, 0, 3)), ('M44', (0.38, 0, 2)), ('M51', (0.24, 0, 2)), ('M55', (0.24, 0, 2))])
+2020-10-11 20:41:09,169 MainThread - dynasty.jani.quotient_container - INFO - Compute colors in the scheduler...
+2020-10-11 20:41:09,169 MainThread - dynasty.jani.quotient_container - INFO - Applying scheduler...
+2020-10-11 20:41:09,196 MainThread - dynasty.jani.quotient_container - DEBUG - Collect hole counts...
+2020-10-11 20:41:09,271 MainThread - dynasty.jani.quotient_container - DEBUG - Selected holes in scheduler: OrderedDict([('M11', Counter({1: 24, 0: 21})), ('M12', Counter({1: 48, 0: 32})), ('M14', Counter({1: 72})), ('M15', Counter({1: 24})), ('M21', Counter({0: 36, 1: 36})), ('M22', Counter({1: 40, 0: 8})), ('M23', Counter({1: 76, 2: 16})), ('M24', Counter({1: 48})), ('M25', Counter({1: 72})), ('M32', Counter({0: 48, 2: 20, 1: 20})), ('M33', Counter({0: 45, 2: 35, 3: 16})), ('M34', Counter({2: 42, 1: 30, 0: 24})), ('M42', Counter({1: 28, 0: 20})), ('M43', Counter({2: 60, 0: 17, 1: 15})), ('M44', Counter({1: 42, 0: 6})), ('M51', Counter({1: 24, 0: 24})), ('M55', Counter({1: 24, 0: 24}))])
+2020-10-11 20:41:09,271 MainThread - dynasty.jani.quotient_container - DEBUG - Check for inconsistent options...
+2020-10-11 20:41:09,271 MainThread - dynasty.jani.quotient_container - DEBUG - Inconsistent options: OrderedDict([('M11', (0.24, 1, 2)), ('M12', (0.48, 1, 2)), ('M21', (0.36, 0, 2)), ('M22', (0.4, 1, 2)), ('M23', (0.76, 1, 2)), ('M32', (0.48, 0, 3)), ('M33', (0.45, 0, 3)), ('M34', (0.42, 2, 3)), ('M42', (0.28, 1, 2)), ('M43', (0.6, 2, 3)), ('M44', (0.42, 1, 2)), ('M51', (0.24, 1, 2)), ('M55', (0.24, 1, 2))])
+2020-10-11 20:41:09,276 MainThread - dynasty.jani.quotient_container - DEBUG - Propose split...!
+2020-10-11 20:41:09,276 MainThread - dynasty.jani.quotient_container - DEBUG - Schedulers differ in OrderedDict([('M11', 30.385833333333334), ('M12', 49.91437500000001), ('M14', 86.02708333333334), ('M15', 35.481249999999996), ('M21', 31.847083333333334), ('M22', 30.550625), ('M23', 111.94565217391306), ('M24', 60.790625000000006), ('M25', 86.02708333333334), ('M32', 73.60984848484848), ('M33', 122.1128125), ('M34', 54.44791666666667), ('M42', 19.525625), ('M43', 57.51231884057972), ('M44', 48.190625000000004), ('M51', 12.910625), ('M55', 12.910625)])
+2020-10-11 20:41:09,276 MainThread - dynasty.jani.quotient_container - DEBUG - Splitting in M33
+2020-10-11 20:41:09,276 MainThread - dynasty.jani.quotient_container - DEBUG - Splitting Options based on Counter({3: 42, 1: 42, 0: 12}) and Counter({0: 45, 2: 35, 3: 16})
+2020-10-11 20:41:09,276 MainThread - dynasty.jani.quotient_container - DEBUG - Splitting Options Differences Counter({1: 42, 3: 26, 0: -33, 2: -35})
+2020-10-11 20:41:09,276 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M33
+2020-10-11 20:41:09,276 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1, 3] vs. [0, 2]
+2020-10-11 20:41:09,276 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '3', '4']...
+2020-10-11 20:41:09,277 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7f972c7a40b0>, <stormpy.storage.storage.Expression object at 0x7f972c7a4130>] and [<stormpy.storage.storage.Expression object at 0x7f972c7a4070>, <stormpy.storage.storage.Expression object at 0x7f972c7a40f0>]
+2020-10-11 20:41:09,277 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2020-10-11 20:41:09,277 MainThread - /home/rachel/projects/research/synthesis/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M33 into [2,4] and [1,3]
+2020-10-11 20:41:09,277 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Undecided.
+2020-10-11 20:41:09,277 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Current number of problems: 1
+2020-10-11 20:41:09,277 MainThread - dynasty.jani.jani_quotient_builder - INFO - Analysing subfamily of size 1327104.
+2020-10-11 20:41:09,277 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - CEGIS stage.
+2020-10-11 20:41:09,810 MainThread - dynasty.jani.jani_quotient_builder - INFO - CEGIS iteration 1.
+2020-10-11 20:41:09,932 MainThread - dynasty.jani.jani_quotient_builder - DEBUG - Constructed DTMC of size 14641.
+2020-10-11 20:41:10,254 MainThread - dynasty.cegis.verifier - DEBUG - Build model with 14641 states in 0.09191155433654785 seconds
+2020-10-11 20:41:10,254 MainThread - dynasty.cegis.verifier - INFO - Start Model Checking....
+2020-10-11 20:41:10,254 MainThread - dynasty.cegis.verifier - DEBUG - Qualitative violations:
+2020-10-11 20:41:10,254 MainThread - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P<=733/1000 [F (((((x = 0) | (y = 0)) | (x = 6)) | (y = 6)) & (count < 5))]'
+2020-10-11 20:41:10,255 MainThread - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2020-10-11 20:41:10,260 MainThread - dynasty.cegis.verifier - DEBUG - MC Result: False
+2020-10-11 20:41:10,261 MainThread - dynasty.cegis.verifier - DEBUG - model states: 14641, transitions: 38088
+2020-10-11 20:41:10,261 MainThread - dynasty.cegis.verifier - INFO - Stop Model Checking
+2020-10-11 20:41:10,261 MainThread - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f972c7a2ef0>]
