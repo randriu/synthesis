@@ -162,14 +162,18 @@ module SR
 	[tick2] sr=1 -> 0.254: (sr'=0) + 0.373: (sr'=1) + 0.373: (sr'=2);
 	[tick2] sr=2 -> 0.254: (sr'=0) + 0.373: (sr'=1) + 0.373: (sr'=2);
 
+	//[tick2] sr=0 -> 0.898: (sr'=0) + 0.051: (sr'=1) + 0.051: (sr'=2);
+	//[tick2] sr=1 -> 0.254: (sr'=0) + 0.373: (sr'=1) + 0.373: (sr'=2);
+	//[tick2] sr=2 -> 0.254: (sr'=0) + 0.373: (sr'=1) + 0.373: (sr'=2);
+
 endmodule
 
 
 // SERVICE REQUEST QUEUES
 module SRQ
 
-	q : [0..CMAX] init 0;
-	qL : [0..CMAX] init 0;
+	q : [0..CMAX] init CMAX/2;
+	qL : [0..CMAX] init CMAX/2;
 
 	[tick2] sr=0 & sp!=0 & sp!=1 -> true; // do not serve and nothing arrives
 

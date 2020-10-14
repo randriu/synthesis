@@ -347,7 +347,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
             self.stage_score += 1
             if self.stage_score >= self.stage_score_limit:
                 # cegar wins the synthesis
-                print("> only cegar")
+                # print("> only cegar")
                 self.stage_switch_allowed = False
                 # switch back to cegar
                 self.stage_start(request_stage_cegar = True)
@@ -357,7 +357,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
             self.stage_score -= 1
             if self.stage_score <= -self.stage_score_limit:
                 # cegar wins the synthesis
-                print("> only cegis")
+                # print("> only cegis")
                 self.stage_switch_allowed = False
                 # no need to switch
                 return False
@@ -371,7 +371,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         self.stage_time_allocation_cegis = cegis_dominance
 
         # stage log
-        print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
+        # print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
 
         # switch back to cegar
         self.stage_start(request_stage_cegar = True)
@@ -379,51 +379,92 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
 
     # ----- CE quality ----- #
 
+    ce_quality_compute = False
+
     def ce_quality_init(self):
-        self.ce_maxsat = self.ce_zero = self.ce_global = self.ce_holes = 0
+        if not self.ce_quality_compute:
+            return
+        self.ce_maxsat = self.ce_zero = self.ce_global = self.ce_local = 0
+        self.ce_maxsat_timer = Timer()
+        self.ce_zero_timer = Timer()
+        self.ce_global_timer = Timer()
+        self.ce_local_timer = Timer()
         self.global_mdp = self.global_mdp_result = None
 
     def ce_quality_global(self,mdp,mdp_result):
+        if not self.ce_quality_compute:
+            return
+        if self.global_mdp is not None:
+            return
         self.global_mdp = mdp
         self.global_mdp_result = mdp_result
 
     def ce_quality_subfamily(self,sketch,relevant_holes_flatset,formula):
-        # return
+        if not self.ce_quality_compute:
+            return
         self.counterexample_global = stormpy.SynthesisResearchCounterexample(sketch, relevant_holes_flatset, formula, self.global_mdp, self.global_mdp_result)
 
-    def ce_quality_measure(self,instance,relevant_holes,counterexample,dtmc,conflict):
-        # return
+    def ce_quality_measure(self,instance,relevant_holes,counterexample,dtmc):
+        if not self.ce_quality_compute:
+            return
         self.statistic.timer.stop()
         self.stage_timer.stop()
         
         # ce_states = counterexample.construct_via_states(dtmc, dtmc_result, 1, 99999)
         # conflict_states = self.relevant_holes(ce_states, relevant_holes)
         # self.ce_states += len(conflict_states) / len(relevant_holes)
+
+        # maxsat
+        self.ce_maxsat_timer.start()
         conflict_maxsat = self.conflict_maxsat(instance)
+        # conflict_maxsat = relevant_holes.copy()
         conflict_maxsat = [hole for hole in conflict_maxsat if hole in relevant_holes]
-        # conflict_zero = counterexample.construct_via_holes(dtmc, False)
-        # conflict_global = self.counterexample_global.construct_via_holes(dtmc,True)
-        
         self.ce_maxsat += len(conflict_maxsat) / len(relevant_holes)
-        # self.ce_zero += len(conflict_zero) / len(relevant_holes)
-        # self.ce_global += len(conflict_global) / len(relevant_holes)
-        self.ce_holes += len(conflict) / len(relevant_holes)
-        print("> {} vs {}".format(self.ce_maxsat / self.cegis_iterations, self.ce_holes / self.cegis_iterations))
+        self.ce_maxsat_timer.stop()
+
+        # zero
+        self.ce_zero_timer.start()
+        conflict_zero = counterexample.construct_via_holes(dtmc, False)
+        self.ce_zero += len(conflict_zero) / len(relevant_holes)
+        self.ce_zero_timer.stop()
         
+        # global
+        self.ce_global_timer.start()
+        conflict_global = self.counterexample_global.construct_via_holes(dtmc,True)
+        self.ce_global += len(conflict_global) / len(relevant_holes)
+        self.ce_global_timer.stop()
+
+        # resume timers and compute normal bounds
         self.stage_timer.start()
         self.statistic.timer.start()
 
+        # local
+        self.ce_local_timer.start()
+        conflict_local = counterexample.construct_via_holes(dtmc, True)
+        self.ce_local += len(conflict_local) / len(relevant_holes)
+        self.ce_local_timer.stop()
+
+        # print("> {} vs {}".format(self.ce_maxsat / self.cegis_iterations, self.ce_local / self.cegis_iterations))
+
+        return conflict_local
+
     def ce_quality_print(self):
-        return
-        if self.cegis_iterations == 0:
+        if not self.ce_quality_compute:
+            return
+        if self.cegis_iterations < 2:
             print("> ce quality: n/a")
         else:
-            iters = self.cegis_iterations
+            iters = self.cegis_iterations - 1
             quality_maxsat = self.ce_maxsat / iters
+            time_maxsat = self.ce_maxsat_timer.read() / iters
             quality_zero = self.ce_zero / iters
+            time_zero = self.ce_zero_timer.read() / iters
             quality_global = self.ce_global / iters
-            quality_holes = self.ce_holes / iters
-            print("> ce quality: {} - {} - {} - {}".format(quality_maxsat, quality_zero, quality_global, quality_holes))
+            time_global = self.ce_global_timer.read() / iters
+            quality_local = self.ce_local / iters
+            time_local = self.ce_local_timer.read() / iters
+            print("> ce quality: {:1.4f} - {:1.4f} - {:1.4f} - {:1.4f}".format(quality_maxsat, quality_zero, quality_global, quality_local))
+            print("> ce time: {:1.4f} - {:1.4f} - {:1.4f} - {:1.4f}".format(time_maxsat, time_zero, time_global, time_local))
 
     def conflict_maxsat(self, instance, all_conflicts=True, naive_deadlocks=True, check_conflicts=False):
         """Naive counterexample generation (for comparison)."""
@@ -532,8 +573,8 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
             conflict = counterexample.construct_via_holes(dtmc, True)
             # print("> ce : {}", counterexample.stats)
 
-            # compare to maxsat, state exploration, naive hole exploration, global vs local bounds
-            self.ce_quality_measure(instance, relevant_holes, counterexample, dtmc, conflict)
+            # compare maxsat vs state exploration vs naive hole exploration vs global bounds vs local bounds
+            # conflict = self.ce_quality_measure(instance, relevant_holes, counterexample, dtmc)
             
             # estimate number of (virtually) pruned models
             # models_pruned = 1
@@ -644,8 +685,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
                     analysed_family = (family, bound, self.new_options)
                     problems.append(analysed_family) #DFS
                     # problems = [analysed_family] + problems # BFS
-                    if self.global_mdp is None:
-                        self.ce_quality_global(self.mdp, self.mdp_mc_result)
+                    self.ce_quality_global(self.mdp, self.mdp_mc_result)
                     
                 self.stage_step(models_pruned)
             

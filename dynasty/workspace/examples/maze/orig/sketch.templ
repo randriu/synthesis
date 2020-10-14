@@ -170,18 +170,18 @@ module maze
 	[north] s=10 -> (s'=7);
 	[south] s=10 -> (s'=12) & (o'=6);
 
-	// [east] s=11 -> (s'=11);
-	// [west] s=11 -> (s'=11);
-	// [north] s=11 -> (s'=8) & (o'=5);
-	// [south] s=11 -> (s'=11);
+	[east] s=11 -> (s'=11);
+	[west] s=11 -> (s'=11);
+	[north] s=11 -> (s'=8) & (o'=5);
+	[south] s=11 -> (s'=11);
 
-	// [east] s=12 -> (s'=12);
-	// [west] s=12 -> (s'=12);
-	// [north] s=12 -> (s'=10) & (o'=5);
-	// [south] s=12 -> (s'=12);
+	[east] s=12 -> (s'=12);
+	[west] s=12 -> (s'=12);
+	[north] s=12 -> (s'=10) & (o'=5);
+	[south] s=12 -> (s'=12);
 
 	// loop when we reach the target
-	[done] s=11 | s=12 | s=13 -> true;
+	[done] s=13 -> true;
 
 endmodule
 
