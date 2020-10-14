@@ -371,7 +371,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         self.stage_time_allocation_cegis = cegis_dominance
 
         # stage log
-        print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
+        # print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
 
         # switch back to cegar
         self.stage_start(request_stage_cegar = True)
@@ -444,7 +444,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         self.ce_local += len(conflict_local) / len(relevant_holes)
         self.ce_local_timer.stop()
 
-        # print("> {} vs {}".format(self.ce_maxsat / self.cegis_iterations, self.ce_local / self.cegis_iterations))
+        print("> {} vs {}".format(self.ce_maxsat / self.cegis_iterations, self.ce_local / self.cegis_iterations))
 
         return conflict_local
 

@@ -1,3 +1,15 @@
 
-> T = 0.9
-> 0.00 \ 0.00 = 1.0 (0)
+> T = 0.894
+> Hybrid: feasible ((1, 5) iters, 85.75 sec)
+> T = 0.895
+> Hybrid: feasible ((1, 5) iters, 86.18 sec)
+> T = 0.896
+> Hybrid: feasible ((1, 5) iters, 86.51 sec)
+> T = 0.897
+> Hybrid: feasible ((1, 5) iters, 86.5 sec)
+> T = 0.898
+> Hybrid: feasible ((1, 5) iters, 86.67 sec)
+> T = 0.899
+> Hybrid: feasible ((1, 5) iters, 85.0 sec)
+> T = 0.900
+> Hybrid: unfeasible ((3, 856) iters, 380.43 sec)

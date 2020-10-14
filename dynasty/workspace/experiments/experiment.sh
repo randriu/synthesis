@@ -126,7 +126,7 @@ function run(){
     # choose_model "${herman[@]}"
     # choose_model "${pole[@]}"
     CMAX=6
-    herbig=("herman/2m-go1" ${CMAX} 0.9 0.9 0.1)
+    herbig=("herman/2m-go1" ${CMAX} 0.894 0.9 0.001)
     choose_model "${herbig[@]}"
 
     hybrid
@@ -152,55 +152,72 @@ function run_test(){
 
     choose_model "${model[@]}"
     # cegis
-    cegar
+    # cegar
     # hybrid
-    exit
 }
 
 function run_ce(){
     timeout=7200
     reset_log
 
-    choose_model "${pole[@]}"
-    hybrd
+    echo ""; echo "> grid"
+    choose_model "${grid[@]}"
+    # cegis
+    # cegar
+    hybrid
 
-    exit
+    echo ""; echo "> maze"
+    choose_model "${maze[@]}"
+    # cegis
+    # cegar
+    hybrid
+
+    echo ""; echo "> pole"
+    # choose_model "${pole[@]}"
+    # cegis
+    # cegar
+    hybrid
+
+    echo ""; echo "> herman"
+    choose_model "${herman[@]}"
+    # cegis
+    # cegar
+    hybrid
 }
 
 function unfeasible() {
     timeout=7200
     reset_log
 
-    echo ""; echo "> gsu"
-    choose_model "${gsu[@]}"
+    echo ""; echo "> grid"
+    choose_model "${grid[@]}"
     # cegis
     # cegar
-    # hybrid
+    hybrid
 
-    echo ""; echo "> msu"
-    choose_model "${msu[@]}"
+    echo ""; echo "> maze"
+    choose_model "${maze[@]}"
     # cegis
     # cegar
-    # hybrid
+    hybrid
 
-    echo ""; echo "> psu"
-    choose_model "${psu[@]}"
+    echo ""; echo "> pole"
+    choose_model "${pole[@]}"
     # cegis
     # cegar
-    # hybrid
+    hybrid
 
-    echo ""; echo "> heru"
-    choose_model "${heru[@]}"
-    cegis
+    echo ""; echo "> herman"
+    choose_model "${herman[@]}"
+    # cegis
     # cegar
-    # hybrid
-    exit
+    hybrid
 }
 
-run
+# run
 # run_ce
 # run_test
-# unfeasible
+unfeasible
 
 exit
 
