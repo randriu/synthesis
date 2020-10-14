@@ -126,7 +126,7 @@ function run(){
     # choose_model "${herman[@]}"
     # choose_model "${pole[@]}"
     CMAX=6
-    herbig=("herman/2m-go1" ${CMAX} 0.89 0.90 0.002)
+    herbig=("herman/2m-go1" ${CMAX} 0.9 0.9 0.1)
     choose_model "${herbig[@]}"
 
     hybrid

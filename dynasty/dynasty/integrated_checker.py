@@ -371,7 +371,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         self.stage_time_allocation_cegis = cegis_dominance
 
         # stage log
-        # print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
+        print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
 
         # switch back to cegar
         self.stage_start(request_stage_cegar = True)
@@ -658,7 +658,7 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
                     # family has been already analysed: refine and continue
                     # note: subfamilies inherit bound from the parent family
                     logger.info("Splitting the family.")
-                    subproblems = [(subfamily, bound, None) for subfamily in self.new_options]
+                    subproblems = [(subfamily, bound, None) for subfamily in subfamilies]
                     problems.extend(subproblems)
                     continue
 
