@@ -371,7 +371,8 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         self.stage_time_allocation_cegis = cegis_dominance
 
         # stage log
-        # print("> {:.2f} \\\\ {:.2f} = {:.1f} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
+        print("> ", end="")
+        print("{:.2e} \\\\ {:.2e} = {:.1e} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
 
         # switch back to cegar
         self.stage_start(request_stage_cegar = True)
@@ -430,13 +431,9 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         
         # global
         self.ce_global_timer.start()
-        conflict_global = self.counterexample_global.construct_via_holes(dtmc,True)
+        conflict_global = self.counterexample_global.construct_via_holes(dtmc, True)
         self.ce_global += len(conflict_global) / len(relevant_holes)
         self.ce_global_timer.stop()
-
-        # resume timers and compute normal bounds
-        self.stage_timer.start()
-        self.statistic.timer.start()
 
         # local
         self.ce_local_timer.start()
@@ -444,17 +441,20 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         self.ce_local += len(conflict_local) / len(relevant_holes)
         self.ce_local_timer.stop()
 
-        print("> {} vs {}".format(self.ce_maxsat / self.cegis_iterations, self.ce_local / self.cegis_iterations))
+        # print("> {} vs {}".format(self.ce_maxsat / self.cegis_iterations, self.ce_local / self.cegis_iterations))
 
-        return conflict_local
+        # resume timers
+        self.stage_timer.start()
+        self.statistic.timer.start()
+
 
     def ce_quality_print(self):
         if not self.ce_quality_compute:
             return
-        if self.cegis_iterations < 2:
+        if self.cegis_iterations < 1:
             print("> ce quality: n/a")
         else:
-            iters = self.cegis_iterations - 1
+            iters = self.cegis_iterations
             quality_maxsat = self.ce_maxsat / iters
             time_maxsat = self.ce_maxsat_timer.read() / iters
             quality_zero = self.ce_zero / iters
@@ -508,6 +508,10 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
 
     # ----- hybrid method ----- #
 
+    only_cegar = False
+    only_cegis = False
+    use_nontrivial_bounds = True
+
     def relevant_holes(self, critical_edges, relevant_holes):
         holes = self._verifier._conflict_analysis(critical_edges)
         holes = [hole for hole in holes if hole in relevant_holes]
@@ -517,6 +521,10 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         """Analyse a family using provided mdp data to construct generalized counterexamples."""
         logger.debug("CEGIS stage.")
         # print("> cegis stage".format(), flush=True)
+
+        if self.only_cegis:
+            # disallow return to CEGAR
+            self.stage_switch_allowed = False
 
         # list of relevant holes (open constants) in this subfamily
         relevant_holes = [hole for hole in self.holes if len(family[hole]) > 1]
@@ -560,6 +568,9 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
 
             # construct and model check a DTMC
             dtmc = stormpy.build_sparse_model_with_options(instance, builder_options)
+            # assert that none of the states contains deadlock (easier notation?)
+            assert dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
+
             logger.debug("Constructed DTMC of size {}.".format(dtmc.nr_states))
 
             assert len(dtmc.initial_states) == 1 # to avoid ambiguity
@@ -570,11 +581,10 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
                 return True
 
             # unsat: construct a counterexample
-            conflict = counterexample.construct_via_holes(dtmc, True)
-            # print("> ce : {}", counterexample.stats)
+            conflict = counterexample.construct_via_holes(dtmc, self.use_nontrivial_bounds)
 
             # compare maxsat vs state exploration vs naive hole exploration vs global bounds vs local bounds
-            # conflict = self.ce_quality_measure(instance, relevant_holes, counterexample, dtmc)
+            self.ce_quality_measure(instance, relevant_holes, counterexample, dtmc)
             
             # estimate number of (virtually) pruned models
             # models_pruned = 1
@@ -642,6 +652,9 @@ class IntegratedChecker(CEGISChecker,CEGARChecker):
         problems = [(family,None,None)]
         self.models_total = family.size()
         self.stage_init()
+        if self.only_cegar:
+            # disallow return to CEGIS
+            self.stage_switch_allowed = False
         while problems:
             logger.debug("Current number of problems: {}".format(len(problems)))
             # print("> ", format(len(problems)))

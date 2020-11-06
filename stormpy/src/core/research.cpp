@@ -37,12 +37,12 @@ void define_research(py::module& m) {
             "Preprocess the quotiendt MDP.",
             py::arg("program"), py::arg("relevant_holes"), py::arg("formula"), py::arg("mdp"), py::arg("mdp_result")
         )
-        .def(
-            "construct_via_states",
-            &storm::research::Counterexample<>::constructViaStates,
-            "Construct a counterexample to a given DTMC via state exploration.",
-            py::arg("dtmc"), py::arg("dtmc_result"), py::arg("expanded_per_iter"), py::arg("subchains_checked_limit")
-        )
+        // .def(
+        //     "construct_via_states",
+        //     &storm::research::Counterexample<>::constructViaStates,
+        //     "Construct a counterexample to a given DTMC via state exploration.",
+        //     py::arg("dtmc"), py::arg("dtmc_result"), py::arg("expanded_per_iter"), py::arg("subchains_checked_limit")
+        // )
         .def(
             "construct_via_holes",
             &storm::research::Counterexample<>::constructViaHoles,

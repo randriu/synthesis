@@ -3,33 +3,29 @@ dtmc
 // To make it more challenging, we can extend the model and consider low and  high priority requests
 // using two request queues.
 
-const int CMAX;
-const double THRESHOLD;
+const int qMax = 10;
 
-const int X11; // = 3;
+const double T_PW;
+const double T_LH;
+const double T_LL;
+
+const int CMAX;
+
+const int X11;// = 3;
 const int X21; // = 1; // or 2
 const int X31; // = 2;
-const int X41; //  = 1;
 const int X12; // = 3;
 const int X22; // = 1; // or 2
 const int X32; // = 2;
-const int X42; //  = 1;
 const int X13; // = 3;
 const int X23; // = 1; // or 2
 const int X33; // = 2;
-const int X43; //  = 1;
-const int X14; // = 3;
-const int X24; // = 1; // or 2
-const int X34; // = 2;
-const int X44; //  = 1;
 
 
-const int LT1 = 3;
-const int LT2 = 5;
-const int LT3 = 7;
-const int HT1 = 3;
-const int HT2 = 5;
-const int HT3 = 7;
+const int LT1 = 3; //3;
+const int LT2 = 7; //6;
+const int HT1 = 3; //3;
+const int HT2 = 7; //6;
 
 // This system can achieve
 
@@ -60,37 +56,23 @@ module PM
 	// 3 - go to sleep
 
 
-	[tick1] qL*10 <= LT1*CMAX & q*10 <= HT1*CMAX   -> (pm'=X11);
+	[tick1] qL*10 <= LT1*qMax & q*10 <= HT1*qMax   -> (pm'=X11);
 
-	[tick1] qL*10 > LT1*CMAX & qL*10 <= LT2*CMAX &  q*10 <= HT1*CMAX -> (pm'=X21);
+	[tick1] qL*10 > LT1*qMax & qL*10 <= LT2*qMax &  q*10 <= HT1*qMax -> (pm'=X21);
 
-	[tick1] qL*10 > LT2*CMAX & qL*10 <= LT3*CMAX &  q*10 <= HT1*CMAX -> (pm'=X31);
+    [tick1] qL*10 > LT2*qMax &  q*10 <= HT1*qMax -> (pm'=X31);
 
-    [tick1] qL*10 > LT3*CMAX &  q*10 <= HT1*CMAX -> (pm'=X41);
+    [tick1] qL*10 <= LT1*qMax & q*10 > HT1*qMax & q*10 <= HT2*qMax -> (pm'=X12);
 
-    [tick1] qL*10 <= LT1*CMAX & q*10 > HT1*CMAX & q*10 <= HT2*CMAX -> (pm'=X12);
+    [tick1] qL*10 > LT1*qMax & qL*10 <= LT2*qMax & q*10 > HT1*qMax & q*10 <= HT2*qMax -> (pm'=X22);
 
-    [tick1] qL*10 > LT1*CMAX & qL*10 <= LT2*CMAX &  q*10 > HT1*CMAX & q*10 <= HT2*CMAX -> (pm'=X22);
+    [tick1] qL*10 > LT2*qMax &  q*10 > HT1*qMax & q*10 <= HT2*qMax -> (pm'=X32);
 
-	[tick1] qL*10 > LT2*CMAX & qL*10 <= LT3*CMAX &  q*10 > HT1*CMAX & q*10 <= HT2*CMAX -> (pm'=X32);
+    [tick1] qL*10 <= LT1*qMax & q*10 > HT2*qMax   -> (pm'=X13);
 
-    [tick1] qL*10 > LT3*CMAX &  q*10 > HT1*CMAX & q*10 <= HT2*CMAX -> (pm'=X42);
+	[tick1] qL*10 > LT1*qMax & qL*10 <= LT2*qMax &  q*10 > HT2*qMax -> (pm'=X23);
 
-    [tick1] qL*10 <= LT1*CMAX & q*10 > HT2*CMAX & q*10 <= HT3*CMAX -> (pm'=X13);
-
-	[tick1] qL*10 > LT1*CMAX & qL*10 <= LT2*CMAX &  q*10 > HT2*CMAX & q*10 <= HT3*CMAX -> (pm'=X23);
-
-	[tick1] qL*10 > LT2*CMAX & qL*10 <= LT3*CMAX &  q*10 > HT2*CMAX & q*10 <= HT3*CMAX -> (pm'=X33);
-
-    [tick1] qL*10 > LT3*CMAX &  q*10 > HT2*CMAX & q*10 <= HT3*CMAX -> (pm'=X43);
-
-    [tick1] qL*10 <= LT1*CMAX & q*10 > HT3*CMAX   -> (pm'=X14);
-
-	[tick1] qL*10 > LT1*CMAX & qL*10 <= LT2*CMAX &  q*10 > HT3*CMAX -> (pm'=X24);
-
-	[tick1] qL*10 > LT2*CMAX & qL*10 <= LT3*CMAX &  q*10 > HT3*CMAX -> (pm'=X34);
-
-    [tick1] qL*10 > LT3*CMAX &  q*10 > HT3*CMAX -> (pm'=X44);
+    [tick1] qL*10 > LT2*qMax &  q*10 > HT2*qMax -> (pm'=X33);
 
 endmodule
 
@@ -168,20 +150,20 @@ endmodule
 // SERVICE REQUEST QUEUES
 module SRQ
 
-	q : [0..CMAX] init CMAX/2;
-	qL : [0..CMAX] init CMAX/2;
+	q : [0..qMax] init 0;
+	qL : [0..qMax] init 0;
 
 	[tick2] sr=0 & sp!=0 & sp!=1 -> true; // do not serve and nothing arrives
 
-	[tick2] sr=1 & sp!=0 & sp!=1 -> (q'=min(q+1,CMAX)); // do not serve and a request arrives
-	[tick2] sr=2 & sp!=0 & sp!=1 -> (qL'=min(qL+1,CMAX)); // do not serve and a request arrives
+	[tick2] sr=1 & sp!=0 & sp!=1 -> (q'=min(q+1,qMax)); // do not serve and a request arrives
+	[tick2] sr=2 & sp!=0 & sp!=1 -> (qL'=min(qL+1,qMax)); // do not serve and a request arrives
 
 	[tick2] sr=0 & sp=0 -> (q'=max(q-1,0)); // serve and nothing arrives
 	[tick2] sr=0 & sp=1 -> (qL'=max(qL-1,0)); // serve and nothing arrives
 
 	// serve and a request arrives arrives -- it actually performs two actions
-	[tick2] sr=2 & sp=0 -> (q'=max(q-1,0)) & (qL'=min(qL+1,CMAX));
-	[tick2] sr=1 & sp=1 -> (qL'=max(qL-1,0)) & (q'=min(q+1,CMAX));
+	[tick2] sr=2 & sp=0 -> (q'=max(q-1,0)) & (qL'=min(qL+1,qMax));
+	[tick2] sr=1 & sp=1 -> (qL'=max(qL-1,0)) & (q'=min(q+1,qMax));
 
 	[tick2] sr=1 & sp=0 -> true;
 	[tick2] sr=2 & sp=1 -> true;
@@ -189,7 +171,10 @@ module SRQ
 endmodule
 
 
-
+module stateext
+    counter : [0..CMAX] init 0;
+    [tick1] true -> (counter'=min(CMAX,counter+1));
+endmodule
 
 
 // BATTERY
@@ -199,9 +184,12 @@ module BAT
 
 	[] bat=0 -> (bat'=0); // loop when battery empty
 
-	[tick2] bat=1 -> 0.0001 : (bat'=0) + 0.9999 : (bat'=1);
+	[tick2] bat=1 -> 0.01 : (bat'=0) + 0.99 : (bat'=1);
 
 endmodule
+
+
+
 
 // queue size
 rewards "queueH"
@@ -219,16 +207,35 @@ endrewards
 // customers lost
 rewards "lostH"
 
-	[tick2] q=CMAX & sr=1 & sp!=0 : 1;
+	[tick2] q=qMax & sr=1 & sp!=0 : 1;
 
 endrewards
 
 rewards "lostL"
 
-	[tick2] qL=CMAX & sr=2 & sp!=1 : 1;
+	[tick2] qL=qMax & sr=2 & sp!=1 : 1;
 
 endrewards
 
+// power consumption
+//rewards "power"
+
+// in contrasr to the PRISM model we assume that the transient states have the power consuption
+// equal to the source state
+
+//	sp=1 & c=0 : 2.5;
+//	sp=0 & c=0 : 2.5;
+//	sp=4 & c=0 : 2.5;
+
+//	sp=2 & c=0 : 1.5;
+//	sp=5 & c=0 : 1.5;
+
+//	sp=3 & c=0 : 0.1;
+//	sp=6 & c=0 : 0.1;
+//	sp=7 & c=0 : 0.1;
+//	sp=8 & c=0 : 0.1;
+
+//endrewards
 
 // power consumption
 rewards "power"
@@ -236,18 +243,35 @@ rewards "power"
 // in contrasr to the PRISM model we assume that the transient states have the power consuption
 // equal to the source state
 
-	sp=1 & c=1 : 2.5;
-	sp=0 & c=1 : 2.5;
-	sp=4 & c=1 : 2.5;
+	[tick2] sp=1 : 2.5;
+	[tick2] sp=0 : 2.5;
+	[tick2] sp=4 : 2.5;
 
-	sp=2 & c=1 : 1.5;
-	sp=5 & c=1 : 1.5;
+	[tick2] sp=2 : 1.5;
+	[tick2] sp=5 : 1.5;
 
-	sp=3 & c=1 : 0.1;
-	sp=6 & c=1 : 0.1;
-	sp=7 & c=1 : 0.1;
-	sp=8 & c=1 : 0.1;
+	[tick2] sp=3 : 0.1;
+	[tick2] sp=6 : 0.1;
+	[tick2] sp=7 : 0.1;
+	[tick2] sp=8 : 0.1;
 
+endrewards
+
+rewards "combined"
+    [tick2] sp=1 : 2.5;
+	[tick2] sp=0 : 2.5;
+	[tick2] sp=4 : 2.5;
+
+	[tick2] sp=2 : 1.5;
+	[tick2] sp=5 : 1.5;
+
+	[tick2] sp=3 : 0.1;
+	[tick2] sp=6 : 0.1;
+	[tick2] sp=7 : 0.1;
+	[tick2] sp=8 : 0.1;
+	[tick2] qL=qMax & sr=2 & sp!=1 : 40;
+
+	[tick2] q=qMax & sr=1 & sp!=0 : 100;
 endrewards
 
 // time

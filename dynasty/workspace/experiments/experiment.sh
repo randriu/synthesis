@@ -1,31 +1,23 @@
 #!/bin/bash
 
-# todo
-# cegis for superfamily
-# lazy mapping
-# rewarding cegis
-
 # presets
+grid=("grid/orig" 40 0.004 0.019 0.003)
+gridbig=("grid/big" 40 0.927 0.931 0.001)
+maze=("maze/orig" 50 0.16127640 0.16127660 0.00000005)
+pole=("pole/orig" 5 0.732 0.736 0.001)
+dpm=("dpm/orig" 12 0.078 0.081 0.001)
+herman=("herman/orig" 2 0.60 0.75 0.05)
 
-# archive
-# def=("pole-safety" 3 0.32 0.32 0.02)
-# small=("small" 50 0.3 0.3 0.02)
-
-# dpm=("dpm" 12 0.003 0.013 0.002)
-# dpmu=("dpm-new" 12 0.1 0.9 0.2)
-
-# her=("herman/herman-old" 2 0.52 0.62 0.02)
-# heru=("herman/herman-old" 2 0.55 0.80 0.05)
-    
-# new generation
-maze=("maze/orig" 50 0.16127635 0.16127665 0.00000005)
-grid=("grid/orig" 40 0.001 0.022 0.003)
-herman=("herman/orig" 2 0.55 0.80 0.05)
-pole=("pole/orig" 5 0.731 0.737 0.001)
+# candidates
+mazexxl=("maze/xxl" 50 0.1 0.1 0.1)
 
 # exploring herman
 CMAX=6
 herbig=("herman/2m-go1" ${CMAX} 0.98433 0.98433 0.3)
+herbigfix=("herman/2m-go1-foxed" ${CMAX} 0.905 0.905 0.3)
+
+# cegis - extended
+
 
 # basic settings
 regime=2
@@ -34,8 +26,8 @@ primary_method=research
 
 # main parameters
 preset=("${psu[@]}")
-timeout=120
-score_limit=5
+timeout=24h
+score_limit=999999
 
 # workspace settings
 workspace="workspace"
@@ -81,7 +73,7 @@ function write_params() {
 function dynasty() {
     dynasty_opts="--project ${examples_dir}/${model}/ --sketch sketch.templ --allowed sketch.allowed --properties sketch.properties"
     dynasty="python dynasty.py ${dynasty_opts} ${primary_method}"
-    timeout ${timeout}s ${dynasty} --constants "CMAX=${cmax},THRESHOLD=${threshold}"
+    timeout ${timeout} ${dynasty} --constants "CMAX=${cmax},THRESHOLD=${threshold}"
     # ${dynasty} --constants "CMAX=${cmax},THRESHOLD=${threshold}"
 }
 
@@ -118,142 +110,99 @@ function hybrid() {
 }
 
 function run(){
-    timeout=7200
+    timeout=12h
+    score_limit=999999
+    # CMAX=6
     reset_log
-
+    
     # choose_model "${grid[@]}"
+    # choose_model "${gridbig[@]}"
     # choose_model "${maze[@]}"
-    # choose_model "${herman[@]}"
+    # choose_model "${mazexxl[@]}"
     # choose_model "${pole[@]}"
+    # choose_model "${dpm[@]}"
+    # choose_model "${herman[@]}"
+
+    # model=("maze/xxl" 50 0.5 0.5 0.1)
+
     CMAX=6
-    herbig=("herman/2m-go1" ${CMAX} 0.894 0.9 0.001)
-    choose_model "${herbig[@]}"
-
-    hybrid
-
-    exit
-}
-
-function run_test(){
-    timeout=10800
-    reset_log
-    
-    # maze-l 0.1612766 U - 0.1612767 F
-
-    # maze-xxl 0.161945 U 0.1619454 F
-    # model=("maze-xxl" 50 0.16 0.17 0.002) # 10 min TO
-    # ./storm --prism ~/projects/research/synthesis/synthesis/dynasty/workspace/examples/grid-xl/sketch.templ -const "M_0_1=3,M_1_1=0,M_2_1=2,M_3_1=1,P_0_1=3,P_1_1=2,P_2_1=4,P_3_1=3,CMAX=40" -ec --build-overlapping-guards-label --io:exportexplicit test.out --buildstateval
-
-    # model=("grid-big" 40 0.926 0.94 0.001) # 0.926 F - 0.927 U
-    model=("grid/big" 40 0.927 0.927 0.001) # 0.926 F - 0.927 U
-    
-    # CMAX=2
-    # model=("herman/herman-7" ${CMAX} 0.4 0.4 0.2) # ? F - 0.6  q-mdp: 2034305
+    model=("herman/2m-go1-fixed" ${CMAX} 0.905 0.905 0.3)
 
     choose_model "${model[@]}"
     # cegis
     # cegar
+    hybrid
+}
+
+
+function counterexamples(){
+    timeout=1h
+    reset_log
+
+    echo ""; echo "> grid"
+    choose_model "${grid[@]}"
+    # hybrid
+
+    echo ""; echo "> maze"
+    choose_model "${maze[@]}"
+    # hybrid
+
+    echo ""; echo "> pole"
+    choose_model "${pole[@]}"
+    # hybrid
+    
+    echo ""; echo "> herman"
+    choose_model "${herman[@]}"
     # hybrid
 }
 
-function run_ce(){
-    timeout=7200
+function performance() {
+    timeout=1h
+    score_limit=999999
     reset_log
 
-    echo ""; echo "> grid"
+    echo ""; echo "> ----- grid"
     choose_model "${grid[@]}"
     # cegis
     # cegar
     hybrid
 
-    echo ""; echo "> maze"
+    echo ""; echo "> ----- grid-big"
+    choose_model "${gridbig[@]}"
+    # cegis
+    # cegar
+    hybrid
+
+    echo ""; echo "> ----- maze"
     choose_model "${maze[@]}"
     # cegis
     # cegar
     hybrid
 
-    echo ""; echo "> pole"
-    # choose_model "${pole[@]}"
-    # cegis
-    # cegar
-    hybrid
-
-    echo ""; echo "> herman"
-    choose_model "${herman[@]}"
-    # cegis
-    # cegar
-    hybrid
-}
-
-function unfeasible() {
-    timeout=7200
-    reset_log
-
-    echo ""; echo "> grid"
-    choose_model "${grid[@]}"
-    # cegis
-    # cegar
-    hybrid
-
-    echo ""; echo "> maze"
-    choose_model "${maze[@]}"
-    # cegis
-    # cegar
-    hybrid
-
-    echo ""; echo "> pole"
+    echo ""; echo "> ----- pole"
     choose_model "${pole[@]}"
     # cegis
     # cegar
     hybrid
 
-    echo ""; echo "> herman"
+    echo ""; echo "> ----- dpm"
+    choose_model "${dpm[@]}"
+    # cegis
+    # cegar
+    hybrid
+
+    echo ""; echo "> ----- herman"
     choose_model "${herman[@]}"
     # cegis
     # cegar
     hybrid
 }
 
-# run
-# run_ce
-# run_test
-unfeasible
+run
+# counterexamples
+# performance
 
 exit
 
 # beep bop
 # paplay /usr/share/sounds/freedesktop/stereo/complete.oga
-
-# if [ $regime -eq 0 ] # simple execution
-# then
-#     dynasty
-#     exit
-# elif [ $regime -eq 1 ] # explore threshold: cegis
-# then
-#     cegis
-# elif [ $regime -eq 2 ] # explore threshold: cegar
-# then
-#     cegar
-# elif [ $regime -eq 3 ] # explore threshold (cegis, cegar)
-# then
-#     hybrid
-# elif [ $regime -eq 3 ] # explore cegar iterations limit
-# then
-#     for cegar_iters_limit in `seq ${l_min} ${l_step} ${l_max}`; do
-#         echo "> L = ${cegar_iters_limit}"  | log_output
-#         write_params
-#         dynasty | log_output
-#     done
-# elif [ $regime -eq 3 ] # explore expanded per iter
-# then
-#     for cegis_expanded_per_iter in `seq ${e_min} ${e_step} ${e_max}`; do
-#         echo "> E = ${cegis_expanded_per_iter}"  | log_output
-#         write_params
-#         dynasty | log_output
-#     done
-# else
-#     echo "what"
-# fi
-
-# subl ${log_file}
-# subl ${log_grep_file}
