@@ -17,7 +17,6 @@ run:
 clean:
 	@$(RM) output* *.out *.log *.jani state_signatures.* $(LOG_DIR)/*
 
-
 r: run
 c: clean
 
