@@ -11,7 +11,7 @@ from dynasty.family_checkers.cegis import Synthesiser
 from dynasty import version
 from dynasty.jani.quotient_container import Engine
 
-from dynasty.integrated_checker import Research #+
+from dynasty.family_checkers.integrated_checker import Research #+
 
 logger = logging.getLogger(__name__)
 
