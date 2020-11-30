@@ -620,10 +620,37 @@ class FamilyHybrid(Family):
                 for index in choice_origins.get_edge_index_set(choice_index):
                     hole_indices = FamilyHybrid._edge_to_hole_indices.get(index, set())
                     state_hole_indices.update(hole_indices)
-            hole_indices = [index for index in state_hole_indices if len(self.options[Family._hole_list[index]]) > 1]
+            state_hole_indices = set([index for index in state_hole_indices if len(self.options[Family._hole_list[index]]) > 1])
             self._state_to_hole_indices.append(state_hole_indices)
         Profiler.stop()
         return self._state_to_hole_indices
+
+    # @property
+    # def dtmc_state_to_hole_indices(self):
+    #     assert self.constructed and self.analyzed
+    #     assert self.dtmc is not None
+
+    #     # lazy evaluation
+    #     if self._state_to_hole_indices is None:
+    #         self._state_to_hole_indices = [None for state in range(self.mdp.nr_states)]
+
+    #     Profiler.start("ce - MDP holes (DTMC)")
+    #     matrix = self.mdp.transition_matrix
+    #     choice_origins = self.mdp.choice_origins
+    #     result = []
+    #     for dtmc_state in range(self.dtmc.nr_states):
+    #         mdp_state = self.dtmc_state_map[dtmc_state]
+    #         if self._state_to_hole_indices[mdp_state] is None:
+    #             state_hole_indices = set()
+    #             for choice_index in range(matrix.get_row_group_start(mdp_state),matrix.get_row_group_end(mdp_state)):
+    #                 for index in choice_origins.get_edge_index_set(choice_index):
+    #                     hole_indices = FamilyHybrid._edge_to_hole_indices.get(index, set())
+    #                     state_hole_indices.update(hole_indices)
+    #             state_hole_indices = set([index for index in state_hole_indices if len(self.options[Family._hole_list[index]]) > 1])
+    #             self._state_to_hole_indices[mdp_state] = state_hole_indices            
+    #         result.append(self._state_to_hole_indices[mdp_state])
+    #     Profiler.stop()
+    #     return result
 
     def pick_member(self):
         
@@ -724,10 +751,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
     
     use_nontrivial_bounds = True
     only_cegar = False
-    # only_cegis = True
     only_cegis = False
+    # only_cegis = True
 
     print_stage_info = False
+    print_profiling = False
     print_profiling = True
 
 

@@ -41,6 +41,7 @@ class Profiler:
     
     def initialize():
         Profiler.timers = dict()
+        Profiler.started_last = None
         Profiler.timer_total = Timer()
         Profiler.timer_total.start()
 
@@ -48,14 +49,17 @@ class Profiler:
         Profiler.ce_stats = [0 for i in range(5)]
 
     def stop():
-        for timer in Profiler.timers.values():
-            timer.stop()
+        if Profiler.started_last is None:
+            return
+        Profiler.started_last.stop()
+        Profiler.started_last = None
 
     def start(timer_name):
         Profiler.stop()
         if timer_name not in Profiler.timers:
             Profiler.timers[timer_name] = Timer()
         Profiler.timers[timer_name].start()
+        Profiler.started_last = Profiler.timers[timer_name]
 
     def add_ce_stats(ce_stats):
         count = Profiler.ce_count

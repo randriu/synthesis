@@ -24,6 +24,7 @@ class Engine(Enum):
 
 def is_inside_function(threshold):
     return (lambda lower, upper: threshold > lower and threshold < upper)
+    # return (lambda lower, upper: threshold >= lower and threshold <= upper) #+ weak vs strong bounds
 
 
 def _compute_choice_origins_to_colors(jani):

@@ -119,26 +119,6 @@ function hybrid() {
 
 # --- sandbox ------------------------------------------------------------------
 
-function rewards_grid() {
-    reset_log
-
-    timeout=1h
-    parallel=true
-    # verbose=true
-
-    CMAX=40
-    T_MIN=15.0
-    T_MAX=15.5
-    T_STEP=0.1
-
-    model=("grid/rew" ${CMAX} ${T_MIN} ${T_MAX} ${T_STEP})
-    choose_model "${model[@]}"
-
-    # cegis
-    # cegar
-    hybrid
-}
-
 function tacas_performance() {
     reset_log
 
@@ -172,6 +152,25 @@ function tacas_performance() {
 
 }
 
+function exploring_grid() {
+    reset_log
+
+    timeout=1h
+    parallel=true
+    # verbose=true
+    
+    model=("grid/big-exploring" 10 0.0714 0.0714 0.0001)
+    # model=("grid/big-exploring" 10 7.6 7.7 0.1)
+    
+    # model=("grid/big-exploring-nobad" 10 0.1 0.9 0.1)
+    # model=("grid/big-exploring-nobad" 10 9.4 /9.5 0.1)
+    
+    choose_model "${model[@]}"
+    
+    hybrid
+    # cegar
+}
+
 function profiling() {
     reset_log
 
@@ -180,46 +179,21 @@ function profiling() {
     # verbose=true
 
     # model=("grid/orig" 40 0.019 0.019 0.15)
-    
-    model=("grid/big" 40 0.928 0.931 0.003)
-    
-    # model=("grid/rew" 40 15 16 1.0)
-
+    # model=("grid/big" 40 0.928 0.931 0.003)
     # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
     # model=("herman/orig" 2 0.60 0.60 0.15)
     # model=("pole/orig" 5 0.735 0.735 0.001)
-
     # model=("dpm/orig" 12 0.080 0.080 0.002)
-    # model=("dpm/mult" 5 1.0 1.0 1.0)
+    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
 
-    # model=("grid/mult" 40 15.0 15.0 0.1)
-
-    # CMAX=6
-    # model=("herman/2m-go1-fixed" ${CMAX} 0.98 0.98 0.3)
+    model=("pole/orig" 5 0.735 0.735 0.001)
 
     choose_model "${model[@]}"
 
-    # hybrid
+    hybrid
     # cegis
-    cegar
+    # cegar
     # onebyone
-}
-
-function profiling_all() {
-    reset_log
-    timeout=2m
-    # parallel=true
-    
-    grid=("grid/orig" 40 0.004 0.004 0.15)
-    maze=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
-    herman=("herman/orig" 2 0.60 0.60 0.15)
-
-    models=("grid" "maze" "herman")
-    for model in "${models[@]}"; do
-        printf "\n--- $model\n"
-        choose_model `eval echo '${'${model}'[@]}'`
-        hybrid
-    done
 }
 
 function test_release() {
@@ -229,7 +203,7 @@ function test_release() {
     model=("herman/orig" 2 0.60 0.75 0.15)
     choose_model "${model[@]}"
     cegar
-    echo "^ should be at 19 and 15 sec"
+    echo "^ should be at 15 and 19 sec"
 }
 
 
@@ -238,10 +212,10 @@ function test_release() {
 # tacas_performance
 
 profiling
-# profiling_all
+
+# exploring_grid
 
 # test_release
-# test_hybrid
 
 exit
 
