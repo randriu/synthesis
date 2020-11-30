@@ -728,7 +728,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
     only_cegis = False
 
     print_stage_info = False
-    print_profiling = False
+    print_profiling = True
 
 
     def stage_init(self):

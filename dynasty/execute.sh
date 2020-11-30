@@ -153,7 +153,8 @@ function tacas_performance() {
     pole=("pole/orig" 5 0.732 0.735 0.003)
     herman=("herman/orig" 2 0.60 0.75 0.15)
 
-    models=("grid" "gridbig" "maze" "dpm" "pole" "herman")
+    # models=("grid" "gridbig" "maze" "dpm" "pole" "herman")
+    models=("grid" "maze" "dpm" "pole" "herman")
 
     echo "----- CEGAR"
     for model in "${models[@]}"; do
@@ -174,13 +175,14 @@ function tacas_performance() {
 function profiling() {
     reset_log
 
-    timeout=10m
-    parallel=true
+    timeout=10h
+    # parallel=true
     # verbose=true
 
+    # model=("grid/orig" 40 0.019 0.019 0.15)
     
-    model=("grid/orig" 40 0.019 0.019 0.15)
-    # model=("grid/big" 40 0.926 0.927 0.15)
+    model=("grid/big" 40 0.928 0.931 0.003)
+    
     # model=("grid/rew" 40 15 16 1.0)
 
     # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
@@ -192,11 +194,15 @@ function profiling() {
 
     # model=("grid/mult" 40 15.0 15.0 0.1)
 
+    # CMAX=6
+    # model=("herman/2m-go1-fixed" ${CMAX} 0.98 0.98 0.3)
+
     choose_model "${model[@]}"
 
-    hybrid
+    # hybrid
     # cegis
-    # cegar
+    cegar
+    # onebyone
 }
 
 function profiling_all() {

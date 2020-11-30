@@ -11,7 +11,7 @@ all: run
 
 run:
 	$(eval RUN_SH := $(LOG_DIR)/run_$(CORE).sh)
-	@$(CP) $(EXP_SH) $(RUN_SH)
+	@cp $(EXP_SH) $(RUN_SH)
 	@bash $(RUN_SH) $(CORE)
 
 clean:
