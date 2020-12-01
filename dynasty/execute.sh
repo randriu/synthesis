@@ -30,6 +30,7 @@ herman=("herman/orig" 2 0.60 0.75 0.05)
 
 # preset candidates
 mazexxl=("maze/xxl" 50 0.1 0.1 0.1)
+virus=("virus/orig" 0 0.1 0.9 0.1)
 
 # exploring herman
 CMAX=6
@@ -149,14 +150,14 @@ function tacas_performance() {
     for model in "${models[@]}"; do
         echo "--- $model"
         choose_model `eval echo '${'${model}'[@]}'`
-        cegar
+        # cegar
     done
 
     echo "----- Hybrid"
     for model in "${models[@]}"; do
         echo "--- $model"
         choose_model `eval echo '${'${model}'[@]}'`
-        # hybrid
+        hybrid
     done
 
 }
@@ -180,6 +181,21 @@ function exploring_grid() {
     # cegar
 }
 
+function exploring_virus() {
+    reset_log
+
+    timeout=1h
+    parallel=true
+    # verbose=true
+    
+    model=("virus/orig" 30 0.1 0.2 0.01)
+    
+    choose_model "${model[@]}"
+    
+    hybrid
+    # cegar
+}
+
 function profiling() {
     reset_log
 
@@ -193,6 +209,7 @@ function profiling() {
     # model=("pole/orig" 5 0.735 0.735 0.001)
     model=("dpm/orig" 12 0.080 0.080 0.002)
     # model=("herman/orig" 2 0.60 0.60 0.15)
+    # model=("virus/orig" 0 0.1 0.9 0.1)
 
     # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
 
@@ -207,10 +224,11 @@ function profiling() {
 # ----------
 
 # test_release
-tacas_performance
+# tacas_performance
 
 # profiling
 # exploring_grid
+exploring_virus
 
 exit
 
