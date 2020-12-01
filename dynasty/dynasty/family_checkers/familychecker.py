@@ -4,6 +4,7 @@ from functools import reduce
 import logging
 import functools
 import operator
+import math
 
 import stormpy
 import stormpy.core
@@ -144,6 +145,8 @@ class FamilyChecker:
         self.differents = None
         self.properties = None
         self._optimality_setting = None
+        self._optimal_value = None
+        self._optimal_assignment = None
 
         self.qualitative_properties = None
         self._engine = engine
@@ -382,6 +385,7 @@ class FamilyChecker:
             raise ValueError("optimality criterion not set")
 
         self._optimality_setting = OptimalitySetting(optimality_criterion, direction, epsilon)
+        self._optimal_value = 0.0 if direction == "max" else math.inf
 
     def input_has_multiple_properties(self):
         if self._optimality_setting is not None:

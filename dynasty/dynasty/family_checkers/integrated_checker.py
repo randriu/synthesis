@@ -504,6 +504,7 @@ class Family:
         logger.debug("CEGAR: analyzing family {} of size {}.".format(self.options, self.size))            
 
         undecided_formulae_indices = []
+        # TODO: optimal property at last index!
         for formula_index in self.formulae_indices:
             logger.debug("CEGAR: model checking MDP against a formula with index {}.".format(formula_index))
             feasible,bound = self.model_check_formula(formula_index)
@@ -791,6 +792,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
 
     def __init__(self):
         QuotientBasedFamilyChecker.__init__(self)
+        self.families = None
         self.iterations_cegis = 0
         self.iterations_cegar = 0
         self.formulae = []
@@ -925,6 +927,43 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         self.stage_start(request_stage_cegar=True)
         return True
 
+    def _check_optimal_property(self, family_ref, assignment):
+        assert family_ref.dtmc is not None
+        vp_index = len(self.formulae) - 1  # Compute the index of the violation property
+
+        # Model checking of the optimality property
+        result = stormpy.model_checking(family_ref.dtmc, self._optimality_setting.criterion)
+
+        # Check whether the improvement was achieved
+        if self._optimality_setting.is_improvement(result.at(family_ref.dtmc.initial_states[0]), self._optimal_value):
+
+            # Set the new values of the optimal attributes
+            self._optimal_value = result.at(family_ref.dtmc.initial_states[0])
+            self._optimal_assignment = assignment
+
+            # Construct new violation property with respect to the currently optimal value
+            vp = self._optimality_setting.get_violation_property(
+                    self._optimal_value,
+                    lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x)),
+            )
+
+            # Update the attributes of the family according to the new optimal values
+            # For each family we need to update theirs formulae and formulae indices to check
+            for family in self.families:
+                # Replace the last violation property by newly one
+                family.formulae[vp_index] = vp.raw_formula
+                # When the violation property is not checking, we have to add its index
+                if vp_index not in family.formulae_indices:
+                    family.formulae_indices.append(vp_index)
+
+            # Change the value of threshold of the violation formulae within constructed quotient MDP
+            Family.set_thresholds(Family.get_thresholds()[:-1] + [vp.raw_formula.threshold])
+            family_ref.model_check_formula(vp_index)
+            family_ref.bounds[vp_index] = Family.quotient_container().latest_result.result
+
+            logger.debug(f"Optimal value improved to {self._optimal_value}.")
+            return True
+
     def analyze_family_cegis(self, family):
         """
         Analyse a family against selected formulae using precomputed MDP data
@@ -969,8 +1008,21 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                 if not sat:
                     violated_formulae_indices.append(formula_index)
             if not violated_formulae_indices:  # all formulae SAT
-                Profiler.add_ce_stats(counterexample_generator.stats)
-                return True
+                if self.input_has_optimality_property():
+                    improved = self._check_optimal_property(family, assignment)
+
+                    if improved:
+                        # Update counterexample generator
+                        Profiler.start("ce - other")
+                        logger.debug("CEGIS: preprocessing quotient MDP")
+                        counterexample_generator = stormpy.SynthesisResearchCounterexample(
+                            family.mdp, len(Family.hole_list), family.state_to_hole_indices,
+                            self.formulae, family.bounds
+                        )
+                        Profiler.stop()
+                else:
+                    Profiler.add_ce_stats(counterexample_generator.stats)
+                    return True
 
             # some formulae UNSAT: construct counterexamples
             logger.debug("CEGIS: preprocessing DTMC.")
@@ -1046,13 +1098,13 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         self.stage_step(0)
 
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
-        families = [family]
+        self.families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
         while families != []:
             logger.debug("Current number of families: {}".format(len(families)))
             
             # pick a family
-            family = families.pop(-1)
+            family = self.families.pop(-1)
             if not self.stage_cegar:
                 # CEGIS
                 feasible = self.analyze_family_cegis(family)
@@ -1068,7 +1120,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                     # stage interrupted: leave the family to cegar
                     # note: phase was switched implicitly
                     logger.debug("CEGIS: stage interrupted.")
-                    families.append(family)
+                    self.families.append(family)
                     continue
             else:  # CEGAR
                 assert family.split_ready
@@ -1102,7 +1154,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                         continue
                     else:  # feasible is None:
                         logger.debug("CEGAR: undecided.")
-                        families.append(subfamily)
+                        self.families.append(subfamily)
                         continue
                 self.stage_step(models_pruned)
 

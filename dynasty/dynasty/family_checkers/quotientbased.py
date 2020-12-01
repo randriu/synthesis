@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 import logging
+import math
 
 import stormpy
 import stormpy.core
@@ -43,20 +44,24 @@ class QuotientBasedFamilyChecker(FamilyChecker):
                 accept_if_above = True
             self.mc_formulae.append(formula)
             self.mc_formulae_alt.append(alt_formula)
-
             self._accept_if_above.append(accept_if_above)
+
         if self._optimality_setting is not None:
             opt_formula = self._optimality_setting.criterion.raw_formula.clone()
             opt_alt_formula = self._optimality_setting.criterion.raw_formula.clone()
             if self._optimality_setting.direction == "max":
                 opt_formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
                 opt_alt_formula.set_optimality_type(stormpy.OptimizationDirection.Minimize)
+                accept_if_above = True
             else:
                 assert self._optimality_setting.direction == "min"
                 opt_formula.set_optimality_type(stormpy.OptimizationDirection.Minimize)
                 opt_alt_formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
+                accept_if_above = False
+            self.thresholds.append(0.0 if self._optimality_setting.direction == "max" else math.inf)
             self.mc_formulae.append(opt_formula)
             self.mc_formulae_alt.append(opt_alt_formula)
+            self._accept_if_above.append(accept_if_above)
 
     def _analyse_from_scratch(self, _open_constants, holes_options, all_in_one_constants, threshold):
         remember = set()  # set(_open_constants)#set()
