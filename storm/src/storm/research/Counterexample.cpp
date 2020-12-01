@@ -171,6 +171,8 @@ namespace storm {
                 if(is_reward) {
                     storm::logic::RewardOperatorFormula rf = formula->asRewardOperatorFormula();
                     this->formula_reward_name.push_back(rf.getRewardModelName());
+                } else {
+                    this->formula_reward_name.push_back("");
                 }
 
                 // Extract predicate for target states and identify such states
@@ -197,7 +199,20 @@ namespace storm {
             this->total.stop();
         }
 
-        
+        template <typename ValueType, typename StateType>
+        void Counterexample<ValueType,StateType>::replaceFormulaThreshold(
+                uint_fast64_t formula_index,
+                ValueType formula_threshold,
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bound
+            ) {
+            assert(formula_index < this->formulae_count);
+            this->mdp_bounds[formula_index] = mdp_bound;
+            storm::logic::OperatorFormula & of = this->formula_modified[formula_index]->asOperatorFormula();
+            storm::expressions::ExpressionManager const& em = of.getThreshold().getManager();
+            storm::expressions::Expression threshold_expression = em.rational(formula_threshold);
+            of.setThreshold(threshold_expression);
+        }
+
         template <typename ValueType, typename StateType>
         void Counterexample<ValueType,StateType>::prepareDtmc(
             storm::models::sparse::Dtmc<ValueType> const& dtmc,

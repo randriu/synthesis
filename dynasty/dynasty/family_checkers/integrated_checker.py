@@ -139,8 +139,11 @@ def check_mdp(mdp, formula, alt_formula, threshold, accept_if_above):
 # synthesis wrappers
 
 def readable_assignment(assignment):
-    return {k:v.__str__() for (k,v) in assignment.items()} if assignment is not None else None
+    # return {k:v[0].__str__() for (k,v) in assignment.items()} if assignment is not None else None
+    return ",".join(["{}={}".format(k,v[0].__str__()) for (k,v) in assignment.items()]) if assignment is not None else None
 
+# ./storm --prism $VIRUS/sketch.templ --constants "CMAX=30,THRESHOLD=0.12,X33_23=1,X22_21=0,X2333_32=2,X2333_13=2,X2333_22=2,X3233_23=0,X3233_31=0,X3233_22=2,X132333_32=0,X132333_12=0,X132333_22=0,X313233_23=0,X313233_21=1,X313233_22=0,X233233_31=0,X233233_13=2,X233233_22=0,X23313233_13=0,X23313233_21=0,X23313233_22=0,X13233233_12=0,X13233233_31=0,X13233233_22=0,X1323313233_12=0,X1323313233_21=0,X1323313233_22=0"
+# X33_23=1,X22_21=0,X2333_32=2,X2333_13=2,X2333_22=2,X3233_23=0,X3233_31=0,X3233_22=2,X132333_32=0,X132333_12=0,X132333_22=0,X313233_23=0,X313233_21=1,X313233_22=0,X233233_31=0,X233233_13=2,X233233_22=0,X23313233_13=0,X23313233_21=0,X23313233_22=0,X13233233_12=0,X13233233_31=0,X13233233_22=0,X1323313233_12=0,X1323313233_21=0,X1323313233_22=0
 
 class Statistic:
     """General computation stats."""
@@ -185,6 +188,9 @@ class CEGISChecker(Synthesiser):
         # if self.input_has_optimality_property()
         self.statistic = Statistic("CEGIS", threshold)
         _, assignment, _ = self.run_feasibility()
+        assignment = {k:[v] for (k,v) in assignment.items()} if assignment is not None else None
+        if assignment is not None:
+            logger.info("Found satisfying assignment: {}".format(readable_assignment(assignment)))
         self.statistic.finished(assignment, self.stats.iterations)
 
 class CEGARChecker(LiftingChecker):
@@ -223,23 +229,20 @@ class CEGARChecker(LiftingChecker):
         # initiate CEGAR loop
         families = [family]
         logger.debug("Initiating CEGAR loop")
-        while families:
+        while families != []:
             logger.debug("Current number of families: {}".format(len(families)))
-            
-            # pick a family
-            family = families.pop(-1)
-
             self.iterations += 1
             logger.debug("CEGAR: iteration {}.".format(self.iterations))
+            family = families.pop(-1)
             family.construct()
             feasible = family.analyze()
             if feasible == True:
                 logger.debug("CEGAR: all SAT.")
                 satisfying_assignment = family.member_assignment
-                break
-            if feasible == False:
+                if satisfying_assignment is not None:
+                    break
+            elif feasible == False:
                 logger.debug("CEGAR: all UNSAT.")
-                continue
             else: # feasible is None:
                 logger.debug("CEGAR: undecided.")
                 logger.debug("Splitting the family.")
@@ -248,10 +251,9 @@ class CEGARChecker(LiftingChecker):
                 logger.debug("Constructed two subfamilies of size {} and {}.".format(subfamily_left.size, subfamily_right.size))
                 families.append(subfamily_left)
                 families.append(subfamily_right)
-                continue
     
         if satisfying_assignment is not None:
-            logger.info("Found satisfying assignment.")
+            logger.info("Found satisfying assignment: {}".format(readable_assignment(satisfying_assignment)))
             return satisfying_assignment
         else:
             logger.info("No more options.")
@@ -379,6 +381,17 @@ class Family():
         Family._quotient_mdp = Family._quotient_container._mdp_handling.full_mdp
         logger.debug("Constructed MDP of size {}.".format(Family._quotient_mdp.nr_states))
 
+        # DEBUG REWARDS
+        # p = Family._mc_formulae[0]
+        # print("> ", p)
+        # m = Family._quotient_mdp
+        # r = m.get_reward_model("easts")
+        # print("> ", r, type(r), dir(r))
+        # print("> ", r.has_state_rewards)
+        # print("> ", r.has_state_action_rewards)
+        # print("> ", r.has_transition_rewards)
+        # exit()
+
         # FIXME SPLIT
         Family._hole_not_generalized = [0 for hole_index in range(len(Family._hole_list))]
 
@@ -485,7 +498,7 @@ class Family():
 
         Profiler.start("ar - MDP model checking")
         logger.debug("CEGAR: analyzing family {} of size {}.".format(self.options, self.size))            
-        
+
         undecided_formulae_indices = []
         for formula_index in self.formulae_indices:
             logger.debug("CEGAR: model checking MDP against a formula with index {}.".format(formula_index))
@@ -865,8 +878,10 @@ class FamilyHybrid(Family):
         # construct the DTMC by exploring the quotient MDP for this (sub-)family
         dtmc,dtmc_state_map = stormpy.dtmc_from_mdp(self.mdp, collected_edge_indices)
 
-        # assert that none of the states contains deadlock (easier notation?)
+        # assert absence of deadlocks or overlapping guargs
+        # TODO does not seem to work (builder options?)
         assert dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
+        assert dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         assert len(dtmc.initial_states) == 1    # to avoid ambiguity
 
         logger.debug("Constructed DTMC of size {}.".format(dtmc.nr_states))
@@ -898,10 +913,10 @@ class FamilyHybrid(Family):
             Family._solver.add(counterexample_encoding)
         self.member_assignment = None
 
-        # FIXME SPLIT
-        for conflict in conflicts:
-            for hole_index in conflict:
-                Family._hole_not_generalized[hole_index] += 1
+        # # FIXME SPLIT
+        # for conflict in conflicts:
+        #     for hole_index in conflict:
+        #         Family._hole_not_generalized[hole_index] += 1
 
     def analyze_member(self, formula_index):
         assert self.dtmc is not None
@@ -1177,7 +1192,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
         families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
-        while families:
+        while families != []:
             logger.debug("Current number of families: {}".format(len(families)))
             
             # pick a family
@@ -1189,7 +1204,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                     logger.debug("CEGIS: some is SAT.")
                     satisfying_assignment = family.member_assignment
                     break
-                if feasible == False:
+                elif feasible == False:
                     logger.debug("CEGIS: all UNSAT.")
                     self.stage_step(family.size)
                     continue
@@ -1219,7 +1234,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                     if feasible == True:
                         logger.debug("CEGAR: all SAT.")
                         satisfying_assignment = subfamily.member_assignment
-                        break
+                        if satisfying_assignment is not None:
+                            break
+                        continue
                     if feasible == False:
                         logger.debug("CEGAR: all UNSAT.")
                         models_pruned += subfamily.size
@@ -1234,7 +1251,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             Profiler.print()
 
         if satisfying_assignment is not None:
-            logger.info("Found satisfying assignment.")
+            logger.info("Found satisfying assignment: {}".format(readable_assignment(satisfying_assignment)))
             return satisfying_assignment
         else:
             logger.info("No more options.")

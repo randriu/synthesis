@@ -53,7 +53,18 @@ namespace storm {
                 std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> const& mdp_bounds
                 );
 
-            /**
+            /*!
+             * Replace a formula threshold and the corresponding mdp bound for
+             * the formula with the given index.
+             * @note This function is used for updating the violation formula.
+             */
+            void replaceFormulaThreshold(
+                uint_fast64_t formula_index,
+                ValueType formula_threshold,
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bound
+            );
+
+            /*!
              * Preprocess the DTMC by establishing the state expansion order (waves):
              * - explore the reachable state space wave by wave
              * - during each wave, expand only 'non-blocking' states (states with registered holes)

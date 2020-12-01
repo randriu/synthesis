@@ -47,6 +47,12 @@ void define_research(py::module& m) {
             py::arg("quotient_mdp"), py::arg("hole_count"), py::arg("mdp_holes"), py::arg("formulae"), py::arg("mdp_bounds")
             )
         .def(
+            "replace_formula_threshold",
+            &storm::research::Counterexample<>::replaceFormulaThreshold,
+            "Replace the formula threshold as well as the corresponding MDP bound.",
+            py::arg("formula_index"), py::arg("formula_threshold"), py::arg("mdp_bound")
+            )
+        .def(
             "prepare_dtmc",
             &storm::research::Counterexample<>::prepareDtmc,
             "Prepare a DTMC for counterexample construction.",

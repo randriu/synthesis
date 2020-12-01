@@ -219,6 +219,7 @@ class ModelHandling:
         logger.debug("Construct submodel...")
         subsystem_options = stormpy.SubsystemBuilderOptions()
         subsystem_options.build_action_mapping = True
+        # subsystem_options.build_state_mapping = True #+
         submodel_construction = stormpy.construct_submodel(self._model, all_states, selected_actions, keep_unreachable_states, subsystem_options)
         assert (not keep_unreachable_states) or submodel_construction.kept_actions == selected_actions, "kept: {} vs selected: {}".format(submodel_construction.kept_actions, selected_actions)
         self._submodel = submodel_construction.model

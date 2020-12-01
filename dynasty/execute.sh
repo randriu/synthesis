@@ -72,9 +72,10 @@ function write_params() {
 
 function dynasty() {
     dynasty_opts="--project ${examples_dir}/${model}/ --sketch sketch.templ --allowed sketch.allowed --properties sketch.properties"
+    # dynasty_opts="--project ${examples_dir}/${model}/ --sketch sketch.templ --allowed sketch.allowed --properties sketch.properties --restrictions sketch.restrictions"
     dynasty="python dynasty.py ${dynasty_opts} ${primary_method}"
-    timeout ${timeout} ${dynasty} --constants "CMAX=${cmax},THRESHOLD=${threshold}"
-    # timeout ${timeout} ${dynasty} --constants "CMAX=${cmax},THRESHOLD=${threshold}" --restrictions sketch.restrictions ${OPTIMALITY}
+    constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
+    timeout ${timeout} ${dynasty} ${constants} ${OPTIMALITY}
 }
 
 function try_thresholds() {
@@ -162,6 +163,55 @@ function tacas_performance() {
 
 }
 
+function profiling() {
+    reset_log
+
+    timeout=10h
+    # parallel=true
+    # verbose=true
+
+    model=("grid/orig" 40 0.019 0.019 0.15)
+
+    # model=("grid/big" 40 0.928 0.931 0.003)
+    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
+    # model=("pole/orig" 5 0.735 0.735 0.001)
+    # model=("dpm/orig" 12 0.080 0.080 0.002)
+    # model=("herman/orig" 2 0.60 0.60 0.15)
+    # model=("virus/orig" 0 0.1 0.9 0.1)
+
+    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
+
+    choose_model "${model[@]}"
+
+    # hybrid
+    cegis
+    # cegar
+    # onebyone
+}
+
+function implementing_rewards() {
+    reset_log
+
+    timeout=1h
+    parallel=true
+    # verbose=true
+    
+    # model=("grid/orig" 40 0.019 0.019 0.15)
+    # model=("grid/big" 40 0.928 0.931 0.003)
+    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
+    # model=("pole/orig" 5 0.735 0.735 0.001)
+    # model=("dpm/orig" 12 0.080 0.080 0.002)
+    # model=("herman/orig" 2 0.60 0.60 0.15)
+    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
+
+    model=("grid/orig" 40 0.01 0.01 0.15)
+    choose_model "${model[@]}"
+
+    hybrid
+    # cegar
+    # cegis
+}
+
 function exploring_grid() {
     reset_log
 
@@ -177,49 +227,12 @@ function exploring_grid() {
     
     choose_model "${model[@]}"
     
-    hybrid
-    # cegar
-}
-
-function exploring_virus() {
-    reset_log
-
-    timeout=1h
-    parallel=true
-    # verbose=true
-    
-    model=("virus/orig" 30 0.1 0.2 0.01)
-    
-    choose_model "${model[@]}"
-    
-    hybrid
-    # cegar
-}
-
-function profiling() {
-    reset_log
-
-    timeout=90s
-    # parallel=true
-    # verbose=true
-
-    # model=("grid/orig" 40 0.019 0.019 0.15)
-    # model=("grid/big" 40 0.928 0.931 0.003)
-    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
-    # model=("pole/orig" 5 0.735 0.735 0.001)
-    model=("dpm/orig" 12 0.080 0.080 0.002)
-    # model=("herman/orig" 2 0.60 0.60 0.15)
-    # model=("virus/orig" 0 0.1 0.9 0.1)
-
-    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
-
-    choose_model "${model[@]}"
 
     # hybrid
-    # cegis
-    cegar
-    # onebyone
+    # cegar
+    cegis
 }
+
 
 # ----------
 
@@ -227,35 +240,13 @@ function profiling() {
 # tacas_performance
 
 # profiling
+
+implementing_rewards
 # exploring_grid
-exploring_virus
 
 exit
 
 # --- halted -------------------------------------------------------------------
-
-function run() {
-
-    reset_log
-    timeout=40s
-    # parallel=true
-    
-    choose_model "${herman[@]}"
-    # choose_model "${gridbig[@]}"
-    # choose_model "${maze[@]}"
-    # choose_model "${mazexxl[@]}"
-    # choose_model "${pole[@]}"
-    # choose_model "${dpm[@]}"
-    # choose_model "${herman[@]}"
-
-    model=("herman/orig" 2 0.60 0.75 0.15)
-
-    choose_model "${model[@]}"
-
-    # cegis
-    # cegar
-    hybrid
-}
 
 # --- CEGIS revisited ---
 
@@ -275,6 +266,37 @@ function cegis_virus_opt() {
     cegis
     # cegar
     # onebyone
+}
+
+function cegis_virus() {
+    # primary_method=cegis
+    timeout=1m
+    reset_log
+    # parallel=true
+    # verbose=true
+
+    model=("cegis-copy/virus" 0 23 23 1.0)
+    choose_model "${model[@]}"
+    # onebyone
+    cegis
+    # cegar
+}
+
+function exploring_virus() {
+    reset_log
+
+    timeout=1h
+    parallel=true
+    # verbose=true
+    
+    # model=("virus/orig" 20 0.01 0.20 0.01)
+    model=("virus/orig" 20 0.13 0.13 0.06)
+    
+    choose_model "${model[@]}"
+    
+    # hybrid
+    cegar
+    # cegis
 }
 
 function cegis_grid_big_opt() {
@@ -345,111 +367,6 @@ function cegis_grid() {
     # cegis
     # onebyone
 }
-
-function cegis_virus() {
-    # primary_method=cegis
-    timeout=1m
-    reset_log
-    # parallel=true
-    # verbose=true
-
-    model=("cegis-copy/virus" 0 23 23 1.0)
-    choose_model "${model[@]}"
-    # onebyone
-    cegis
-    # cegar
-}
-
-function cegis_grid_big() {
-    reset_log
-
-    timeout=1h
-    # parallel=true
-    # verbose=true
-
-    CMAX=4000
-    T_MIN=1000
-    T_MAX=1000
-    T_STEP=200.0
-
-    model=("cegis-copy/grid-big" ${CMAX} ${T_MIN} ${T_MAX} ${T_STEP})
-    choose_model "${model[@]}"
-
-    # cegis
-    # cegar
-    onebyone
-    # wait
-}
-
-function cegis_grid() {
-    reset_log
-
-    timeout=1m
-    parallel=true
-    # verbose=true
-
-    CMAX=100
-    T_MIN=0.99
-    T_MAX=1.0
-    T_STEP=0.01
-
-    model=("cegis-copy/grid" ${CMAX} ${T_MIN} ${T_MAX} ${T_STEP})
-    choose_model "${model[@]}"
-
-    cegis
-    # cegar
-    # onebyone
-    # wait
-}
-
-function cegis_dpm() {
-    reset_log
-
-    # primary_method=cegis
-    # OPTIMALITY="--optimality sketch.optimal"
-    timeout=1m
-
-    # parallel=true
-    # verbose=true
-    
-    CMAX=10
-    # THRESHOLD=1.0
-    model=("cegis-copy/dpm" ${CMAX} 0.008 0.008 0.001)
-    choose_model "${model[@]}"
-    
-    # cegis
-    # cegar
-    # try_thresholds
-
-    onebyone
-}
-
-function test_parallel_run() {
-    processes=$1
-    for job in `seq $processes`; do
-        cegar
-    done;
-    wait
-}
-
-function test_parallel() {
-    reset_log
-
-    timeout=10m
-    parallel=true
-    
-    model=("herman/orig" 2 0.60 0.60 0.15)
-    choose_model "${model[@]}"
-
-    for processes in `seq 1 1 16`; do
-        echo "> $processes"
-        time test_parallel_run $processes
-    done
-
-    # hybrid
-}
-
-
 
 # beep bop
 # paplay /usr/share/sounds/freedesktop/stereo/complete.oga
