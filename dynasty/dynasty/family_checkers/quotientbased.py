@@ -356,75 +356,75 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                 hole_options_next_round = []
         return options_above, options_below
 
+    @staticmethod
+    def split_hole_options(hole_options, oracle, self_hole_options, use_oracle):
 
-def split_hole_options(hole_options, oracle, self_hole_options, use_oracle):
+        def split_list(a_list):
+            half = len(a_list) // 2
+            return a_list[:half], a_list[half:]
 
-    def split_list(a_list):
-        half = len(a_list) // 2
-        return a_list[:half], a_list[half:]
+        # Where to split.
+        splitters = []
+        selected_splitter = None
+        one_side_list = None
+        other_side_list = None
 
-    # Where to split.
-    splitters = []
-    selected_splitter = None
-    one_side_list = None
-    other_side_list = None
+        if oracle is not None and use_oracle:
+            selected_splitter, one_side_list, other_side_list = oracle.propose_split()
+            logger.debug(f"Oracle proposes a split at {selected_splitter}")
 
-    if oracle is not None and use_oracle:
-        selected_splitter, one_side_list, other_side_list = oracle.propose_split()
-        logger.debug(f"Oracle proposes a split at {selected_splitter}")
+        if not isinstance(one_side_list, Iterable):
+            one_side_list = [one_side_list]
+        if not isinstance(other_side_list, Iterable):
+            other_side_list = [other_side_list]
 
-    if not isinstance(one_side_list, Iterable):
-        one_side_list = [one_side_list]
-    if not isinstance(other_side_list, Iterable):
-        other_side_list = [other_side_list]
+        logger.debug(f"Proposed (pre)split: {one_side_list} vs. {other_side_list}")
 
-    logger.debug(f"Proposed (pre)split: {one_side_list} vs. {other_side_list}")
+        if selected_splitter is None:
+            # Split longest.
+            maxlength = 0
+            for k, v in hole_options.items():
+                maxlength = max(maxlength, len(v))
+                if len(v) == maxlength:
+                    selected_splitter = k
+            if maxlength == 1:
+                raise RuntimeError("Undecided result, but cannot split")
 
-    if selected_splitter is None:
-        # Split longest.
-        maxlength = 0
-        for k, v in hole_options.items():
-            maxlength = max(maxlength, len(v))
-            if len(v) == maxlength:
-                selected_splitter = k
-        if maxlength == 1:
-            raise RuntimeError("Undecided result, but cannot split")
+        options = hole_options[selected_splitter]
+        logger.debug(f"Splitting {[str(val) for val in options]}...")
+        assert len(options) > 1, f"Cannot split along {selected_splitter}"
 
-    options = hole_options[selected_splitter]
-    logger.debug(f"Splitting {[str(val) for val in options]}...")
-    assert len(options) > 1, f"Cannot split along {selected_splitter}"
+        one_vals = [self_hole_options[selected_splitter][one_side] for one_side in one_side_list if one_side is not None]
+        other_vals = [self_hole_options[selected_splitter][other_side] for other_side in other_side_list if
+                      other_side is not None]
+        logger.debug(f"Pre-splitted {one_vals} and {other_vals}")
+        remaining_options = [x for x in options if x not in one_vals + other_vals]
+        logger.debug('Now distribute {}'.format(remaining_options))
+        second, first = split_list(remaining_options)
+        # if one_side is not None:
+        first = first + one_vals
+        # if other_side is not None:
+        second = second + other_vals
+        splitters.append([selected_splitter, first, second])
 
-    one_vals = [self_hole_options[selected_splitter][one_side] for one_side in one_side_list if one_side is not None]
-    other_vals = [self_hole_options[selected_splitter][other_side] for other_side in other_side_list if
-                  other_side is not None]
-    logger.debug(f"Pre-splitted {one_vals} and {other_vals}")
-    remaining_options = [x for x in options if x not in one_vals + other_vals]
-    logger.debug('Now distribute {}'.format(remaining_options))
-    second, first = split_list(remaining_options)
-    # if one_side is not None:
-    first = first + one_vals
-    # if other_side is not None:
-    second = second + other_vals
-    splitters.append([selected_splitter, first, second])
+        logger.info(
+            f"Splitting {selected_splitter} into "
+            f"{'[' + ','.join([str(x) for x in first]) + ']'} and {'[' + ','.join([str(x) for x in second]) + ']'}"
+        )
 
-    logger.info(
-        f"Splitting {selected_splitter} into "
-        f"{'[' + ','.join([str(x) for x in first]) + ']'} and {'[' + ','.join([str(x) for x in second]) + ']'}"
-    )
-
-    # Split.
-    assert len(splitters) == 1
-    split_queue = [hole_options]
-    for splitter in splitters:
-        new_split_queue = []
-        for options in split_queue:
-            new_split_queue.append(HoleOptions(options))
-            new_split_queue[-1][splitter[0]] = splitter[1]
-            new_split_queue.append(HoleOptions(options))
-            new_split_queue[-1][splitter[0]] = splitter[2]
-        split_queue = new_split_queue
-    assert len(split_queue) == 2
-    return split_queue
+        # Split.
+        assert len(splitters) == 1
+        split_queue = [hole_options]
+        for splitter in splitters:
+            new_split_queue = []
+            for options in split_queue:
+                new_split_queue.append(HoleOptions(options))
+                new_split_queue[-1][splitter[0]] = splitter[1]
+                new_split_queue.append(HoleOptions(options))
+                new_split_queue[-1][splitter[0]] = splitter[2]
+            split_queue = new_split_queue
+        assert len(split_queue) == 2
+        return split_queue
 
 
 class AllInOneChecker(QuotientBasedFamilyChecker):

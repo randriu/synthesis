@@ -16,7 +16,7 @@ from ..jani.quotient_container import logger as quotient_container_logger, Thres
 from ..model_handling.mdp_handling import ExplicitMCResult, logger as model_handling_logger
 from ..profiler import Profiler, Timer
 from .cegis import Synthesiser
-from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker
+from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker, logger as quotienbased_logger
 from .familychecker import HoleOptions
 
 # ------------------------------------------------------------------------------
@@ -28,6 +28,7 @@ dynasty.jani.jani_quotient_builder.logger.disabled = True
 dynasty.jani.jani_quotient_builder.logger.disabled = True
 # dynasty.model_handling.mdp_handling.logger.disabled = True
 
+quotienbased_logger.disabled = True
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
@@ -36,7 +37,7 @@ ONLY_CEGAR = False
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
-PRINT_PROFILING = False
+PRINT_PROFILING = True
 
 
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
@@ -511,7 +512,7 @@ class Family:
                 logger.debug("formula {}: UNSAT".format(formula_index))
                 undecided_formulae_indices = None
                 break
-            if feasible is None:
+            elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
                 undecided_formulae_indices.append(formula_index)
                 if not self.split_ready:
@@ -998,7 +999,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             Profiler.stop()
 
             # record stage
-            if self.stage_step(0) and not self.only_cegis:
+            if self.stage_step(0) and not ONLY_CEGIS:
                 # switch requested
                 Profiler.add_ce_stats(counterexample_generator.stats)
                 return None
@@ -1040,7 +1041,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         Profiler.stop()
         if feasible == True:
             return family.member_assignment
-        elif not feasible:
+        elif not feasible and isinstance(feasible, bool):
             return None
         self.stage_step(0)
 
@@ -1055,7 +1056,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             if not self.stage_cegar:
                 # CEGIS
                 feasible = self.analyze_family_cegis(family)
-                if feasible:
+                if feasible and isinstance(feasible, bool):
                     logger.debug("CEGIS: some is SAT.")
                     satisfying_assignment = family.member_assignment
                     break
@@ -1105,7 +1106,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                         continue
                 self.stage_step(models_pruned)
 
-        if self.print_profiling:
+        if PRINT_PROFILING:
             Profiler.print()
 
         if satisfying_assignment is not None:
