@@ -63,12 +63,12 @@ module grid
 			+ 1/15 : (o'=1) & (x'=3) & (y'=3);
 			
 	// move around the grid
-	[east] o=1 & !(x=2 & y=0) -> 0.9: (x'=min(x+1,3)) + 0.1: (x'=x)&(y'=y)&(o'=o); // not reached target
-	[east] o=1 & x=2 & y=0 -> 0.9: (x'=min(x+1,3)) & (o'=2) + 0.1: (x'=x)&(y'=y)&(o'=o); // reached target
-	[west] o=1 -> 0.9: (x'=max(x-1,0)) + 0.1: (x'=x)&(y'=y)&(o'=o); // not reached target
-	[north] o=1 -> 0.9: (y'=min(y+1,3)) + 0.1: (x'=x)&(y'=y)&(o'=o); // reached target
-	[south] o=1 & !(x=3 & y=1) -> 0.4: (y'=max(y-1,0)) + 0.6: (x'=x)&(y'=y)&(o'=o); // not reached target
-	[south] o=1 & x=3 & y=1 -> 0.4: (y'=max(y-1,0)) & (o'=2) + 0.6: (x'=x)&(y'=y)&(o'=o); // reached target
+	[east] o=1 & !(x=2 & y=0) -> 0.9: (x'=min(x+1,3)) + 0.1: true; // not reached target
+	[east] o=1 & x=2 & y=0 -> 0.9: (x'=min(x+1,3)) & (o'=2) + 0.1: true; // reached target
+	[west] o=1 -> 0.9: (x'=max(x-1,0)) + 0.1: true; // not reached target
+	[north] o=1 -> 0.9: (y'=min(y+1,3)) + 0.1: true; // reached target
+	[south] o=1 & !(x=3 & y=1) -> 0.4: (y'=max(y-1,0)) + 0.6: true; // not reached target
+	[south] o=1 & x=3 & y=1 -> 0.4: (y'=max(y-1,0)) & (o'=2) + 0.6: true; // reached target
 	
 	// reached target
 	[done] o=2 -> true;

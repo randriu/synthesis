@@ -96,5 +96,7 @@ class Profiler:
         Profiler.stop()
         Profiler.timer_total.stop()
 
-        Profiler.print_ce()
+        # Profiler.print_ce()
         Profiler.print_base()
+
+

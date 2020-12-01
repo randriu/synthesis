@@ -119,10 +119,20 @@ function hybrid() {
 
 # --- sandbox ------------------------------------------------------------------
 
+function test_release() {
+    parallel=true
+    reset_log
+    timeout=5m
+    model=("herman/orig" 2 0.60 0.75 0.15)
+    choose_model "${model[@]}"
+    cegar
+    echo "^ should be at 15 and 19 sec"
+}
+
 function tacas_performance() {
     reset_log
 
-    timeout=5m
+    timeout=1h
     # parallel=true
     # verbose=true
 
@@ -133,21 +143,20 @@ function tacas_performance() {
     pole=("pole/orig" 5 0.732 0.735 0.003)
     herman=("herman/orig" 2 0.60 0.75 0.15)
 
-    # models=("grid" "gridbig" "maze" "dpm" "pole" "herman")
-    models=("grid" "maze" "dpm" "pole" "herman")
+    models=("grid" "gridbig" "maze" "dpm" "pole" "herman")
 
     echo "----- CEGAR"
     for model in "${models[@]}"; do
         echo "--- $model"
         choose_model `eval echo '${'${model}'[@]}'`
-        # cegar
+        cegar
     done
 
     echo "----- Hybrid"
     for model in "${models[@]}"; do
         echo "--- $model"
         choose_model `eval echo '${'${model}'[@]}'`
-        hybrid
+        # hybrid
     done
 
 }
@@ -174,48 +183,34 @@ function exploring_grid() {
 function profiling() {
     reset_log
 
-    timeout=10h
+    timeout=90s
     # parallel=true
     # verbose=true
 
     # model=("grid/orig" 40 0.019 0.019 0.15)
     # model=("grid/big" 40 0.928 0.931 0.003)
     # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
-    # model=("herman/orig" 2 0.60 0.60 0.15)
     # model=("pole/orig" 5 0.735 0.735 0.001)
-    # model=("dpm/orig" 12 0.080 0.080 0.002)
-    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
+    model=("dpm/orig" 12 0.080 0.080 0.002)
+    # model=("herman/orig" 2 0.60 0.60 0.15)
 
-    model=("pole/orig" 5 0.735 0.735 0.001)
+    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
 
     choose_model "${model[@]}"
 
-    hybrid
+    # hybrid
     # cegis
-    # cegar
+    cegar
     # onebyone
 }
 
-function test_release() {
-    parallel=true
-    reset_log
-    timeout=5m
-    model=("herman/orig" 2 0.60 0.75 0.15)
-    choose_model "${model[@]}"
-    cegar
-    echo "^ should be at 15 and 19 sec"
-}
-
-
-
-# rewards_grid
-# tacas_performance
-
-profiling
-
-# exploring_grid
+# ----------
 
 # test_release
+tacas_performance
+
+# profiling
+# exploring_grid
 
 exit
 
