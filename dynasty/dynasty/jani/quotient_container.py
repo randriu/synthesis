@@ -70,6 +70,22 @@ class JaniQuotientContainer:
     def jani_program(self):
         return self._jani_program
 
+    @property
+    def mdp_handling(self):
+        return self._mdp_handling
+
+    @property
+    def latest_result(self):
+        return self._latest_result
+
+    @property
+    def edge_coloring(self):
+        return self._edge_coloring
+
+    @property
+    def color_to_edge_indices(self):
+        return self._color_to_edge_indices
+
     def consider_subset(self, subset, indexed_suboptions):
         logger.debug("Consider sub-set of hole-options: {}".format(subset))
 
