@@ -107,6 +107,9 @@ class ModelHandling:
     def mdp(self):
         return self._submodel
 
+    @property
+    def mapping_to_original(self):
+        return self._mapping_to_original
 
     def has_reward_model(self, index=0):
         """

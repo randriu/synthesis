@@ -139,8 +139,8 @@ def check_mdp(mdp, formula, alt_formula, threshold, accept_if_above):
 # Synthesis wrappers ------------------------------------------------------------------------------ Synthesis wrappers
 
 def readable_assignment(assignment):
-    # return {k:v[0].__str__() for (k,v) in assignment.items()} if assignment is not None else None
-    return ",".join(["{}={}".format(k,v[0].__str__()) for (k,v) in assignment.items()]) if assignment is not None else None
+    # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
+    return ",".join([f"{k}={v[0].__str__()}" for (k, v) in assignment.items()]) if assignment is not None else None
 
 class Statistic:
     """General computation stats."""
@@ -163,8 +163,9 @@ class Statistic:
     def __str__(self):
         feasible = "F" if self.feasible else "U"
         time = int(self.timer.time)
-        return "> T={:g} : {} : {} ({} iters, {} sec)\n".format(self.threshold, self.method, feasible, self.iterations, time)
+        return f"> T={self.threshold:g} : {self.method} : {feasible} ({self.iterations} iters, {time} sec)\n"
         # return "> {}".format(self.iterations) # FIXME
+
 
 class EnumerationChecker(OneByOneChecker):
     """1-by-1 enumeration wrapper."""
@@ -192,30 +193,31 @@ class CEGISChecker(Synthesiser):
         threshold = float(self.properties[0].raw_formula.threshold)  # FIXME
         self.statistic = Statistic("CEGIS", threshold)
         _, assignment, _ = self.run_feasibility()
-        assignment = {k:[v] for (k,v) in assignment.items()} if assignment is not None else None
+        assignment = {k: [v] for (k, v) in assignment.items()} if assignment is not None else None
         if assignment is not None:
-            logger.info("Found satisfying assignment: {}".format(readable_assignment(assignment)))
+            logger.info(f"Found satisfying assignment: {readable_assignment(assignment)}")
         self.statistic.finished(assignment, self.stats.iterations)
 
 
 class CEGARChecker(LiftingChecker):
     """CEGAR wrapper."""
-    
-    def __init__(self,*args):
+
+    def __init__(self, *args):
         super().__init__(*args)
+        self.statistic = None
+        self.formulae = []
         self.iterations = 0
 
     def initialise(self):
         super().initialise()
-        self.formulae = [property.raw_formula for property in self.properties]
+        self.formulae = [property_obj.raw_formula for property_obj in self.properties]
         # no optimality support (TODO Simon)
         assert not self.input_has_optimality_property()
 
     def run_feasibility(self):
-        '''
-        Run feasibility synthesis. Return either a satisfying assignment
-        (feasible) or None (unfeasible).
-        '''
+        """
+        Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
+        """
         Profiler.initialize()
         logger.info("Running feasibility synthesis.")
 
@@ -225,42 +227,44 @@ class CEGARChecker(LiftingChecker):
             self.sketch, self.holes, self.hole_options, self.symmetries,
             self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
             self.thresholds, self._accept_if_above
-            )
+        )
 
         # initiate CEGAR loop
         family = Family()
         families = [family]
         satisfying_assignment = None
         logger.debug("Initiating CEGAR loop")
-        while families != []:
-            logger.debug("Current number of families: {}".format(len(families)))
+        while families:
+            logger.debug(f"Current number of families: {len(families)}")
+
             self.iterations += 1
             logger.debug("CEGAR: iteration {}.".format(self.iterations))
+
             family = families.pop(-1)
             family.construct()
             feasible = family.analyze()
-            if feasible == True:
+            if feasible and isinstance(feasible, bool):
                 logger.debug("CEGAR: all SAT.")
                 satisfying_assignment = family.member_assignment
                 if satisfying_assignment is not None:
                     break
-            elif feasible == False:
+            elif not feasible and isinstance(feasible, bool):
                 logger.debug("CEGAR: all UNSAT.")
-            else: # feasible is None:
+            else:  # feasible is None:
                 logger.debug("CEGAR: undecided.")
                 logger.debug("Splitting the family.")
                 subfamily_left,subfamily_right = family.split()
                 logger.debug("Constructed two subfamilies of size {} and {}.".format(subfamily_left.size, subfamily_right.size))
                 families.append(subfamily_left)
                 families.append(subfamily_right)
-    
+
         if satisfying_assignment is not None:
             logger.info("Found satisfying assignment: {}".format(readable_assignment(satisfying_assignment)))
             return satisfying_assignment
         else:
             logger.info("No more options.")
             return None
-        
+
     def run(self):
         threshold = float(self.properties[0].raw_formula.threshold)  # FIXME
         self.statistic = Statistic("CEGAR", threshold)
@@ -303,6 +307,7 @@ class Family:
 
     # - indexed hole options
     hole_list = None
+    hole_not_generalized = None
     _hole_indices = None
 
     # - jani representation + sparse MDP representation
@@ -329,6 +334,7 @@ class Family:
         """
         self.options = Family._hole_options.copy() if parent is None else options
         self.mdp = Family._quotient_mdp if parent is None else None
+        self.choice_map = [i for i in range(Family._quotient_mdp.nr_choices)] if parent is None else None
         self.formulae_indices = list(range(len(Family._formulae))) if parent is None else parent.formulae_indices
 
         # encode this family
@@ -457,6 +463,22 @@ class Family:
     def split_ready(self):
         return self.suboptions is not None
 
+    @property
+    def formulae(self):
+        return Family._formulae
+
+    @staticmethod
+    def get_thresholds():
+        return Family._thresholds
+
+    @staticmethod
+    def set_thresholds(thresholds):
+        Family._thresholds = thresholds
+
+    @staticmethod
+    def quotient_container():
+        return Family._quotient_container
+
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """
         if self.constructed:
@@ -467,10 +489,10 @@ class Family:
         logger.debug(f"Constructing quotient MDP for family {self.options}.")
         indexed_options = Family._hole_options.index_map(self.options)
         Family._quotient_container.consider_subset(self.options, indexed_options)
-        self.mdp = Family._quotient_container._mdp_handling.mdp
-        self.choice_map = Family._quotient_container._mdp_handling._mapping_to_original
-        logger.debug("Constructed MDP of size {}.".format(self.mdp.nr_states))
-        
+        self.mdp = Family._quotient_container.mdp_handling.mdp
+        self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
+        logger.debug(f"Constructed MDP of size {self.mdp.nr_states}.")
+
         Profiler.stop()
 
     def model_check_formula(self, formula_index):
@@ -696,6 +718,18 @@ class FamilyHybrid(Family):
                 hole_indices = [index for index, value in enumerate(assignment) if value is not None]
                 FamilyHybrid._edge_to_hole_indices[index] = hole_indices
 
+        # map actions of a quotient MDP to hole indices
+        FamilyHybrid._choice_to_hole_indices = []
+        choice_origins = Family._quotient_mdp.choice_origins
+        matrix = Family._quotient_mdp.transition_matrix
+        for state in range(Family._quotient_mdp.nr_states):
+            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
+                choice_hole_indices = set()
+                for index in choice_origins.get_edge_index_set(choice_index):
+                    hole_indices = FamilyHybrid._edge_to_hole_indices.get(index, set())
+                    choice_hole_indices.update(hole_indices)
+                FamilyHybrid._choice_to_hole_indices.append(choice_hole_indices)
+
     def split(self):
         assert self.split_ready
         return FamilyHybrid(self, self.suboptions[0]), FamilyHybrid(self, self.suboptions[1])
@@ -714,15 +748,17 @@ class FamilyHybrid(Family):
 
         Profiler.start("is - MDP holes")
         logger.debug("Constructing state-holes mapping via choice-holes mapping.")
+
         self._state_to_hole_indices = []
         matrix = self.mdp.transition_matrix
         for state in range(self.mdp.nr_states):
             state_hole_indices = set()
-            for choice_index in range(matrix.get_row_group_start(state),matrix.get_row_group_end(state)):
+            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
                 quotient_choice_index = self.choice_map[choice_index]
                 choice_hole_indices = FamilyHybrid._choice_to_hole_indices[quotient_choice_index]
                 state_hole_indices.update(choice_hole_indices)
-            state_hole_indices = set([index for index in state_hole_indices if len(self.options[Family._hole_list[index]]) > 1])
+            state_hole_indices = set(
+                [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1])
             self._state_to_hole_indices.append(state_hole_indices)
         Profiler.stop()
         return self._state_to_hole_indices
@@ -814,44 +850,15 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
 
     def initialise(self):
         QuotientBasedFamilyChecker.initialise(self)
-        self.formulae = [property.raw_formula for property in self.properties]
-        # no optimality support (TODO Simon)
-        assert not self.input_has_optimality_property()
+        self.formulae = [property_obj.raw_formula for property_obj in self.properties]
+        if self.input_has_optimality_property():
+            self.formulae.append(self._optimality_setting.criterion.raw_formula)
 
     # ----- Adaptivity ----- #
     # Main idea: switch between cegar/cegis, allocate more time to the more efficient method; if one method is
     # consistently better than the other, declare it the winner and stop switching. Cegar wins over cegis by reaching
     # the score limit, cegis wins by reaching the negative score limit.
     # note: this is the only parameter in the integrated synthesis
-    stage_score_limit = 99999
-    
-    use_nontrivial_bounds = True
-    only_cegar = False
-    # only_cegar = True
-    only_cegis = False
-    # only_cegis = True
-
-    print_stage_info = False
-    print_profiling = False
-    # print_profiling = True
-
-
-    def stage_init(self):
-        # once a method wins, set this to false and do not switch between methods
-        self.stage_switch_allowed = True
-        # +1 point whenever cegar wins the stage, -1 otherwise
-        self.stage_score = 0
-        
-        # cegar/cegis stats
-        self.stage_time_cegar = 0
-        self.stage_pruned_cegar = 0
-        self.stage_time_cegis = 0
-        self.stage_pruned_cegis = 0
-
-        # multiplier to derive time allocated for cegis
-        # =1 is fair, <1 favours cegar, >1 favours cegis
-        self.cegis_allocated_time_factor = 1
-        self.stage_timer = Timer()
 
     def stage_start(self, request_stage_cegar):
         self.stage_cegar = request_stage_cegar
@@ -1100,9 +1107,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
         self.families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
-        while families != []:
-            logger.debug("Current number of families: {}".format(len(families)))
-            
+        while self.families:
+            logger.debug(f"Current number of families: {len(self.families)}")
+
             # pick a family
             family = self.families.pop(-1)
             if not self.stage_cegar:
@@ -1112,7 +1119,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                     logger.debug("CEGIS: some is SAT.")
                     satisfying_assignment = family.member_assignment
                     break
-                elif feasible == False:
+                elif not feasible and isinstance(feasible, bool):
                     logger.debug("CEGIS: all UNSAT.")
                     self.stage_step(family.size)
                     continue
@@ -1147,8 +1154,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                         satisfying_assignment = subfamily.member_assignment
                         if satisfying_assignment is not None:
                             break
-                        continue
-                    if feasible == False:
+                    elif not feasible and isinstance(feasible, bool):
                         logger.debug("CEGAR: all UNSAT.")
                         models_pruned += subfamily.size
                         continue
@@ -1218,8 +1224,8 @@ class Research:
         print("\n")
         for stat in stats:
             print(stat)
-    
-    def run_algorithm(self, algorithmClass):
+
+    def run_algorithm(self, algorithm_class):
         print("\n\n\n")
         print(algorithm_class.__name__)
         algorithm = algorithm_class()
