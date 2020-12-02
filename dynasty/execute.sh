@@ -204,7 +204,7 @@ function implementing_rewards() {
     # model=("herman/orig" 2 0.60 0.60 0.15)
     # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
 
-    model=("grid/orig-rew" 10 7.7 7.8 0.01)
+    model=("grid/orig" 10 7.7 7.8 0.01)
     choose_model "${model[@]}"
 
     # hybrid
@@ -236,12 +236,12 @@ function exploring_grid() {
 
 # ----------
 
-# test_release
+test_release
 # tacas_performance
 
 # profiling
 
-implementing_rewards
+# implementing_rewards
 # exploring_grid
 
 exit
