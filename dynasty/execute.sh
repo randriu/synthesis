@@ -204,11 +204,11 @@ function implementing_rewards() {
     # model=("herman/orig" 2 0.60 0.60 0.15)
     # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
 
-    model=("grid/orig" 40 0.01 0.01 0.15)
+    model=("grid/orig-rew" 10 7.7 7.8 0.01)
     choose_model "${model[@]}"
 
-    hybrid
-    # cegar
+    # hybrid
+    cegar
     # cegis
 }
 

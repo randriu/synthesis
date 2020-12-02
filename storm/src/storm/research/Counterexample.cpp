@@ -25,7 +25,7 @@ namespace storm {
         template<typename ValueType, typename StateType>
         std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<StateType>> DtmcFromMdp (
             storm::models::sparse::Mdp<ValueType> const& mdp,
-            storm::storage::FlatSet<uint_fast64_t> const& automataAndEdgeIndices
+            storm::storage::FlatSet<uint_fast64_t> const& selected_edge_indices
             ) {
 
             // MDP info
@@ -33,38 +33,40 @@ namespace storm {
             StateType mdp_initial_state = *(mdp.getInitialStates().begin());
             storm::storage::SparseMatrix<ValueType> const& mdp_matrix = mdp.getTransitionMatrix();
             storm::storage::sparse::JaniChoiceOrigins & mdp_choice_origins = mdp.getChoiceOrigins()->asJaniChoiceOrigins();
+            std::vector<uint_fast64_t> const& action_group_indices = mdp_matrix.getRowGroupIndices();
 
             // Reachable subspace structures
-            storm::storage::BitVector state_reachable(mdp_states, false);
-            std::vector<StateType> mdp_state_map(mdp_states);   // mdp->dtmc
-            std::vector<StateType> dtmc_state_map(mdp_states);  // dtmc->mdp
-            std::queue<StateType> reachable_states;
-            uint_fast64_t dtmc_states = 0; // state reached -> added to DTMC
-            storm::storage::SparseMatrixBuilder<ValueType> matrix_builder(0, 0, 0, false, false, 0);
-            
-            // Initiate BFS from the initial state
-            state_reachable.set(mdp_initial_state);
-            mdp_state_map[mdp_initial_state] = dtmc_states;
-              dtmc_state_map[dtmc_states] = mdp_initial_state;
-              dtmc_states++;
-            reachable_states.push(mdp_initial_state);
+            // establish DTMC state to MDP state/action mapping
+            storm::storage::BitVector mdp_state_reachable(mdp_states, false);
+            std::queue<StateType> mdp_horizon;
+            std::vector<StateType> mdp2dtmc_state(mdp_states);
+            uint_fast64_t dtmc_states = 0; // state reached => added to DTMC
+            std::vector<StateType> dtmc2mdp_state;
+            std::vector<uint_fast64_t> dtmc2mdp_action;
 
-            std::vector<uint_fast64_t> const& action_group_indices = mdp_matrix.getRowGroupIndices();
-            while(!reachable_states.empty()) {
-                StateType mdp_state = reachable_states.front();
-                reachable_states.pop();
-                StateType dtmc_state = mdp_state_map[mdp_state];
+            // Initiate BFS from the initial state
+            mdp_state_reachable.set(mdp_initial_state);
+            mdp_horizon.push(mdp_initial_state);
+            mdp2dtmc_state[mdp_initial_state] = dtmc_states;
+              dtmc2mdp_state.push_back(mdp_initial_state);
+              dtmc2mdp_action.push_back(0);
+              dtmc_states++;
+            while(!mdp_horizon.empty()) {
+                StateType mdp_state = mdp_horizon.front();
+                mdp_horizon.pop();
+                StateType dtmc_state = mdp2dtmc_state[mdp_state];
                 
                 // Identify exactly one action of interest
                 bool action_identified = false;
                 uint_fast64_t action_of_interest;
                 for (
                     uint_fast64_t action = action_group_indices[mdp_state];
-                    action < action_group_indices[mdp_state+1]; action++
+                    action < action_group_indices[mdp_state+1];
+                    action++
                 ) {
                     bool action_suitable = true;
                     for(auto edge_index: mdp_choice_origins.getEdgeIndexSet(action)) {
-                        if(!automataAndEdgeIndices.contains(edge_index)) {
+                        if(!selected_edge_indices.contains(edge_index)) {
                             action_suitable = false;
                             break;
                         }
@@ -78,23 +80,32 @@ namespace storm {
                 assert(action_identified);
 
                 // Expand via the action of interest
+                dtmc2mdp_action[dtmc_state] = action_of_interest;
                 for(auto entry: mdp_matrix.getRow(action_of_interest)) {
                     StateType mdp_successor = entry.getColumn();
-                    if(!state_reachable[mdp_successor]) {
-                        state_reachable.set(mdp_successor);
-                        mdp_state_map[mdp_successor] = dtmc_states;
-                          dtmc_state_map[dtmc_states] = mdp_successor;
+                    if(!mdp_state_reachable[mdp_successor]) {
+                        // new state reached
+                        mdp_state_reachable.set(mdp_successor);
+                        mdp_horizon.push(mdp_successor);
+                        mdp2dtmc_state[mdp_successor] = dtmc_states;
+                          dtmc2mdp_state.push_back(mdp_successor);
+                          dtmc2mdp_action.push_back(0);
                           dtmc_states++;
-                        reachable_states.push(mdp_successor);
                     }
-                    StateType dtmc_successor = mdp_state_map[mdp_successor];
-                    matrix_builder.addNextValue(dtmc_state, dtmc_successor, entry.getValue());
                 }
             }
-            dtmc_state_map.resize(dtmc_states);
 
             // Build DTMC components:
             // - matrix
+            storm::storage::SparseMatrixBuilder<ValueType> matrix_builder(0, 0, 0, false, false, 0);
+            for(StateType dtmc_state = 0; dtmc_state < dtmc_states; dtmc_state++) {
+                uint_fast64_t mdp_action = dtmc2mdp_action[dtmc_state];
+                for(auto entry: mdp_matrix.getRow(mdp_action)) {
+                    StateType mdp_successor = entry.getColumn();
+                    StateType dtmc_successor = mdp2dtmc_state[mdp_successor];
+                    matrix_builder.addNextValue(dtmc_state, dtmc_successor, entry.getValue());
+                }
+            }
             storm::storage::SparseMatrix<ValueType> dtmc_matrix = matrix_builder.build();
             assert(dtmc_matrix.isProbabilistic());
 
@@ -105,7 +116,7 @@ namespace storm {
                 dtmc_labeling.addLabel(label);
             }
             for(StateType state = 0; state < dtmc_states; state++) {
-                StateType mdp_state = dtmc_state_map[state];
+                StateType mdp_state = dtmc2mdp_state[state];
                 for(auto & label: mdp_labeling.getLabelsOfState(mdp_state)) {
                     dtmc_labeling.addLabelToState(label,state);
                 }
@@ -116,13 +127,16 @@ namespace storm {
             for(auto const& kv: mdp.getRewardModels()) {
                 std::string reward_name = kv.first;
                 storm::models::sparse::StandardRewardModel<ValueType> const& mdp_reward = kv.second;
-                assert(mdp_reward.hasStateRewards());
-                assert(mdp_reward.hasOnlyStateRewards());
-
+                assert(mdp_reward.hasStateRewards() || mdp_reward.hasStateActionRewards());
                 std::vector<ValueType> dtmc_state_rewards(dtmc_states);
                 for(StateType dtmc_state = 0; dtmc_state < dtmc_states; dtmc_state++) {
-                    uint_fast64_t mdp_state = dtmc_state_map[dtmc_state];
-                    dtmc_state_rewards[dtmc_state] = mdp_reward.getStateReward(mdp_state);
+                    if(mdp_reward.hasStateRewards()) {
+                        uint_fast64_t mdp_state = dtmc2mdp_state[dtmc_state];
+                        dtmc_state_rewards[dtmc_state] = mdp_reward.getStateReward(mdp_state);
+                    } else {
+                        uint_fast64_t mdp_action = dtmc2mdp_action[dtmc_state];
+                        dtmc_state_rewards[dtmc_state] = mdp_reward.getStateActionReward(mdp_action);
+                    }
                 }
                 storm::models::sparse::StandardRewardModel<ValueType> dtmc_reward(dtmc_state_rewards, boost::none, boost::none);
                 dtmc_reward_models.emplace(reward_name,dtmc_reward);
@@ -132,7 +146,7 @@ namespace storm {
             storm::storage::sparse::ModelComponents<ValueType> components(dtmc_matrix, dtmc_labeling, dtmc_reward_models);
             std::shared_ptr<storm::models::sparse::Model<ValueType>> dtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
 
-            return std::make_pair(dtmc,dtmc_state_map);
+            return std::make_pair(dtmc,dtmc2mdp_state);
         }
 
         template <typename ValueType, typename StateType>
@@ -422,7 +436,6 @@ namespace storm {
                 assert(this->formula_safety[formula_index]);
                 assert(dtmc->hasRewardModel(this->formula_reward_name[formula_index]));
                 storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[formula_index]);
-                assert(reward_model_dtmc.hasStateRewards());
                 assert(reward_model_dtmc.hasOnlyStateRewards());
 
                 std::vector<ValueType> state_rewards_subdtmc(dtmc_states+2);

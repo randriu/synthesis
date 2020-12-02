@@ -17,15 +17,16 @@ namespace storm {
 
         /*!
          * Construct a DTMC by exploring a reachable state space of an MDP 
-         * through selected edges.
+         * through selected edges All reward models are automatically reduced
+         * to their state variants.
          * @param mdp An MDP.
-         * @param automataAndEdgeIndices Allowed edges in the resulting DTMC.
+         * @param selected_edge_indices Allowed edges in the resulting DTMC.
          * @return A DTMC with a DTMC-MDP state mapping.
          */
         template<typename ValueType = double, typename StateType = uint_fast64_t>
         std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<StateType>> DtmcFromMdp(
             storm::models::sparse::Mdp<ValueType> const& mdp,
-            storm::storage::FlatSet<uint_fast64_t> const& automataAndEdgeIndices
+            storm::storage::FlatSet<uint_fast64_t> const& selected_edge_indices
             );
 
         template<typename ValueType = double, typename StateType = uint_fast64_t>

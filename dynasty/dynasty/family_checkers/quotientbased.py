@@ -125,7 +125,6 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                 if threshold_synthesis_result == ThresholdSynthesisResult.ABOVE:
                     logger.debug("All above.")
                     if self._accept_if_above[0]:
-                        self.iterations = iterations #+
                         return True, hole_options[0].pick_one_in_family(), None
                     else:
                         nr_options_remaining -= hole_options[0].size()
@@ -133,7 +132,6 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                 else:
                     logger.debug("All below.")
                     if not self._accept_if_above[0]:
-                        self.iterations = iterations #+
                         return True, hole_options[0].pick_one_in_family(), None
                     else:
                         nr_options_remaining -= hole_options[0].size()
@@ -152,7 +150,6 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                 hole_options = hole_options_next_round
                 hole_options_next_round = []
 
-        self.iterations = iterations #+
         return False, None, None
 
     def _run_optimal_feasibility(self, nr_options_above=None):
