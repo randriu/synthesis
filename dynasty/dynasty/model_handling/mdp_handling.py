@@ -255,7 +255,7 @@ class ModelHandling:
         internal_res.filter(stormpy.create_filter_initial_states_symbolic(self._submodel))
         return SymbolicMCResult(internal_res.min, internal_res.max)
 
-    def mc_model(self, index=0, compute_action_values=False, check_dir_2 = always_true):
+    def mc_model(self, index=0, compute_action_values=False, check_dir_2=always_true):
         """
 
         :param index:

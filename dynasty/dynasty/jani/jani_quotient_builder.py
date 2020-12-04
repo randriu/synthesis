@@ -8,8 +8,8 @@ import itertools
 import logging
 import enum
 
-from dynasty.jani.edge_coloring import EdgeColoring
-from dynasty.jani.quotient_container import *
+from .edge_coloring import EdgeColoring
+from .quotient_container import JaniQuotientContainer
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,6 @@ class JaniQuotientBuilder:
                 if dest.probability.contains_variable(set([constant.expression_variable])):
                     return True
 
-
     def construct(self, holes_options, remember={}, init_all_in_one={}):
         assert len(remember) == 0, "Remember options have not been tested in a long time"
         self._counter = self._counter + 1
@@ -70,13 +69,14 @@ class JaniQuotientBuilder:
         edge_coloring = EdgeColoring(holes_options)
         jani_program = stormpy.JaniModel(self.original_model)
 
-        holes_memory_vars = {c.name: self._make_memory_var(c, self.holes_memory_ep[c.name], len(holes_options[c.name])) for c
+        holes_memory_vars = {c.name: self._make_memory_var(c, self.holes_memory_ep[c.name], len(holes_options[c.name]))
+                             for c
                              in self._open_constants.values()}
 
         new_automata = dict()
 
         for aut_index, automaton in enumerate(jani_program.automata):
-            if len([x for x in self._automata_to_open_constants[automaton.name] if x not in init_all_in_one])  == 0:
+            if len([x for x in self._automata_to_open_constants[automaton.name] if x not in init_all_in_one]) == 0:
                 continue
             logger.debug("Reconstructing automaton {}".format(automaton.name))
             new_aut = stormpy.storage.JaniAutomaton(automaton.name + "", automaton.location_variable)
@@ -116,11 +116,12 @@ class JaniQuotientBuilder:
                     if len(expand_guard) == 0:
                         guard_expr = stormpy.Expression(edge.template_edge.guard)
 
-                    for combination in itertools.product(*[range(len(holes_options[c.name])) if (c in expand_td or c in expand_guard) else [None] for c in self._open_constants.values()]):
+                    for combination in itertools.product(
+                            *[range(len(holes_options[c.name])) if (c in expand_td or c in expand_guard) else [None] for
+                              c in self._open_constants.values()]):
 
-
-
-                        substitution = {c.expression_variable: holes_options[c.name][v] for c, v in zip(self._open_constants.values(), combination) if
+                        substitution = {c.expression_variable: holes_options[c.name][v] for c, v in
+                                        zip(self._open_constants.values(), combination) if
                                         v is not None}
 
                         if len(expand_guard) > 0:
@@ -128,8 +129,8 @@ class JaniQuotientBuilder:
                             guard_expr = guard_expr.substitute(substitution)
 
                         te = stormpy.storage.JaniTemplateEdge(guard_expr)
-                        remember_addition = {c: v+1 for c,v in zip(self._open_constants.values(), combination) if
-                                        v is not None and c.name in remember}
+                        remember_addition = {c: v + 1 for c, v in zip(self._open_constants.values(), combination) if
+                                             v is not None and c.name in remember}
 
                         for ted in edge.template_edge.destinations:
                             assignments = ted.assignments.clone()
@@ -139,14 +140,19 @@ class JaniQuotientBuilder:
                                     if a.expression.contains_variable(set([x.expression_variable])):
                                         remember_here.add(x)
                             for x in remember_here:
-                                #logger.debug("Remember {} in {}={}".format(x.name, holes_memory_vars[x.name], remember_addition[x]))
-                                memory_assignment = stormpy.JaniAssignment(holes_memory_vars[x.name], self.expression_manager.create_integer(remember_addition[x]))
+                                # logger.debug("Remember {} in {}={}".format(x.name, holes_memory_vars[x.name], remember_addition[x]))
+                                memory_assignment = stormpy.JaniAssignment(holes_memory_vars[x.name],
+                                                                           self.expression_manager.create_integer(
+                                                                               remember_addition[x]))
                                 assignments.add(memory_assignment)
-                                guard_mem_set_before = stormpy.Expression.Eq(holes_memory_vars[x.name].expression_variable.get_expression(),
-                                                      self.expression_manager.create_integer(0))
-                                guard_mem_not_set = stormpy.Expression.Eq(holes_memory_vars[x.name].expression_variable.get_expression(),
-                                                      self.expression_manager.create_integer(remember_addition[x]))
-                                te.guard = stormpy.Expression.And(te.guard, stormpy.Expression.Or(guard_mem_set_before, guard_mem_not_set))
+                                guard_mem_set_before = stormpy.Expression.Eq(
+                                    holes_memory_vars[x.name].expression_variable.get_expression(),
+                                    self.expression_manager.create_integer(0))
+                                guard_mem_not_set = stormpy.Expression.Eq(
+                                    holes_memory_vars[x.name].expression_variable.get_expression(),
+                                    self.expression_manager.create_integer(remember_addition[x]))
+                                te.guard = stormpy.Expression.And(te.guard, stormpy.Expression.Or(guard_mem_set_before,
+                                                                                                  guard_mem_not_set))
                             assignments.substitute(substitution)
 
                             te.add_destination(stormpy.storage.JaniTemplateEdgeDestination(assignments))
@@ -160,7 +166,8 @@ class JaniQuotientBuilder:
                         expand_d = list(expand_d)
                         assert len(expand_d) == 0
 
-                        new_edge = stormpy.storage.JaniEdge(edge.source_location_index, edge.action_index, edge.rate, te,
+                        new_edge = stormpy.storage.JaniEdge(edge.source_location_index, edge.action_index, edge.rate,
+                                                            te,
                                                             dests)
 
                         new_edge.color = edge_coloring.get_or_make_color(combination)
@@ -178,21 +185,27 @@ class JaniQuotientBuilder:
                     dests = [(d.target_location_index, d.probability) for d in edge.destinations]
                     expand_d = set()
                     for c in self._open_constants.values():
-                        for (t,p) in dests:
+                        for (t, p) in dests:
                             if p.contains_variable(set([c.expression_variable])):
                                 expand_d.add(c)
                     expand_d = list(expand_d)
 
-                    if len(expand_d) > 0: #TODO
-                        for combination in itertools.product(*[(range(len(holes_options[c.name])) if c in expand_d else [None]) for c in self._open_constants.values()]):
+                    if len(expand_d) > 0:  # TODO
+                        for combination in itertools.product(
+                                *[(range(len(holes_options[c.name])) if c in expand_d else [None]) for c in
+                                  self._open_constants.values()]):
                             edge_color = edge_coloring.get_or_make_color(combination)
-                            substitution = {c.expression_variable : holes_options[c.name][v] for c,v in zip(self._open_constants.values(), combination) if v is not None}
-                            new_dests = [(d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations]
-                            new_edge = stormpy.storage.JaniEdge(edge.source_location_index, edge.action_index, edge.rate, te, new_dests)
+                            substitution = {c.expression_variable: holes_options[c.name][v] for c, v in
+                                            zip(self._open_constants.values(), combination) if v is not None}
+                            new_dests = [(d.target_location_index, d.probability.substitute(substitution)) for d in
+                                         edge.destinations]
+                            new_edge = stormpy.storage.JaniEdge(edge.source_location_index, edge.action_index,
+                                                                edge.rate, te, new_dests)
                             new_edge.color = edge_color
                             new_aut.add_edge(new_edge)
                     else:
-                        new_edge = stormpy.storage.JaniEdge(edge.source_location_index, edge.action_index, edge.rate, te, dests)
+                        new_edge = stormpy.storage.JaniEdge(edge.source_location_index, edge.action_index, edge.rate,
+                                                            te, dests)
                         new_aut.add_edge(new_edge)
             logger.debug("Done rewriting {}".format(new_aut.name))
             new_automata[aut_index] = new_aut
@@ -202,16 +215,15 @@ class JaniQuotientBuilder:
         for idx, aut in new_automata.items():
             jani_program.replace_automaton(idx, aut)
 
-
         logger.debug("Number of colors: {}".format(len(edge_coloring)))
 
         logger.debug("Removing constants...")
         remove_constant_names = [c.name for c in self._open_constants.values()]
         new_variables = []
-        for c,vs in holes_options.items():
+        for c, vs in holes_options.items():
             if c not in init_all_in_one:
                 continue
-            #TODO use evaluation
+            # TODO use evaluation
             min_val = min([int(str(v)) for v in vs])
             max_val = max([int(str(v)) for v in vs])
             logger.debug("Variable {} with options {} ranges from {} to {}".format(c, vs, min_val, max_val))
@@ -219,8 +231,10 @@ class JaniQuotientBuilder:
             expr_var = self._open_constants[c].expression_variable
             var_restriction = self.expression_manager.create_boolean(False)
             for v in vs:
-                var_restriction = stormpy.Expression.Or(var_restriction, stormpy.Expression.Eq(expr_var.get_expression(), v))
-            jani_program.initial_states_restriction = stormpy.Expression.And(jani_program.initial_states_restriction, var_restriction)
+                var_restriction = stormpy.Expression.Or(var_restriction,
+                                                        stormpy.Expression.Eq(expr_var.get_expression(), v))
+            jani_program.initial_states_restriction = stormpy.Expression.And(jani_program.initial_states_restriction,
+                                                                             var_restriction)
             # TODO if using an initialiser automaton, change the way variables are initialises
             lower_bound = self.expression_manager.create_integer(min_val)
             new_variables.append(stormpy.storage.JaniBoundedIntegerVariable(c, expr_var, lower_bound, upper_bound))
@@ -239,7 +253,7 @@ class JaniQuotientBuilder:
         filename = "output_{}.jani".format(self._counter)
         logger.debug("Write to {}".format(filename))
         with open(filename, "w") as F:
-            #jani_program.make_standard_compliant()
+            # jani_program.make_standard_compliant()
             F.write(str(jani_program))
             pass
         logger.debug("done writing file.")
@@ -250,9 +264,6 @@ class JaniQuotientBuilder:
                 new_list = color_to_edge_indices.get(edge.color, stormpy.FlatSet())
                 new_list.insert(jani_program.encode_automaton_and_edge_index(aut_index, edge_index))
                 color_to_edge_indices[edge.color] = new_list
-        # print(",".join(["{}: {}".format(k,v) for k,v in color_to_edge_indices.items()]))
+        print(",".join(["{}: {}".format(k, v) for k, v in color_to_edge_indices.items()]))
 
         return JaniQuotientContainer(jani_program, edge_coloring, holes_options, color_to_edge_indices)
-
-
-

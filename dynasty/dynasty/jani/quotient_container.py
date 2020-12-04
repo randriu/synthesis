@@ -5,7 +5,7 @@ import time
 
 import stormpy.core
 
-from dynasty.model_handling.mdp_handling import *
+from ..model_handling.mdp_handling import *
 
 logger = logging.getLogger(__name__)
 
@@ -446,7 +446,9 @@ class JaniQuotientContainer:
             self._latest_result = self._mdp_handling.mc_model_hybrid(index)
         else:
             assert engine == Engine.Sparse
-            self._latest_result = self._mdp_handling.mc_model(index, compute_action_values=False, check_dir_2=is_inside_function(threshold) if threshold is not None else always_true)
+            self._latest_result = self._mdp_handling.mc_model(
+                index, compute_action_values=False, check_dir_2=always_true
+            ) # TODO: is_inside_function?
         end_time = time.time()
         self._mc_time += end_time - start_time
         return self._latest_result
