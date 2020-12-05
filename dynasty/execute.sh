@@ -28,14 +28,12 @@ pole=("pole/orig" 5 0.732 0.736 0.001)
 dpm=("dpm/orig" 12 0.078 0.081 0.001)
 herman=("herman/orig" 2 0.60 0.75 0.05)
 
+CMAX=6
+herbig=("herman/big" ${CMAX} 0.95 0.95 0.3)
+
 # preset candidates
 mazexxl=("maze/xxl" 50 0.1 0.1 0.1)
 virus=("virus/orig" 0 0.1 0.9 0.1)
-
-# exploring herman
-CMAX=6
-herbig=("herman/2m-go1" ${CMAX} 0.95 0.95 0.3)
-herbigfix=("herman/2m-go1-fixed" ${CMAX} 0.95 0.95 0.3)
 
 # workspace settings
 examples_dir="workspace/examples"
@@ -44,6 +42,7 @@ parameters_file="${log_dir}/parameters.txt"
 log_file="${log_dir}/log_${core}.txt"
 log_grep_file="${log_dir}/log_grep_${core}.txt"
 
+# ------------------------------------------------------------------------------
 # functions
 
 function log_output() {
@@ -179,7 +178,7 @@ function profiling() {
     # model=("herman/orig" 2 0.60 0.60 0.15)
     # model=("virus/orig" 0 0.1 0.9 0.1)
 
-    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
+    # model=("herman/big" 6 0.98 0.98 0.3)
 
     choose_model "${model[@]}"
 
@@ -187,29 +186,6 @@ function profiling() {
     cegis
     # cegar
     # onebyone
-}
-
-function implementing_rewards() {
-    reset_log
-
-    timeout=1h
-    parallel=true
-    # verbose=true
-    
-    # model=("grid/orig" 40 0.019 0.019 0.15)
-    # model=("grid/big" 40 0.928 0.931 0.003)
-    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
-    # model=("pole/orig" 5 0.735 0.735 0.001)
-    # model=("dpm/orig" 12 0.080 0.080 0.002)
-    # model=("herman/orig" 2 0.60 0.60 0.15)
-    # model=("herman/2m-go1-fixed" 6 0.98 0.98 0.3)
-
-    model=("grid/orig" 10 7.7 7.8 0.01)
-    choose_model "${model[@]}"
-
-    # hybrid
-    cegar
-    # cegis
 }
 
 function exploring_grid() {
@@ -233,16 +209,42 @@ function exploring_grid() {
     cegis
 }
 
+function run() {
+    reset_log
+
+    timeout=36h
+    parallel=true
+    # verbose=true
+    
+    # model=("grid/orig" 40 0.019 0.019 0.15)
+    # model=("grid/big" 40 0.928 0.931 0.003)
+    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
+    # model=("pole/orig" 5 0.735 0.735 0.001)
+    # model=("dpm/orig" 12 0.080 0.080 0.002)
+    # model=("herman/orig" 2 0.60 0.60 0.15)
+
+    # model=("herman/orig-rew" 2 1.80 1.88 0.02)
+    # model=("herman/big-rew" 6 1.5 1.7 0.2)
+    # model=("herman/big-rew" 0 2.801 2.801 0.001)
+
+    model=("herman/orig" 6 0.9254 0.9254 0.15)
+    
+    choose_model "${model[@]}"
+
+    hybrid
+    # cegar
+    # cegis
+}
 
 # ----------
 
-test_release
+# test_release
 # tacas_performance
 
 # profiling
-
-# implementing_rewards
 # exploring_grid
+
+run
 
 exit
 

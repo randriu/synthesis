@@ -33,22 +33,26 @@ const int M1LC;
 
 module initialise
     start : [0..1] init 0;
+
+    // 0
     [go] start = 0 -> (start'=1);
     [step1] start = 1 -> (start'=1);
 endmodule
-
 
 module controller
     round : [0..5] init 1;
     syncs : [0..CMAX] init 0; //+
 
+    // 0
     [step1] round = 1 -> (round'=2);
     [step2] round = 2 -> (round'=3);
     [step3] round = 3 -> (round'=4);
     [step4] round = 4 -> (round'=5);
     [step5] round = 5 -> (round'=0);
-    // [sync] round = 0 -> (round'=1);
+
+    // 5
     [sync] round = 0 -> (round'=1) & (syncs'=min(syncs+1,CMAX)); //+
+    // [sync] round = 0 -> (round'=1);
 
 endmodule
 
@@ -60,8 +64,11 @@ module process1
     y1 : [0..1] init 0;
     m1 : [0..MAXMEM] init 0;
 
-    [go]  (true) -> 0.5: (x1'=0) + 0.5: (x1'=1);
+    // 0
+    [go]  (true) -> 1: (x1'=1) & (y1'=1);
+    // [go]  (true) -> 0.5: (x1'=0) + 0.5: (x1'=1);
 
+    // 1
     [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M0LA) + 1-pUnfairLow : (y1'=1) & (m1'=M0LB);
     [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=1 -> pBitUnfairLow : (y1'=0) & (m1'=M0LA) + 1-pBitUnfairLow : (y1'=1) & (m1'=M0LB);
     [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=2 -> pFair : (y1'=0) & (m1'=M0LA) + 1-pFair : (y1'=1) & (m1'=M0LB);
@@ -69,25 +76,28 @@ module process1
     [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=4 -> pUnfairHigh : (y1'=0) & (m1'=M0LA) + 1-pUnfairHigh : (y1'=1) & (m1'=M0LB);
     [step1] !(x1=x7) & x1 = 0 & m1 = 0 -> (y1'=x7) & (m1'=M0LC);
 
+    // 7
     [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0HFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M0HA) + 1-pUnfairLow : (y1'=1) & (m1'=M0HB);
     [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0HFAIR=1 -> pBitUnfairLow : (y1'=0) & (m1'=M0HA) + 1-pBitUnfairLow : (y1'=1) & (m1'=M0HB);
     [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0HFAIR=2 -> pFair : (y1'=0) & (m1'=M0HA) + 1-pFair : (y1'=1) & (m1'=M0HB);
     [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0HFAIR=3 -> pBitUnfairHigh : (y1'=0) & (m1'=M0HA) + 1-pBitUnfairHigh : (y1'=1) & (m1'=M0HB);
-    [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0HFAIR=4 -> pUnfairHigh : (y1'=0) & (m1'=M0HA) + 1-pUnfairHigh : (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0HFAIR=4 -> pUnfairHigh : (y1'=0) & (m1'=M0HA) + 1-pUnfairHigh : (y1'=1) & (m1'=M0HB);        // 2-6,11
     [step1] !(x1=x7) & x1 = 1 & m1 = 0 -> (y1'=x7) & (m1'=M0HC);
 
+    // 13
     [step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1LA) + 1-pUnfairLow : (y1'=1) & (m1'=M1LB);
     [step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=1 -> pFair : (y1'=0) & (m1'=M1LA) + 1-pFair : (y1'=1) & (m1'=M1LB);
     [step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1LA) + 1-pUnfairHigh : (y1'=1) & (m1'=M1LB);
-    [step1] !(x1=x7) & x1 = 0 & m1 = 1 -> (y1'=x7) & (m1'=M1LC);
+    [step1] !(x1=x7) & x1 = 0 & m1 = 1 -> (y1'=x7) & (m1'=M1LC);    // *,16
 
-    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1LA) + 1-pUnfairLow : (y1'=1) & (m1'=M1LB);
-    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=1 -> pFair : (y1'=0) & (m1'=M1LA) + 1-pFair : (y1'=1) & (m1'=M1LB);
-    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1LA) + 1-pUnfairHigh : (y1'=1) & (m1'=M1LB);
-    [step1] !(x1=x7) & x1 = 1 & m1 = 1 -> (y1'=x7) & (m1'=M1LC);
+    // 17
+    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1HFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1LA) + 1-pUnfairLow : (y1'=1) & (m1'=M1LB);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1HFAIR=1 -> pFair : (y1'=0) & (m1'=M1LA) + 1-pFair : (y1'=1) & (m1'=M1LB);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1HFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1LA) + 1-pUnfairHigh : (y1'=1) & (m1'=M1LB);
+    [step1] !(x1=x7) & x1 = 1 & m1 = 1 -> (y1'=x7) & (m1'=M1LC);    // *,20
 
-
-    [sync] true -> (x1' = y1) & (y1'=0);
+    // 21
+    [sync] true -> (x1' = y1) & (y1'=0);        // *,21
 
 endmodule
 
