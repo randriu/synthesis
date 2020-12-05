@@ -385,7 +385,7 @@ class FamilyChecker:
             raise ValueError("optimality criterion not set")
 
         self._optimality_setting = OptimalitySetting(optimality_criterion, direction, epsilon)
-        self._optimal_value = 0.0 if direction == "max" else math.inf
+        self._optimal_value = 0.0 if direction == "max" else 99999
 
     def input_has_multiple_properties(self):
         if self._optimality_setting is not None:

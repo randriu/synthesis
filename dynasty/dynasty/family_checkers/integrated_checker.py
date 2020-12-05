@@ -21,7 +21,7 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-quotienbased_logger.disabled = True
+# quotienbased_logger.disabled = True
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
@@ -486,7 +486,7 @@ class Family:
 
     def check_optimal_property(self):
         # TODO: Set right value of is_max variable
-        is_max = True
+        is_max = True if self._optimality_setting.direction == "max" else False
         feasible = self.model_check_formula(len(self.formulae) - 1)
         oracle = Family._quotient_container
         optimal_value = None

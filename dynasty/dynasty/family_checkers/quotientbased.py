@@ -125,7 +125,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
             if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
                 logger.debug("Undecided.")
                 oracle.scheduler_color_analysis()
-                hole_options = self._split_hole_options(
+                hole_options = self.split_hole_options(
                     hole_options[0], oracle, self.hole_options, self.use_oracle
                 ) + hole_options[1:]
             else:
@@ -211,7 +211,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                         nr_options_remaining -= hole_options[0].size()
                         hole_options = hole_options[1:]
                     else:
-                        hole_options = self._split_hole_options(
+                        hole_options = self.split_hole_options(
                             hole_options[0], oracle, self.hole_options, self.use_oracle
                         ) + hole_options[1:]
                 else:
@@ -251,7 +251,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                     hole_options = hole_options[1:]
                 elif improved_untight:
                     optimal_hole_options = None
-                    hole_options = self._split_hole_options(
+                    hole_options = self.split_hole_options(
                         hole_options[0], oracle, self.hole_options, self.use_oracle
                     ) + hole_options[1:]
 
@@ -322,11 +322,11 @@ class LiftingChecker(QuotientBasedFamilyChecker):
 
                 if hole_options[0].size() > 2:
                     oracle.scheduler_color_analysis()
-                    hole_options_next_round += self._split_hole_options(
+                    hole_options_next_round += self.split_hole_options(
                         hole_options[0], oracle, self.hole_options, self.use_oracle
                     )
                 else:
-                    hole_options_next_round += self._split_hole_options(
+                    hole_options_next_round += self.split_hole_options(
                         hole_options[0], None, self.hole_options, self.use_oracle
                     )
 
