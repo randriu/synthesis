@@ -1,6 +1,6 @@
 // author: Roman Andriushchenko
 
-#include "storm/research/Counterexample.h"
+#include "storm-synthesis/synthesis/Counterexample.h"
 
 #include <queue>
 #include <deque>
@@ -20,7 +20,7 @@
 #include "storm/modelchecker/CheckTask.h"
 
 namespace storm {
-    namespace research {
+    namespace synthesis {
 
         template<typename ValueType, typename StateType>
         std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<StateType>> DtmcFromMdp (
@@ -66,7 +66,7 @@ namespace storm {
                 ) {
                     bool action_suitable = true;
                     for(auto edge_index: mdp_choice_origins.getEdgeIndexSet(action)) {
-                        if(!selected_edge_indices.contains(edge_index)) {
+                        if(selected_edge_indices.find(edge_index) == selected_edge_indices.end()) {
                             action_suitable = false;
                             break;
                         }

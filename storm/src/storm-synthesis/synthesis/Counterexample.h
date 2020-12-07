@@ -1,7 +1,7 @@
 // author: Roman Andriushchenko
 
-#ifndef STORM_RESEARCH_COUNTEREXAMPLE_H
-#define STORM_RESEARCH_COUNTEREXAMPLE_H
+#ifndef STORM_SYNTHESIS_COUNTEREXAMPLE_H
+#define STORM_SYNTHESIS_COUNTEREXAMPLE_H
 
 #include "storm/storage/jani/Model.h"
 #include "storm/logic/Formula.h"
@@ -13,7 +13,7 @@
 #include "storm/utility/Stopwatch.h"
 
 namespace storm {
-    namespace research {
+    namespace synthesis {
 
         /*!
          * Construct a DTMC by exploring a reachable state space of an MDP 
@@ -184,4 +184,4 @@ namespace storm {
     } // namespace research
 } // namespace storm
 
-#endif  /* STORM_RESEARCH_COUNTEREXAMPLE_H */
+#endif  /* STORM_SYNTHESIS_COUNTEREXAMPLE_H */

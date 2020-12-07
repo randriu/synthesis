@@ -11,7 +11,7 @@
 #include "core/transformation.h"
 #include "core/simulator.h"
 
-#include "core/research.h" //+
+#include "core/synthesis.h"
 
 PYBIND11_MODULE(core, m) {
     m.doc() = "core";
@@ -37,5 +37,6 @@ PYBIND11_MODULE(core, m) {
     define_graph_constraints(m);
     define_transformation(m);
     define_sparse_model_simulator(m);
-    define_research(m); //+
+
+    define_synthesis(m);
 }

@@ -226,7 +226,8 @@ function run() {
     # model=("herman/orig" 6 0.9254 0.9254 0.15)
     # model=("herman/orig-rew" 2 1.80 1.88 0.02)
     
-    model=("herman/553x_1_0" 0 1.0 2.0 0.2)
+    model=("herman/553x_1_0" 0 1.4 1.8 0.2)
+
     # model=("herman/553x_r_0" 0 2.0 2.0 0.2)
     # model=("herman/5533_r_0" 0 1.0 1.0 0.2)
     # model=("herman/5555_r_0" 0 1.1 1.3 0.1)

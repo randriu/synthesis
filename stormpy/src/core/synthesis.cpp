@@ -1,11 +1,9 @@
-#include <algorithm>
+#include "synthesis.h"
 
-#include "research.h"
-
-#include "storm/research/Counterexample.h"
+#include "storm-synthesis/synthesis/Counterexample.h"
 
 // Define python bindings
-void define_research(py::module& m) {
+void define_synthesis(py::module& m) {
 
     // String container
     // using FlatSetString = boost::container::flat_set<std::string, std::less<std::string>, boost::container::new_allocator<std::string>>;
@@ -26,13 +24,13 @@ void define_research(py::module& m) {
         storm::models::sparse::Mdp<double> const& mdp,
         storm::storage::FlatSet<uint_fast64_t> const& automataAndEdgeIndices
         )
-            {return storm::research::DtmcFromMdp<>(mdp,automataAndEdgeIndices);},
+            {return storm::synthesis::DtmcFromMdp<>(mdp,automataAndEdgeIndices);},
             "Restrict an MDP to selected edge indices",
             py::arg("mdp"), py::arg("automata_and_edge_indices")
         );
 
     // Counterexample generation
-    py::class_<storm::research::Counterexample<>>(
+    py::class_<storm::synthesis::Counterexample<>>(
         m, "SynthesisResearchCounterexample", "[synthesis research] Counterexample generation"
     )
         .def(
@@ -48,25 +46,25 @@ void define_research(py::module& m) {
             )
         .def(
             "replace_formula_threshold",
-            &storm::research::Counterexample<>::replaceFormulaThreshold,
+            &storm::synthesis::Counterexample<>::replaceFormulaThreshold,
             "Replace the formula threshold as well as the corresponding MDP bound.",
             py::arg("formula_index"), py::arg("formula_threshold"), py::arg("mdp_bound")
             )
         .def(
             "prepare_dtmc",
-            &storm::research::Counterexample<>::prepareDtmc,
+            &storm::synthesis::Counterexample<>::prepareDtmc,
             "Prepare a DTMC for counterexample construction.",
             py::arg("dtmc"), py::arg("state_mdp")
             )
         .def(
             "construct_conflict",
-            &storm::research::Counterexample<>::constructCounterexample,
+            &storm::synthesis::Counterexample<>::constructCounterexample,
             "Construct a counterexample to a prepared DTMC.",
             py::arg("formula_index"), py::arg("use_bounds") = true
         )
         .def_property_readonly(
             "stats",
-            [](storm::research::Counterexample<> & counterexample) {
+            [](storm::synthesis::Counterexample<> & counterexample) {
                 return counterexample.stats();
             },
             "Read stats."
