@@ -6,7 +6,7 @@ lib/**/_config.py
 build/
 dist/
 .idea/
-**/__pycache__/
+__pycache__/
 _build/
 .pytest_cache/
 .idea/
