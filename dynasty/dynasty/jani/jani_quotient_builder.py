@@ -250,7 +250,7 @@ class JaniQuotientBuilder:
                 new_list = color_to_edge_indices.get(edge.color, stormpy.FlatSet())
                 new_list.insert(jani_program.encode_automaton_and_edge_index(aut_index, edge_index))
                 color_to_edge_indices[edge.color] = new_list
-        print(",".join(["{}: {}".format(k,v) for k,v in color_to_edge_indices.items()]))
+        # print(",".join(["{}: {}".format(k,v) for k,v in color_to_edge_indices.items()]))
 
         return JaniQuotientContainer(jani_program, edge_coloring, holes_options, color_to_edge_indices)
 
