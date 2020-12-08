@@ -134,8 +134,8 @@ storm-build() {
     dot_clean
     cd $STORM_BLD
     make storm-main --jobs $COMPILE_JOBS
-    cd $OLDPWD
     # make check --jobs $COMPILE_JOBS
+    cd $OLDPWD
 }
 
 stormpy-build() {
