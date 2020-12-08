@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# compilation parameters
+
+export COMPILE_JOBS='8'
+
 # general
 
 alias dot_clean='find ~ -name "._*" -delete; find . -name ".DS_Store" -delete'
@@ -17,12 +21,9 @@ export STORM_BLD=$STORM_DIR/build
 export STORMPY_DIR=$SYNTHESIS/stormpy
 export DYNASTY_DIR=$SYNTHESIS/dynasty
 
-# building
-export COMPILE_JOBS='8'
-
 # functions
 
-storm-dependencies() {
+dynasty-dependencies() {
     sudo apt update
     sudo apt -y install git cmake automake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
 
@@ -30,7 +31,7 @@ storm-dependencies() {
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
 
-storm-download() {
+dynasty-download() {
     mkdir -p $PREREQUISITES
 
     # mathsat
@@ -63,17 +64,21 @@ storm-download() {
     # created folder: stormpy-1.6.0
 }
 
-storm-patch() {
-    rsync -av storm/ moves-rwth-storm-058fed3/ && rm -rf storm && mv moves-rwth-storm-058fed3 storm
-    rsync -av stormpy/ stormpy-1.6.0/ && rm -rf stormpy && mv stormpy-1.6.0 stormpy
+dynasty-patch() {
+    rsync -av $SYNTHESIS/storm/ $SYNTHESIS/moves-rwth-storm-058fed3/
+        rm -rf $SYNTHESIS/storm
+        mv $SYNTHESIS/moves-rwth-storm-058fed3 $SYNTHESIS/storm
+    rsync -av $SYNTHESIS/stormpy/ $SYNTHESIS/stormpy-1.6.0/
+        rm -rf $SYNTHESIS/stormpy
+        mv $SYNTHESIS/stormpy-1.6.0 $SYNTHESIS/stormpy
 }
 
-storm-setup-python() {
+dynasty-setup-python() {
     pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
 }
 
-build-carl() {
+carl-build() {
     cd $PREREQUISITES
     cd carl && mkdir -p build && cd build
     cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
@@ -90,7 +95,7 @@ build-carl() {
 
 # }
 
-build-pycarl() {
+pycarl-build() {
     cd $PREREQUISITES/pycarl
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py build_ext --carl-dir $PREREQUISITES/carl --jobs $COMPILE_JOBS develop
@@ -99,7 +104,7 @@ build-pycarl() {
 
 storm-config() {
     dot_clean
-    mkdir $STORM_BLD
+    mkdir -p $STORM_BLD
     cd $STORM_BLD
     cmake ..
     cd $OLDPWD
@@ -121,7 +126,7 @@ stormpy-build() {
     cd $OLDPWD
 }
 
-install-dynasty() {
+dynasty-install() {
     dot_clean
     cd $DYNASTY_DIR
     source $SYNTHESIS_ENV/bin/activate
@@ -129,3 +134,33 @@ install-dynasty() {
     deactivate
     cd $OLDPWD
 }
+
+# aggregated functions
+
+storm-rebuild() {
+    storm-config
+    storm-build
+}
+
+stormpy-rebuild() {
+    storm-rebuild
+    stormpy-build
+}
+
+dynasty-nodep() {
+    dynasty-download
+    dynasty-patch
+    dynasty-setup-python
+
+    carl-build
+    pycarl-build
+
+    stormpy-rebuild
+    dynasty-install
+}
+
+dynasty-full() {
+    dynasty-dependencies
+    dynasty-nodep
+}
+
