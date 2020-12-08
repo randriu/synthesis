@@ -64,6 +64,10 @@ dynasty-download() {
     # created folder: stormpy-1.6.0
 }
 
+dynasty-patch-create() {
+    rsync -av $SYNTHESIS/storm/src/storm-counterexamples
+}
+
 dynasty-patch() {
     rsync -av $SYNTHESIS/storm/ $SYNTHESIS/moves-rwth-storm-058fed3/
         rm -rf $SYNTHESIS/storm
