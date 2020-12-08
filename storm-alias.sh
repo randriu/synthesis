@@ -64,8 +64,8 @@ storm-download() {
 }
 
 storm-patch() {
-    cp -r storm/* moves-rwth-storm-058fed3/ && rm -rf storm && mv moves-rwth-storm-058fed3 storm
-    cp -r stormpy/* stormpy-1.6.0/ && rm -rf stormpy && mv stormpy-1.6.0 stormpy
+    rsync -av storm/ moves-rwth-storm-058fed3/ && rm -rf storm && mv moves-rwth-storm-058fed3 storm
+    rsync -av stormpy/ stormpy-1.6.0/ && rm -rf stormpy && mv stormpy-1.6.0 stormpy
 }
 
 storm-setup-python() {
