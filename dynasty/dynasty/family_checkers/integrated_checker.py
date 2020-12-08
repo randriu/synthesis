@@ -21,7 +21,7 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-# quotienbased_logger.disabled = True
+quotienbased_logger.disabled = True
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True

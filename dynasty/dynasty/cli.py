@@ -49,9 +49,9 @@ def dump_stats_to_file(path, keyword, constants, description, *args):
 
 @click.command()
 @click.option('--project', help="root", required=True)
-@click.option('--sketch', help="the sketch", required=True)
-@click.option('--allowed', help="for each hole the options", required=True)
-@click.option('--properties', help="the properties", required=True)
+@click.option('--sketch', help="the sketch", required=False, default="sketch.templ")
+@click.option('--allowed', help="for each hole the options", required=False, default="sketch.allowed")
+@click.option('--properties', help="the properties", required=False, default="sketch.properties")
 @click.option('--optimality', help="optimality criterion")
 @click.option('--restrictions', help="restrictions")
 @click.option("--constants", default="")
