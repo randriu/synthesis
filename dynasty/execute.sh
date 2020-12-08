@@ -216,7 +216,7 @@ function run() {
     parallel=true
     # verbose=true
     
-    model=("grid/orig" 40 0.019 0.019 0.15)
+    # model=("grid/orig" 40 0.019 0.019 0.15)
     # model=("grid/big" 40 0.928 0.931 0.003)
     # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
     # model=("pole/orig" 5 0.735 0.735 0.001)
@@ -228,7 +228,7 @@ function run() {
     
     # model=("herman/553x_1_0" 0 1.8 2.2 0.2)
     # model=("herman/553x_1_0_m" 0 1 1 0.1)
-    # model=("herman/553x_1_3_m" 3 0.2 0.2 0.2)
+    model=("herman/553x_1_3_m" 3 1.0 1.0 0.1)
 
     # model=("herman/553x_r_0" 0 2.0 2.0 0.2)
     # model=("herman/5533_r_0" 0 1.0 1.0 0.2)

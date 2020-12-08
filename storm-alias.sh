@@ -208,10 +208,11 @@ alias tb='dyn; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_
 alias tf='envd'
 
 # execution
-alias dshow='ps -aux | grep "timeout"'
-alias dtime='ps -aux | grep "python dynasty.py"'
-alias dcount='echo `dshow | wc -l`-1 | bc'
-alias dkill='killall bash; killall python'
+alias dpid='pgrep -f "^python dynasty.py .*"'
+alias dshow='pgrep -af "^python dynasty.py .*"'
+alias dcount='pgrep -afc "^python dynasty.py .*"'
+alias dkill='dpid | xargs kill'
+
 
 dlog() {
     cat $SYNTHESIS/dynasty/workspace/log/log_$1.txt
