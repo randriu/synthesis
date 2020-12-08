@@ -2,6 +2,8 @@
 .*
 
 !.gitignore
-!src/CMakeLists.txt
-!src/storm-cli-utilities/CMakeLists.txt
-!storm-synthesis/*
+!src/storm/storm-counterexamples/synthesis/
+
+# !src/CMakeLists.txt
+# !src/storm-cli-utilities/CMakeLists.txt
+# !storm/storm-synthesis/*

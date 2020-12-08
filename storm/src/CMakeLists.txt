@@ -22,8 +22,6 @@ add_subdirectory(storm-pomdp-cli)
 add_subdirectory(storm-conv)
 add_subdirectory(storm-conv-cli)
 
-add_subdirectory(storm-synthesis) #+
-
 add_subdirectory(test)
 
 set(STORM_TARGETS ${STORM_TARGETS} PARENT_SCOPE)
