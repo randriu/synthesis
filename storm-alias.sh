@@ -137,6 +137,26 @@ dynasty-install() {
 
 # aggregated functions
 
+dynasty-nodep() {
+    # dynasty-download
+    # dynasty-patch
+    # dynasty-setup-python
+
+    # carl-build
+    # pycarl-build
+
+    storm-config
+    storm-build
+    stormpy-build
+
+    # dynasty-install
+}
+
+dynasty-full() {
+    # dynasty-dependencies
+    dynasty-nodep
+}
+
 storm-rebuild() {
     storm-config
     storm-build
@@ -147,20 +167,56 @@ stormpy-rebuild() {
     stormpy-build
 }
 
-dynasty-nodep() {
-    dynasty-download
-    dynasty-patch
-    dynasty-setup-python
+################################################################################
+# aliases
 
-    carl-build
-    pycarl-build
+alias sc='storm-config'
+alias sb='storm-build'
+alias pb='stormpy-build'
+alias sr='storm-rebuild'
 
-    stormpy-rebuild
-    dynasty-install
+# storm api
+alias enva='source $SYNTHESIS_ENV/bin/activate'
+alias envd='deactivate'
+alias dyn='cd $SYNTHESIS/dynasty'
+
+alias tb='dyn; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
+alias tf='envd'
+
+# execution
+alias dshow='ps -aux | grep "timeout"'
+alias dtime='ps -aux | grep "python dynasty.py"'
+alias dcount='echo `dshow | wc -l`-1 | bc'
+alias dkill='killall bash; killall python'
+
+dlog() {
+    cat $SYNTHESIS/dynasty/workspace/log/log_$1.txt
 }
 
-dynasty-full() {
-    dynasty-dependencies
-    dynasty-nodep
+dgrep() {
+    cat $SYNTHESIS/dynasty/workspace/log/log_grep_$1.txt
 }
 
+diter() {
+    dlog $1 | grep "iteration " | tail -n 1
+}
+
+diteri() {
+    dlog $1 | grep "CEGIS: iteration " | tail -n 1
+}
+
+ditera() {
+    dlog $1 | grep "CEGAR: iteration " | tail -n 1
+}
+
+ddtmc() {
+    dlog $1 | grep "Constructed DTMC"
+}
+
+dopt() {
+    dlog $1 | grep "Optimal value" | tail -n 1
+}
+
+dbounds() {
+    dlog $1 | grep "Result for initial"
+}
