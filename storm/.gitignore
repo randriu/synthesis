@@ -1,8 +1,8 @@
 *
-.*
+*/
 
 !.gitignore
-!src/storm/storm-counterexamples/synthesis/
+!src/storm-counterexamples/synthesis/*
 
 # !src/CMakeLists.txt
 # !src/storm-cli-utilities/CMakeLists.txt
