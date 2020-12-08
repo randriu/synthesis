@@ -1,10 +1,12 @@
 !.gitignore
 
 *
-*/
-
 !src
+
 src/*
 !src/mod_core.cpp
+!src/core/
+
 src/core/*
 !src/core/synthesis.*
+

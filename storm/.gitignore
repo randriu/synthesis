@@ -1,11 +1,11 @@
 !.gitignore
 
 *
-*/
-
 !src
+
 src/*
 !src/storm-counterexamples
+
 src/storm-counterexamples/*
 !src/storm-counterexamples/synthesis
 
