@@ -1,6 +1,6 @@
 // author: Roman Andriushchenko
 
-#include "storm-synthesis/synthesis/Counterexample.h"
+#include "storm-counterexamples/synthesis/Counterexample.h"
 
 #include <queue>
 #include <deque>
