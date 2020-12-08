@@ -56,12 +56,14 @@ dynasty-download() {
     # storm
     wget https://zenodo.org/record/3885454/files/moves-rwth/storm-1.6.0.zip
     unzip storm-1.6.0.zip && rm storm-1.6.0.zip
-    # created folder: moves-rwth-storm-058fed3
+    mv moves-rwth-storm-058fed3 storm
+    # created folder: storm
 
     # stormpy
     wget https://github.com/moves-rwth/stormpy/archive/1.6.0.zip
     unzip 1.6.0.zip && rm 1.6.0.zip
-    # created folder: stormpy-1.6.0
+    mv stormpy-1.6.0 stormpy
+    # created folder: stormpy
 }
 
 dynasty-patch-create() {
@@ -69,12 +71,8 @@ dynasty-patch-create() {
 }
 
 dynasty-patch() {
-    rsync -av $SYNTHESIS/storm/ $SYNTHESIS/moves-rwth-storm-058fed3/
-        rm -rf $SYNTHESIS/storm
-        mv $SYNTHESIS/moves-rwth-storm-058fed3 $SYNTHESIS/storm
-    rsync -av $SYNTHESIS/stormpy/ $SYNTHESIS/stormpy-1.6.0/
-        rm -rf $SYNTHESIS/stormpy
-        mv $SYNTHESIS/stormpy-1.6.0 $SYNTHESIS/stormpy
+    rsync -av $SYNTHESIS/storm-patch/ $SYNTHESIS/storm/
+    rsync -av $SYNTHESIS/stormpy-patch/ $SYNTHESIS/stormpy/
 }
 
 dynasty-setup-python() {
