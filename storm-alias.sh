@@ -153,6 +153,7 @@ dynasty-install() {
     cd $DYNASTY_DIR
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py install
+    # python setup.py test
     deactivate
     cd $OLDPWD
 }
