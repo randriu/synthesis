@@ -9,7 +9,7 @@ CORE := 0
 
 all: run
 
-run:
+run: $(LOG_DIR)
 	$(eval RUN_SH := $(LOG_DIR)/run_$(CORE).sh)
 	@cp $(EXP_SH) $(RUN_SH)
 	@bash $(RUN_SH) $(CORE)
@@ -20,6 +20,8 @@ clean:
 r: run
 c: clean
 
+$(LOG_DIR):
+	mkdir -p $(LOG_DIR)
 c1:
 	@$(MAKE) --no-print-directory run CORE=1
 c2:

@@ -25,7 +25,16 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 dynasty-dependencies() {
     sudo apt update
-    sudo apt -y install git cmake automake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+
+    # not installed on sarka:
+        # carl:
+            # libcln-dev (+, requires texinfo)
+            # libginac-dev (+)
+            # libeigen3-dev (+)
+        # storm:
+            # libglpk-dev (+)
+            # libxerces-c-dev (we probably do not need -- gspn)
 
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
@@ -54,15 +63,19 @@ dynasty-download() {
     # created folder: $PREREQUISITES/pycarl
 
     # storm
+    cd $SYNTHESIS
     wget https://zenodo.org/record/3885454/files/moves-rwth/storm-1.6.0.zip
     unzip storm-1.6.0.zip && rm storm-1.6.0.zip
     mv moves-rwth-storm-058fed3 storm
+    cd $OLDPWD
     # created folder: storm
 
     # stormpy
+    cd $SYNTHESIS
     wget https://github.com/moves-rwth/stormpy/archive/1.6.0.zip
     unzip 1.6.0.zip && rm 1.6.0.zip
     mv stormpy-1.6.0 stormpy
+    cd $OLDPWD
     # created folder: stormpy
 }
 
@@ -87,8 +100,8 @@ carl-build() {
     cd $PREREQUISITES
     cd carl && mkdir -p build && cd build
     cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
-    make --jobs $COMPILE_JOBS
-    make lib_carl
+    make lib_carl --jobs $COMPILE_JOBS
+    # make test
 }
 
 # build-carl-parser() {
@@ -103,7 +116,8 @@ carl-build() {
 pycarl-build() {
     cd $PREREQUISITES/pycarl
     source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --carl-dir $PREREQUISITES/carl --jobs $COMPILE_JOBS develop
+    python3 setup.py build_ext --carl-dir $PREREQUISITES/carl/build --jobs $COMPILE_JOBS develop
+    # python setup.py test
     deactivate
 }
 
@@ -111,7 +125,8 @@ storm-config() {
     dot_clean
     mkdir -p $STORM_BLD
     cd $STORM_BLD
-    cmake ..
+    cmake -DSTORM_USE_LTO=OFF ..
+    # cmake ..
     cd $OLDPWD
 }
 
@@ -120,6 +135,7 @@ storm-build() {
     cd $STORM_BLD
     make storm-main --jobs $COMPILE_JOBS
     cd $OLDPWD
+    # make check --jobs $COMPILE_JOBS
 }
 
 stormpy-build() {
@@ -127,6 +143,7 @@ stormpy-build() {
     cd $STORMPY_DIR
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    # python setup.py test
     deactivate
     cd $OLDPWD
 }
