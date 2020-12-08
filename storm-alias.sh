@@ -76,6 +76,9 @@ dynasty-patch() {
 dynasty-setup-python() {
     pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
+    source $SYNTHESIS_ENV/bin/activate
+    pip3 install pysmt z3-solver click
+    deactivate
 }
 
 carl-build() {
@@ -138,18 +141,18 @@ dynasty-install() {
 # aggregated functions
 
 dynasty-nodep() {
-    # dynasty-download
-    # dynasty-patch
-    # dynasty-setup-python
+    dynasty-download
+    dynasty-patch
+    dynasty-setup-python
 
-    # carl-build
-    # pycarl-build
+    carl-build
+    pycarl-build
 
     storm-config
     storm-build
     stormpy-build
 
-    # dynasty-install
+    dynasty-install
 }
 
 dynasty-full() {
@@ -175,10 +178,11 @@ alias sb='storm-build'
 alias pb='stormpy-build'
 alias sr='storm-rebuild'
 
-# storm api
+alias synthesis='cd $SYNTHESIS'
+alias dyn='cd $SYNTHESIS/dynasty'
+
 alias enva='source $SYNTHESIS_ENV/bin/activate'
 alias envd='deactivate'
-alias dyn='cd $SYNTHESIS/dynasty'
 
 alias tb='dyn; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
 alias tf='envd'
