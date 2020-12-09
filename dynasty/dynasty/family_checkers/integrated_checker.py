@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 # jani_quotient_builder_logger.disabled = True
 # model_handling_logger.disabled = True
 
-ONLY_CEGAR = True
+ONLY_CEGAR = False
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
@@ -418,11 +418,17 @@ class Family:
         logger.debug(f"CEGAR: analyzing family {self.options} of size {self.size}.")
 
         undecided_formulae_indices = []
+        decided = None
+        optimal_value = None
         # for formula_index in self.formulae_indices[:-1] \
         #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
         for formula_index in self.formulae_indices:
             logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
+
+            # if formula_index == len(self.formulae) - 1:
+            #     decided, optimal_value = self.check_optimal_property(feasible=feasible)
+
             if not feasible and isinstance(feasible, bool):
                 logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None
@@ -435,8 +441,6 @@ class Family:
             else:
                 logger.debug("Formula {}: SAT".format(formula_index))
 
-        decided = None
-        optimal_value = None
         if self._optimality_setting is not None:
             if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
                 decided, optimal_value = self.check_optimal_property()
@@ -484,8 +488,7 @@ class Family:
 
         return self.member_assignment
 
-    def check_optimal_property(self):
-        # TODO: Set right value of is_max variable
+    def check_optimal_property(self, feasible=None):
         is_max = True if self._optimality_setting.direction == "max" else False
         feasible, result = self.model_check_formula(len(self.formulae) - 1)
         oracle = Family._quotient_container
@@ -670,8 +673,8 @@ class FamilyHybrid(Family):
 
     def analyze_member(self, formula_index):
         assert self.dtmc is not None
-        sat, _ = check_dtmc(self.dtmc, Family._formulae[formula_index])
-        return sat
+        sat, result = check_dtmc(self.dtmc, Family._formulae[formula_index])
+        return sat, result
 
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
@@ -882,17 +885,17 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             for formula_index in family.formulae_indices:
                 logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
                 Profiler.start("is - DTMC model checking")
-                sat = family.analyze_member(formula_index)
+                sat, _ = family.analyze_member(formula_index)
                 Profiler.stop()
                 logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
                 if not sat:
                     violated_formulae_indices.append(formula_index)
-            if not violated_formulae_indices:  # all formulae SAT
-                if self.input_has_optimality_property():
-                    self._check_optimal_property(family, assignment, counterexample_generator)
-                else:
-                    Profiler.add_ce_stats(counterexample_generator.stats)
-                    return True
+            if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
+                    and self.input_has_optimality_property():
+                self._check_optimal_property(family, assignment, counterexample_generator)
+            elif not violated_formulae_indices:
+                Profiler.add_ce_stats(counterexample_generator.stats)
+                return True
 
             # some formulae UNSAT: construct counterexamples
             logger.debug("CEGIS: preprocessing DTMC.")
