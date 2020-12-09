@@ -426,12 +426,11 @@ class Family:
             logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
 
-            # if formula_index == len(self.formulae) - 1:
-            #     decided, optimal_value = self.check_optimal_property(feasible=feasible)
-
             if not feasible and isinstance(feasible, bool):
                 logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None
+                if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
+                    decided, optimal_value = self.check_optimal_property(feasible=feasible)
                 break
             elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
@@ -440,10 +439,12 @@ class Family:
                     self.prepare_split()
             else:
                 logger.debug("Formula {}: SAT".format(formula_index))
+                if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
+                    decided, optimal_value = self.check_optimal_property(feasible=feasible)
 
-        if self._optimality_setting is not None:
-            if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
-                decided, optimal_value = self.check_optimal_property()
+        # if self._optimality_setting is not None:
+        #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
+        #         decided, optimal_value = self.check_optimal_property()
 
         self.formulae_indices = undecided_formulae_indices
 
