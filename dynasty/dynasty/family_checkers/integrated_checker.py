@@ -430,7 +430,7 @@ class Family:
                 logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
-                    decided, optimal_value = self.check_optimal_property(feasible=feasible)
+                    decided, optimal_value = self.check_optimal_property(feasible)
                 break
             elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
@@ -440,7 +440,7 @@ class Family:
             else:
                 logger.debug("Formula {}: SAT".format(formula_index))
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
-                    decided, optimal_value = self.check_optimal_property(feasible=feasible)
+                    decided, optimal_value = self.check_optimal_property(feasible)
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
@@ -489,9 +489,8 @@ class Family:
 
         return self.member_assignment
 
-    def check_optimal_property(self, feasible=None):
+    def check_optimal_property(self, feasible):
         is_max = True if self._optimality_setting.direction == "max" else False
-        feasible, result = self.model_check_formula(len(self.formulae) - 1)
         oracle = Family._quotient_container
         optimal_value = None
         decided = False
