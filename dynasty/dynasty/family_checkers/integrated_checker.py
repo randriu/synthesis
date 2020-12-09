@@ -841,6 +841,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             # Construct the violation property according newly found optimal value
             self._construct_violation_property(family_ref, cex_generator)
 
+            logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
 
     def analyze_family_cegis(self, family):

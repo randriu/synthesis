@@ -1,3 +1,4 @@
+import time
 from collections.abc import Iterable
 import logging
 import math
@@ -8,7 +9,7 @@ import stormpy.core
 import dynasty.jani
 from dynasty.jani.jani_quotient_builder import *
 from dynasty.jani.quotient_container import ThresholdSynthesisResult as ThresholdSynthesisResult
-from dynasty.jani.quotient_container import Engine as Engine
+from dynasty.jani.quotient_container import Engine as Engine, ModelHandling
 from dynasty.annotated_property import AnnotatedProperty
 from dynasty.family_checkers.familychecker import FamilyChecker, HoleOptions
 
