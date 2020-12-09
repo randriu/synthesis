@@ -26,7 +26,7 @@ quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
 
-ONLY_CEGAR = False
+ONLY_CEGAR = True
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
@@ -132,8 +132,6 @@ class CEGARChecker(LiftingChecker):
     def initialise(self):
         super().initialise()
         self.formulae = [property_obj.raw_formula for property_obj in self.properties]
-        # no optimality support (TODO Simon)
-        assert not self.input_has_optimality_property()
 
     def run_feasibility(self):
         """
@@ -414,7 +412,7 @@ class Family:
         result, store a hole assignment.
         Note: we do not check whether assignment is not None
         """
-        assert not self.analyzed  # sanity check
+        # assert not self.analyzed  # sanity check
         assert self.constructed
 
         logger.debug(f"CEGAR: analyzing family {self.options} of size {self.size}.")
@@ -506,8 +504,8 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
-            if not self.split_ready:
-                self.prepare_split()
+            # if not self.split_ready:
+            #     self.prepare_split()
             # oracle.scheduler_color_analysis()
             improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
@@ -723,6 +721,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
 
     def stage_start(self, request_stage_cegar):
         self.stage_cegar = request_stage_cegar
+        if ONLY_CEGAR:
+            # disallow return to CEGIS
+            self.stage_switch_allowed = False
         self.stage_timer.reset()
         self.stage_timer.start()
 
