@@ -1,0 +1,3 @@
+R{"steps"}<=THRESHOLD [F ("bad" | "goal")]
+min
+relative 0.1
