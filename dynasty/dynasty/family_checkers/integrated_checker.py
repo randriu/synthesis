@@ -420,8 +420,9 @@ class Family:
         logger.debug(f"CEGAR: analyzing family {self.options} of size {self.size}.")
 
         undecided_formulae_indices = []
-        for formula_index in self.formulae_indices[:-1] \
-                if superfamily and self._optimality_setting is not None else self.formulae_indices:
+        # for formula_index in self.formulae_indices[:-1] \
+        #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
+        for formula_index in self.formulae_indices:
             logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
             if not feasible and isinstance(feasible, bool):
@@ -487,7 +488,7 @@ class Family:
     def check_optimal_property(self):
         # TODO: Set right value of is_max variable
         is_max = True if self._optimality_setting.direction == "max" else False
-        feasible = self.model_check_formula(len(self.formulae) - 1)
+        feasible, result = self.model_check_formula(len(self.formulae) - 1)
         oracle = Family._quotient_container
         optimal_value = None
         decided = False
