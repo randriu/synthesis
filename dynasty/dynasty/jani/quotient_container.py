@@ -268,6 +268,7 @@ class JaniQuotientContainer:
             self._hole_option_maps.append(hole_option_map)
         end_time = time.time()
         self._sched_ana_time += end_time - start_time
+        assert len(self._inconsistencies) == 2
 
     def _model_color_analysis_acts(self, mdp):
         act_to_color = OrderedDict()

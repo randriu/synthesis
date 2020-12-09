@@ -456,9 +456,10 @@ class Family:
         assert self.constructed and not self.split_ready
         Profiler.start("ar - splitting")
         Family._quotient_container.scheduler_color_analysis()
-        self.suboptions = LiftingChecker.split_hole_options(
-            self.options, Family._quotient_container, Family._hole_options, True
-        )
+        if len(Family._quotient_container._inconsistencies) == 2:
+            self.suboptions = LiftingChecker.split_hole_options(
+                self.options, Family._quotient_container, Family._hole_options, True
+            )
         Profiler.stop()
 
     def split(self):
@@ -504,8 +505,8 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
-            # if not self.split_ready:
-            #     self.prepare_split()
+            if not self.split_ready:
+                self.prepare_split()
             # oracle.scheduler_color_analysis()
             improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
