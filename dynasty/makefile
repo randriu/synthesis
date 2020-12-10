@@ -30,6 +30,14 @@ c3:
 	@$(MAKE) --no-print-directory run CORE=3
 c4:
 	@$(MAKE) --no-print-directory run CORE=4
+c5:
+	@$(MAKE) --no-print-directory run CORE=5
+c6:
+	@$(MAKE) --no-print-directory run CORE=6
+c7:
+	@$(MAKE) --no-print-directory run CORE=7
+c8:
+	@$(MAKE) --no-print-directory run CORE=8
 
 test:
 	./test.sh

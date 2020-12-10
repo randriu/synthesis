@@ -64,17 +64,29 @@ dynasty-download() {
 
     # storm
     cd $SYNTHESIS
-    wget https://zenodo.org/record/3885454/files/moves-rwth/storm-1.6.0.zip
-    unzip storm-1.6.0.zip && rm storm-1.6.0.zip
-    mv moves-rwth-storm-058fed3 storm
+    
+    # wget https://zenodo.org/record/3885454/files/moves-rwth/storm-1.6.0.zip
+    # unzip storm-1.6.0.zip && rm storm-1.6.0.zip
+    # mv moves-rwth-storm-058fed3 storm
+
+    wget https://zenodo.org/record/4288652/files/moves-rwth/storm-1.6.3.zip
+    unzip storm-1.6.3.zip && rm storm-1.6.3.zip
+    mv moves-rwth-storm-e763b83 storm
+    
     cd $OLDPWD
     # created folder: storm
 
     # stormpy
     cd $SYNTHESIS
-    wget https://github.com/moves-rwth/stormpy/archive/1.6.0.zip
-    unzip 1.6.0.zip && rm 1.6.0.zip
-    mv stormpy-1.6.0 stormpy
+    
+    # wget https://github.com/moves-rwth/stormpy/archive/1.6.0.zip
+    # unzip 1.6.0.zip && rm 1.6.0.zip
+    # mv stormpy-1.6.0 stormpy
+
+    wget https://github.com/moves-rwth/stormpy/archive/1.6.3.zip
+    unzip 1.6.3.zip && rm 1.6.3.zip
+    mv stormpy-1.6.3 stormpy
+
     cd $OLDPWD
     # created folder: stormpy
 }
