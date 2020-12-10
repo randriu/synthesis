@@ -21,10 +21,10 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-# quotienbased_logger.disabled = True
-# quotient_container_logger.disabled = True
-# jani_quotient_builder_logger.disabled = True
-# model_handling_logger.disabled = True
+quotienbased_logger.disabled = True
+quotient_container_logger.disabled = True
+jani_quotient_builder_logger.disabled = True
+model_handling_logger.disabled = True
 
 ONLY_CEGAR = False
 ONLY_CEGIS = False
@@ -418,7 +418,6 @@ class Family:
         logger.debug(f"CEGAR: analyzing family {self.options} of size {self.size}.")
 
         undecided_formulae_indices = []
-        decided = None
         optimal_value = None
         # for formula_index in self.formulae_indices[:-1] \
         #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
@@ -431,6 +430,7 @@ class Family:
                 undecided_formulae_indices = None
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
                     decided, optimal_value = self.check_optimal_property(feasible)
+                    undecided_formulae_indices = [formula_index] if not decided else []
                 break
             elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
@@ -441,6 +441,7 @@ class Family:
                 logger.debug("Formula {}: SAT".format(formula_index))
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
                     decided, optimal_value = self.check_optimal_property(feasible)
+                    undecided_formulae_indices += [formula_index] if not decided else []
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
@@ -451,7 +452,7 @@ class Family:
         # postprocessing
         if self.formulae_indices is None:
             return False, optimal_value
-        if not self.formulae_indices or decided is not None:
+        elif not self.formulae_indices:
             self.pick_assignment()
             return True, optimal_value
         return None, optimal_value
