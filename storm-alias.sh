@@ -6,7 +6,7 @@ export COMPILE_JOBS='8'
 
 # general
 
-alias dot_clean='find ~ -name "._*" -delete; find . -name ".DS_Store" -delete'
+alias dotc='find ~ -name "._*" -delete; find ~ -name ".DS_Store" -delete'
 
 # environment variables
 
@@ -64,35 +64,24 @@ dynasty-download() {
 
     # storm
     cd $SYNTHESIS
-    
-    # wget https://zenodo.org/record/3885454/files/moves-rwth/storm-1.6.0.zip
-    # unzip storm-1.6.0.zip && rm storm-1.6.0.zip
-    # mv moves-rwth-storm-058fed3 storm
-
     wget https://zenodo.org/record/4288652/files/moves-rwth/storm-1.6.3.zip
     unzip storm-1.6.3.zip && rm storm-1.6.3.zip
     mv moves-rwth-storm-e763b83 storm
-    
     cd $OLDPWD
     # created folder: storm
 
     # stormpy
     cd $SYNTHESIS
-    
-    # wget https://github.com/moves-rwth/stormpy/archive/1.6.0.zip
-    # unzip 1.6.0.zip && rm 1.6.0.zip
-    # mv stormpy-1.6.0 stormpy
-
     wget https://github.com/moves-rwth/stormpy/archive/1.6.3.zip
     unzip 1.6.3.zip && rm 1.6.3.zip
     mv stormpy-1.6.3 stormpy
-
     cd $OLDPWD
     # created folder: stormpy
 }
 
 dynasty-patch-create() {
-    rsync -av $SYNTHESIS/storm/src/storm-counterexamples
+    # rsync -av $SYNTHESIS/storm/src/storm-counterexamples
+    echo NOT IMPLEMENTED YET
 }
 
 dynasty-patch() {
@@ -221,6 +210,7 @@ alias tf='envd'
 
 # execution
 alias dpid='pgrep -f "^python dynasty.py .*"'
+alias dtime='ps -aux | grep "python dynasty.py"'
 alias dshow='pgrep -af "^python dynasty.py .*"'
 alias dcount='pgrep -afc "^python dynasty.py .*"'
 alias dkill='dpid | xargs kill'

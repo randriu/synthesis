@@ -212,11 +212,11 @@ function exploring_grid() {
 function run() {
     reset_log
 
-    timeout=1m
+    timeout=1h
     parallel=true
     # verbose=true
     
-    # model=("grid/orig" 40 0.019 0.019 0.15)
+    model=("grid/orig" 40 0.019 0.019 0.15)
     # model=("grid/big" 40 0.928 0.931 0.003)
     # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
     # model=("pole/orig" 5 0.735 0.735 0.001)
@@ -224,7 +224,7 @@ function run() {
     # model=("herman/orig" 2 0.60 0.60 0.15)
 
     # model=("herman/orig" 6 0.9254 0.9254 0.15)
-    model=("herman/orig-rew" 2 1.80 1.88 0.02)
+    # model=("herman/orig-rew" 2 1.80 1.88 0.02)
     
     # model=("herman/553x_1_0" 0 1.8 2.2 0.2)
     # model=("herman/553x_1_0_m" 0 1 1 0.1)
@@ -248,9 +248,9 @@ function run() {
     choose_model "${model[@]}"
 
     # hybrid
-    # cegar
+    cegar
     # cegis
-    onebyone
+    # onebyone
 }
 
 # ----------
