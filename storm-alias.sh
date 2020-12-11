@@ -85,8 +85,7 @@ dynasty-patch-create() {
 }
 
 dynasty-patch() {
-    rsync -av $SYNTHESIS/storm-patch/ $SYNTHESIS/storm/
-    rsync -av $SYNTHESIS/stormpy-patch/ $SYNTHESIS/stormpy/
+    rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
 }
 
 dynasty-setup-python() {

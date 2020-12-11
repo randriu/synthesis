@@ -212,7 +212,7 @@ function exploring_grid() {
 function run() {
     reset_log
 
-    timeout=1h
+    timeout=1m
     parallel=true
     # verbose=true
     
@@ -232,6 +232,8 @@ function run() {
     # model=("herman/553x_1_3_m_r" 3 0.57 0.57 0.1)
     # model=("herman/553x_1_3_m_p" 3 0.57 0.57 0.1)
     # model=("herman/553x_1_3_m_rp" 3 0.57 0.57 0.1)
+
+    # model=("herman/553x_new" 0 0.95 0.95 0.01)
 
     # models=("r" "rp")
     # for model in "${models[@]}"; do

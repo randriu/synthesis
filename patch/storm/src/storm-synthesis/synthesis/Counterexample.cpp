@@ -1,7 +1,7 @@
 // author: Roman Andriushchenko
 // git check
 
-#include "storm-counterexamples/synthesis/Counterexample.h"
+#include "storm-synthesis/synthesis/Counterexample.h"
 
 #include <queue>
 #include <deque>
