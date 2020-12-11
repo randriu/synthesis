@@ -126,8 +126,8 @@ storm-config() {
     dot_clean
     mkdir -p $STORM_BLD
     cd $STORM_BLD
-    cmake -DSTORM_USE_LTO=OFF ..
-    # cmake ..
+    # cmake -DSTORM_USE_LTO=OFF ..
+    cmake ..
     cd $OLDPWD
 }
 
