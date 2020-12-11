@@ -1,6 +1,6 @@
 #include "synthesis.h"
 
-#include "storm-counterexamples/synthesis/Counterexample.h"
+#include "storm-synthesis/synthesis/Counterexample.h"
 
 // Define python bindings
 void define_synthesis(py::module& m) {
