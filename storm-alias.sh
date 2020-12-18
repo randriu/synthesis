@@ -6,7 +6,7 @@ export COMPILE_JOBS='8'
 
 # general
 
-alias dotc='find ~ -name "._*" -delete; find ~ -name ".DS_Store" -delete'
+# alias dotc='find ~ -name "._*" -delete; find ~ -name ".DS_Store" -delete'
 
 # environment variables
 
@@ -23,7 +23,13 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 # functions
 
-dynasty-dependencies() {
+tacas21-prepare() {
+    # tacas 21
+    pip3 uninstall virtualenv
+    sudo apt-get install texlive-latex-extra
+}
+
+synthesis-dependencies() {
     sudo apt update
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
 
@@ -89,6 +95,7 @@ dynasty-patch() {
 }
 
 dynasty-setup-python() {
+    # pip3 uninstall virtualenv
     pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
     source $SYNTHESIS_ENV/bin/activate
@@ -160,7 +167,7 @@ dynasty-install() {
 
 # aggregated functions
 
-dynasty-nodep() {
+synthesis-install() {
     dynasty-download
     dynasty-patch
     dynasty-setup-python
@@ -175,9 +182,14 @@ dynasty-nodep() {
     dynasty-install
 }
 
-dynasty-full() {
-    # dynasty-dependencies
-    dynasty-nodep
+synthesis-full() {
+    if [ $SYNTHESIS_TACAS21 = "true" ]; then
+        tacas21-prepare
+    fi
+    if [ $SYNTHESIS_INSTALL_DEPENDENCIES = "true" ]; then
+        synthesis-dependencies
+    fi
+    synthesis-install
 }
 
 storm-rebuild() {
