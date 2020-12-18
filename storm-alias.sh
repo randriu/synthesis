@@ -2,7 +2,7 @@
 
 # compilation parameters
 
-export COMPILE_JOBS='8'
+export COMPILE_JOBS=8
 
 # general
 
@@ -129,7 +129,6 @@ pycarl-build() {
 }
 
 storm-config() {
-    dot_clean
     mkdir -p $STORM_BLD
     cd $STORM_BLD
     # cmake -DSTORM_USE_LTO=OFF ..
@@ -138,7 +137,6 @@ storm-config() {
 }
 
 storm-build() {
-    dot_clean
     cd $STORM_BLD
     make storm-main --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
@@ -146,7 +144,6 @@ storm-build() {
 }
 
 stormpy-build() {
-    dot_clean
     cd $STORMPY_DIR
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
@@ -156,7 +153,6 @@ stormpy-build() {
 }
 
 dynasty-install() {
-    dot_clean
     cd $DYNASTY_DIR
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py install
