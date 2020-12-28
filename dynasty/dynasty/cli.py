@@ -6,14 +6,16 @@ import os
 import time
 
 from dynasty.family_checkers.familychecker import FamilyCheckMethod
-from dynasty.family_checkers.quotientbased import LiftingChecker, AllInOneChecker,OneByOneChecker,ConsistentSchedChecker
+from dynasty.family_checkers.quotientbased import LiftingChecker, AllInOneChecker, OneByOneChecker, \
+    ConsistentSchedChecker
 from dynasty.family_checkers.cegis import Synthesiser
 from dynasty import version
 from dynasty.jani.quotient_container import Engine
 
-from dynasty.family_checkers.integrated_checker import Research #+
+from dynasty.family_checkers.integrated_checker import Hybrid
 
 logger = logging.getLogger(__name__)
+
 
 def setup_logger(log_path):
     """
@@ -41,9 +43,10 @@ def setup_logger(log_path):
         root.addHandler(h)
     return handlers
 
+
 def dump_stats_to_file(path, keyword, constants, description, *args):
     logger.debug("Storing stats...")
-    pickle.dump((keyword,constants, description,*args), open(path, "wb"))
+    pickle.dump((keyword, constants, description, *args), open(path, "wb"))
     logger.info("Stored stats at {}".format(path))
 
 
@@ -56,17 +59,20 @@ def dump_stats_to_file(path, keyword, constants, description, *args):
 @click.option('--restrictions', help="restrictions")
 @click.option("--constants", default="")
 @click.option("--stats", default="stats.out")
-@click.option('--engine', help="What engine to use",type=click.Choice(['dd', 'sparse']), default="sparse")
+@click.option('--engine', help="What engine to use", type=click.Choice(['dd', 'sparse']), default="sparse")
 @click.option("--print-stats", is_flag=True)
 @click.option('--check-prerequisites', help="should prerequisites be checked", is_flag=True)
 @click.option('--partitioning', help="Run partitioning instead of feasibility", is_flag=True)
-@click.argument("method",  type=click.Choice(['lift', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'research'])) #+
-def dynasty(project, sketch, allowed, properties, optimality, restrictions, constants, stats, engine, print_stats, check_prerequisites, partitioning, method):
+@click.argument("method", type=click.Choice(['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid']))  # +
+def dynasty(
+        project, sketch, allowed, properties, optimality, restrictions, constants,
+        stats, engine, print_stats, check_prerequisites, partitioning, method
+):
     print("This is Dynasty version {}.".format(version()))
     approach = FamilyCheckMethod.from_string(method)
     selected_engine = Engine.Sparse if engine == "sparse" else Engine.Dd
     assert approach is not None
-    backward_cuts = 1 # Only used for cegis.
+    backward_cuts = 1  # Only used for cegis.
 
     if optimality:
         if partitioning:
@@ -75,7 +81,7 @@ def dynasty(project, sketch, allowed, properties, optimality, restrictions, cons
     if selected_engine == Engine.Dd and approach != FamilyCheckMethod.AllInOne:
         raise RuntimeError("DD engine is currently only supported with the all-in-one approach")
 
-    #+
+    # +
     sketch_path = os.path.join(project, sketch)
     allowed_path = os.path.join(project, allowed)
     restriction_path = None
@@ -86,8 +92,8 @@ def dynasty(project, sketch, allowed, properties, optimality, restrictions, cons
         optimality_path = os.path.join(project, optimality)
     else:
         optimality_path = None
-    #.
-    
+    # .
+
     if approach == FamilyCheckMethod.Lifting:
         algorithm = LiftingChecker()
     elif approach == FamilyCheckMethod.AllInOne:
@@ -97,20 +103,18 @@ def dynasty(project, sketch, allowed, properties, optimality, restrictions, cons
     elif approach == FamilyCheckMethod.SchedulerIteration:
         algorithm = ConsistentSchedChecker()
     elif approach == FamilyCheckMethod.CEGIS:
-        algorithm = Synthesiser(threads=1, check_prerequisites=check_prerequisites,
-                              add_cuts=backward_cuts)
-    #+
-    elif approach == FamilyCheckMethod.Research:
-        Research(
+        algorithm = Synthesiser(threads=1, check_prerequisites=check_prerequisites, add_cuts=backward_cuts)
+    # +
+    elif approach == FamilyCheckMethod.Hybrid:
+        Hybrid(
             check_prerequisites, backward_cuts,
             sketch_path, allowed_path, property_path, optimality_path, constants,
             restrictions, restriction_path
         )
-        return 
-    #.
+        return
+        # .
     else:
         assert None
-
 
     if not os.path.isdir(project):
         raise ValueError(f"The project folder {project} is not a directory")
@@ -151,7 +155,7 @@ def dynasty(project, sketch, allowed, properties, optimality, restrictions, cons
             if sat:
                 print("Satisfiable!")
                 if solution is not None:
-                    print("using " + ", ".join([str(k) + ": " + str(v) for k,v in solution.items()]))
+                    print("using " + ", ".join([str(k) + ": " + str(v) for k, v in solution.items()]))
                 if optimal_value is not None:
                     print("and induces a value of {}".format(optimal_value))
                 # print(algorithm.build_instance(solution))
@@ -170,9 +174,11 @@ def dynasty(project, sketch, allowed, properties, optimality, restrictions, cons
                              backward_cuts, "sat" if result is not None else "unsat"]])
     dump_stats_to_file(stats, algorithm.stats_keyword, constants, description, algorithm.store_in_statistics())
 
+
 def main():
     setup_logger("dynasty.log")
     dynasty()
+
 
 if __name__ == "__main__":
     main()

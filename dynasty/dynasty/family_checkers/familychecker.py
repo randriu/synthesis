@@ -26,7 +26,7 @@ class FamilyCheckMethod(Enum):
     SchedulerIteration = 1,
     DtmcIteration = 2,
     AllInOne = 3,
-    Research = 99, #+
+    Hybrid = 5,
     CEGIS = 4
 
     @classmethod
@@ -34,10 +34,10 @@ class FamilyCheckMethod(Enum):
         """
         Construct enum from string. 
         
-        :param input: either of [lift, cschedenum, onebyone, allinone, smt, cegis]
+        :param input: either of [cegar, cschedenum, onebyone, allinone, smt, cegis]
         :return: the corresponding enum, or None
         """
-        if input == "lift":
+        if input == "cegar":
             return cls.Lifting
         elif input == "cschedenum":
             return cls.SchedulerIteration
@@ -48,8 +48,8 @@ class FamilyCheckMethod(Enum):
         elif input == "cegis":
             return cls.CEGIS
         #+
-        elif input == "research":
-            return cls.Research
+        elif input == "hybrid":
+            return cls.Hybrid
         #.
         else:
             return None

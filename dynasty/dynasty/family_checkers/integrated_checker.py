@@ -21,10 +21,10 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-# quotienbased_logger.disabled = True
-# quotient_container_logger.disabled = True
-# jani_quotient_builder_logger.disabled = True
-# model_handling_logger.disabled = True
+quotienbased_logger.disabled = True
+quotient_container_logger.disabled = True
+jani_quotient_builder_logger.disabled = True
+model_handling_logger.disabled = True
 
 ONLY_CEGAR = False
 ONLY_CEGIS = False
@@ -235,7 +235,6 @@ class CEGARChecker(LiftingChecker):
     def _check_optimal_property(self, optimal_value, assignment):
         # Check whether the improvement was achieved
         if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
-
             # Set the new values of the optimal attributes
             self._optimal_value = optimal_value
             self._optimal_assignment = assignment
@@ -457,8 +456,9 @@ class Family:
         threshold_synthesis_result = Family._quotient_container.decided(threshold)
 
         return None if threshold_synthesis_result == ThresholdSynthesisResult.UNDECIDED else \
-            (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[formula_index], \
-            Family._quotient_container.latest_result.result
+                   (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[
+                       formula_index], \
+               Family._quotient_container.latest_result.result
 
     def analyze(self, superfamily=False):
         """
@@ -653,7 +653,7 @@ class FamilyHybrid(Family):
         matrix = self.mdp.transition_matrix
         for state in range(self.mdp.nr_states):
             state_hole_indices = set()
-            for choice_index in range(matrix.get_row_group_start(state),matrix.get_row_group_end(state)):
+            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
                 state_hole_indices.update(FamilyHybrid._choice_to_hole_indices[self.choice_map[choice_index]])
             state_hole_indices = set(
                 [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1]
@@ -903,7 +903,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
 
         # Check whether the improvement was achieved
         if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
-
             # Set the new values of the optimal attributes
             self._optimal_value = optimal_value
             self._optimal_assignment = assignment
@@ -1124,7 +1123,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         self.statistic.finished(assignment, (self.iterations_cegar, self.iterations_cegis))
 
 
-class Research:
+class Hybrid:
     """Entry point: execution setup."""
 
     def __init__(
@@ -1148,8 +1147,9 @@ class Research:
         #     regime = int(lines[0])
         #     stage_score_limit = int(lines[1])
 
-        regime = 2
+        regime = 3
         stage_score_limit = 99999
+
         IntegratedChecker.stage_score_limit = stage_score_limit
         stats = []
 
