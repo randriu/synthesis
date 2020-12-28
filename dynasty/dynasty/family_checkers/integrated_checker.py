@@ -222,18 +222,15 @@ class CEGARChecker(LiftingChecker):
                 logger.debug("CEGAR: all SAT.")
                 satisfying_assignment = self.family.member_assignment
                 if optimal_value is not None:
-                    print(f">> SAT CHECK: {self._optimal_value}, {optimal_value}")
                     self._check_optimal_property(optimal_value, self.family.member_assignment)
                 if satisfying_assignment is not None and self._optimality_setting is None:
                     break
             elif not feasible and isinstance(feasible, bool):
                 if optimal_value is not None:
-                    print(">> UNSAT CHECK")
                     self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: all UNSAT.")
             else:  # feasible is None:
                 if optimal_value is not None:
-                    print(f">> UNDECIDED CHECK: {self._optimal_value}, {optimal_value}")
                     self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: undecided.")
                 logger.debug("Splitting the family.")

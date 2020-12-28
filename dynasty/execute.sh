@@ -18,7 +18,7 @@ parallel=false
 # synthesis method
 # primary_method=cschedenum
 # primary_method=cegis
-primary_method=research
+primary_method=hybrid
 
 # presets: TACAS
 grid=("grid/orig" 40 0.004 0.019 0.003)
