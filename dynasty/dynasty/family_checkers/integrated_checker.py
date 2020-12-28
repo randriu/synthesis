@@ -5,6 +5,7 @@ import z3
 import stormpy
 import stormpy.utility
 import stormpy.core
+import stormpy.synthesis
 
 import dynasty.jani
 from dynasty.jani.jani_quotient_builder import *
@@ -710,7 +711,7 @@ class FamilyHybrid(Family):
             collected_edge_indices.insert_set(Family._quotient_container._color_to_edge_indices.get(c))
 
         # construct the DTMC by exploring the quotient MDP for this subfamily
-        dtmc,dtmc_state_map = stormpy.dtmc_from_mdp(self.mdp, collected_edge_indices)
+        dtmc,dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
 
         # assert absence of deadlocks or overlapping guargs
         # TODO does not seem to work (builder options?)
@@ -912,7 +913,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         bounds = family.bounds
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
-        counterexample_generator = stormpy.SynthesisResearchCounterexample(mdp, hole_count, state_to_hole_indices, formulae, bounds)
+        counterexample_generator = stormpy.synthesis.SynthesisResearchCounterexample(mdp, hole_count, state_to_hole_indices, formulae, bounds)
         Profiler.stop()
 
         # process family members

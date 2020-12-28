@@ -132,6 +132,7 @@ storm-config() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD
     # cmake -DSTORM_USE_LTO=OFF ..
+    # cmake --DSTORM_PORTABLE=ON ..
     cmake ..
     cd $OLDPWD
 }
@@ -207,15 +208,27 @@ alias pb='stormpy-build'
 alias sr='storm-rebuild'
 
 alias synthesis='cd $SYNTHESIS'
-alias dyn='cd $SYNTHESIS/dynasty'
+alias dynasty='cd $SYNTHESIS/dynasty'
 
 alias enva='source $SYNTHESIS_ENV/bin/activate'
 alias envd='deactivate'
 
-alias tb='dyn; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
+alias tb='dynasty; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
 alias tf='envd'
 
 # execution
+
+dynrun() {
+    dynasty
+    enva
+    make c$1 & disown
+    envd
+    cd $OLDPWD
+}
+dr() {
+    dynrun $1
+}
+
 alias dpid='pgrep -f "^python dynasty.py .*"'
 alias dtime='ps -aux | grep "python dynasty.py"'
 alias dshow='pgrep -af "^python dynasty.py .*"'
