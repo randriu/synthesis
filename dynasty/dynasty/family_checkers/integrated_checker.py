@@ -2,6 +2,7 @@
 # co-author: Simon Stupinsky
 
 import logging
+import operator
 import z3
 
 import stormpy
@@ -31,6 +32,7 @@ ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
 PRINT_PROFILING = True
+STAGE_SCORE_LIMIT = 99999
 
 
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
@@ -66,26 +68,59 @@ def readable_assignment(assignment):
 class Statistic:
     """General computation stats."""
 
-    def __init__(self, method, threshold):
+    def __init__(self, method, formulae, holes_count, opt_setting, long_summary=False):
         self.method = method
-        self.threshold = threshold
+        self.long_summary = long_summary
         self.timer = Timer()
         self.timer.start()
         self.feasible = False
         self.assignment = {}
-        self.iterations = 0
+        self.iterations = (0, 0)
+        self.optimal_value = None
+        self.formulae = formulae
+        self.holes_count = holes_count
+        self.opt_setting = opt_setting
+        self.family_size = 0
+        self.super_mdp_size, self.mdp_checks, self.avg_mdp_size = 0, 0, 0
+        self.avg_dtmc_size, self.dtmc_checks = 0, 0
 
-    def finished(self, assignment, iterations):
+    def finished(
+            self, assignment, iterations, optimal_value, family_size, super_mdp_size,
+            avg_mdp_size, mdp_checks, avg_dtmc_size, dtmc_checks
+    ):
         self.timer.stop()
         self.feasible = assignment is not None
         self.assignment = readable_assignment(assignment)
         self.iterations = iterations
+        self.optimal_value = optimal_value
+        self.family_size = family_size
+        self.super_mdp_size = super_mdp_size
+        self.avg_mdp_size = round(avg_mdp_size, 2)
+        self.mdp_checks = mdp_checks
+        self.avg_dtmc_size = round(avg_dtmc_size, 2)
+        self.dtmc_checks = dtmc_checks
+
+    def get_long_summary(self):
+        formulae = self.formulae if self.optimal_value is None else self.formulae[:-1]
+        formulae = "\n".join([f">> Formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
+        opt_formula = f">> Optimal Setting: {self.opt_setting}" if self.optimal_value else ""
+        space_info = f">> Number of holes: {self.holes_count}; Family size: {self.family_size}"
+        cegar = f">> Super MDP: {self.super_mdp_size}; Average MDP: {self.avg_mdp_size}; " \
+                f"MPD Checks: {self.mdp_checks}; Iters: {self.iterations[0]}"
+        cegis = f">> Average DTMC {self.avg_dtmc_size}; DTMC Checks: {self.dtmc_checks}; Iters: {self.iterations[1]}"
+        feasible = "YES" if self.feasible else "NO"
+        result = f"feasible={feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
+        summary = f">> method: {self.method}; {result}; time: {round(self.timer.time, 2)}"
+        assignment = f">> assignment: {self.assignment}\n"
+        return f"{formulae}\n{opt_formula}\n{space_info}\n{cegar}\n{cegis}\n{summary}\n{assignment}"
 
     def __str__(self):
-        feasible = "F" if self.feasible else "U"
-        time = int(self.timer.time)
-        return f"> T={self.threshold} : {self.method} : {feasible} ({self.iterations} iters, {time} sec)\n"
-        # return "> {}".format(self.iterations) # FIXME
+        feasible = "YES" if self.feasible else "NO"
+        time = round(self.timer.time, 2)
+        result = f"feasible={feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
+        short_summary = f">> method: {self.method}; {result}; iters: {self.iterations}; time: {time}\n" \
+                        f">> assignment: {self.assignment}\n"
+        return self.get_long_summary() if self.long_summary else short_summary
 
 
 class EnumerationChecker(OneByOneChecker):
@@ -95,12 +130,15 @@ class EnumerationChecker(OneByOneChecker):
         super().__init__(*args)
         self.statistic = None
 
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold)  # FIXME
-        self.statistic = Statistic("1-by-1", threshold)
-        iterations = self.run_feasibility()
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        iterations, avg_model_size = self.run_feasibility()
         assignment = None  # we do not care about assignment
-        self.statistic.finished(assignment, iterations)
+        self.statistic.finished(
+            assignment, (iterations, 0), None, 0, 0.0, avg_model_size, 0.0, 0.0, 0.0
+        )
 
 
 class CEGISChecker(Synthesiser):
@@ -110,14 +148,20 @@ class CEGISChecker(Synthesiser):
         super().__init__(*args)
         self.statistic = None
 
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold)  # FIXME
-        self.statistic = Statistic("CEGIS", threshold)
-        _, assignment, _ = self.run_feasibility()
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "CEGIS", self._verifier.properties, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        _, assignment, optimal_value = self.run_feasibility()
         assignment = {k: [v] for (k, v) in assignment.items()} if assignment is not None else None
         if assignment is not None:
             logger.info(f"Found satisfying assignment: {readable_assignment(assignment)}")
-        self.statistic.finished(assignment, self.stats.iterations)
+        self.statistic.finished(
+            assignment, (0, self.stats.iterations), optimal_value, self.stats.design_space_size,
+            0, 0, 0,
+            self.stats.qualitative_model_checking_calls + self.stats.quantitative_model_checking_calls,
+            self.stats.average_model_size()
+        )
 
 
 class CEGARChecker(LiftingChecker):
@@ -130,6 +174,7 @@ class CEGARChecker(LiftingChecker):
         self.iterations = 0
         self.family = None
         self.families = []
+        self.models_total = 0
 
     def initialise(self):
         super().initialise()
@@ -160,6 +205,7 @@ class CEGARChecker(LiftingChecker):
 
         # initiate CEGAR loop
         self.family = Family()
+        self.models_total = self.family.size
         self.families = [self.family]
         satisfying_assignment = None
         logger.debug("Initiating CEGAR loop")
@@ -201,13 +247,13 @@ class CEGARChecker(LiftingChecker):
         if self._optimal_value is not None:
             assert not self.families
             logger.info(f"Found optimal assignment: {self._optimal_value}")
-            return self._optimal_assignment
+            return self._optimal_assignment, self._optimal_value
         elif satisfying_assignment is not None:
             logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
-            return satisfying_assignment
+            return satisfying_assignment, None
         else:
             logger.info("No more options.")
-            return None
+            return None, None
 
     def _construct_violation_property(self):
         vp_index = len(self.formulae) - 1  # Compute the index of the violation property
@@ -246,11 +292,16 @@ class CEGARChecker(LiftingChecker):
             logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
 
-    def run(self):
-        # TODO: threshold param in the Statistic
-        self.statistic = Statistic("CEGAR", None)
-        assignment = self.run_feasibility()
-        self.statistic.finished(assignment, self.iterations)
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "CEGAR", self.formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        assignment, optimal_value = self.run_feasibility()
+        self.statistic.finished(
+            assignment, (self.iterations, 0), optimal_value, self.models_total,
+            Family.quotient_mdp().nr_states, Family.quotient_mdp_stats(0) / Family.quotient_mdp_stats(1),
+            Family.mdp_checks(), 0.0, 0.0
+        )
 
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
@@ -305,6 +356,12 @@ class Family:
     _thresholds = None
     _accept_if_above = None
     _optimality_setting = None
+
+    # - statistics for summary
+    _quotient_mdp_stats = (0, 0)
+    _dtmc_stats = (0, 0)
+    _mdp_checks = 0
+    _dtmc_checks = 0
 
     def __init__(self, parent=None, options=None):
         """
@@ -395,6 +452,9 @@ class Family:
         Family._quotient_container = quotient_builder.construct(Family._hole_options, remember=set())
         Family._quotient_container.prepare(Family._mc_formulae, Family._mc_formulae_alt)
         Family._quotient_mdp = Family._quotient_container.mdp_handling.full_mdp
+        Family._quotient_mdp_stats = (
+            Family._quotient_mdp_stats[0] + Family._quotient_mdp.nr_states, Family._quotient_mdp_stats[1] + 1
+        )
         logger.debug(f"Constructed MDP of size {Family._quotient_mdp.nr_states}.")
 
     @property
@@ -416,6 +476,26 @@ class Family:
     @property
     def formulae(self):
         return Family._formulae
+
+    @staticmethod
+    def quotient_mdp_stats(idx):
+        return Family._quotient_mdp_stats[idx]
+
+    @staticmethod
+    def dtmc_stats(idx):
+        return Family._dtmc_stats[idx]
+
+    @staticmethod
+    def mdp_checks():
+        return Family._mdp_checks
+
+    @staticmethod
+    def dtmc_checks():
+        return Family._dtmc_checks
+
+    @staticmethod
+    def quotient_mdp():
+        return Family._quotient_mdp
 
     @staticmethod
     def get_thresholds():
@@ -442,6 +522,9 @@ class Family:
         self.mdp = Family._quotient_container.mdp_handling.mdp
         self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
         logger.debug(f"Constructed MDP of size {self.mdp.nr_states}.")
+        Family._quotient_mdp_stats = (
+            Family._quotient_mdp_stats[0] + self.mdp.nr_states, Family._quotient_mdp_stats[1] + 1
+        )
 
         Profiler.stop()
 
@@ -482,6 +565,7 @@ class Family:
         #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
         for formula_index in self.formulae_indices:
             logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
+            Family._mdp_checks += 1
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
 
             if not feasible and isinstance(feasible, bool):
@@ -705,6 +789,7 @@ class FamilyHybrid(Family):
 
             # construct the DTMC by exploring the quotient MDP for this subfamily
             self.dtmc, self.dtmc_state_map = stormpy.dtmc_from_mdp(self.mdp, collected_edge_indices)
+            Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             # assert absence of deadlocks or overlapping guargs
@@ -949,6 +1034,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             for formula_index in family.formulae_indices:
                 logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
                 Profiler.start("is - DTMC model checking")
+                Family._dtmc_checks += 1
                 sat, _ = family.analyze_member(formula_index)
                 Profiler.stop()
                 logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
@@ -1034,9 +1120,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                 family, family.member_assignment, cex_generator=None, optimal_value=optimal_value
             )
         elif feasible and isinstance(feasible, bool) and self._optimality_setting is None:
-            return family.member_assignment
+            return family.member_assignment, None
         elif not feasible and isinstance(feasible, bool) and self._optimality_setting is None:
-            return None
+            return None, None
         self.stage_step(0)
 
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
@@ -1109,19 +1195,24 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         if self._optimal_value is not None:
             assert not self.families
             logger.info(f"Found optimal assignment: {self._optimal_value}")
-            return self._optimal_assignment
+            return self._optimal_assignment, self._optimal_value
         elif satisfying_assignment is not None:
             logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
-            return satisfying_assignment
+            return satisfying_assignment, None
         else:
             logger.info("No more options.")
-            return None
+            return None, None
 
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold) if self.properties else None
-        self.statistic = Statistic("Hybrid", threshold)
-        assignment = self.run_feasibility()
-        self.statistic.finished(assignment, (self.iterations_cegar, self.iterations_cegis))
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "Hybrid", self.formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        assignment, optimal_value = self.run_feasibility()
+        self.statistic.finished(
+            assignment, (self.iterations_cegar, self.iterations_cegis), optimal_value, self.models_total,
+            Family.quotient_mdp().nr_states, Family.quotient_mdp_stats(0) / Family.quotient_mdp_stats(1),
+            Family.mdp_checks(), Family.dtmc_stats(0) / Family.dtmc_stats(1), Family.dtmc_checks()
+        )
 
 
 class Hybrid:
@@ -1129,7 +1220,7 @@ class Hybrid:
 
     def __init__(
             self, check_prerequisites, backward_cuts, sketch_path, allowed_path, property_path,
-            optimality_path, constants, restrictions, restriction_path
+            optimality_path, constants, restrictions, restriction_path, regime, long_summary
     ):
 
         assert not check_prerequisites
@@ -1141,17 +1232,9 @@ class Hybrid:
         self.constants = constants
         self.restrictions = restrictions
         self.restriction_path = restriction_path
+        self.long_summary = long_summary
 
-        # workdir = "workspace/log"
-        # with open(f"{workdir}/parameters.txt", 'r') as f:
-        #     lines = f.readlines()
-        #     regime = int(lines[0])
-        #     stage_score_limit = int(lines[1])
-
-        regime = 3
-        stage_score_limit = 99999
-
-        IntegratedChecker.stage_score_limit = stage_score_limit
+        IntegratedChecker.stage_score_limit = STAGE_SCORE_LIMIT
         stats = []
 
         if regime == 0:
@@ -1180,5 +1263,5 @@ class Hybrid:
         if self.restrictions:
             algorithm.load_restrictions(self.restriction_path)
         algorithm.initialise()
-        algorithm.run()
+        algorithm.run(self.long_summary)
         return algorithm.statistic

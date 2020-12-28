@@ -510,7 +510,8 @@ class OneByOneChecker(QuotientBasedFamilyChecker):
             logger.info("Ran for {}, expect total: {}".format(time.time() - iter_start, (
                 time.time() - iter_start) * total_nr_options / iteration))
             logger.info("Avg model size {} states, {} transition".format(model_states_cum, model_transitions_cum))
-            #TODO something with result
+        return iteration, model_states_cum / iteration
+
 
 class ConsistentSchedChecker(QuotientBasedFamilyChecker):
     """

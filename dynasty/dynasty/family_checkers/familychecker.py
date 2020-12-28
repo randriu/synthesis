@@ -61,6 +61,9 @@ class OptimalitySetting:
         self._direction = direction
         self._eps = epsilon
 
+    def __str__(self):
+        return f"formula: {self._criterion.raw_formula}; direction: {self._direction}; eps: {self._eps}"
+
     @property
     def criterion(self):
         return self._criterion
