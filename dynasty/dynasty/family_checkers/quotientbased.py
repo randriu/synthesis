@@ -80,6 +80,7 @@ class QuotientBasedFamilyChecker(FamilyChecker):
         oracle.analyse(threshold=None, index=0)
         return oracle
 
+
 class LiftingChecker(QuotientBasedFamilyChecker):
     """
     The lifting technique described in the TACAS 2019 paper: Shepherding of hordes of Markov Chains.

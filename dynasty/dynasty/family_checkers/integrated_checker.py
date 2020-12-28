@@ -235,6 +235,7 @@ class CEGARChecker(LiftingChecker):
     def _check_optimal_property(self, optimal_value, assignment):
         # Check whether the improvement was achieved
         if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
+
             # Set the new values of the optimal attributes
             self._optimal_value = optimal_value
             self._optimal_assignment = assignment
@@ -456,9 +457,8 @@ class Family:
         threshold_synthesis_result = Family._quotient_container.decided(threshold)
 
         return None if threshold_synthesis_result == ThresholdSynthesisResult.UNDECIDED else \
-                   (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[
-                       formula_index], \
-               Family._quotient_container.latest_result.result
+            (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[formula_index], \
+            Family._quotient_container.latest_result.result
 
     def analyze(self, superfamily=False):
         """
@@ -653,7 +653,7 @@ class FamilyHybrid(Family):
         matrix = self.mdp.transition_matrix
         for state in range(self.mdp.nr_states):
             state_hole_indices = set()
-            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
+            for choice_index in range(matrix.get_row_group_start(state),matrix.get_row_group_end(state)):
                 state_hole_indices.update(FamilyHybrid._choice_to_hole_indices[self.choice_map[choice_index]])
             state_hole_indices = set(
                 [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1]
@@ -903,6 +903,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
 
         # Check whether the improvement was achieved
         if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
+
             # Set the new values of the optimal attributes
             self._optimal_value = optimal_value
             self._optimal_assignment = assignment

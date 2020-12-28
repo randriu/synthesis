@@ -281,14 +281,13 @@ class FamilyChecker:
 
         logger.debug("Holes found: {}".format(list(self.holes.keys())))
 
-    def _annotate_properties(self, constant_str):
-        _constants_map = self._constants_map(constant_str, self.sketch)
-        self.properties = [AnnotatedProperty(stormpy.Property("property-{}".format(i),
-                                                              p.raw_formula.clone().substitute(_constants_map)),
-                                             self.sketch,
-                                             add_prerequisites=self._check_prereq
-                                             ) for i, p in
-                           enumerate(self.properties)]
+    def _annotate_properties(self, constants_map):
+        self.properties = [
+            AnnotatedProperty(
+                stormpy.Property("property-{}".format(i), p.raw_formula.clone().substitute(constants_map)),
+                self.sketch, add_prerequisites=self._check_prereq
+            ) for i, p in enumerate(self.properties)
+        ]
 
 
     def _set_constants(self, constant_str):
@@ -314,7 +313,11 @@ class FamilyChecker:
             self.properties = all_properties
         self._set_constants(constant_str)
         self._find_holes()
-        self._annotate_properties(constant_str)
+        constants_map = self._constants_map(constant_str, self.sketch)
+        self._optimality_setting._criterion = stormpy.Property(
+            "optimality_property", self._optimality_setting._criterion.raw_formula.clone().substitute(constants_map),
+        )
+        self._annotate_properties(constants_map)
 
         assert self.expression_manager == self.sketch.expression_manager
 
@@ -385,7 +388,8 @@ class FamilyChecker:
             raise ValueError("optimality criterion not set")
 
         self._optimality_setting = OptimalitySetting(optimality_criterion, direction, epsilon)
-        self._optimal_value = 0.0 if direction == "max" else 99999
+        # TODO: Cannot send math.inf to stormpy.Rational()
+        self._optimal_value = 0.0 if direction == "max" else 999999999999999999
 
     def input_has_multiple_properties(self):
         if self._optimality_setting is not None:
