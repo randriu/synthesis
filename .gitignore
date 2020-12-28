@@ -1,2 +1,6 @@
 env/
 prerequisites/
+pycarl/
+venv/
+venv3.8/
+.idea/

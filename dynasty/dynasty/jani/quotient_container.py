@@ -5,7 +5,7 @@ import time
 
 import stormpy.core
 
-from dynasty.model_handling.mdp_handling import *
+from ..model_handling.mdp_handling import *
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,22 @@ class JaniQuotientContainer:
     @property
     def jani_program(self):
         return self._jani_program
+
+    @property
+    def mdp_handling(self):
+        return self._mdp_handling
+
+    @property
+    def latest_result(self):
+        return self._latest_result
+
+    @property
+    def edge_coloring(self):
+        return self._edge_coloring
+
+    @property
+    def color_to_edge_indices(self):
+        return self._color_to_edge_indices
 
     def consider_subset(self, subset, indexed_suboptions):
         logger.debug("Consider sub-set of hole-options: {}".format(subset))
@@ -252,6 +268,7 @@ class JaniQuotientContainer:
             self._hole_option_maps.append(hole_option_map)
         end_time = time.time()
         self._sched_ana_time += end_time - start_time
+        assert len(self._inconsistencies) == 2
 
     def _model_color_analysis_acts(self, mdp):
         act_to_color = OrderedDict()
@@ -430,7 +447,9 @@ class JaniQuotientContainer:
             self._latest_result = self._mdp_handling.mc_model_hybrid(index)
         else:
             assert engine == Engine.Sparse
-            self._latest_result = self._mdp_handling.mc_model(index, compute_action_values=False, check_dir_2=is_inside_function(threshold) if threshold is not None else always_true)
+            self._latest_result = self._mdp_handling.mc_model(
+                index, compute_action_values=False, check_dir_2=always_true
+            ) # TODO: is_inside_function?
         end_time = time.time()
         self._mc_time += end_time - start_time
         return self._latest_result

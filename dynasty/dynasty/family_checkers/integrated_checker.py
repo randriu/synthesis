@@ -1,299 +1,344 @@
 # author: Roman Andriushchenko
+# co-author: Simon Stupinsky
 
+import logging
+import operator
 import z3
 
 import stormpy
-import stormpy.utility
-import stormpy.core
-
-import dynasty.jani
-from dynasty.jani.jani_quotient_builder import *
-from dynasty.family_checkers.cegis import Synthesiser
-from dynasty.family_checkers.quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker
-from dynasty.family_checkers.familychecker import HoleOptions, FamilyChecker
-
-from dynasty.model_handling.mdp_handling import *
 
 from collections import OrderedDict
-from collections.abc import Iterable
 
-from dynasty.profiler import Timer,Profiler
+from ..jani.jani_quotient_builder import logger as jani_quotient_builder_logger, JaniQuotientBuilder
+from ..jani.quotient_container import logger as quotient_container_logger, ThresholdSynthesisResult
+from ..model_handling.mdp_handling import logger as model_handling_logger
+from ..profiler import Profiler, Timer
+from .cegis import Synthesiser
+from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker, logger as quotienbased_logger
+from .familychecker import HoleOptions
 
-# ------------------------------------------------------------------------------
-# logging
+# LOGGING -------------------------------------------------------------------------------------------------- LOGGING
+
 
 logger = logging.getLogger(__name__)
-dynasty.jani.quotient_container.logger.disabled = True
-dynasty.jani.jani_quotient_builder.logger.disabled = True
-dynasty.jani.jani_quotient_builder.logger.disabled = True
-# dynasty.model_handling.mdp_handling.logger.disabled = True
 
-# ------------------------------------------------------------------------------
-# manual model checking
+quotienbased_logger.disabled = True
+quotient_container_logger.disabled = True
+jani_quotient_builder_logger.disabled = True
+model_handling_logger.disabled = True
+
+ONLY_CEGAR = False
+ONLY_CEGIS = False
+NONTRIVIAL_BOUNDS = True
+PRINT_STAGE_INFO = False
+PRINT_PROFILING = True
+STAGE_SCORE_LIMIT = 99999
+
+
+# MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
+
 
 def check_dtmc(dtmc, formula, quantitative=False):
     """Model check a DTMC against a (quantitative) property."""
     threshold = formula.threshold_expr.evaluate_as_double()
-    if(quantitative):
+    if quantitative:
         formula = formula.clone()
         formula.remove_bound()
 
     result = stormpy.model_checking(dtmc, formula)
     satisfied = result.at(dtmc.initial_states[0])
-    if(quantitative):
+    if quantitative:
         op = {
-            stormpy.ComparisonType.LESS : operator.lt,
-            stormpy.ComparisonType.LEQ : operator.le,
+            stormpy.ComparisonType.LESS: operator.lt,
+            stormpy.ComparisonType.LEQ: operator.le,
             stormpy.ComparisonType.GREATER: operator.gt,
             stormpy.ComparisonType.GEQ: operator.ge
-        } [raw_formula.comparison_type] 
-        satisfied = op(satisfied,threshold)
-    return satisfied,result
+        }[formula.comparison_type]
+        satisfied = op(satisfied, threshold)
+    return satisfied, result
 
-def check_mdp(mdp, formula, alt_formula, threshold, accept_if_above):
-        '''
-        Model check an MDP against a property. Note: the following is a copy of
-        ModelHandling::mc_model and JaniQuotientContainer::decided
-        '''
-        
-        is_dtmc = False
-        extract_scheduler = True
-        if mdp.nr_choices == mdp.nr_states:
-            is_dtmc = True
-            extract_scheduler = False
 
-        #TODO set from the outside.
-        env = stormpy.Environment()
-        env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(0.000001)
-        if is_dtmc:
-            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        else:
-            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-
-        assert not formula.has_bound
-
-        logger.info("Start checking direction 1: {}".format(formula))
-        prime_result = stormpy.model_checking(mdp, formula, only_initial_states=False, extract_scheduler=extract_scheduler, environment=env)
-
-        if is_dtmc:
-            maximise = True
-            absolute_min = min([prime_result.at(x) for x in mdp.initial_states])
-            absolute_max = max([prime_result.at(x) for x in mdp.initial_states])
-            logger.info("Done DTMC Checking. Result for initial state is: {} -- {}".format(absolute_min, absolute_max))
-            return ExplicitMCResult(prime_result, prime_result, maximise, None, None, absolute_min=absolute_min, absolute_max=absolute_max)
-
-        absolute_min = -math.inf
-        absolute_max = math.inf
-        second_result = None
-
-        if formula.optimality_type == stormpy.OptimizationDirection.Maximize:
-            maximise = True
-            upper_result = prime_result
-            absolute_max = max([upper_result.at(x) for x in mdp.initial_states])
-        else:
-            assert formula.optimality_type == stormpy.OptimizationDirection.Minimize
-            maximise = False
-            lower_result = prime_result
-            absolute_min = min([lower_result.at(x) for x in mdp.initial_states])
-
-        if absolute_min < threshold and threshold < absolute_max:
-            logger.info("Start checking direction 2: {}".format(alt_formula))
-            second_result = stormpy.model_checking(mdp, alt_formula, only_initial_states=False, extract_scheduler=extract_scheduler, environment=env)
-
-            if maximise:
-                lower_result = second_result
-                absolute_min = min([lower_result.at(x) for x in mdp.initial_states])
-            else:
-                assert not maximise
-                upper_result = second_result
-                absolute_max = max([upper_result.at(x) for x in mdp.initial_states])
-
-        logger.info("Done Checking. Result for initial state is: {} -- {}".format(absolute_min, absolute_max))
-
-        # prime_result_action_values = None
-        # second_result_action_values = None
-        # return ExplicitMCResult(prime_result, second_result, maximise, prime_result_action_values, second_result_action_values, absolute_min = absolute_min, absolute_max = absolute_max)
-
-        # result interpretation
-        logger.debug(f"Absolute minimum: {absolute_min}, Absolute maximum {absolute_max}, threshold: {threshold}")
-        if threshold > absolute_max:
-            logger.debug("Absolute maximum {} is below threshold {}".format(absolute_max, threshold))
-            threshold_synthesis_result = ThresholdSynthesisResult.BELOW
-        elif threshold <= absolute_min:
-            logger.debug("Absolute minimum {} is above threshold {}".format(absolute_min, threshold))
-            threshold_synthesis_result =  ThresholdSynthesisResult.ABOVE
-        else:
-            logger.debug("Threshold is between")
-            threshold_synthesis_result =  ThresholdSynthesisResult.UNDECIDED
-
-        if threshold_synthesis_result == ThresholdSynthesisResult.UNDECIDED:
-            feasible = None
-        else:
-            all_above = (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE)
-            feasible = (all_above == Family.accept_if_above[property_index])
-
-        return feasible,prime_result
-
-# ------------------------------------------------------------------------------
-# synthesis wrappers
+# Synthesis wrappers ------------------------------------------------------------------------------ Synthesis wrappers
 
 def readable_assignment(assignment):
-    # return {k:v[0].__str__() for (k,v) in assignment.items()} if assignment is not None else None
-    return ",".join(["{}={}".format(k,v[0].__str__()) for (k,v) in assignment.items()]) if assignment is not None else None
+    # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
+    return ",".join([f"{k}={v[0].__str__()}" for (k, v) in assignment.items()]) if assignment is not None else None
+
 
 class Statistic:
     """General computation stats."""
-    def __init__(self, method, threshold):
+
+    def __init__(self, method, formulae, holes_count, opt_setting, long_summary=False):
         self.method = method
-        self.threshold = threshold
+        self.long_summary = long_summary
         self.timer = Timer()
         self.timer.start()
+        self.feasible = False
+        self.assignment = {}
+        self.iterations = (0, 0)
+        self.optimal_value = None
+        self.formulae = formulae
+        self.holes_count = holes_count
+        self.opt_setting = opt_setting
+        self.family_size = 0
+        self.super_mdp_size, self.mdp_checks, self.avg_mdp_size = 0, 0, 0
+        self.avg_dtmc_size, self.dtmc_checks = 0, 0
 
-    def finished(self, assignment, iterations):
+    def finished(
+            self, assignment, iterations, optimal_value, family_size, super_mdp_size,
+            avg_mdp_size, mdp_checks, avg_dtmc_size, dtmc_checks
+    ):
         self.timer.stop()
         self.feasible = assignment is not None
         self.assignment = readable_assignment(assignment)
         self.iterations = iterations
-    
+        self.optimal_value = optimal_value
+        self.family_size = family_size
+        self.super_mdp_size = super_mdp_size
+        self.avg_mdp_size = round(avg_mdp_size, 2)
+        self.mdp_checks = mdp_checks
+        self.avg_dtmc_size = round(avg_dtmc_size, 2)
+        self.dtmc_checks = dtmc_checks
+
+    def get_long_summary(self):
+        formulae = self.formulae if self.optimal_value is None else self.formulae[:-1]
+        formulae = "\n".join([f">> Formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
+        opt_formula = f">> Optimal Setting: {self.opt_setting}" if self.optimal_value else ""
+        space_info = f">> Number of holes: {self.holes_count}; Family size: {self.family_size}"
+        cegar = f">> Super MDP: {self.super_mdp_size}; Average MDP: {self.avg_mdp_size}; " \
+                f"MPD Checks: {self.mdp_checks}; Iters: {self.iterations[0]}"
+        cegis = f">> Average DTMC {self.avg_dtmc_size}; DTMC Checks: {self.dtmc_checks}; Iters: {self.iterations[1]}"
+        feasible = "YES" if self.feasible else "NO"
+        result = f"feasible={feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
+        summary = f">> method: {self.method}; {result}; time: {round(self.timer.time, 2)}"
+        assignment = f">> assignment: {self.assignment}\n"
+        return f"{formulae}\n{opt_formula}\n{space_info}\n{cegar}\n{cegis}\n{summary}\n{assignment}"
+
     def __str__(self):
-        feasible = "F" if self.feasible else  "U"
-        # time = round(self.timer.time,2)
-        time = int(self.timer.time)
-        return "> T={:g} : {} : {} ({} iters, {} sec)\n".format(self.threshold, self.method, feasible, self.iterations, time)
-        # return "> {}".format(self.iterations) # FIXME
+        feasible = "YES" if self.feasible else "NO"
+        time = round(self.timer.time, 2)
+        result = f"feasible={feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
+        short_summary = f">> method: {self.method}; {result}; iters: {self.iterations}; time: {time}\n" \
+                        f">> assignment: {self.assignment}\n"
+        return self.get_long_summary() if self.long_summary else short_summary
+
 
 class EnumerationChecker(OneByOneChecker):
     """1-by-1 enumeration wrapper."""
-    
-    # def __init__(self, *args):
-    #     super().__init__(*args)
 
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold) # FIXME
-        self.statistic = Statistic("1-by-1", threshold)
-        iterations = self.run_feasibility()
-        assignment = None # we do not care about assignment
-        self.statistic.finished(assignment, iterations)
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.statistic = None
+
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        iterations, avg_model_size = self.run_feasibility()
+        assignment = None  # we do not care about assignment
+        self.statistic.finished(
+            assignment, (iterations, 0), None, 0, 0.0, avg_model_size, 0.0, 0.0, 0.0
+        )
 
 
 class CEGISChecker(Synthesiser):
     """CEGIS wrapper."""
-    
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold) # FIXME
-        # if self.input_has_optimality_property()
-        self.statistic = Statistic("CEGIS", threshold)
-        _, assignment, _ = self.run_feasibility()
-        assignment = {k:[v] for (k,v) in assignment.items()} if assignment is not None else None
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.statistic = None
+
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "CEGIS", self._verifier.properties, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        _, assignment, optimal_value = self.run_feasibility()
+        assignment = {k: [v] for (k, v) in assignment.items()} if assignment is not None else None
         if assignment is not None:
-            logger.info("Found satisfying assignment: {}".format(readable_assignment(assignment)))
-        self.statistic.finished(assignment, self.stats.iterations)
+            logger.info(f"Found satisfying assignment: {readable_assignment(assignment)}")
+        self.statistic.finished(
+            assignment, (0, self.stats.iterations), optimal_value, self.stats.design_space_size,
+            0, 0, 0,
+            self.stats.qualitative_model_checking_calls + self.stats.quantitative_model_checking_calls,
+            self.stats.average_model_size()
+        )
+
 
 class CEGARChecker(LiftingChecker):
     """CEGAR wrapper."""
-    
-    def __init__(self,*args):
+
+    def __init__(self, *args):
         super().__init__(*args)
+        self.statistic = None
+        self.formulae = []
         self.iterations = 0
+        self.family = None
+        self.families = []
+        self.models_total = 0
 
     def initialise(self):
         super().initialise()
-        self.formulae = [property.raw_formula for property in self.properties]
-        # no optimality support (TODO Simon)
-        assert not self.input_has_optimality_property()
+        # QuotientBasedFamilyChecker.initialise(self)
+        self.formulae = [property_obj.raw_formula for property_obj in self.properties]
+        if self.input_has_optimality_property():
+            ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
+                else stormpy.logic.ComparisonType.LESS
+            bound = self.sketch.expression_manager.create_rational(stormpy.Rational(self._optimal_value))
+            opt_formula = self._optimality_setting.criterion.raw_formula.clone()
+            opt_formula.set_bound(ct, bound)
+            self.formulae.append(opt_formula)
 
     def run_feasibility(self):
-        '''
-        Run feasibility synthesis. Return either a satisfying assignment
-        (feasible) or None (unfeasible).
-        '''
+        """
+        Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
+        """
         Profiler.initialize()
-        logger.info("Running feasibility synthesis.")
+        logger.info("Running feasibility + optimal synthesis.")
 
         # initialize family description
         logger.debug("Constructing quotient MDP of the superfamily.")
         Family.initialize(
             self.sketch, self.holes, self.hole_options, self.symmetries,
             self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
-            self.thresholds, self._accept_if_above
-            )
+            self.thresholds, self._accept_if_above, self._optimality_setting
+        )
 
         # initiate CEGAR loop
-        family = Family()
-        families = [family]
+        self.family = Family()
+        self.models_total = self.family.size
+        self.families = [self.family]
         satisfying_assignment = None
         logger.debug("Initiating CEGAR loop")
-        while families != []:
-            logger.debug("Current number of families: {}".format(len(families)))
+        while self.families:
+            logger.debug(f"Current number of families: {len(self.families)}")
+
             self.iterations += 1
             logger.debug("CEGAR: iteration {}.".format(self.iterations))
-            family = families.pop(-1)
-            family.construct()
-            feasible = family.analyze()
-            if feasible == True:
+
+            self.family = self.families.pop(-1)
+            self.family.construct()
+            feasible, optimal_value = self.family.analyze()
+            if feasible and isinstance(feasible, bool):
                 logger.debug("CEGAR: all SAT.")
-                satisfying_assignment = family.member_assignment
-                if satisfying_assignment is not None:
+                satisfying_assignment = self.family.member_assignment
+                if optimal_value is not None:
+                    print(f">> SAT CHECK: {self._optimal_value}, {optimal_value}")
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
+                if satisfying_assignment is not None and self._optimality_setting is None:
                     break
-            elif feasible == False:
+            elif not feasible and isinstance(feasible, bool):
+                if optimal_value is not None:
+                    print(">> UNSAT CHECK")
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: all UNSAT.")
-            else: # feasible is None:
+            else:  # feasible is None:
+                if optimal_value is not None:
+                    print(f">> UNDECIDED CHECK: {self._optimal_value}, {optimal_value}")
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: undecided.")
                 logger.debug("Splitting the family.")
-                subfamily_left,subfamily_right = family.split()
-                logger.debug("Constructed two subfamilies of size {} and {}.".format(subfamily_left.size, subfamily_right.size))
-                families.append(subfamily_left)
-                families.append(subfamily_right)
-    
-        if satisfying_assignment is not None:
-            logger.info("Found satisfying assignment: {}".format(readable_assignment(satisfying_assignment)))
-            return satisfying_assignment
+                subfamily_left, subfamily_right = self.family.split()
+                logger.debug(
+                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
+                )
+                self.families.append(subfamily_left)
+                self.families.append(subfamily_right)
+
+        if self._optimal_value is not None:
+            assert not self.families
+            logger.info(f"Found optimal assignment: {self._optimal_value}")
+            return self._optimal_assignment, self._optimal_value
+        elif satisfying_assignment is not None:
+            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
+            return satisfying_assignment, None
         else:
             logger.info("No more options.")
-            return None
-        
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold) # FIXME
-        self.statistic = Statistic("CEGAR", threshold)
-        # _, assignment, _ = self.run_feasibility()
-        assignment = self.run_feasibility()
-        self.statistic.finished(assignment, self.iterations)
+            return None, None
 
-# ------------------------------------------------------------------------------
-# Family encapsulator
+    def _construct_violation_property(self):
+        vp_index = len(self.formulae) - 1  # Compute the index of the violation property
 
-class Family():
-    '''
+        # Construct new violation property with respect to the currently optimal value
+        vp = self._optimality_setting.get_violation_property(
+            self._optimal_value,
+            lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x)),
+        )
+
+        # Update the attributes of the family according to the new optimal values
+        # For each family we need to update theirs formulae and formulae indices to check
+        for family in self.families + [self.family]:
+            # Replace the last violation property by newly one
+            family.formulae[vp_index] = vp.raw_formula
+            # When the violation property is not checking, we have to add its index
+            if vp_index not in family.formulae_indices:
+                family.formulae_indices.append(vp_index)
+                family.model_check_formula(vp_index)
+                family.bounds[vp_index] = Family.quotient_container().latest_result.result
+
+        # Change the value of threshold of the violation formulae within constructed quotient MDP
+        Family.set_thresholds(Family.get_thresholds()[:-1] + [vp.raw_formula.threshold])
+
+    def _check_optimal_property(self, optimal_value, assignment):
+        # Check whether the improvement was achieved
+        if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
+
+            # Set the new values of the optimal attributes
+            self._optimal_value = optimal_value
+            self._optimal_assignment = assignment
+
+            # Construct the violation property according newly found optimal value
+            self._construct_violation_property()
+
+            logger.debug(f"Optimal value improved to: {self._optimal_value}")
+            return True
+
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "CEGAR", self.formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        assignment, optimal_value = self.run_feasibility()
+        self.statistic.finished(
+            assignment, (self.iterations, 0), optimal_value, self.models_total,
+            Family.quotient_mdp().nr_states, Family.quotient_mdp_stats(0) / Family.quotient_mdp_stats(1),
+            Family.mdp_checks(), 0.0, 0.0
+        )
+
+
+# Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
+
+class Family:
+    """
         notation:
-        hole is String
-        Holes = a set of all holes
+        hole: String
+        Holes: a set of all holes
         HoleOptions : Hole -> [Expression]
 
         Family.holes : Hole -> JaniConstant
         Family.hole_options is HoleOptions
-        Family.solver_metavariables : Var -> Hole
+        Family.solver_meta_vars : Var -> Hole
         Family.hole_option_indices : Hole -> (Expression -> int)
 
         self.options is HoleOptions
 
         sat_model: Var -> int
         assignment: Hole -> [Expression]
-    '''
+    """
 
-    # TODO check beforehand if family is non-empty
+    # TODO: Check beforehand if family is non-empty.
 
     # Superfamily description
 
     # - original prism description
     _sketch = None
-    
+
     # - hole options
-    _holes = None # ordered dictionary
+    _holes = None  # ordered dictionary
     _hole_options = None
     _hole_option_indices = None
 
     # - indexed hole options
-    _hole_list = None
+    hole_list = None
+    hole_not_generalized = None
     _hole_indices = None
 
     # - jani representation + sparse MDP representation
@@ -302,7 +347,7 @@ class Family():
 
     # - SMT encoding (used to enable restrictions)
     _solver = None
-    _solver_metavariables = None
+    _solver_meta_vars = None
 
     # - formulae of interest
     _formulae = None
@@ -310,24 +355,58 @@ class Family():
     _mc_formulae_alt = None
     _thresholds = None
     _accept_if_above = None
+    _optimality_setting = None
 
-    def initialize(_sketch, _holes, _hole_options, symmetries, differents,
-        _formulae, _mc_formulae, _mc_formulae_alt, _thresholds, _accept_if_above
-        ):
+    # - statistics for summary
+    _quotient_mdp_stats = (0, 0)
+    _dtmc_stats = (0, 0)
+    _mdp_checks = 0
+    _dtmc_checks = 0
+
+    def __init__(self, parent=None, options=None):
+        """
+        Construct a family. Each family is either a superfamily represented by
+        a Family._quotient_mdp or a (proper) subfamily that is constructed on
+        demand via Family._quotient_container.consider_subset(). Subfamilies
+        inherit formulae of interest from their parents.
+        """
+        self.options = Family._hole_options.copy() if parent is None else options
+        self.mdp = Family._quotient_mdp if parent is None else None
+        self.choice_map = [i for i in range(Family._quotient_mdp.nr_choices)] if parent is None else None
+        self.formulae_indices = list(range(len(Family._formulae))) if parent is None else parent.formulae_indices
+
+        # encode this family
+        hole_clauses = dict()
+        for var, hole in Family._solver_meta_vars.items():
+            hole_clauses[hole] = z3.Or(
+                [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
+            )
+        self.encoding = z3.And(list(hole_clauses.values()))
+
+        # a family that has never been MDP-analyzed is not ready to be split
+        self.bounds = [None] * len(Family._formulae)  # assigned when analysis is initiated
+        self.suboptions = None
+        self.member_assignment = None
+
+    @staticmethod
+    def initialize(
+            _sketch, _holes, _hole_options, symmetries, differents, _formulae,
+            _mc_formulae, _mc_formulae_alt, _thresholds, _accept_if_above, optimality_setting
+    ):
 
         Family._sketch = _sketch
         Family._holes = _holes
         Family._hole_options = _hole_options
 
         # map holes to their indices
-        Family._hole_list = list(Family._holes.keys())
+        Family.hole_list = list(Family._holes.keys())
         Family._hole_indices = dict()
-        for hole_index,hole in enumerate(Family._hole_list):
+        for hole_index, hole in enumerate(Family.hole_list):
             Family._hole_indices[hole] = hole_index
-        
+
         # map hole options to their indices
         Family._hole_option_indices = dict()
-        for hole,options in Family._hole_options.items():
+        for hole, options in Family._hole_options.items():
             indices = dict()
             k = 0
             for option in options:
@@ -336,14 +415,14 @@ class Family():
             Family._hole_option_indices[hole] = indices
 
         # initialize z3 solver
-        Family._solver = z3.Solver()            
-        Family._solver_metavariables = OrderedDict()
+        Family._solver = z3.Solver()
+        Family._solver_meta_vars = OrderedDict()
         variables = dict()
-        for k,v in Family._hole_options.items():
+        for k, v in Family._hole_options.items():
             # create integer variable
             var = z3.Int(k)
             # store the variable
-            Family._solver_metavariables[var] = k
+            Family._solver_meta_vars[var] = k
             variables[k] = var
             # add constraints for the hole assignments
             Family._solver.add(var >= 0)
@@ -356,8 +435,8 @@ class Family():
                     Family._solver.add(variables[x] < variables[y])
         if differents is not None:
             for diff in differents:
-                for id, x in enumerate(diff):
-                    for y in diff[id + 1:]:
+                for idx, x in enumerate(diff):
+                    for y in diff[idx + 1:]:
                         Family._solver.add(variables[x] != variables[y])
 
         # store formulae info
@@ -366,45 +445,17 @@ class Family():
         Family._mc_formulae_alt = _mc_formulae_alt
         Family._thresholds = _thresholds
         Family._accept_if_above = _accept_if_above
+        Family._optimality_setting = optimality_setting
 
         # build quotient MDP
         quotient_builder = JaniQuotientBuilder(Family._sketch, Family._holes)
-        Family._quotient_container = quotient_builder.construct(Family._hole_options, remember = set())
+        Family._quotient_container = quotient_builder.construct(Family._hole_options, remember=set())
         Family._quotient_container.prepare(Family._mc_formulae, Family._mc_formulae_alt)
-        Family._quotient_mdp = Family._quotient_container._mdp_handling.full_mdp
-        logger.debug("Constructed MDP of size {}.".format(Family._quotient_mdp.nr_states))
-
-    def __init__(self, parent = None, options = None):
-        '''
-        Construct a family. Each family is either a superfamily represented by
-        a Family._quotient_mdp or a (proper) subfamily that is constructed on
-        demand via Family._quotient_container.consider_subset(). Subfamilies
-        inherit formulae of interest from their parents.
-        '''
-
-        if parent is None:
-            # construct the superfamily
-            self.options = Family._hole_options.copy()
-            self.mdp = Family._quotient_mdp
-            self.choice_map = [i for i in range(Family._quotient_mdp.nr_choices)]
-            self.formulae_indices = [i for i in range(len(Family._formulae))]
-        else:
-            # construct a subfamily
-            self.options = options
-            self.mdp = None # constructed only for the purpose of analysis
-            self.choice_map = None
-            self.formulae_indices = parent.formulae_indices
-
-        # encode this family
-        hole_clauses = dict()
-        for var,hole in Family._solver_metavariables.items():
-            hole_clauses[hole] = z3.Or([var == Family._hole_option_indices[hole][option] for option in self.options[hole]])
-        self.encoding = z3.And(list(hole_clauses.values()))
-
-        # a family that has never been MDP-analyzed is not ready to be split
-        self.bounds = [None for index in range(len(Family._formulae))] # assigned when analysis is initiated
-        self.suboptions = None
-        self.member_assignment = None
+        Family._quotient_mdp = Family._quotient_container.mdp_handling.full_mdp
+        Family._quotient_mdp_stats = (
+            Family._quotient_mdp_stats[0] + Family._quotient_mdp.nr_states, Family._quotient_mdp_stats[1] + 1
+        )
+        logger.debug(f"Constructed MDP of size {Family._quotient_mdp.nr_states}.")
 
     @property
     def size(self):
@@ -422,220 +473,233 @@ class Family():
     def split_ready(self):
         return self.suboptions is not None
 
+    @property
+    def formulae(self):
+        return Family._formulae
+
+    @staticmethod
+    def quotient_mdp_stats(idx):
+        return Family._quotient_mdp_stats[idx]
+
+    @staticmethod
+    def dtmc_stats(idx):
+        return Family._dtmc_stats[idx]
+
+    @staticmethod
+    def mdp_checks():
+        return Family._mdp_checks
+
+    @staticmethod
+    def dtmc_checks():
+        return Family._dtmc_checks
+
+    @staticmethod
+    def quotient_mdp():
+        return Family._quotient_mdp
+
+    @staticmethod
+    def get_thresholds():
+        return Family._thresholds
+
+    @staticmethod
+    def set_thresholds(thresholds):
+        Family._thresholds = thresholds
+
+    @staticmethod
+    def quotient_container():
+        return Family._quotient_container
+
     def construct(self):
-        ''' Construct quotient MDP for this family using the quotient container. '''
+        """ Construct quotient MDP for this family using the quotient container. """
         if self.constructed:
             return
-        
+
         Profiler.start("ar - MDP construction")
 
-        logger.debug("Constructing quotient MDP for family {}.".format(self.options))
+        logger.debug(f"Constructing quotient MDP for family {self.options}.")
         indexed_options = Family._hole_options.index_map(self.options)
         Family._quotient_container.consider_subset(self.options, indexed_options)
-        self.mdp = Family._quotient_container._mdp_handling.mdp
-        self.choice_map = Family._quotient_container._mdp_handling._mapping_to_original
-        logger.debug("Constructed MDP of size {}.".format(self.mdp.nr_states))
-        
+        self.mdp = Family._quotient_container.mdp_handling.mdp
+        self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
+        logger.debug(f"Constructed MDP of size {self.mdp.nr_states}.")
+        Family._quotient_mdp_stats = (
+            Family._quotient_mdp_stats[0] + self.mdp.nr_states, Family._quotient_mdp_stats[1] + 1
+        )
+
         Profiler.stop()
 
     def model_check_formula(self, formula_index):
-        '''
+        """
         Model check the underlying quotient MDP against a given formula.
-        Return feasibility (SAT = True, UNSAT = False, ? = None) as well as the
-        model checking result.
-        '''
+        Return feasibility (SAT = True, UNSAT = False, ? = None) as well as the model checking result.
+        """
         assert self.constructed
-        
+
         threshold = float(Family._thresholds[formula_index])
-        accept_if_above = Family._accept_if_above[formula_index]
         Family._quotient_container.analyse(threshold, formula_index)
         threshold_synthesis_result = Family._quotient_container.decided(threshold)
-        if threshold_synthesis_result == ThresholdSynthesisResult.UNDECIDED:
-            feasible = None
-        else:
-            is_above = (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE)
-            feasible = is_above == accept_if_above
 
-        return feasible, Family._quotient_container._latest_result.result
+        return None if threshold_synthesis_result == ThresholdSynthesisResult.UNDECIDED else \
+            (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[formula_index], \
+            Family._quotient_container.latest_result.result
 
-    def analyze(self):
-        '''
+    def analyze(self, superfamily=False):
+        """
         Analyze the underlying quotient MDP for this subfamily with respect
         to all (yet undecided) formulae and store all model checking results.
         Return feasibility (SAT = True, UNSAT = False, ? = None). Whenever an
-        undecidable formula is encountered, prepare the family for splitting.
+        undecidable formula is met, prepare the family for splitting.
         In the case of inconclusive result, update the set of undecidable
         formulae for future processing. Otherwise, in the case of satisfying
         result, store a hole assignment.
-        Note: we do not check here whether the constructed assignment is not None.
-        '''
-        assert not self.analyzed    # sanity check
+        Note: we do not check whether assignment is not None
+        """
+        # assert not self.analyzed  # sanity check
         assert self.constructed
 
-        logger.debug("CEGAR: analyzing family {} of size {}.".format(self.options, self.size))            
+        logger.debug(f"CEGAR: analyzing family {self.options} of size {self.size}.")
 
         undecided_formulae_indices = []
+        optimal_value = None
+        # for formula_index in self.formulae_indices[:-1] \
+        #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
         for formula_index in self.formulae_indices:
-            logger.debug("CEGAR: model checking MDP against a formula with index {}.".format(formula_index))
-            feasible,bound = self.model_check_formula(formula_index)
-            self.bounds[formula_index] = bound
-            if feasible == False:
-                logger.debug("formula {}: UNSAT".format(formula_index))
+            logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
+            Family._mdp_checks += 1
+            feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
+
+            if not feasible and isinstance(feasible, bool):
+                logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None
+                if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
+                    decided, optimal_value = self.check_optimal_property(feasible)
+                    # undecided_formulae_indices += [formula_index] if decided is None else []
                 break
-            if feasible is None:
-                logger.debug("formula {}: undecided".format(formula_index))
+            elif feasible is None:
+                logger.debug(f"Formula {formula_index}: UNDECIDED")
                 undecided_formulae_indices.append(formula_index)
                 if not self.split_ready:
                     self.prepare_split()
             else:
-                logger.debug("formula {}: SAT".format(formula_index))
+                logger.debug("Formula {}: SAT".format(formula_index))
+                if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
+                    decided, optimal_value = self.check_optimal_property(feasible)
+                    undecided_formulae_indices += [formula_index] if decided is None else []
+
+        # if self._optimality_setting is not None:
+        #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
+        #         decided, optimal_value = self.check_optimal_property()
 
         self.formulae_indices = undecided_formulae_indices
 
         # postprocessing
         if self.formulae_indices is None:
-            return False
-        if self.formulae_indices == []:
+            return False, optimal_value
+        elif not self.formulae_indices:
             self.pick_assignment()
-            return True
-        return None
+            return True, optimal_value
+        return None, optimal_value
 
     def prepare_split(self):
-        # logger.debug("Preparing to split family {}".format(self.options))
+        # logger.debug(f"Preparing to split family {self.options}")
         assert self.constructed and not self.split_ready
         Profiler.start("ar - splitting")
-        self.suboptions = self.split_options()
-        Profiler.stop()
-
-    def split_options(self):
-        '''
-        The following is the call of scheduler color analysis followed by
-        LiftingChecker::_split_hole_options(self.options, Family._quotient_container)
-        '''
         Family._quotient_container.scheduler_color_analysis()
-        hole_options = self.options
-        oracle = Family._quotient_container
-
-        def split_list(a_list):
-            half = len(a_list) // 2
-            return a_list[:half], a_list[half:]
-
-        # Where to split.
-        splitters = []
-        selected_splitter = None
-        one_side_list = None
-        other_side_list = None
-
-        selected_splitter, one_side_list, other_side_list = oracle.propose_split()
-        # logger.debug("Oracle proposes a split at {}".format(selected_splitter))
-
-        if not isinstance(one_side_list, Iterable):
-            one_side_list = [one_side_list]
-        if not isinstance(other_side_list, Iterable):
-            other_side_list = [other_side_list]
-
-        # logger.debug("Proposed (pre)split: {} vs. {}".format(one_side_list, other_side_list))
-
-        if selected_splitter is None:
-            # Split longest.
-            maxlength = 0
-            for k, v in hole_options.items():
-                maxlength = max(maxlength, len(v))
-                if len(v) == maxlength:
-                    selected_splitter = k
-            if maxlength == 1:
-                raise RuntimeError("Undecided result, but cannot split")
-
-
-        options = hole_options[selected_splitter]
-        # logger.debug("Splitting {}...".format([str(val) for val in options]))
-        assert len(options) > 1, "Cannot split along {}".format(selected_splitter)
-
-        one_vals = [Family._hole_options[selected_splitter][one_side] for one_side in one_side_list if one_side is not None]
-        other_vals = [Family._hole_options[selected_splitter][other_side] for other_side in other_side_list if
-                      other_side is not None]
-        # logger.debug("Pre-splitted {} and {}".format(one_vals, other_vals))
-        remaining_options = [x for x in options if x not in one_vals + other_vals]
-        # logger.debug("Now distribute {}".format(remaining_options))
-        second, first = split_list(remaining_options)
-        # if one_side is not None:
-        first = first + one_vals
-        # if other_side is not None:
-        second = second + other_vals
-        splitters.append([selected_splitter, first, second])
-
-        logger.info("Splitting {} into {} and {}".format(selected_splitter, "[" + ",".join([str(x) for x in first]) + "]",
-                                                             "[" + ",".join([str(x) for x in second]) + "]"))
-
-        # split
-        assert len(splitters) == 1
-        split_queue = [hole_options]
-        for splitter in splitters:
-            new_split_queue = []
-            for options in split_queue:
-                new_split_queue.append(HoleOptions(options))
-                new_split_queue[-1][splitter[0]] = splitter[1]
-                new_split_queue.append(HoleOptions(options))
-                new_split_queue[-1][splitter[0]] = splitter[2]
-            split_queue = new_split_queue
-        assert len(split_queue) == 2
-        
-        # return
-        return split_queue
+        if len(Family._quotient_container._inconsistencies) == 2:
+            self.suboptions = LiftingChecker.split_hole_options(
+                self.options, Family._quotient_container, Family._hole_options, True
+            )
+        Profiler.stop()
 
     def split(self):
         assert self.split_ready
-        subfamily_left = Family(self, self.suboptions[0])
-        subfamily_right = Family(self, self.suboptions[1])
-        return subfamily_left, subfamily_right
+        return Family(self, self.suboptions[0]), Family(self, self.suboptions[1])
 
     def pick_assignment(self):
-        ''' Pick any feasible hole assignment. Return None if no instance remains. '''
-        self.member_assignment = None
-
-        # assignment = self.options.pick_one_in_family() # this ignores encoding
-        
+        """ Pick any feasible hole assignment. Return None if no instance remains. """
         # get satisfiable assignment
         solver_result = Family._solver.check(self.encoding)
         if solver_result != z3.sat:
             # no further instances
             return None
-    
+
         # construct the corresponding singleton (a single-member family)
         sat_model = Family._solver.model()
         assignment = HoleOptions()
-        for var,hole in Family._solver_metavariables.items():
-            val = sat_model[var].as_long()
-            selected_option = Family._hole_options[hole][val]
-            assignment[hole] = [selected_option]
+        self.member_assignment = None
+        for var, hole in Family._solver_meta_vars.items():
+            assignment[hole] = [Family._hole_options[hole][sat_model[var].as_long()]]
         self.member_assignment = assignment
 
         return self.member_assignment
 
-# ------------------------------------------------------------------------------
-# Integrated method
+    def check_optimal_property(self, feasible):
+        is_max = True if self._optimality_setting.direction == "max" else False
+        oracle = Family._quotient_container
+        optimal_value = None
+        decided = None
+        if feasible is None:
+            logger.debug("Family is UNDECIDED for optimal property.")
+            if not self.split_ready:
+                self.prepare_split()
+            if self.size > 1:
+                # oracle.scheduler_color_analysis()
+                if (oracle.is_lower_bound_tight() and not is_max) or (oracle.is_upper_bound_tight() and is_max):
+                    logger.debug(f'Found a tight {"upper" if is_max else "lower"} bound.')
+                    optimal_value = oracle.upper_bound() if is_max else oracle.lower_bound()
+                    decided = True
+            else:
+                decided = True
+        elif feasible:
+            logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
+            if not self.split_ready:
+                self.prepare_split()
+            # oracle.scheduler_color_analysis()
+            improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
+            optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
+                else oracle.lower_bound()
+            if improved_tight:
+                decided = True
+            elif not improved_tight:
+                decided = None
+        elif not feasible:
+            decided = False
+            logger.debug("All discarded within analyses of family for optimal property.")
+
+        return decided, optimal_value
+
+
+# INTEGRATED METHOD --------------------------------------------------------------------------------- INTEGRATED METHOD
 
 class FamilyHybrid(Family):
-    ''' Family adopted for CEGAR-CEGIS analysis. '''
+    """ Family adopted for CEGAR-CEGIS analysis. """
 
     # TODO: more efficient state-hole mapping?
-    
-    _choice_to_hole_indices = None
+
+    _choice_to_hole_indices = {}
+
+    def __init__(self, *args):
+        super().__init__(*args)
+
+        self._state_to_hole_indices = None  # evaluated on demand
+
+        # dtmc corresponding to the constructed assignment
+        self.dtmc = None
+        self.dtmc_state_map = None
 
     def initialize(*args):
         Family.initialize(*args)
-        
+
         # map edges of a quotient container to hole indices
-        jani = Family._quotient_container._jani_program
+        jani = Family._quotient_container.jani_program
         _edge_to_hole_indices = dict()
-        for aut_index,aut in enumerate(jani.automata):
-            for edge_index,edge in enumerate(aut.edges):
+        for aut_index, aut in enumerate(jani.automata):
+            for edge_index, edge in enumerate(aut.edges):
                 if edge.color == 0:
                     continue
-                index = jani.encode_automaton_and_edge_index(aut_index,edge_index)
-                assignment = Family._quotient_container._edge_coloring.get_hole_assignment(edge.color)
-                hole_indices = [index for index,value in enumerate(assignment) if value is not None]
+                index = jani.encode_automaton_and_edge_index(aut_index, edge_index)
+                assignment = Family._quotient_container.edge_coloring.get_hole_assignment(edge.color)
+                hole_indices = [index for index, value in enumerate(assignment) if value is not None]
                 _edge_to_hole_indices[index] = hole_indices
 
         # map actions of a quotient MDP to hole indices
@@ -643,102 +707,111 @@ class FamilyHybrid(Family):
         choice_origins = Family._quotient_mdp.choice_origins
         matrix = Family._quotient_mdp.transition_matrix
         for state in range(Family._quotient_mdp.nr_states):
-            for choice_index in range(matrix.get_row_group_start(state),matrix.get_row_group_end(state)):
+            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
                 choice_hole_indices = set()
                 for index in choice_origins.get_edge_index_set(choice_index):
                     hole_indices = _edge_to_hole_indices.get(index, set())
                     choice_hole_indices.update(hole_indices)
                 FamilyHybrid._choice_to_hole_indices.append(choice_hole_indices)
 
-    def __init__(self, *args):
-        super().__init__(*args)
-
-        self._state_to_hole_indices = None # evaluated on demand
-
-        # dtmc corresponding to the constructed assignment
-        self.dtmc = None
-        self.dtmc_state_map = None
-
     def split(self):
         assert self.split_ready
-        subfamily_left = FamilyHybrid(self, self.suboptions[0])
-        subfamily_right = FamilyHybrid(self, self.suboptions[1])
-        return subfamily_left, subfamily_right
+        return FamilyHybrid(self, self.suboptions[0]), FamilyHybrid(self, self.suboptions[1])
 
     @property
     def state_to_hole_indices(self):
-        '''
-        Identify holes relevant to the states of the MDP and store only 
-        significant ones.
-        '''
-        # if someone (i.e., CEGIS) asks for state indices, the model should
-        # already be analyzed
+        """
+        Identify holes relevant to the states of the MDP and store only significant ones.
+        """
+        # if someone (i.e., CEGIS) asks for state indices, the model should already be analyzed
         assert self.constructed and self.analyzed
 
         # lazy evaluation
         if self._state_to_hole_indices is not None:
             return self._state_to_hole_indices
 
-        Profiler.start("is - MDP holes")
-        logger.debug("Constructing state-holes mapping via choice-holes mapping.")
+        Profiler.start("is - MDP holes (edges)")
+        logger.debug("Constructing state-holes mapping via edge-holes mapping.")
+
         self._state_to_hole_indices = []
         matrix = self.mdp.transition_matrix
         for state in range(self.mdp.nr_states):
             state_hole_indices = set()
             for choice_index in range(matrix.get_row_group_start(state),matrix.get_row_group_end(state)):
+                state_hole_indices.update(FamilyHybrid._choice_to_hole_indices[self.choice_map[choice_index]])
+            state_hole_indices = set(
+                [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1]
+            )
+            self._state_to_hole_indices.append(state_hole_indices)
+
+        Profiler.stop()
+        return self._state_to_hole_indices
+
+    @property
+    def state_to_hole_indices_choices(self):
+        """
+        Identify holes relevant to the states of the MDP and store only significant ones.
+        """
+        # if someone (i.e., CEGIS) asks for state indices, the model should already be analyzed
+        assert self.constructed and self.analyzed
+
+        # lazy evaluation
+        if self._state_to_hole_indices is not None:
+            return self._state_to_hole_indices
+
+        Profiler.start("is - MDP holes (choices)")
+        logger.debug("Constructing state-holes mapping via choice-holes mapping.")
+
+        self._state_to_hole_indices = []
+        matrix = self.mdp.transition_matrix
+        for state in range(self.mdp.nr_states):
+            state_hole_indices = set()
+            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
                 quotient_choice_index = self.choice_map[choice_index]
                 choice_hole_indices = FamilyHybrid._choice_to_hole_indices[quotient_choice_index]
                 state_hole_indices.update(choice_hole_indices)
-            state_hole_indices = set([index for index in state_hole_indices if len(self.options[Family._hole_list[index]]) > 1])
+            state_hole_indices = set(
+                [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1])
             self._state_to_hole_indices.append(state_hole_indices)
         Profiler.stop()
         return self._state_to_hole_indices
 
     def pick_member(self):
-        
         # pick hole assignment
         self.pick_assignment()
-        if self.member_assignment is None:
-            return None
+        if self.member_assignment is not None:
+            # collect edges relevant for this assignment
+            indexed_assignment = Family._hole_options.index_map(self.member_assignment)
+            subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
+            collected_edge_indices = stormpy.FlatSet(Family._quotient_container.color_to_edge_indices.get(0))
+            for c in subcolors:
+                collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
-        # collect edges relevant for this assignment
-        indexed_assignment = Family._hole_options.index_map(self.member_assignment)
-        subcolors = Family._quotient_container._edge_coloring.subcolors(indexed_assignment)
-        color_0_indices = Family._quotient_container._color_to_edge_indices.get(0)
-        collected_edge_indices = stormpy.FlatSet(color_0_indices)
-        for c in subcolors:
-            collected_edge_indices.insert_set(Family._quotient_container._color_to_edge_indices.get(c))
+            # construct the DTMC by exploring the quotient MDP for this subfamily
+            self.dtmc, self.dtmc_state_map = stormpy.dtmc_from_mdp(self.mdp, collected_edge_indices)
+            Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
+            logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
-        # construct the DTMC by exploring the quotient MDP for this subfamily
-        dtmc,dtmc_state_map = stormpy.dtmc_from_mdp(self.mdp, collected_edge_indices)
-
-        # assert absence of deadlocks or overlapping guargs
-        # TODO does not seem to work (builder options?)
-        assert dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
-        assert dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-        assert len(dtmc.initial_states) == 1    # to avoid ambiguity
-
-        logger.debug("Constructed DTMC of size {}.".format(dtmc.nr_states))
-        self.dtmc = dtmc
-        self.dtmc_state_map = dtmc_state_map
+            # assert absence of deadlocks or overlapping guargs
+            # TODO does not seem to work (builder options?)
+            assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
+            assert self.dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+            assert len(self.dtmc.initial_states) == 1  # to avoid ambiguity
 
         # success
         return self.member_assignment
 
     def exclude_member(self, conflicts):
-        '''
-        Exclude the subfamily induced by the selected assignment and a set of
-        conflicts.
-        '''
+        """
+        Exclude the subfamily induced by the selected assignment and a set of conflicts.
+        """
         assert self.member_assignment is not None
 
         for conflict in conflicts:
             counterexample_clauses = dict()
-            for var,hole in Family._solver_metavariables.items():
-                hole_index = Family._hole_indices[hole]
-                if hole_index in conflict:
-                    selected_option = self.member_assignment[hole][0]
-                    option_index = Family._hole_option_indices[hole][selected_option]
+            for var, hole in Family._solver_meta_vars.items():
+                if Family._hole_indices[hole] in conflict:
+                    option_index = Family._hole_option_indices[hole][self.member_assignment[hole][0]]
                     counterexample_clauses[hole] = (var == option_index)
                 else:
                     all_options = [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
@@ -749,73 +822,61 @@ class FamilyHybrid(Family):
 
     def analyze_member(self, formula_index):
         assert self.dtmc is not None
-        sat,_ = check_dtmc(self.dtmc, Family._formulae[formula_index])
-        return sat
+        sat, result = check_dtmc(self.dtmc, Family._formulae[formula_index])
+        return sat, result
 
-# ------------------------------------------------------------------------------
-# Family encapsulator
 
+# Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
 
 class IntegratedChecker(QuotientBasedFamilyChecker):
     """Integrated checker."""
-    
+
+    stage_score_limit = 99999
+
     def __init__(self):
         QuotientBasedFamilyChecker.__init__(self)
+        self.families = []
         self.iterations_cegis = 0
         self.iterations_cegar = 0
+        self.formulae = []
+        self.statistic = None
+        self.models_total = 0
+        self.cegis_iterations = 0
+        self.cegar_iterations = 0
+        self.stage_timer = Timer()
+        self.stage_switch_allowed = True  # once a method wins, set this to false and do not switch between methods
+        self.stage_score = 0  # +1 point whenever cegar wins the stage, -1 otherwise
+        # cegar/cegis stats
+        self.stage_time_cegar, self.stage_pruned_cegar, self.stage_time_cegis, self.stage_pruned_cegis = 0, 0, 0, 0
+        # multiplier to derive time allocated for cegis; =1 is fair, <1 favours cegar, >1 favours cegis
+        self.cegis_allocated_time_factor = 1.0
+        # start with CEGAR
+        self.stage_cegar = True
+        self.cegis_allocated_time = 0
+        self.stage_time_allocation_cegis = 0
 
     def initialise(self):
         QuotientBasedFamilyChecker.initialise(self)
-        self.formulae = [property.raw_formula for property in self.properties]
-        # no optimality support (TODO Simon)
-        assert not self.input_has_optimality_property()
+        self.formulae = [property_obj.raw_formula for property_obj in self.properties]
+        if self.input_has_optimality_property():
+            ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
+                else stormpy.logic.ComparisonType.LESS
+            bound = self.sketch.expression_manager.create_rational(stormpy.Rational(self._optimal_value))
+            opt_formula = self._optimality_setting.criterion.raw_formula.clone()
+            opt_formula.set_bound(ct, bound)
+            self.formulae.append(opt_formula)
 
     # ----- Adaptivity ----- #
-    # Main idea: switch between cegar/cegis, allocate more time to the more
-    # efficient method; if one method is consistently better than the other,
-    # declare it the winner and stop switching
-
-    # cegar wins over cegis by reaching the score limit, cegis wins by reaching the negative
+    # Main idea: switch between cegar/cegis, allocate more time to the more efficient method; if one method is
+    # consistently better than the other, declare it the winner and stop switching. Cegar wins over cegis by reaching
+    # the score limit, cegis wins by reaching the negative score limit.
     # note: this is the only parameter in the integrated synthesis
-    stage_score_limit = 99999
-    
-    use_nontrivial_bounds = True
-    only_cegar = False
-    # only_cegar = True
-    only_cegis = False
-    # only_cegis = True
 
-    print_stage_info = False
-    print_profiling = False
-    # print_profiling = True
-
-
-    def stage_init(self):
-        # once a method wins, set this to false and do not switch between methods
-        self.stage_switch_allowed = True
-        # +1 point whenever cegar wins the stage, -1 otherwise
-        self.stage_score = 0
-        
-        # cegar/cegis stats
-        self.stage_time_cegar = 0
-        self.stage_pruned_cegar = 0
-        self.stage_time_cegis = 0
-        self.stage_pruned_cegis = 0
-
-        # multiplier to derive time allocated for cegis
-        # =1 is fair, <1 favours cegar, >1 favours cegis
-        self.cegis_allocated_time_factor = 1
-        self.stage_timer = Timer()
-
-        # start with CEGAR 
-        self.stage_start(request_stage_cegar = True)
-
-        if self.only_cegar:
-            # disallow return to CEGIS
-            self.stage_switch_allowed = False
-        
     def stage_start(self, request_stage_cegar):
         self.stage_cegar = request_stage_cegar
+        if ONLY_CEGAR:
+            # disallow return to CEGIS
+            self.stage_switch_allowed = False
         self.stage_timer.reset()
         self.stage_timer.start()
 
@@ -827,28 +888,25 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             return False
 
         # record pruned models
-        if self.stage_cegar:
-            self.stage_pruned_cegar += models_pruned / self.models_total
-        else:
-            self.stage_pruned_cegis += models_pruned / self.models_total
+        self.stage_pruned_cegar += models_pruned / self.models_total if self.stage_cegar else 0
+        self.stage_pruned_cegis += models_pruned / self.models_total if not self.stage_cegar else 0
 
         # allow cegis another stage step if some time remains
-        if not self.stage_cegar:
-            if self.stage_timer.read() < self.cegis_allocated_time:
-                return False
+        if not self.stage_cegar and self.stage_timer.read() < self.cegis_allocated_time:
+            return False
 
         # stage is finished: record time
         self.stage_timer.stop()
-        time = self.stage_timer.read()
+        current_time = self.stage_timer.read()
         if self.stage_cegar:
             # cegar stage over: allocate time for cegis and switch
-            self.stage_time_cegar += time
-            self.cegis_allocated_time = time * self.cegis_allocated_time_factor
-            self.stage_start(request_stage_cegar = False)
+            self.stage_time_cegar += current_time
+            self.cegis_allocated_time = current_time * self.cegis_allocated_time_factor
+            self.stage_start(request_stage_cegar=False)
             return True
 
         # cegis stage over
-        self.stage_time_cegis += time
+        self.stage_time_cegis += current_time
 
         # calculate average success rate, update stage score
         success_rate_cegar = self.stage_pruned_cegar / self.stage_time_cegar
@@ -861,7 +919,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                 # print("> only cegar")
                 self.stage_switch_allowed = False
                 # switch back to cegar
-                self.stage_start(request_stage_cegar = True)
+                self.stage_start(request_stage_cegar=True)
                 return True
         elif success_rate_cegar < success_rate_cegis:
             # cegis wins the stage
@@ -877,64 +935,115 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         if self.stage_pruned_cegar == 0 or self.stage_pruned_cegis == 0:
             cegar_dominance = 1
         else:
-            cegar_dominance = success_rate_cegar / success_rate_cegis 
+            cegar_dominance = success_rate_cegar / success_rate_cegis
         cegis_dominance = 1 / cegar_dominance
         self.stage_time_allocation_cegis = cegis_dominance
 
         # stage log
-        if self.print_stage_info:
-            print("> {:.2e} \\\\ {:.2e} = {:.1e} ({})".format(success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score))
+        print("> ", end="")
+        print("{:.2e} \\\\ {:.2e} = {:.1e} ({})".format(
+            success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score)
+        )
 
         # switch back to cegar
-        self.stage_start(request_stage_cegar = True)
+        self.stage_start(request_stage_cegar=True)
         return True
 
-    # ----- hybrid method ----- #
+    def _construct_violation_property(self, family_ref, cex_generator=None):
+        vp_index = len(self.formulae) - 1  # Compute the index of the violation property
+
+        # Construct new violation property with respect to the currently optimal value
+        vp = self._optimality_setting.get_violation_property(
+            self._optimal_value,
+            lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x)),
+        )
+
+        # Update the attributes of the family according to the new optimal values
+        # For each family we need to update theirs formulae and formulae indices to check
+        for family in self.families + [family_ref]:
+            # Replace the last violation property by newly one
+            family.formulae[vp_index] = vp.raw_formula
+            # When the violation property is not checking, we have to add its index
+            if vp_index not in family.formulae_indices:
+                family.formulae_indices.append(vp_index)
+                family.model_check_formula(vp_index)
+                family.bounds[vp_index] = Family.quotient_container().latest_result.result
+
+        # Change the value of threshold of the violation formulae within constructed quotient MDP
+        Family.set_thresholds(Family.get_thresholds()[:-1] + [vp.raw_formula.threshold])
+
+        # Update counter-example generator for violation property
+        if cex_generator is not None:
+            cex_generator.replace_formula_threshold(
+                vp_index, vp.raw_formula.threshold_expr.evaluate_as_double(), family_ref.bounds[vp_index]
+            )
+
+    def _check_optimal_property(self, family_ref, assignment, cex_generator=None, optimal_value=None):
+
+        if optimal_value is None:
+            assert family_ref.dtmc is not None
+            # Model checking of the optimality property
+            result = stormpy.model_checking(family_ref.dtmc, self._optimality_setting.criterion)
+            optimal_value = result.at(family_ref.dtmc.initial_states[0])
+
+        # Check whether the improvement was achieved
+        if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
+
+            # Set the new values of the optimal attributes
+            self._optimal_value = optimal_value
+            self._optimal_assignment = assignment
+
+            # Construct the violation property according newly found optimal value
+            self._construct_violation_property(family_ref, cex_generator)
+
+            logger.debug(f"Optimal value improved to: {self._optimal_value}")
+            return True
 
     def analyze_family_cegis(self, family):
-        '''
+        """
         Analyse a family against selected formulae using precomputed MDP data
         to construct generalized counterexamples.
-        '''
+        """
 
         # TODO preprocess only formulae of interest
 
-        logger.debug("CEGIS: analyzing family {} of size {}.".format(family.options, family.size))
+        logger.debug(f"CEGIS: analyzing family {family.options} of size {family.size}.")
 
         assert family.constructed
         assert family.analyzed
-        
+
         # prepare counterexample generator
-        mdp = family.mdp
-        hole_count = len(Family._hole_list)
-        state_to_hole_indices = family.state_to_hole_indices
-        formulae = self.formulae
-        bounds = family.bounds
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
-        counterexample_generator = stormpy.SynthesisResearchCounterexample(mdp, hole_count, state_to_hole_indices, formulae, bounds)
+        counterexample_generator = stormpy.SynthesisResearchCounterexample(
+            family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
+        )
         Profiler.stop()
 
         # process family members
         Profiler.start("is - pick DTMC")
         assignment = family.pick_member()
         Profiler.stop()
+
         while assignment is not None:
             self.iterations_cegis += 1
-            logger.debug("CEGIS: iteration {}.".format(self.iterations_cegis))
+            logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
 
             # collect indices of violated formulae
             violated_formulae_indices = []
             for formula_index in family.formulae_indices:
-                logger.debug("CEGIS: model checking DTMC against formula with index {}.".format(formula_index))
+                logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
                 Profiler.start("is - DTMC model checking")
-                sat = family.analyze_member(formula_index)
+                Family._dtmc_checks += 1
+                sat, _ = family.analyze_member(formula_index)
                 Profiler.stop()
-                logger.debug("formula {} is {}".format(formula_index, "SAT" if sat else "UNSAT"))
+                logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
                 if not sat:
                     violated_formulae_indices.append(formula_index)
-            if violated_formulae_indices == []:
-                # all SAT
+            if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
+                    and self.input_has_optimality_property():
+                self._check_optimal_property(family, assignment, counterexample_generator)
+            elif not violated_formulae_indices:
                 Profiler.add_ce_stats(counterexample_generator.stats)
                 return True
 
@@ -947,12 +1056,14 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             Profiler.start("is - constructing CE")
             conflicts = []
             for formula_index in violated_formulae_indices:
-                logger.debug("CEGIS: constructing CE for formula with index {}.".format(formula_index))
+                logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
                 conflict_indices = counterexample_generator.construct_conflict(formula_index)
                 # conflict = counterexample_generator.construct(formula_index, self.use_nontrivial_bounds)
-                conflict_holes = [Family._hole_list[index] for index in conflict_indices]
-                generalized_count = len(Family._hole_list) - len(conflict_holes)
-                logger.debug("CEGIS: found conflict involving {} (generalized {} holes).".format(conflict_holes, generalized_count))
+                conflict_holes = [Family.hole_list[index] for index in conflict_indices]
+                generalized_count = len(Family.hole_list) - len(conflict_holes)
+                logger.debug(
+                    f"CEGIS: found conflict involving {conflict_holes} (generalized {generalized_count} holes)."
+                )
                 conflicts.append(conflict_indices)
             family.exclude_member(conflicts)
             Profiler.stop()
@@ -963,7 +1074,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             Profiler.stop()
 
             # record stage
-            if self.stage_step(0) and not self.only_cegis:
+            if self.stage_step(0) and not ONLY_CEGIS:
                 # switch requested
                 Profiler.add_ce_stats(counterexample_generator.stats)
                 return None
@@ -972,12 +1083,10 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         Profiler.add_ce_stats(counterexample_generator.stats)
         return False
 
-    
     def run_feasibility(self):
-        '''
-        Run feasibility synthesis. Return either a satisfying assignment
-        (feasible) or None (unfeasible).
-        '''
+        """
+        Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
+        """
         Profiler.initialize()
         logger.info("Running feasibility synthesis.")
 
@@ -987,8 +1096,8 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         FamilyHybrid.initialize(
             self.sketch, self.holes, self.hole_options, self.symmetries,
             self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
-            self.thresholds, self._accept_if_above
-            )
+            self.thresholds, self._accept_if_above, self._optimality_setting
+        )
 
         # get the first family to analyze
         Profiler.start("_")
@@ -996,105 +1105,123 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         family.construct()
         Profiler.stop()
         satisfying_assignment = None
-        
+
         # CEGAR the superfamily
         self.models_total = family.size
-        self.stage_init()
+        self.stage_start(request_stage_cegar=True)
         self.iterations_cegar += 1
-        logger.debug("CEGAR: iteration {}.".format(self.iterations_cegar))
+        logger.debug(f"CEGAR: iteration {self.iterations_cegar}.")
         Profiler.start("ar - MDP model checking")
-        feasible = family.analyze()
+        feasible, optimal_value = family.analyze(superfamily=True)
         Profiler.stop()
-        if feasible == True:
-            return family.member_assignment
-        if feasible == False:
-            return None
+
+        if optimal_value is not None:
+            self._check_optimal_property(
+                family, family.member_assignment, cex_generator=None, optimal_value=optimal_value
+            )
+        elif feasible and isinstance(feasible, bool) and self._optimality_setting is None:
+            return family.member_assignment, None
+        elif not feasible and isinstance(feasible, bool) and self._optimality_setting is None:
+            return None, None
         self.stage_step(0)
 
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
-        families = [family]
+        self.families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
-        while families != []:
-            logger.debug("Current number of families: {}".format(len(families)))
-            
+        while self.families:
+            logger.debug(f"Current number of families: {len(self.families)}")
+
             # pick a family
-            family = families.pop(-1)
+            family = self.families.pop(-1)
             if not self.stage_cegar:
-                 # CEGIS
+                # CEGIS
                 feasible = self.analyze_family_cegis(family)
-                if feasible == True:
+                if feasible and isinstance(feasible, bool):
                     logger.debug("CEGIS: some is SAT.")
                     satisfying_assignment = family.member_assignment
                     break
-                elif feasible == False:
+                elif not feasible and isinstance(feasible, bool):
                     logger.debug("CEGIS: all UNSAT.")
                     self.stage_step(family.size)
                     continue
-                else: # feasible is None:
+                else:  # feasible is None:
                     # stage interrupted: leave the family to cegar
                     # note: phase was switched implicitly
                     logger.debug("CEGIS: stage interrupted.")
-                    families.append(family)
+                    self.families.append(family)
                     continue
-            else:
-                # CEGAR
+            else:  # CEGAR
                 assert family.split_ready
 
                 # family has already been analysed: discard the parent and refine
                 logger.debug("Splitting the family.")
-                subfamily_left,subfamily_right = family.split()
-                subfamilies = [subfamily_left,subfamily_right]
-                logger.debug("Constructed two subfamilies of size {} and {}.".format(subfamily_left.size, subfamily_right.size))
+                subfamily_left, subfamily_right = family.split()
+                subfamilies = [subfamily_left, subfamily_right]
+                logger.debug(
+                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
+                )
 
                 # analyze both subfamilies
                 models_pruned = 0
                 for subfamily in subfamilies:
                     self.iterations_cegar += 1
-                    logger.debug("CEGAR: iteration {}.".format(self.iterations_cegar))
+                    logger.debug(f"CEGAR: iteration {self.iterations_cegar}.")
                     subfamily.construct()
                     Profiler.start("ar - MDP model checking")
-                    feasible = subfamily.analyze()
+                    feasible, optimal_value = subfamily.analyze()
                     Profiler.stop()
-                    if feasible == True:
+                    if feasible and isinstance(feasible, bool):
                         logger.debug("CEGAR: all SAT.")
                         satisfying_assignment = subfamily.member_assignment
-                        if satisfying_assignment is not None:
+                        if optimal_value is not None:
+                            self._check_optimal_property(
+                                subfamily, satisfying_assignment, cex_generator=None, optimal_value=optimal_value
+                            )
+                        elif satisfying_assignment is not None and self._optimality_setting is None:
                             break
-                        continue
-                    if feasible == False:
+                    elif not feasible and isinstance(feasible, bool):
                         logger.debug("CEGAR: all UNSAT.")
                         models_pruned += subfamily.size
                         continue
-                    else: # feasible is None:
+                    else:  # feasible is None:
                         logger.debug("CEGAR: undecided.")
-                        families.append(subfamily)
+                        self.families.append(subfamily)
                         continue
                 self.stage_step(models_pruned)
-        
-        if self.print_profiling:
+
+        if PRINT_PROFILING:
             Profiler.print()
 
-        if satisfying_assignment is not None:
-            logger.info("Found satisfying assignment: {}".format(readable_assignment(satisfying_assignment)))
+        if self._optimal_value is not None:
+            assert not self.families
+            logger.info(f"Found optimal assignment: {self._optimal_value}")
+            return self._optimal_assignment, self._optimal_value
+        elif satisfying_assignment is not None:
+            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
+            return satisfying_assignment, None
         else:
             logger.info("No more options.")
-        return satisfying_assignment
-        
+            return None, None
 
-    def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold) #FIXME
-        self.statistic = Statistic("Hybrid", threshold)
-        assignment = self.run_feasibility()
-        self.statistic.finished(assignment, (self.iterations_cegar, self.iterations_cegis))
+    def run(self, long_summary):
+        self.statistic = Statistic(
+            "Hybrid", self.formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+        )
+        assignment, optimal_value = self.run_feasibility()
+        self.statistic.finished(
+            assignment, (self.iterations_cegar, self.iterations_cegis), optimal_value, self.models_total,
+            Family.quotient_mdp().nr_states, Family.quotient_mdp_stats(0) / Family.quotient_mdp_stats(1),
+            Family.mdp_checks(), Family.dtmc_stats(0) / Family.dtmc_stats(1), Family.dtmc_checks()
+        )
 
 
-class Research():
+class Hybrid:
     """Entry point: execution setup."""
+
     def __init__(
-            self, check_prerequisites, backward_cuts,
-            sketch_path, allowed_path, property_path, optimality_path, constants,
-            restrictions, restriction_path
-        ):
+            self, check_prerequisites, backward_cuts, sketch_path, allowed_path, property_path,
+            optimality_path, constants, restrictions, restriction_path, regime, long_summary
+    ):
 
         assert not check_prerequisites
 
@@ -1105,120 +1232,36 @@ class Research():
         self.constants = constants
         self.restrictions = restrictions
         self.restriction_path = restriction_path
+        self.long_summary = long_summary
 
-        # import research.generator1
-        # import research.generator2
-        # workspace.generator2.run()
-        
-        workdir = "workspace/log"
-        with open(f"{workdir}/parameters.txt", 'r') as f:
-            lines = f.readlines()
-            regime = int(lines[0])
-            stage_score_limit = int(lines[1])
-        IntegratedChecker.stage_score_limit = stage_score_limit
-        
+        IntegratedChecker.stage_score_limit = STAGE_SCORE_LIMIT
         stats = []
-        
+
         if regime == 0:
-            # stats.append(self.run_algorithm(CEGISChecker))
-            # stats.append(self.run_algorithm(CEGARChecker))
-            stats.append(self.run_algorithm(IntegratedChecker))
-        elif regime == 1:
             stats.append(self.run_algorithm(EnumerationChecker))
-        elif regime == 2:
+        elif regime == 1:
             stats.append(self.run_algorithm(CEGISChecker))
-        elif regime == 3:
+        elif regime == 2:
             stats.append(self.run_algorithm(CEGARChecker))
-        elif regime == 4:
+        elif regime == 3:
             stats.append(self.run_algorithm(IntegratedChecker))
-            
-        # elif regime in [2,3]:
-            # stats.append(self.run_algorithm(IntegratedChecker))
         else:
             assert None
-              
+
         print("\n")
         for stat in stats:
             print(stat)
-    
-    def run_algorithm(self, algorithmClass):
+
+    def run_algorithm(self, algorithm_class):
         print("\n\n\n")
-        print(algorithmClass.__name__)    
-        algorithm = algorithmClass()
-        algorithm.load_sketch(self.sketch_path, self.property_path, optimality_path=self.optimality_path, constant_str=self.constants)
+        print(algorithm_class.__name__)
+        algorithm = algorithm_class()
+        algorithm.load_sketch(
+            self.sketch_path, self.property_path, optimality_path=self.optimality_path, constant_str=self.constants
+        )
         algorithm.load_template_definitions(self.allowed_path)
         if self.restrictions:
             algorithm.load_restrictions(self.restriction_path)
         algorithm.initialise()
-        algorithm.run()
+        algorithm.run(self.long_summary)
         return algorithm.statistic
-
-# ------------------------------------------------------------------------------
-
-# short-term archive
-
-# ----
-# splitting
-
-    # def split_at_hole(hole_options,hole):
-    #     def split_list(a_list):
-    #         half = len(a_list) // 2
-    #         return a_list[:half], a_list[half:]
-
-    #     suboptions_left = hole_options.copy()
-    #     suboptions_right = hole_options.copy()
-    #     split_left, split_right = split_list(hole_options[hole])
-    #     suboptions_left[hole] = split_left
-    #     suboptions_right[hole] = split_right
-    #     return suboptions_left, suboptions_right
-
-    # def split_options_first(self):
-    #     splittable = [hole for hole,options in self.options.items() if len(options) > 1]
-    #     assert splittable != []
-    #     hole = splittable[0]
-    #     l,r = Family.split_at_hole(self.options,hole)
-    #     return [l,r]
-
-    # def split_options_last(self):
-    #     splittable = [hole for hole,options in self.options.items() if len(options) > 1]
-    #     assert splittable != []
-    #     hole = splittable[-1]
-    #     l,r = Family.split_at_hole(self.options,hole)
-    #     return [l,r]
-
-    # def split_options_priority(self):
-    #     splittable = [hole for hole,options in self.options.items() if len(options) > 1]
-    #     assert splittable != []
-    #     for hole in Family._permutation:
-    #         if hole in splittable:
-    #             l,r = Family.split_at_hole(self.options,hole)
-    #             return [l,r]
-
-    # def split_options_least_generalized(self):
-    #     splittable = [hole for hole,options in self.options.items() if len(options) > 1]
-    #     assert splittable != []
-    #     hole_max = None
-    #     not_generalized_max = -math.inf
-    #     for hole in splittable:
-    #         not_generalized_this = Family._hole_not_generalized[Family._hole_indices[hole]]
-    #         if not_generalized_this > not_generalized_max:
-    #             hole_max = hole
-    #             not_generalized_max = not_generalized_this
-    #     assert hole_max is not None
-    #     l,r = Family.split_at_hole(self.options,hole_max)
-    #     return [l,r]
-
-    # def split_options_most_generalized(self):
-    #     splittable = [hole for hole,options in self.options.items() if len(options) > 1]
-    #     assert splittable != []
-    #     hole_min = None
-    #     not_generalized_min = math.inf
-    #     for hole in splittable:
-    #         not_generalized_this = Family._hole_not_generalized[Family._hole_indices[hole]]
-    #         if not_generalized_this < not_generalized_min:
-    #             hole_min = hole
-    #             not_generalized_min = not_generalized_this
-    #     assert hole_min is not None
-    #     l,r = Family.split_at_hole(self.options,hole_min)
-    #     return [l,r]
-

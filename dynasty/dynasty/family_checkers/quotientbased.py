@@ -1,5 +1,7 @@
+import time
 from collections.abc import Iterable
 import logging
+import math
 
 import stormpy
 import stormpy.core
@@ -7,7 +9,7 @@ import stormpy.core
 import dynasty.jani
 from dynasty.jani.jani_quotient_builder import *
 from dynasty.jani.quotient_container import ThresholdSynthesisResult as ThresholdSynthesisResult
-from dynasty.jani.quotient_container import Engine as Engine
+from dynasty.jani.quotient_container import Engine as Engine, ModelHandling
 from dynasty.annotated_property import AnnotatedProperty
 from dynasty.family_checkers.familychecker import FamilyChecker, HoleOptions
 
@@ -43,20 +45,24 @@ class QuotientBasedFamilyChecker(FamilyChecker):
                 accept_if_above = True
             self.mc_formulae.append(formula)
             self.mc_formulae_alt.append(alt_formula)
-
             self._accept_if_above.append(accept_if_above)
+
         if self._optimality_setting is not None:
             opt_formula = self._optimality_setting.criterion.raw_formula.clone()
             opt_alt_formula = self._optimality_setting.criterion.raw_formula.clone()
             if self._optimality_setting.direction == "max":
                 opt_formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
                 opt_alt_formula.set_optimality_type(stormpy.OptimizationDirection.Minimize)
+                accept_if_above = True
             else:
                 assert self._optimality_setting.direction == "min"
                 opt_formula.set_optimality_type(stormpy.OptimizationDirection.Minimize)
                 opt_alt_formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
+                accept_if_above = False
+            self.thresholds.append(0.0 if self._optimality_setting.direction == "max" else math.inf)
             self.mc_formulae.append(opt_formula)
             self.mc_formulae_alt.append(opt_alt_formula)
+            self._accept_if_above.append(accept_if_above)
 
     def _analyse_from_scratch(self, _open_constants, holes_options, all_in_one_constants, threshold):
         remember = set()  # set(_open_constants)#set()
@@ -73,6 +79,7 @@ class QuotientBasedFamilyChecker(FamilyChecker):
         index = 0
         oracle.analyse(threshold=None, index=0)
         return oracle
+
 
 class LiftingChecker(QuotientBasedFamilyChecker):
     """
@@ -120,7 +127,9 @@ class LiftingChecker(QuotientBasedFamilyChecker):
             if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
                 logger.debug("Undecided.")
                 oracle.scheduler_color_analysis()
-                hole_options = self._split_hole_options(hole_options[0], oracle) + hole_options[1:]
+                hole_options = self.split_hole_options(
+                    hole_options[0], oracle, self.hole_options, self.use_oracle
+                ) + hole_options[1:]
             else:
                 if threshold_synthesis_result == ThresholdSynthesisResult.ABOVE:
                     logger.debug("All above.")
@@ -204,7 +213,9 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                         nr_options_remaining -= hole_options[0].size()
                         hole_options = hole_options[1:]
                     else:
-                        hole_options = self._split_hole_options(hole_options[0], oracle) + hole_options[1:]
+                        hole_options = self.split_hole_options(
+                            hole_options[0], oracle, self.hole_options, self.use_oracle
+                        ) + hole_options[1:]
                 else:
                     hole_options = hole_options[1:]
 
@@ -242,7 +253,9 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                     hole_options = hole_options[1:]
                 elif improved_untight:
                     optimal_hole_options = None
-                    hole_options = self._split_hole_options(hole_options[0], oracle) + hole_options[1:]
+                    hole_options = self.split_hole_options(
+                        hole_options[0], oracle, self.hole_options, self.use_oracle
+                    ) + hole_options[1:]
 
 
             logger.info("Number options remaining: {}".format(nr_options_remaining))
@@ -311,9 +324,13 @@ class LiftingChecker(QuotientBasedFamilyChecker):
 
                 if hole_options[0].size() > 2:
                     oracle.scheduler_color_analysis()
-                    hole_options_next_round += self._split_hole_options(hole_options[0], oracle)
+                    hole_options_next_round += self.split_hole_options(
+                        hole_options[0], oracle, self.hole_options, self.use_oracle
+                    )
                 else:
-                    hole_options_next_round += self._split_hole_options(hole_options[0], None)
+                    hole_options_next_round += self.split_hole_options(
+                        hole_options[0], None, self.hole_options, self.use_oracle
+                    )
 
             else:
                 if threshold_synthesis_result == ThresholdSynthesisResult.ABOVE:
@@ -346,7 +363,8 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                 hole_options_next_round = []
         return options_above, options_below
 
-    def _split_hole_options(self, hole_options, oracle):
+    @staticmethod
+    def split_hole_options(hole_options, oracle, self_hole_options, use_oracle):
 
         def split_list(a_list):
             half = len(a_list) // 2
@@ -358,16 +376,16 @@ class LiftingChecker(QuotientBasedFamilyChecker):
         one_side_list = None
         other_side_list = None
 
-        if oracle is not None and self.use_oracle:
+        if oracle is not None and use_oracle:
             selected_splitter, one_side_list, other_side_list = oracle.propose_split()
-            logger.debug("Oracle proposes a split at {}".format(selected_splitter))
+            logger.debug(f"Oracle proposes a split at {selected_splitter}")
 
         if not isinstance(one_side_list, Iterable):
             one_side_list = [one_side_list]
         if not isinstance(other_side_list, Iterable):
             other_side_list = [other_side_list]
 
-        logger.debug("Proposed (pre)split: {} vs. {}".format(one_side_list, other_side_list))
+        logger.debug(f"Proposed (pre)split: {one_side_list} vs. {other_side_list}")
 
         if selected_splitter is None:
             # Split longest.
@@ -379,17 +397,16 @@ class LiftingChecker(QuotientBasedFamilyChecker):
             if maxlength == 1:
                 raise RuntimeError("Undecided result, but cannot split")
 
-
         options = hole_options[selected_splitter]
-        logger.debug("Splitting {}...".format([str(val) for val in options]))
-        assert len(options) > 1, "Cannot split along {}".format(selected_splitter)
+        logger.debug(f"Splitting {[str(val) for val in options]}...")
+        assert len(options) > 1, f"Cannot split along {selected_splitter}"
 
-        one_vals = [self.hole_options[selected_splitter][one_side] for one_side in one_side_list if one_side is not None]
-        other_vals = [self.hole_options[selected_splitter][other_side] for other_side in other_side_list if
+        one_vals = [self_hole_options[selected_splitter][one_side] for one_side in one_side_list if one_side is not None]
+        other_vals = [self_hole_options[selected_splitter][other_side] for other_side in other_side_list if
                       other_side is not None]
-        logger.debug("Pre-splitted {} and {}".format(one_vals, other_vals))
+        logger.debug(f"Pre-splitted {one_vals} and {other_vals}")
         remaining_options = [x for x in options if x not in one_vals + other_vals]
-        logger.debug("Now distribute {}".format(remaining_options))
+        logger.debug('Now distribute {}'.format(remaining_options))
         second, first = split_list(remaining_options)
         # if one_side is not None:
         first = first + one_vals
@@ -397,9 +414,10 @@ class LiftingChecker(QuotientBasedFamilyChecker):
         second = second + other_vals
         splitters.append([selected_splitter, first, second])
 
-        logger.info("Splitting {} into {} and {}".format(selected_splitter, "[" + ",".join([str(x) for x in first]) + "]",
-                                                             "[" + ",".join([str(x) for x in second]) + "]"))
-
+        logger.info(
+            f"Splitting {selected_splitter} into "
+            f"{'[' + ','.join([str(x) for x in first]) + ']'} and {'[' + ','.join([str(x) for x in second]) + ']'}"
+        )
 
         # Split.
         assert len(splitters) == 1
@@ -492,7 +510,8 @@ class OneByOneChecker(QuotientBasedFamilyChecker):
             logger.info("Ran for {}, expect total: {}".format(time.time() - iter_start, (
                 time.time() - iter_start) * total_nr_options / iteration))
             logger.info("Avg model size {} states, {} transition".format(model_states_cum, model_transitions_cum))
-            #TODO something with result
+        return iteration, model_states_cum / iteration
+
 
 class ConsistentSchedChecker(QuotientBasedFamilyChecker):
     """

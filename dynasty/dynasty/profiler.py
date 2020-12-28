@@ -1,16 +1,18 @@
 import time
 
+
 class Timer:
     def __init__(self):
-        self.reset()
-
-    def reset(self):
         self.running = False
-        self.timer = None        
+        self.timer = None
         self.time = 0
 
-    def timestamp(self):
+    @staticmethod
+    def timestamp():
         return time.process_time()  # cpu time
+
+    def reset(self):
+        self.__init__()
 
     def start(self):
         if self.running:
@@ -37,61 +39,70 @@ class Timer:
         else:
             return self.time + (self.timestamp() - self.timer)
 
+
 class Profiler:
-    
+
+    labels = []
+    ce_stats = []
+    timer_total = None
+    ce_count = None
+    timers = None
+
+    @staticmethod
     def initialize():
-        Profiler.timers = dict()
+        Profiler.timers = {}
         Profiler.started_last = None
         Profiler.timer_total = Timer()
         Profiler.timer_total.start()
 
+        Profiler.labels = ["TODO", "MDP", "DTMC", "sub-DTMC", "CE"]
         Profiler.ce_count = 0
-        Profiler.ce_stats = [0 for i in range(5)]
+        Profiler.ce_stats = [0] * len(Profiler.labels)
 
+    @staticmethod
     def stop():
         if Profiler.started_last is None:
             return
         Profiler.started_last.stop()
         Profiler.started_last = None
 
+    @staticmethod
     def start(timer_name):
         Profiler.stop()
-        if timer_name not in Profiler.timers:
-            Profiler.timers[timer_name] = Timer()
+        Profiler.timers[timer_name] = Profiler.timers.get(timer_name, Timer())
         Profiler.timers[timer_name].start()
         Profiler.started_last = Profiler.timers[timer_name]
 
+    @staticmethod
     def add_ce_stats(ce_stats):
-        count = Profiler.ce_count
         Profiler.ce_stats[0] += ce_stats[0]
-        for i in range(1,len(ce_stats)):
-            Profiler.ce_stats[i] = (Profiler.ce_stats[i]*count+ce_stats[i])/(count+1)
+        for i in range(1, len(ce_stats)):
+            Profiler.ce_stats[i] = (Profiler.ce_stats[i] * Profiler.ce_count + ce_stats[i]) / (Profiler.ce_count + 1)
         Profiler.ce_count += 1
 
+    @staticmethod
     def print_base():
         time_total = Profiler.timer_total.read()
         covered = 0
-        for timer_name,timer in Profiler.timers.items():
-            time = timer.read()
-            covered += time
-            percentage = time / time_total * 100
-            print("> {} : {:g}%".format(timer_name, round(percentage,0)))
-        covered = covered / time_total * 100
-        print("> covered {:g}% of {} sec".format(round(covered,0),round(time_total,1)))
+        for timer_name, timer in Profiler.timers.items():
+            t = timer.read()
+            covered += t
+            print(f'> {timer_name} : {round(t / time_total * 100, 0)}%')
+        print(f"> covered {round(covered / time_total * 100, 0)}% of {round(time_total, 1)} sec")
 
+    @staticmethod
     def print_ce():
-        s = Profiler.ce_stats
+        stats = Profiler.ce_stats
         print("> ---")
         print("> storm stats:")
 
-        labels = ["MDP", "DTMC", "sub-DTMC", "CE"]
-        for i in range(1,len(s)):
-            print("> {}: {}%".format(labels[i-1], round(s[i]*100, 0)))
+        [print(f"> {Profiler.labels[i]}: {round(stats[i] * 100, 0)}%") for i in range(1, len(stats))]
 
-        covered = 100 * sum([s[i] for i in range(1,len(s))])
-        print("> covered {:g}% of {} sec".format(round(covered,0),round(s[0]/1000.0,1)))
+        covered = 100 * sum([stats[i] for i in range(1, len(stats))])
+        print(f"> covered {round(covered, 0):g}% of {round(stats[0] / 1000.0, 1)} sec")
         print("> ---")
 
+    @staticmethod
     def print():
         Profiler.stop()
         Profiler.timer_total.stop()
