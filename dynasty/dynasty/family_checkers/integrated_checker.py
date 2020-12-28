@@ -21,10 +21,10 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-quotienbased_logger.disabled = True
-quotient_container_logger.disabled = True
-jani_quotient_builder_logger.disabled = True
-model_handling_logger.disabled = True
+# quotienbased_logger.disabled = True
+# quotient_container_logger.disabled = True
+# jani_quotient_builder_logger.disabled = True
+# model_handling_logger.disabled = True
 
 ONLY_CEGAR = False
 ONLY_CEGIS = False
@@ -128,17 +128,27 @@ class CEGARChecker(LiftingChecker):
         self.statistic = None
         self.formulae = []
         self.iterations = 0
+        self.family = None
+        self.families = []
 
     def initialise(self):
         super().initialise()
+        # QuotientBasedFamilyChecker.initialise(self)
         self.formulae = [property_obj.raw_formula for property_obj in self.properties]
+        if self.input_has_optimality_property():
+            ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
+                else stormpy.logic.ComparisonType.LESS
+            bound = self.sketch.expression_manager.create_rational(stormpy.Rational(self._optimal_value))
+            opt_formula = self._optimality_setting.criterion.raw_formula.clone()
+            opt_formula.set_bound(ct, bound)
+            self.formulae.append(opt_formula)
 
     def run_feasibility(self):
         """
         Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
         """
         Profiler.initialize()
-        logger.info("Running feasibility synthesis.")
+        logger.info("Running feasibility + optimal synthesis.")
 
         # initialize family description
         logger.debug("Constructing quotient MDP of the superfamily.")
@@ -149,47 +159,96 @@ class CEGARChecker(LiftingChecker):
         )
 
         # initiate CEGAR loop
-        family = Family()
-        families = [family]
+        self.family = Family()
+        self.families = [self.family]
         satisfying_assignment = None
         logger.debug("Initiating CEGAR loop")
-        while families:
-            logger.debug(f"Current number of families: {len(families)}")
+        while self.families:
+            logger.debug(f"Current number of families: {len(self.families)}")
 
             self.iterations += 1
             logger.debug("CEGAR: iteration {}.".format(self.iterations))
 
-            family = families.pop(-1)
-            family.construct()
-            feasible = family.analyze()
+            self.family = self.families.pop(-1)
+            self.family.construct()
+            feasible, optimal_value = self.family.analyze()
             if feasible and isinstance(feasible, bool):
                 logger.debug("CEGAR: all SAT.")
-                satisfying_assignment = family.member_assignment
-                if satisfying_assignment is not None:
+                satisfying_assignment = self.family.member_assignment
+                if optimal_value is not None:
+                    print(f">> SAT CHECK: {self._optimal_value}, {optimal_value}")
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
+                if satisfying_assignment is not None and self._optimality_setting is None:
                     break
             elif not feasible and isinstance(feasible, bool):
+                if optimal_value is not None:
+                    print(">> UNSAT CHECK")
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: all UNSAT.")
             else:  # feasible is None:
+                if optimal_value is not None:
+                    print(f">> UNDECIDED CHECK: {self._optimal_value}, {optimal_value}")
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: undecided.")
                 logger.debug("Splitting the family.")
-                subfamily_left, subfamily_right = family.split()
+                subfamily_left, subfamily_right = self.family.split()
                 logger.debug(
                     f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
                 )
-                families.append(subfamily_left)
-                families.append(subfamily_right)
+                self.families.append(subfamily_left)
+                self.families.append(subfamily_right)
 
-        if satisfying_assignment is not None:
-            logger.info("Found satisfying assignment: {}".format(readable_assignment(satisfying_assignment)))
+        if self._optimal_value is not None:
+            assert not self.families
+            logger.info(f"Found optimal assignment: {self._optimal_value}")
+            return self._optimal_assignment
+        elif satisfying_assignment is not None:
+            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
             return satisfying_assignment
         else:
             logger.info("No more options.")
             return None
 
+    def _construct_violation_property(self):
+        vp_index = len(self.formulae) - 1  # Compute the index of the violation property
+
+        # Construct new violation property with respect to the currently optimal value
+        vp = self._optimality_setting.get_violation_property(
+            self._optimal_value,
+            lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x)),
+        )
+
+        # Update the attributes of the family according to the new optimal values
+        # For each family we need to update theirs formulae and formulae indices to check
+        for family in self.families + [self.family]:
+            # Replace the last violation property by newly one
+            family.formulae[vp_index] = vp.raw_formula
+            # When the violation property is not checking, we have to add its index
+            if vp_index not in family.formulae_indices:
+                family.formulae_indices.append(vp_index)
+                family.model_check_formula(vp_index)
+                family.bounds[vp_index] = Family.quotient_container().latest_result.result
+
+        # Change the value of threshold of the violation formulae within constructed quotient MDP
+        Family.set_thresholds(Family.get_thresholds()[:-1] + [vp.raw_formula.threshold])
+
+    def _check_optimal_property(self, optimal_value, assignment):
+        # Check whether the improvement was achieved
+        if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
+
+            # Set the new values of the optimal attributes
+            self._optimal_value = optimal_value
+            self._optimal_assignment = assignment
+
+            # Construct the violation property according newly found optimal value
+            self._construct_violation_property()
+
+            logger.debug(f"Optimal value improved to: {self._optimal_value}")
+            return True
+
     def run(self):
-        threshold = float(self.properties[0].raw_formula.threshold)  # FIXME
-        self.statistic = Statistic("CEGAR", threshold)
-        # _, assignment, _ = self.run_feasibility()
+        # TODO: threshold param in the Statistic
+        self.statistic = Statistic("CEGAR", None)
         assignment = self.run_feasibility()
         self.statistic.finished(assignment, self.iterations)
 
@@ -430,7 +489,7 @@ class Family:
                 undecided_formulae_indices = None
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
                     decided, optimal_value = self.check_optimal_property(feasible)
-                    undecided_formulae_indices = [formula_index] if not decided else []
+                    # undecided_formulae_indices += [formula_index] if decided is None else []
                 break
             elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
@@ -441,7 +500,7 @@ class Family:
                 logger.debug("Formula {}: SAT".format(formula_index))
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
                     decided, optimal_value = self.check_optimal_property(feasible)
-                    undecided_formulae_indices += [formula_index] if not decided else []
+                    undecided_formulae_indices += [formula_index] if decided is None else []
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
@@ -494,7 +553,7 @@ class Family:
         is_max = True if self._optimality_setting.direction == "max" else False
         oracle = Family._quotient_container
         optimal_value = None
-        decided = False
+        decided = None
         if feasible is None:
             logger.debug("Family is UNDECIDED for optimal property.")
             if not self.split_ready:
@@ -515,8 +574,12 @@ class Family:
             improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
                 else oracle.lower_bound()
-            decided = True if improved_tight else decided
+            if improved_tight:
+                decided = True
+            elif not improved_tight:
+                decided = None
         elif not feasible:
+            decided = False
             logger.debug("All discarded within analyses of family for optimal property.")
 
         return decided, optimal_value
@@ -1085,7 +1148,7 @@ class Research:
         #     regime = int(lines[0])
         #     stage_score_limit = int(lines[1])
 
-        regime = 3
+        regime = 2
         stage_score_limit = 99999
         IntegratedChecker.stage_score_limit = stage_score_limit
         stats = []
