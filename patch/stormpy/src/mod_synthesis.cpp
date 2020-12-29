@@ -2,8 +2,8 @@
 
 #include "synthesis/synthesis.h"
 
-PYBIND11_MODULE(core, m) {
-    m.doc() = "core";
+PYBIND11_MODULE(synthesis, m) {
+    m.doc() = "Synthesis";
 
 #ifdef STORMPY_DISABLE_SIGNATURE_DOC
     py::options options;

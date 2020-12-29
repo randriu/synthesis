@@ -104,11 +104,12 @@ dynasty-setup-python() {
 }
 
 carl-build() {
-    cd $PREREQUISITES
-    cd carl && mkdir -p build && cd build
+    mkdir -p $PREREQUISITES/carl/build
+    cd $PREREQUISITES/carl/build
     cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
     make lib_carl --jobs $COMPILE_JOBS
     # make test
+    cd $OLDPWD
 }
 
 # build-carl-parser() {
@@ -126,6 +127,7 @@ pycarl-build() {
     python3 setup.py build_ext --carl-dir $PREREQUISITES/carl/build --jobs $COMPILE_JOBS develop
     # python setup.py test
     deactivate
+    cd $OLDPWD
 }
 
 storm-config() {
