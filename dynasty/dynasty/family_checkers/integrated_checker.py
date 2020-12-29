@@ -6,6 +6,7 @@ import operator
 import z3
 
 import stormpy
+import stormpy.synthesis
 
 from collections import OrderedDict
 
@@ -36,7 +37,7 @@ STAGE_SCORE_LIMIT = 99999
 # Zero approximation to avoid zero division etc.
 APPROX_ZERO = 0.000001
 
-COMPUTE_CE_QUALITY = True
+COMPUTE_CE_QUALITY = False
 COMPUTE_CE_QUALITY_MAXSAT = False
 
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
@@ -846,7 +847,7 @@ class FamilyHybrid(Family):
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
             # construct the DTMC by exploring the quotient MDP for this subfamily
-            self.dtmc, self.dtmc_state_map = stormpy.dtmc_from_mdp(self.mdp, collected_edge_indices)
+            self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
             Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
@@ -1019,7 +1020,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     #     self.stage_timer.stop()
 
     #     if self.ce_quality_compute:
-    #         Family.global_cex_generator = stormpy.SynthesisResearchCounterexample(
+    #         Family.global_cex_generator = stormpy.synthesis.SynthesisResearchCounterexample(
     #             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
     #         )
 
@@ -1157,7 +1158,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
-        counterexample_generator = stormpy.SynthesisResearchCounterexample(
+        counterexample_generator = stormpy.synthesis.SynthesisResearchCounterexample(
             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
         )
         Profiler.stop()

@@ -205,7 +205,7 @@ function run() {
 
     timeout=5m
     parallel=true
-    # verbose=true
+    verbose=true
     
     model=("grid/orig" 40 0.019 0.019 0.15)
     # model=("grid/big" 40 0.928 0.931 0.003)
@@ -246,9 +246,9 @@ function run() {
     choose_model "${model[@]}"
 
     hybrid
-    cegar
-    cegis
-    onebyone
+    # cegar
+    # cegis
+    # onebyone
 }
 
 # ----------
