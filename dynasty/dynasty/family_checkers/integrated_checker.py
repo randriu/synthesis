@@ -36,6 +36,8 @@ STAGE_SCORE_LIMIT = 99999
 # Zero approximation to avoid zero division etc.
 APPROX_ZERO = 0.000001
 
+COMPUTE_CE_QUALITY = False
+COMPUTE_CE_QUALITY_MAXSAT = False
 
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
 
@@ -401,7 +403,7 @@ class Family:
     _dtmc_checks = 0
 
     # - CEXs for MDP of superfamily
-    global_cex_generator = None
+    # global_cex_generator = None
 
     def __init__(self, parent=None, options=None):
         """
@@ -913,7 +915,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         self.ce_maxsat, self.ce_zero, self.ce_global, self.ce_local = 0, 0, 0, 0
         self.ce_maxsat_timer, self.ce_zero_timer, self.ce_global_timer, self.ce_local_timer = \
             Timer(), Timer(), Timer(), Timer()
-        self.ce_quality_compute = True
 
     def initialise(self):
         QuotientBasedFamilyChecker.initialise(self)
@@ -1013,22 +1014,22 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
     # ----- CE quality ----- #
 
-    def construct_global_cex_generator(self, family):
-        self.statistic.timer.stop()
-        self.stage_timer.stop()
+    # def construct_global_cex_generator(self, family):
+    #     self.statistic.timer.stop()
+    #     self.stage_timer.stop()
 
-        if self.ce_quality_compute:
-            Family.global_cex_generator = stormpy.SynthesisResearchCounterexample(
-                family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
-            )
+    #     if self.ce_quality_compute:
+    #         Family.global_cex_generator = stormpy.SynthesisResearchCounterexample(
+    #             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
+    #         )
 
-        self.stage_timer.start()
-        self.statistic.timer.start()
+    #     self.stage_timer.start()
+    #     self.statistic.timer.start()
 
     def ce_quality_measure(
             self, assignments, relevant_holes, counterexample_generator, dtmc, dtmc_state_map, formula_idx
     ):
-        if not self.ce_quality_compute:
+        if not COMPUTE_CE_QUALITY:
             return
         self.statistic.timer.stop()
         self.stage_timer.stop()
@@ -1036,10 +1037,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # maxsat
         self.ce_maxsat_timer.start()
         instance = self.build_instance(assignments)
-        _, conflict_maxsat = self._verifier.naive_check(instance, all_conflicts=True)
-        conflict_maxsat = \
-            [hole for hole in (conflict_maxsat.pop() if conflict_maxsat else []) if hole in relevant_holes]
-        self.ce_maxsat += safe_division(len(conflict_maxsat), len(relevant_holes))
+        if COMPUTE_CE_QUALITY_MAXSAT:
+            _, conflict_maxsat = self._verifier.naive_check(instance, all_conflicts=True)
+            conflict_maxsat = conflict_maxsat.pop() if conflict_maxsat else []
+            conflict_maxsat = [hole for hole in conflict_maxsat if hole in relevant_holes]
+            self.ce_maxsat += safe_division(len(conflict_maxsat), len(relevant_holes))
         self.ce_maxsat_timer.stop()
 
         # zero
@@ -1050,11 +1052,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         self.ce_zero_timer.stop()
 
         # global
-        self.ce_global_timer.start()
-        Family.global_cex_generator.prepare_dtmc(dtmc, dtmc_state_map)
-        conflict_global = Family.global_cex_generator.construct_conflict(formula_idx, use_bounds=True)
-        self.ce_global += safe_division(len(conflict_global), len(relevant_holes))
-        self.ce_global_timer.stop()
+        # self.ce_global_timer.start()
+        # Family.global_cex_generator.prepare_dtmc(dtmc, dtmc_state_map)
+        # conflict_global = Family.global_cex_generator.construct_conflict(formula_idx, use_bounds=True)
+        # self.ce_global += safe_division(len(conflict_global), len(relevant_holes))
+        # self.ce_global_timer.stop()
 
         # local
         self.ce_local_timer.start()
@@ -1068,20 +1070,18 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         self.statistic.timer.start()
 
     def get_ce_quality_string(self):
-        if not self.ce_quality_compute:
+        if not COMPUTE_CE_QUALITY:
             return ""
-        if self.iterations_cegis < 1:
+        if self.iterations_cegis == 0:
             return "> ce quality: n/a"
         else:
-            stats = f"ce quality: maxsat: {self.ce_maxsat / self.iterations_cegis:1.4f}; " + \
-                    f"zero: {self.ce_zero / self.iterations_cegis:1.4f}; " \
-                    f"global: {self.ce_global / self.iterations_cegis:1.4f}; " + \
-                    f"local: {self.ce_local / self.iterations_cegis:1.4f}"
+            stats = f"ce quality: maxsat: {self.ce_maxsat / self.iterations_cegis:1.4f}, " + \
+                    f"trivial: {self.ce_zero / self.iterations_cegis:1.4f}, " \
+                    f"non-trivial: {self.ce_local / self.iterations_cegis:1.4f}"
             times = f"ce time: " + \
-                    f"maxsat: {self.ce_maxsat_timer.read() / self.iterations_cegis:1.4f}; " + \
-                    f"zero: {self.ce_zero_timer.read() / self.iterations_cegis:1.4f}; " + \
-                    f"global: {self.ce_global_timer.read() / self.iterations_cegis:1.4f}; " + \
-                    f"local: {self.ce_local_timer.read() / self.iterations_cegis:1.4f}\n"
+                    f"maxsat: {self.ce_maxsat_timer.read() / self.iterations_cegis:1.4f}, " + \
+                    f"trivial: {self.ce_zero_timer.read() / self.iterations_cegis:1.4f}, " + \
+                    f"non-trivial: {self.ce_local_timer.read() / self.iterations_cegis:1.4f}\n"
             return stats + "\n" + times
 
     # ----- CE quality ----- #
@@ -1114,9 +1114,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             cex_generator.replace_formula_threshold(
                 vp_index, vp.raw_formula.threshold_expr.evaluate_as_double(), family_ref.bounds[vp_index]
             )
-            Family.global_cex_generator.replace_formula_threshold(
-                vp_index, vp.raw_formula.threshold_expr.evaluate_as_double(), family_ref.bounds[vp_index]
-            )
+            # Family.global_cex_generator.replace_formula_threshold(
+            #     vp_index, vp.raw_formula.threshold_expr.evaluate_as_double(), family_ref.bounds[vp_index]
+            # )
 
     def _check_optimal_property(self, family_ref, assignment, cex_generator=None, optimal_value=None):
 
@@ -1263,7 +1263,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         Profiler.start("ar - MDP model checking")
         feasible, optimal_value = family.analyze()
         Profiler.stop()
-        self.construct_global_cex_generator(family)
+        # self.construct_global_cex_generator(family)
 
         if optimal_value is not None:
             self._check_optimal_property(
