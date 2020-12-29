@@ -74,6 +74,8 @@ function dynasty() {
     # dynasty_opts="--project ${examples_dir}/${model}/ --sketch sketch.templ --allowed sketch.allowed --properties sketch.properties --restrictions sketch.restrictions"
     dynasty="python dynasty.py ${dynasty_opts} ${primary_method}"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
+    echo "> " ${dynasty} ${constants} ${OPTIMALITY}
+    exit
     timeout ${timeout} ${dynasty} ${constants} ${OPTIMALITY}
 }
 
