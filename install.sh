@@ -1,6 +1,8 @@
 #!/bin/bash
 
-. storm-alias.sh
+set -ex
+
+source storm-alias.sh
 
 export COMPILE_JOBS=8
 
