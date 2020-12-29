@@ -1,21 +1,20 @@
+import logging
+import operator
+
 from collections import OrderedDict
 from enum import Enum
 from functools import reduce
-import logging
-import functools
-import operator
-import math
 
 import stormpy
-import stormpy.core
 
-from dynasty.jani.quotient_container import ThresholdSynthesisResult, Engine
-from dynasty.annotated_property import AnnotatedProperty
+from ..annotated_property import AnnotatedProperty
+from ..jani.quotient_container import Engine
 
 logger = logging.getLogger(__name__)
 
+
 def prod(iterable):
-    return functools.reduce(operator.mul, iterable, 1)
+    return reduce(operator.mul, iterable, 1)
 
 
 class FamilyCheckMethod(Enum):
@@ -30,34 +29,33 @@ class FamilyCheckMethod(Enum):
     CEGIS = 4
 
     @classmethod
-    def from_string(cls, input):
+    def from_string(cls, input_str):
         """
         Construct enum from string. 
         
-        :param input: either of [cegar, cschedenum, onebyone, allinone, smt, cegis]
+        :param input_str: either of [cegar, cschedenum, onebyone, allinone, smt, cegis]
         :return: the corresponding enum, or None
         """
-        if input == "cegar":
+        if input_str == "cegar":
             return cls.Lifting
-        elif input == "cschedenum":
+        elif input_str == "cschedenum":
             return cls.SchedulerIteration
-        elif input == "onebyone":
+        elif input_str == "onebyone":
             return cls.DtmcIteration
-        elif input == "allinone":
+        elif input_str == "allinone":
             return cls.AllInOne
-        elif input == "cegis":
+        elif input_str == "cegis":
             return cls.CEGIS
-        #+
-        elif input == "hybrid":
+        elif input_str == "hybrid":
             return cls.Hybrid
-        #.
         else:
             return None
+
 
 class OptimalitySetting:
     def __init__(self, criterion, direction, epsilon):
         self._criterion = criterion
-        assert direction in ["min","max"]
+        assert direction in ["min", "max"]
         self._direction = direction
         self._eps = epsilon
 
@@ -81,7 +79,11 @@ class OptimalitySetting:
             return mc_result > best_so_far
 
     def get_violation_property(self, best_so_far, bound_translator):
-        vp = stormpy.Property("optimality_violation", self._criterion.raw_formula.clone(), comment="Optimality criterion with adapted bound")
+        vp = stormpy.Property(
+            "optimality_violation",
+            self._criterion.raw_formula.clone(),
+            comment="Optimality criterion with adapted bound"
+        )
         if self._direction == "min":
             bound = best_so_far - best_so_far * self._eps
             ct = stormpy.logic.ComparisonType.LESS
@@ -99,21 +101,17 @@ def open_constants(model):
 
 class HoleOptions(OrderedDict):
     def __str__(self):
-        return "HoleOptions{" + ",".join(
-            ["{}: [{}]".format(k, ",".join([str(x) for x in v])) for k, v in self.items()]) + "}"
+        return "HoleOptions{" + ",".join([f"{k}: [{','.join([str(x) for x in v])}]" for k, v in self.items()]) + "}"
 
     def __repr__(self):
         return self.__str__()
 
     def size(self):
-        def prod(iterable):
-            return reduce(operator.mul, iterable, 1)
-
         return prod([len(v) for v in self.values()])
 
     def index_map(self, sub_options):
         result = OrderedDict()
-        for k,values in sub_options.items():
+        for k, values in sub_options.items():
             result[k] = []
             for v in values:
                 for index, ref in enumerate(self.get(k)):
@@ -129,8 +127,8 @@ class HoleOptions(OrderedDict):
 
 
 class RoundStats:
-    def __init__(self, round, queued, above, below, time):
-        self.round = round
+    def __init__(self, round_var, queued, above, below, time):
+        self.round = round_var
         self.queued = queued
         self.cumulative_above = above
         self.cumulative_below = below
@@ -138,7 +136,7 @@ class RoundStats:
 
 
 class FamilyChecker:
-    def __init__(self, check_prerequisites=False, engine = Engine.Sparse):
+    def __init__(self, check_prerequisites=False, engine=Engine.Sparse):
         self._check_prereq = check_prerequisites
         self.expression_manager = None
         self.holes = None
@@ -193,12 +191,13 @@ class FamilyChecker:
                 assert prop.raw_formula.has_bound
                 # print(prop.raw_formula)
 
-                if True:  # prop.raw_formula.is_probability_operator and prop.raw_formula.threshold > 0 and prop.raw_formula.threshold < 1:
+                if True:  # prop.raw_formula.is_probability_operator
+                    # and prop.raw_formula.threshold > 0 and prop.raw_formula.threshold < 1:
                     self.properties.append(prop)
         _constants_map = self._constants_map(constant_str, program)
 
-
-    def _parse_template_defs(self, location):
+    @staticmethod
+    def _parse_template_defs(location):
         definitions = OrderedDict()
         with open(location) as file:
             for line in file:
@@ -213,7 +212,7 @@ class FamilyChecker:
         return definitions
 
     def _register_unconstrained_design_space(self, size):
-        logger.info("Design space (without constraints): {}".format(size))
+        logger.info(f"Design space (without constraints): {size}")
 
     def load_template_definitions(self, location):
         """
@@ -244,12 +243,11 @@ class FamilyChecker:
         self.sketch = self.sketch.define_constants(constants_map).substitute_constants()
         assert self.hole_options.keys() == self.holes.keys()
 
-        logger.debug("Template variables: {}".format(self.hole_options))
+        logger.debug(f"Template variables: {self.hole_options}")
         self._register_unconstrained_design_space(prod([len(v) for v in self.hole_options.values()]))
 
-
     def _constants_map(self, constant_str, program):
-        logger.debug("Load constants '{}'".format(constant_str))
+        logger.debug(f"Load constants '{constant_str}'")
         if constant_str.rstrip() == "":
             return dict()
         constants_map = dict()
@@ -264,7 +262,7 @@ class FamilyChecker:
         for kv in kvs:
             key_value = kv.split("=")
             if len(key_value) != 2:
-                raise ValueError("Expected Key-Value pair, got '{}'.".format(kv))
+                raise ValueError(f"Expected Key-Value pair, got '{kv}'.")
 
             expr = ep.parse(key_value[1])
             constants_map[holes[key_value[0]].expression_variable] = expr
@@ -282,23 +280,22 @@ class FamilyChecker:
             if not c.defined:
                 self.holes[c.name] = c
 
-        logger.debug("Holes found: {}".format(list(self.holes.keys())))
+        logger.debug(f"Holes found: {list(self.holes.keys())}")
 
     def _annotate_properties(self, constants_map):
         self.properties = [
             AnnotatedProperty(
-                stormpy.Property("property-{}".format(i), p.raw_formula.clone().substitute(constants_map)),
+                stormpy.Property(f"property-{i}", p.raw_formula.clone().substitute(constants_map)),
                 self.sketch, add_prerequisites=self._check_prereq
             ) for i, p in enumerate(self.properties)
         ]
-
 
     def _set_constants(self, constant_str):
         constants_map = self._constants_map(constant_str, self.sketch)
         self.sketch = self.sketch.define_constants(constants_map)
 
     def load_sketch(self, path, property_path, optimality_path=None, constant_str=""):
-        logger.info("Load sketch from {}  with constants {}".format(path, constant_str))
+        logger.info(f"Load sketch from {path} with constants {constant_str}")
 
         prism_program = stormpy.parse_prism_program(path)
         self.expression_manager = prism_program.expression_manager
@@ -357,11 +354,11 @@ class FamilyChecker:
         for symmetry in symmetries:
             for hole_name in symmetry:
                 if hole_name not in self.holes:
-                    raise ValueError("Key {} not in template, but in list of symmetries".format(hole_name))
+                    raise ValueError(f"Key {hole_name} not in template, but in list of symmetries")
         for different in differents:
             for hole_name in different:
                 if hole_name not in self.holes:
-                    raise ValueError("Key {} not in template, but in list of differents".format(hole_name))
+                    raise ValueError(f"Key {hole_name} not in template, but in list of differents")
         self.symmetries = symmetries
         self.differents = differents
 
@@ -380,7 +377,7 @@ class FamilyChecker:
                 elif line.startswith("relative"):
                     epsilon = float(line.split()[1])
                 else:
-                    logger.debug("Criterion {}".format(line))
+                    logger.debug(f"Criterion {line}")
                     optimality_criterion = stormpy.parse_properties_for_prism_program(line, program)[0]
         logger.debug("Done parsing optimality file.")
         if direction is None:

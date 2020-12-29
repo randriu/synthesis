@@ -62,7 +62,7 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
 def readable_assignment(assignment):
     # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
-    return ",".join([f"{k}={v[0].__str__()}" for (k, v) in assignment.items()]) if assignment is not None else None
+    return ",".join([f"{k}={v[0].__str__}" for (k, v) in assignment.items()]) if assignment is not None else None
 
 
 class Statistic:
