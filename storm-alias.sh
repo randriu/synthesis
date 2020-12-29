@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 # compilation parameters
 
 export COMPILE_JOBS=8
