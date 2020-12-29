@@ -73,7 +73,6 @@ function dynasty() {
     dynasty="python dynasty.py hybrid --regime $1 --project ${examples_dir}/${model}/ --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     echo "> " ${dynasty} ${constants} ${OPTIMALITY}
-    # exit
     timeout ${timeout} ${dynasty} ${constants} ${OPTIMALITY}
 }
 
