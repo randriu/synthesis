@@ -16,7 +16,7 @@ class EdgeColoring:
         )
 
     def _hole_assignment_to_string(self, v):
-        return "{0}".format(
+        return "{}".format(
             ", ".join(["{}: {}".format(x, y) for x, y in zip(self.hole_options.keys(), v) if y is not None])
         )
 

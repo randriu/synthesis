@@ -101,7 +101,7 @@ def open_constants(model):
 
 class HoleOptions(OrderedDict):
     def __str__(self):
-        return "HoleOptions{" + ",".join([f"{k}: [{','.join([str(x) for x in v])}]" for k, v in self.items()]) + "}"
+        return "HoleOptions{}".format(",".join([f"{k}: [{','.join([str(x) for x in v])}]" for k, v in self.items()]))
 
     def __repr__(self):
         return self.__str__()
