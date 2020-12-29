@@ -225,9 +225,6 @@ dynrun() {
     envd
     cd $OLDPWD
 }
-dr() {
-    dynrun $1
-}
 
 alias dpid='pgrep -f "^python dynasty.py .*"'
 alias dtime='ps -aux | grep "python dynasty.py"'

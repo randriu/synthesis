@@ -13,7 +13,14 @@ const int MAXMEM = 1;
 const double pUnfairLow = 0.1;
 const double pBitUnfairLow = 0.25;
 
+const double pBitBitUnfairLow = 0.45;
+const double pBitBitBitUnfairLow = 0.49;
+
 const double pFair = 0.5;
+
+const double pBitBitBitUnfairHigh = 1 - pBitBitBitUnfairLow;
+const double pBitBitUnfairHigh = 1 - pBitBitUnfairLow;
+
 const double pBitUnfairHigh = 1 - pBitUnfairLow;
 const double pUnfairHigh = 1 - pUnfairLow;
 
@@ -71,16 +78,24 @@ module process1
 
     [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=0 -> pUnfairLow :      (y1'=0) & (m1'=M0LA) + 1-pUnfairLow :       (y1'=1) & (m1'=M0LB);
     [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=1 -> pBitUnfairLow :   (y1'=0) & (m1'=M0LA) + 1-pBitUnfairLow :    (y1'=1) & (m1'=M0LB);
-    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=2 -> pFair :           (y1'=0) & (m1'=M0LA) + 1-pFair :            (y1'=1) & (m1'=M0LB);
-    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=3 -> pBitUnfairHigh :  (y1'=0) & (m1'=M0LA) + 1-pBitUnfairHigh :   (y1'=1) & (m1'=M0LB);
-    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=4 -> pUnfairHigh :     (y1'=0) & (m1'=M0LA) + 1-pUnfairHigh :      (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=2 -> pBitBitUnfairLow :   (y1'=0) & (m1'=M0LA) + 1-pBitBitUnfairLow :    (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=3 -> pBitBitBitUnfairLow :   (y1'=0) & (m1'=M0LA) + 1-pBitBitBitUnfairLow :    (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=4 -> pFair :           (y1'=0) & (m1'=M0LA) + 1-pFair :            (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=5 -> pBitBitBitUnfairHigh :  (y1'=0) & (m1'=M0LA) + 1-pBitBitBitUnfairHigh :   (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=6 -> pBitBitUnfairHigh :  (y1'=0) & (m1'=M0LA) + 1-pBitBitUnfairHigh :   (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=7 -> pBitUnfairHigh :  (y1'=0) & (m1'=M0LA) + 1-pBitUnfairHigh :   (y1'=1) & (m1'=M0LB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=8 -> pUnfairHigh :     (y1'=0) & (m1'=M0LA) + 1-pUnfairHigh :      (y1'=1) & (m1'=M0LB);
     [step1] !(x1=x7) & m1 = 0 & x1 = 0              -> (y1'=x7) & (m1'=M0LC);
 
     [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=0 -> pUnfairLow :      (y1'=0) & (m1'=M0HA) + 1-pUnfairLow :       (y1'=1) & (m1'=M0HB);
     [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=1 -> pBitUnfairLow :   (y1'=0) & (m1'=M0HA) + 1-pBitUnfairLow :    (y1'=1) & (m1'=M0HB);
-    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=2 -> pFair :           (y1'=0) & (m1'=M0HA) + 1-pFair :            (y1'=1) & (m1'=M0HB);
-    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=3 -> pBitUnfairHigh :  (y1'=0) & (m1'=M0HA) + 1-pBitUnfairHigh :   (y1'=1) & (m1'=M0HB);
-    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=4 -> pUnfairHigh :     (y1'=0) & (m1'=M0HA) + 1-pUnfairHigh :      (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=2 -> pBitBitUnfairLow :   (y1'=0) & (m1'=M0HA) + 1-pBitBitUnfairLow :    (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=3 -> pBitBitBitUnfairLow :   (y1'=0) & (m1'=M0HA) + 1-pBitBitBitUnfairLow :    (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=4 -> pFair :           (y1'=0) & (m1'=M0HA) + 1-pFair :            (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=5 -> pBitBitBitUnfairHigh :  (y1'=0) & (m1'=M0HA) + 1-pBitBitBitUnfairHigh :   (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=6 -> pBitBitUnfairHigh :  (y1'=0) & (m1'=M0HA) + 1-pBitBitUnfairHigh :   (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=7 -> pBitUnfairHigh :  (y1'=0) & (m1'=M0HA) + 1-pBitUnfairHigh :   (y1'=1) & (m1'=M0HB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=8 -> pUnfairHigh :     (y1'=0) & (m1'=M0HA) + 1-pUnfairHigh :      (y1'=1) & (m1'=M0HB);
     [step1] !(x1=x7) & m1 = 0 & x1 = 1              -> (y1'=x7) & (m1'=M0HC);
 
     [step1]  (x1=x7) & m1 = 1 & x1 = 0 & M1LFAIR=0 -> pUnfairLow :      (y1'=0) & (m1'=M1XA) + 1-pUnfairLow :       (y1'=1) & (m1'=M1XB);
