@@ -86,6 +86,10 @@ class JaniQuotientContainer:
         return self._edge_coloring
 
     @property
+    def inconsistencies(self):
+        return self._inconsistencies
+
+    @property
     def color_to_edge_indices(self):
         return self._color_to_edge_indices
 

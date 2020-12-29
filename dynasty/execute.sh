@@ -18,7 +18,7 @@ parallel=false
 # synthesis method
 # primary_method=cschedenum
 # primary_method=cegis
-primary_method=research
+primary_method=hybrid
 
 # presets: TACAS
 grid=("grid/orig" 40 0.004 0.019 0.003)
@@ -70,21 +70,19 @@ function write_params() {
 }
 
 function dynasty() {
-    dynasty_opts="--project ${examples_dir}/${model}/ --sketch sketch.templ --allowed sketch.allowed --properties sketch.properties"
-    # dynasty_opts="--project ${examples_dir}/${model}/ --sketch sketch.templ --allowed sketch.allowed --properties sketch.properties --restrictions sketch.restrictions"
-    dynasty="python dynasty.py ${dynasty_opts} ${primary_method}"
+    dynasty="python dynasty.py hybrid --regime $1 --project ${examples_dir}/${model}/ --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     echo "> " ${dynasty} ${constants} ${OPTIMALITY}
-    exit
+    # exit
     timeout ${timeout} ${dynasty} ${constants} ${OPTIMALITY}
 }
 
 function try_thresholds() {
     for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
         if [ ${parallel} = "false" ]; then
-            dynasty | log_output
+            dynasty $1 | log_output
         else
-            dynasty | log_output &
+            dynasty $1 | log_output &
         fi
     done
     wait
@@ -97,27 +95,19 @@ reset_log() {
 }
 
 function onebyone() {
-    regime=1
-    write_params
-    try_thresholds
+    try_thresholds 0
 }
 
 function cegis() {
-    regime=2
-    write_params
-    try_thresholds
+    try_thresholds 1
 }
 
 function cegar() {
-    regime=3
-    write_params
-    try_thresholds
+    try_thresholds 2
 }
 
 function hybrid() {
-    regime=4
-    write_params
-    try_thresholds
+    try_thresholds 3
 }
 
 # --- sandbox ------------------------------------------------------------------
@@ -257,9 +247,9 @@ function run() {
     choose_model "${model[@]}"
 
     hybrid
-    # cegar
-    # cegis
-    # onebyone
+    cegar
+    cegis
+    onebyone
 }
 
 # ----------

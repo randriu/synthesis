@@ -101,7 +101,7 @@ def open_constants(model):
 
 class HoleOptions(OrderedDict):
     def __str__(self):
-        return "HoleOptions{}".format(",".join([f"{k}: [{','.join([str(x) for x in v])}]" for k, v in self.items()]))
+        return "HoleOptions {}".format(",".join([f"{k}: [{','.join([str(x) for x in v])}]" for k, v in self.items()]))
 
     def __repr__(self):
         return self.__str__()
@@ -316,7 +316,7 @@ class FamilyChecker:
         constants_map = self._constants_map(constant_str, self.sketch)
         if self._optimality_setting is not None:
             self._optimality_setting._criterion = stormpy.Property(
-                "optimality_property", self._optimality_setting._criterion.raw_formula.clone().substitute(constants_map),
+                "optimality_property", self._optimality_setting._criterion.raw_formula.clone().substitute(constants_map)
             )
         self._annotate_properties(constants_map)
 

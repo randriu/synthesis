@@ -1,4 +1,3 @@
-
 class SynthetiserStats:
     def __init__(self):
         self.iterations = 0
@@ -21,19 +20,19 @@ class SynthetiserStats:
     def total_solver_clause_adding_time(self):
         return sum(self.clause_adding_times)
 
+
 class CAStats:
     def __init__(self, cex_stats):
         self.iterations = cex_stats.iterations
-        self.setup_time = cex_stats.setup_time.count()/1000
-        self.model_checking_time = cex_stats.model_checking_time.count()/1000
-        self.analysis_time = cex_stats.analysis_time.count()/1000
-        self.solver_time = cex_stats.solver_time.count()/1000
-        self.cut_time = cex_stats.cut_time.count()/1000
+        self.setup_time = cex_stats.setup_time.count() / 1000
+        self.model_checking_time = cex_stats.model_checking_time.count() / 1000
+        self.analysis_time = cex_stats.analysis_time.count() / 1000
+        self.solver_time = cex_stats.solver_time.count() / 1000
+        self.cut_time = cex_stats.cut_time.count() / 1000
 
     @property
     def total_time(self):
         return self.setup_time + self.model_checking_time + self.analysis_time + self.solver_time
-
 
 
 class Stats:
@@ -53,11 +52,11 @@ class Stats:
     def report_conflict_analysis_stats(self, ca):
         self._conflict_analysis_stats.append(CAStats(ca))
 
-    def _get_property_stats(self, property):
-        if property.name not in self._property_stats:
+    def _get_property_stats(self, property_obj):
+        if property_obj.name not in self._property_stats:
             return self._optimality_stats
         else:
-            return self._property_stats[property.name]
+            return self._property_stats[property_obj.name]
 
     def initialize_properties_and_holes(self, properties, holes):
         for p in properties:
@@ -70,18 +69,18 @@ class Stats:
         self._model_building_time.append(time)
         self._model_sizes.append(size)
 
-    def report_conflict_details(self, property, time, conflicts):
+    def report_conflict_details(self, property_obj, time, conflicts):
         self.conflict_analysis_calls = self.conflict_analysis_calls + 1
         self.conflict_analysis_time = self.conflict_analysis_time + time
-        self._get_property_stats(property).report_conflict_details(conflicts, time)
+        self._get_property_stats(property_obj).report_conflict_details(conflicts, time)
 
-    def report_model_checking(self, property, time, conflict):
+    def report_model_checking(self, property_obj, time, conflict):
         self.quantitative_model_checking_calls += 1
         self.quantitative_model_checking_time += time
         if conflict:
-            self._get_property_stats(property).report_conflict(time)
+            self._get_property_stats(property_obj).report_conflict(time)
         else:
-            self._get_property_stats(property).report_no_conflict(time)
+            self._get_property_stats(property_obj).report_no_conflict(time)
 
     @property
     def model_building_time(self):
@@ -93,7 +92,7 @@ class Stats:
 
     @property
     def average_model_building_time(self):
-        return self.model_building_time/self.model_building_calls
+        return self.model_building_time / self.model_building_calls
 
     @property
     def cumulative_model_size(self):
@@ -109,7 +108,7 @@ class Stats:
 
     @property
     def average_model_size(self):
-        return self.cumulative_model_size/self.model_building_calls
+        return self.cumulative_model_size / self.model_building_calls
 
     @property
     def total_conflict_analysis_setup_time(self):
@@ -152,10 +151,11 @@ class PropertyStats:
         self._model_checking_times = []
         self._conflict_analysis_times = []
         self._conflict_sizes = []
+        self._conflict_size = 0
         self._hole_relevant = dict([(hole, 0) for hole in holes])
 
     def report_conflict_details(self, conflicts, time):
-        print("report {}".format(conflicts))
+        print(f"report {conflicts}")
         self._conflict_sizes.append([])
         for conflict in conflicts:
             self._conflict_sizes[-1].append(len(conflict))
@@ -179,9 +179,9 @@ class PropertyStats:
         histogram = dict()
         for i in range(self._nr_holes + 1):
             histogram[i] = 0
-        for csets in self._conflict_sizes:
-            if csets is not None:
-                for cs in csets:
+        for conflict_sets in self._conflict_sizes:
+            if conflict_sets is not None:
+                for cs in conflict_sets:
                     histogram[cs] += 1
         return histogram
 
@@ -190,17 +190,15 @@ class PropertyStats:
         return self._hole_relevant
 
     def print(self):
-        print("Violations: {}".format(self._violations))
+        print(f"Violations: {self._violations}")
         histogram = self.histogram()
         print("Violation of size:")
         for i, v in histogram.items():
-            print("{}: {}".format(i,v))
+            print(f"{i}: {v}")
         print("Holes relevant")
         for h, v in self._hole_relevant.items():
-            print("{}: {}".format(h, v))
-
-
+            print(f"{h}: {v}")
 
     @property
-    def average_conflict():
+    def average_conflict(self):
         return sum(self._conflict_sizes) / self._violations
