@@ -31,11 +31,25 @@ ONLY_CEGAR = False
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
-PRINT_PROFILING = True
+PRINT_PROFILING = False
 STAGE_SCORE_LIMIT = 99999
+# Zero approximation to avoid zero division etc.
+APPROX_ZERO = 0.000001
 
 
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
+
+
+def safe_division(dividend, divisor):
+    """Safe division of dividend by operand
+    :param number dividend: upper operand of the division
+    :param number divisor: lower operand of the division, may be zero
+    :return: safe value after division of approximated zero
+    """
+    try:
+        return dividend / divisor
+    except (ZeroDivisionError, ValueError):
+        return dividend / APPROX_ZERO
 
 
 def check_dtmc(dtmc, formula, quantitative=False):
@@ -68,9 +82,9 @@ def readable_assignment(assignment):
 class Statistic:
     """General computation stats."""
 
-    def __init__(self, method, formulae, holes_count, opt_setting, long_summary=False):
+    def __init__(self, method, formulae, holes_count, opt_setting, short_summary=False):
         self.method = method
-        self.long_summary = long_summary
+        self.short_summary = short_summary
         self.timer = Timer()
         self.timer.start()
         self.feasible = False
@@ -83,10 +97,11 @@ class Statistic:
         self.family_size = 0
         self.super_mdp_size, self.mdp_checks, self.avg_mdp_size = 0, 0, 0
         self.avg_dtmc_size, self.dtmc_checks = 0, 0
+        self.ce_quality = None
 
     def finished(
             self, assignment, iterations, optimal_value, family_size, super_mdp_size,
-            avg_mdp_size, mdp_checks, avg_dtmc_size, dtmc_checks
+            avg_mdp_size, mdp_checks, avg_dtmc_size, dtmc_checks, ce_quality=""
     ):
         self.timer.stop()
         self.feasible = assignment is not None
@@ -99,28 +114,54 @@ class Statistic:
         self.mdp_checks = mdp_checks
         self.avg_dtmc_size = round(avg_dtmc_size, 2)
         self.dtmc_checks = dtmc_checks
+        self.ce_quality = ce_quality
 
     def get_long_summary(self):
         formulae = self.formulae if self.optimal_value is None else self.formulae[:-1]
-        formulae = "\n".join([f">> Formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
-        opt_formula = f">> Optimal Setting: {self.opt_setting}" if self.optimal_value else ""
-        space_info = f">> Number of holes: {self.holes_count}; Family size: {self.family_size}"
-        cegar = f">> Super MDP: {self.super_mdp_size}; Average MDP: {self.avg_mdp_size}; " \
-                f"MPD Checks: {self.mdp_checks}; Iters: {self.iterations[0]}"
-        cegis = f">> Average DTMC {self.avg_dtmc_size}; DTMC Checks: {self.dtmc_checks}; Iters: {self.iterations[1]}"
-        feasible = "YES" if self.feasible else "NO"
-        result = f"feasible={feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
-        summary = f">> method: {self.method}; {result}; time: {round(self.timer.time, 2)}"
-        assignment = f">> assignment: {self.assignment}\n"
-        return f"{formulae}\n{opt_formula}\n{space_info}\n{cegar}\n{cegis}\n{summary}\n{assignment}"
+        formulae = "\n".join([f"formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
+        opt_formula = f"optimal setting: {self.opt_setting}" if self.optimal_value else ""
+
+        design_space = f"number of holes: {self.holes_count}, family size: {self.family_size}"
+
+        mdp_stats = f"super MDP size: {self.super_mdp_size}, average MDP size: {round(self.avg_mdp_size)}, " \
+                    f"MPD checks: {self.mdp_checks}, iterations: {self.iterations[0]}"
+        dtmc_stats = f"average DTMC size: {round(self.avg_dtmc_size)}, " \
+                     f"DTMC checks: {self.dtmc_checks}, iterations: {self.iterations[1]}"
+        family_stats = ""
+        if self.method == "CEGAR" or self.method == "Hybrid":
+            family_stats += f"{mdp_stats}\n"
+        if self.method != "CEGAR":
+            family_stats += f"{dtmc_stats}\n"
+
+        timing = f"method: {self.method}, synthesis time: {round(self.timer.time, 2)}"
+
+        feasible = "yes" if self.feasible else "no"
+        result = f"feasible: {feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
+        assignment = f"hole assignment: {self.assignment}\n" if self.feasible else ""
+
+        summary = f"{formulae}\n{opt_formula}\n{timing}\n{design_space}\n" \
+                  f"{family_stats}{self.ce_quality}\n{result}\n{assignment}"
+        return summary
+
+    def get_short_summary(self):
+        if self.optimal_value is None:
+            result = "F" if self.feasible else "U"
+        else:
+            result = f"opt = {round(self.optimal_value, 6)}"
+        if self.method == "CEGAR":
+            iters = self.iterations[0]
+        elif self.method == "CEGIS" or self.method == "1-by-1":
+            iters = self.iterations[1]
+        else:
+            iters = (self.iterations[0], self.iterations[1])
+        return f"> {self.method}: {result} ({iters} iters, {round(self.timer.time, 2)} sec)"
 
     def __str__(self):
-        feasible = "YES" if self.feasible else "NO"
-        time = round(self.timer.time, 2)
-        result = f"feasible={feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
-        short_summary = f">> method: {self.method}; {result}; iters: {self.iterations}; time: {time}\n" \
-                        f">> assignment: {self.assignment}\n"
-        return self.get_long_summary() if self.long_summary else short_summary
+        sep = "--------------------"
+        summary = f"{sep}\n{self.get_long_summary()}"
+        if self.short_summary:
+            summary += f"\n{sep}\n{self.get_short_summary()}\n"
+        return summary
 
 
 class EnumerationChecker(OneByOneChecker):
@@ -130,14 +171,14 @@ class EnumerationChecker(OneByOneChecker):
         super().__init__(*args)
         self.statistic = None
 
-    def run(self, long_summary):
+    def run(self, short_summary):
         self.statistic = Statistic(
-            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
         )
         iterations, avg_model_size = self.run_feasibility()
         assignment = None  # we do not care about assignment
         self.statistic.finished(
-            assignment, (iterations, 0), None, 0, 0.0, avg_model_size, 0.0, 0.0, 0.0
+            assignment, (0, iterations), None, 0, 0.0, avg_model_size, 0.0, 0.0, 0.0
         )
 
 
@@ -148,19 +189,19 @@ class CEGISChecker(Synthesiser):
         super().__init__(*args)
         self.statistic = None
 
-    def run(self, long_summary):
+    def run(self, short_summary):
+        formulae = [property_obj.raw_formula for property_obj in self._verifier.properties]
         self.statistic = Statistic(
-            "CEGIS", self._verifier.properties, len(self.holes), self._optimality_setting, long_summary=long_summary
+            "CEGIS", formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
         )
         _, assignment, optimal_value = self.run_feasibility()
         assignment = {k: [v] for (k, v) in assignment.items()} if assignment is not None else None
         if assignment is not None:
             logger.info(f"Found satisfying assignment: {readable_assignment(assignment)}")
         self.statistic.finished(
-            assignment, (0, self.stats.iterations), optimal_value, self.stats.design_space_size,
-            0, 0, 0,
-            self.stats.qualitative_model_checking_calls + self.stats.quantitative_model_checking_calls,
-            self.stats.average_model_size()
+            assignment, (0, self.stats.iterations), optimal_value, self.stats.design_space_size, 0, 0, 0,
+            self.verifier_stats.average_model_size,
+            self.verifier_stats.qualitative_model_checking_calls + self.verifier_stats.quantitative_model_checking_calls
         )
 
 
@@ -278,7 +319,6 @@ class CEGARChecker(LiftingChecker):
     def _check_optimal_property(self, optimal_value, assignment):
         # Check whether the improvement was achieved
         if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
-
             # Set the new values of the optimal attributes
             self._optimal_value = optimal_value
             self._optimal_assignment = assignment
@@ -289,14 +329,14 @@ class CEGARChecker(LiftingChecker):
             logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
 
-    def run(self, long_summary):
+    def run(self, short_summary):
         self.statistic = Statistic(
-            "CEGAR", self.formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+            "CEGAR", self.formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
         )
         assignment, optimal_value = self.run_feasibility()
         self.statistic.finished(
             assignment, (self.iterations, 0), optimal_value, self.models_total,
-            Family.quotient_mdp().nr_states, Family.quotient_mdp_stats(0) / Family.quotient_mdp_stats(1),
+            Family.quotient_mdp().nr_states, safe_division(Family.quotient_mdp_stats(0), Family.quotient_mdp_stats(1)),
             Family.mdp_checks(), 0.0, 0.0
         )
 
@@ -359,6 +399,9 @@ class Family:
     _dtmc_stats = (0, 0)
     _mdp_checks = 0
     _dtmc_checks = 0
+
+    # - CEXs for MDP of superfamily
+    global_cex_generator = None
 
     def __init__(self, parent=None, options=None):
         """
@@ -471,6 +514,14 @@ class Family:
         return self.suboptions is not None
 
     @property
+    def hole_options(self):
+        return Family._hole_options
+
+    @property
+    def hole_indices(self):
+        return Family._hole_indices
+
+    @property
     def formulae(self):
         return Family._formulae
 
@@ -506,6 +557,14 @@ class Family:
     def quotient_container():
         return Family._quotient_container
 
+    @staticmethod
+    def mdp_checks_inc():
+        Family._mdp_checks += 1
+
+    @staticmethod
+    def dtmc_checks_inc():
+        Family._dtmc_checks += 1
+
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """
         if self.constructed:
@@ -534,13 +593,13 @@ class Family:
 
         threshold = float(Family._thresholds[formula_index])
         Family._quotient_container.analyse(threshold, formula_index)
-        threshold_synthesis_result = Family._quotient_container.decided(threshold)
+        thresh_synthesis_res = Family._quotient_container.decided(threshold)
 
-        return None if threshold_synthesis_result == ThresholdSynthesisResult.UNDECIDED else \
-            (threshold_synthesis_result == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[formula_index], \
+        return None if thresh_synthesis_res == ThresholdSynthesisResult.UNDECIDED else \
+            (thresh_synthesis_res == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[formula_index], \
             Family._quotient_container.latest_result.result
 
-    def analyze(self, superfamily=False):
+    def analyze(self):
         """
         Analyze the underlying quotient MDP for this subfamily with respect
         to all (yet undecided) formulae and store all model checking results.
@@ -562,7 +621,7 @@ class Family:
         #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
         for formula_index in self.formulae_indices:
             logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
-            Family._mdp_checks += 1
+            Family.mdp_checks_inc()
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
 
             if not feasible and isinstance(feasible, bool):
@@ -602,7 +661,7 @@ class Family:
         assert self.constructed and not self.split_ready
         Profiler.start("ar - splitting")
         Family._quotient_container.scheduler_color_analysis()
-        if len(Family._quotient_container._inconsistencies) == 2:
+        if len(Family._quotient_container.inconsistencies) == 2:
             self.suboptions = LiftingChecker.split_hole_options(
                 self.options, Family._quotient_container, Family._hole_options, True
             )
@@ -734,7 +793,7 @@ class FamilyHybrid(Family):
         matrix = self.mdp.transition_matrix
         for state in range(self.mdp.nr_states):
             state_hole_indices = set()
-            for choice_index in range(matrix.get_row_group_start(state),matrix.get_row_group_end(state)):
+            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
                 state_hole_indices.update(FamilyHybrid._choice_to_hole_indices[self.choice_map[choice_index]])
             state_hole_indices = set(
                 [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1]
@@ -789,7 +848,7 @@ class FamilyHybrid(Family):
             Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
-            # assert absence of deadlocks or overlapping guargs
+            # assert absence of deadlocks or overlapping guards
             # TODO does not seem to work (builder options?)
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
             assert self.dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
@@ -825,21 +884,20 @@ class FamilyHybrid(Family):
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
 
-class IntegratedChecker(QuotientBasedFamilyChecker):
+class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     """Integrated checker."""
 
     stage_score_limit = 99999
 
     def __init__(self):
         QuotientBasedFamilyChecker.__init__(self)
+        CEGISChecker.__init__(self)
         self.families = []
         self.iterations_cegis = 0
         self.iterations_cegar = 0
         self.formulae = []
         self.statistic = None
         self.models_total = 0
-        self.cegis_iterations = 0
-        self.cegar_iterations = 0
         self.stage_timer = Timer()
         self.stage_switch_allowed = True  # once a method wins, set this to false and do not switch between methods
         self.stage_score = 0  # +1 point whenever cegar wins the stage, -1 otherwise
@@ -851,9 +909,15 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         self.stage_cegar = True
         self.cegis_allocated_time = 0
         self.stage_time_allocation_cegis = 0
+        # CE quality
+        self.ce_maxsat, self.ce_zero, self.ce_global, self.ce_local = 0, 0, 0, 0
+        self.ce_maxsat_timer, self.ce_zero_timer, self.ce_global_timer, self.ce_local_timer = \
+            Timer(), Timer(), Timer(), Timer()
+        self.ce_quality_compute = True
 
     def initialise(self):
         QuotientBasedFamilyChecker.initialise(self)
+        CEGISChecker.initialise(self)
         self.formulae = [property_obj.raw_formula for property_obj in self.properties]
         if self.input_has_optimality_property():
             ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
@@ -937,14 +1001,90 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         self.stage_time_allocation_cegis = cegis_dominance
 
         # stage log
-        print("> ", end="")
-        print("{:.2e} \\\\ {:.2e} = {:.1e} ({})".format(
-            success_rate_cegar, success_rate_cegis, cegis_dominance, self.stage_score)
-        )
+        if PRINT_STAGE_INFO:
+            print("> ", end="")
+            print(
+                f"{success_rate_cegar:.2e} \\\\ {success_rate_cegis:.2e} = {cegis_dominance:.1e} ({self.stage_score})"
+            )
 
         # switch back to cegar
         self.stage_start(request_stage_cegar=True)
         return True
+
+    # ----- CE quality ----- #
+
+    def construct_global_cex_generator(self, family):
+        self.statistic.timer.stop()
+        self.stage_timer.stop()
+
+        if self.ce_quality_compute:
+            Family.global_cex_generator = stormpy.SynthesisResearchCounterexample(
+                family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
+            )
+
+        self.stage_timer.start()
+        self.statistic.timer.start()
+
+    def ce_quality_measure(
+            self, assignments, relevant_holes, counterexample_generator, dtmc, dtmc_state_map, formula_idx
+    ):
+        if not self.ce_quality_compute:
+            return
+        self.statistic.timer.stop()
+        self.stage_timer.stop()
+
+        # maxsat
+        self.ce_maxsat_timer.start()
+        instance = self.build_instance(assignments)
+        _, conflict_maxsat = self._verifier.naive_check(instance, all_conflicts=True)
+        conflict_maxsat = \
+            [hole for hole in (conflict_maxsat.pop() if conflict_maxsat else []) if hole in relevant_holes]
+        self.ce_maxsat += safe_division(len(conflict_maxsat), len(relevant_holes))
+        self.ce_maxsat_timer.stop()
+
+        # zero
+        self.ce_zero_timer.start()
+        counterexample_generator.prepare_dtmc(dtmc, dtmc_state_map)
+        conflict_zero = counterexample_generator.construct_conflict(formula_idx, use_bounds=False)
+        self.ce_zero += safe_division(len(conflict_zero), len(relevant_holes))
+        self.ce_zero_timer.stop()
+
+        # global
+        self.ce_global_timer.start()
+        Family.global_cex_generator.prepare_dtmc(dtmc, dtmc_state_map)
+        conflict_global = Family.global_cex_generator.construct_conflict(formula_idx, use_bounds=True)
+        self.ce_global += safe_division(len(conflict_global), len(relevant_holes))
+        self.ce_global_timer.stop()
+
+        # local
+        self.ce_local_timer.start()
+        counterexample_generator.prepare_dtmc(dtmc, dtmc_state_map)
+        conflict_local = counterexample_generator.construct_conflict(formula_idx, use_bounds=True)
+        self.ce_local += safe_division(len(conflict_local), len(relevant_holes))
+        self.ce_local_timer.stop()
+
+        # resume timers
+        self.stage_timer.start()
+        self.statistic.timer.start()
+
+    def get_ce_quality_string(self):
+        if not self.ce_quality_compute:
+            return ""
+        if self.iterations_cegis < 1:
+            return "> ce quality: n/a"
+        else:
+            stats = f"ce quality: maxsat: {self.ce_maxsat / self.iterations_cegis:1.4f}; " + \
+                    f"zero: {self.ce_zero / self.iterations_cegis:1.4f}; " \
+                    f"global: {self.ce_global / self.iterations_cegis:1.4f}; " + \
+                    f"local: {self.ce_local / self.iterations_cegis:1.4f}"
+            times = f"ce time: " + \
+                    f"maxsat: {self.ce_maxsat_timer.read() / self.iterations_cegis:1.4f}; " + \
+                    f"zero: {self.ce_zero_timer.read() / self.iterations_cegis:1.4f}; " + \
+                    f"global: {self.ce_global_timer.read() / self.iterations_cegis:1.4f}; " + \
+                    f"local: {self.ce_local_timer.read() / self.iterations_cegis:1.4f}\n"
+            return stats + "\n" + times
+
+    # ----- CE quality ----- #
 
     def _construct_violation_property(self, family_ref, cex_generator=None):
         vp_index = len(self.formulae) - 1  # Compute the index of the violation property
@@ -974,6 +1114,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             cex_generator.replace_formula_threshold(
                 vp_index, vp.raw_formula.threshold_expr.evaluate_as_double(), family_ref.bounds[vp_index]
             )
+            Family.global_cex_generator.replace_formula_threshold(
+                vp_index, vp.raw_formula.threshold_expr.evaluate_as_double(), family_ref.bounds[vp_index]
+            )
 
     def _check_optimal_property(self, family_ref, assignment, cex_generator=None, optimal_value=None):
 
@@ -985,7 +1128,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
 
         # Check whether the improvement was achieved
         if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
-
             # Set the new values of the optimal attributes
             self._optimal_value = optimal_value
             self._optimal_assignment = assignment
@@ -1009,6 +1151,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         assert family.constructed
         assert family.analyzed
 
+        # list of relevant holes (open constants) in this subfamily
+        relevant_holes = [hole for hole in family.hole_list if len(family.hole_options[hole]) > 1]
+
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
@@ -1031,7 +1176,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             for formula_index in family.formulae_indices:
                 logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
                 Profiler.start("is - DTMC model checking")
-                Family._dtmc_checks += 1
+                Family.dtmc_checks_inc()
                 sat, _ = family.analyze_member(formula_index)
                 Profiler.stop()
                 logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
@@ -1062,6 +1207,13 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
                     f"CEGIS: found conflict involving {conflict_holes} (generalized {generalized_count} holes)."
                 )
                 conflicts.append(conflict_indices)
+
+                # compare to maxsat, state exploration, naive hole exploration, global vs local bounds
+                self.ce_quality_measure(
+                    assignment, relevant_holes, counterexample_generator,
+                    family.dtmc, family.dtmc_state_map, formula_index
+                )
+
             family.exclude_member(conflicts)
             Profiler.stop()
 
@@ -1109,8 +1261,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
         self.iterations_cegar += 1
         logger.debug(f"CEGAR: iteration {self.iterations_cegar}.")
         Profiler.start("ar - MDP model checking")
-        feasible, optimal_value = family.analyze(superfamily=True)
+        feasible, optimal_value = family.analyze()
         Profiler.stop()
+        self.construct_global_cex_generator(family)
 
         if optimal_value is not None:
             self._check_optimal_property(
@@ -1200,15 +1353,16 @@ class IntegratedChecker(QuotientBasedFamilyChecker):
             logger.info("No more options.")
             return None, None
 
-    def run(self, long_summary):
+    def run(self, short_summary):
         self.statistic = Statistic(
-            "Hybrid", self.formulae, len(self.holes), self._optimality_setting, long_summary=long_summary
+            "Hybrid", self.formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
         )
         assignment, optimal_value = self.run_feasibility()
         self.statistic.finished(
             assignment, (self.iterations_cegar, self.iterations_cegis), optimal_value, self.models_total,
-            Family.quotient_mdp().nr_states, Family.quotient_mdp_stats(0) / Family.quotient_mdp_stats(1),
-            Family.mdp_checks(), Family.dtmc_stats(0) / Family.dtmc_stats(1), Family.dtmc_checks()
+            Family.quotient_mdp().nr_states, safe_division(Family.quotient_mdp_stats(0), Family.quotient_mdp_stats(1)),
+            Family.mdp_checks(), safe_division(Family.dtmc_stats(0), Family.dtmc_stats(1)), Family.dtmc_checks(),
+            self.get_ce_quality_string()
         )
 
 
@@ -1217,7 +1371,7 @@ class Hybrid:
 
     def __init__(
             self, check_prerequisites, backward_cuts, sketch_path, allowed_path, property_path,
-            optimality_path, constants, restrictions, restriction_path, regime, long_summary
+            optimality_path, constants, restrictions, restriction_path, regime, short_summary
     ):
 
         assert not check_prerequisites
@@ -1229,7 +1383,8 @@ class Hybrid:
         self.constants = constants
         self.restrictions = restrictions
         self.restriction_path = restriction_path
-        self.long_summary = long_summary
+        self.short_summary = short_summary
+        self.backward_cuts = backward_cuts
 
         IntegratedChecker.stage_score_limit = STAGE_SCORE_LIMIT
         stats = []
@@ -1260,5 +1415,5 @@ class Hybrid:
         if self.restrictions:
             algorithm.load_restrictions(self.restriction_path)
         algorithm.initialise()
-        algorithm.run(self.long_summary)
+        algorithm.run(self.short_summary)
         return algorithm.statistic

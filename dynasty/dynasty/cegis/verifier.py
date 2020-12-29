@@ -2,12 +2,11 @@ import logging
 import time
 
 import stormpy
-import stormpy.utility
 
 import dynasty.cegis.stats
 
-
 logger = logging.getLogger(__name__)
+
 
 class Verifier:
     def __init__(self):
@@ -22,11 +21,10 @@ class Verifier:
         self._opt_value = None
         self.sketch = None
 
-
     def initialise(self, sketch, properties, qualitative_properties, dont_care_set, add_cuts=True):
         self.properties = properties
         self.sketch = sketch
-        self.qualitative_properties  = qualitative_properties
+        self.qualitative_properties = qualitative_properties
         self._dont_care_set = dont_care_set
         self._set_cex_options(add_cuts)
 
@@ -49,23 +47,22 @@ class Verifier:
         :param naive_deadlocks: 
         :return: 
         """
-        return self._naive_check(instance, all_conflicts, naive_deadlocks)
+        return self.naive_check(instance, all_conflicts, naive_deadlocks)
 
-    def _naive_check(self, instance, all_conflicts, naive_deadlocks=True, check_conflicts=False):
+    def naive_check(self, instance, all_conflicts, naive_deadlocks=True, check_conflicts=False):
         """
         Check the concrete program for the given assignments.
 
-        :param assignments: 
-        :return: 
+        :return:
         """
         self.nr_checks += 1
         logger.debug("Build DTMC....")
         model = self._build_model(instance)
-        logger.debug("...done building DTMC (with {} states and {} transitions)".format(model.nr_states,
-                                                                                        model.nr_transitions))
+        logger.debug(f"...done building DTMC (with {model.nr_states} states and {model.nr_transitions} transitions)")
         # Analyse which properties hold.
-        qualitative_conflicts_properties, quantitative_conflict_properties = self._naive_check_model(model,
-                                                                                                     all_conflicts)
+        qualitative_conflicts_properties, quantitative_conflict_properties = \
+            self._naive_check_model(model, all_conflicts)
+
         if qualitative_conflicts_properties:
             # conflicts.add(tuple([c.name for c in self.sketch.used_constants()]))
             # TODO handling for qualitative conflicts can certainly be improved.
@@ -82,8 +79,9 @@ class Verifier:
         conflicts = set()
         assert self._dont_care_set is not None
         for p, additional in merged_conflict_props.items():
-            logger.debug("Conflict analysis for {} and {}".format(p.raw_formula, ",".join(
-                [str(a[0]) + " " + str(a[1]) for a in additional])))
+            logger.debug('Conflict analysis for {} and {}'.format(
+                p.raw_formula, ",".join([str(a[0]) + " " + str(a[1]) for a in additional]))
+            )
             conflict_analysis_timer = time.time()
 
             # Create input for the counterexample generation.
@@ -95,13 +93,14 @@ class Verifier:
             # Prepare execution of the counterexample generation
             cex_stats = stormpy.core.SMTCounterExampleGeneratorStats()
             # Generate the counterexample
-            result = stormpy.core.SMTCounterExampleGenerator.build(env, cex_stats, symbolic_model, model, cex_input,
-                                                                   self._dont_care_set, self.cex_options)
+            result = stormpy.core.SMTCounterExampleGenerator.build(
+                env, cex_stats, symbolic_model, model, cex_input, self._dont_care_set, self.cex_options
+            )
             # And put the counterexamples into a set.
             result = set(result)
             conflict_analysis_time = time.time() - conflict_analysis_timer
 
-            logger.debug("Found {} counterexamples.".format(len(result)))
+            logger.debug(f"Found {len(result)} counterexamples.")
 
             # Translate the counterexamples into conflicts.
             analysed_conflicts = [self._conflict_analysis(conflict) for conflict in result]
@@ -110,10 +109,11 @@ class Verifier:
                 # Checking conflicts if for debugging purposes only.
                 # We double check whether the counterexamples violate the properties.
                 for cex in result:
-                    test_model = self._build_model(instance.restrict_edges(cex), with_origins=False,
-                                                   register_stats=False)
-                    qualitative_conflicts_properties, quantitative_conflict_properties = self._naive_check_model(
-                        test_model, all_conflicts)
+                    test_model = self._build_model(
+                        instance.restrict_edges(cex), with_origins=False, register_stats=False
+                    )
+                    qualitative_conflicts_properties, quantitative_conflict_properties = \
+                        self._naive_check_model(test_model, all_conflicts)
                     assert len(quantitative_conflict_properties) > 0
 
             # And store details for benchmarking etc.
@@ -155,19 +155,19 @@ class Verifier:
         building_time = time.time() - start_mb
         if register_stats:
             self.stats.report_model_building(building_time, model.nr_states)
-        logger.debug("Build model with {} states in {} seconds".format(model.nr_states, building_time))
+        logger.debug(f"Build model with {model.nr_states} states in {building_time} seconds")
         assert len(model.initial_states) == 1
-        #logger.debug(instance)
+        # logger.debug(instance)
         return model
 
-    def _naive_check_model(self, model, check_all, terminate_after_qualitative_violation = True):
+    def _naive_check_model(self, model, check_all, terminate_after_qualitative_violation=True):
         """
         Do the model checking of the properties
 
         :param model: the Markov chain
         :param check_all: Should we abort as soon as we have found a conflicting property?
         :param terminate_after_qualitative_violation: Should we abort after a qualitative conflict?
-        :return: The set of qualitative conflict properties and the set of quantiative conflict properties
+        :return: The set of qualitative conflict properties and the set of quantitative conflict properties
         """
         logger.info("Start Model Checking....")
         start_mc = time.time()
@@ -180,20 +180,20 @@ class Verifier:
         #         qualitative_violation = True
         #         if not check_all or terminate_after_qualitative_violation:
         #             break
-        logger.debug("Qualitative violations: {}".format(";".join([str(p.raw_formula) for p in violated])))
+        logger.debug(f"Qualitative violations: {';'.join([str(p.raw_formula) for p in violated])}")
         self.stats.qualitative_model_checking_time += time.time() - start_mc
         if terminate_after_qualitative_violation and len(violated) > 0:
             return qualitative_violation, violated
         for p in self.properties:
 
-            logger.debug("Consider..: {}".format(p.property))
+            logger.debug(f"Consider..: {p.property}")
             # First, we check some prerequisite properties, in case they exist.
             if p.prerequisite_property:
-                logger.debug("Prerequisite checking..: {}".format(p.prerequisite_property))
+                logger.debug(f"Prerequisite checking..: {p.prerequisite_property}")
                 start_mc = time.time()
                 mc_result = stormpy.model_checking(model, p.prerequisite_property).at(model.initial_states[0])
-                logger.debug("MC result for prerequisite: {}".format(mc_result))
-                logger.debug("model states: {}, transitions: {}".format(model.nr_states, model.nr_transitions))
+                logger.debug(f"MC result for prerequisite: {mc_result}")
+                logger.debug(f"model states: {model.nr_states}, transitions: {model.nr_transitions}")
                 self.stats.report_model_checking(p.prerequisite_property, time.time() - start_mc, not mc_result)
                 if not mc_result:
                     violated.append(p.prerequisite_property)
@@ -206,8 +206,8 @@ class Verifier:
 
             start_mc = time.time()
             mc_result = stormpy.model_checking(model, p.property).at(model.initial_states[0])
-            logger.debug("MC Result: {}".format(mc_result))
-            logger.debug("model states: {}, transitions: {}".format(model.nr_states, model.nr_transitions))
+            logger.debug(f"MC Result: {mc_result}")
+            logger.debug(f"model states: {model.nr_states}, transitions: {model.nr_transitions}")
             self.stats.report_model_checking(p.property, time.time() - start_mc, not mc_result)
             if not mc_result:
                 violated.append(p.property)
@@ -216,11 +216,13 @@ class Verifier:
         if self._optimality and len(violated) == 0:
             mc_result = stormpy.model_checking(model, self._optimality.criterion).at(model.initial_states[0])
             if self._optimality.is_improvement(mc_result, self._opt_value):
-                logger.debug("Optimal value improved to {}.".format(mc_result))
+                logger.debug(f"Optimal value improved to {mc_result}.")
                 self._opt_value = mc_result
             else:
-                logger.debug("Optimal value ({}) not improved, conflict analysis!".format(self._opt_value))
-                violated.append(self._optimality.get_violation_property(self._opt_value, lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x))))
+                logger.debug(f"Optimal value ({self._opt_value}) not improved, conflict analysis!")
+                violated.append(self._optimality.get_violation_property(
+                    self._opt_value, lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x))
+                ))
         logger.info("Stop Model Checking")
         logger.debug(violated)
         return qualitative_violation, violated
@@ -228,10 +230,9 @@ class Verifier:
     def is_jani(self):
         return type(self.sketch) == stormpy.storage.JaniModel
 
-
     def _set_cex_options(self, add_cuts):
         self.cex_options.maximum_counterexamples = 10000
-        self.cex_options.continue_after_first_counterexample = 1 # was 1.
+        self.cex_options.continue_after_first_counterexample = 1
         self.cex_options.maximum_iterations_after_counterexample = 20
         self.cex_options.use_dynamic_constraints = True
         self.cex_options.add_backward_implication_cuts = True if int(add_cuts) > 0 else False
@@ -239,15 +240,14 @@ class Verifier:
         self.cex_options.check_threshold_feasible = False
         self.cex_options.silent = True
 
-
-
     def _conflict_analysis(self, result):
         applied_cex = self._restrict_sketch(result)
         conflict = tuple(self._used_constants(applied_cex))
-        logger.debug("Conflict of size {}".format(len(conflict)))
+        logger.debug(f"Conflict of size {len(conflict)}")
         return conflict
 
-    def _merge_conflict_properties(self, conflict_props):
+    @staticmethod
+    def _merge_conflict_properties(conflict_props):
         merged_conflict_props = dict()
         eliminated = set()
         for i, p in enumerate(conflict_props):
@@ -263,19 +263,19 @@ class Verifier:
                     merged_conflict_props[p].append((q.raw_formula.reward_name, q.raw_formula.threshold))
         return merged_conflict_props
 
-    def _used_constants(self, model):
+    @staticmethod
+    def _used_constants(model):
         if type(model) == stormpy.storage.JaniModel:
-            vars = set()
+            variables = set()
             for automaton in model.automata:
-                automaton_index = model.get_automaton_index(automaton.name)
                 for edge_index, e in enumerate(automaton.edges):
-                    vars.update(e.guard.get_variables())
+                    variables.update(e.guard.get_variables())
                     for d in e.destinations:
                         for assignment in d.assignments:
-                            vars.update(assignment.expression.get_variables())
-                        vars.update(d.probability.get_variables())
+                            variables.update(assignment.expression.get_variables())
+                        variables.update(d.probability.get_variables())
 
-            var_names = set([var.name for var in vars])
+            var_names = set([var.name for var in variables])
             constants = set()
             for c in model.constants:
                 if c.name in var_names:
@@ -286,11 +286,12 @@ class Verifier:
 
     def _restrict_sketch(self, to):
         if self.is_jani():
-            return self.sketch.restrict_edges(to)#.simplify()
+            return self.sketch.restrict_edges(to)
         else:
             return self.sketch.restrict_commands(to).simplify()
 
-    def _print_overlapping_guards(self, model):
+    @staticmethod
+    def _print_overlapping_guards(model):
         has_overlap_guards = model.labeling.get_states("overlap_guards")
         if has_overlap_guards.number_of_set_bits() == 0:
             return
@@ -307,5 +308,3 @@ class Verifier:
 
         for cs in conflicting_sets:
             print(choice_origins.model.restrict_edges(cs))
-
-

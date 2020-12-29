@@ -64,11 +64,11 @@ def dump_stats_to_file(path, keyword, constants, description, *args):
 @click.option('--check-prerequisites', help="should prerequisites be checked", is_flag=True)
 @click.option('--partitioning', help="Run partitioning instead of feasibility", is_flag=True)
 @click.option('--regime', help="What method to run", default=3, required=False, type=click.IntRange(0, 4))
-@click.option('--long_summary', '-ls', help="Print long synthesis summary", is_flag=True)
+@click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True)
 @click.argument("method", type=click.Choice(['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid']))  # +
 def dynasty(
         project, sketch, allowed, properties, optimality, restrictions, constants, stats, engine,
-        print_stats, check_prerequisites, partitioning, method, regime, long_summary
+        print_stats, check_prerequisites, partitioning, method, regime, short_summary
 ):
     print("This is Dynasty version {}.".format(version()))
     approach = FamilyCheckMethod.from_string(method)
@@ -111,7 +111,7 @@ def dynasty(
         Hybrid(
             check_prerequisites, backward_cuts,
             sketch_path, allowed_path, property_path, optimality_path, constants,
-            restrictions, restriction_path, regime, long_summary
+            restrictions, restriction_path, regime, short_summary
         )
         return
         # .

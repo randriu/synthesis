@@ -1,26 +1,28 @@
+import concurrent.futures as conc
 import logging
 import time
-from collections import OrderedDict
-import concurrent.futures as conc
 import threading
-
-import stormpy
-import stormpy.utility
-
-from dynasty.cegis.stats import SynthetiserStats as SynthetiserStates
-from dynasty.family_checkers.familychecker import FamilyChecker
-from dynasty.cegis.verifier import Verifier
 import z3
 
+from collections import OrderedDict
+
+import stormpy
+
+from dynasty.cegis.stats import SynthetiserStats as SynthetiserStates
+from dynasty.cegis.verifier import Verifier
+from dynasty.family_checkers.familychecker import FamilyChecker
+
 logger = logging.getLogger(__name__)
+
 
 class Synthesiser(FamilyChecker):
     """
     Class that constructs new candidates to be verified.
     """
+
     def __init__(self, check_prerequisites=False, threads=1, add_cuts=True):
         super().__init__(check_prerequisites)
-        self.template_metavariables = OrderedDict()
+        self.template_meta_vars = OrderedDict()
         self.learned_clauses = []
         self.stats = SynthetiserStates()
         self._label_renaming = None
@@ -39,7 +41,7 @@ class Synthesiser(FamilyChecker):
 
     def _register_unconstrained_design_space(self, size):
         self.stats.design_space_size = size
-        logger.info("Design space (without constraints): {}".format(self.stats.design_space_size))
+        logger.info(f"Design space (without constraints): {self.stats.design_space_size}")
 
     def initialise(self):
         self._initialize_solver()
@@ -54,14 +56,14 @@ class Synthesiser(FamilyChecker):
         synt_time = time.time()
         futures = set()
 
-        def make_callback(assignments, sat_model):
-            return lambda fut: self._process_verifier_result(sat_model, assignments, fut.result()[0], fut.result()[1])
+        def make_callback(assignments, model):
+            return lambda fut: self._process_verifier_result(model, assignments, fut.result()[0], fut.result()[1])
 
         while True:
             self.stats.iterations += 1
-            logger.debug("Iteration: {} acquire lock..".format(self.stats.iterations))
+            logger.debug(f"Iteration: {self.stats.iterations} acquire lock..")
             self._smtlock.acquire()
-            logger.debug("Iteration: {} sat-solving..".format(self.stats.iterations))
+            logger.debug(f"Iteration: {self.stats.iterations} sat-solving..")
             solver_time = time.time()
             # Is there one more possible assignment?
             solver_result = self.solver.check()
@@ -71,29 +73,30 @@ class Synthesiser(FamilyChecker):
                 self._smtlock.release()
                 logger.debug("No further instances to explore.")
                 break
-            logger.debug("Iteration: {} obtain model..".format(self.stats.iterations))
+            logger.debug(f"Iteration: {self.stats.iterations} obtain model..")
 
             # Get the model for the instance that the SAT solver encountered.
             sat_model = self.solver.model()
             self._smtlock.release()
 
-            # If we run several tasks in parallel, ensure that no further model is going to work on this particular instance.
+            # If we run several tasks in parallel, ensure that no
+            # further model is going to work on this particular instance.
             if self.tasks > 1:
                 self._exclude_sat_model(sat_model, [self.holes])
 
-            logger.debug("Iteration: {} instantiating..".format(self.stats.iterations))
+            logger.debug(f"Iteration: {self.stats.iterations} instantiating..")
             # Create an assignment for the holes ..
             hole_assignments = self._sat_model_to_constants_assignment(sat_model)
             # and construct ..
             instance = self.build_instance(hole_assignments)
 
-            logger.debug("Iteration: {} dispatching ..".format(self.stats.iterations))
+            logger.debug(f"Iteration: {self.stats.iterations} dispatching ..")
 
             # Execute the verifier in another thread.
             future = self._executor.submit(self._verifier.run, instance, self._all_conflicts)
             future._cb = make_callback(hole_assignments, sat_model)
             futures.add(future)
-            logger.debug("Currently running: {}".format(len(futures)))
+            logger.debug(f"Currently running: {len(futures)}")
             if len(futures) >= self.tasks:
                 logger.debug("Waiting for one task to finish")
                 done, futures = conc.wait(futures, return_when=conc.FIRST_COMPLETED)
@@ -124,13 +127,17 @@ class Synthesiser(FamilyChecker):
         :param assignments:
         :return:
         """
+        # if isinstance(assignments, OrderedDict):
         logger.info(
-            "Consider hole assignment: {}".format(",".join("{}={}".format(k, v) for k, v in assignments.items())))
+            "Consider hole assignment: {}".format(",".join("{}={}".format(k, v) for k, v in assignments.items()))
+        )
+        # else:
+        # logger.info(f"Consider hole assignment: {assignments}")
         constants_map = dict()
         ep = stormpy.storage.ExpressionParser(self.expression_manager)
         ep.set_identifier_mapping(dict())
         for hole_name, expr in assignments.items():
-            constants_map[self.holes[hole_name].expression_variable] = expr
+            constants_map[self.holes[hole_name].expression_variable] = expr[0] if isinstance(expr, list) else expr
         logger.debug("construct instance")
         instance = self.sketch.define_constants(constants_map).substitute_constants()
         logger.debug("constructed instance")
@@ -148,15 +155,16 @@ class Synthesiser(FamilyChecker):
                         for dest in e.destinations:
                             for assignment in dest.assignments:
                                 if assignment.expression.contains_variable(
-                                        set([c.expression_variable for c in self.holes.values()])):
+                                        set([c.expression_variable for c in self.holes.values()])
+                                ):
                                     dont_care = False
                                     continue
 
                     if dont_care:
-                        automaton_edge_index = stormpy.JaniModel.encode_automaton_and_edge_index(automaton_index,
-                                                                                                 edge_index)
+                        automaton_edge_index = stormpy.JaniModel.encode_automaton_and_edge_index(
+                            automaton_index, edge_index
+                        )
                         dont_care_set.insert(automaton_edge_index)
-
 
         else:
             logger.warning("Dont care sets for prism are not supported")
@@ -169,7 +177,7 @@ class Synthesiser(FamilyChecker):
             # Create Integer Variable
             var = z3.Int(k)
             # Store the variable.
-            self.template_metavariables[var] = k
+            self.template_meta_vars[var] = k
             variables[k] = var
             # Add constraints for the number of actions.
             self.solver.add(var >= 0)
@@ -182,15 +190,16 @@ class Synthesiser(FamilyChecker):
 
         if self.differents:
             for sym in self.differents:
-                for id, x in enumerate(sym):
-                    for y in sym[id + 1:]:
-                        logger.debug("{} != {}".format(x, y))
+                for idx, x in enumerate(sym):
+                    for y in sym[idx + 1:]:
+                        logger.debug(f"{x} != {y}")
                         self.solver.add(variables[x] != variables[y])
 
     def _initialise_verifier(self):
         dont_care_set = self._compute_dont_care_set()
-        self._verifier.initialise(self.sketch, self.properties, self.qualitative_properties, dont_care_set,
-                                  self._add_cuts)
+        self._verifier.initialise(
+            self.sketch, self.properties, self.qualitative_properties, dont_care_set, self._add_cuts
+        )
         self._verifier.initialise_stats(self.holes)
         self._verifier.initialise_optimality(self._optimality_setting)
 
@@ -205,10 +214,10 @@ class Synthesiser(FamilyChecker):
             self.result = assignments
         else:
             for conflict in conflicts:
-                if len(conflict) < len(self.template_metavariables):
+                if len(conflict) < len(self.template_meta_vars):
                     self.stats.non_trivial_cex += 1
                 print(conflicts)
-            logger.info("Found conflicts involving {}".format(conflicts))
+            logger.info(f"Found conflicts involving {conflicts}")
             self._exclude_sat_model(sat_model_map, conflicts)
 
     def _count_remaining_models(self):
@@ -223,17 +232,17 @@ class Synthesiser(FamilyChecker):
         print("Counting remaining models....")
         while self.solver.check() == z3.sat:
             sat_model = self.solver.model()
-            clause = Not(And([var == sat_model[var] for var, hole in self.template_metavariables.items()]))
+            clause = z3.Not(z3.And([var == sat_model[var] for var, hole in self.template_meta_vars.items()]))
             self.solver.add(clause)
             i += 1
             if i % 1000 == 0:
                 print(i)
-        print("Remaining models: {}".format(i))
+        print(f"Remaining models: {i}")
         self.solver.pop()
 
     def _sat_model_to_constants_assignment(self, sat_model):
         hole_assignments = OrderedDict()
-        for var, hole in self.template_metavariables.items():
+        for var, hole in self.template_meta_vars.items():
             val = sat_model[var].as_long()
             hole_assignments[hole] = self.hole_options[hole][val]
         return hole_assignments
@@ -247,9 +256,9 @@ class Synthesiser(FamilyChecker):
         """
         for conflict in conflicts:
             clause = z3.Not(
-                z3.And([var == sat_model[var] for var, hole in self.template_metavariables.items() if hole in conflict]))
-            logger.info("learned clause: {}".format(clause))
-            if len(conflict) != len(self.template_metavariables):
+                z3.And([var == sat_model[var] for var, hole in self.template_meta_vars.items() if hole in conflict]))
+            logger.info(f"learned clause: {clause}")
+            if len(conflict) != len(self.template_meta_vars):
                 self.learned_clauses.append(clause)
             self._smtlock.acquire()
             clause_add_time = time.time()
@@ -260,31 +269,40 @@ class Synthesiser(FamilyChecker):
             logger.debug("added clause!")
 
     def print_stats(self):
-        print("Iterations: {} ({} s), Qualitative Iterations {}/{}".format(self.stats.iterations,
-                                                                           self.stats.total_time,
-                                                                           self.stats.qualitative_iterations,
-                                                                           self.stats.iterations))
-        print("Non-trivial counterexamples: {}".format(self.stats.non_trivial_cex))
-        print("Model Building Calls: {} ({} s)".format(self.verifier_stats.model_building_calls,
-                                                       self.verifier_stats.model_building_time))
-        print("Synthethiser Analysis: {} = {} + {} s".format(self.stats.total_solver_time,
-                                                             self.stats.total_solver_analysis_time,
-                                                             self.stats.total_solver_clause_adding_time))
-        print("Conflict analyses Calls: {} ({} s)".format(self.verifier_stats.conflict_analysis_calls,
-                                                          self.verifier_stats.conflict_analysis_time))
-        print("Qualitative Model Checking Calls: {} ({} s)".format(
-            self.verifier_stats.qualitative_model_checking_calls,
-            self.verifier_stats.qualitative_model_checking_time))
-        print("Quantitative Model Checking Calls: {} ({} s)".format(
-            self.verifier_stats.quantitative_model_checking_calls,
-            self.verifier_stats.quantitative_model_checking_time))
+        print(
+            f"Iterations: {self.stats.iterations} ({self.stats.total_time} s), "
+            f"Qualitative Iterations {self.stats.qualitative_iterations}/{self.stats.iterations}"
+        )
+        print(f"Non-trivial counterexamples: {self.stats.non_trivial_cex}")
+        print(
+            f"Model Building Calls: "
+            f"{self.verifier_stats.model_building_calls} ({self.verifier_stats.model_building_time} s)"
+        )
+        print(
+            f"Synthesiser Analysis: {self.stats.total_solver_time} = "
+            f"{self.stats.total_solver_analysis_time} + {self.stats.total_solver_clause_adding_time} s"
+        )
+        print(
+            f"Conflict analyses Calls: "
+            f"{self.verifier_stats.conflict_analysis_calls} ({self.verifier_stats.conflict_analysis_time} s)"
+        )
+        print(
+            f"Qualitative Model Checking Calls: "
+            f"{self.verifier_stats.qualitative_model_checking_calls} "
+            f"({self.verifier_stats.qualitative_model_checking_time} s)"
+        )
+        print(
+            f"Quantitative Model Checking Calls: "
+            f"{self.verifier_stats.quantitative_model_checking_calls} "
+            f"({self.verifier_stats.quantitative_model_checking_time} s)"
+        )
 
-        print("CA/Iterations: {}".format(self.verifier_stats.total_conflict_analysis_iterations))
-        print("CA/SMT solving: {} s".format(self.verifier_stats.total_conflict_analysis_solver_time))
-        print("CA/Analysis: {} s".format(self.verifier_stats.total_conflict_analysis_analysis_time))
-        print("CA/MC: {} s".format(self.verifier_stats.total_conflict_analysis_mc_time))
-        print("CA/Setup: {} s".format(self.verifier_stats.total_conflict_analysis_setup_time))
-        print("CA/Cuts: {} s".format(self.verifier_stats.total_conflict_analysis_cut_time))
+        print(f"CA/Iterations: {self.verifier_stats.total_conflict_analysis_iterations}")
+        print(f"CA/SMT solving: {self.verifier_stats.total_conflict_analysis_solver_time} s")
+        print(f"CA/Analysis: {self.verifier_stats.total_conflict_analysis_analysis_time} s")
+        print(f"CA/MC: {self.verifier_stats.total_conflict_analysis_mc_time} s")
+        print(f"CA/Setup: {self.verifier_stats.total_conflict_analysis_setup_time} s")
+        print(f"CA/Cuts: {self.verifier_stats.total_conflict_analysis_cut_time} s")
 
         # print("Learned clauses: {}".format(",".join([str(c) for c in self.stats.learned_clauses])))
         # print(self.sketch)
