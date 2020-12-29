@@ -37,9 +37,6 @@ STAGE_SCORE_LIMIT = 99999
 # Zero approximation to avoid zero division etc.
 APPROX_ZERO = 0.000001
 
-COMPUTE_CE_QUALITY = False
-COMPUTE_CE_QUALITY_MAXSAT = False
-
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
 
 
@@ -891,6 +888,8 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     """Integrated checker."""
 
     stage_score_limit = 99999
+    ce_quality = False
+    ce_maxsat = False
 
     def __init__(self):
         QuotientBasedFamilyChecker.__init__(self)
@@ -1020,7 +1019,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     #     self.stage_timer.stop()
 
     #     if self.ce_quality_compute:
-    #         Family.global_cex_generator = stormpy.synthesis.SynthesisResearchCounterexample(
+    #         Family.global_cex_generator = stormpy.synthesis.SynthesisCounterexample(
     #             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
     #         )
 
@@ -1030,7 +1029,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     def ce_quality_measure(
             self, assignments, relevant_holes, counterexample_generator, dtmc, dtmc_state_map, formula_idx
     ):
-        if not COMPUTE_CE_QUALITY:
+        if not IntegratedChecker.ce_quality:
             return
         self.statistic.timer.stop()
         self.stage_timer.stop()
@@ -1038,7 +1037,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # maxsat
         self.ce_maxsat_timer.start()
         instance = self.build_instance(assignments)
-        if COMPUTE_CE_QUALITY_MAXSAT:
+        if IntegratedChecker.ce_maxsat:
             _, conflict_maxsat = self._verifier.naive_check(instance, all_conflicts=True)
             conflict_maxsat = conflict_maxsat.pop() if conflict_maxsat else []
             conflict_maxsat = [hole for hole in conflict_maxsat if hole in relevant_holes]
@@ -1071,7 +1070,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         self.statistic.timer.start()
 
     def get_ce_quality_string(self):
-        if not COMPUTE_CE_QUALITY:
+        if not IntegratedChecker.ce_quality:
             return ""
         if self.iterations_cegis == 0:
             return "> ce quality: n/a"
@@ -1158,7 +1157,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
-        counterexample_generator = stormpy.synthesis.SynthesisResearchCounterexample(
+        counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
         )
         Profiler.stop()
@@ -1371,8 +1370,8 @@ class Hybrid:
     """Entry point: execution setup."""
 
     def __init__(
-            self, check_prerequisites, backward_cuts, sketch_path, allowed_path, property_path,
-            optimality_path, constants, restrictions, restriction_path, regime, short_summary
+            self, check_prerequisites, backward_cuts, sketch_path, allowed_path, property_path, optimality_path,
+            constants, restrictions, restriction_path, regime, short_summary, ce_quality, ce_maxsat
     ):
 
         assert not check_prerequisites
@@ -1387,6 +1386,8 @@ class Hybrid:
         self.short_summary = short_summary
         self.backward_cuts = backward_cuts
 
+        IntegratedChecker.ce_quality = ce_quality
+        IntegratedChecker.ce_maxsat = ce_maxsat
         IntegratedChecker.stage_score_limit = STAGE_SCORE_LIMIT
         stats = []
 

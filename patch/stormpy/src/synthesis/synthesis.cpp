@@ -31,7 +31,7 @@ void define_synthesis(py::module& m) {
 
     // Counterexample generation
     py::class_<storm::synthesis::Counterexample<>>(
-        m, "SynthesisResearchCounterexample", "[synthesis research] Counterexample generation"
+        m, "SynthesisCounterexample", "[synthesis research] Counterexample generation"
     )
         .def(
             py::init<
