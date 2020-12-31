@@ -121,6 +121,7 @@ class Statistic:
         formulae = "\n".join([f"formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
         opt_formula = f"optimal setting: {self.opt_setting}" if self.optimal_value else ""
 
+        timing = f"method: {self.method}, synthesis time: {round(self.timer.time, 2)}"
         design_space = f"number of holes: {self.holes_count}, family size: {self.family_size}"
 
         mdp_stats = f"super MDP size: {self.super_mdp_size}, average MDP size: {round(self.avg_mdp_size)}, " \
@@ -132,8 +133,6 @@ class Statistic:
             family_stats += f"{mdp_stats}\n"
         if self.method != "CEGAR":
             family_stats += f"{dtmc_stats}\n"
-
-        timing = f"method: {self.method}, synthesis time: {round(self.timer.time, 2)}"
 
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
@@ -154,7 +153,9 @@ class Statistic:
             iters = self.iterations[1]
         else:
             iters = (self.iterations[0], self.iterations[1])
-        return f"> {self.method}: {result} ({iters} iters, {round(self.timer.time, 2)} sec)"
+        thresholds = [round(float(f.threshold),10) for f in self.formulae]
+        
+        return f"> T = {thresholds} - {self.method}: {result} ({iters} iters, {round(self.timer.time, 2)} sec)"
 
     def __str__(self):
         sep = "--------------------"

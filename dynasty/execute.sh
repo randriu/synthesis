@@ -1,24 +1,23 @@
 #!/bin/bash
 
 # command-line argument: core index
-# if [ -n "$1" ]; then
-#     core=$1
-# else
-#     core="0"
-# fi
 core=$1
 
 # default parameters
-regime=0
-timeout=720h
-score_limit=999999
+primary_method=hybrid
+regime=2
+timeout=10d
 verbose=false
 parallel=false
 
-# synthesis method
-# primary_method=cschedenum
-# primary_method=cegis
-primary_method=hybrid
+# workspace settings
+models_dir="workspace/examples"
+log_dir="workspace/log"
+parameters_file="${log_dir}/parameters.txt"
+log_file="${log_dir}/log_${core}.txt"
+log_grep_file="${log_dir}/log_grep_${core}.txt"
+
+# ------------------------------------------------------------------------------
 
 # presets: TACAS
 grid=("grid/orig" 40 0.004 0.019 0.003)
@@ -31,29 +30,9 @@ herman=("herman/orig" 2 0.60 0.75 0.05)
 CMAX=6
 herbig=("herman/big" ${CMAX} 0.95 0.95 0.3)
 
-# preset candidates
-mazexxl=("maze/xxl" 50 0.1 0.1 0.1)
-virus=("virus/orig" 0 0.1 0.9 0.1)
-
-# workspace settings
-examples_dir="workspace/examples"
-log_dir="workspace/log"
-parameters_file="${log_dir}/parameters.txt"
-log_file="${log_dir}/log_${core}.txt"
-log_grep_file="${log_dir}/log_grep_${core}.txt"
 
 # ------------------------------------------------------------------------------
 # functions
-
-function log_output() {
-    while read input; do
-        if [ ${verbose} = "false" ]; then
-            echo ${input} | tee --append ${log_file} | grep "^> " | tee --append ${log_grep_file}
-        else
-            echo ${input} | tee --append ${log_file}
-        fi
-    done
-}
 
 function choose_model() {
     preset=("$@")
@@ -64,16 +43,22 @@ function choose_model() {
     t_step=${preset[4]}
 }
 
-function write_params() {
-    echo $regime > $parameters_file
-    echo $score_limit >> $parameters_file
+function log_output() {
+    while read input; do
+        if [ ${verbose} = "true" ]; then
+            echo ${input} | tee --append ${log_file}
+        else
+            echo ${input} | tee --append ${log_file} | grep "^> " | tee --append ${log_grep_file}
+        fi
+    done
 }
 
 function dynasty() {
-    dynasty="python dynasty.py hybrid --regime $1 --project ${examples_dir}/${model}/ --short-summary"
+    dynasty="python dynasty.py hybrid --regime $1 --project ${models_dir}/${model}/ --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    echo "> " ${dynasty} ${constants} ${OPTIMALITY}
-    timeout ${timeout} ${dynasty} ${constants} ${OPTIMALITY}
+    optimality="--optimality sketch.optimal"
+    echo ${dynasty} ${constants} ${optimality}
+    timeout ${timeout} ${dynasty} ${constants} ${optimality}
 }
 
 function try_thresholds() {
@@ -87,10 +72,9 @@ function try_thresholds() {
     wait
 }
 
-reset_log() {
-    echo "" > ${log_file}
-    echo "" > ${log_grep_file}
-    write_params
+function reset_log() {
+    > ${log_file}
+    > ${log_grep_file}
 }
 
 function onebyone() {
@@ -114,11 +98,10 @@ function hybrid() {
 function test_release() {
     parallel=true
     reset_log
-    timeout=5m
     model=("herman/orig" 2 0.60 0.75 0.15)
     choose_model "${model[@]}"
     cegar
-    echo "^ should be at 15 and 19 sec"
+    echo "^ should be at 15 and 18 sec"
 }
 
 function tacas_performance() {
@@ -153,51 +136,21 @@ function tacas_performance() {
 
 }
 
-function profiling() {
+function tacas_performance_2() {
     reset_log
 
-    timeout=10h
-    # parallel=true
-    # verbose=true
-
-    model=("grid/orig" 40 0.019 0.019 0.15)
-
-    # model=("grid/big" 40 0.928 0.931 0.003)
-    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
-    # model=("pole/orig" 5 0.735 0.735 0.001)
-    # model=("dpm/orig" 12 0.080 0.080 0.002)
-    # model=("herman/orig" 2 0.60 0.60 0.15)
-    # model=("virus/orig" 0 0.1 0.9 0.1)
-
-    # model=("herman/big" 6 0.98 0.98 0.3)
-
-    choose_model "${model[@]}"
-
-    # hybrid
-    cegis
-    # cegar
-    # onebyone
-}
-
-function exploring_grid() {
-    reset_log
-
-    timeout=1h
+    timeout=5m
     parallel=true
     # verbose=true
-    
-    model=("grid/big-exploring" 10 0.0714 0.0714 0.0001)
-    # model=("grid/big-exploring" 10 7.6 7.7 0.1)
-    
-    # model=("grid/big-exploring-nobad" 10 0.1 0.9 0.1)
-    # model=("grid/big-exploring-nobad" 10 9.4 /9.5 0.1)
-    
-    choose_model "${model[@]}"
-    
 
-    # hybrid
+    # grid=("grid/big" 40 0.928 0.931 0.003)
+    grid=("grid/big" 40 0.931 0.931 0.003)
+
+    choose_model "${grid[@]}"
+
+    hybrid
     # cegar
-    cegis
+    # cegis
 }
 
 function run() {
@@ -251,139 +204,16 @@ function run() {
     # onebyone
 }
 
-# ----------
+# --- execution ----------------------------------------------------------------
 
 # test_release
 # tacas_performance
 
-# profiling
-# exploring_grid
+tacas_performance_2
 
-run
+# run
 
 exit
 
 # --- halted -------------------------------------------------------------------
 
-# --- CEGIS revisited ---
-
-function cegis_virus_opt() {
-    reset_log
-
-    # primary_method=cegis
-    OPTIMALITY="--optimality sketch.optimal"
-    timeout=360h
-    
-    # parallel=true
-    # verbose=true
-
-    model=("cegis-copy/virus-opt" 0 1 1 1.0)
-    choose_model "${model[@]}"
-    
-    cegis
-    # cegar
-    # onebyone
-}
-
-function cegis_virus() {
-    # primary_method=cegis
-    timeout=1m
-    reset_log
-    # parallel=true
-    # verbose=true
-
-    model=("cegis-copy/virus" 0 23 23 1.0)
-    choose_model "${model[@]}"
-    # onebyone
-    cegis
-    # cegar
-}
-
-function exploring_virus() {
-    reset_log
-
-    timeout=1h
-    parallel=true
-    # verbose=true
-    
-    # model=("virus/orig" 20 0.01 0.20 0.01)
-    model=("virus/orig" 20 0.13 0.13 0.06)
-    
-    choose_model "${model[@]}"
-    
-    # hybrid
-    cegar
-    # cegis
-}
-
-function cegis_grid_big_opt() {
-    reset_log
-
-    # primary_method=cegis
-    OPTIMALITY="--optimality sketch.optimal"
-    timeout=1m
-
-    # parallel=true
-    verbose=true
-
-    CMAX=4000
-    
-    model=("cegis-copy/grid-big-opt" ${CMAX} 1 1 1.0)
-    choose_model "${model[@]}"
-
-    cegis
-    # cegar
-    # onebyone
-}
-
-function cegis_grid() {
-    timeout=120h
-    reset_log
-    parallel=true
-
-    CMAX=10
-    echo CMAX=${CMAX}
-    model=("cegis-copy/grid" ${CMAX} 1 9 2.0)
-    choose_model "${model[@]}"
-    # cegis
-    # onebyone
-    wait
-
-    CMAX=100
-    echo CMAX=${CMAX}
-    model=("cegis-copy/grid" ${CMAX} 10 90 20.0)
-    choose_model "${model[@]}"
-    # cegis
-    # onebyone
-    wait
-
-    CMAX=1000
-    echo CMAX=${CMAX}
-    model=("cegis-copy/grid" ${CMAX} 100 900 200.0)
-    choose_model "${model[@]}"
-    # cegis
-    # onebyone
-    wait
-    
-    CMAX=4000
-    echo CMAX=${CMAX}
-    model=("cegis-copy/grid" ${CMAX} 400 3600 800.0)
-    choose_model "${model[@]}"
-    # cegis
-    # onebyone
-    wait
-
-    CMAX=10000
-    echo CMAX=${CMAX}
-    model=("cegis-copy/grid" ${CMAX} 1000 9000 2000.0)
-    choose_model "${model[@]}"
-    # cegis
-    # onebyone
-    wait
-    
-    # cegis
-    # onebyone
-}
-
-# beep bop
-# paplay /usr/share/sounds/freedesktop/stereo/complete.oga
