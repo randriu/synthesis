@@ -2,8 +2,8 @@
 # set -x
 
 # timeout value for each experiment
-timeout_basic=0.2s
-timeout_large_model=0.5s
+timeout_basic=2s
+timeout_large_model=2s
 
 # number of experiments
 experiment_current=0
@@ -77,25 +77,25 @@ mkdir -p experiments/large_model
 source env/bin/activate
 cd dynasty
 
-## evaluate cegis/cegar/hybrid on a basic benchmark
-# echo "-- evaluating basic benchmark (cegis)"
-# evaluate_models basic_cegis cegis
-# echo "-- evaluating basic benchmark (cegar)"
-# evaluate_models basic_cegar cegar
-# echo "-- evaluating basic benchmark (hybrid)"
-# evaluate_models basic_hybrid hybrid
+# evaluate cegis/cegar/hybrid on a basic benchmark
+echo "-- evaluating basic benchmark (cegis)"
+evaluate_models basic_cegis cegis
+echo "-- evaluating basic benchmark (cegar)"
+evaluate_models basic_cegar cegar
+echo "-- evaluating basic benchmark (hybrid)"
+evaluate_models basic_hybrid hybrid
 
-# ## evaluate CE quality on the same benchmark
-# echo "-- evaluating CE quality (hybrid)"
-# evaluate_models ce_quality hybrid --ce-quality
-# echo "-- evaluating CE quality (maxsat)"
-# evaluate_models ce_maxsat hybrid --ce-maxsat
+# evaluate CE quality on the same benchmark
+echo "-- evaluating CE quality (hybrid)"
+evaluate_models ce_quality hybrid --ce-quality
+echo "-- evaluating CE quality (maxsat)"
+evaluate_models ce_maxsat hybrid --ce-maxsat
 
 ## TODO multiple properties
 echo "TODO multiple properties"
 
 ## large model experiments
-methods=( onebyone cegis cegar hybrid )
+methods=( onebyone cegar hybrid )
 for method in "${methods[@]}"; do
     regime="$(method_to_regime ${method})"
     
