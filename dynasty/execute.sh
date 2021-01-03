@@ -56,7 +56,7 @@ function log_output() {
 function dynasty() {
     dynasty="python dynasty.py hybrid --regime $1 --project ${models_dir}/${model}/ --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    # optimality="--optimality sketch.optimal"
+    optimality="--optimality sketch.optimal"
     echo ${dynasty} ${constants} ${optimality}
     timeout ${timeout} ${dynasty} ${constants} ${optimality}
 }
@@ -141,8 +141,8 @@ function try_herman() {
 
     # model=("herman/3_1" 0 0.0 0.9 0.1)
     
-    model=("herman/5_feas" 0 18.0 19.0 0.1)
-    # model=("herman/5_opt" 0 0 0 0.1)
+    # model=("herman/5_feas" 0 18.1 18.2 0.1)
+    model=("herman/5_opt" 0 0 0 0.1)
     
     # model=("herman/10_1" 0 0.1 0.1 0.1)
     # model=("herman/15_1" 0 0 0 1.0)

@@ -2,10 +2,8 @@
 # set -x
 
 # timeout values for each experiment
-
-timeout_basic=2h # for basic benchmark
-timeout_onebyone=10s # used to estimate performance of a 1-by-1 approach
-timeout_large_model=2h # 
+timeout_basic_benchmark=2s  # grid/maze/dpm/pole/herman
+timeout_large_model=2s      # large herman
 
 # number of experiments
 experiment_current=0
@@ -58,8 +56,8 @@ function evaluate_models() {
     options=$3
     models=( grid maze dpm pole herman )
     for model in "${models[@]}"; do
-        dynasty ${timeout_basic} ${experiment_set} ${model} easy ${method} ${options} 
-        dynasty ${timeout_basic} ${experiment_set} ${model} hard ${method} ${options}
+        dynasty ${timeout_basic_benchmark} ${experiment_set} ${model} easy ${method} ${options} 
+        dynasty ${timeout_basic_benchmark} ${experiment_set} ${model} hard ${method} ${options}
     done
 }
 
@@ -82,7 +80,7 @@ evaluate_models basic hybrid
 
 # evaluate CE quality on the same benchmark
 echo "-- evaluating CE quality (hybrid)"
-evaluate_models ce_quality hybrid --ce-quality
+evaluate_models ce_quality hybrid "--ce-quality"
 echo "-- evaluating CE quality (maxsat)"
 evaluate_models ce_maxsat hybrid "--ce-quality --ce-maxsat"
 
