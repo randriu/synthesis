@@ -255,6 +255,9 @@ ditera() {
     dlog $1 | grep "CEGAR: iteration " | tail -n 1
 }
 
+dfamily() {
+    dlog $1 | grep "family size" | tail -n 1
+}
 ddtmc() {
     dlog $1 | grep "Constructed DTMC"
 }

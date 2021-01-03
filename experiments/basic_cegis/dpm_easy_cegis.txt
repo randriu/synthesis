@@ -1,0 +1,38 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+CEGISChecker
+2021-01-03 03:32:04,553 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from workspace/tacas21/dpm/sketch.templ with constants 
+2021-01-03 03:32:04,556 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-03 03:32:04,557 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:04,557 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:04,557 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-03 03:32:04,557 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X13', 'X23', 'X33', 'X43', 'X14', 'X24', 'X34', 'X44']
+2021-01-03 03:32:04,557 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:04,558 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions X11: [0,1,2],X21: [0,1,2],X31: [0,1,2],X41: [0,1,2],X12: [0,1,2],X22: [0,1,2],X32: [0,1,2],X42: [0,1,2],X13: [0,1,2],X23: [0,1,2],X33: [0,1,2],X43: [0,1,2],X14: [0,1,2],X24: [0,1,2],X34: [0,1,2],X44: [0,1,2]
+2021-01-03 03:32:04,558 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 43046721
+2021-01-03 03:32:04,568 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 acquire lock..
+2021-01-03 03:32:04,568 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 sat-solving..
+2021-01-03 03:32:04,572 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 obtain model..
+2021-01-03 03:32:04,572 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 instantiating..
+2021-01-03 03:32:04,573 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: X11=0,X21=0,X31=0,X41=0,X12=0,X22=0,X32=0,X42=0,X13=0,X23=0,X33=0,X43=0,X14=0,X24=0,X34=0,X44=0
+2021-01-03 03:32:04,573 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-03 03:32:04,573 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-03 03:32:04,574 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 dispatching ..
+2021-01-03 03:32:04,574 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-03 03:32:04,595 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-03 03:32:04,595 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-03 03:32:04,595 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1136 states in 0.02103590965270996 seconds
+2021-01-03 03:32:04,595 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1136 states and 3319 transitions)
+2021-01-03 03:32:04,595 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-03 03:32:04,595 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-03 03:32:04,595 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P<=39/500 [F ((((q = 0) | (q = 12)) | (qL = 0)) | (qL = 12))]'
+2021-01-03 03:32:04,595 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-03 03:32:04,596 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-03 03:32:04,596 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1136, transitions: 3319
+2021-01-03 03:32:04,596 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-03 03:32:04,596 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f43fb485b70>]
+2021-01-03 03:32:04,596 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P<=39/500 [F ((((q = 0) | (q = 12)) | (qL = 0)) | (qL = 12))] and 
+TO

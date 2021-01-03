@@ -1,0 +1,18 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+CEGARChecker
+2021-01-03 03:32:05,780 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from workspace/tacas21/grid/sketch.templ with constants 
+2021-01-03 03:32:05,782 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-03 03:32:05,783 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:05,783 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:05,783 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-03 03:32:05,783 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M_0_1', 'M_1_1', 'M_2_1', 'M_3_1', 'P_0_1', 'P_1_1', 'P_2_1', 'P_3_1']
+2021-01-03 03:32:05,783 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:05,784 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M_0_1: [0,1,2,3],M_1_1: [0,1,2,3],M_2_1: [0,1,2,3],M_3_1: [0,1,2,3],P_0_1: [1,2,3,4],P_1_1: [1,2,3,4],P_2_1: [1,2,3,4],P_3_1: [1,2,3,4]
+2021-01-03 03:32:05,784 MainThread - dynasty.family_checkers.familychecker - INFO - Design space (without constraints): 65536
+2021-01-03 03:32:05,784 MainThread - dynasty.family_checkers.integrated_checker - INFO - Running feasibility + optimal synthesis.
+2021-01-03 03:32:05,784 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP of the superfamily.
+TO

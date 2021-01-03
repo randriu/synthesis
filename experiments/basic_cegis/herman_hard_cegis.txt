@@ -1,0 +1,38 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+CEGISChecker
+2021-01-03 03:32:05,576 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from workspace/tacas21/herman/sketch.templ with constants 
+2021-01-03 03:32:05,583 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-03 03:32:05,583 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:05,584 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:05,584 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-03 03:32:05,584 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M0LFAIR', 'M1LFAIR', 'M0HFAIR', 'M1HFAIR', 'M0A', 'M0B', 'M0C', 'M1A', 'M1B', 'M1C', 'M2A', 'M2B', 'M2C']
+2021-01-03 03:32:05,584 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:32:05,585 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M0LFAIR: [0,1,2],M1LFAIR: [0,1,2],M0A: [0,1],M0B: [0,1],M0C: [0,1],M1A: [0,1],M1B: [0,1],M1C: [0,1]
+2021-01-03 03:32:05,585 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 576
+2021-01-03 03:32:05,594 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 acquire lock..
+2021-01-03 03:32:05,594 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 sat-solving..
+2021-01-03 03:32:05,598 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 obtain model..
+2021-01-03 03:32:05,598 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 instantiating..
+2021-01-03 03:32:05,598 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M0LFAIR=0,M1LFAIR=0,M0A=0,M0B=0,M0C=0,M1A=0,M1B=0,M1C=0
+2021-01-03 03:32:05,598 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-03 03:32:05,599 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-03 03:32:05,599 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 dispatching ..
+2021-01-03 03:32:05,599 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-03 03:32:05,624 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-03 03:32:05,624 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1759 states in 0.02464580535888672 seconds
+2021-01-03 03:32:05,624 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-03 03:32:05,624 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1759 states and 2396 transitions)
+2021-01-03 03:32:05,625 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-03 03:32:05,625 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-03 03:32:05,625 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'R[exp]{"steps"}<=9/5 [F "stable"]'
+2021-01-03 03:32:05,625 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-03 03:32:05,626 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-03 03:32:05,626 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1759, transitions: 2396
+2021-01-03 03:32:05,626 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-03 03:32:05,626 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7fa2f4fcde70>]
+2021-01-03 03:32:05,626 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for R[exp]{"steps"}<=9/5 [F "stable"] and 
+TO

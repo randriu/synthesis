@@ -168,8 +168,8 @@ endmodule
 // SERVICE REQUEST QUEUES
 module SRQ
 
-	q : [0..CMAX] init CMAX/2;
-	qL : [0..CMAX] init CMAX/2;
+	q : [0..CMAX] init 0;
+	qL : [0..CMAX] init 0;
 
 	[tick2] sr=0 & sp!=0 & sp!=1 -> true; // do not serve and nothing arrives
 

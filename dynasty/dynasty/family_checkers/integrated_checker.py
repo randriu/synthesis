@@ -15,7 +15,7 @@ from ..jani.quotient_container import logger as quotient_container_logger, Thres
 from ..model_handling.mdp_handling import logger as model_handling_logger
 from ..profiler import Profiler, Timer
 from .cegis import Synthesiser
-from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker, logger as quotienbased_logger
+from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker, logger as quotientbased_logger
 from .familychecker import HoleOptions
 
 # LOGGING -------------------------------------------------------------------------------------------------- LOGGING
@@ -23,7 +23,7 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-quotienbased_logger.disabled = True
+quotientbased_logger.disabled = False
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
@@ -121,7 +121,7 @@ class Statistic:
         formulae = "\n".join([f"formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
         opt_formula = f"optimal setting: {self.opt_setting}" if self.optimal_value else ""
 
-        timing = f"method: {self.method}, synthesis time: {round(self.timer.time, 2)}"
+        timing = f"method: {self.method}, synthesis time: {round(self.timer.time, 2)} s"
         design_space = f"number of holes: {self.holes_count}, family size: {self.family_size}"
 
         mdp_stats = f"super MDP size: {self.super_mdp_size}, average MDP size: {round(self.avg_mdp_size)}, " \

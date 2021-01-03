@@ -1,0 +1,63 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+EnumerationChecker
+2021-01-03 03:34:56,051 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from workspace/tacas21/herman_large/optimality/sketch.templ with constants 
+2021-01-03 03:34:56,095 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-03 03:34:56,096 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:34:56,096 MainThread - dynasty.family_checkers.familychecker - DEBUG - Loading optimality info.
+2021-01-03 03:34:56,096 MainThread - dynasty.family_checkers.familychecker - DEBUG - Criterion R{"steps"}=? [F "stable"]
+
+2021-01-03 03:34:56,096 MainThread - dynasty.family_checkers.familychecker - DEBUG - Done parsing optimality file.
+2021-01-03 03:34:56,101 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:34:56,103 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-03 03:34:56,103 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M0LFAIR', 'M0HFAIR', 'M1LFAIR', 'M1HFAIR', 'MxxA', 'MxxB', 'MxxC']
+2021-01-03 03:34:56,103 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-03 03:34:56,106 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M0LFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],M0HFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],M1LFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],M1HFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],MxxA: [0,1],MxxB: [0,1],MxxC: [0,1]
+2021-01-03 03:34:56,106 MainThread - dynasty.family_checkers.familychecker - INFO - Design space (without constraints): 3125000
+2021-01-03 03:34:56,106 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 1 / 3125000
+2021-01-03 03:34:56,128 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.021705150604248047, expect total: 67830.08575439453
+2021-01-03 03:34:56,129 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 7 states, 7 transition
+2021-01-03 03:34:56,129 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 2 / 3125000
+2021-01-03 03:34:56,150 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.04373741149902344, expect total: 68340.45052528381
+2021-01-03 03:34:56,151 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 14 states, 14 transition
+2021-01-03 03:34:56,151 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 3 / 3125000
+2021-01-03 03:34:56,171 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.0649113655090332, expect total: 67616.50244394939
+2021-01-03 03:34:56,172 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 26 states, 26 transition
+2021-01-03 03:34:56,172 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 4 / 3125000
+2021-01-03 03:34:56,193 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.08640742301940918, expect total: 67506.54429197311
+2021-01-03 03:34:56,193 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 38 states, 38 transition
+2021-01-03 03:34:56,193 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 5 / 3125000
+2021-01-03 03:34:56,215 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.10819363594055176, expect total: 67621.6185092926
+2021-01-03 03:34:56,215 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 45 states, 45 transition
+2021-01-03 03:34:56,215 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 6 / 3125000
+2021-01-03 03:34:56,236 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.1299757957458496, expect total: 67696.09947999318
+2021-01-03 03:34:56,237 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 52 states, 52 transition
+2021-01-03 03:34:56,237 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 7 / 3125000
+2021-01-03 03:34:56,258 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.1517953872680664, expect total: 67766.11719812665
+2021-01-03 03:34:56,259 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 64 states, 64 transition
+2021-01-03 03:34:56,259 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 8 / 3125000
+2021-01-03 03:34:56,280 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.1736290454864502, expect total: 67824.21842217445
+2021-01-03 03:34:56,281 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 76 states, 76 transition
+2021-01-03 03:34:56,281 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 9 / 3125000
+2021-01-03 03:34:56,302 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.1955273151397705, expect total: 67891.67722066243
+2021-01-03 03:34:56,302 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 83 states, 83 transition
+2021-01-03 03:34:56,302 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 10 / 3125000
+2021-01-03 03:34:56,324 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.21778535842895508, expect total: 68058.22253227234
+2021-01-03 03:34:56,324 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 90 states, 90 transition
+2021-01-03 03:34:56,325 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 11 / 3125000
+2021-01-03 03:34:56,351 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.2450089454650879, expect total: 69605.01725023444
+2021-01-03 03:34:56,352 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 697 states, 824 transition
+2021-01-03 03:34:56,352 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 12 / 3125000
+2021-01-03 03:34:56,378 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.27101993560791016, expect total: 70578.29449574153
+2021-01-03 03:34:56,378 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 1166 states, 1411 transition
+2021-01-03 03:34:56,378 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 13 / 3125000
+2021-01-03 03:34:56,399 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.2926597595214844, expect total: 70351.07566760137
+2021-01-03 03:34:56,400 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 1173 states, 1418 transition
+2021-01-03 03:34:56,400 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 14 / 3125000
+2021-01-03 03:34:56,421 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Ran for 0.3146941661834717, expect total: 70244.4463968277
+2021-01-03 03:34:56,422 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Avg model size 1180 states, 1425 transition
+2021-01-03 03:34:56,422 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Iteration: 15 / 3125000
+TO

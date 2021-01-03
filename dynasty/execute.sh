@@ -93,6 +93,14 @@ function hybrid() {
     try_thresholds 3
 }
 
+function try_models() {
+    echo "----- $1"
+    for model in "${models[@]}"; do
+        choose_model `eval echo '${'${model}'[@]}'`
+        echo "--- $model"
+        $1
+    done
+}
 # --- sandbox ------------------------------------------------------------------
 
 function test_release() {
@@ -107,109 +115,56 @@ function test_release() {
 function tacas_performance() {
     reset_log
 
-    timeout=1h
-    # parallel=true
+    timeout=5m
+    parallel=true
     # verbose=true
 
-    grid=("grid/orig" 40 0.004 0.019 0.015)
-    gridbig=("grid/big" 40 0.928 0.931 0.003)
+    grid=("grid/big" 40 0.931 0.927 -0.004)
     maze=("maze/orig" 50 0.1612764 0.1612766 0.0000002)
-    dpm=("dpm/orig" 12 0.078 0.080 0.002)
-    pole=("pole/orig" 5 0.732 0.735 0.003)
-    herman=("herman/orig" 2 0.60 0.75 0.15)
+    dpm=("dpm/half" 12 0.078 0.0818 0.0038)
+    pole=("pole/orig" 0 3.350 3.355 0.005)
+    herman=("herman/orig" 2 1.2 1.8 0.6)
 
-    models=("grid" "gridbig" "maze" "dpm" "pole" "herman")
+    models=("grid" "maze" "dpm" "pole" "herman")
 
-    echo "----- CEGAR"
-    for model in "${models[@]}"; do
-        echo "--- $model"
-        choose_model `eval echo '${'${model}'[@]}'`
-        # cegar
-    done
-
-    echo "----- Hybrid"
-    for model in "${models[@]}"; do
-        echo "--- $model"
-        choose_model `eval echo '${'${model}'[@]}'`
-        hybrid
-    done
-
+    try_models cegis
+    # try_models cegar
+    # try_models hybrid
 }
 
-function tacas_performance_2() {
+function try_herman() {
     reset_log
 
-    timeout=5m
-    parallel=true
-    # verbose=true
-
-    # grid=("grid/big" 40 0.928 0.931 0.003)
-    grid=("grid/big" 40 0.931 0.931 0.003)
-
-    choose_model "${grid[@]}"
-
-    hybrid
-    # cegar
-    # cegis
-}
-
-function run() {
-    reset_log
-
-    timeout=5m
-    parallel=true
+    timeout=1s
+    # parallel=true
     verbose=true
+
+    # model=("herman/3_1" 0 0.0 0.9 0.1)
     
-    model=("grid/orig" 40 0.019 0.019 0.15)
-    # model=("grid/big" 40 0.928 0.931 0.003)
-    # model=("maze/orig" 50 0.1612764 0.1612764 0.0000002)
-    # model=("pole/orig" 5 0.735 0.735 0.001)
-    # model=("dpm/orig" 12 0.080 0.080 0.002)
-    # model=("herman/orig" 2 0.60 0.60 0.15)
-
-    # model=("herman/orig" 6 0.9254 0.9254 0.15)
-    # model=("herman/orig-rew" 2 1.80 1.88 0.02)
+    # model=("herman/5_feas" 0 18.0 19.0 0.1)
+    # model=("herman/5_opt" 0 0 0 0.1)
     
-    # model=("herman/553x_1_0_m" 0 1 1 0.1)
-
-    # model=("herman/553x_1_3_m_r" 3 0.57 0.57 0.1)
-    # model=("herman/553x_1_3_m_p" 3 0.57 0.57 0.1)
-    # model=("herman/553x_1_3_m_rp" 3 0.57 0.57 0.1)
-
-    # model=("herman/553x_new" 0 0.95 0.95 0.01)
-
-    # models=("r" "rp")
-    # for model in "${models[@]}"; do
-    #     # echo "--- $model"
-    #     choose_model `eval echo '${'${model}'[@]}'`
-    #     hybrid
-    #     # cegar
-    # done
-
-    # model=("herman/553x_r_0" 0 2.0 2.0 0.2)
-    # model=("herman/5533_r_0" 0 1.0 1.0 0.2)
-    # model=("herman/5555_r_0" 0 1.1 1.3 0.1)
-
-    # ---
-
-    # model=("herman/553x" 0 2 2 0.1)
-    # model=("herman/553x-bitbit" 0 2 2 0.1)
-    # model=("herman/553x-bitbitbit" 0 2 2 0.1)
+    # model=("herman/10_1" 0 0.1 0.1 0.1)
+    # model=("herman/15_1" 0 0 0 1.0)
+    # model=("herman/20_1" 0 0 0 1.0)
+    
+    # model=("herman/25_feas" 0 3.6 4.0 0.4)
+    model=("herman/25_opt" 0 0.0 0.0 1.0)
     
     choose_model "${model[@]}"
 
-    hybrid
+    # hybrid
     # cegar
-    # cegis
+    cegis
     # onebyone
 }
 
 # --- execution ----------------------------------------------------------------
 
 # test_release
-# tacas_performance
 
-tacas_performance_2
+# tacas_performance
+try_herman
 
 # run
 
