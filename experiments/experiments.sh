@@ -2,8 +2,8 @@
 # set -x
 
 # timeout values for each experiment
-timeout_basic_benchmark=2s  # grid/maze/dpm/pole/herman
-timeout_large_model=2s      # large herman
+timeout_basic_benchmark=2h  # grid/maze/dpm/pole/herman
+timeout_large_model=2h      # large herman
 
 # number of experiments
 experiment_current=0
