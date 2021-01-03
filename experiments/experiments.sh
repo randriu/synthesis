@@ -1,13 +1,20 @@
 # verbose mode
 # set -x
 
+# checklist
+
+# herman: multiple-props
+# herman: feasibility-opt (cegar, hybrid)
+# herman: optimaliy (cegar, hybrid)
+
 # timeout values for each experiment
-timeout_basic_benchmark=2h  # grid/maze/dpm/pole/herman
-timeout_large_model=2h      # large herman
+timeout_basic_benchmark=2s  # grid/maze/dpm/pole/herman
+timeout_large_model=1s      # large herman
+timeout_onebyone=10s        # for 1-by-1 estimation
 
 # number of experiments
 experiment_current=0
-experiment_total=56
+experiment_total=55
 
 # sample command:
 # timeout ${timeout} python dynasty.py --project workspace/tacas21/grid/ --constants CMAX=40,THRESHOLD=0.931 hybrid --regime 3 > ../experiments/grid_easy_hybrid.txt || > ../experiments/grid_easy_hybrid.txt
@@ -46,7 +53,7 @@ function dynasty() {
     
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiment_total}: ${model} (${property}), method: ${method} (${extra_option_1} ${extra_option_2})"
-    timeout ${timeout} python dynasty.py --project workspace/tacas21/${model} --properties ${property}.properties hybrid --regime ${regime} ${extra_option_1} ${extra_option_2} > ${logfile} || echo "TO" >> ${logfile}
+    timeout ${timeout} python dynasty.py --project workspace/tacas21/${model} --properties ${property}.properties hybrid --regime ${regime} --check-prerequisites ${extra_option_1} ${extra_option_2} > ${logfile} || echo "TO" >> ${logfile}
 }
 
 # evaluate five models from the basic benchmark using a selected method
@@ -88,7 +95,17 @@ evaluate_models ce_maxsat hybrid "--ce-quality --ce-maxsat"
 echo "TODO multiple properties"
 
 ## large model experiments
-methods=( onebyone cegar hybrid )
+
+# sample 1-by-1 on optimality
+method=onebyone
+regime="$(method_to_regime ${method})"
+((experiment_current+=1))
+echo "experiment ${experiment_current}/${experiment_total}: herman_large (optimality), method: ${method}"
+logfile="../experiments/large_model/optimality_${method}.txt"
+timeout ${timeout_large_model} python dynasty.py --project workspace/tacas21/herman_large/optimality --properties sketch.properties hybrid --optimality sketch.optimal --regime ${regime} > ${logfile} || echo "TO" >> ${logfile}
+
+# evaluate CEGAR and hybrid
+methods=( cegar hybrid )
 for method in "${methods[@]}"; do
     regime="$(method_to_regime ${method})"
     
@@ -160,10 +177,6 @@ function print_large_model_stats() {
 
     printf "\n-- ${problem}\n"
 
-    # 1-by-1 estimate: divide family size by the number of iterations performed before timeout
-    multiplier=$(cat large_model/${problem}_onebyone.txt | grep "Iteration:" | tail -n 1 | awk '{print $12 / $10}')
-    printf "1-by-1: approximately %s * %s\n" ${multiplier} ${timeout_large_model}
-
     cegar_time="$(python3 parse_log.py large_model/${problem}_cegar.txt synthesis_time)"
     cegar_iters="$(python3 parse_log.py large_model/${problem}_cegar.txt cegar_iters)"
 
@@ -207,6 +220,11 @@ echo "TODO"
 
 # Table 4 (large model)
 printf "\nTable 3 (large model)\n"
+
+# 1-by-1 estimate: divide family size by the number of iterations performed before timeout
+multiplier=$(cat large_model/optimality_onebyone.txt | grep "Iteration:" | tail -n 1 | awk '{print $12 / $10}')
+printf "1-by-1: approximately %s * %s\n" ${multiplier} ${timeout_large_model}
+
 print_large_model_stats feasibility
 print_large_model_stats optimality
 

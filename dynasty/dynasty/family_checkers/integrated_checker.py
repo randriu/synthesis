@@ -1375,7 +1375,7 @@ class Hybrid:
             constants, restrictions, restriction_path, regime, short_summary, ce_quality, ce_maxsat
     ):
 
-        assert not check_prerequisites
+        # assert not check_prerequisites
 
         self.sketch_path = sketch_path
         self.allowed_path = allowed_path

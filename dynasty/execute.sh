@@ -135,21 +135,21 @@ function tacas_performance() {
 function try_herman() {
     reset_log
 
-    timeout=1d
+    timeout=2d
     parallel=true
     # verbose=true
 
     # model=("herman/3_1" 0 0.0 0.9 0.1)
     
     # model=("herman/5_feas" 0 18.1 18.2 0.1)
-    model=("herman/5_opt" 0 0 0 0.1)
+    # model=("herman/5_opt" 0 0 0 0.1)
     
     # model=("herman/10_1" 0 0.1 0.1 0.1)
     # model=("herman/15_1" 0 0 0 1.0)
     # model=("herman/20_1" 0 0 0 1.0)
     
-    # model=("herman/25_feas" 0 3.6 4.0 0.4)
-    # model=("herman/25_opt" 0 0.0 0.0 1.0)
+    # model=("herman/25_feas" 0 3.89 3.89 0.1)
+    model=("herman/25_opt" 0 0.0 0.0 1.0)
     
     choose_model "${model[@]}"
 
