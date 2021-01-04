@@ -269,3 +269,7 @@ dopt() {
 dbounds() {
     dlog $1 | grep "Result for initial"
 }
+
+dperf() {
+     dlog $1 | grep "Performance" | tail -n 1
+}

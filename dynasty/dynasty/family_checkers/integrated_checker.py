@@ -235,6 +235,9 @@ class CEGARChecker(LiftingChecker):
         Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
         """
         Profiler.initialize()
+        estimation_timer = Timer()
+        estimation_timer.start()
+        
         logger.info("Running feasibility + optimal synthesis.")
 
         # initialize family description
@@ -248,11 +251,16 @@ class CEGARChecker(LiftingChecker):
         # initiate CEGAR loop
         self.family = Family()
         self.models_total = self.family.size
+        models_rejected = 0
         self.families = [self.family]
         satisfying_assignment = None
         logger.debug("Initiating CEGAR loop")
         while self.families:
             logger.debug(f"Current number of families: {len(self.families)}")
+            percentage_regected = max((models_rejected / self.models_total),0.0000000001) # division by zero fix
+            iters_estimate = self.iterations / percentage_regected
+            time_estimate = estimation_timer.read() / percentage_regected
+            logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
 
             self.iterations += 1
             logger.debug("CEGAR: iteration {}.".format(self.iterations))
@@ -271,6 +279,7 @@ class CEGARChecker(LiftingChecker):
                 if optimal_value is not None:
                     self._check_optimal_property(optimal_value, self.family.member_assignment)
                 logger.debug("CEGAR: all UNSAT.")
+                models_rejected += self.family.size
             else:  # feasible is None:
                 if optimal_value is not None:
                     self._check_optimal_property(optimal_value, self.family.member_assignment)

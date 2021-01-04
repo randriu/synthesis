@@ -1,0 +1,270 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+IntegratedChecker
+2021-01-04 03:54:59,025 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from workspace/tacas21/pole/sketch.templ with constants 
+2021-01-04 03:54:59,031 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-04 03:54:59,032 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-04 03:54:59,033 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-04 03:54:59,033 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-04 03:54:59,033 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M11', 'M12', 'M13', 'M14', 'M15', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M33', 'M34', 'M35', 'M41', 'M42', 'M43', 'M44', 'M45', 'M51', 'M52', 'M53', 'M54', 'M55']
+2021-01-04 03:54:59,033 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-04 03:54:59,035 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3]
+2021-01-04 03:54:59,035 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 1327104
+2021-01-04 03:54:59,052 MainThread - dynasty.family_checkers.integrated_checker - INFO - Running feasibility synthesis.
+2021-01-04 03:54:59,052 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP of the superfamily.
+0: [0, 4294967296, 8589934592, 12884901888, 17179869184, 21474836480, 21474836481, 21474836482, 21474836483, 21474836484, 21474836485, 21474836486, 21474836487, 25769803776, 25769803777, 25769803778, 25769803779, 25769803783, 25769803789, 25769803793, 25769803806, 25769803809, 25769803814, 25769803820, 25769803825, 25769803828, 30064771072, 30064771073, 30064771074, 30064771075, 30064771076, 34359738368, ],22: [25769803780, ],27: [25769803781, ],40: [25769803782, ],37: [25769803784, ],36: [25769803785, ],34: [25769803786, ],32: [25769803787, ],30: [25769803788, ],26: [25769803790, ],20: [25769803791, ],17: [25769803792, ],13: [25769803794, ],12: [25769803795, ],1: [25769803796, ],11: [25769803797, ],10: [25769803798, ],9: [25769803799, ],8: [25769803800, ],24: [25769803801, ],28: [25769803802, ],7: [25769803803, ],5: [25769803804, ],21: [25769803805, ],39: [25769803807, ],38: [25769803808, ],35: [25769803810, ],33: [25769803811, ],31: [25769803812, ],29: [25769803813, ],25: [25769803815, ],19: [25769803816, ],15: [25769803817, ],16: [25769803818, ],14: [25769803819, ],6: [25769803821, ],2: [25769803822, ],3: [25769803823, ],4: [25769803824, ],23: [25769803826, ],18: [25769803827, ]
+2021-01-04 03:54:59,228 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6745.
+2021-01-04 03:54:59,382 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 1.
+2021-01-04 03:54:59,382 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 1327104.
+2021-01-04 03:54:59,382 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: model checking MDP against a formula with index 0.
+2021-01-04 03:54:59,392 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-04 03:54:59,583 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M32
+2021-01-04 03:54:59,583 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [0] vs. [2, 1]
+2021-01-04 03:54:59,584 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '4']...
+2021-01-04 03:54:59,584 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fad576206c0>] and [<stormpy.storage.storage.Expression object at 0x7fad57620730>, <stormpy.storage.storage.Expression object at 0x7fad576206f8>]
+2021-01-04 03:54:59,584 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-04 03:54:59,584 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M32 into [1] and [4,2]
+2021-01-04 03:54:59,584 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Initiating CEGAR--CEGIS loop
+2021-01-04 03:54:59,584 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-04 03:54:59,584 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 1327104.
+2021-01-04 03:54:59,584 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing quotient MDP
+2021-01-04 03:54:59,584 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing state-holes mapping via edge-holes mapping.
+2021-01-04 03:54:59,606 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:54:59,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 1.
+2021-01-04 03:54:59,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:54:59,611 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:54:59,611 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:54:59,612 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:54:59,618 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33'] (generalized 16 holes).
+2021-01-04 03:54:59,618 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad57620420>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad576204c8>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad57620768>],M34=[<stormpy.storage.storage.Expression object at 0x7fad57620848>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:54:59,618 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:54:59,619 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:54:59,697 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:54:59,729 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 2.
+2021-01-04 03:54:59,729 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:54:59,734 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:54:59,734 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:54:59,735 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:54:59,740 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33'] (generalized 16 holes).
+2021-01-04 03:54:59,741 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad576204c8>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207a0>],M34=[<stormpy.storage.storage.Expression object at 0x7fad57620848>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:54:59,741 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:54:59,741 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:54:59,819 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:54:59,819 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 3.
+2021-01-04 03:54:59,819 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:54:59,824 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:54:59,824 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:54:59,824 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:54:59,833 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M33'] (generalized 15 holes).
+2021-01-04 03:54:59,834 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad576204c8>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad57620848>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:54:59,834 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:54:59,834 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:54:59,915 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:54:59,915 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 4.
+2021-01-04 03:54:59,915 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:54:59,920 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:54:59,920 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:54:59,921 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:54:59,933 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M33', 'M34'] (generalized 14 holes).
+2021-01-04 03:54:59,933 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad57620848>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:54:59,934 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:54:59,934 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,018 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,018 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 5.
+2021-01-04 03:55:00,018 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,023 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,023 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,023 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,033 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M33'] (generalized 15 holes).
+2021-01-04 03:55:00,033 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620538>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad57620848>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,033 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,033 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,115 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,115 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 6.
+2021-01-04 03:55:00,115 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,120 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,120 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,120 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,133 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M33', 'M34'] (generalized 14 holes).
+2021-01-04 03:55:00,133 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad57620880>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,133 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,134 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,218 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,218 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 7.
+2021-01-04 03:55:00,218 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,222 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,222 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,223 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,251 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M24', 'M33', 'M34', 'M43', 'M44', 'M55'] (generalized 10 holes).
+2021-01-04 03:55:00,251 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad57620570>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,251 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,252 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,350 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,350 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: stage interrupted.
+2021-01-04 03:55:00,351 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-04 03:55:00,351 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-04 03:55:00,358 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 442368 and 884736.
+2021-01-04 03:55:00,358 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 2.
+2021-01-04 03:55:00,359 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-04 03:55:00,412 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6649.
+2021-01-04 03:55:00,412 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 442368.
+2021-01-04 03:55:00,412 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: model checking MDP against a formula with index 0.
+2021-01-04 03:55:00,421 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-04 03:55:00,457 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M23
+2021-01-04 03:55:00,457 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [2, 0]
+2021-01-04 03:55:00,457 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3', '4']...
+2021-01-04 03:55:00,458 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fad57620500>] and [<stormpy.storage.storage.Expression object at 0x7fad57620538>, <stormpy.storage.storage.Expression object at 0x7fad576204c8>]
+2021-01-04 03:55:00,458 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-04 03:55:00,458 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M23 into [3] and [4,2]
+2021-01-04 03:55:00,458 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-04 03:55:00,458 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 3.
+2021-01-04 03:55:00,458 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-04 03:55:00,478 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6697.
+2021-01-04 03:55:00,479 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 884736.
+2021-01-04 03:55:00,479 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: model checking MDP against a formula with index 0.
+2021-01-04 03:55:00,488 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-04 03:55:00,524 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M23
+2021-01-04 03:55:00,524 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [2, 0]
+2021-01-04 03:55:00,524 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3', '4']...
+2021-01-04 03:55:00,524 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fad57620500>] and [<stormpy.storage.storage.Expression object at 0x7fad57620538>, <stormpy.storage.storage.Expression object at 0x7fad576204c8>]
+2021-01-04 03:55:00,524 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-04 03:55:00,524 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M23 into [3] and [4,2]
+2021-01-04 03:55:00,524 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-04 03:55:00,524 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-04 03:55:00,525 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 884736.
+2021-01-04 03:55:00,525 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing quotient MDP
+2021-01-04 03:55:00,525 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing state-holes mapping via edge-holes mapping.
+2021-01-04 03:55:00,546 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,546 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 8.
+2021-01-04 03:55:00,546 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,551 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,551 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,551 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,557 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33'] (generalized 16 holes).
+2021-01-04 03:55:00,558 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206f8>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,558 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,558 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,637 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,637 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 9.
+2021-01-04 03:55:00,637 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,642 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,642 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,642 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,648 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33'] (generalized 16 holes).
+2021-01-04 03:55:00,648 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad57620730>],M33=[<stormpy.storage.storage.Expression object at 0x7fad57620810>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,648 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,649 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,723 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: all UNSAT.
+2021-01-04 03:55:00,723 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-04 03:55:00,723 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 442368.
+2021-01-04 03:55:00,724 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing quotient MDP
+2021-01-04 03:55:00,724 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing state-holes mapping via edge-holes mapping.
+2021-01-04 03:55:00,754 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,754 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 10.
+2021-01-04 03:55:00,754 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,759 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,759 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,760 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,766 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33'] (generalized 16 holes).
+2021-01-04 03:55:00,767 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad57620810>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,767 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,767 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,847 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,848 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 11.
+2021-01-04 03:55:00,848 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,852 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,852 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,853 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,874 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M33', 'M34', 'M43', 'M44'] (generalized 12 holes).
+2021-01-04 03:55:00,874 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,874 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,875 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:00,968 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:00,968 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 12.
+2021-01-04 03:55:00,968 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:00,973 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:00,973 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:00,974 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:00,994 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M23', 'M33', 'M34', 'M43', 'M44'] (generalized 12 holes).
+2021-01-04 03:55:00,995 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a40>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620b20>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:00,995 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:00,995 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:01,089 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:01,089 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: stage interrupted.
+2021-01-04 03:55:01,089 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-04 03:55:01,089 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-04 03:55:01,097 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 147456 and 294912.
+2021-01-04 03:55:01,097 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 4.
+2021-01-04 03:55:01,097 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-04 03:55:01,115 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6553.
+2021-01-04 03:55:01,116 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 147456.
+2021-01-04 03:55:01,116 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: model checking MDP against a formula with index 0.
+2021-01-04 03:55:01,125 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-04 03:55:01,159 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M33
+2021-01-04 03:55:01,159 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [2, 0] vs. [3, 1]
+2021-01-04 03:55:01,159 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '3', '4']...
+2021-01-04 03:55:01,159 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fad576207d8>, <stormpy.storage.storage.Expression object at 0x7fad57620768>] and [<stormpy.storage.storage.Expression object at 0x7fad57620810>, <stormpy.storage.storage.Expression object at 0x7fad576207a0>]
+2021-01-04 03:55:01,160 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-04 03:55:01,160 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M33 into [3,1] and [4,2]
+2021-01-04 03:55:01,160 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-04 03:55:01,160 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 5.
+2021-01-04 03:55:01,160 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [4,2],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-04 03:55:01,176 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6601.
+2021-01-04 03:55:01,177 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [4,2],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 294912.
+2021-01-04 03:55:01,177 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: model checking MDP against a formula with index 0.
+2021-01-04 03:55:01,186 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-04 03:55:01,220 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M33
+2021-01-04 03:55:01,221 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [2, 0] vs. [3, 1]
+2021-01-04 03:55:01,221 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '3', '4']...
+2021-01-04 03:55:01,221 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fad576207d8>, <stormpy.storage.storage.Expression object at 0x7fad57620768>] and [<stormpy.storage.storage.Expression object at 0x7fad57620810>, <stormpy.storage.storage.Expression object at 0x7fad576207a0>]
+2021-01-04 03:55:01,221 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-04 03:55:01,221 MainThread - /home/xandri03/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M33 into [3,1] and [4,2]
+2021-01-04 03:55:01,221 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-04 03:55:01,221 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-04 03:55:01,222 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [4,2],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 294912.
+2021-01-04 03:55:01,223 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing quotient MDP
+2021-01-04 03:55:01,223 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing state-holes mapping via edge-holes mapping.
+2021-01-04 03:55:01,240 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: all UNSAT.
+2021-01-04 03:55:01,240 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-04 03:55:01,240 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [1],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 147456.
+2021-01-04 03:55:01,240 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing quotient MDP
+2021-01-04 03:55:01,240 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing state-holes mapping via edge-holes mapping.
+2021-01-04 03:55:01,261 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:01,261 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 13.
+2021-01-04 03:55:01,261 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:01,266 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:01,266 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:01,267 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:01,281 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33', 'M34', 'M43'] (generalized 14 holes).
+2021-01-04 03:55:01,281 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620ab0>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:01,281 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:01,282 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:01,366 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 5641.
+2021-01-04 03:55:01,366 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 14.
+2021-01-04 03:55:01,366 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: model checking DTMC against formula with index 0.
+2021-01-04 03:55:01,371 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-04 03:55:01,371 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing DTMC.
+2021-01-04 03:55:01,371 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: constructing CE for formula with index 0.
+2021-01-04 03:55:01,385 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['M33', 'M34', 'M43'] (generalized 14 holes).
+2021-01-04 03:55:01,385 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M11=[<stormpy.storage.storage.Expression object at 0x7fad57620228>],M12=[<stormpy.storage.storage.Expression object at 0x7fad57620298>],M14=[<stormpy.storage.storage.Expression object at 0x7fad57620378>],M15=[<stormpy.storage.storage.Expression object at 0x7fad576abfb8>],M21=[<stormpy.storage.storage.Expression object at 0x7fad576203e8>],M22=[<stormpy.storage.storage.Expression object at 0x7fad57620458>],M23=[<stormpy.storage.storage.Expression object at 0x7fad57620500>],M24=[<stormpy.storage.storage.Expression object at 0x7fad576205a8>],M25=[<stormpy.storage.storage.Expression object at 0x7fad576205e0>],M32=[<stormpy.storage.storage.Expression object at 0x7fad576206c0>],M33=[<stormpy.storage.storage.Expression object at 0x7fad576207d8>],M34=[<stormpy.storage.storage.Expression object at 0x7fad576208b8>],M42=[<stormpy.storage.storage.Expression object at 0x7fad576209d0>],M43=[<stormpy.storage.storage.Expression object at 0x7fad57620a78>],M44=[<stormpy.storage.storage.Expression object at 0x7fad57620ae8>],M51=[<stormpy.storage.storage.Expression object at 0x7fad57620bc8>],M55=[<stormpy.storage.storage.Expression object at 0x7fad57620d88>]
+2021-01-04 03:55:01,385 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-04 03:55:01,386 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-04 03:55:01,465 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: all UNSAT.
+2021-01-04 03:55:01,465 MainThread - dynasty.family_checkers.integrated_checker - INFO - No more options.
+
+
+--------------------
+formula 1: R[exp]{"rounds"}<=67/20 [F ((((x = 0) | (y = 0)) | (x = 6)) | (y = 6))]
+
+method: Hybrid, synthesis time: 1.28 s
+number of holes: 17, family size: 1327104
+super MDP size: 6745, average MDP size: 6649, MPD checks: 5, iterations: 5
+average DTMC size: 5641, DTMC checks: 14, iterations: 14
+ce quality: maxsat: 0.0000, trivial: 0.8739, non-trivial: 0.1597
+ce time: maxsat: 0.0008, trivial: 0.0630, non-trivial: 0.0128
+
+feasible: no
+

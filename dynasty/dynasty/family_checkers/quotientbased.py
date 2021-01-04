@@ -507,8 +507,10 @@ class OneByOneChecker(QuotientBasedFamilyChecker):
             index = 0
             mh.mc_model(index)
 
-            logger.info("Ran for {}, expect total: {}".format(time.time() - iter_start, (
-                time.time() - iter_start) * total_nr_options / iteration))
+            logger.info("Performance estimation (unfeasible): {} iterations in {} sec.".format(
+                total_nr_options, (time.time() - iter_start) * total_nr_options / iteration)
+            ) #+
+            logger.info("Ran for {}, expect total: {}".format(time.time() - iter_start, (time.time() - iter_start) * total_nr_options / iteration))
             logger.info("Avg model size {} states, {} transition".format(model_states_cum, model_transitions_cum))
         return iteration, model_states_cum / iteration
 

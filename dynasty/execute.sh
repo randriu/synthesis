@@ -54,9 +54,8 @@ function log_output() {
 }
 
 function dynasty() {
-    dynasty="python dynasty.py hybrid --regime $1 --project ${models_dir}/${model}/ --short-summary"
+    dynasty="python dynasty.py --check-prerequisites --project ${models_dir}/${model}/ hybrid --regime $1 --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    optimality="--optimality sketch.optimal"
     echo ${dynasty} ${constants} ${optimality}
     timeout ${timeout} ${dynasty} ${constants} ${optimality}
 }
@@ -135,21 +134,14 @@ function tacas_performance() {
 function try_herman() {
     reset_log
 
-    timeout=2d
+    timeout=5h
     parallel=true
     # verbose=true
 
-    # model=("herman/3_1" 0 0.0 0.9 0.1)
+    optimality="--optimality sketch.optimal --properties none.properties"
     
-    # model=("herman/5_feas" 0 18.1 18.2 0.1)
-    # model=("herman/5_opt" 0 0 0 0.1)
-    
-    # model=("herman/10_1" 0 0.1 0.1 0.1)
-    # model=("herman/15_1" 0 0 0 1.0)
-    # model=("herman/20_1" 0 0 0 1.0)
-    
-    # model=("herman/25_feas" 0 3.89 3.89 0.1)
-    model=("herman/25_opt" 0 0.0 0.0 1.0)
+    # model=("herman/5" 0 18.1 18.1 0.1)
+    model=("herman/10" 0 1 1 0.1)
     
     choose_model "${model[@]}"
 
