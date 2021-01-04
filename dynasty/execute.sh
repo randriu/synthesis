@@ -56,6 +56,7 @@ function log_output() {
 function dynasty() {
     dynasty="python dynasty.py --check-prerequisites --project ${models_dir}/${model}/ hybrid --regime $1 --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
+    optimality="--optimality sketch.optimal --properties none.properties"
     echo ${dynasty} ${constants} ${optimality}
     timeout ${timeout} ${dynasty} ${constants} ${optimality}
 }
@@ -137,16 +138,14 @@ function try_herman() {
     timeout=5h
     parallel=true
     # verbose=true
-
-    optimality="--optimality sketch.optimal --properties none.properties"
     
     # model=("herman/5" 0 18.1 18.1 0.1)
-    model=("herman/10" 0 1 1 0.1)
+    # model=("herman/10" 0 1 1 0.1)
     
     choose_model "${model[@]}"
 
-    # hybrid
-    cegar
+    hybrid
+    # cegar
     # cegis
     # onebyone
 }
@@ -154,9 +153,8 @@ function try_herman() {
 # --- execution ----------------------------------------------------------------
 
 # test_release
-
 # tacas_performance
-try_herman
+# try_herman
 
 # run
 

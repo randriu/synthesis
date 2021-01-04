@@ -1,18 +1,16 @@
 # verbose mode
 # set -x
 
-# checklist
+# sample command:
+# python3 dynasty.py --project workspace/tacas21/grid/ --properties easy.properties hybrid --regime 3
 
 # timeout values for each experiment
-timeout_basic_benchmark=30s  # grid/maze/dpm/pole/herman
-timeout_large_model=1m      # large herman
+timeout_basic_benchmark=2h  # grid/maze/dpm/pole/herman
+timeout_large_model=30s      # large herman
 
 # number of experiments
 experiment_current=0
 experiment_total=59
-
-# sample command:
-# timeout ${timeout} python dynasty.py --project workspace/tacas21/grid/ --constants CMAX=40,THRESHOLD=0.931 hybrid --regime 3 > ../experiments/grid_easy_hybrid.txt || > ../experiments/grid_easy_hybrid.txt
 
 ## helper functions ############################################################
 
@@ -37,12 +35,12 @@ function method_to_regime() {
 # ryn dynasty on a given model/property via a selected method (onebyone, cegis, cegar, hybrid)
 function dynasty() {
     local timeout=$1
-    local experiment_set=$2
+    local experiment_name=$2
     local model=$3
     local property=$4
     local method=$5
     local regime="$(method_to_regime ${method})"
-    local logfile="../experiments/${experiment_set}/${model}_${property}_${method}.txt"
+    local logfile="../experiments/${experiment_name}/${model}_${property}_${method}.txt"
     local extra_option_1=$6
     local extra_option_2=$7
     
@@ -53,26 +51,28 @@ function dynasty() {
 
 # evaluate five models from the basic benchmark using a selected method
 function evaluate_basic_benchmark() {
-    local experiment_set=$1
+    local experiment_name=$1
     local method=$2
     local options=$3
     local models=( grid maze dpm pole herman )
     for model in "${models[@]}"; do
-        dynasty ${timeout_basic_benchmark} ${experiment_set} ${model} easy ${method} ${options} 
-        dynasty ${timeout_basic_benchmark} ${experiment_set} ${model} hard ${method} ${options}
+        dynasty ${timeout_basic_benchmark} ${experiment_name} ${model} easy ${method} ${options}
+        dynasty ${timeout_basic_benchmark} ${experiment_name} ${model} hard ${method} ${options}
     done
 }
 
 ## experiment section ##########################################################
 
 # create folders for log files
-mkdir -p basic ce_quality ce_maxsat large_model large_model/feasibility large_model/multiple large_model/optimality_0 large_model/optimality_5
+mkdir -p basic
+mkdir -p ce ce/quality ce/maxsat
+mkdir -p large_model large_model/feasibility large_model/multiple large_model/optimality_0 large_model/optimality_5
 
 # activate python environment and navigate to dynasty
 source ../env/bin/activate
 cd ../dynasty
 
-# # evaluate cegis/cegar/hybrid on a basic benchmark
+# # # evaluate cegis/cegar/hybrid on a basic benchmark
 # echo "-- evaluating basic benchmark (cegis)"
 # evaluate_basic_benchmark basic cegis
 # echo "-- evaluating basic benchmark (cegar)"
@@ -82,16 +82,16 @@ cd ../dynasty
 
 # # evaluate CE quality on the same benchmark
 # echo "-- evaluating CE quality (hybrid)"
-# evaluate_basic_benchmark ce_quality hybrid "--ce-quality"
+# evaluate_basic_benchmark ce/quality hybrid "--ce-quality"
 # echo "-- evaluating CE quality (maxsat)"
-# evaluate_basic_benchmark ce_maxsat hybrid "--ce-quality --ce-maxsat"
+# evaluate_basic_benchmark ce/maxsat hybrid "--ce-quality --ce-maxsat"
 
-## large model experiments
+# large model experiments
 
 # estimate 1-by-1 on optimality
 dynasty ${timeout_large_model} large_model/optimality_0 herman_large none onebyone "--optimality 0.optimal"
 
-# evaluate CEGAR and hybrid
+# evaluate cegar and hybrid
 methods=( cegar hybrid )
 for method in "${methods[@]}"; do
     regime="$(method_to_regime ${method})"
@@ -106,4 +106,5 @@ done
 deactivate
 cd $OLDPWD
 
+# done
 echo "all experiments complete"
