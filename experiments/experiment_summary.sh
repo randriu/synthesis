@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ## helper functions ############################################################
 
 function print_benchmark_info() {

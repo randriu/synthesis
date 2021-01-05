@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ## settings ####################################################################
 
 TIMEOUT_BASIC=${EXPERIMENT_TIMEOUT_BASIC}

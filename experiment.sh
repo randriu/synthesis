@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # sample command:
 # python3 dynasty.py --project workspace/tacas21/grid/ --properties easy.properties hybrid --regime 3
 
