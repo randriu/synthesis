@@ -1,0 +1,67 @@
+
+Table 1 (benchmark info)
+
+benchmark  	 holes      	 family     	 MDP        	 DTMC      
+        grid 	 -          	 -          	 -          	 -         
+        maze 	 -          	 -          	 -          	 -         
+         dpm 	 -          	 -          	 -          	 -         
+        pole 	 -          	 -          	 -          	 -         
+      herman 	 -          	 -          	 -          	 -         
+herman-large 	 -          	 -          	 -          	 -         
+
+Table 2 (counterexamples)
+
+benchmark  	 maxsat           	 trivial          	 family    
+   grid_easy 	 - (-)            	 -      (-     ) 	 -      	
+   grid_hard 	 - (-)            	 -      (-     ) 	 -      	
+   maze_easy 	 - (-)            	 -      (-     ) 	 -      	
+   maze_hard 	 - (-)            	 -      (-     ) 	 -      	
+    dpm_easy 	 - (-)            	 -      (-     ) 	 -      	
+    dpm_hard 	 - (-)            	 -      (-     ) 	 -      	
+   pole_easy 	 - (-)            	 -      (-     ) 	 -      	
+   pole_hard 	 - (-)            	 -      (-     ) 	 -      	
+ herman_easy 	 - (-)            	 -      (-     ) 	 -      	
+ herman_hard 	 - (-)            	 -      (-     ) 	 -      	
+
+Table 2 (performance)
+
+benchmark  	 cegis_iters  	 cegis_time   	 cegar_iters  	 cegar_time   	 hybrid_iters 	 hybrid_time  
+   grid_easy 	 -          	 -          	 0.0*       	 3261879510.0* 	 -          	 -          
+   grid_hard 	 -          	 -          	 0.0*       	 3219240950.0* 	 -          	 -          
+   maze_easy 	 -          	 -          	 0.0*       	 2825479000.0* 	 -          	 -          
+   maze_hard 	 -          	 -          	 0.0*       	 2774729290.0* 	 -          	 -          
+    dpm_easy 	 -          	 -          	 0.0*       	 3705549860.0* 	 -          	 -          
+    dpm_hard 	 -          	 -          	 0.0*       	 3723693610.0* 	 -          	 -          
+   pole_easy 	 -          	 -          	 7.0*       	 2.0*       	 -          	 -          
+   pole_hard 	 -          	 -          	 20000000000.0* 	 6415393080.0* 	 -          	 -          
+ herman_easy 	 -          	 -          	 -          	 -          	 -          	 -          
+ herman_hard 	 -          	 -          	 -          	 -          	 -          	 -          
+
+Table 3 (large model)
+
+
+-- herman2_smaller/feasibility
+cegar: 0.0* iters, 55358946690.0* sec
+hybrid: - iters, - sec
+
+-- herman2_smaller/multiple
+cegar: 0.0* iters, 68821119440.0* sec
+hybrid: - iters, - sec
+
+-- herman2_smaller/optimality_0
+cegar: 0.0* iters, 56049573560.0* sec
+hybrid: - iters, - sec
+
+-- herman2_larger/feasibility
+cegar: - iters, - sec
+hybrid: - iters, - sec
+
+-- herman2_larger/optimality_0
+cegar: - iters, - sec
+hybrid: - iters, - sec
+
+-- herman2_larger/optimality_5
+cegar: - iters, - sec
+hybrid: - iters, - sec
+
+1-by-1 on herman2_larger: 143438.0* sec

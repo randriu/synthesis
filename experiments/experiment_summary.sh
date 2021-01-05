@@ -73,7 +73,7 @@ printf "%-10s \t %-10s \t %-10s \t %-10s \t %-10s\n" benchmark holes family MDP 
 for benchmark in "${basic_bechmarks[@]}"; do
     print_benchmark_info ${benchmark} basic/${benchmark}_easy_hybrid.txt
 done
-print_benchmark_info herman-large large_model/optimality_5/*hybrid.txt
+print_benchmark_info herman-large large_model/herman2_larger/optimality_5/*hybrid.txt
 
 # Table 2 (counterexamples)
 printf "\nTable 2 (counterexamples)\n\n"
@@ -93,9 +93,11 @@ done
 
 # Table 3 (large model)
 printf "\nTable 3 (large model)\n\n"
-onebyone_time="$(python3 parse_log.py large_model/optimality_0/herman_large_none_onebyone.txt synthesis_time)"
-printf "1-by-1: %s sec\n" ${onebyone_time}
-print_large_model_stats feasibility
-print_large_model_stats multiple
-print_large_model_stats optimality_0
-print_large_model_stats optimality_5
+print_large_model_stats herman2_smaller/feasibility
+print_large_model_stats herman2_smaller/multiple
+print_large_model_stats herman2_smaller/optimality_0
+print_large_model_stats herman2_larger/feasibility
+print_large_model_stats herman2_larger/optimality_0
+print_large_model_stats herman2_larger/optimality_5
+onebyone_time="$(python3 parse_log.py large_model/herman2_larger/optimality_0/*onebyone.txt synthesis_time)"
+printf "\n1-by-1 on herman2_larger: %s sec\n" ${onebyone_time}

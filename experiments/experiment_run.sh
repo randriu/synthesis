@@ -2,7 +2,7 @@
 
 # experiment counters
 experiment_current=0
-experiment_total=59
+experiment_total=63
 
 ## helper functions ############################################################
 
@@ -32,7 +32,7 @@ function dynasty() {
     
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiment_total}: ${model} (${property}), method: ${method} (${extra_option_1} ${extra_option_2})"
-    timeout ${timeout} python dynasty.py --project ../tacas21-benchmark/${model} --properties ${property}.properties ${method} ${extra_option_1} ${extra_option_2} > ${logfile} || echo "TO" >> ${logfile} &
+    timeout ${timeout} python3 dynasty.py --project ../tacas21-benchmark/${model} --properties ${property}.properties ${method} ${extra_option_1} ${extra_option_2} > ${logfile} || echo "TO" >> ${logfile} &
 }
 
 # evaluate five models from the basic benchmark using a selected method
@@ -50,9 +50,11 @@ function evaluate_basic_benchmark() {
 ## experiment section ##########################################################
 
 # create folders for log files
-mkdir -p basic
-mkdir -p ce ce/quality ce/maxsat
-mkdir -p large_model large_model/feasibility large_model/multiple large_model/optimality_0 large_model/optimality_5
+mkdir -p basic ce large_model
+mkdir -p ce/quality ce/maxsat
+mkdir -p large_model/herman2_smaller large_model/herman2_larger
+mkdir -p large_model/herman2_smaller/feasibility large_model/herman2_smaller/multiple large_model/herman2_smaller/optimality_0
+mkdir -p large_model/herman2_larger/feasibility large_model/herman2_larger/optimality_0 large_model/herman2_larger/optimality_5 large_model/herman2_larger/onebyone
 
 # activate python environment and navigate to dynasty
 source ../env/bin/activate
@@ -76,20 +78,23 @@ evaluate_basic_benchmark ce/maxsat hybrid "--ce-quality --ce-maxsat"
 
 ## experiments with a large model (Table 3)
 
-# estimate 1-by-1 enumeration on optimality (0%)
-echo "-- evaluating large model (1-by-1)"
-dynasty ${TIMEOUT_LARGE_MODELS} large_model/optimality_0 herman_large none onebyone "--optimality 0.optimal"
-children=$(pgrep -c -P$$)
-
-# evaluate cegar and hybrid on four synthesis problems (feasibility, multiple-property, optimality-0%, optimality-5%)
-echo "-- evaluating large model (cegar, hybrid)"
+# evaluate smaller and larger variant of Herman using cegar and hybrid
 methods=( cegar hybrid )
+echo "-- evaluating herman2-smaller (cegar, hybrid)"
 for method in "${methods[@]}"; do
-    dynasty ${TIMEOUT_LARGE_MODELS} large_model/feasibility herman_large feasibility ${method}
-    dynasty ${TIMEOUT_LARGE_MODELS} large_model/multiple herman_large multiple ${method}
-    dynasty ${TIMEOUT_LARGE_MODELS} large_model/optimality_0 herman_large none ${method} "--optimality 0.optimal"
-    dynasty ${TIMEOUT_LARGE_MODELS} large_model/optimality_5 herman_large none ${method} "--optimality 5.optimal"
+    dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_smaller/feasibility herman2_smaller feasibility ${method}
+    dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_smaller/multiple herman2_smaller multiple ${method}
+    dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_smaller/optimality_0 herman2_smaller none ${method} "--optimality 0.optimal"
 done
+echo "-- evaluating herman2-larger (cegar, hybrid, 1-by-1)"
+for method in "${methods[@]}"; do
+    dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_larger/feasibility herman2_larger feasibility ${method}
+    dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_larger/optimality_0 herman2_larger none ${method} "--optimality 0.optimal"
+    dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_larger/optimality_5 herman2_larger none ${method} "--optimality 5.optimal"
+done
+# estimate 1-by-1 enumeration on optimality (0%)
+dynasty ${TIMEOUT_LARGE_MODELS} large_model/herman2_larger/optimality_0 herman2_larger none onebyone "--optimality 0.optimal"
+children=$(pgrep -c -P$$)
 
 # wait for the remaining experiments to finish
 wait

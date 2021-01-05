@@ -1,0 +1,404 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+CEGISChecker
+2021-01-05 16:46:36,889 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/grid/sketch.templ with constants 
+2021-01-05 16:46:36,894 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-05 16:46:36,895 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-05 16:46:36,896 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-05 16:46:36,896 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-05 16:46:36,896 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M_0_1', 'M_1_1', 'M_2_1', 'M_3_1', 'P_0_1', 'P_1_1', 'P_2_1', 'P_3_1']
+2021-01-05 16:46:36,896 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-05 16:46:36,897 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M_0_1: [0,1,2,3],M_1_1: [0,1,2,3],M_2_1: [0,1,2,3],M_3_1: [0,1,2,3],P_0_1: [1,2,3,4],P_1_1: [1,2,3,4],P_2_1: [1,2,3,4],P_3_1: [1,2,3,4]
+2021-01-05 16:46:36,897 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 65536
+2021-01-05 16:46:36,911 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 acquire lock..
+2021-01-05 16:46:36,911 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 sat-solving..
+2021-01-05 16:46:36,920 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 obtain model..
+2021-01-05 16:46:36,920 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 instantiating..
+2021-01-05 16:46:36,921 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=0,M_1_1=0,M_2_1=0,M_3_1=0,P_0_1=1,P_1_1=1,P_2_1=1,P_3_1=1
+2021-01-05 16:46:36,921 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:36,921 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:36,921 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 1 dispatching ..
+2021-01-05 16:46:36,922 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:36,922 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:36,954 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:36,954 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1175 states in 0.032273054122924805 seconds
+2021-01-05 16:46:36,954 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1175 states and 1588 transitions)
+2021-01-05 16:46:36,954 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:36,954 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:36,954 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:36,955 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:36,955 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:36,955 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1175, transitions: 1588
+2021-01-05 16:46:36,955 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:36,955 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:36,955 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:36,973 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:36,974 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 2
+report [('M_0_1', 'P_0_1')]
+2021-01-05 16:46:36,975 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1')}
+2021-01-05 16:46:36,975 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1')}
+2021-01-05 16:46:36,977 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(0 == M_0_1, 0 == P_0_1))
+2021-01-05 16:46:36,977 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:36,977 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:36,977 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 2 acquire lock..
+2021-01-05 16:46:36,977 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 2 sat-solving..
+2021-01-05 16:46:36,978 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 2 obtain model..
+2021-01-05 16:46:36,978 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 2 instantiating..
+2021-01-05 16:46:36,979 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=0,M_2_1=0,M_3_1=0,P_0_1=2,P_1_1=1,P_2_1=1,P_3_1=1
+2021-01-05 16:46:36,979 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:36,979 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:36,979 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 2 dispatching ..
+2021-01-05 16:46:36,980 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:36,980 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:36,980 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,010 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1225 states in 0.029658794403076172 seconds
+2021-01-05 16:46:37,010 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1225 states and 1669 transitions)
+2021-01-05 16:46:37,010 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,010 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,010 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,010 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,011 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,011 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1225, transitions: 1669
+2021-01-05 16:46:37,011 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,011 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,011 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,036 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,038 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,038 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,038 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,041 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 0 == M_1_1, 1 == P_0_1, 0 == P_1_1))
+2021-01-05 16:46:37,041 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,042 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,042 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 3 acquire lock..
+2021-01-05 16:46:37,042 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 3 sat-solving..
+2021-01-05 16:46:37,042 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 3 obtain model..
+2021-01-05 16:46:37,042 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 3 instantiating..
+2021-01-05 16:46:37,043 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=1,M_2_1=0,M_3_1=0,P_0_1=2,P_1_1=2,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,043 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,043 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,044 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 3 dispatching ..
+2021-01-05 16:46:37,044 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,044 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,044 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,073 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1215 states in 0.02905416488647461 seconds
+2021-01-05 16:46:37,073 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1215 states and 1668 transitions)
+2021-01-05 16:46:37,073 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,073 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,073 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,073 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,074 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,074 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1215, transitions: 1668
+2021-01-05 16:46:37,074 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,074 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,074 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,098 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,100 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,100 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,100 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,103 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 1 == M_1_1, 1 == P_0_1, 1 == P_1_1))
+2021-01-05 16:46:37,103 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,103 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,104 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 4 acquire lock..
+2021-01-05 16:46:37,104 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 4 sat-solving..
+2021-01-05 16:46:37,104 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 4 obtain model..
+2021-01-05 16:46:37,104 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 4 instantiating..
+2021-01-05 16:46:37,105 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=2,M_1_1=0,M_2_1=0,M_3_1=0,P_0_1=3,P_1_1=1,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,105 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,105 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,106 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 4 dispatching ..
+2021-01-05 16:46:37,106 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,106 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,106 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,135 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1225 states in 0.029062747955322266 seconds
+2021-01-05 16:46:37,135 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1225 states and 1669 transitions)
+2021-01-05 16:46:37,135 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,135 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,135 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,135 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,136 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,136 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1225, transitions: 1669
+2021-01-05 16:46:37,136 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,136 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,136 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,161 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,163 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('P_2_1', 'M_0_1', 'P_0_1', 'M_2_1')]
+2021-01-05 16:46:37,163 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('P_2_1', 'M_0_1', 'P_0_1', 'M_2_1')}
+2021-01-05 16:46:37,163 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('P_2_1', 'M_0_1', 'P_0_1', 'M_2_1')}
+2021-01-05 16:46:37,166 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(2 == M_0_1, 0 == M_2_1, 2 == P_0_1, 0 == P_2_1))
+2021-01-05 16:46:37,166 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,167 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,167 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 5 acquire lock..
+2021-01-05 16:46:37,167 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 5 sat-solving..
+2021-01-05 16:46:37,167 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 5 obtain model..
+2021-01-05 16:46:37,167 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 5 instantiating..
+2021-01-05 16:46:37,168 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=2,M_1_1=0,M_2_1=1,M_3_1=0,P_0_1=3,P_1_1=1,P_2_1=2,P_3_1=1
+2021-01-05 16:46:37,168 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,168 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,169 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 5 dispatching ..
+2021-01-05 16:46:37,169 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,169 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,169 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,199 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1261 states in 0.030333995819091797 seconds
+2021-01-05 16:46:37,200 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1261 states and 1722 transitions)
+2021-01-05 16:46:37,200 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,200 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,200 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,200 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,201 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,201 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1261, transitions: 1722
+2021-01-05 16:46:37,201 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,201 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,201 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,234 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,236 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('P_2_1', 'M_0_1', 'P_0_1', 'M_2_1')]
+2021-01-05 16:46:37,236 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('P_2_1', 'M_0_1', 'P_0_1', 'M_2_1')}
+2021-01-05 16:46:37,236 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('P_2_1', 'M_0_1', 'P_0_1', 'M_2_1')}
+2021-01-05 16:46:37,239 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(2 == M_0_1, 1 == M_2_1, 2 == P_0_1, 1 == P_2_1))
+2021-01-05 16:46:37,239 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,239 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,239 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 6 acquire lock..
+2021-01-05 16:46:37,239 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 6 sat-solving..
+2021-01-05 16:46:37,240 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 6 obtain model..
+2021-01-05 16:46:37,240 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 6 instantiating..
+2021-01-05 16:46:37,241 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=0,M_2_1=2,M_3_1=0,P_0_1=3,P_1_1=1,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,241 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,241 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,242 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 6 dispatching ..
+2021-01-05 16:46:37,242 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,242 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,242 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,271 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1225 states in 0.029323339462280273 seconds
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1225 states and 1669 transitions)
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,272 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1225, transitions: 1669
+2021-01-05 16:46:37,273 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,273 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,273 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,298 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,300 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,300 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,300 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,303 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 0 == M_1_1, 2 == P_0_1, 0 == P_1_1))
+2021-01-05 16:46:37,303 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,304 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,304 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 7 acquire lock..
+2021-01-05 16:46:37,304 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 7 sat-solving..
+2021-01-05 16:46:37,304 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 7 obtain model..
+2021-01-05 16:46:37,304 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 7 instantiating..
+2021-01-05 16:46:37,305 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=0,M_2_1=2,M_3_1=0,P_0_1=4,P_1_1=1,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,305 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,306 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,306 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 7 dispatching ..
+2021-01-05 16:46:37,306 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,306 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,306 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1204 states in 0.02758336067199707 seconds
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1204 states and 1627 transitions)
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,334 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,335 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1204, transitions: 1627
+2021-01-05 16:46:37,335 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,335 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,335 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,354 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,355 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,356 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,356 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,359 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 0 == M_1_1, 3 == P_0_1, 0 == P_1_1))
+2021-01-05 16:46:37,359 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,359 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,359 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 8 acquire lock..
+2021-01-05 16:46:37,359 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 8 sat-solving..
+2021-01-05 16:46:37,360 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 8 obtain model..
+2021-01-05 16:46:37,360 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 8 instantiating..
+2021-01-05 16:46:37,361 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=0,M_2_1=2,M_3_1=0,P_0_1=4,P_1_1=2,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,361 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,361 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,361 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 8 dispatching ..
+2021-01-05 16:46:37,362 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,362 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,362 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,391 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1224 states in 0.029451847076416016 seconds
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1224 states and 1667 transitions)
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1224, transitions: 1667
+2021-01-05 16:46:37,392 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,393 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,393 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,418 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,420 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,420 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,421 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,423 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 0 == M_1_1, 3 == P_0_1, 1 == P_1_1))
+2021-01-05 16:46:37,424 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,424 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,424 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 9 acquire lock..
+2021-01-05 16:46:37,424 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 9 sat-solving..
+2021-01-05 16:46:37,424 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 9 obtain model..
+2021-01-05 16:46:37,425 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 9 instantiating..
+2021-01-05 16:46:37,425 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=0,M_2_1=2,M_3_1=0,P_0_1=4,P_1_1=3,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,425 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,426 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,426 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 9 dispatching ..
+2021-01-05 16:46:37,426 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,426 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,426 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,457 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1224 states in 0.030298471450805664 seconds
+2021-01-05 16:46:37,457 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1224 states and 1667 transitions)
+2021-01-05 16:46:37,457 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,457 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,457 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,457 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,458 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,458 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1224, transitions: 1667
+2021-01-05 16:46:37,458 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,458 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,458 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,483 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,484 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,485 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,485 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,488 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 0 == M_1_1, 3 == P_0_1, 2 == P_1_1))
+2021-01-05 16:46:37,488 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,488 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,488 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 10 acquire lock..
+2021-01-05 16:46:37,488 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 10 sat-solving..
+2021-01-05 16:46:37,489 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 10 obtain model..
+2021-01-05 16:46:37,489 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 10 instantiating..
+2021-01-05 16:46:37,490 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=0,M_2_1=2,M_3_1=0,P_0_1=4,P_1_1=4,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,490 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,490 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,491 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 10 dispatching ..
+2021-01-05 16:46:37,491 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,491 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,491 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,521 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1204 states in 0.030039310455322266 seconds
+2021-01-05 16:46:37,521 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1204 states and 1627 transitions)
+2021-01-05 16:46:37,521 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,521 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,521 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,521 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,522 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,522 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1204, transitions: 1627
+2021-01-05 16:46:37,522 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,522 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,522 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,541 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,542 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,542 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,542 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,545 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 0 == M_1_1, 3 == P_0_1, 3 == P_1_1))
+2021-01-05 16:46:37,546 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,546 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,546 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 11 acquire lock..
+2021-01-05 16:46:37,546 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 11 sat-solving..
+2021-01-05 16:46:37,546 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 11 obtain model..
+2021-01-05 16:46:37,547 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 11 instantiating..
+2021-01-05 16:46:37,547 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=1,M_2_1=2,M_3_1=0,P_0_1=4,P_1_1=3,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,547 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,548 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,548 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 11 dispatching ..
+2021-01-05 16:46:37,548 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,548 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,548 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,577 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1214 states in 0.028841257095336914 seconds
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1214 states and 1666 transitions)
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1214, transitions: 1666
+2021-01-05 16:46:37,578 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,579 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,579 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,603 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,605 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 4
+report [('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')]
+2021-01-05 16:46:37,606 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,606 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('M_0_1', 'P_0_1', 'M_1_1', 'P_1_1')}
+2021-01-05 16:46:37,609 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1, 1 == M_1_1, 3 == P_0_1, 2 == P_1_1))
+2021-01-05 16:46:37,609 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,609 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,609 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 12 acquire lock..
+2021-01-05 16:46:37,610 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 12 sat-solving..
+2021-01-05 16:46:37,610 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 12 obtain model..
+2021-01-05 16:46:37,610 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 12 instantiating..
+2021-01-05 16:46:37,611 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=2,M_2_1=2,M_3_1=0,P_0_1=4,P_1_1=3,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,611 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,612 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,612 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 12 dispatching ..
+2021-01-05 16:46:37,612 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,612 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,612 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+2021-01-05 16:46:37,640 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build model with 1176 states in 0.028146743774414062 seconds
+2021-01-05 16:46:37,640 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - ...done building DTMC (with 1176 states and 1590 transitions)
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Start Model Checking....
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Qualitative violations: 
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Consider..: (property-0): Obtain the values of the '"init"'-states with values described by 'P>=927/1000 [F ("goal" & (c < 40))]'
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - No prerequisite found!
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - MC Result: False
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - model states: 1176, transitions: 1590
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - INFO - Stop Model Checking
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - [<stormpy.core.Property object at 0x7f88fee89db0>]
+2021-01-05 16:46:37,641 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict analysis for P>=927/1000 [F ("goal" & (c < 40))] and 
+2021-01-05 16:46:37,665 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Found 1 counterexamples.
+2021-01-05 16:46:37,667 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Conflict of size 6
+report [('P_2_1', 'M_0_1', 'P_1_1', 'M_1_1', 'P_0_1', 'M_2_1')]
+2021-01-05 16:46:37,668 MainThread - dynasty.family_checkers.cegis - DEBUG - Task finished... postprocessing...
+{('P_2_1', 'M_0_1', 'P_1_1', 'M_1_1', 'P_0_1', 'M_2_1')}
+2021-01-05 16:46:37,668 MainThread - dynasty.family_checkers.cegis - INFO - Found conflicts involving {('P_2_1', 'M_0_1', 'P_1_1', 'M_1_1', 'P_0_1', 'M_2_1')}
+2021-01-05 16:46:37,672 MainThread - dynasty.family_checkers.cegis - INFO - learned clause: Not(And(1 == M_0_1,
+        2 == M_1_1,
+        2 == M_2_1,
+        3 == P_0_1,
+        2 == P_1_1,
+        0 == P_2_1))
+2021-01-05 16:46:37,672 MainThread - dynasty.family_checkers.cegis - DEBUG - added clause!
+2021-01-05 16:46:37,672 MainThread - dynasty.family_checkers.cegis - DEBUG - Done postprocessing
+2021-01-05 16:46:37,672 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 13 acquire lock..
+2021-01-05 16:46:37,672 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 13 sat-solving..
+2021-01-05 16:46:37,673 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 13 obtain model..
+2021-01-05 16:46:37,673 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 13 instantiating..
+2021-01-05 16:46:37,674 MainThread - dynasty.family_checkers.cegis - INFO - Consider hole assignment: M_0_1=1,M_1_1=3,M_2_1=0,M_3_1=0,P_0_1=4,P_1_1=3,P_2_1=1,P_3_1=1
+2021-01-05 16:46:37,674 MainThread - dynasty.family_checkers.cegis - DEBUG - construct instance
+2021-01-05 16:46:37,675 MainThread - dynasty.family_checkers.cegis - DEBUG - constructed instance
+2021-01-05 16:46:37,675 MainThread - dynasty.family_checkers.cegis - DEBUG - Iteration: 13 dispatching ..
+2021-01-05 16:46:37,675 MainThread - dynasty.family_checkers.cegis - DEBUG - Currently running: 1
+2021-01-05 16:46:37,675 MainThread - dynasty.family_checkers.cegis - DEBUG - Waiting for one task to finish
+2021-01-05 16:46:37,675 ThreadPoolExecutor-0_0 - dynasty.cegis.verifier - DEBUG - Build DTMC....
+TO
