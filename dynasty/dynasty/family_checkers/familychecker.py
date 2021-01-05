@@ -29,24 +29,31 @@ class FamilyCheckMethod(Enum):
     CEGIS = 4
 
     @classmethod
-    def from_string(cls, input_str):
+    def from_string(cls, input_str, regime):
         """
         Construct enum from string. 
-        
+
         :param input_str: either of [cegar, cschedenum, onebyone, allinone, smt, cegis]
         :return: the corresponding enum, or None
         """
         if input_str == "cegar":
-            return cls.Lifting
+            # return cls.Lifting
+            FamilyCheckMethod.regime = 2  # CEGARChecker
+            return cls.Hybrid
         elif input_str == "cschedenum":
             return cls.SchedulerIteration
         elif input_str == "onebyone":
-            return cls.DtmcIteration
+            # return cls.DtmcIteration
+            FamilyCheckMethod.regime = 0  # EnumerationChecker
+            return cls.Hybrid
         elif input_str == "allinone":
             return cls.AllInOne
         elif input_str == "cegis":
-            return cls.CEGIS
+            # return cls.CEGIS
+            FamilyCheckMethod.regime = 1  # CEGISChecker
+            return cls.Hybrid
         elif input_str == "hybrid":
+            FamilyCheckMethod.regime = regime
             return cls.Hybrid
         else:
             return None

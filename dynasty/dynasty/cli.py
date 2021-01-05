@@ -73,7 +73,7 @@ def dynasty(
         print_stats, check_prerequisites, partitioning, method, regime, short_summary, ce_quality, ce_maxsat
 ):
     print("This is Dynasty version {}.".format(version()))
-    approach = FamilyCheckMethod.from_string(method)
+    approach = FamilyCheckMethod.from_string(method, regime)
     selected_engine = Engine.Sparse if engine == "sparse" else Engine.Dd
     assert approach is not None
     backward_cuts = 1  # Only used for cegis.
@@ -112,8 +112,8 @@ def dynasty(
     elif approach == FamilyCheckMethod.Hybrid:
         Hybrid(
             check_prerequisites, backward_cuts,
-            sketch_path, allowed_path, property_path, optimality_path, constants,
-            restrictions, restriction_path, regime, short_summary, ce_quality, ce_maxsat
+            sketch_path, allowed_path, property_path, optimality_path, constants, restrictions, restriction_path,
+            FamilyCheckMethod.regime, short_summary, ce_quality, ce_maxsat
         )
         return
         # .
