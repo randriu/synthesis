@@ -20,7 +20,7 @@ class Synthesiser(FamilyChecker):
     Class that constructs new candidates to be verified.
     """
 
-    def __init__(self, check_prerequisites=False, threads=1, add_cuts=True):
+    def __init__(self, check_prerequisites=True, threads=1, add_cuts=True):
         super().__init__(check_prerequisites)
         self.template_meta_vars = OrderedDict()
         self.learned_clauses = []

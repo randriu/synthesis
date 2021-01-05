@@ -1380,11 +1380,9 @@ class Hybrid:
     """Entry point: execution setup."""
 
     def __init__(
-            self, check_prerequisites, backward_cuts, sketch_path, allowed_path, property_path, optimality_path,
+            self, backward_cuts, sketch_path, allowed_path, property_path, optimality_path,
             constants, restrictions, restriction_path, regime, short_summary, ce_quality, ce_maxsat
     ):
-
-        # assert not check_prerequisites
 
         self.sketch_path = sketch_path
         self.allowed_path = allowed_path

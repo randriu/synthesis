@@ -61,7 +61,6 @@ def dump_stats_to_file(path, keyword, constants, description, *args):
 @click.option("--stats", default="stats.out")
 @click.option('--engine', help="What engine to use", type=click.Choice(['dd', 'sparse']), default="sparse")
 @click.option("--print-stats", is_flag=True)
-@click.option('--check-prerequisites', help="should prerequisites be checked", is_flag=True)
 @click.option('--partitioning', help="Run partitioning instead of feasibility", is_flag=True)
 @click.option('--regime', help="What method to run", default=3, required=False, type=click.IntRange(0, 4))
 @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
@@ -70,7 +69,7 @@ def dump_stats_to_file(path, keyword, constants, description, *args):
 @click.argument("method", type=click.Choice(['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid']))  # +
 def dynasty(
         project, sketch, allowed, properties, optimality, restrictions, constants, stats, engine,
-        print_stats, check_prerequisites, partitioning, method, regime, short_summary, ce_quality, ce_maxsat
+        print_stats, partitioning, method, regime, short_summary, ce_quality, ce_maxsat
 ):
     print("This is Dynasty version {}.".format(version()))
     approach = FamilyCheckMethod.from_string(method, regime)
@@ -107,13 +106,12 @@ def dynasty(
     elif approach == FamilyCheckMethod.SchedulerIteration:
         algorithm = ConsistentSchedChecker()
     elif approach == FamilyCheckMethod.CEGIS:
-        algorithm = Synthesiser(threads=1, check_prerequisites=check_prerequisites, add_cuts=backward_cuts)
+        algorithm = Synthesiser(threads=1, check_prerequisites=True, add_cuts=backward_cuts)
     # +
     elif approach == FamilyCheckMethod.Hybrid:
         Hybrid(
-            check_prerequisites, backward_cuts,
-            sketch_path, allowed_path, property_path, optimality_path, constants, restrictions, restriction_path,
-            FamilyCheckMethod.regime, short_summary, ce_quality, ce_maxsat
+            backward_cuts, sketch_path, allowed_path, property_path, optimality_path, constants, restrictions,
+            restriction_path, FamilyCheckMethod.regime, short_summary, ce_quality, ce_maxsat
         )
         return
         # .
