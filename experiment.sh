@@ -1,21 +1,21 @@
 #!/bin/bash
 
 # sample command:
-# python3 dynasty.py --project workspace/tacas21/grid/ --properties easy.properties hybrid --regime 3
+# python3 dynasty.py --project workspace/tacas21/grid/ --properties easy.properties hybrid
 
-# timeout values for each experiment
-export EXPERIMENT_TIMEOUT_BASIC=2s  # grid/maze/dpm/pole/herman
-export EXPERIMENT_TIMEOUT_LARGE=10s  # herman L
+# timeout values for each experiment (recommended values: 30m and 6h)
+export TIMEOUT_SMALL_MODELS=30m     # grid/maze/dpm/pole/herman
+export TIMEOUT_LARGE_MODELS=3h      # herman L
 
-# setting this value to >1 will enable concurrent running of experiments
-export EXPERIMENT_CORES=8
+# setting this value to >1 will enable concurrent evaluation of experiments
+export THREADS=$(nproc)
 
 # run experiments and process logs
-echo "> starting experimental evaluation ..."
+printf "> starting experimental evaluation ...\n"
 cd experiments
-. experiment_run.sh
-echo "> all experiments finished, collecting stats ..."
-. experiment_summary.sh > summary.txt
+./experiment_run.sh
+printf "> processing experiment logs ...\n"
+./experiment_summary.sh > summary.txt
 cd ..
-echo "> stats stored to experiments/summary.txt"
-# cat experiments/summary.txt
+printf "> stats stored to file experiments/summary.txt, printing it below:\n\n"
+cat experiments/summary.txt

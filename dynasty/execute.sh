@@ -54,7 +54,7 @@ function log_output() {
 }
 
 function dynasty() {
-    dynasty="python dynasty.py --check-prerequisites --project ${models_dir}/${model}/ hybrid --regime $1 --short-summary"
+    dynasty="python dynasty.py --check-prerequisites --project ${models_dir}/${model}/ $1 --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     optimality="--optimality sketch.optimal --properties none.properties"
     echo ${dynasty} ${constants} ${optimality}
@@ -78,19 +78,16 @@ function reset_log() {
 }
 
 function onebyone() {
-    try_thresholds 0
+    try_thresholds onebyone
 }
-
 function cegis() {
-    try_thresholds 1
+    try_thresholds cegis
 }
-
 function cegar() {
-    try_thresholds 2
+    try_thresholds cegar
 }
-
 function hybrid() {
-    try_thresholds 3
+    try_thresholds hybrid
 }
 
 function try_models() {
@@ -104,32 +101,12 @@ function try_models() {
 # --- sandbox ------------------------------------------------------------------
 
 function test_release() {
-    parallel=true
     reset_log
+    parallel=true
     model=("herman/orig" 2 0.60 0.75 0.15)
     choose_model "${model[@]}"
     cegar
     echo "^ should be at 15 and 18 sec"
-}
-
-function tacas_performance() {
-    reset_log
-
-    timeout=5m
-    parallel=true
-    # verbose=true
-
-    grid=("grid/big" 40 0.931 0.927 -0.004)
-    maze=("maze/orig" 50 0.1612764 0.1612766 0.0000002)
-    dpm=("dpm/half" 12 0.078 0.0818 0.0038)
-    pole=("pole/orig" 0 3.350 3.355 0.005)
-    herman=("herman/orig" 2 1.2 1.8 0.6)
-
-    models=("grid" "maze" "dpm" "pole" "herman")
-
-    try_models cegis
-    # try_models cegar
-    # try_models hybrid
 }
 
 function try_herman() {
@@ -139,13 +116,14 @@ function try_herman() {
     parallel=true
     # verbose=true
     
+    # model=("herman/orig" 2 1.86 1.86 0.6)
     # model=("herman/5" 0 18.1 18.1 0.1)
-    # model=("herman/10" 0 1 1 0.1)
+    model=("herman/10" 0 1 1 0.1)
     
     choose_model "${model[@]}"
 
-    hybrid
-    # cegar
+    # hybrid
+    cegar
     # cegis
     # onebyone
 }
@@ -153,8 +131,7 @@ function try_herman() {
 # --- execution ----------------------------------------------------------------
 
 # test_release
-# tacas_performance
-# try_herman
+try_herman
 
 # run
 
