@@ -40,13 +40,14 @@ In this case, the summary will contain two additional rows with information abou
 
 $ python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid --ce-quality --ce-maxsat
 
-Using summaries from these two commands we managed to replicate experiments from the first row of Table 2. Finally, to deactivate the python environment, simply run
+Using summaries from these two commands we managed to replicate data reported in the first row of Table 2. Finally, to deactivate the python environment, simply run
 
 $ deactivate
 
-
-** Note: TODO iters/time **
-
-
+**Please note** that all of the discussed synthesis methods -- CEGIS, CEGAR and the novel integrated method -- are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different numbers of iterations as well as execution times. Furthermore, the switching nature of the integrated hybrid heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the quantitative conclusions -- i.e., overall performance of hybrid vs CEGAR, or overall quality of MaxSat counterexamples vs those obtained by a novel approach -- will be preserved.
 
 ## Reproducing presented experiments
+
+## Exploring the synthesis problems beyond the presented experiment suit
+
+
