@@ -118,7 +118,6 @@ carl-build() {
 #     cmake ..
 #     sed -i ' 1 s/$/ -lgmp -lcln -lginac/' test/CMakeFiles/carl-parser-test.dir/link.txt
 #     make --jobs $COMPILE_JOBS
-
 # }
 
 pycarl-build() {

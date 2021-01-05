@@ -1,6 +1,3 @@
-# verbose mode
-# set -x
-
 ## helper functions ############################################################
 
 function print_benchmark_info() {
@@ -18,11 +15,11 @@ function print_benchmark_info() {
 function print_ce_info() {
     benchmark_name=$1
     
-    logfile=ce_maxsat/${benchmark_name}_hybrid.txt
+    logfile=ce/maxsat/${benchmark_name}_hybrid.txt
     ce_quality_maxsat="$(python3 parse_log.py ${logfile} ce_quality_maxsat)"
     ce_time_maxsat="$(python3 parse_log.py ${logfile} ce_time_maxsat)"
     
-    logfile=ce_quality/${benchmark_name}_hybrid.txt
+    logfile=ce/quality/${benchmark_name}_hybrid.txt
     ce_quality_trivial="$(python3 parse_log.py ${logfile} ce_quality_trivial)"
     ce_time_trivial="$(python3 parse_log.py ${logfile} ce_time_trivial)"
     ce_quality_nontrivial="$(python3 parse_log.py ${logfile} ce_quality_nontrivial)"
@@ -74,7 +71,7 @@ printf "%-10s \t %-10s \t %-10s \t %-10s \t %-10s\n" benchmark holes family MDP 
 for benchmark in "${basic_bechmarks[@]}"; do
     print_benchmark_info ${benchmark} basic/${benchmark}_easy_hybrid.txt
 done
-print_benchmark_info herman-large large_model/feasibility/*hybrid.txt
+print_benchmark_info herman-large large_model/optimality_5/*hybrid.txt
 
 # Table 2 (counterexamples)
 printf "\nTable 2 (counterexamples)\n\n"
@@ -94,7 +91,7 @@ done
 
 # Table 3 (large model)
 printf "\nTable 3 (large model)\n\n"
-onebyone_time="$(python3 parse_log.py large_model/optimality_0/herman_large_none_onebyone.txt cegis_iters)"
+onebyone_time="$(python3 parse_log.py large_model/optimality_0/herman_large_none_onebyone.txt synthesis_time)"
 printf "1-by-1: %s sec\n" ${onebyone_time}
 print_large_model_stats feasibility
 print_large_model_stats multiple
