@@ -5,7 +5,7 @@
 
 # timeout values for each experiment (recommended values: 30m and 6h)
 export TIMEOUT_SMALL_MODELS=30m     # grid/maze/dpm/pole/herman
-export TIMEOUT_LARGE_MODELS=3h      # herman L
+export TIMEOUT_LARGE_MODELS=4h      # herman L
 
 # setting this value to >1 will enable concurrent evaluation of experiments
 export THREADS=$(nproc)

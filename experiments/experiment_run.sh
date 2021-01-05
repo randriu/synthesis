@@ -32,7 +32,7 @@ function dynasty() {
     
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiment_total}: ${model} (${property}), method: ${method} (${extra_option_1} ${extra_option_2})"
-    timeout ${timeout} python dynasty.py --project workspace/tacas21/${model} --properties ${property}.properties ${method} --check-prerequisites ${extra_option_1} ${extra_option_2} > ${logfile} || echo "TO" >> ${logfile} &
+    timeout ${timeout} python dynasty.py --project ../tacas21-benchmark/${model} --properties ${property}.properties ${method} ${extra_option_1} ${extra_option_2} > ${logfile} || echo "TO" >> ${logfile} &
 }
 
 # evaluate five models from the basic benchmark using a selected method
