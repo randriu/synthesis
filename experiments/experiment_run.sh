@@ -88,16 +88,16 @@ for ce_quality in hybrid maxsat; do
     done
 done
 
-## experiments with Herman2 (Table 3)
+## experiments with herman-2 (Table 3)
 
-# evaluate smaller and larger variant of Herman2 using cegar and hybrid
-echo "-- evaluating Herman2-smaller (cegar, hybrid)"
+# evaluate herman-2 (smaller,larger) using only cegar and hybrid
+echo "-- evaluating herman-2 (smaller)"
 for method in cegar hybrid; do
-    dynasty herman2 herman2_smaller "feasibility" "" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
-    dynasty herman2 herman2_smaller "multiple" "" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
-    dynasty herman2 herman2_smaller "none" "0" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
+    dynasty herman2 herman2_smaller "feasibility" "" "${method}" "" "${TIMEOUT_SMALL_MODELS}"
+    dynasty herman2 herman2_smaller "multiple" "" "${method}" "" "${TIMEOUT_SMALL_MODELS}"
+    dynasty herman2 herman2_smaller "none" "0" "${method}" "" "${TIMEOUT_SMALL_MODELS}"
 done
-echo "-- evaluating Herman2-larger (cegar, hybrid, 1-by-1)"
+echo "-- evaluating herman-2 (larger)"
 for method in cegar hybrid; do
     dynasty herman2 herman2_larger "feasibility" "" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
     dynasty herman2 herman2_larger "none" "0" "${method}" "" "${TIMEOUT_LARGE_MODELS}"

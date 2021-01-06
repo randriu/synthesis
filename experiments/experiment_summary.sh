@@ -34,7 +34,7 @@ function print_ce_stats() {
 
 function print_performance_stats() {
     benchmark=$1
-    printf "    %-16s" ${benchmark}
+    printf "    %-16s" "${benchmark} (${property})"
     for method in cegis cegar hybrid; do
         logfile=performance/${benchmark}_${property}_${method}.txt
         iters="$(python3 parse_log.py ${logfile} iters)"
@@ -91,7 +91,7 @@ for benchmark in "${small_models[@]}"; do
 done
 printf "\n"
 
-# Table 3 (Herman-2)
+# Table 3 (herman-2)
 
 printf "Table 3 (herman-2, smaller)\n\n"
 printf "%-20s%-20s%-20s%-20s%-20s\n" problem cegar_iters cegar_time hybrid_iters hybrid_time
@@ -104,6 +104,6 @@ print_herman2_stats larger feasibility 0 5
 printf "\n"
 
 onebyone_time="$(python3 parse_log.py herman2/*onebyone.txt time)"
-printf "1-by-1 on herman-2 (larger): %s sec\n" ${onebyone_time}
+printf "1-by-1 enumeration of herman-2 (larger): %s sec\n" ${onebyone_time}
 printf "\n"
 

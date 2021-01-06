@@ -4,8 +4,8 @@
 # python3 dynasty.py --project workspace/tacas21/grid/ --properties easy.properties hybrid
 
 # timeout values for each experiment (recommended values: 30m and 6h)
-export TIMEOUT_SMALL_MODELS=1m     # grid/maze/dpm/pole/herman
-export TIMEOUT_LARGE_MODELS=2m     # herman-2
+export TIMEOUT_SMALL_MODELS=30s     # grid, maze, dpm, pole, herman, herman-2 (smaller)
+export TIMEOUT_LARGE_MODELS=30s     # herman-2 (larger)
 
 # run experiments and process logs
 printf "> starting experimental evaluation ...\n"

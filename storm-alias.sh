@@ -4,10 +4,6 @@
 
 export COMPILE_JOBS=8
 
-# general
-
-# alias dotc='find ~ -name "._*" -delete; find ~ -name ".DS_Store" -delete'
-
 # environment variables
 
 export SYNTHESIS=`pwd`
@@ -26,7 +22,7 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 tacas21-prepare() {
     # tacas 21
     pip3 uninstall --yes virtualenv
-    sudo apt-get install texlive-latex-extra
+    sudo apt -y install texlive-latex-extra
 }
 
 synthesis-dependencies() {
@@ -40,7 +36,7 @@ synthesis-dependencies() {
             # libeigen3-dev (+)
         # storm:
             # libglpk-dev (+)
-            # libxerces-c-dev (we probably do not need -- gspn)
+            # libxerces-c-dev (we probably do not need --gspn)
 
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
