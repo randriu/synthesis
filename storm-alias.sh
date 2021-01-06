@@ -52,12 +52,12 @@ tacas21-download() {
     rm -rf dependencies
 }
 
-tacas21-prepare() {
+tacas21-dependencies() {
     unzip dependencies.zip
     cd dependencies/dependencies
     pip3 install --no-index -f pip-packages -r python-requirements
-    dpkg -i apt-packages/*.deb
-    cd $SYNTHESIS
+    sudo dpkg -i apt-packages/*.deb
+    cd -
 }
 
 synthesis-dependencies() {
@@ -82,9 +82,7 @@ synthesis-dependencies() {
 
 dynasty-download() {
     local target_dir=$1
-    cd ${target_dir}
-
-    mkdir -p prerequisites
+    mkdir -p ${target_dir}/prerequisites
 
     # mathsat
     # cd $PREREQUISITES
@@ -94,13 +92,13 @@ dynasty-download() {
     # created folder: $PREREQUISITES/mathsat
 
     # carl
-    cd prerequisites
+    cd ${target_dir}/prerequisites
     git clone -b master14 https://github.com/smtrat/carl
     cd -
     # created folder: prerequisites/carl
 
     # pycarl
-    cd prerequisites
+    cd ${target_dir}/prerequisites
     git clone https://github.com/moves-rwth/pycarl.git
     cd -
     # created folder: prerequisites/pycarl
@@ -114,7 +112,7 @@ dynasty-download() {
     # created folder: storm
 
     # stormpy
-    cd target_dir
+    cd $target_dir
     wget https://github.com/moves-rwth/stormpy/archive/1.6.3.zip
     unzip 1.6.3.zip && rm 1.6.3.zip
     mv stormpy-1.6.3 stormpy
