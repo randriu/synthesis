@@ -81,10 +81,10 @@ synthesis-dependencies() {
 }
 
 dynasty-download() {
-    target=$1
-    cd ${target}
+    local target_dir=$1
+    cd ${target_dir}
 
-    mkdir -p $PREREQUISITES
+    mkdir -p prerequisites
 
     # mathsat
     # cd $PREREQUISITES
@@ -94,31 +94,31 @@ dynasty-download() {
     # created folder: $PREREQUISITES/mathsat
 
     # carl
-    cd $PREREQUISITES
+    cd prerequisites
     git clone -b master14 https://github.com/smtrat/carl
-    cd $OLDPWD
-    # created folder: $PREREQUISITES/carl
+    cd -
+    # created folder: prerequisites/carl
 
     # pycarl
-    cd $PREREQUISITES
+    cd prerequisites
     git clone https://github.com/moves-rwth/pycarl.git
-    cd $OLDPWD
-    # created folder: $PREREQUISITES/pycarl
+    cd -
+    # created folder: prerequisites/pycarl
 
     # storm
-    cd $SYNTHESIS
+    cd $target_dir
     wget https://zenodo.org/record/4288652/files/moves-rwth/storm-1.6.3.zip
     unzip storm-1.6.3.zip && rm storm-1.6.3.zip
     mv moves-rwth-storm-e763b83 storm
-    cd $OLDPWD
+    cd -
     # created folder: storm
 
     # stormpy
-    cd $SYNTHESIS
+    cd target_dir
     wget https://github.com/moves-rwth/stormpy/archive/1.6.3.zip
     unzip 1.6.3.zip && rm 1.6.3.zip
     mv stormpy-1.6.3 stormpy
-    cd $OLDPWD
+    cd -
     # created folder: stormpy
 }
 
