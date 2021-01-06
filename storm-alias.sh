@@ -20,7 +20,7 @@ export STORM_BLD=$STORM_DIR/build
 export STORMPY_DIR=$SYNTHESIS/stormpy
 export DYNASTY_DIR=$SYNTHESIS/dynasty
 
-# functions
+### TACAS 2021 #################################################################
 
 tacas21-download() {
     local ART_DIR=$SYNTHESIS/dependencies
@@ -44,41 +44,36 @@ tacas21-download() {
     pip3 download -d $PIP_DIR -r $DEP_DIR/python-requirements
 
     # download prerequisites
-    sudo apt install -y git
     dynasty-download $ART_DIR
     
-    # zip and clean
+    # zip and clean dependencies
     zip -r dependencies.zip dependencies
     rm -rf dependencies
 }
 
+tacas21-prepare() {
+    sudo apt install -y git
+    git clone https://github.com/gargantophob/synthesis.git
+    cd synthesis
+    source storm-alias.sh
+    tacas21-download
+    cd ~
+    zip -r synthesis.zip synthesis
+}
+
 tacas21-dependencies() {
     unzip dependencies.zip
+    cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy . 
     cd dependencies/dependencies
     pip3 install --no-index -f pip-packages -r python-requirements
     sudo dpkg -i apt-packages/*.deb
+    sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
+    source $HOME/.profile
     cd -
 }
 
-synthesis-dependencies() {
-    sudo apt update
-    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
-    sudo apt -y install texlive-latex-extra
 
-    # not installed on sarka:
-        # carl:
-            # libcln-dev (+, requires texinfo)
-            # libginac-dev (+)
-            # libeigen3-dev (+)
-        # storm:
-            # libglpk-dev (+)
-            # libxerces-c-dev (we probably do not need --gspn)
-
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
-    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-    pip3 install virtualenv
-    pip3 install pysmt z3-solver click
-}
+### dependencies ###############################################################
 
 dynasty-download() {
     local target_dir=$1
@@ -120,6 +115,41 @@ dynasty-download() {
     # created folder: stormpy
 }
 
+dynasty-dependencies() {
+    sudo apt update
+    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install texlive-latex-extra
+
+    # not installed on sarka:
+        # carl:
+            # libcln-dev (+, requires texinfo)
+            # libginac-dev (+)
+            # libeigen3-dev (+)
+        # storm:
+            # libglpk-dev (+)
+            # libxerces-c-dev (we probably do not need --gspn)
+
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
+    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+    pip3 install virtualenv
+    pip3 install pysmt z3-solver click
+}
+
+synthesis-dependencies() {
+    if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
+        dynasty-dependencies
+    fi
+    
+    if [ $SYNTHESIS_TACAS21 == "true" ]; then
+        tacas21-dependencies
+    else
+        dynasty-download $SYNTHESIS
+    fi
+    
+}
+
+### storm patch ################################################################
+
 dynasty-patch-create() {
     echo "NOT IMPLEMENTED YET"
 }
@@ -127,6 +157,8 @@ dynasty-patch-create() {
 dynasty-patch() {
     rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
 }
+
+### preparing prerequisites ####################################################
 
 dynasty-setup-python() {
     virtualenv -p python3 $SYNTHESIS_ENV
@@ -159,6 +191,8 @@ pycarl-build() {
     deactivate
     cd $OLDPWD
 }
+
+### storm and stormpy ##########################################################
 
 storm-config() {
     mkdir -p $STORM_BLD
@@ -211,16 +245,13 @@ synthesis-install() {
 }
 
 synthesis-full() {
-    if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
-        synthesis-dependencies
-    fi
-    if [ $SYNTHESIS_TACAS21 == "true" ]; then
-        tacas21-prepare
-    else
-        dynasty-download $SYNTHESIS
-    fi
+    synthesis-dependencies
     synthesis-install
 }
+
+### development ################################################################
+
+#recompilation
 
 storm-rebuild() {
     storm-config
@@ -232,7 +263,6 @@ stormpy-rebuild() {
     stormpy-build
 }
 
-################################################################################
 # aliases
 
 alias sc='storm-config'
