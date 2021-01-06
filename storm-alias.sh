@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# repository link:
+# https://github.com/gargantophob/synthesis/archive/master.zip
+
 # compilation parameters
 
 export COMPILE_JOBS=8
