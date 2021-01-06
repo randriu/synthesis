@@ -18,11 +18,11 @@ function print_ce_stats() {
     benchmark=$1
     property=$2
     
-    logfile=ce/${benchmark}_${property}_ce_maxsat_hybrid.txt
+    logfile=logs/ce/${benchmark}_${property}_ce_maxsat_hybrid.txt
     ce_quality_maxsat="$(python3 parse_log.py ${logfile} ce_quality_maxsat)"
     ce_time_maxsat="$(python3 parse_log.py ${logfile} ce_time_maxsat)"
     
-    logfile=ce/${benchmark}_${property}_ce_hybrid_hybrid.txt
+    logfile=logs/ce/${benchmark}_${property}_ce_hybrid_hybrid.txt
     ce_quality_trivial="$(python3 parse_log.py ${logfile} ce_quality_trivial)"
     ce_time_trivial="$(python3 parse_log.py ${logfile} ce_time_trivial)"
     ce_quality_nontrivial="$(python3 parse_log.py ${logfile} ce_quality_nontrivial)"
@@ -36,7 +36,7 @@ function print_performance_stats() {
     benchmark=$1
     printf "    %-16s" "${benchmark} (${property})"
     for method in cegis cegar hybrid; do
-        logfile=performance/${benchmark}_${property}_${method}.txt
+        logfile=logs/performance/${benchmark}_${property}_${method}.txt
         iters="$(python3 parse_log.py ${logfile} iters)"
         time="$(python3 parse_log.py ${logfile} time)"
         printf "%-20s%-20s" ${iters} ${time}
@@ -49,7 +49,7 @@ function print_herman2_stats() {
     for problem in $2 $3 $4; do
         printf "    %-16s" ${problem}
         for method in cegar hybrid; do
-            logfile=herman2/herman2_${variant}_${problem}_${method}.txt
+            logfile=logs/herman2/herman2_${variant}_${problem}_${method}.txt
             iters="$(python3 parse_log.py ${logfile} iters)"
             time="$(python3 parse_log.py ${logfile} time)"
             printf "%-20s%-20s" ${iters} ${time}    
@@ -66,9 +66,9 @@ small_models=( grid maze dpm pole herman )
 printf "\nTable 1 (benchmark info)\n\n"
 printf "%-24s%-20s%-20s%-20s%-20s\n" benchmark parameters "family size" "MDP size" "DTMC size"
 for benchmark in "${small_models[@]}"; do
-    print_benchmark_info ${benchmark} performance/${benchmark}_easy_hybrid.txt
+    print_benchmark_info ${benchmark} logs/performance/${benchmark}_easy_hybrid.txt
 done
-print_benchmark_info "herman-2 (larger)" herman2/herman2_larger_5_hybrid.txt
+print_benchmark_info "herman-2 (larger)" logs/herman2/herman2_larger_5_hybrid.txt
 printf "\n"
 
 # Table 2 (counterexamples)

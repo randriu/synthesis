@@ -50,7 +50,7 @@ function dynasty() {
     fi
 
     local timeout=$7
-    local logfile="../experiments/${experiment_set}/${benchmark}_${tag}_${method}.txt"
+    local logfile="../experiments/logs/${experiment_set}/${benchmark}_${tag}_${method}.txt"
     
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiment_total}: ${benchmark} (${tag}), method: ${method}"
@@ -60,7 +60,7 @@ function dynasty() {
 ## experiment section ##########################################################
 
 # create folders for log files
-mkdir -p performance ce herman2
+mkdir -p logs logs/performance logs/ce logs/herman2
 
 # activate python environment and navigate to dynasty
 source ../env/bin/activate
