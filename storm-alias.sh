@@ -22,11 +22,42 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 # functions
 
+tacas21-download() {
+    ART_DIR=$SYNTHESIS/dependencies
+    DEP_DIR=$ART_DIR/dependencies
+    PACK_DIR=$DEP_DIR/apt-packages
+    PIP_DIR=$DEP_DIR/pip-packages
+    PACK_URIS=$DEP_DIR/packages.uri
+
+    # download apt-packages
+    mkdir -p $PACK_DIR
+    sudo apt-get update
+    apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake texlive-latex-extra | grep -oP "(?<=').*(?=')" > $PACK_URIS
+    cd $PACK_DIR
+    wget -i $PACK_URIS
+    cd $SYNTHESIS
+
+    # download requested pip packages
+    pip3 download -d $PIP_DIR -r python-requirements
+
+    # download prerequisites
+    dynasty-download $ART_DIR
+    
+    # copy installation scripts
+    cp python-requirements $DEP_DIR
+    cp install_dependencies.sh $ART_DIR
+
+    # zip and clean
+    zip -r dependencies.zip dependencies
+    rm -rf dependencies
+}
+
 tacas21-prepare() {
     unzip dependencies.zip
-    cd dependencies
-    sudo ./install_dependencies.sh
-    cd -
+    cd dependencies/dependencies
+    pip3 install --no-index -f pip-packages -r python-requirements
+    dpkg -i apt-packages/*.deb
+    cd $SYNTHESIS
 }
 
 synthesis-dependencies() {
@@ -50,6 +81,9 @@ synthesis-dependencies() {
 }
 
 dynasty-download() {
+    target=$1
+    cd ${target}
+
     mkdir -p $PREREQUISITES
 
     # mathsat
@@ -185,7 +219,7 @@ synthesis-full() {
     if [ $SYNTHESIS_TACAS21 == "true" ]; then
         tacas21-prepare
     else
-        dynasty-download
+        dynasty-download $SYNTHESIS
     fi
     synthesis-install
 }
