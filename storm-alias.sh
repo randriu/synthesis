@@ -23,14 +23,16 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 # functions
 
 tacas21-prepare() {
-    # tacas 21
-    # pip3 uninstall --yes virtualenv
-    sudo apt -y install texlive-latex-extra
+    unzip dependencies.zip
+    cd dependencies
+    sudo ./install_dependencies.sh
+    cd $SYNTHESIS
 }
 
 synthesis-dependencies() {
     sudo apt update
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install texlive-latex-extra
 
     # not installed on sarka:
         # carl:
@@ -43,6 +45,7 @@ synthesis-dependencies() {
 
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+    pip3 install virtualenv
 }
 
 dynasty-download() {
@@ -85,8 +88,7 @@ dynasty-download() {
 }
 
 dynasty-patch-create() {
-    # rsync -av $SYNTHESIS/storm/src/storm-counterexamples
-    echo NOT IMPLEMENTED YET
+    echo "NOT IMPLEMENTED YET"
 }
 
 dynasty-patch() {
@@ -94,8 +96,6 @@ dynasty-patch() {
 }
 
 dynasty-setup-python() {
-    # pip3 uninstall virtualenv
-    pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
     source $SYNTHESIS_ENV/bin/activate
     pip3 install pysmt z3-solver click
@@ -165,7 +165,6 @@ dynasty-install() {
 # aggregated functions
 
 synthesis-install() {
-    dynasty-download
     dynasty-patch
     dynasty-setup-python
 
@@ -180,11 +179,13 @@ synthesis-install() {
 }
 
 synthesis-full() {
-    if [ $SYNTHESIS_TACAS21 = "true" ]; then
-        tacas21-prepare
-    fi
-    if [ $SYNTHESIS_INSTALL_DEPENDENCIES = "true" ]; then
+    if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
         synthesis-dependencies
+    fi
+    if [ $SYNTHESIS_TACAS21 == "true" ]; then
+        tacas21-prepare
+    else
+        dynasty-download
     fi
     synthesis-install
 }

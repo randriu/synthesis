@@ -42,12 +42,6 @@ average DTMC size: 1232, DTMC checks: 215, iterations: 215
 feasible: no
 ```
 
-Finally, to deactivate the python environment, simply run
-
-```sh
-deactivate
-```
-
 ## Reproducing presented experiments
 
 All of the experiments discussed in the paper can be evaluated by running the `experiment.sh` script:
@@ -139,7 +133,7 @@ Notice that this family contains roughly six hundred members (as opposed to 5k m
 python3 dynasty/dynasty.py --project tacas21-benchmark/herman2_smaller --properties none.properties --optimality 0.optimal hybrid
 ```
 
-You can see that the optimal value is 35.6 steps and that the summary also contains the parameter assignment for this optimal member. If we enlarge this family to its original size:
+You can see that the optimal value is 35.6 (expected) steps and that the summary also contains the parameter assignment for this optimal member. If we enlarge this family to its original size:
 
 ```
 M0LFAIR;0;1;2;3;4
@@ -151,7 +145,7 @@ MxxB;0;1
 MxxC;0;1
 ```
 
-computing the optimal value now takes some more time, but the optimal value is now around 18.1, meaning that we have found a member that can stabilize almost twice as fast. What happened here is that we have added some strategies for our protocol and, fortunately, some of these strategies were better (wrt. the specification) than existing ones.
+computing the optimal value now takes some more time, but the obtained value is now around 18.1, meaning that we have found a member that can stabilize almost twice as fast. What happened here is that we have added some strategies for our protocol and, fortunately, some of these strategies were better (wrt. the specification) than existing ones.
 
 #### Modifying the (average) size of the family members
 Most of our models (i.e. DPM, Grid, Herman, and Maze) include the parameter CMAX allowing users to change size of the particular family members (i.e. the underlying DTMCs) -- increasing this parameter increases the average size of the members. Please note that some properties are linked with this parameter and thus changing the parameter can change feasibility outcome and can even make some properties invalid. For example, you can try to run 
