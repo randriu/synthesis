@@ -29,6 +29,8 @@ tacas21-download() {
     PIP_DIR=$DEP_DIR/pip-packages
     PACK_URIS=$DEP_DIR/packages.uri
 
+    printf "pysmt\nz3-solver\nclick\nvirtualenv\n" > $DEP_DIR/python-requirements
+
     # download apt-packages
     mkdir -p $PACK_DIR
     sudo apt-get update
@@ -43,10 +45,6 @@ tacas21-download() {
     # download prerequisites
     dynasty-download $ART_DIR
     
-    # copy installation scripts
-    cp python-requirements $DEP_DIR
-    cp install_dependencies.sh $ART_DIR
-
     # zip and clean
     zip -r dependencies.zip dependencies
     rm -rf dependencies
