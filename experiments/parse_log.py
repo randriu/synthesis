@@ -9,11 +9,13 @@ def match(regex, lines):
     return None
 
 # default values
+iters_estimate = time_estimate = None
 method = synthesis_time = number_of_holes = family_size = None
 mdp_size = cegar_iters = None
 dtmc_size = cegis_iters = None
 ce_quality_maxsat = ce_quality_trivial = ce_quality_nontrivial = None
 ce_time_maxsat = ce_time_trivial = ce_time_nontrivial = None
+iters = time = None
 
 # process command line arguments
 assert len(sys.argv) == 3
@@ -34,8 +36,8 @@ if lines[-1] == "TO\n":
     if res is not None:
         iters = round(float(res[0]),0)
         time = round(float(res[1]),0)
-        cegar_iters = cegis_iters = str(iters) + "*"
-        synthesis_time = str(time) + "*"
+        iters_estimate = str(iters) + "*"
+        time_estimate = str(time) + "*"
 
 res = match(r"^method: (.*?), synthesis time: (.*?) s$", lines)
 if res is not None:
@@ -69,7 +71,15 @@ if res is not None:
     ce_time_trivial = res[1]
     ce_time_nontrivial = res[2]
 
-hybrid_iters = None if cegar_iters is None and cegis_iters is None else f"({cegar_iters},{cegis_iters})"
+hybrid_iters = None if cegar_iters is None or cegis_iters is None else f"({cegar_iters},{cegis_iters})"
+
+# identify iters and time
+if method is None:
+    iters = iters_estimate
+    time = time_estimate
+else:
+    iters = next(value for value in [hybrid_iters, cegis_iters, cegar_iters] if value is not None)
+    time = synthesis_time
 
 # print selected value
 value_selected = globals()[selection]
