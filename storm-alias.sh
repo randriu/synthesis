@@ -26,7 +26,7 @@ tacas21-prepare() {
     unzip dependencies.zip
     cd dependencies
     sudo ./install_dependencies.sh
-    cd $SYNTHESIS
+    cd -
 }
 
 synthesis-dependencies() {
@@ -46,6 +46,7 @@ synthesis-dependencies() {
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
     pip3 install virtualenv
+    pip3 install pysmt z3-solver click
 }
 
 dynasty-download() {
@@ -98,7 +99,6 @@ dynasty-patch() {
 dynasty-setup-python() {
     virtualenv -p python3 $SYNTHESIS_ENV
     source $SYNTHESIS_ENV/bin/activate
-    pip3 install pysmt z3-solver click
     deactivate
 }
 
