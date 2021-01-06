@@ -21,7 +21,7 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 tacas21-prepare() {
     # tacas 21
-    pip3 uninstall --yes virtualenv
+    # pip3 uninstall --yes virtualenv
     sudo apt -y install texlive-latex-extra
 }
 
