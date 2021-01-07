@@ -30,7 +30,7 @@ tacas21-download() {
 
     # create a list of python requirements
     mkdir -p $PACK_DIR $PIP_DIR
-    printf "pysmt\nz3-solver\nclick\nvirtualenv\n" > $DEP_DIR/python-requirements
+    printf "pysmt\nz3-solver\nclick\nvirtualenv\npytest\npytest-runner\n" > $DEP_DIR/python-requirements
 
     # download apt-packages
     local PACK_URIS=$DEP_DIR/packages.uri
