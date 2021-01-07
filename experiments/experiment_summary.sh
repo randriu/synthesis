@@ -103,6 +103,6 @@ printf "%-20s%-20s%-20s%-20s%-20s\n" problem cegar_iters cegar_time hybrid_iters
 print_herman2_stats larger feasibility 0 5
 printf "\n"
 
-onebyone_time="$(python3 parse_log.py herman2/*onebyone.txt time)"
+onebyone_time="$(python3 parse_log.py logs/herman2/*onebyone.txt time)"
 printf "1-by-1 enumeration of herman-2 (larger): %s sec\n" ${onebyone_time}
 printf "\n"

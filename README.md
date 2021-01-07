@@ -18,7 +18,7 @@ Installation is performed automatically by running the installation script `inst
 sudo ./install.sh
 ```
 
-Compilation of the tool and of all of its prerequisites will take about an hour. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 1.5 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 6 GB of RAM, the compilation should take around 20 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see exported variable COMPILE_JOBS in the script install.sh).
+Compilation of the tool and of all of its prerequisites will take a couple of hours. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see exported variable COMPILE_JOBS in the script install.sh).
 
 ## Initial testing of the artifact
 
@@ -73,7 +73,7 @@ Choosing concrete values for the timeouts will define how many experiments you w
 
 Regarding the `TIMEOUT_LARGE_MODELS` value, choosing `0s` will allow you to ignore these experiments completely. Option `TIMEOUT_LARGE_MODELS=30m` is the minimum value that will safely allow the integrated method to finish. Experiments on large models with this timeout will amount to three hours. For the CEGAR method, you will obtain very rough estimates of their performance.  Unfortunately, these estimates will be very poor: obtaining good estimates requires running CEGAR for at least five hours (recommended default value), resulting in the overall runtime of 21 hours. In our evaluation, we used `TIMEOUT_LARGE_MODELS=24h`.
 
-Finally, note that the `./experiment.sh` script evaluates experiments concurrently based on the number `nproc` of CPU cores available on your VM. Therefore, supplying your VM with multiple cores will greatly reduce computation time. For instance, having a VM with 4 CPU cores and choosing recommended settings `TIMEOUT_SMALL_MODELS=20m` and `TIMEOUT_LARGE_MODELS=5h` will allow you to reproduce almost all experiments and obtain relatively good estimates of the CEGAR behaviour in only about 6 hours of uptime. Also note that all of the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
+Finally, note that the `experiment.sh` script evaluates experiments concurrently based on the number `nproc` of CPU cores available on your VM. Therefore, supplying your VM with multiple cores will greatly reduce computation time. For instance, having a VM with 4 CPU cores and choosing recommended settings `TIMEOUT_SMALL_MODELS=20m` and `TIMEOUT_LARGE_MODELS=5h` will allow you to reproduce almost all experiments and obtain relatively good estimates of the CEGAR behaviour in only about 6 hours of uptime. Also note that all of the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
 
 ## How to run synthesis manually
 
@@ -115,9 +115,7 @@ In order to further investigate the performance of the synthesis methods, we sug
 
 #### Modifying the family size
 Changing the family size of particular models can require nontrivial changes in the model definition and thus a certain level of understanding of the models. However, there are some models where the family size can be easily changed. For example, the size of the larger variant of the model can be modified in the following way:
-Go to 
-herman2_larger/sketch.allowed
-and reduce the domains of the selected options (holes), e.g., modify the file in the following way:
+Go to `herman2_larger/sketch.allowed` and reduce the domains of the selected options (holes), e.g., modify the file in the following way:
 
 ```
 M0LFAIR;0;1;2
@@ -129,47 +127,41 @@ MxxB;0;1
 MxxC;0;1
 ```
 
-This reduces the number of randomization strategies of the protocol and thus the family size. You can now run
+This greatly reduces the number of randomization strategies of the protocol and thus the family size. We can now run optimal synthesis to find the best solution in the reduced family:
 
 ```sh
-python3 dynasty/dynasty.py --project tacas21-benchmark/herman2_smaller --properties feasibility.properties hybrid
-python3 dynasty/dynasty.py --project tacas21-benchmark/herman2_smaller --properties feasibility.properties cegar
+python3 dynasty/dynasty.py --project tacas21-benchmark/herman2_larger --properties none.properties --optimality 0.optimal hybrid
+python3 dynasty/dynasty.py --project tacas21-benchmark/herman2_larger --properties none.properties --optimality 0.optimal cegar
 ```
 
-Notice that this family contains roughly six hundred members (as opposed to 5k members in the original model. Instead of deciding feasibility, you can also compute the optimal value for this model:
-
-```sh
-python3 dynasty/dynasty.py --project tacas21-benchmark/herman2_smaller --properties none.properties --optimality 0.optimal hybrid
-```
-
-You can see that the optimal value is 35.6 (expected) steps and that the summary also contains the parameter assignment for this optimal member. If we enlarge this family to its original size:
+Notice that this family contains only six hundred members (as opposed to 3M members in the original model. You can see that the optimal value is now 35.6 (expected) steps and that the summary also contains the parameter assignment for this optimal member. If we enlarge this family by adding more strategies:
 
 ```
-M0LFAIR;0;1;2;3;4
-M0HFAIR;0;1;2;3;4
-M1LFAIR;0;1;2;3;4
-M1HFAIR;0;1;2;3;4
+M0LFAIR;0;1;2;3;4;5;6
+M0HFAIR;0;1;2;3;4;5;6
+M1LFAIR;0;1;2;3;4;5;6
+M1HFAIR;0;1;2;3;4;5;6
 MxxA;0;1
 MxxB;0;1
 MxxC;0;1
 ```
 
-computing the optimal value now takes some more time, but the obtained value is now around 18.1, meaning that we have found a member that can stabilize almost twice as fast. What happened here is that we have added some strategies for our protocol and, fortunately, some of these strategies were better (wrt. the specification) than existing ones.
+computing the optimal value now takes some more time, but the obtained value is now around 12.3 (we recommend computing it using the hybrid approach), meaning that we have found a member that can stabilize much faster. What happened here is that we have added some strategies to our protocol (the family size is nor arounk 19k members) and, fortunately, some of these strategies were better (wrt. the specification) than existing ones. Feel free to experiment with these parameter domains -- you can even try to assign different domains to different parameters `MxyFAIR` -- but be aware that the family blows up really fast and that CEGAR will struggle even with families having as few as 80k members.
 
 #### Modifying the (average) size of the family members
-Most of our models (i.e. DPM, Grid, Herman, and Maze) include the parameter CMAX allowing users to change size of the particular family members (i.e. the underlying DTMCs) -- increasing this parameter increases the average size of the members. Please note that some properties are linked with this parameter and thus changing the parameter can change feasibility outcome and can even make some properties invalid. For example, you can try to run 
+Most of our models (i.e. DPM, Grid, Herman, and Maze) include parameter CMAX allowing users to change size of the particular family members (i.e. the underlying DTMCs) -- increasing this parameter increases the average size of the members. Please note that most properties are linked with this parameter and thus changing the parameter can change feasibility outcome and can even make some properties invalid. For example, you can try to run 
 
 ```sh
-python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid
-python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties cegis
+python3 dynasty/dynasty.py --project tacas21-benchmark/maze --properties easy.properties hybrid
+python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties cegar
 ```
-and then modify the parameter CMAX in file tacas21-benchmark/grid/sketch.templ:
+and then modify the parameter CMAX in file tacas21-benchmark/maze/sketch.templ:
 
 ```
-const int CMAX = 100;
+const int CMAX = 200;
 ```
 
-and rerun the two commands above. You can inspect that the size of underlying DTMCs as well as the size of quotient MDPs has increased and that the synthesis now takes more time.
+and rerun the two commands above. You can inspect that, although the number of iterations has not changed (the family size remained the same) the size of underlying DTMCs as well as the size of quotient MDPs has increased and therefore the synthesis now takes significantly more time.
 
 #### Modifying threshold of the given property
 

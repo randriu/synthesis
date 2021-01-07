@@ -2,8 +2,10 @@
 
 # merlin:
 # wget https://www.stud.fit.vutbr.cz/~xandri03/synthesis.zip
-# repository link:
+# git:
 # https://github.com/gargantophob/synthesis/archive/master.zip
+# zenodo:
+# wget https://zenodo.org/record/4422544/files/synthesis.zip
 
 # compilation parameters
 
