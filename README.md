@@ -22,14 +22,13 @@ Compilation of the tool and of all of its prerequisites will take about an hour.
 
 ## Initial testing of the artifact
 
-Having installed the tool, you can test it by evaluating a simple synthesis problem:
+Having installed the tool, you can test it by running the dynasty tool to evaluate a simple synthesis problem:
 
 ```sh
-source env/bin/activate
 python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid
 ```
 
-The first command activates python environment, while the second one runs the dynasty itself. The syntax of the second command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the TACAS'21 paper and synthesize it wrt. the easy property using the hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
+The syntax of the command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the TACAS'21 paper and synthesize it wrt. the easy property using the hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
 formula 1: P>=931/1000 [F ("goal" & (c < 40))]
@@ -68,7 +67,7 @@ Finally, note that the `./experiment.sh` script evaluates experiments concurrent
 
 ## How to run synthesis manually
 
-The remainder of this README explains how to run dynasty tool manually to help you set up your own experiments. First, recall the dynasty call mentioned above (do not forget to activate python environment):
+The remainder of this README explains how to run dynasty tool manually to help you set up your own experiments. First, recall the dynasty call mentioned above:
 
 ```sh
 python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid

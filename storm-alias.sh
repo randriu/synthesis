@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# creator:
+# wget https://www.stud.fit.vutbr.cz/~xandri03/creator.zip
 # repository link:
 # https://github.com/gargantophob/synthesis/archive/master.zip
 
@@ -24,44 +26,79 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 ### TACAS 2021 #################################################################
 
-tacas21-download() {
-    local ART_DIR=$SYNTHESIS/dependencies
-    local DEP_DIR=$ART_DIR/dependencies
-    local PACK_DIR=$DEP_DIR/apt-packages
-    local PIP_DIR=$DEP_DIR/pip-packages
+tacas21-download-dependencies() {
+    cd artifact
 
-    # create a list of python requirements
-    mkdir -p $PACK_DIR $PIP_DIR
-    printf "pysmt\nz3-solver\nclick\nvirtualenv\npytest\npytest-runner\n" > $DEP_DIR/python-requirements
+    ROOT_DIR=$PWD
+    ART_DIR=$ROOT_DIR/dependencies
+    DEP_DIR=$ART_DIR/dependencies
+    PACK_DIR=$DEP_DIR/apt-packages
+    PIP_DIR=$DEP_DIR/pip-packages
+    STORM_VERSION=1.6.3
 
     # download apt-packages
-    local PACK_URIS=$DEP_DIR/packages.uri
+    PACK_URIS=$DEP_DIR/packages.uri
+    mkdir -p $PACK_DIR
     sudo apt-get update
-    apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake texlive-latex-extra | grep -oP "(?<=').*(?=')" > $PACK_URIS
+    apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake | grep -oP "(?<=').*(?=')" > $PACK_URIS
     cd $PACK_DIR
     wget -i $PACK_URIS
-    cd $SYNTHESIS
+    cd $ROOT_DIR
 
-    # download requested pip packages
-    pip3 download -d $PIP_DIR -r $DEP_DIR/python-requirements
+    # download pip packages
+    pip3 download -d $PIP_DIR -r python-requirements
 
-    # download prerequisites
-    dynasty-download $ART_DIR
-    
-    # zip and clean dependencies
-    zip -r dependencies.zip dependencies
+    # download carl & storm
+    wget -O $DEP_DIR/carl.zip https://github.com/smtrat/carl/archive/master14.zip
+    wget -O $DEP_DIR/pycarl.zip https://github.com/moves-rwth/pycarl/archive/master.zip
+    wget -O $DEP_DIR/storm.zip https://github.com/moves-rwth/storm/archive/$STORM_VERSION.zip
+    wget -O $DEP_DIR/stormpy.zip https://github.com/moves-rwth/stormpy/archive/$STORM_VERSION.zip
+
+    # copy storm adjustments
+    cp -r storm_3rdparty_CMakeLists.txt StormEigen $DEP_DIR
+
+    # copy installation scripts
+    cp install_carl.sh install_storm.sh python-requirements $DEP_DIR
+    cp install_dependencies.sh $ART_DIR
+
+    # zip everything
+    zip -r ../dependencies.zip dependencies/*
     rm -rf dependencies
+    cd ..
 }
 
-tacas21-prepare() {
+tacas21-prepare-artifact() {
     sudo apt install -y git
     git clone https://github.com/gargantophob/synthesis.git
     cd synthesis
     source storm-alias.sh
-    tacas21-download
-    cd ~
+    tacas21-download-dependencies
+    cd ..
     zip -r synthesis.zip synthesis
 }
+
+tacas21-install() {
+    # install dependencies
+    unzip dependencies.zip
+    cd dependencies
+    sudo ./install_dependencies.sh
+    cd ..
+    # apply patch and recompile
+    sudo rsync -av patch/ dependencies/
+    cd dependencies/storm/build
+    sudo cmake ..
+    sudo make storm-main --jobs $COMPILE_JOBS
+    cd -
+    cd dependencies/stormpy
+    sudo pip3 install -ve .
+    cd -
+    # install dynasty
+    cd dynasty
+    python3 setup.py install
+    cd -
+}
+
+### THE FOLLOWING FUNCTIONS ARE USED FOR TACAS'21 ARTIFACT #####################
 
 ### dependencies ###############################################################
 

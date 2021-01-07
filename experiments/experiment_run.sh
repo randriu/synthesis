@@ -63,7 +63,7 @@ function dynasty() {
 mkdir -p logs logs/performance logs/ce logs/herman2
 
 # activate python environment and navigate to dynasty
-source ../env/bin/activate
+# source ../env/bin/activate
 cd ../dynasty
 
 ## experiments with small models (Table 2)
@@ -111,7 +111,7 @@ wait
 echo "-- all experiments finished"
 
 # deactivate python environment and navigate to root folder
-deactivate
-cd $OLDPWD
+# deactivate
+cd -
 
 # done
