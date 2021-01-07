@@ -84,12 +84,12 @@ tacas21-install() {
     sudo ./install_dependencies.sh
     cd ..
     # apply patch and recompile
-    sudo rsync -av patch/ dependencies/
-    cd dependencies/storm/build
+    sudo rsync -av patch/ dependencies/dependencies
+    cd dependencies/dependencies/storm/build
     sudo cmake ..
     sudo make storm-main --jobs $COMPILE_JOBS
     cd -
-    cd dependencies/stormpy
+    cd dependencies/dependencies/stormpy
     sudo pip3 install -ve .
     cd -
     # install dynasty
