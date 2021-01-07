@@ -14,7 +14,7 @@ cd storm/build
 mkdir -p include/resources/3rdparty/
 cp -r ../../StormEigen include/resources/3rdparty/
 cmake ..
-make storm-main -j$THREADS
+make storm-main --jobs $THREADS
 cd ../../
 
 # stormpy

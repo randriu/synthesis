@@ -18,5 +18,5 @@ cd ../../
 unzip pycarl.zip
 mv pycarl-master pycarl
 cd pycarl
-sudo python setup.py build_ext --carl-dir $DEP_DIR/carl/build --jobs $COMPILE_JOBS develop --disable-parser develop
+sudo python setup.py build_ext --carl-dir $DEP_DIR/carl/build --jobs $THREADS --disable-parser develop
 cd ..
