@@ -2,7 +2,7 @@
 
 This artifact includes an implementation of the novel method for synthesis of probabilistic systems proposed in the TACAS 2021 submission #87 (Inductive Synthesis for Probabilistic Programs Reaches New Horizons). The artifact further includes an implementation of state-of-the-art methods for synthesis of probabilistic systems that are used in the experimental part of the paper to evaluate the performance of the proposed methods, and the benchmarks used in the evaluation. The artifact allows users to replicate all the experiments presented in the paper, in particular, the results presented in Tables 1-3. It further suggests additional experiments that allow to explore the discussed methods beyond the presented experiment suit.
 
-This artifact is publicly available at TBD () for the currently developed branch of the dynasty (https://github.com/moves-rwth/dynasty) tool for synthesis of probabilistic systems.
+This artifact will be made publicly available at [zenodo](https://zenodo.org/) and represents the currently developed branch of the dynasty (https://github.com/moves-rwth/dynasty) tool for the synthesis of probabilistic systems.
  
 # Artifact for submission 87
 
