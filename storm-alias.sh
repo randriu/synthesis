@@ -124,9 +124,9 @@ dynasty-dependencies() {
 
 synthesis-dependencies() {
     
-    if [ $SYNTHESIS_TACAS21 == "true" ]; then
+    if [ "$SYNTHESIS_TACAS21" == "true" ]; then
         unzip dependencies.zip
-        cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy . 
+        cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy .
         cd dependencies/dependencies
         sudo dpkg -i apt-packages/*.deb
         pip3 install --no-index -f pip-packages -r python-requirements
@@ -137,7 +137,7 @@ synthesis-dependencies() {
         deactivate
         cd -
     else
-        if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
+        if [ "$SYNTHESIS_INSTALL_DEPENDENCIES" == "true" ]; then
             dynasty-dependencies
         fi
         dynasty-download $SYNTHESIS
