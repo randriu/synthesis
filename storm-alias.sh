@@ -5,7 +5,9 @@
 
 # compilation parameters
 
-export COMPILE_JOBS=8
+export COMPILE_JOBS=$(nproc)
+export SYNTHESIS_TACAS21=true
+export SYNTHESIS_INSTALL_DEPENDENCIES=false
 
 # environment variables
 
@@ -132,6 +134,8 @@ synthesis-dependencies() {
         pip3 install --no-index -f pip-packages -r python-requirements
         sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
         source $HOME/.profile
+
+        virtualenv -p python3 $SYNTHESIS_ENV
         source $SYNTHESIS_ENV/bin/activate
         pip3 install --no-index -f pip-packages -r python-requirements
         deactivate
@@ -228,12 +232,10 @@ dynasty-install() {
 # aggregated functions
 
 synthesis-install() {
-    dynasty-patch
-    dynasty-setup-python
-
     carl-build
     pycarl-build
 
+    dynasty-patch
     storm-config
     storm-build
     stormpy-build
