@@ -115,7 +115,7 @@ In order to further investigate the performance of the synthesis methods, we sug
 
 #### Modifying the family size
 Changing the family size of particular models can require nontrivial changes in the model definition and thus a certain level of understanding of the models. However, there are some models where the family size can be easily changed. For example, the size of the larger variant of the model can be modified in the following way:
-Go to `herman2_larger/sketch.allowed` and reduce the domains of the selected options (holes), e.g., modify the file in the following way:
+Go to `tacas21-benchmark/herman2_larger/sketch.allowed` and reduce the domains of the selected options (holes), e.g., modify the file in the following way:
 
 ```
 M0LFAIR;0;1;2
@@ -146,14 +146,14 @@ MxxB;0;1
 MxxC;0;1
 ```
 
-computing the optimal value now takes some more time, but the obtained value is now around 12.3 (we recommend computing it using the hybrid approach), meaning that we have found a member that can stabilize much faster. What happened here is that we have added some strategies to our protocol (the family size is nor arounk 19k members) and, fortunately, some of these strategies were better (wrt. the specification) than existing ones. Feel free to experiment with these parameter domains -- you can even try to assign different domains to different parameters `MxyFAIR` -- but be aware that the family blows up really fast and that CEGAR will struggle even with families having as few as 80k members.
+computing the optimal value now takes some more time, but the obtained value is now around 12.3 (we recommend computing it using the hybrid approach), meaning that we have found a member that can stabilize much faster. What happened here is that we have added some strategies to our protocol (the family now has around 19k members) and, fortunately, some of these strategies were better (wrt. the specification) than existing ones. Feel free to experiment with these parameter domains -- you can even try to assign different domains to different parameters `MxyFAIR` -- but be aware that the family blows up really fast and that CEGAR will struggle even with families having as few as 80k members.
 
 #### Modifying the (average) size of the family members
-Most of our models (i.e. DPM, Grid, Herman, and Maze) include parameter CMAX allowing users to change size of the particular family members (i.e. the underlying DTMCs) -- increasing this parameter increases the average size of the members. Please note that most properties are linked with this parameter and thus changing the parameter can change feasibility outcome and can even make some properties invalid. For example, you can try to run 
+Most of our models (Grid, Maze, DPM and Herman) include parameter CMAX allowing users to change size of the particular family members (i.e. the underlying DTMCs) -- increasing this parameter increases the average size of the members. Please note that most properties are linked with this parameter and thus changing the parameter can change feasibility outcome and can even make some properties invalid. For example, you can try to analyze maze benchmark: 
 
 ```sh
 python3 dynasty/dynasty.py --project tacas21-benchmark/maze --properties easy.properties hybrid
-python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties cegar
+python3 dynasty/dynasty.py --project tacas21-benchmark/maze --properties easy.properties cegar
 ```
 and then modify the parameter CMAX in file tacas21-benchmark/maze/sketch.templ:
 
