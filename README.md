@@ -43,27 +43,37 @@ feasible: no
 
 ## Reproducing presented experiments
 
-All of the experiments discussed in the paper can be evaluated by running the `experiment.sh` script:
+Reproducing all of the experiments discussed in the paper is a time-consuming procedure that can take hundreds of hours. We recommend the reviewers to first run 
+
+```sh
+./experiment.sh --quick
+```
+
+This will run a small subset of the experiments, namely performance of CEGAR and the hybrid methods on the basic benchmark, as reported in Table 2, as well the quality of counterexamples for the novel approach (columns `trivial` and `family`). Reproducing these experiments should take about 30 minutes and even less if you enable multiple cores on your VM to allow concurrent evaluation of experiments. To reproduce all experiments, one may then run 
 
 ```sh
 ./experiment.sh
 ```
 
-The script executes all 63 experiments and creates a separate log for each experiment (see `experiments/logs/` folder). Afterwards, these logs are parsed to generate Tables 1, 2 and 3 reported in the paper. These automatically generated tables are stored in experiments/summary.txt file and are printed to the standard output as well.
+Notice that the latter call merely evaluates *more* benchmarks with longer timeouts. We recommend running this script only overnight: at default settings and with VM having 4 CPU cores, this evaluation should take around 6 hours. To understand the experiments and alternatives settings, please consult the remaining sections in which we advise you how to create tables with different user-set timeouts and even how to run individual experiments.
 
-Due to the fact that reproducing _all_ of the experiments discussed in the paper would take hundreds of hours, we provide two timeout values defined right at the beginning of the `experiment.sh` script: `TIMEOUT_SMALL_MODELS` and `TIMEOUT_LARGE_MODELS`. While the former value is applied when evaluating smaller benchmarks (Grid, Maze, DPM, Pole, Herman and the smaller variant of Herman-2), the latter is applied only to the larger variant of Herman-2 (see the right part of Table 3). The timeout value is applied to each individual experiment. If the experiment hits the timeout, the corresponding log file will be terminated by "TO" line and the corresponding entry in the auto-generated table will contain a dash '-'. However, if the CEGAR execution will hit a timeout, its performance will be estimated based on the number of rejected members, and the corresponding table entry will contain this estimate with a star '\*', mirroring the notation adapted in the paper.
+**Please note** that all of the discussed synthesis methods -- CEGIS, CEGAR and the novel integrated method -- are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different numbers of iterations as well as execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs CEGAR or overall quality of MaxSat counterexamples vs those obtained by a novel approach -- should be preserved.
+
+## How experiments are evaluated automatically
+
+The script `experiment.sh` executes all 63 experiments and creates a separate log for each experiment (see `experiments/logs/` folder). Afterwards, these logs are parsed to generate Tables 1, 2 and 3 reported in the paper. These automatically generated tables are stored in experiments/summary.txt file and are printed to the standard output as well.
+
+Due to the fact that reproducing _all_ of the experiments discussed in the paper would take hundreds of hours, we provide two timeout values defined right at the beginning of the `experiment.sh` script: `TIMEOUT_SMALL_MODELS` and `TIMEOUT_LARGE_MODELS`. While the former value is applied when evaluating smaller benchmarks (Grid, Maze, DPM, Pole, Herman and the smaller variant of Herman-2), the latter is applied only to the larger variant of Herman-2 (see the right part of Table 3). The timeout value is applied to each individual experiment. If the experiment hits the timeout, the corresponding log file will be terminated by "TO" line and the corresponding entry in the auto-generated table will contain a dash '-'. However, if the CEGAR execution hits a timeout, its performance is estimated based on the number of rejected members, and the corresponding table entry will contain this estimate with a star '\*', mirroring the notation adapted in the paper.
 
 Choosing concrete values for the timeouts will define how many experiments you will be able to replicate. The following are some possible values for the smaller `TIMEOUT_SMALL_MODELS` to help you decide:
 
 - `2m` -- two minutes is the 'minimum' value that will allow you to replicate 36/48 experiments that consider smaller benchmarks -- this execution will take roughly 40 minutes.
-- `20m` (recommended value) -- this setting will result in a computation that lasts approximately 5 hours and will replicate 44/48 experiments
+- `20m` (recommended default value) -- this setting will result in a computation that lasts approximately 5 hours and will replicate 44/48 experiments
 - `2h` -- this setting (used during our preparation of the paper) will occupy your CPU for 23 hours and will successfully replicate all 48/48 experiments
 
-Regarding the `TIMEOUT_LARGE_MODELS` value, choosing `0s` will allow you to ignore these experiments completely. Option `TIMEOUT_LARGE_MODELS=30m` is the minimum value that will safely allow the integrated method to finish. Experiments on large models with this timeout will amount to three hours. For the CEGAR method, you will obtain very rough estimates of their performance.  Unfortunately, these estimates will be very poor: obtaining good estimates requires running CEGAR for at least five hours (recommended value), resulting in the overall runtime of 21 hours. In our evaluation, we used `TIMEOUT_LARGE_MODELS=24h`.
+Regarding the `TIMEOUT_LARGE_MODELS` value, choosing `0s` will allow you to ignore these experiments completely. Option `TIMEOUT_LARGE_MODELS=30m` is the minimum value that will safely allow the integrated method to finish. Experiments on large models with this timeout will amount to three hours. For the CEGAR method, you will obtain very rough estimates of their performance.  Unfortunately, these estimates will be very poor: obtaining good estimates requires running CEGAR for at least five hours (recommended default value), resulting in the overall runtime of 21 hours. In our evaluation, we used `TIMEOUT_LARGE_MODELS=24h`.
 
-Finally, note that the `./experiment.sh` script evaluates experiments concurrently based on the number `nproc` of CPU cores available on your VM. Therefore, supplying your VM with multiple cores will greatly reduce computation time. For instance, having a VM with 4 CPU cores and choosing recommended settings `TIMEOUT_SMALL_MODELS=20m` and `TIMEOUT_LARGE_MODELS=5h` will allow you to reproduce almost all experiments and obtain relatively good estimates of the CEGAR behaviour in only about 6 hours of uptime.
-
-**Please note** that all of the discussed synthesis methods -- CEGIS, CEGAR and the novel integrated method -- are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different numbers of iterations as well as execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs CEGAR or overall quality of MaxSat counterexamples vs those obtained by a novel approach -- should be preserved.
+Finally, note that the `./experiment.sh` script evaluates experiments concurrently based on the number `nproc` of CPU cores available on your VM. Therefore, supplying your VM with multiple cores will greatly reduce computation time. For instance, having a VM with 4 CPU cores and choosing recommended settings `TIMEOUT_SMALL_MODELS=20m` and `TIMEOUT_LARGE_MODELS=5h` will allow you to reproduce almost all experiments and obtain relatively good estimates of the CEGAR behaviour in only about 6 hours of uptime. Also note that all of the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
 
 ## How to run synthesis manually
 

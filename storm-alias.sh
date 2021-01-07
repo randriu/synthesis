@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# creator:
-# wget https://www.stud.fit.vutbr.cz/~xandri03/creator.zip
+# merlin:
+# wget https://www.stud.fit.vutbr.cz/~xandri03/synthesis.zip
 # repository link:
 # https://github.com/gargantophob/synthesis/archive/master.zip
 

@@ -106,4 +106,3 @@ printf "\n"
 onebyone_time="$(python3 parse_log.py herman2/*onebyone.txt time)"
 printf "1-by-1 enumeration of herman-2 (larger): %s sec\n" ${onebyone_time}
 printf "\n"
-

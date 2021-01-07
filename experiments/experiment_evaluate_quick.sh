@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # experiment counters
-experiment_current=0
-experiment_total=63
+export experiment_current=0
+export experiment_total=30
 
 # setting this value to >1 will enable concurrent evaluation of experiments
-threads=$(nproc)
+export threads=$(nproc)
 
 ## helper functions ############################################################
 
@@ -60,16 +60,15 @@ function dynasty() {
 ## experiment section ##########################################################
 
 # create folders for log files
-mkdir -p logs logs/performance logs/ce logs/herman2
+mkdir -p logs logs/performance logs/ce
 
-# activate python environment and navigate to dynasty
-# source ../env/bin/activate
+# navigate to dynasty
 cd ../dynasty
 
 ## experiments with small models (Table 2)
 
-# evaluate cegis/cegar/hybrid on a basic benchmark
-for method in cegis cegar hybrid; do
+# evaluate cegar/hybrid on a basic benchmark
+for method in cegar hybrid; do
     echo "-- evaluating basic benchmark (${method})"
     for benchmark in grid maze dpm pole herman; do
         for property in easy hard; do
@@ -78,8 +77,8 @@ for method in cegis cegar hybrid; do
     done
 done
 
-# evaluate CE quality on the same benchmark
-for ce_quality in hybrid maxsat; do
+# evaluate CE quality (hybrid) on the same benchmark
+for ce_quality in hybrid; do
     echo "-- evaluating CE quality (${ce_quality})"
     for benchmark in grid maze dpm pole herman; do
         for property in easy hard; do
@@ -88,30 +87,11 @@ for ce_quality in hybrid maxsat; do
     done
 done
 
-## experiments with herman-2 (Table 3)
-
-# evaluate herman-2 (smaller,larger) using only cegar and hybrid
-echo "-- evaluating herman-2 (smaller)"
-for method in cegar hybrid; do
-    dynasty herman2 herman2_smaller "feasibility" "" "${method}" "" "${TIMEOUT_SMALL_MODELS}"
-    dynasty herman2 herman2_smaller "multiple" "" "${method}" "" "${TIMEOUT_SMALL_MODELS}"
-    dynasty herman2 herman2_smaller "none" "0" "${method}" "" "${TIMEOUT_SMALL_MODELS}"
-done
-echo "-- evaluating herman-2 (larger)"
-for method in cegar hybrid; do
-    dynasty herman2 herman2_larger "feasibility" "" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
-    dynasty herman2 herman2_larger "none" "0" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
-    dynasty herman2 herman2_larger "none" "5" "${method}" "" "${TIMEOUT_LARGE_MODELS}"
-done
-# estimate 1-by-1 enumeration on optimality (0%)
-dynasty herman2 herman2_larger "none" "0" "onebyone" "" "${TIMEOUT_LARGE_MODELS}"
-
 # wait for the remaining experiments to finish
 wait
 echo "-- all experiments finished"
 
-# deactivate python environment and navigate to root folder
-# deactivate
+# navigate back to root folder
 cd -
 
 # done
