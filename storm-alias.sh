@@ -61,18 +61,6 @@ tacas21-prepare() {
     zip -r synthesis.zip synthesis
 }
 
-tacas21-dependencies() {
-    unzip dependencies.zip
-    cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy . 
-    cd dependencies/dependencies
-    pip3 install --no-index -f pip-packages -r python-requirements
-    sudo dpkg -i apt-packages/*.deb
-    sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
-    source $HOME/.profile
-    cd -
-}
-
-
 ### dependencies ###############################################################
 
 dynasty-download() {
@@ -120,6 +108,7 @@ dynasty-dependencies() {
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
     sudo apt -y install texlive-latex-extra
 
+
     # not installed on sarka:
         # carl:
             # libcln-dev (+, requires texinfo)
@@ -131,19 +120,33 @@ dynasty-dependencies() {
 
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-    pip3 install virtualenv
-    pip3 install pysmt z3-solver click
 }
 
 synthesis-dependencies() {
-    if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
-        dynasty-dependencies
-    fi
     
     if [ $SYNTHESIS_TACAS21 == "true" ]; then
-        tacas21-dependencies
+        unzip dependencies.zip
+        cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy . 
+        cd dependencies/dependencies
+        sudo dpkg -i apt-packages/*.deb
+        pip3 install --no-index -f pip-packages -r python-requirements
+        sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
+        source $HOME/.profile
+        source $SYNTHESIS_ENV/bin/activate
+        pip3 install --no-index -f pip-packages -r python-requirements
+        deactivate
+        cd -
     else
+        if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
+            dynasty-dependencies
+        fi
         dynasty-download $SYNTHESIS
+        pip3 install virtualenv
+
+        virtualenv -p python3 $SYNTHESIS_ENV
+        source $SYNTHESIS_ENV/bin/activate
+        pip3 install pysmt z3-solver click
+        deactivate
     fi
     
 }
@@ -159,12 +162,6 @@ dynasty-patch() {
 }
 
 ### preparing prerequisites ####################################################
-
-dynasty-setup-python() {
-    virtualenv -p python3 $SYNTHESIS_ENV
-    source $SYNTHESIS_ENV/bin/activate
-    deactivate
-}
 
 carl-build() {
     mkdir -p $PREREQUISITES/carl/build

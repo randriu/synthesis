@@ -130,8 +130,8 @@ function try_herman() {
 
 # --- execution ----------------------------------------------------------------
 
-# test_release
-try_herman
+test_release
+# try_herman
 
 # run
 
