@@ -338,6 +338,10 @@ dlog() {
     cat $SYNTHESIS/dynasty/workspace/log/log_$1.txt
 }
 
+dtail() {
+    dlog $1 | tail -n 20
+}
+
 dgrep() {
     cat $SYNTHESIS/dynasty/workspace/log/log_grep_$1.txt
 }

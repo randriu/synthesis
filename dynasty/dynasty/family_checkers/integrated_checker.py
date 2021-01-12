@@ -23,7 +23,7 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-quotientbased_logger.disabled = False
+quotientbased_logger.disabled = True
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
@@ -136,7 +136,7 @@ class Statistic:
 
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
-        assignment = f"hole assignment: {self.assignment}\n" if self.feasible else ""
+        assignment = f"hole assignment: {self.assignment}\n" if self.assignment is not None else ""
 
         summary = f"{formulae}\n{opt_formula}\n{timing}\n{design_space}\n" \
                   f"{family_stats}{self.ce_quality}\n{result}\n{assignment}"
@@ -630,7 +630,7 @@ class Family:
         # for formula_index in self.formulae_indices[:-1] \
         #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
         for formula_index in self.formulae_indices:
-            logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
+            # logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             Family.mdp_checks_inc()
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
 
@@ -797,7 +797,7 @@ class FamilyHybrid(Family):
             return self._state_to_hole_indices
 
         Profiler.start("is - MDP holes (edges)")
-        logger.debug("Constructing state-holes mapping via edge-holes mapping.")
+        # logger.debug("Constructing state-holes mapping via edge-holes mapping.")
 
         self._state_to_hole_indices = []
         matrix = self.mdp.transition_matrix
@@ -1183,7 +1183,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             # collect indices of violated formulae
             violated_formulae_indices = []
             for formula_index in family.formulae_indices:
-                logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
+                # logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
                 Profiler.start("is - DTMC model checking")
                 Family.dtmc_checks_inc()
                 sat, _ = family.analyze_member(formula_index)
@@ -1199,7 +1199,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 return True
 
             # some formulae UNSAT: construct counterexamples
-            logger.debug("CEGIS: preprocessing DTMC.")
+            # logger.debug("CEGIS: preprocessing DTMC.")
             Profiler.start("_")
             counterexample_generator.prepare_dtmc(family.dtmc, family.dtmc_state_map)
             Profiler.stop()
@@ -1207,7 +1207,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             Profiler.start("is - constructing CE")
             conflicts = []
             for formula_index in violated_formulae_indices:
-                logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
+                # logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
                 conflict_indices = counterexample_generator.construct_conflict(formula_index)
                 # conflict = counterexample_generator.construct(formula_index, self.use_nontrivial_bounds)
                 conflict_holes = [Family.hole_list[index] for index in conflict_indices]

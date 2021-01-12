@@ -44,34 +44,35 @@ function choose_model() {
     t_step=${preset[4]}
 }
 
-function log_output() {
-    while read input; do
-        if [ ${verbose} = "true" ]; then
-            echo ${input} | tee --append ${log_file}
-        else
-            echo ${input} | tee --append ${log_file} | grep "^> " | tee --append ${log_grep_file}
-        fi
-    done
-}
-
-function dynasty() {
-    dynasty="python dynasty.py --project ${models_dir}/${model}/ $1 --short-summary"
-    constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    optimality=""
+function python-dynasty() {
+    local dynasty="python dynasty.py --project ${models_dir}/${model}/ $1 --short-summary"
+    local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
+    local optimality=""
     if [ ${optimal} = "true" ]; then
         optimality="--optimality sketch.optimal --properties none.properties"
     fi
-    echo ${dynasty} ${constants} ${optimality}
+    echo \$ ${dynasty} ${constants} ${optimality}
     timeout ${timeout} ${dynasty} ${constants} ${optimality}
 }
 
+function dynasty() {
+    local parallelity=""
+    if [ ${parallel} = "true" ]; then
+        parallelity="&"
+    fi
+    local verbosity='tee >(cat >>${log_file}) >(grep "^> " | cat >>${log_grep_file})'
+    if [ ${verbose} = "false" ]; then
+        verbosity=${verbosity}' | grep "^> "'
+    fi
+    command="python-dynasty $1 | ${verbosity} ${parallelity}"
+    # echo ${command}
+    eval ${command}
+}
+
 function try_thresholds() {
+
     for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
-        if [ ${parallel} = "false" ]; then
-            dynasty $1 | log_output
-        else
-            dynasty $1 | log_output &
-        fi
+        dynasty $1
     done
     wait
 }
@@ -106,7 +107,9 @@ function try_models() {
 
 function test_release() {
     reset_log
+    timeout=1m
     parallel=true
+    # verbose=true
     model=("herman/orig" 2 0.60 0.75 0.15)
     choose_model "${model[@]}"
     cegar
@@ -135,10 +138,10 @@ function try_herman() {
 function run() {
     reset_log
 
-    timeout=5h
+    timeout=12h
     parallel=true
-    # verbose=true
-    # optimal=true
+    verbose=true
+    optimal=true
     
     model=("msp/dice" 0 2 2 1.0)
     
@@ -154,7 +157,6 @@ function run() {
 
 # test_release
 # try_herman
-
 run
 
 exit
