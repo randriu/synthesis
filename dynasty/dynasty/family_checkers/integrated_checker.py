@@ -849,7 +849,7 @@ class FamilyHybrid(Family):
             # collect edges relevant for this assignment
             indexed_assignment = Family._hole_options.index_map(self.member_assignment)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
-            collected_edge_indices = stormpy.FlatSet(Family._quotient_container.color_to_edge_indices.get(0))
+            collected_edge_indices = Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
             for c in subcolors:
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
@@ -859,7 +859,6 @@ class FamilyHybrid(Family):
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             # assert absence of deadlocks or overlapping guards
-            # TODO does not seem to work (builder options?)
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
             assert self.dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
             assert len(self.dtmc.initial_states) == 1  # to avoid ambiguity

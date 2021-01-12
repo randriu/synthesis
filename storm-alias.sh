@@ -102,8 +102,6 @@ tacas21-install() {
     cd -
 }
 
-### THE FOLLOWING FUNCTIONS ARE USED FOR TACAS'21 ARTIFACT #####################
-
 ### dependencies ###############################################################
 
 dynasty-download() {

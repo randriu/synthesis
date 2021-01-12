@@ -387,7 +387,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
 
         logger.debug(f"Proposed (pre)split: {one_side_list} vs. {other_side_list}")
 
-        if selected_splitter is None:
+        if selected_splitter is None or len(hole_options[selected_splitter]) == 1: #+
             # Split longest.
             maxlength = 0
             for k, v in hole_options.items():

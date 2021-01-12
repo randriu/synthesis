@@ -9,6 +9,7 @@ regime=2
 timeout=10d
 verbose=false
 parallel=false
+optimal=false
 
 # workspace settings
 models_dir="workspace/examples"
@@ -56,7 +57,10 @@ function log_output() {
 function dynasty() {
     dynasty="python dynasty.py --project ${models_dir}/${model}/ $1 --short-summary"
     constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    # optimality="--optimality sketch.optimal --properties none.properties"
+    optimality=""
+    if [ ${optimal} = "true" ]; then
+        optimality="--optimality sketch.optimal --properties none.properties"
+    fi
     echo ${dynasty} ${constants} ${optimality}
     timeout ${timeout} ${dynasty} ${constants} ${optimality}
 }
@@ -128,12 +132,30 @@ function try_herman() {
     # onebyone
 }
 
+function run() {
+    reset_log
+
+    timeout=5h
+    parallel=true
+    # verbose=true
+    # optimal=true
+    
+    model=("msp/dice" 0 2 2 1.0)
+    
+    choose_model "${model[@]}"
+
+    # hybrid
+    cegar
+    # cegis
+    # onebyone
+}
+
 # --- execution ----------------------------------------------------------------
 
-test_release
+# test_release
 # try_herman
 
-# run
+run
 
 exit
 
