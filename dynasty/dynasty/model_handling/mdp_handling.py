@@ -273,7 +273,7 @@ class ModelHandling:
 
         # TODO set from the outside.
         env = stormpy.Environment()
-        env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(0.000001)  # +
+        env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(0.0000000001)  # +
         if is_dtmc:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:

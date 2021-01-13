@@ -28,6 +28,8 @@ export STORM_BLD=$STORM_DIR/build
 export STORMPY_DIR=$SYNTHESIS/stormpy
 export DYNASTY_DIR=$SYNTHESIS/dynasty
 
+export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
+
 ### TACAS 2021 #################################################################
 
 tacas21-download-dependencies() {

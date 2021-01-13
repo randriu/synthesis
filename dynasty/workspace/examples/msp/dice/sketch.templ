@@ -12,14 +12,14 @@ const int s3a; const int s3b; const int s3c;
 const int s4a; const int s4b; const int s4c;
 
 module dice
-    s : [0..4] init 2;
-    [] s=0 | s=1 -> true;
-    [] s=2 -> pa : (s' = s2a) + pb : (s' = s2b) + pc : (s' = s2c);
+    s : [0..4] init 0;
+    [] s=2 | s=1 -> true;
+    [] s=0 -> pa : (s' = s2a) + pb : (s' = s2b) + pc : (s' = s2c);
     [] s=3 -> pa : (s' = s3a) + pb : (s' = s3b) + pc : (s' = s3c);
     [] s=4 -> pa : (s' = s4a) + pb : (s' = s4b) + pc : (s' = s4c);
 endmodule
 
-formula heads = (s = 0);
+formula heads = (s = 2);
 formula tails = (s = 1);
 
 formula finished = heads | tails;

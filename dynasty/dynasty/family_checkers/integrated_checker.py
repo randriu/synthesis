@@ -61,6 +61,7 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
     result = stormpy.model_checking(dtmc, formula)
     satisfied = result.at(dtmc.initial_states[0])
+
     if quantitative:
         op = {
             stormpy.ComparisonType.LESS: operator.lt,
@@ -603,11 +604,23 @@ class Family:
 
         threshold = float(Family._thresholds[formula_index])
         Family._quotient_container.analyse(threshold, formula_index)
-        thresh_synthesis_res = Family._quotient_container.decided(threshold)
 
-        return None if thresh_synthesis_res == ThresholdSynthesisResult.UNDECIDED else \
-            (thresh_synthesis_res == ThresholdSynthesisResult.ABOVE) == Family._accept_if_above[formula_index], \
-            Family._quotient_container.latest_result.result
+        mc_result = Family._quotient_container.decided(threshold)
+        accept_if_above = Family._accept_if_above[formula_index]
+        if mc_result == ThresholdSynthesisResult.UNDECIDED:
+            feasibility = None
+        else:
+            feasibility = (mc_result == ThresholdSynthesisResult.ABOVE) == accept_if_above
+        bounds = Family._quotient_container.latest_result.result
+
+        # +
+        # bounds_alt = Family._quotient_container.latest_result.alt_result
+        # init_state = self._quotient_mdp.initial_states[0]
+        # print("> MDP result: ", bounds.at(init_state), " -> ", feasibility)
+        # print("> MDP result (alt): ", bounds_alt.at(init_state))
+
+        return feasibility, bounds
+            
 
     def analyze(self):
         """
@@ -718,6 +731,12 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
+            sched = oracle._latest_result.scheduler
+            print("> ", type(sched), dir(sched))
+            print("> ", sched)
+            for state in range(5):
+                choice = sched.get_choice(state)
+                print(f"> {state} -> {choice}")
             if not self.split_ready:
                 self.prepare_split()
             # oracle.scheduler_color_analysis()
@@ -733,6 +752,46 @@ class Family:
             logger.debug("All discarded within analyses of family for optimal property.")
 
         return decided, optimal_value
+
+    def print_mdp(self):
+        print("> MDP info")
+        mdp = self.mdp
+        tm = mdp.transition_matrix
+        for state in range(mdp.nr_states):
+            print("> state: ", state)
+            for row in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                print("> ", str(tm.get_row(row)))
+
+    def check_mdp(self):
+        mdp = self.mdp
+        tm = mdp.transition_matrix
+        init_state = mdp.initial_states[0]
+        mdp_actions = tm.get_row_group_end(init_state)-tm.get_row_group_start(init_state)
+        hole_combinations = len(self.options["s2a"]) * len(self.options["s2b"]) * len(self.options["s2c"])
+        if mdp_actions != hole_combinations:
+            print(f"> MDP is invalid ({mdp_actions} actions != {hole_combinations} combinations)")
+            print("> family: ", self.options)
+            self.print_mdp()
+            exit()
+        logger.debug("MDP is OK")
+
+
+    def is_in_family(hole_assignment, hole_options):
+        hole_assignment={key:str(value) for key,value in hole_assignment.items()}
+        # print("> comparing ", hole_assignment, " and ", hole_options)
+        for hole,option in hole_assignment.items():
+            family_hole_options = [str(hole_option) for hole_option in hole_options[hole]]
+            # print("> ", option, " in ", family_hole_options)
+            if option not in family_hole_options:
+                return False
+        return True
+
+    # interesting_assignment = {"s2a":4,"s2b":1,"s2c":0,"s3a":3,"s3b":4,"s3c":4,"s4a":0,"s4b":1,"s4c":4}
+    interesting_assignment = {"s2a":3,"s2b":1,"s2c":2,"s3a":2,"s3b":1,"s3c":4,"s4a":2,"s4b":1,"s4c":3}
+
+    def contains_interesting(self):
+        return Family.is_in_family(Family.interesting_assignment,self.options)
+
 
 
 # INTEGRATED METHOD --------------------------------------------------------------------------------- INTEGRATED METHOD
@@ -844,12 +903,14 @@ class FamilyHybrid(Family):
 
     def pick_member(self):
         # pick hole assignment
+
         self.pick_assignment()
         if self.member_assignment is not None:
+
             # collect edges relevant for this assignment
             indexed_assignment = Family._hole_options.index_map(self.member_assignment)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
-            collected_edge_indices = Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
+            collected_edge_indices = stormpy.FlatSet(Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet()))
             for c in subcolors:
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
@@ -887,8 +948,23 @@ class FamilyHybrid(Family):
 
     def analyze_member(self, formula_index):
         assert self.dtmc is not None
-        sat, result = check_dtmc(self.dtmc, Family._formulae[formula_index])
+        sat, result = check_dtmc(self.dtmc, Family._formulae[formula_index], quantitative=True)
         return sat, result
+
+    def print_member(self):
+        print("> DTMC info:")
+        dtmc = self.dtmc
+        tm = dtmc.transition_matrix
+        for state in range(dtmc.nr_states):
+            row = tm.get_row(state)
+            print("> ", str(row))
+
+    def conflict_covers_interesting(self,conflict):
+        generalized_options = self.options.copy()
+        for hole in conflict:
+            generalized_options[hole] = self.member_assignment[hole]
+        return Family.is_in_family(Family.interesting_assignment, generalized_options)
+
 
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
@@ -1179,6 +1255,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         while assignment is not None:
             self.iterations_cegis += 1
             logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
+            logger.debug(f"CEGIS: picked family member: {assignment}.")
 
             # collect indices of violated formulae
             violated_formulae_indices = []
@@ -1238,6 +1315,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 return None
 
         # full family pruned
+        logger.debug("CEGIS: no more family members.")
         Profiler.add_ce_stats(counterexample_generator.stats)
         return False
 
