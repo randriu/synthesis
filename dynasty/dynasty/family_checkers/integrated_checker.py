@@ -23,7 +23,7 @@ from .familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-quotientbased_logger.disabled = True
+quotientbased_logger.disabled = False
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
@@ -646,10 +646,7 @@ class Family:
             # logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             Family.mdp_checks_inc()
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
-            #+
-            res_init_state = self.bounds[formula_index].at(self.mdp.initial_states[0])
-            logger.debug(f"Result in the initial state: {res_init_state}")
-
+            
             if not feasible and isinstance(feasible, bool):
                 logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None

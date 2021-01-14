@@ -495,7 +495,8 @@ class OneByOneChecker(QuotientBasedFamilyChecker):
         total_nr_options = self.hole_options.size()
         for constant_assignment in itertools.product(*self.hole_options.values()):
             iteration += 1
-            logger.info("Iteration: {} / {}".format(iteration, total_nr_options))
+            if iteration % 10 == 0:
+                logger.info("Iteration: {} / {}".format(iteration, total_nr_options))
             constants = [jani_program.get_constant(c).expression_variable for c in self.hole_options.keys()]
             substitution = dict(zip(constants, constant_assignment))
             instance = jani_program.define_constants(substitution)
@@ -507,11 +508,12 @@ class OneByOneChecker(QuotientBasedFamilyChecker):
             index = 0
             mh.mc_model(index)
 
-            logger.info("Performance estimation (unfeasible): {} iterations in {} sec.".format(
-                total_nr_options, (time.time() - iter_start) * total_nr_options / iteration)
-            ) #+
-            logger.info("Ran for {}, expect total: {}".format(time.time() - iter_start, (time.time() - iter_start) * total_nr_options / iteration))
-            logger.info("Avg model size {} states, {} transition".format(model_states_cum, model_transitions_cum))
+            if iteration % 10 == 0:
+                logger.info("Performance estimation (unfeasible): {} iterations in {} sec.".format(
+                    total_nr_options, (time.time() - iter_start) * total_nr_options / iteration)
+                )
+                logger.info("Ran for {}, expect total: {}".format(time.time() - iter_start, (time.time() - iter_start) * total_nr_options / iteration))
+                logger.info("Avg model size {} states, {} transition".format(model_states_cum, model_transitions_cum))
         return iteration, model_states_cum / iteration
 
 

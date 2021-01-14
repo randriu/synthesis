@@ -379,16 +379,25 @@ dperf() {
      dlog $1 | grep "Performance" | tail -n 1
 }
 
+dhole() {
+    dlog $1 | grep "hole assignment:" | awk '{print $3}'
+}
+
 ### tmp ################################################################
 
 export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm
 
 storm() {
     cd $STORM_BLD/bin
-    cmd="./storm --prism $1 --prop $2 --constants $3"
+    local cmd="./storm --explchecks --build-overlapping-guards-label $1 --prop $2 --constants $3"
     eval $cmd
     cd -
 }
 dpm() {
-    storm $DPM/sketch.templ $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
+    storm "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
 }
+dpmread() {
+    local hole=`dhole $1`
+    dpm $hole
+}
+

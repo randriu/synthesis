@@ -20,13 +20,14 @@ const double THRESHOLD;
 // ----- synthesized parameters ------------------------------------------------
 
 // queue size
-const int QMAX = CMAX;
+const int QMAX;
 // observation level thresholds
 const int T1; const int T2; const int T3;
 // actions taken at observation levels
 const int A1; const int A2; const int A3; const int A4;
 
 // ----- modules ---------------------------------------------------------------
+
 
 // clock
 
@@ -35,6 +36,7 @@ module CLOCK
     [tick0] c=0 -> (c'=1);
     [tick1] c=1 -> (c'=0);
 endmodule
+
 
 // power manager
 
@@ -45,6 +47,7 @@ module PM
     [tick0] q*10 > T2*QMAX & q*10 <= T3*QMAX -> (pm'=A3);
     [tick0] q*10 > T3*QMAX -> (pm'=A4);
 endmodule
+
 
 // service provider
 
@@ -61,40 +64,43 @@ module SP
     [tick1] sp <= 2 & pm > sp -> (sp'=sp+3);
 
     // waiting states
-    [tick1] sp = 3 -> 0.2 : (sp'=sp-2) + 0.8 : true;
-    [tick1] sp = 4 -> 0.7 : (sp'=sp-2) + 0.3 : true;
+    [tick1] sp = 3 -> 0.5 : (sp'=sp-2) + 0.5 : true;
+    [tick1] sp = 4 -> 0.8 : (sp'=sp-2) + 0.2 : true;
 
 endmodule
-
 
 
 // service requester
 
 module SR
     sr : [0..1] init 0; // 0 - idle, 1 - active
-    [tick1] sr=0 -> 0.5: true + 0.5: (sr' = 1);
-    [tick1] sr=1 -> 0.5: true + 0.5: (sr' = 0);
+    [tick1] sr=0 -> 0.4: true + 0.6: (sr' = 1);
+    [tick1] sr=1 -> 0.4: true + 0.6: (sr' = 0);
 endmodule
 
 
 // service request queues
 
 module SRQ
-    q : [0..1000] init q_init;
+    q : [0..10000] init q_init;
+    lost : [0..1] init 0; // request lost flag
 
-    [tick0] sr=1 -> (q'=min(q+1,QMAX)); // request
+    // [tick0] sr=1 -> (q'=min(q+1,QMAX)); // request
+    [tick0] sr=1 & q < QMAX -> (q'=q+1); // request
+    [tick0] sr=1 & q = QMAX -> (lost'=1); // request lost
     [tick0] sr!=1 -> true;
 
-    [tick1] sp=2 -> (q'=max(q-1,0)); // serve
-    [tick1] sp!=2 -> true;
+    [tick1] sp=2 -> (lost'=0) & (q'=max(q-1,0)); // serve
+    [tick1] sp!=2 -> (lost'=0) ;
 endmodule
+
 
 // battery
 
 module BAT
     bat : [0..1] init 1; // 0 empty, 1 - operational
-    [tick1] bat=1 -> 0.0001 : (bat'=0) + 0.9999 : true;
-    [] bat=0 -> true;
+    [tick1] bat=0 ->true;
+    [tick1] bat=1 -> 0.01 : (bat'=0) + 0.99 : true;
 endmodule
 
 // ----- rewards ----------------------------------------------------------------
@@ -105,6 +111,10 @@ rewards "time"
     [tick0] true : 1;
 endrewards
 
+rewards "queuesize"
+    [tick0] true: q;
+endrewards
+
 rewards "requests"
     [tick0] sr=1 : 1;
 endrewards
@@ -113,12 +123,16 @@ rewards "served"
     [tick1] q > 0 & sp=2 : 1;
 endrewards
 
+// rewards "lost"
+//    [tick0] q=QMAX & sr=1 : 1;
+// endrewards
+
 rewards "lost"
-    [tick0] q=QMAX & sr=1 : 1;
+    [tick1] lost=1 : 1;
 endrewards
 
 rewards "power"
-    [tick1] sp=2 : 5.0;
-    [tick1] sp=3 : 2.0;
-    [tick1] sp=4 : 1.0;
+    [tick1] sp=2 : 100.0 + 10*q; // active
+    [tick1] sp=3 : 5.0; // idle to active
+    [tick1] sp=4 : 2.0; // sleep to idle
 endrewards
