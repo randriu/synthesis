@@ -143,7 +143,10 @@ function run() {
     # verbose=true
     # optimal=true
     
-    model=("msp/dice" 0 1.0 2.0 0.1)
+    # model=("msp/dice" 0 1.0 2.0 0.1)
+
+    # model=("msp/dpm" 8 0.99 0.99 0.1)
+    model=("msp/dpm" 10 27000 27000 1000.0)
     
     choose_model "${model[@]}"
 

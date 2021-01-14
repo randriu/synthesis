@@ -646,6 +646,9 @@ class Family:
             # logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             Family.mdp_checks_inc()
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
+            #+
+            res_init_state = self.bounds[formula_index].at(self.mdp.initial_states[0])
+            logger.debug(f"Result in the initial state: {res_init_state}")
 
             if not feasible and isinstance(feasible, bool):
                 logger.debug(f"Formula {formula_index}: UNSAT")

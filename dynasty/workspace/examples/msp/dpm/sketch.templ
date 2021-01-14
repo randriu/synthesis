@@ -1,5 +1,15 @@
 dtmc
 
+// timing:
+// tick-0:
+//     queue state is observed and state change is planned (pm)
+//     request are generated (if service requester is active)
+// tick-1:
+//     requests are served
+//     state change is executed
+//     service requester changes its state
+//     battery depletes
+
 // initial queue size
 const int q_init = 0;
 
@@ -7,198 +17,108 @@ const int q_init = 0;
 const int CMAX;
 const double THRESHOLD;
 
+// ----- synthesized parameters ------------------------------------------------
+
 // queue size
-const int QMAX;
+const int QMAX = CMAX;
 // observation level thresholds
 const int T1; const int T2; const int T3;
 // actions taken at observation levels
 const int A1; const int A2; const int A3; const int A4;
 
+// ----- modules ---------------------------------------------------------------
+
 // clock
 
 module CLOCK
-
-    c : [0..1];
-
-    [tick1] c=0 -> (c'=1);
-    [tick2] c=1 -> (c'=0);
-
+    c : [0..1] init 0;
+    [tick0] c=0 -> (c'=1);
+    [tick1] c=1 -> (c'=0);
 endmodule
 
 // power manager
 
 module PM
-
-    pm  :  [0..2] init 0;
-    // 0 - sleep
-    // 1 - idle
-    // 2 - active
-
-    [tick1] q*10 <= T1*QMAX    -> (pm'=A1);
-    [tick1] q*10 > T1*QMAX & q*10 <= T2*QMAX  -> (pm'=A2);
-    [tick1] q*10 > T2*QMAX & q*10 <= T3*QMAX  -> (pm'=A3);
-    [tick1] q*10 > T3*QMAX     -> (pm'=A4);
-
+    pm  :  [0..2] init 0; // 0 - sleep, 1 - idle, 2 - active
+    [tick0] q*10 <= T1*QMAX -> (pm'=A1);
+    [tick0] q*10 > T1*QMAX & q*10 <= T2*QMAX -> (pm'=A2);
+    [tick0] q*10 > T2*QMAX & q*10 <= T3*QMAX -> (pm'=A3);
+    [tick0] q*10 > T3*QMAX -> (pm'=A4);
 endmodule
 
 // service provider
 
 module SP
+    sp : [0..4] init 0;
+    // 0 - sleep, 1 - idle, 2 - active
+    // 3 - sleep to idle
+    // 4 - idle to active
 
-    sp : [0..8] init 3;
-    // 0 active
-    // 1 active for LOW
-    // 2 idle
-    // 3 sleep
+    // immediate transitions - change to lower-energy (or same) state
+    [tick1] sp <= 2 & pm <= sp -> (sp'=pm);
 
-    // 4 active_both_to_sleep
-    // 5 idle_to_sleep
+    // transitions through waiting states - change to higher-energy state (sleep to idle or idle to active)
+    [tick1] sp <= 2 & pm > sp -> (sp'=sp+3);
 
-    // 6 sleep_to_idle
-    // 7 sleep_to_active
-    // 8 sleep_to_active_L
-
-    // states where PM has no control (transient states)
-
-    [tick2] sp=4  -> 0.9  : (sp'=4) + 0.1  : (sp'=3);
-    [tick2] sp=5  -> 0.9   : (sp'=5) + 0.1   : (sp'=3);
-
-    [tick2] sp=6  -> 0.9   : (sp'=6) + 0.1   : (sp'=2);
-
-    [tick2] sp=7  -> 0.9  : (sp'=7) + 0.1  : (sp'=0);
-    [tick2] sp=8  -> 0.9  : (sp'=8) + 0.1  : (sp'=1);
-
-
-    // states where PM has control
-    // goto_active
-    [tick2] sp=0 & pm=0 -> (sp'=0); // from active
-    [tick2] sp=1 & pm=0 -> (sp'=0); // from activeL
-    [tick2] sp=2 & pm=0 -> (sp'=0); // from idle
-    [tick2] sp=3 & pm=0 -> (sp'=7); // from sleep
-
-
-    // goto_active_L
-    [tick2] sp=0 & pm=1 -> (sp'=1); // from active
-    [tick2] sp=1 & pm=1 -> (sp'=1); // from activeL
-    [tick2] sp=2 & pm=1 -> (sp'=1); // from idle
-    [tick2] sp=3 & pm=1 -> (sp'=8); // from sleep
-
-    // goto_idle
-    [tick2] sp=0 & pm=2 -> (sp'=2); // from active
-    [tick2] sp=1 & pm=2 -> (sp'=2); // from active_L
-    [tick2] sp=2 & pm=2 -> (sp'=2); // from idle
-    [tick2] sp=3 & pm=2 -> (sp'=6); // from sleep
-
-    // goto_sleep
-    [tick2] sp=0 & pm=3 -> (sp'=4); // from active
-    [tick2] sp=1 & pm=3 -> (sp'=4); // from active_L
-    [tick2] sp=2 & pm=3 -> (sp'=5); // idle
-    [tick2] sp=3 & pm=3 -> (sp'=3); // sleep
+    // waiting states
+    [tick1] sp = 3 -> 0.2 : (sp'=sp-2) + 0.8 : true;
+    [tick1] sp = 4 -> 0.7 : (sp'=sp-2) + 0.3 : true;
 
 endmodule
 
 
+
 // service requester
+
 module SR
-
-    sr : [0..1] init 0; // 0 - idle, 1 - Hreq, 2-Lreq
-
-    [tick2] sr=0 -> 0.898: (sr'=0) + 0.051: (sr'=1) + 0.051: (sr'=2);
-    [tick2] sr=1 -> 0.254: (sr'=0) + 0.373: (sr'=1) + 0.373: (sr'=2);
-    [tick2] sr=2 -> 0.254: (sr'=0) + 0.373: (sr'=1) + 0.373: (sr'=2);
-
+    sr : [0..1] init 0; // 0 - idle, 1 - active
+    [tick1] sr=0 -> 0.5: true + 0.5: (sr' = 1);
+    [tick1] sr=1 -> 0.5: true + 0.5: (sr' = 0);
 endmodule
 
 
 // service request queues
+
 module SRQ
+    q : [0..1000] init q_init;
 
-    q : [0..QMAX] init q_init;
+    [tick0] sr=1 -> (q'=min(q+1,QMAX)); // request
+    [tick0] sr!=1 -> true;
 
-    [tick2] sr=0 & sp!=0 & sp!=1 -> true; // do not serve and nothing arrives
-
-    [tick2] sr=1 & sp!=0 & sp!=1 -> (q'=min(q+1,CMAX)); // do not serve and a request arrives
-    [tick2] sr=2 & sp!=0 & sp!=1 -> (qL'=min(qL+1,CMAX)); // do not serve and a request arrives
-
-    [tick2] sr=0 & sp=0 -> (q'=max(q-1,0)); // serve and nothing arrives
-    [tick2] sr=0 & sp=1 -> (qL'=max(qL-1,0)); // serve and nothing arrives
-
-    // serve and a request arrives arrives -- it actually performs two actions
-    [tick2] sr=2 & sp=0 -> (q'=max(q-1,0)) & (qL'=min(qL+1,CMAX));
-    [tick2] sr=1 & sp=1 -> (qL'=max(qL-1,0)) & (q'=min(q+1,CMAX));
-
-    [tick2] sr=1 & sp=0 -> true;
-    [tick2] sr=2 & sp=1 -> true;
-
+    [tick1] sp=2 -> (q'=max(q-1,0)); // serve
+    [tick1] sp!=2 -> true;
 endmodule
 
+// battery
 
-
-
-
-// BATTERY
 module BAT
-
     bat : [0..1] init 1; // 0 empty, 1 - operational
-
-    [] bat=0 -> (bat'=0); // loop when battery empty
-
-    [tick2] bat=1 -> 0.0001 : (bat'=0) + 0.9999 : (bat'=1);
-
+    [tick1] bat=1 -> 0.0001 : (bat'=0) + 0.9999 : true;
+    [] bat=0 -> true;
 endmodule
 
-// queue size
-rewards "queueH"
+// ----- rewards ----------------------------------------------------------------
 
-    c=1 : q;
+label "finished" = (bat = 0);
 
-endrewards
-
-rewards "queueL"
-
-    c=1 : qL;
-
-endrewards
-
-// customers lost
-rewards "lostH"
-
-    [tick2] q=CMAX & sr=1 & sp!=0 : 1;
-
-endrewards
-
-rewards "lostL"
-
-    [tick2] qL=CMAX & sr=2 & sp!=1 : 1;
-
-endrewards
-
-
-// power consumption
-rewards "power"
-
-// in contrasr to the PRISM model we assume that the transient states have the power consuption
-// equal to the source state
-
-    sp=1 & c=1 : 2.5;
-    sp=0 & c=1 : 2.5;
-    sp=4 & c=1 : 2.5;
-
-    sp=2 & c=1 : 1.5;
-    sp=5 & c=1 : 1.5;
-
-    sp=3 & c=1 : 0.1;
-    sp=6 & c=1 : 0.1;
-    sp=7 & c=1 : 0.1;
-    sp=8 & c=1 : 0.1;
-
-endrewards
-
-// time
 rewards "time"
-
-    [tick2] true : 1;
-
+    [tick0] true : 1;
 endrewards
 
-label "finished" = bat = 0;
+rewards "requests"
+    [tick0] sr=1 : 1;
+endrewards
+
+rewards "served"
+    [tick1] q > 0 & sp=2 : 1;
+endrewards
+
+rewards "lost"
+    [tick0] q=QMAX & sr=1 : 1;
+endrewards
+
+rewards "power"
+    [tick1] sp=2 : 5.0;
+    [tick1] sp=3 : 2.0;
+    [tick1] sp=4 : 1.0;
+endrewards
