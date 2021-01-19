@@ -729,6 +729,8 @@ class Family:
                     if not undecided_formulae_indices:
                         decided, optimal_value = self.check_optimal_property(feasible)
                         undecided_formulae_indices += [formula_index] if decided is None else []
+                    else:
+                        undecided_formulae_indices.append(formula_index)
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
@@ -1029,7 +1031,6 @@ class FamilyHybrid(Family):
         for hole in conflict:
             generalized_options[hole] = self.member_assignment[hole]
         return Family.is_in_family(Family.interesting_assignment, generalized_options)
-
 
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
