@@ -100,7 +100,7 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
 def readable_assignment(assignment):
     # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
-    return ",".join([f"{k}={v.__str__()}" for (k, v) in assignment.items()]) if assignment is not None else None
+    return ",".join([f"{k}={v[0].__str__()}" for (k, v) in assignment.items()]) if assignment is not None else None
 
 
 class Statistic:
@@ -714,8 +714,9 @@ class Family:
                 logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
-                    decided, optimal_value = self.check_optimal_property(feasible)
-                    # undecided_formulae_indices += [formula_index] if decided is None else []
+                    if not undecided_formulae_indices:
+                        decided, optimal_value = self.check_optimal_property(feasible)
+                        # undecided_formulae_indices += [formula_index] if decided is None else []
                 break
             elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
@@ -725,8 +726,9 @@ class Family:
             else:
                 logger.debug("Formula {}: SAT".format(formula_index))
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
-                    decided, optimal_value = self.check_optimal_property(feasible)
-                    undecided_formulae_indices += [formula_index] if decided is None else []
+                    if not undecided_formulae_indices:
+                        decided, optimal_value = self.check_optimal_property(feasible)
+                        undecided_formulae_indices += [formula_index] if decided is None else []
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
