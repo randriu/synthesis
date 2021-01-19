@@ -8,6 +8,7 @@
 # wget https://zenodo.org/record/4422544/files/synthesis.zip
 # zenodo 0.11: https://zenodo.org/record/4425438
 # wget https://zenodo.org/record/4425438/files/synthesis.zip
+# zenodo 0.12: TODO
 
 # compilation parameters
 
@@ -340,6 +341,9 @@ dlog() {
     cat $SYNTHESIS/dynasty/workspace/log/log_$1.txt
 }
 
+dhead() {
+    dlog $1 | head -n 20
+}
 dtail() {
     dlog $1 | tail -n 20
 }
@@ -386,12 +390,16 @@ dhole() {
 ### tmp ################################################################
 
 export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm
+export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
 
 storm() {
     cd $STORM_BLD/bin
     local cmd="./storm --explchecks --build-overlapping-guards-label $1 --prop $2 --constants $3"
     eval $cmd
     cd -
+}
+dice() {
+    storm "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
 }
 dpm() {
     storm "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"

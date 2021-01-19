@@ -83,15 +83,22 @@ endmodule
 
 module SRQ
     q : [0..10000] init q_init;
-    lost : [0..1] init 0; // request lost flag
 
-    // [tick0] sr=1 -> (q'=min(q+1,QMAX)); // request
-    [tick0] sr=1 & q < QMAX -> (q'=q+1); // request
-    [tick0] sr=1 & q = QMAX -> (lost'=1); // request lost
+    [tick0] sr=1 -> (q'=min(q+1,QMAX)); // request
     [tick0] sr!=1 -> true;
 
-    [tick1] sp=2 -> (lost'=0) & (q'=max(q-1,0)); // serve
-    [tick1] sp!=2 -> (lost'=0) ;
+    [tick1] sp=2 -> (q'=max(q-1,0)); // serve
+    [tick1] sp!=2 -> true;
+endmodule
+
+
+// lost request flag
+
+module LRF
+    lost : [0..1] init 0;
+    [tick0] sr=1 & q = QMAX -> (lost'=1); // request lost
+    [tick0] sr!=1 | q != QMAX -> true;
+    [tick1] true -> (lost'=0);
 endmodule
 
 

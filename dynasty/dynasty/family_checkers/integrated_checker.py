@@ -3,6 +3,7 @@
 
 import logging
 import operator
+import itertools
 import z3
 
 import stormpy
@@ -12,7 +13,7 @@ from collections import OrderedDict
 
 from ..jani.jani_quotient_builder import logger as jani_quotient_builder_logger, JaniQuotientBuilder
 from ..jani.quotient_container import logger as quotient_container_logger, ThresholdSynthesisResult
-from ..model_handling.mdp_handling import logger as model_handling_logger
+from ..model_handling.mdp_handling import ModelHandling, logger as model_handling_logger
 from ..profiler import Profiler, Timer
 from .cegis import Synthesiser
 from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker, logger as quotientbased_logger
@@ -51,6 +52,15 @@ def safe_division(dividend, divisor):
     except (ZeroDivisionError, ValueError):
         return dividend / APPROX_ZERO
 
+def is_satisfied(formula, result):
+    threshold = formula.threshold_expr.evaluate_as_double()
+    op = {
+        stormpy.ComparisonType.LESS: operator.lt,
+        stormpy.ComparisonType.LEQ: operator.le,
+        stormpy.ComparisonType.GREATER: operator.gt,
+        stormpy.ComparisonType.GEQ: operator.ge
+    }[formula.comparison_type]
+    return op(result, threshold)
 
 def check_dtmc(dtmc, formula, quantitative=False):
     """Model check a DTMC against a (quantitative) property."""
@@ -60,17 +70,30 @@ def check_dtmc(dtmc, formula, quantitative=False):
         formula.remove_bound()
 
     result = stormpy.model_checking(dtmc, formula)
-    satisfied = result.at(dtmc.initial_states[0])
-
-    if quantitative:
-        op = {
-            stormpy.ComparisonType.LESS: operator.lt,
-            stormpy.ComparisonType.LEQ: operator.le,
-            stormpy.ComparisonType.GREATER: operator.gt,
-            stormpy.ComparisonType.GEQ: operator.ge
-        }[formula.comparison_type]
-        satisfied = op(satisfied, threshold)
+    at_init = result.at(dtmc.initial_states[0])
+    satisfied = at_init if not quantitative else is_satisfied(formula, at_init)
     return satisfied, result
+
+
+# def check_dtmc(dtmc, formula, quantitative=False):
+#     """Model check a DTMC against a (quantitative) property."""
+#     threshold = formula.threshold_expr.evaluate_as_double()
+#     if quantitative:
+#         formula = formula.clone()
+#         formula.remove_bound()
+
+#     result = stormpy.model_checking(dtmc, formula)
+#     satisfied = result.at(dtmc.initial_states[0])
+
+#     if quantitative:
+#         op = {
+#             stormpy.ComparisonType.LESS: operator.lt,
+#             stormpy.ComparisonType.LEQ: operator.le,
+#             stormpy.ComparisonType.GREATER: operator.gt,
+#             stormpy.ComparisonType.GEQ: operator.ge
+#         }[formula.comparison_type]
+#         satisfied = op(satisfied, threshold)
+#     return satisfied, result
 
 
 # Synthesis wrappers ------------------------------------------------------------------------------ Synthesis wrappers
@@ -165,23 +188,218 @@ class Statistic:
             summary += f"\n{sep}\n{self.get_short_summary()}\n"
         return summary
 
+# class EnumerationChecker(OneByOneChecker):
+#     """1-by-1 enumeration wrapper."""
 
-class EnumerationChecker(OneByOneChecker):
-    """1-by-1 enumeration wrapper."""
+#     def __init__(self, *args):
+#         super().__init__(*args)
+#         self.statistic = None
+
+#     def run(self, short_summary):
+#         self.statistic = Statistic(
+#             "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
+#         )
+#         iterations, assignment = self.run_feasibility()
+#         self.statistic.finished(
+#             assignment, (0, iterations), None, 0, 0.0, None, 0.0, 0.0, 0.0
+#         )
+
+#     def run_feasibility(self):
+#         jani_program = self.sketch
+#         total_nr_options = self.hole_options.size()
+#         self.iterations = 0
+        
+#         estimation_timer = Timer()
+#         estimation_timer.start()
+
+#         saitisfying_assignment = None
+        
+#         for constant_assignment in itertools.product(*self.hole_options.values()):
+#             self.iterations += 1
+#             if self.iterations % 10 == 0:
+#                 logger.info("Iteration: {} / {}".format(self.iterations, total_nr_options))
+#             constants = [jani_program.get_constant(c).expression_variable for c in self.hole_options.keys()]
+#             substitution = dict(zip(constants, constant_assignment))
+#             instance = jani_program.define_constants(substitution)
+#             mh = ModelHandling()
+#             mh.build_model(instance, self.mc_formulae, self.mc_formulae_alt)
+#             # model_states_cum += mh.full_mdp.nr_states
+
+#             all_sat = True
+#             for formula_index in range(len(self.mc_formulae)):
+#                 formula = self.mc_formulae[formula_index]
+#                 logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}.")
+#                 result = mh.mc_model(index = 0).result
+#                 at_init = result.at(mh.full_mdp.initial_states[0])
+#                 satisfied = is_satisfied(formula,at_init)
+#                 if not satisfied:
+#                     all_sat = False
+#                     break
+#             if all_sat:
+#                 satisfying_assignment = substitution
+#                 break
+
+#             if self.iterations % 10 == 0:
+#                 models_rejected = self.iterations
+#                 percentage_regected = max((models_rejected / total_nr_options),0.0000000001) # division by zero fix
+#                 iters_estimate = self.iterations / percentage_regected
+#                 time_estimate = estimation_timer.read() / percentage_regected
+#                 logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
+#         return self.iterations, satisfying_assignment
+
+class EnumerationChecker(LiftingChecker):
+    """1-by-1 checker wrapper."""
 
     def __init__(self, *args):
         super().__init__(*args)
         self.statistic = None
+        self.formulae = []
+        self.iterations = 0
+        self.family = None
+        self.families = []
+        self.models_total = 0
+
+    def initialize(self):
+        super().initialise()
+        self.formulae = [property_obj.raw_formula for property_obj in self.properties]
+        if self.input_has_optimality_property():
+            ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
+                else stormpy.logic.ComparisonType.LESS
+            bound = self.sketch.expression_manager.create_rational(stormpy.Rational(self._optimal_value))
+            opt_formula = self._optimality_setting.criterion.raw_formula.clone()
+            opt_formula.set_bound(ct, bound)
+            self.formulae.append(opt_formula)
+
+    def run(self, short_summary):
+        self.statistic = Statistic(
+            "1-by-1", self.formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
+        )
+        assignment, optimal_value = self.run_feasibility()
+        self.statistic.finished(
+            assignment, self.iterations, optimal_value, self.models_total,
+            None, None,
+            None, 0.0, 0.0
+        )
 
     def run(self, short_summary):
         self.statistic = Statistic(
             "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
         )
-        iterations, avg_model_size = self.run_feasibility()
-        assignment = None  # we do not care about assignment
+        iterations, assignment = self.run_feasibility()
         self.statistic.finished(
-            assignment, (0, iterations), None, 0, 0.0, avg_model_size, 0.0, 0.0, 0.0
+            assignment, (0, iterations), None, 0, 0.0, None, 0.0, 0.0, 0.0
         )
+
+    def run_feasibility(self):
+        jani_program = self.sketch
+        total_nr_options = self.hole_options.size()
+        self.iterations = 0
+        
+        estimation_timer = Timer()
+        estimation_timer.start()
+
+        saitisfying_assignment = None
+        
+        for constant_assignment in itertools.product(*self.hole_options.values()):
+            self.iterations += 1
+            if self.iterations % 10 == 0:
+                logger.info("Iteration: {} / {}".format(self.iterations, total_nr_options))
+            constants = [jani_program.get_constant(c).expression_variable for c in self.hole_options.keys()]
+            substitution = dict(zip(constants, constant_assignment))
+            instance = jani_program.define_constants(substitution)
+            mh = ModelHandling()
+            mh.build_model(instance, self.mc_formulae, self.mc_formulae_alt)
+            # model_states_cum += mh.full_mdp.nr_states
+
+            all_sat = True
+            for formula_index in range(len(self.mc_formulae)):
+                formula = self.mc_formulae[formula_index]
+                logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}.")
+                result = mh.mc_model(index = 0).result
+                at_init = result.at(mh.full_mdp.initial_states[0])
+                satisfied = is_satisfied(formula,at_init)
+                if not satisfied:
+                    all_sat = False
+                    break
+            if all_sat:
+                satisfying_assignment = substitution
+                break
+
+            if self.iterations % 10 == 0:
+                models_rejected = self.iterations
+                percentage_regected = max((models_rejected / total_nr_options),0.0000000001) # division by zero fix
+                iters_estimate = self.iterations / percentage_regected
+                time_estimate = estimation_timer.read() / percentage_regected
+                logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
+        return self.iterations, satisfying_assignment
+
+    def run_feasibility(self):
+        """
+        Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
+        """
+        estimation_timer = Timer()
+        estimation_timer.start()
+
+        # initialize family description
+        logger.debug("Constructing quotient MDP of the superfamily.")
+        Family.initialize(
+            self.sketch, self.holes, self.hole_options, self.symmetries,
+            self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
+            self.thresholds, self._accept_if_above, self._optimality_setting
+        )
+
+        # initiate CEGAR loop
+        self.family = Family()
+        self.models_total = self.family.size
+        models_rejected = 0
+        self.families = [self.family]
+        satisfying_assignment = None
+        logger.debug("Initiating CEGAR loop")
+        while self.families:
+            logger.debug(f"Current number of families: {len(self.families)}")
+            percentage_regected = max((models_rejected / self.models_total),0.0000000001) # division by zero fix
+            iters_estimate = self.iterations / percentage_regected
+            time_estimate = estimation_timer.read() / percentage_regected
+            logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
+
+            self.iterations += 1
+            logger.debug("CEGAR: iteration {}.".format(self.iterations))
+
+            self.family = self.families.pop(-1)
+            self.family.construct()
+            feasible, optimal_value = self.family.analyze()
+            if feasible and isinstance(feasible, bool):
+                logger.debug("CEGAR: all SAT.")
+                satisfying_assignment = self.family.member_assignment
+                if optimal_value is not None:
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
+                if satisfying_assignment is not None and self._optimality_setting is None:
+                    break
+            elif not feasible and isinstance(feasible, bool):
+                if optimal_value is not None:
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
+                logger.debug("CEGAR: all UNSAT.")
+                models_rejected += self.family.size
+            else:  # feasible is None:
+                if optimal_value is not None:
+                    self._check_optimal_property(optimal_value, self.family.member_assignment)
+                logger.debug("CEGAR: undecided.")
+                logger.debug("Splitting the family.")
+                subfamily_left, subfamily_right = self.family.split()
+                logger.debug(
+                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
+                )
+                self.families.append(subfamily_left)
+                self.families.append(subfamily_right)
+
+        # TODO translate satisfying assignment to HoleOptions
+
+        if satisfying_assignment is not None:
+            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
+            return satisfying_assignment, None
+        else:
+            logger.info("No more options.")
+            return None, None
 
 
 class CEGISChecker(Synthesiser):
@@ -230,6 +448,17 @@ class CEGARChecker(LiftingChecker):
             opt_formula = self._optimality_setting.criterion.raw_formula.clone()
             opt_formula.set_bound(ct, bound)
             self.formulae.append(opt_formula)
+
+    def run(self, short_summary):
+        self.statistic = Statistic(
+            "CEGAR", self.formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
+        )
+        assignment, optimal_value = self.run_feasibility()
+        self.statistic.finished(
+            assignment, (self.iterations, 0), optimal_value, self.models_total,
+            Family.quotient_mdp().nr_states, safe_division(Family.quotient_mdp_stats(0), Family.quotient_mdp_stats(1)),
+            Family.mdp_checks(), 0.0, 0.0
+        )
 
     def run_feasibility(self):
         """
@@ -339,17 +568,6 @@ class CEGARChecker(LiftingChecker):
 
             logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
-
-    def run(self, short_summary):
-        self.statistic = Statistic(
-            "CEGAR", self.formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
-        )
-        assignment, optimal_value = self.run_feasibility()
-        self.statistic.finished(
-            assignment, (self.iterations, 0), optimal_value, self.models_total,
-            Family.quotient_mdp().nr_states, safe_division(Family.quotient_mdp_stats(0), Family.quotient_mdp_stats(1)),
-            Family.mdp_checks(), 0.0, 0.0
-        )
 
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator
@@ -731,12 +949,12 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
-            sched = oracle._latest_result.scheduler
-            print("> ", type(sched), dir(sched))
-            print("> ", sched)
-            for state in range(5):
-                choice = sched.get_choice(state)
-                print(f"> {state} -> {choice}")
+            # sched = oracle._latest_result.scheduler
+            # print("> ", type(sched), dir(sched))
+            # print("> ", sched)
+            # for state in range(5):
+            #     choice = sched.get_choice(state)
+            #     print(f"> {state} -> {choice}")
             if not self.split_ready:
                 self.prepare_split()
             # oracle.scheduler_color_analysis()

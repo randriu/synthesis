@@ -49,7 +49,7 @@ function python-dynasty() {
     local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     local optimality=""
     if [ ${optimal} = "true" ]; then
-        optimality="--optimality sketch.optimal --properties none.properties"
+        optimality="--optimality sketch.optimal --properties optimal.properties"
     fi
     echo \$ ${dynasty} ${constants} ${optimality}
     timeout ${timeout} ${dynasty} ${constants} ${optimality}
@@ -124,7 +124,7 @@ function try_herman() {
     # verbose=true
     
     # model=("herman/orig" 2 1.86 1.86 0.6)
-    model=("herman/5" 0 18.1 18.1 0.1)
+    # model=("herman/5" 0 18.1 18.1 0.1)
     # model=("herman/10" 0 1 1 0.1)
     
     choose_model "${model[@]}"
@@ -138,22 +138,22 @@ function try_herman() {
 function run() {
     reset_log
 
-    timeout=1m
-    parallel=true
+    timeout=1h
+    # parallel=true
     verbose=true
-    # optimal=true
+    optimal=true
     
-    # model=("msp/dice" 0 1.0 2.0 0.1)
+    model=("msp/dice" 0 1.6 1.6 0.1)
 
-    # model=("msp/dpm" 8 0.99 0.99 0.1)
-    model=("msp/dpm" 10 5700 5700 100.0)
+    # model=("msp/dpm-main" 10 5700 5800 100.0)
+    # model=("grid/big" 1 0.004 0.004 0.003)
     
     choose_model "${model[@]}"
 
-    # hybrid
+    hybrid
     # cegar
     # cegis
-    onebyone
+    # onebyone
 }
 
 # --- execution ----------------------------------------------------------------
