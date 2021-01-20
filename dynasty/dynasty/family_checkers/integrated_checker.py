@@ -81,7 +81,9 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
 def readable_assignment(assignment):
     # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
-    return ",".join([f"{k}={v[0].__str__()}" for (k, v) in assignment.items()]) if assignment is not None else None
+    return ",".join(
+        [f"{k}={[int(v.__str__()) for v in vs] if len(vs) > 1 else int(vs[0].__str__())}" for (k, vs) in assignment.items()]
+    ) if assignment is not None else None
 
 
 class Statistic:
@@ -760,7 +762,7 @@ class Family:
         if self.formulae_indices is None:
             return False, optimal_value
         elif not self.formulae_indices:
-            self.pick_assignment()
+            self.pick_assignment() if self.size == 1 else self.pick_whole_family()
             return True, optimal_value
         return None, optimal_value
 
@@ -783,8 +785,7 @@ class Family:
         """ Pick any feasible hole assignment. Return None if no instance remains. """
         # get satisfiable assignment
         solver_result = Family._solver.check(self.encoding)
-        if solver_result.r > 1:
-            logger.error(f"Family has more members than 1: {solver_result.r}")
+
         if solver_result != z3.sat:
             # no further instances
             return None
@@ -798,6 +799,12 @@ class Family:
         self.member_assignment = assignment
 
         return self.member_assignment
+
+    def pick_whole_family(self):
+        assignment = HoleOptions()
+        for hole, vals in self.options.items():
+            assignment[hole] = [int(str(val)) for val in vals]
+        self.member_assignment = assignment
 
     def check_optimal_property(self, feasible):
         is_max = True if self._optimality_setting.direction == "max" else False
@@ -818,12 +825,6 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
-            # sched = oracle._latest_result.scheduler
-            # print("> ", type(sched), dir(sched))
-            # print("> ", sched)
-            # for state in range(5):
-            #     choice = sched.get_choice(state)
-            #     print(f"> {state} -> {choice}")
             if not self.split_ready:
                 self.prepare_split()
             # oracle.scheduler_color_analysis()
