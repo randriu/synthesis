@@ -389,23 +389,21 @@ dhole() {
 
 ### tmp ################################################################
 
-export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm
-export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
-
 storm() {
     cd $STORM_BLD/bin
     local cmd="./storm --explchecks --build-overlapping-guards-label $1 --prop $2 --constants $3"
     eval $cmd
     cd -
 }
+
+export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm
+export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
+
 dice() {
     storm "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
 }
 dpm() {
     storm "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
 }
-dpmread() {
-    local hole=`dhole $1`
-    dpm $hole
-}
+
 
