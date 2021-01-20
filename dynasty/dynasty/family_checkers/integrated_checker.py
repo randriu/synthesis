@@ -214,7 +214,7 @@ class EnumerationChecker(LiftingChecker):
                 if not satisfied:
                     all_sat = False
                     break
-                if formula_index == len(self.mc_formulae) - 1 and satisfied:
+                if self.input_has_optimality_property() and formula_index == len(self.mc_formulae) - 1 and satisfied:
                     improved = self._check_optimal_property(mh.full_mdp)
             if all_sat:
                 if not self.input_has_optimality_property():
@@ -260,7 +260,8 @@ class EnumerationChecker(LiftingChecker):
 
     def run(self, short_summary):
         self.statistic = Statistic(
-            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
+            "1-by-1", [p.raw_formula for p in self.properties], len(self.holes),
+            self._optimality_setting, short_summary=short_summary
         )
         iterations = self.run_feasibility()
         self.statistic.finished(
