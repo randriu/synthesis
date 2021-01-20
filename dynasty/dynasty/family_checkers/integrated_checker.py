@@ -16,7 +16,7 @@ from ..jani.quotient_container import logger as quotient_container_logger, Thres
 from ..model_handling.mdp_handling import ModelHandling, logger as model_handling_logger
 from ..profiler import Profiler, Timer
 from .cegis import Synthesiser
-from .quotientbased import LiftingChecker, OneByOneChecker, QuotientBasedFamilyChecker, logger as quotientbased_logger
+from .quotientbased import LiftingChecker, QuotientBasedFamilyChecker, logger as quotientbased_logger
 from .familychecker import HoleOptions
 
 # LOGGING -------------------------------------------------------------------------------------------------- LOGGING
@@ -38,6 +38,7 @@ STAGE_SCORE_LIMIT = 99999
 # Zero approximation to avoid zero division etc.
 APPROX_ZERO = 0.000001
 
+
 # MANUAL MODEL CHECKING ------------------------------------------------------------------------- MANUAL MODEL CHECKING
 
 
@@ -52,6 +53,7 @@ def safe_division(dividend, divisor):
     except (ZeroDivisionError, ValueError):
         return dividend / APPROX_ZERO
 
+
 def is_satisfied(formula, result):
     threshold = formula.threshold_expr.evaluate_as_double()
     op = {
@@ -62,9 +64,9 @@ def is_satisfied(formula, result):
     }[formula.comparison_type]
     return op(result, threshold)
 
+
 def check_dtmc(dtmc, formula, quantitative=False):
     """Model check a DTMC against a (quantitative) property."""
-    threshold = formula.threshold_expr.evaluate_as_double()
     if quantitative:
         formula = formula.clone()
         formula.remove_bound()
@@ -74,29 +76,8 @@ def check_dtmc(dtmc, formula, quantitative=False):
     satisfied = at_init if not quantitative else is_satisfied(formula, at_init)
     return satisfied, result
 
-
-# def check_dtmc(dtmc, formula, quantitative=False):
-#     """Model check a DTMC against a (quantitative) property."""
-#     threshold = formula.threshold_expr.evaluate_as_double()
-#     if quantitative:
-#         formula = formula.clone()
-#         formula.remove_bound()
-
-#     result = stormpy.model_checking(dtmc, formula)
-#     satisfied = result.at(dtmc.initial_states[0])
-
-#     if quantitative:
-#         op = {
-#             stormpy.ComparisonType.LESS: operator.lt,
-#             stormpy.ComparisonType.LEQ: operator.le,
-#             stormpy.ComparisonType.GREATER: operator.gt,
-#             stormpy.ComparisonType.GEQ: operator.ge
-#         }[formula.comparison_type]
-#         satisfied = op(satisfied, threshold)
-#     return satisfied, result
-
-
 # Synthesis wrappers ------------------------------------------------------------------------------ Synthesis wrappers
+
 
 def readable_assignment(assignment):
     # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
@@ -177,8 +158,8 @@ class Statistic:
             iters = self.iterations[1]
         else:
             iters = (self.iterations[0], self.iterations[1])
-        thresholds = [round(float(f.threshold),10) for f in self.formulae]
-        
+        thresholds = [round(float(f.threshold), 10) for f in self.formulae]
+
         return f"> T = {thresholds} - {self.method}: {result} ({iters} iters, {round(self.timer.time, 2)} sec)"
 
     def __str__(self):
@@ -188,64 +169,6 @@ class Statistic:
             summary += f"\n{sep}\n{self.get_short_summary()}\n"
         return summary
 
-# class EnumerationChecker(OneByOneChecker):
-#     """1-by-1 enumeration wrapper."""
-
-#     def __init__(self, *args):
-#         super().__init__(*args)
-#         self.statistic = None
-
-#     def run(self, short_summary):
-#         self.statistic = Statistic(
-#             "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
-#         )
-#         iterations, assignment = self.run_feasibility()
-#         self.statistic.finished(
-#             assignment, (0, iterations), None, 0, 0.0, None, 0.0, 0.0, 0.0
-#         )
-
-#     def run_feasibility(self):
-#         jani_program = self.sketch
-#         total_nr_options = self.hole_options.size()
-#         self.iterations = 0
-        
-#         estimation_timer = Timer()
-#         estimation_timer.start()
-
-#         saitisfying_assignment = None
-        
-#         for constant_assignment in itertools.product(*self.hole_options.values()):
-#             self.iterations += 1
-#             if self.iterations % 10 == 0:
-#                 logger.info("Iteration: {} / {}".format(self.iterations, total_nr_options))
-#             constants = [jani_program.get_constant(c).expression_variable for c in self.hole_options.keys()]
-#             substitution = dict(zip(constants, constant_assignment))
-#             instance = jani_program.define_constants(substitution)
-#             mh = ModelHandling()
-#             mh.build_model(instance, self.mc_formulae, self.mc_formulae_alt)
-#             # model_states_cum += mh.full_mdp.nr_states
-
-#             all_sat = True
-#             for formula_index in range(len(self.mc_formulae)):
-#                 formula = self.mc_formulae[formula_index]
-#                 logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}.")
-#                 result = mh.mc_model(index = 0).result
-#                 at_init = result.at(mh.full_mdp.initial_states[0])
-#                 satisfied = is_satisfied(formula,at_init)
-#                 if not satisfied:
-#                     all_sat = False
-#                     break
-#             if all_sat:
-#                 satisfying_assignment = substitution
-#                 break
-
-#             if self.iterations % 10 == 0:
-#                 models_rejected = self.iterations
-#                 percentage_regected = max((models_rejected / total_nr_options),0.0000000001) # division by zero fix
-#                 iters_estimate = self.iterations / percentage_regected
-#                 time_estimate = estimation_timer.read() / percentage_regected
-#                 logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
-#         return self.iterations, satisfying_assignment
 
 class EnumerationChecker(LiftingChecker):
     """1-by-1 checker wrapper."""
@@ -253,153 +176,94 @@ class EnumerationChecker(LiftingChecker):
     def __init__(self, *args):
         super().__init__(*args)
         self.statistic = None
-        self.formulae = []
         self.iterations = 0
-        self.family = None
-        self.families = []
-        self.models_total = 0
-
-    def initialize(self):
-        super().initialise()
-        self.formulae = [property_obj.raw_formula for property_obj in self.properties]
-        if self.input_has_optimality_property():
-            ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
-                else stormpy.logic.ComparisonType.LESS
-            bound = self.sketch.expression_manager.create_rational(stormpy.Rational(self._optimal_value))
-            opt_formula = self._optimality_setting.criterion.raw_formula.clone()
-            opt_formula.set_bound(ct, bound)
-            self.formulae.append(opt_formula)
-
-    def run(self, short_summary):
-        self.statistic = Statistic(
-            "1-by-1", self.formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
-        )
-        assignment, optimal_value = self.run_feasibility()
-        self.statistic.finished(
-            assignment, self.iterations, optimal_value, self.models_total,
-            None, None,
-            None, 0.0, 0.0
-        )
-
-    def run(self, short_summary):
-        self.statistic = Statistic(
-            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
-        )
-        iterations, assignment = self.run_feasibility()
-        self.statistic.finished(
-            assignment, (0, iterations), None, 0, 0.0, None, 0.0, 0.0, 0.0
-        )
+        self.satisfying_assignment = None
 
     def run_feasibility(self):
         jani_program = self.sketch
         total_nr_options = self.hole_options.size()
-        self.iterations = 0
-        
+
+        if self.input_has_optimality_property():
+            ct = stormpy.logic.ComparisonType.GREATER if self._optimality_setting.direction == 'max' \
+                else stormpy.logic.ComparisonType.LESS
+            self.mc_formulae[len(self.mc_formulae) - 1].set_bound(
+                ct, self.sketch.expression_manager.create_rational(stormpy.Rational(self._optimal_value))
+            )
+
         estimation_timer = Timer()
         estimation_timer.start()
 
-        saitisfying_assignment = None
-        
         for constant_assignment in itertools.product(*self.hole_options.values()):
             self.iterations += 1
             if self.iterations % 10 == 0:
-                logger.info("Iteration: {} / {}".format(self.iterations, total_nr_options))
+                logger.info(f"Iteration: {self.iterations} / {total_nr_options}")
             constants = [jani_program.get_constant(c).expression_variable for c in self.hole_options.keys()]
             substitution = dict(zip(constants, constant_assignment))
             instance = jani_program.define_constants(substitution)
             mh = ModelHandling()
             mh.build_model(instance, self.mc_formulae, self.mc_formulae_alt)
-            # model_states_cum += mh.full_mdp.nr_states
 
+            improved = False
             all_sat = True
             for formula_index in range(len(self.mc_formulae)):
-                formula = self.mc_formulae[formula_index]
-                logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}.")
-                result = mh.mc_model(index = 0).result
-                at_init = result.at(mh.full_mdp.initial_states[0])
-                satisfied = is_satisfied(formula,at_init)
+                mc_result = mh.mc_model(index=formula_index).result
+                satisfied = is_satisfied(self.mc_formulae[formula_index], mc_result.at(mh.full_mdp.initial_states[0]))
+                logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}: {satisfied}")
                 if not satisfied:
                     all_sat = False
                     break
+                if formula_index == len(self.mc_formulae) - 1 and satisfied:
+                    improved = self._check_optimal_property(mh.full_mdp)
             if all_sat:
-                satisfying_assignment = substitution
-                break
+                if not self.input_has_optimality_property():
+                    self.satisfying_assignment = {c.name: [v] for (c, v) in substitution.items()}
+                    break
+                elif improved:
+                    self.satisfying_assignment = {c.name: [v] for (c, v) in substitution.items()}
 
             if self.iterations % 10 == 0:
-                models_rejected = self.iterations
-                percentage_regected = max((models_rejected / total_nr_options),0.0000000001) # division by zero fix
-                iters_estimate = self.iterations / percentage_regected
-                time_estimate = estimation_timer.read() / percentage_regected
-                logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
-        return self.iterations, satisfying_assignment
-
-    def run_feasibility(self):
-        """
-        Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
-        """
-        estimation_timer = Timer()
-        estimation_timer.start()
-
-        # initialize family description
-        logger.debug("Constructing quotient MDP of the superfamily.")
-        Family.initialize(
-            self.sketch, self.holes, self.hole_options, self.symmetries,
-            self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
-            self.thresholds, self._accept_if_above, self._optimality_setting
-        )
-
-        # initiate CEGAR loop
-        self.family = Family()
-        self.models_total = self.family.size
-        models_rejected = 0
-        self.families = [self.family]
-        satisfying_assignment = None
-        logger.debug("Initiating CEGAR loop")
-        while self.families:
-            logger.debug(f"Current number of families: {len(self.families)}")
-            percentage_regected = max((models_rejected / self.models_total),0.0000000001) # division by zero fix
-            iters_estimate = self.iterations / percentage_regected
-            time_estimate = estimation_timer.read() / percentage_regected
-            logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
-
-            self.iterations += 1
-            logger.debug("CEGAR: iteration {}.".format(self.iterations))
-
-            self.family = self.families.pop(-1)
-            self.family.construct()
-            feasible, optimal_value = self.family.analyze()
-            if feasible and isinstance(feasible, bool):
-                logger.debug("CEGAR: all SAT.")
-                satisfying_assignment = self.family.member_assignment
-                if optimal_value is not None:
-                    self._check_optimal_property(optimal_value, self.family.member_assignment)
-                if satisfying_assignment is not None and self._optimality_setting is None:
-                    break
-            elif not feasible and isinstance(feasible, bool):
-                if optimal_value is not None:
-                    self._check_optimal_property(optimal_value, self.family.member_assignment)
-                logger.debug("CEGAR: all UNSAT.")
-                models_rejected += self.family.size
-            else:  # feasible is None:
-                if optimal_value is not None:
-                    self._check_optimal_property(optimal_value, self.family.member_assignment)
-                logger.debug("CEGAR: undecided.")
-                logger.debug("Splitting the family.")
-                subfamily_left, subfamily_right = self.family.split()
-                logger.debug(
-                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
+                percentage_rejected = safe_division(self.iterations, total_nr_options)  # division by zero fix
+                iters_estimate = self.iterations / percentage_rejected
+                time_estimate = estimation_timer.read() / percentage_rejected
+                logger.info(
+                    f">> Performance estimation (unfeasible): "
+                    f"{iters_estimate} ({self.iterations}) iterations in {time_estimate} sec. "
+                    f"(OPT: {self._optimal_value})"
                 )
-                self.families.append(subfamily_left)
-                self.families.append(subfamily_right)
+        return self.iterations
 
-        # TODO translate satisfying assignment to HoleOptions
+    def _check_optimal_property(self, dtmc):
+        # Model checking of the optimality property
+        result = stormpy.model_checking(dtmc, self._optimality_setting.criterion)
+        optimal_value = result.at(dtmc.initial_states[0])
 
-        if satisfying_assignment is not None:
-            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
-            return satisfying_assignment, None
-        else:
-            logger.info("No more options.")
-            return None, None
+        # Check whether the improvement was achieved
+        if self._optimality_setting.is_improvement(optimal_value, self._optimal_value):
+            # Set the new values of the optimal attributes
+            self._optimal_value = optimal_value
+
+            # Construct new violation property with respect to the currently optimal value
+            vp = self._optimality_setting.get_violation_property(
+                self._optimal_value,
+                lambda x: self.sketch.expression_manager.create_rational(stormpy.Rational(x)),
+            )
+
+            # Replace the last violation property by newly one
+            self.mc_formulae[len(self.mc_formulae) - 1] = vp.raw_formula
+
+            logger.debug(f"Optimal value improved to: {self._optimal_value}")
+
+            return True
+        return False
+
+    def run(self, short_summary):
+        self.statistic = Statistic(
+            "1-by-1", self.mc_formulae, len(self.holes), self._optimality_setting, short_summary=short_summary
+        )
+        iterations = self.run_feasibility()
+        self.statistic.finished(
+            self.satisfying_assignment, (0, iterations), self._optimal_value, 0, 0.0, 0.0, 0.0, 0.0, 0.0
+        )
 
 
 class CEGISChecker(Synthesiser):
@@ -467,7 +331,7 @@ class CEGARChecker(LiftingChecker):
         Profiler.initialize()
         estimation_timer = Timer()
         estimation_timer.start()
-        
+
         logger.info("Running feasibility + optimal synthesis.")
 
         # initialize family description
@@ -487,9 +351,9 @@ class CEGARChecker(LiftingChecker):
         logger.debug("Initiating CEGAR loop")
         while self.families:
             logger.debug(f"Current number of families: {len(self.families)}")
-            percentage_regected = max((models_rejected / self.models_total),0.0000000001) # division by zero fix
-            iters_estimate = self.iterations / percentage_regected
-            time_estimate = estimation_timer.read() / percentage_regected
+            percentage_rejected = max((models_rejected / self.models_total), 0.0000000001)  # division by zero fix
+            iters_estimate = self.iterations / percentage_rejected
+            time_estimate = estimation_timer.read() / percentage_rejected
             logger.info(f"Performance estimation (unfeasible): {iters_estimate} iterations in {time_estimate} sec.")
 
             self.iterations += 1
@@ -838,7 +702,6 @@ class Family:
         # print("> MDP result (alt): ", bounds_alt.at(init_state))
 
         return feasibility, bounds
-            
 
     def analyze(self):
         """
@@ -864,13 +727,14 @@ class Family:
             # logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             Family.mdp_checks_inc()
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
-            
+
             if not feasible and isinstance(feasible, bool):
                 logger.debug(f"Formula {formula_index}: UNSAT")
                 undecided_formulae_indices = None
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
-                    decided, optimal_value = self.check_optimal_property(feasible)
-                    # undecided_formulae_indices += [formula_index] if decided is None else []
+                    if not undecided_formulae_indices:
+                        decided, optimal_value = self.check_optimal_property(feasible)
+                        # undecided_formulae_indices += [formula_index] if decided is None else []
                 break
             elif feasible is None:
                 logger.debug(f"Formula {formula_index}: UNDECIDED")
@@ -880,8 +744,11 @@ class Family:
             else:
                 logger.debug("Formula {}: SAT".format(formula_index))
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
-                    decided, optimal_value = self.check_optimal_property(feasible)
-                    undecided_formulae_indices += [formula_index] if decided is None else []
+                    if not undecided_formulae_indices:
+                        decided, optimal_value = self.check_optimal_property(feasible)
+                        undecided_formulae_indices += [formula_index] if decided is None else []
+                    else:
+                        undecided_formulae_indices.append(formula_index)
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
@@ -916,6 +783,8 @@ class Family:
         """ Pick any feasible hole assignment. Return None if no instance remains. """
         # get satisfiable assignment
         solver_result = Family._solver.check(self.encoding)
+        if solver_result.r > 1:
+            logger.error(f"Family has more members than 1: {solver_result.r}")
         if solver_result != z3.sat:
             # no further instances
             return None
@@ -977,14 +846,14 @@ class Family:
         tm = mdp.transition_matrix
         for state in range(mdp.nr_states):
             print("> state: ", state)
-            for row in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+            for row in range(tm.get_row_group_start(state), tm.get_row_group_end(state)):
                 print("> ", str(tm.get_row(row)))
 
     def check_mdp(self):
         mdp = self.mdp
         tm = mdp.transition_matrix
         init_state = mdp.initial_states[0]
-        mdp_actions = tm.get_row_group_end(init_state)-tm.get_row_group_start(init_state)
+        mdp_actions = tm.get_row_group_end(init_state) - tm.get_row_group_start(init_state)
         hole_combinations = len(self.options["s2a"]) * len(self.options["s2b"]) * len(self.options["s2c"])
         if mdp_actions != hole_combinations:
             print(f"> MDP is invalid ({mdp_actions} actions != {hole_combinations} combinations)")
@@ -993,11 +862,11 @@ class Family:
             exit()
         logger.debug("MDP is OK")
 
-
+    @staticmethod
     def is_in_family(hole_assignment, hole_options):
-        hole_assignment={key:str(value) for key,value in hole_assignment.items()}
+        hole_assignment = {key: str(value) for key, value in hole_assignment.items()}
         # print("> comparing ", hole_assignment, " and ", hole_options)
-        for hole,option in hole_assignment.items():
+        for hole, option in hole_assignment.items():
             family_hole_options = [str(hole_option) for hole_option in hole_options[hole]]
             # print("> ", option, " in ", family_hole_options)
             if option not in family_hole_options:
@@ -1005,11 +874,10 @@ class Family:
         return True
 
     # interesting_assignment = {"s2a":4,"s2b":1,"s2c":0,"s3a":3,"s3b":4,"s3c":4,"s4a":0,"s4b":1,"s4c":4}
-    interesting_assignment = {"s2a":3,"s2b":1,"s2c":2,"s3a":2,"s3b":1,"s3c":4,"s4a":2,"s4b":1,"s4c":3}
+    interesting_assignment = {"s2a": 3, "s2b": 1, "s2c": 2, "s3a": 2, "s3b": 1, "s3c": 4, "s4a": 2, "s4b": 1, "s4c": 3}
 
     def contains_interesting(self):
-        return Family.is_in_family(Family.interesting_assignment,self.options)
-
+        return Family.is_in_family(Family.interesting_assignment, self.options)
 
 
 # INTEGRATED METHOD --------------------------------------------------------------------------------- INTEGRATED METHOD
@@ -1128,7 +996,8 @@ class FamilyHybrid(Family):
             # collect edges relevant for this assignment
             indexed_assignment = Family._hole_options.index_map(self.member_assignment)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
-            collected_edge_indices = stormpy.FlatSet(Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet()))
+            collected_edge_indices = stormpy.FlatSet(
+                Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet()))
             for c in subcolors:
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
@@ -1177,12 +1046,11 @@ class FamilyHybrid(Family):
             row = tm.get_row(state)
             print("> ", str(row))
 
-    def conflict_covers_interesting(self,conflict):
+    def conflict_covers_interesting(self, conflict):
         generalized_options = self.options.copy()
         for hole in conflict:
             generalized_options[hole] = self.member_assignment[hole]
         return Family.is_in_family(Family.interesting_assignment, generalized_options)
-
 
 
 # Family encapsulator ------------------------------------------------------------------------------ Family encapsulator

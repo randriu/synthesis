@@ -279,7 +279,7 @@ class ModelHandling:
         else:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
-        assert not self._formulae[index].has_bound
+        # assert not self._formulae[index].has_bound
 
         logger.info(f"Start checking direction 1: {self._formulae[index]}")
         # TODO allow qualitative model checking with scheduler extraction.
