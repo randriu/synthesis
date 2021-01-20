@@ -23,8 +23,8 @@ const double THRESHOLD;
 const int QMAX;
 // observation level thresholds
 const int T1; const int T2; const int T3;
-// actions taken at observation levels
-const int A1; const int A2; const int A3; const int A4;
+// profiles desired at observation levels
+const int P1; const int P2; const int P3; const int P4;
 
 // ----- modules ---------------------------------------------------------------
 
@@ -42,10 +42,10 @@ endmodule
 
 module PM
     pm  :  [0..2] init 0; // 0 - sleep, 1 - idle, 2 - active
-    [tick0] q*10 <= T1*QMAX -> (pm'=A1);
-    [tick0] q*10 > T1*QMAX & q*10 <= T2*QMAX -> (pm'=A2);
-    [tick0] q*10 > T2*QMAX & q*10 <= T3*QMAX -> (pm'=A3);
-    [tick0] q*10 > T3*QMAX -> (pm'=A4);
+    [tick0] q*10 <= T1*QMAX -> (pm'=P1);
+    [tick0] q*10 > T1*QMAX & q*10 <= T2*QMAX -> (pm'=P2);
+    [tick0] q*10 > T2*QMAX & q*10 <= T3*QMAX -> (pm'=P3);
+    [tick0] q*10 > T3*QMAX -> (pm'=P4);
 endmodule
 
 
