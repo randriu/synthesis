@@ -17,7 +17,7 @@ ce_quality_maxsat = ce_quality_trivial = ce_quality_nontrivial = None
 ce_time_maxsat = ce_time_trivial = ce_time_nontrivial = None
 iters = time = None
 
-# process command line arguments
+# process command-line arguments
 assert len(sys.argv) == 3
 filename = sys.argv[1]
 selection = sys.argv[2]
@@ -27,12 +27,12 @@ file = open(filename, 'r')
 lines = file.readlines()
 file.close()
 
-# we will only last few lines
+# we will only need last few lines
 lines = lines[-20:]
 
 # timeout check
 if lines[-1] == "TO\n":
-    res = match(r"^.*?Performance estimation \(unfeasible\): (.*?) iterations in (.*?) sec\.$", lines)
+    res = match(r"^.*?Performance estimation \(unfeasible\): (.*?) iterations in (.*?) sec\..*?$", lines)
     if res is not None:
         iters = round(float(res[0]),0)
         time = round(float(res[1]),0)
@@ -75,6 +75,7 @@ hybrid_iters = None if cegar_iters is None or cegis_iters is None else f"({cegar
 
 # identify iters and time
 if method is None:
+    # timeout
     iters = iters_estimate
     time = time_estimate
 else:

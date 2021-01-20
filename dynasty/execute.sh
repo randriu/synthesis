@@ -143,17 +143,17 @@ function run() {
     verbose=true
     # optimal=true
     
-    model=("msp/dice" 0 2 2 0.1)
+    # model=("msp/dice" 0 2 2 0.1)
 
-    # model=("msp/dpm-main" 10 5700 5800 100.0)
+    model=("msp/dpm-main" 10 5700 5800 100.0)
     # model=("grid/big" 1 0.004 0.004 0.003)
     
     choose_model "${model[@]}"
 
-    hybrid
+    # hybrid
     # cegar
     # cegis
-    # onebyone
+    onebyone
 }
 
 # --- execution ----------------------------------------------------------------
