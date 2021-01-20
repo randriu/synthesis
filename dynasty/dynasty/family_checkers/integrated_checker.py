@@ -210,7 +210,7 @@ class EnumerationChecker(LiftingChecker):
             for formula_index in range(len(self.mc_formulae)):
                 mc_result = mh.mc_model(index=formula_index).result
                 satisfied = is_satisfied(self.mc_formulae[formula_index], mc_result.at(mh.full_mdp.initial_states[0]))
-                logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}: {satisfied}")
+                # logger.debug(f"1-by-1: model checking DTMC against a formula with index {formula_index}: {satisfied}")
                 if not satisfied:
                     all_sat = False
                     break
