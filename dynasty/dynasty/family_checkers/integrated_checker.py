@@ -227,7 +227,7 @@ class EnumerationChecker(LiftingChecker):
                 time_estimate = estimation_timer.read() / percentage_rejected
                 logger.info(
                     f">> Performance estimation (unfeasible): "
-                    f"{iters_estimate} ({self.iterations}) iterations in {time_estimate} sec.\n"
+                    f"{iters_estimate} ({self.iterations}) iterations in {time_estimate} sec. "
                     f"(OPT: {self._optimal_value})"
                 )
         return self.iterations
@@ -783,6 +783,8 @@ class Family:
         """ Pick any feasible hole assignment. Return None if no instance remains. """
         # get satisfiable assignment
         solver_result = Family._solver.check(self.encoding)
+        if solver_result.r > 1:
+            logger.error(f"Family has more members than 1: {solver_result.r}")
         if solver_result != z3.sat:
             # no further instances
             return None
