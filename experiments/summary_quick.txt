@@ -1,0 +1,14 @@
+Table 2: counterexamples (hybrid), performance of cegar/hybrid on a basic benchmark
+
+benchmark           ce_trivial          ce_family           cegar_iters         cegar_time          hybrid_iters        hybrid_time         
+    grid (easy)     - (-)               -                   -                   -                   -                   -                   
+    grid (hard)     - (-)               -                   -                   -                   -                   -                   
+    maze (easy)     - (-)               -                   -                   -                   -                   -                   
+    maze (hard)     - (-)               -                   -                   -                   -                   -                   
+    dpm (easy)      - (-)               -                   -                   -                   -                   -                   
+    dpm (hard)      - (-)               -                   -                   -                   -                   -                   
+    pole (easy)     - (-)               -                   -                   -                   -                   -                   
+    pole (hard)     - (-)               -                   -                   -                   -                   -                   
+    herman (easy)   - (-)               -                   -                   -                   -                   -                   
+    herman (hard)   - (-)               -                   -                   -                   -                   -                   
+

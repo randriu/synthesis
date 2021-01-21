@@ -1,0 +1,255 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+CEGARChecker
+2021-01-21 19:17:38,379 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/pole/sketch.templ with constants 
+2021-01-21 19:17:38,388 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-21 19:17:38,388 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:38,390 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:38,390 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-21 19:17:38,390 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M11', 'M12', 'M13', 'M14', 'M15', 'M21', 'M22', 'M23', 'M24', 'M25', 'M31', 'M32', 'M33', 'M34', 'M35', 'M41', 'M42', 'M43', 'M44', 'M45', 'M51', 'M52', 'M53', 'M54', 'M55']
+2021-01-21 19:17:38,390 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:38,392 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3]
+2021-01-21 19:17:38,392 MainThread - dynasty.family_checkers.familychecker - INFO - Design space (without constraints): 1327104
+2021-01-21 19:17:38,392 MainThread - dynasty.family_checkers.integrated_checker - INFO - Running feasibility + optimal synthesis.
+2021-01-21 19:17:38,392 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP of the superfamily.
+0: [0, 4294967296, 8589934592, 12884901888, 17179869184, 21474836480, 21474836481, 21474836482, 21474836483, 21474836484, 21474836485, 21474836486, 21474836487, 25769803776, 25769803777, 25769803778, 25769803779, 25769803783, 25769803789, 25769803793, 25769803806, 25769803809, 25769803814, 25769803820, 25769803825, 25769803828, 30064771072, 30064771073, 30064771074, 30064771075, 30064771076, 34359738368, ],22: [25769803780, ],27: [25769803781, ],40: [25769803782, ],37: [25769803784, ],36: [25769803785, ],34: [25769803786, ],32: [25769803787, ],30: [25769803788, ],26: [25769803790, ],20: [25769803791, ],17: [25769803792, ],13: [25769803794, ],12: [25769803795, ],1: [25769803796, ],11: [25769803797, ],10: [25769803798, ],9: [25769803799, ],8: [25769803800, ],24: [25769803801, ],28: [25769803802, ],7: [25769803803, ],5: [25769803804, ],21: [25769803805, ],39: [25769803807, ],38: [25769803808, ],35: [25769803810, ],33: [25769803811, ],31: [25769803812, ],29: [25769803813, ],25: [25769803815, ],19: [25769803816, ],15: [25769803817, ],16: [25769803818, ],14: [25769803819, ],6: [25769803821, ],2: [25769803822, ],3: [25769803823, ],4: [25769803824, ],23: [25769803826, ],18: [25769803827, ]
+2021-01-21 19:17:38,606 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6745.
+2021-01-21 19:17:38,613 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Initiating CEGAR loop
+2021-01-21 19:17:38,614 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-21 19:17:38,614 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 0.0 iterations in 2213549919.9999995 sec.
+2021-01-21 19:17:38,614 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 1.
+2021-01-21 19:17:38,614 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [1,2,4],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 1327104.
+2021-01-21 19:17:38,630 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:38,876 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M32
+2021-01-21 19:17:38,877 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [0] vs. [2, 1]
+2021-01-21 19:17:38,877 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '4']...
+2021-01-21 19:17:38,877 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef8b0>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef930>, <stormpy.storage.storage.Expression object at 0x7fcf4a8ef8f0>]
+2021-01-21 19:17:38,877 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:38,877 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M32 into [1] and [4,2]
+2021-01-21 19:17:38,877 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:38,877 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:38,888 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 442368 and 884736.
+2021-01-21 19:17:38,888 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:38,888 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 10000000000.0 iterations in 4957208130.0 sec.
+2021-01-21 19:17:38,888 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 2.
+2021-01-21 19:17:38,888 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:38,949 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6697.
+2021-01-21 19:17:38,950 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [2,3,4],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 884736.
+2021-01-21 19:17:38,966 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,013 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M23
+2021-01-21 19:17:39,013 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [2, 0]
+2021-01-21 19:17:39,013 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3', '4']...
+2021-01-21 19:17:39,013 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef530>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef570>, <stormpy.storage.storage.Expression object at 0x7fcf4a8ef4f0>]
+2021-01-21 19:17:39,013 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,014 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M23 into [3] and [4,2]
+2021-01-21 19:17:39,014 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,014 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,024 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 294912 and 589824.
+2021-01-21 19:17:39,024 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,024 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 20000000000.0 iterations in 6319969230.0 sec.
+2021-01-21 19:17:39,024 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 3.
+2021-01-21 19:17:39,025 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [4,2],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,048 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6649.
+2021-01-21 19:17:39,048 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [4,2],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 589824.
+2021-01-21 19:17:39,063 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,064 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,064 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,064 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 6.75 iterations in 1.5104123527500002 sec.
+2021-01-21 19:17:39,064 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 4.
+2021-01-21 19:17:39,064 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,085 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6601.
+2021-01-21 19:17:39,086 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [1,2,3,4],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 294912.
+2021-01-21 19:17:39,101 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,148 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M33
+2021-01-21 19:17:39,148 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [2, 0] vs. [3, 1]
+2021-01-21 19:17:39,149 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '3', '4']...
+2021-01-21 19:17:39,149 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8efa70>, <stormpy.storage.storage.Expression object at 0x7fcf4a8ef9f0>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8efab0>, <stormpy.storage.storage.Expression object at 0x7fcf4a8efa30>]
+2021-01-21 19:17:39,149 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,149 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M33 into [3,1] and [4,2]
+2021-01-21 19:17:39,149 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,149 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,160 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 147456 and 147456.
+2021-01-21 19:17:39,161 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,161 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 9.0 iterations in 1.72843009875 sec.
+2021-01-21 19:17:39,161 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 5.
+2021-01-21 19:17:39,161 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [4,2],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,184 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6505.
+2021-01-21 19:17:39,184 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [4,2],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 147456.
+2021-01-21 19:17:39,199 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,200 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,200 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,200 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 9.0 iterations in 1.4530715513999999 sec.
+2021-01-21 19:17:39,200 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 6.
+2021-01-21 19:17:39,200 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,222 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6505.
+2021-01-21 19:17:39,222 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [1,2,3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 147456.
+2021-01-21 19:17:39,237 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,286 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M34
+2021-01-21 19:17:39,286 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [2] vs. [0, 1]
+2021-01-21 19:17:39,286 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '2', '3']...
+2021-01-21 19:17:39,286 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8efbf0>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8efb70>, <stormpy.storage.storage.Expression object at 0x7fcf4a8efbb0>]
+2021-01-21 19:17:39,286 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,287 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M34 into [3] and [1,2]
+2021-01-21 19:17:39,287 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,287 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,298 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 49152 and 98304.
+2021-01-21 19:17:39,299 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,299 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 10.799999999999999 iterations in 1.6310749374 sec.
+2021-01-21 19:17:39,299 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 7.
+2021-01-21 19:17:39,299 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [1,2],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,322 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6457.
+2021-01-21 19:17:39,322 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [1,2],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 98304.
+2021-01-21 19:17:39,337 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,337 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,337 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,337 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 11.117647058823529 iterations in 1.5005886040588237 sec.
+2021-01-21 19:17:39,337 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 8.
+2021-01-21 19:17:39,337 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,359 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6409.
+2021-01-21 19:17:39,359 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2,3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 49152.
+2021-01-21 19:17:39,373 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,420 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M14
+2021-01-21 19:17:39,420 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [0]
+2021-01-21 19:17:39,420 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3']...
+2021-01-21 19:17:39,420 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef270>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef230>]
+2021-01-21 19:17:39,420 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,421 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M14 into [3] and [2]
+2021-01-21 19:17:39,421 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,421 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,432 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 24576 and 24576.
+2021-01-21 19:17:39,432 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,432 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 12.705882352941176 iterations in 1.6512612511764706 sec.
+2021-01-21 19:17:39,432 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 9.
+2021-01-21 19:17:39,432 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [2],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,456 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6361.
+2021-01-21 19:17:39,457 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [2],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 24576.
+2021-01-21 19:17:39,471 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,471 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,471 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,471 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 13.885714285714286 iterations in 1.664708871085714 sec.
+2021-01-21 19:17:39,472 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 10.
+2021-01-21 19:17:39,472 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,494 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6361.
+2021-01-21 19:17:39,494 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [2,3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 24576.
+2021-01-21 19:17:39,509 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,557 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M15
+2021-01-21 19:17:39,557 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [0]
+2021-01-21 19:17:39,557 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3']...
+2021-01-21 19:17:39,558 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef330>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef2f0>]
+2021-01-21 19:17:39,558 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,558 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M15 into [3] and [2]
+2021-01-21 19:17:39,558 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,558 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,568 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 12288 and 12288.
+2021-01-21 19:17:39,568 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,569 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 15.428571428571429 iterations in 1.814508138857143 sec.
+2021-01-21 19:17:39,569 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 11.
+2021-01-21 19:17:39,569 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [2],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,592 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6313.
+2021-01-21 19:17:39,592 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [2],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 12288.
+2021-01-21 19:17:39,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,607 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 16.732394366197184 iterations in 1.847232322478873 sec.
+2021-01-21 19:17:39,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 12.
+2021-01-21 19:17:39,607 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,630 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6313.
+2021-01-21 19:17:39,630 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [2,3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 12288.
+2021-01-21 19:17:39,644 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,699 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M24
+2021-01-21 19:17:39,699 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [0]
+2021-01-21 19:17:39,699 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3']...
+2021-01-21 19:17:39,699 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef630>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef5f0>]
+2021-01-21 19:17:39,699 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,699 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M24 into [3] and [2]
+2021-01-21 19:17:39,699 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,699 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,710 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 6144 and 6144.
+2021-01-21 19:17:39,710 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,710 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 18.253521126760564 iterations in 2.0040087610140844 sec.
+2021-01-21 19:17:39,710 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 13.
+2021-01-21 19:17:39,710 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [2],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,736 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6265.
+2021-01-21 19:17:39,737 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [2],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 6144.
+2021-01-21 19:17:39,751 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,751 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,751 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,751 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 19.636363636363633 iterations in 2.052501307300699 sec.
+2021-01-21 19:17:39,751 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 14.
+2021-01-21 19:17:39,752 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,774 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6265.
+2021-01-21 19:17:39,774 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [2,3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 6144.
+2021-01-21 19:17:39,788 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,839 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M25
+2021-01-21 19:17:39,840 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [0]
+2021-01-21 19:17:39,840 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['2', '3']...
+2021-01-21 19:17:39,840 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef730>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8ef6f0>]
+2021-01-21 19:17:39,840 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,840 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M25 into [3] and [2]
+2021-01-21 19:17:39,840 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,840 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,851 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 3072 and 3072.
+2021-01-21 19:17:39,852 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,852 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 21.146853146853147 iterations in 2.2040646887832165 sec.
+2021-01-21 19:17:39,852 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 15.
+2021-01-21 19:17:39,852 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [2],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,875 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6217.
+2021-01-21 19:17:39,876 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [2],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 3072.
+2021-01-21 19:17:39,890 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:39,890 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:39,890 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:39,890 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 22.578397212543553 iterations in 2.2541663906341465 sec.
+2021-01-21 19:17:39,890 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 16.
+2021-01-21 19:17:39,890 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:39,914 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6217.
+2021-01-21 19:17:39,914 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1,3],M51: [1,4],M55: [1,3] of size 3072.
+2021-01-21 19:17:39,928 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:39,975 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M44
+2021-01-21 19:17:39,975 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [0]
+2021-01-21 19:17:39,975 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '3']...
+2021-01-21 19:17:39,975 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8170f0>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8170b0>]
+2021-01-21 19:17:39,975 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:39,975 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M44 into [3] and [1]
+2021-01-21 19:17:39,975 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:39,975 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:39,986 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 1536 and 1536.
+2021-01-21 19:17:39,986 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:39,986 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 24.083623693379792 iterations in 2.398663900097561 sec.
+2021-01-21 19:17:39,986 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 17.
+2021-01-21 19:17:39,986 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:40,016 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6169.
+2021-01-21 19:17:40,016 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [1],M51: [1,4],M55: [1,3] of size 1536.
+2021-01-21 19:17:40,030 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:40,030 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:40,030 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:40,030 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 25.544347826086955 iterations in 2.4608334598121737 sec.
+2021-01-21 19:17:40,030 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 18.
+2021-01-21 19:17:40,030 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:40,051 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6169.
+2021-01-21 19:17:40,051 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [1,3,4],M44: [3],M51: [1,4],M55: [1,3] of size 1536.
+2021-01-21 19:17:40,065 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:40,113 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at M43
+2021-01-21 19:17:40,113 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [2] vs. [1, 0]
+2021-01-21 19:17:40,113 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['1', '3', '4']...
+2021-01-21 19:17:40,113 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7fcf4a8effb0>] and [<stormpy.storage.storage.Expression object at 0x7fcf4a8eff70>, <stormpy.storage.storage.Expression object at 0x7fcf4a8eff30>]
+2021-01-21 19:17:40,113 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute []
+2021-01-21 19:17:40,113 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting M43 into [4] and [3,1]
+2021-01-21 19:17:40,113 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: undecided.
+2021-01-21 19:17:40,113 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Splitting the family.
+2021-01-21 19:17:40,123 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed two subfamilies of size 512 and 1024.
+2021-01-21 19:17:40,123 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 3
+2021-01-21 19:17:40,123 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 27.04695652173913 iterations in 2.6008509362086953 sec.
+2021-01-21 19:17:40,124 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 19.
+2021-01-21 19:17:40,124 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [3,1],M44: [3],M51: [1,4],M55: [1,3].
+2021-01-21 19:17:40,145 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 6121.
+2021-01-21 19:17:40,146 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [3,1],M44: [3],M51: [1,4],M55: [1,3] of size 1024.
+2021-01-21 19:17:40,159 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNSAT
+2021-01-21 19:17:40,159 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: all UNSAT.
+2021-01-21 19:17:40,159 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 2
+2021-01-21 19:17:40,160 MainThread - dynasty.family_checkers.integrated_checker - INFO - Performance estimation (unfeasible): 28.51650260567458 iterations in 2.6519908314163287 sec.
+2021-01-21 19:17:40,160 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 20.
+2021-01-21 19:17:40,160 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP for family HoleOptions M11: [2,4],M12: [2,4],M14: [3],M15: [3],M21: [2,4],M22: [2,4],M23: [3],M24: [3],M25: [3],M32: [4,2],M33: [3,1],M34: [3],M42: [1,4],M43: [4],M44: [3],M51: [1,4],M55: [1,3].
+TO

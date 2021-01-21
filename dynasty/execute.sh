@@ -4,9 +4,7 @@
 core=$1
 
 # default parameters
-primary_method=hybrid
-regime=2
-timeout=10d
+timeout=100d
 verbose=false
 parallel=false
 optimal=false
@@ -14,26 +12,20 @@ optimal=false
 # workspace settings
 models_dir="workspace/examples"
 log_dir="workspace/log"
-parameters_file="${log_dir}/parameters.txt"
 log_file="${log_dir}/log_${core}.txt"
 log_grep_file="${log_dir}/log_grep_${core}.txt"
 
 # ------------------------------------------------------------------------------
-
-# presets: TACAS
-grid=("grid/orig" 40 0.004 0.019 0.003)
-gridbig=("grid/big" 40 0.927 0.931 0.001)
-maze=("maze/orig" 50 0.16127640 0.16127660 0.00000005)
-pole=("pole/orig" 5 0.732 0.736 0.001)
-dpm=("dpm/orig" 12 0.078 0.081 0.001)
-herman=("herman/orig" 2 0.60 0.75 0.05)
-
-CMAX=6
-herbig=("herman/big" ${CMAX} 0.95 0.95 0.3)
+# presets
 
 
 # ------------------------------------------------------------------------------
 # functions
+
+function reset_log() {
+    > ${log_file}
+    > ${log_grep_file}
+}
 
 function choose_model() {
     preset=("$@")
@@ -44,8 +36,9 @@ function choose_model() {
     t_step=${preset[4]}
 }
 
-function python-dynasty() {
-    local dynasty="python dynasty.py --project ${models_dir}/${model}/ $1 --short-summary"
+function python_dynasty() {
+    local method=$1
+    local dynasty="python dynasty.py --project ${models_dir}/${model}/ $method --short-summary"
     local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     local optimality=""
     if [ ${optimal} = "true" ]; then
@@ -56,6 +49,7 @@ function python-dynasty() {
 }
 
 function dynasty() {
+    local method=$1
     local parallelity=""
     if [ ${parallel} = "true" ]; then
         parallelity="&"
@@ -64,22 +58,16 @@ function dynasty() {
     if [ ${verbose} = "false" ]; then
         verbosity=${verbosity}' | grep "^> "'
     fi
-    command="python-dynasty $1 | ${verbosity} ${parallelity}"
-    # echo ${command}
+    command="python_dynasty $method | ${verbosity} ${parallelity}"
     eval ${command}
 }
 
 function try_thresholds() {
-
+    local method=$1
     for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
-        dynasty $1
+        dynasty $method
     done
     wait
-}
-
-function reset_log() {
-    > ${log_file}
-    > ${log_grep_file}
 }
 
 function onebyone() {
@@ -96,61 +84,59 @@ function hybrid() {
 }
 
 function try_models() {
-    echo "----- $1"
+    local method=$1
+    echo "----- $method"
     for model in "${models[@]}"; do
-        choose_model `eval echo '${'${model}'[@]}'`
         echo "--- $model"
-        $1
+        choose_model `eval echo '${'${model}'[@]}'`
+        try_thresholds $method
     done
 }
+
 # --- sandbox ------------------------------------------------------------------
 
 function test_release() {
-    reset_log
     timeout=1m
     parallel=true
     # verbose=true
-    model=("herman/orig" 2 0.60 0.75 0.15)
+    # optimal=true
+
+    model=("herman/release-test" 2 0.60 0.75 0.15)
     choose_model "${model[@]}"
     cegar
-    echo "^ should be at 15 and 18 sec"
+    echo "^ should be at 15 and 19 sec"
 }
 
-function try_herman() {
-    reset_log
-
-    timeout=5h
+function tacas() {
+    timeout=10m
     parallel=true
-    # verbose=true
-    
-    # model=("herman/orig" 2 1.86 1.86 0.6)
-    # model=("herman/5" 0 18.1 18.1 0.1)
-    # model=("herman/10" 0 1 1 0.1)
-    
-    choose_model "${model[@]}"
 
-    hybrid
-    # cegar
-    # cegis
-    # onebyone
+    grid=("grid/big" 40 0.931 0.927 -0.004)
+    maze=("maze/orig" 50 0.1612764 0.1612766 0.0000002)
+    dpm=("dpm/half" 12 0.078 0.0818 0.0038)
+    pole=("pole/orig" 0 3.350 3.355 0.005)
+    herman=("herman/orig" 2 1.2 1.8 0.6)
+
+    # models=( grid maze dpm pole herman )
+    models=( dpm )
+    # try_models onebyone
+    # try_models cegar
+    try_models hybrid
 }
 
 function run() {
-    reset_log
-
     timeout=2d
-    # parallel=true
+    parallel=true
     # verbose=true
-    optimal=true
+    # optimal=true
     
-    # model=("msp/dice-3" 0 2 2 0.1)
-    # model=("msp/dice-4" 0 2 2 0.1)
+    # model=("cav/dice/3" 0 2 2 0.1)
+    # model=("cav/dice/4" 0 2 2 0.1)
 
-    # model=("msp/dpm-main" 10 3000 3000 500.0)
-    model=("msp/dpm-test" 10 3000 3000 500.0)
-    # model=("msp/dpm-tacas" 12 1.0 1.0 0.1)
+    # model=("cav/dpm-main" 10 3000 3000 500.0)
+    # model=("cav/dpm-test" 10 3000 3000 500.0)
 
-    # model=("grid/big" 1 0.004 0.004 0.003)
+    model=("grid/big" 40 0.004 0.010 0.001)
     
     choose_model "${model[@]}"
 
@@ -162,8 +148,10 @@ function run() {
 
 # --- execution ----------------------------------------------------------------
 
+reset_log
+
 # test_release
-# try_herman
+# tacas
 run
 
 exit

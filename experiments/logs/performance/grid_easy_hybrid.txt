@@ -1,0 +1,23 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+IntegratedChecker
+2021-01-21 19:17:38,429 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/grid/sketch.templ with constants 
+2021-01-21 19:17:38,434 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-21 19:17:38,435 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:38,435 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:38,435 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-21 19:17:38,435 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M_0_1', 'M_1_1', 'M_2_1', 'M_3_1', 'P_0_1', 'P_1_1', 'P_2_1', 'P_3_1']
+2021-01-21 19:17:38,436 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:38,436 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M_0_1: [0,1,2,3],M_1_1: [0,1,2,3],M_2_1: [0,1,2,3],M_3_1: [0,1,2,3],P_0_1: [1,2,3,4],P_1_1: [1,2,3,4],P_2_1: [1,2,3,4],P_3_1: [1,2,3,4]
+2021-01-21 19:17:38,437 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 65536
+2021-01-21 19:17:38,450 MainThread - dynasty.family_checkers.integrated_checker - INFO - Running feasibility synthesis.
+2021-01-21 19:17:38,451 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP of the superfamily.
+0: [0, 4294967296, 4294967297, 4294967362, 4294967363, 8589934592, 8589934593, 8589934594, 8589934595, 8589934596, 8589934597, 8589934598, 8589934599, 8589934600, 8589934601, 8589934602, 8589934603, 8589934604, ],56: [4294967298, ],30: [4294967299, ],32: [4294967300, ],60: [4294967301, ],54: [4294967302, ],52: [4294967303, ],50: [4294967304, ],48: [4294967305, ],46: [4294967306, ],44: [4294967307, ],42: [4294967308, ],40: [4294967309, ],38: [4294967310, ],36: [4294967311, ],34: [4294967312, ],28: [4294967313, ],64: [4294967314, ],58: [4294967315, ],63: [4294967316, ],6: [4294967317, ],5: [4294967318, ],4: [4294967319, ],3: [4294967320, ],2: [4294967321, ],8: [4294967322, ],17: [4294967323, ],19: [4294967324, ],21: [4294967325, ],23: [4294967326, ],25: [4294967327, ],27: [4294967328, ],59: [4294967329, ],10: [4294967330, ],33: [4294967331, ],7: [4294967332, ],61: [4294967333, ],57: [4294967334, ],29: [4294967335, ],35: [4294967336, ],37: [4294967337, ],39: [4294967338, ],41: [4294967339, ],43: [4294967340, ],45: [4294967341, ],47: [4294967342, ],49: [4294967343, ],51: [4294967344, ],53: [4294967345, ],9: [4294967346, ],31: [4294967347, ],11: [4294967348, ],12: [4294967349, ],13: [4294967350, ],14: [4294967351, ],1: [4294967352, ],15: [4294967353, ],16: [4294967354, ],18: [4294967355, ],20: [4294967356, ],22: [4294967357, ],24: [4294967358, ],26: [4294967359, ],62: [4294967360, ],55: [4294967361, ]
+2021-01-21 19:17:38,772 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 11535.
+2021-01-21 19:17:39,787 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 1.
+2021-01-21 19:17:39,787 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions M_0_1: [0,1,2,3],M_1_1: [0,1,2,3],M_2_1: [0,1,2,3],M_3_1: [0,1,2,3],P_0_1: [1,2,3,4],P_1_1: [1,2,3,4],P_2_1: [1,2,3,4],P_3_1: [1,2,3,4] of size 65536.
+2021-01-21 19:17:39,841 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+TO

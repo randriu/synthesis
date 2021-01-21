@@ -4,7 +4,7 @@
 // the procotol is synchronous with no nondeterminism (a DTMC)
 dtmc
 
-const int CMAX = 2; //+
+const int CMAX = 2;
 
 const double pFair = 0.5;
 const double pUnfairLow = 0.25;
@@ -35,49 +35,49 @@ endmodule
 
 module controller
     round : [0..5] init 1;
-    syncs : [0..CMAX] init 0; //+
+    syncs : [0..CMAX] init 0;
 
     [step1] round = 1 -> (round'=2);
     [step2] round = 2 -> (round'=3);
     [step3] round = 3 -> (round'=4);
     [step4] round = 4 -> (round'=5);
     [step5] round = 5 -> (round'=0);
-    [sync] round = 0 -> (round'=1) & (syncs'=min(syncs+1,CMAX)); //+
+    [sync] round = 0 -> (round'=1) & (syncs'=min(syncs+1,CMAX));
 
 endmodule
 
 // module for process 1
 module process1
 
-	// Boolean variable for process 1
-	x1 : [0..1] init 0;
-	y1 : [0..1] init 0;
-	m1 : [0..MAXMEM] init 0;
+    // Boolean variable for process 1
+    x1 : [0..1] init 0;
+    y1 : [0..1] init 0;
+    m1 : [0..MAXMEM] init 0;
 
     [go]  (true) -> 0.5: (x1'=0) + 0.5: (x1'=1);
 
-	[step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M0A) + 1-pUnfairLow : (y1'=1) & (m1'=M0B);
-	[step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=1 -> pFair : (y1'=0) & (m1'=M0A) + 1-pFair : (y1'=1) & (m1'=M0B);
-	[step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M0A) + 1-pUnfairHigh : (y1'=1) & (m1'=M0B);
-	[step1] !(x1=x7) & x1 = 0 & m1 = 0 -> (y1'=x7) & (m1'=M0C);
+    [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M0A) + 1-pUnfairLow : (y1'=1) & (m1'=M0B);
+    [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=1 -> pFair : (y1'=0) & (m1'=M0A) + 1-pFair : (y1'=1) & (m1'=M0B);
+    [step1]  (x1=x7) & x1 = 0 & m1 = 0 & M0LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M0A) + 1-pUnfairHigh : (y1'=1) & (m1'=M0B);
+    [step1] !(x1=x7) & x1 = 0 & m1 = 0 -> (y1'=x7) & (m1'=M0C);
 
-	[step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M0A) + 1-pUnfairLow : (y1'=1) & (m1'=M0B);
-	[step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0LFAIR=1 -> pFair : (y1'=0) & (m1'=M0A) + 1-pFair : (y1'=1) & (m1'=M0B);
-	[step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M0A) + 1-pUnfairHigh : (y1'=1) & (m1'=M0B);
-	[step1] !(x1=x7) & x1 = 1 & m1 = 0 -> (y1'=x7) & (m1'=M0C);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M0A) + 1-pUnfairLow : (y1'=1) & (m1'=M0B);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0LFAIR=1 -> pFair : (y1'=0) & (m1'=M0A) + 1-pFair : (y1'=1) & (m1'=M0B);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 0 & M0LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M0A) + 1-pUnfairHigh : (y1'=1) & (m1'=M0B);
+    [step1] !(x1=x7) & x1 = 1 & m1 = 0 -> (y1'=x7) & (m1'=M0C);
 
-	[step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1A) + 1-pUnfairLow : (y1'=1) & (m1'=M1B);
-	[step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=1 -> pFair : (y1'=0) & (m1'=M1A) + 1-pFair : (y1'=1) & (m1'=M1B);
-	[step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1A) + 1-pUnfairHigh : (y1'=1) & (m1'=M1B);
-	[step1] !(x1=x7) & x1 = 0 & m1 = 1 -> (y1'=x7) & (m1'=M1C);
+    [step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1A) + 1-pUnfairLow : (y1'=1) & (m1'=M1B);
+    [step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=1 -> pFair : (y1'=0) & (m1'=M1A) + 1-pFair : (y1'=1) & (m1'=M1B);
+    [step1]  (x1=x7) & x1 = 0 & m1 = 1 & M1LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1A) + 1-pUnfairHigh : (y1'=1) & (m1'=M1B);
+    [step1] !(x1=x7) & x1 = 0 & m1 = 1 -> (y1'=x7) & (m1'=M1C);
 
-	[step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1A) + 1-pUnfairLow : (y1'=1) & (m1'=M1B);
-	[step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=1 -> pFair : (y1'=0) & (m1'=M1A) + 1-pFair : (y1'=1) & (m1'=M1B);
-	[step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1A) + 1-pUnfairHigh : (y1'=1) & (m1'=M1B);
-	[step1] !(x1=x7) & x1 = 1 & m1 = 1 -> (y1'=x7) & (m1'=M1C);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=0 -> pUnfairLow : (y1'=0) & (m1'=M1A) + 1-pUnfairLow : (y1'=1) & (m1'=M1B);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=1 -> pFair : (y1'=0) & (m1'=M1A) + 1-pFair : (y1'=1) & (m1'=M1B);
+    [step1]  (x1=x7) & x1 = 1 & m1 = 1 & M1LFAIR=2 -> pUnfairHigh : (y1'=0) & (m1'=M1A) + 1-pUnfairHigh : (y1'=1) & (m1'=M1B);
+    [step1] !(x1=x7) & x1 = 1 & m1 = 1 -> (y1'=x7) & (m1'=M1C);
 
 
-	[sync] true -> (x1' = y1) & (y1'=0);
+    [sync] true -> (x1' = y1) & (y1'=0);
 
 endmodule
 
@@ -91,7 +91,7 @@ module process7 = process1 [ x1=x7, y1=y7, x7=x4, m1=m7, step1=step5 ] endmodule
 
 // cost - 1 in each state (expected number of steps)
 rewards "steps"
-	round=0 : 1;
+    round=0 : 1;
 endrewards
 
 // set of initial states: all (i.e. any possible initial configuration of tokens)

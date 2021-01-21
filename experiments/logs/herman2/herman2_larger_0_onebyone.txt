@@ -1,0 +1,80 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+EnumerationChecker
+2021-01-21 19:17:50,455 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/herman2_larger/sketch.templ with constants 
+2021-01-21 19:17:50,551 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-21 19:17:50,553 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:50,553 MainThread - dynasty.family_checkers.familychecker - DEBUG - Loading optimality info.
+2021-01-21 19:17:50,553 MainThread - dynasty.family_checkers.familychecker - DEBUG - Criterion R{"steps"}=? [F "stable"]
+
+2021-01-21 19:17:50,553 MainThread - dynasty.family_checkers.familychecker - DEBUG - Done parsing optimality file.
+2021-01-21 19:17:50,564 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:50,566 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-21 19:17:50,567 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M0LFAIR', 'M0HFAIR', 'M1LFAIR', 'M1HFAIR', 'MxxA', 'MxxB', 'MxxC']
+2021-01-21 19:17:50,567 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:50,574 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M0LFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],M0HFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],M1LFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],M1HFAIR: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],MxxA: [0,1],MxxB: [0,1],MxxC: [0,1]
+2021-01-21 19:17:50,574 MainThread - dynasty.family_checkers.familychecker - INFO - Design space (without constraints): 3125000
+2021-01-21 19:17:50,956 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 10 / 3125000
+2021-01-21 19:17:50,999 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 132742.01718750002 sec (opt: 999999999999999999).
+2021-01-21 19:17:51,055 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 121.39363736780977
+2021-01-21 19:17:51,108 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 71.66045342206084
+2021-01-21 19:17:51,304 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 71.66045341182273
+2021-01-21 19:17:51,448 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 61.38661908570118
+2021-01-21 19:17:51,448 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 20 / 3125000
+2021-01-21 19:17:51,502 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 36.67132256293255
+2021-01-21 19:17:51,502 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 144867.66796875 sec (opt: 36.67132256293255).
+2021-01-21 19:17:51,699 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 36.67132245763779
+2021-01-21 19:17:51,898 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 25.015954417038444
+2021-01-21 19:17:51,942 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 30 / 3125000
+2021-01-21 19:17:51,987 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 147168.35322916665 sec (opt: 25.015954417038444).
+2021-01-21 19:17:52,100 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 25.015954058963388
+2021-01-21 19:17:52,303 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 19.194363125078265
+2021-01-21 19:17:52,452 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 40 / 3125000
+2021-01-21 19:17:52,505 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 19.19436231163168
+2021-01-21 19:17:52,505 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 150780.659296875 sec (opt: 19.19436231163168).
+2021-01-21 19:17:52,707 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 15.706563088456534
+2021-01-21 19:17:52,909 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 15.706561833408285
+2021-01-21 19:17:52,954 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 50 / 3125000
+2021-01-21 19:17:53,000 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 151592.27931250003 sec (opt: 15.706561833408285).
+2021-01-21 19:17:53,113 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 13.385903116908908
+2021-01-21 19:17:53,311 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 13.385903116517527
+2021-01-21 19:17:53,397 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 60 / 3125000
+2021-01-21 19:17:53,423 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 11.732398796857025
+2021-01-21 19:17:53,423 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 148335.30010416667 sec (opt: 11.732398796857025).
+2021-01-21 19:17:53,517 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 11.73239879631652
+2021-01-21 19:17:53,610 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 10.496066397920949
+2021-01-21 19:17:53,631 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 70 / 3125000
+2021-01-21 19:17:53,652 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 137373.61017857146 sec (opt: 10.496066397920949).
+2021-01-21 19:17:53,704 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 10.496066396967406
+2021-01-21 19:17:53,798 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 9.538033886985293
+2021-01-21 19:17:53,866 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 80 / 3125000
+2021-01-21 19:17:53,891 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 9.538033885150854
+2021-01-21 19:17:53,891 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 129533.23839843752 sec (opt: 9.538033885150854).
+2021-01-21 19:17:53,985 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 8.774985395911642
+2021-01-21 19:17:54,078 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 8.774985392522106
+2021-01-21 19:17:54,099 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 90 / 3125000
+2021-01-21 19:17:54,120 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 123077.2476388889 sec (opt: 8.774985392522106).
+2021-01-21 19:17:54,172 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 8.153908721149872
+2021-01-21 19:17:54,265 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 8.153908715363556
+2021-01-21 19:17:54,333 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 100 / 3125000
+2021-01-21 19:17:54,359 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 7.639469087747529
+2021-01-21 19:17:54,359 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 118246.44784375001 sec (opt: 7.639469087747529).
+2021-01-21 19:17:54,452 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 7.639469078632693
+2021-01-21 19:17:54,546 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 7.2072104211517924
+2021-01-21 19:17:54,567 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 110 / 3125000
+2021-01-21 19:17:54,588 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 113998.72565340907 sec (opt: 7.2072104211517924).
+2021-01-21 19:17:54,640 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 7.207210407792942
+2021-01-21 19:17:54,733 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 6.839670374103587
+2021-01-21 19:17:54,802 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 120 / 3125000
+2021-01-21 19:17:54,827 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 6.839670355720886
+2021-01-21 19:17:54,827 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 110716.22778645832 sec (opt: 6.839670355720886).
+2021-01-21 19:17:54,920 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 6.524049357496058
+2021-01-21 19:17:55,013 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 6.5240493335586525
+2021-01-21 19:17:55,034 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 130 / 3125000
+2021-01-21 19:17:55,055 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 3125000.0 iterations in 107684.22110576923 sec (opt: 6.5240493335586525).
+2021-01-21 19:17:55,107 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 6.250753699772203
+2021-01-21 19:17:55,201 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Optimal value improved to: 6.250753670085466
+TO

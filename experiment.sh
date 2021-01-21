@@ -1,5 +1,6 @@
 #!/bin/bash
 
+source env/bin/activate
 # timeout values for each experiment (recommended values: 20m and 5h)
 export TIMEOUT_SMALL_MODELS=20m     # grid, maze, dpm, pole, herman, herman-2 (smaller)
 export TIMEOUT_LARGE_MODELS=5h      # herman-2 (larger)

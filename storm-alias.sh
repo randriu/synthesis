@@ -28,8 +28,7 @@ export STORM_BLD=$STORM_DIR/build
 
 export STORMPY_DIR=$SYNTHESIS/stormpy
 export DYNASTY_DIR=$SYNTHESIS/dynasty
-
-export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
+export DYNASTY_LOG=$DYNASTY_DIR/workspace/log
 
 ### TACAS 2021 #################################################################
 
@@ -111,13 +110,6 @@ dynasty-download() {
     local target_dir=$1
     mkdir -p ${target_dir}/prerequisites
 
-    # mathsat
-    # cd $PREREQUISITES
-    # wget -O mathsat.tar.gz http://mathsat.fbk.eu/download.php?file=mathsat-5.5.4-linux-x86_64.tar.gz
-    # tar -xf mathsat.tar.gz && rm mathsat.tar.gz && mv mathsat-5.5.4-linux-x86_64 mathsat
-    # cd $OLDPWD
-    # created folder: $PREREQUISITES/mathsat
-
     # carl
     cd ${target_dir}/prerequisites
     git clone -b master14 https://github.com/smtrat/carl
@@ -152,7 +144,6 @@ dynasty-dependencies() {
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
     sudo apt -y install texlive-latex-extra
 
-
     # not installed on sarka:
         # carl:
             # libcln-dev (+, requires texinfo)
@@ -168,7 +159,7 @@ dynasty-dependencies() {
 
 synthesis-dependencies() {
     
-    if [ "$SYNTHESIS_TACAS21" == "true" ]; then
+    if [ $SYNTHESIS_TACAS21 == "true" ]; then
         unzip dependencies.zip
         cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy .
         cd dependencies/dependencies
@@ -183,7 +174,7 @@ synthesis-dependencies() {
         deactivate
         cd -
     else
-        if [ "$SYNTHESIS_INSTALL_DEPENDENCIES" == "true" ]; then
+        if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
             dynasty-dependencies
         fi
         dynasty-download $SYNTHESIS
@@ -218,14 +209,6 @@ carl-build() {
     cd $OLDPWD
 }
 
-# build-carl-parser() {
-#     cd $PREREQUISITES
-#     cd carl-parser && mkdir -p build && cd build
-#     cmake ..
-#     sed -i ' 1 s/$/ -lgmp -lcln -lginac/' test/CMakeFiles/carl-parser-test.dir/link.txt
-#     make --jobs $COMPILE_JOBS
-# }
-
 pycarl-build() {
     cd $PREREQUISITES/pycarl
     source $SYNTHESIS_ENV/bin/activate
@@ -240,9 +223,8 @@ pycarl-build() {
 storm-config() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD
-    # cmake -DSTORM_USE_LTO=OFF ..
-    # cmake --DSTORM_PORTABLE=ON ..
     cmake ..
+    # cmake -DSTORM_USE_LTO=OFF ..
     cd $OLDPWD
 }
 
@@ -312,22 +294,36 @@ alias pb='stormpy-build'
 alias sr='storm-rebuild'
 
 alias synthesis='cd $SYNTHESIS'
-alias dynasty='cd $SYNTHESIS/dynasty'
 
 alias enva='source $SYNTHESIS_ENV/bin/activate'
 alias envd='deactivate'
 
-alias tb='dynasty; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
+alias tb='cd $DYNASTY_DIR; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
 alias tf='envd'
 
-# execution
+### execution $$################################################################
 
-dynrun() {
-    dynasty
+function dynasty() {
+    local core=0
+    if [ -n "$1" ]; then
+        core=$1
+    fi
+    local exp_sh=$DYNASTY_DIR/execute.sh
+    local run_sh=$DYNASTY_LOG/run_${core}.sh
+
+    cd $DYNASTY_DIR
+    mkdir -p $DYNASTY_LOG
+    cp $exp_sh $run_sh
     enva
-    make c$1 & disown
+    bash $run_sh $core
     envd
-    cd $OLDPWD
+    cd ~-
+}
+function d() {
+    dynasty $1
+}
+function db() {
+    dynasty $1 & disown
 }
 
 alias dpid='pgrep -f "^python dynasty.py .*"'
@@ -336,9 +332,8 @@ alias dshow='pgrep -af "^python dynasty.py .*"'
 alias dcount='pgrep -afc "^python dynasty.py .*"'
 alias dkill='dpid | xargs kill'
 
-
 dlog() {
-    cat $SYNTHESIS/dynasty/workspace/log/log_$1.txt
+    cat $DYNASTY_LOG/log_$1.txt
 }
 
 dhead() {
@@ -349,7 +344,7 @@ dtail() {
 }
 
 dgrep() {
-    cat $SYNTHESIS/dynasty/workspace/log/log_grep_$1.txt
+    cat $DYNASTY_LOG/log_grep_$1.txt
 }
 
 diter() {
@@ -386,6 +381,22 @@ dperf() {
 dholes() {
     dlog $1 | grep "hole assignment:" | awk '{print $3}'
 }
+
+### binds ###
+
+bind '"\ei"':"\"storm-config \C-m\""
+bind '"\eo"':"\"storm-build \C-m\""
+bind '"\ep"':"\"stormpy-build \C-m\""
+
+bind '"\ed"':"\"db \C-m\""
+bind '"\e1"':"\"db 1 \C-m\""
+bind '"\e2"':"\"db 2 \C-m\""
+bind '"\e3"':"\"db 3 \C-m\""
+bind '"\e4"':"\"db 4 \C-m\""
+bind '"\e5"':"\"db 5 \C-m\""
+bind '"\e6"':"\"db 6 \C-m\""
+bind '"\e7"':"\"db 7 \C-m\""
+bind '"\e8"':"\"db 8 \C-m\""
 
 ### tmp ################################################################
 

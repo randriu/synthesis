@@ -32,7 +32,7 @@ lines = lines[-20:]
 
 # timeout check
 if lines[-1] == "TO\n":
-    res = match(r"^.*?Performance estimation \(unfeasible\): (.*?) iterations in (.*?) sec\..*?$", lines)
+    res = match(r"^.*?Performance estimation \(unfeasible\): (.*?) iterations in (.*?) sec.*?$", lines)
     if res is not None:
         iters = round(float(res[0]),0)
         time = round(float(res[1]),0)

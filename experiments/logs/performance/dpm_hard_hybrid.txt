@@ -1,0 +1,133 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+IntegratedChecker
+2021-01-21 19:17:40,401 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/dpm/sketch.templ with constants 
+2021-01-21 19:17:40,407 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-21 19:17:40,408 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:40,409 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:40,410 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-21 19:17:40,410 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X13', 'X23', 'X33', 'X43', 'X14', 'X24', 'X34', 'X44']
+2021-01-21 19:17:40,410 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:40,411 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions X11: [0,1,2],X21: [0,1,2],X31: [0,1,2],X41: [0,1,2],X12: [0,1,2],X22: [0,1,2],X32: [0,1,2],X42: [0,1,2],X13: [0,1,2],X23: [0,1,2],X33: [0,1,2],X43: [0,1,2],X14: [0,1,2],X24: [0,1,2],X34: [0,1,2],X44: [0,1,2]
+2021-01-21 19:17:40,412 MainThread - dynasty.family_checkers.cegis - INFO - Design space (without constraints): 43046721
+2021-01-21 19:17:40,431 MainThread - dynasty.family_checkers.integrated_checker - INFO - Running feasibility synthesis.
+2021-01-21 19:17:40,431 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructing quotient MDP of the superfamily.
+0: [0, 1, 8589934592, 8589934593, 8589934594, 8589934595, 8589934596, 8589934597, 8589934598, 8589934599, 8589934600, 8589934601, 8589934602, 8589934603, 8589934604, 8589934605, 8589934606, 8589934607, 8589934608, 8589934609, 8589934610, 8589934611, 8589934612, 12884901888, 12884901889, 12884901890, 17179869184, 17179869185, 17179869186, 17179869187, 17179869188, 17179869189, 17179869190, 17179869191, 17179869192, 21474836480, 21474836481, ],26: [4294967296, ],8: [4294967297, ],7: [4294967298, ],6: [4294967299, ],5: [4294967300, ],4: [4294967301, ],3: [4294967302, ],2: [4294967303, ],18: [4294967304, ],20: [4294967305, ],22: [4294967306, ],24: [4294967307, ],1: [4294967308, ],28: [4294967309, ],30: [4294967310, ],32: [4294967311, ],34: [4294967312, ],36: [4294967313, ],38: [4294967314, ],40: [4294967315, ],42: [4294967316, ],44: [4294967317, ],46: [4294967318, ],48: [4294967319, ],9: [4294967320, ],10: [4294967321, ],11: [4294967322, ],12: [4294967323, ],13: [4294967324, ],14: [4294967325, ],15: [4294967326, ],16: [4294967327, ],17: [4294967328, ],19: [4294967329, ],21: [4294967330, ],23: [4294967331, ],25: [4294967332, ],27: [4294967333, ],29: [4294967334, ],31: [4294967335, ],33: [4294967336, ],35: [4294967337, ],37: [4294967338, ],39: [4294967339, ],41: [4294967340, ],43: [4294967341, ],45: [4294967342, ],47: [4294967343, ]
+2021-01-21 19:17:40,803 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed MDP of size 11569.
+2021-01-21 19:17:41,198 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: iteration 1.
+2021-01-21 19:17:41,198 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGAR: analyzing family HoleOptions X11: [0,1,2],X21: [0,1,2],X31: [0,1,2],X41: [0,1,2],X12: [0,1,2],X22: [0,1,2],X32: [0,1,2],X42: [0,1,2],X13: [0,1,2],X23: [0,1,2],X33: [0,1,2],X43: [0,1,2],X14: [0,1,2],X24: [0,1,2],X34: [0,1,2],X44: [0,1,2] of size 43046721.
+2021-01-21 19:17:41,242 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0: UNDECIDED
+2021-01-21 19:17:41,765 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Oracle proposes a split at X32
+2021-01-21 19:17:41,766 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Proposed (pre)split: [1] vs. [0]
+2021-01-21 19:17:41,766 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Splitting ['0', '1', '2']...
+2021-01-21 19:17:41,766 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Pre-splitted [<stormpy.storage.storage.Expression object at 0x7f026ccafa30>] and [<stormpy.storage.storage.Expression object at 0x7f026ccaf9f0>]
+2021-01-21 19:17:41,766 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - DEBUG - Now distribute [<stormpy.storage.storage.Expression object at 0x7f026ccafa70>]
+2021-01-21 19:17:41,766 MainThread - /home/maria/synthesis/dynasty/dynasty/family_checkers/quotientbased.py - INFO - Splitting X32 into [2,1] and [0]
+2021-01-21 19:17:41,766 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Initiating CEGAR--CEGIS loop
+2021-01-21 19:17:41,766 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Current number of families: 1
+2021-01-21 19:17:41,766 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: analyzing family HoleOptions X11: [0,1,2],X21: [0,1,2],X31: [0,1,2],X41: [0,1,2],X12: [0,1,2],X22: [0,1,2],X32: [0,1,2],X42: [0,1,2],X13: [0,1,2],X23: [0,1,2],X33: [0,1,2],X43: [0,1,2],X14: [0,1,2],X24: [0,1,2],X34: [0,1,2],X44: [0,1,2] of size 43046721.
+2021-01-21 19:17:41,766 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: preprocessing quotient MDP
+2021-01-21 19:17:41,820 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1136.
+2021-01-21 19:17:41,820 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 1.
+2021-01-21 19:17:41,820 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [0],X31: [0],X41: [0],X12: [0],X22: [0],X32: [0],X42: [0],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [0].
+2021-01-21 19:17:41,822 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,825 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X31', 'X22', 'X32', 'X23'] (generalized 12 holes).
+2021-01-21 19:17:41,835 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1547.
+2021-01-21 19:17:41,835 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 2.
+2021-01-21 19:17:41,835 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [0],X31: [1],X41: [0],X12: [0],X22: [0],X32: [0],X42: [0],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,837 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,841 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X22', 'X32', 'X23'] (generalized 11 holes).
+2021-01-21 19:17:41,851 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1742.
+2021-01-21 19:17:41,851 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 3.
+2021-01-21 19:17:41,851 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [0],X12: [0],X22: [0],X32: [0],X42: [0],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,853 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,859 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X41', 'X22', 'X32', 'X23'] (generalized 10 holes).
+2021-01-21 19:17:41,868 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1664.
+2021-01-21 19:17:41,868 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 4.
+2021-01-21 19:17:41,868 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [0],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,870 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,876 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X41', 'X22', 'X32', 'X42', 'X23', 'X33'] (generalized 8 holes).
+2021-01-21 19:17:41,885 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1739.
+2021-01-21 19:17:41,885 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 5.
+2021-01-21 19:17:41,885 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [1],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,887 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,897 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 5 holes).
+2021-01-21 19:17:41,904 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1805.
+2021-01-21 19:17:41,904 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 6.
+2021-01-21 19:17:41,905 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [2],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,907 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,913 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X41', 'X22', 'X32', 'X42', 'X23'] (generalized 9 holes).
+2021-01-21 19:17:41,922 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1907.
+2021-01-21 19:17:41,922 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 7.
+2021-01-21 19:17:41,922 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [0],X13: [0],X23: [0],X33: [1],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,924 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,935 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 5 holes).
+2021-01-21 19:17:41,943 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1853.
+2021-01-21 19:17:41,943 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 8.
+2021-01-21 19:17:41,943 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [0],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,945 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,953 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X41', 'X22', 'X32', 'X42', 'X23', 'X33'] (generalized 8 holes).
+2021-01-21 19:17:41,961 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1934.
+2021-01-21 19:17:41,962 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 9.
+2021-01-21 19:17:41,962 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [1],X13: [0],X23: [0],X33: [1],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,964 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,974 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 5 holes).
+2021-01-21 19:17:41,982 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1928.
+2021-01-21 19:17:41,982 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 10.
+2021-01-21 19:17:41,983 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [1],X12: [0],X22: [0],X32: [0],X42: [1],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:41,985 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:41,995 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 5 holes).
+2021-01-21 19:17:42,002 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1976.
+2021-01-21 19:17:42,003 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 11.
+2021-01-21 19:17:42,003 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [0],X42: [2],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,005 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,012 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X41', 'X22', 'X32', 'X23'] (generalized 10 holes).
+2021-01-21 19:17:42,021 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1961.
+2021-01-21 19:17:42,021 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 12.
+2021-01-21 19:17:42,021 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [1],X42: [2],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,023 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,029 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X22', 'X32', 'X42', 'X23'] (generalized 10 holes).
+2021-01-21 19:17:42,039 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1919.
+2021-01-21 19:17:42,039 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 13.
+2021-01-21 19:17:42,039 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [2],X42: [2],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,041 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,047 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X22', 'X32', 'X42', 'X23'] (generalized 10 holes).
+2021-01-21 19:17:42,056 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 2015.
+2021-01-21 19:17:42,057 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 14.
+2021-01-21 19:17:42,057 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [2],X42: [1],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,059 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,070 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 5 holes).
+2021-01-21 19:17:42,077 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 2171.
+2021-01-21 19:17:42,078 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 15.
+2021-01-21 19:17:42,078 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [0],X12: [0],X22: [0],X32: [2],X42: [1],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,080 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,092 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 5 holes).
+2021-01-21 19:17:42,100 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1943.
+2021-01-21 19:17:42,100 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 16.
+2021-01-21 19:17:42,100 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [1],X42: [1],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,102 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,112 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 6 holes).
+2021-01-21 19:17:42,120 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 2087.
+2021-01-21 19:17:42,120 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 17.
+2021-01-21 19:17:42,120 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [1],X42: [0],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,122 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,133 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 6 holes).
+2021-01-21 19:17:42,141 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1943.
+2021-01-21 19:17:42,141 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 18.
+2021-01-21 19:17:42,141 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [2],X42: [0],X13: [0],X23: [0],X33: [2],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,143 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,149 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X22', 'X32', 'X42', 'X23'] (generalized 10 holes).
+2021-01-21 19:17:42,158 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 2018.
+2021-01-21 19:17:42,158 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 19.
+2021-01-21 19:17:42,159 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [1],X42: [0],X13: [0],X23: [0],X33: [1],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,161 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,171 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X11', 'X21', 'X31', 'X12', 'X22', 'X32', 'X42', 'X23', 'X33', 'X24'] (generalized 6 holes).
+2021-01-21 19:17:42,179 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Constructed DTMC of size 1868.
+2021-01-21 19:17:42,179 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: iteration 20.
+2021-01-21 19:17:42,179 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: picked family member: HoleOptions X11: [0],X21: [1],X31: [1],X41: [2],X12: [0],X22: [0],X32: [1],X42: [0],X13: [0],X23: [0],X33: [0],X43: [0],X14: [0],X24: [0],X34: [0],X44: [1].
+2021-01-21 19:17:42,181 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - Formula 0 is UNSAT
+2021-01-21 19:17:42,188 MainThread - dynasty.family_checkers.integrated_checker - DEBUG - CEGIS: found conflict involving ['X21', 'X31', 'X22', 'X32', 'X42', 'X23', 'X33'] (generalized 9 holes).
+TO

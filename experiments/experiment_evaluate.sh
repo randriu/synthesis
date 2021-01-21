@@ -2,7 +2,7 @@
 
 # experiment counters
 export experiment_current=0
-export experiment_total=63
+export experiment_total=73
 
 # setting this value to >1 will enable concurrent evaluation of experiments
 export threads=$(nproc)
@@ -68,7 +68,8 @@ cd ../dynasty
 ## experiments with small models (Table 2)
 
 # evaluate cegis/cegar/hybrid on a basic benchmark
-for method in cegis cegar hybrid; do
+# for method in cegis cegar hybrid; do
+for method in onebyone cegis cegar hybrid; do
     echo "-- evaluating basic benchmark (${method})"
     for benchmark in grid maze dpm pole herman; do
         for property in easy hard; do

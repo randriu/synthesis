@@ -1,0 +1,22 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+EnumerationChecker
+2021-01-21 19:17:32,340 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/dpm/sketch.templ with constants 
+2021-01-21 19:17:32,346 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-21 19:17:32,347 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:32,348 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:32,348 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-21 19:17:32,348 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['X11', 'X21', 'X31', 'X41', 'X12', 'X22', 'X32', 'X42', 'X13', 'X23', 'X33', 'X43', 'X14', 'X24', 'X34', 'X44']
+2021-01-21 19:17:32,348 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:32,350 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions X11: [0,1,2],X21: [0,1,2],X31: [0,1,2],X41: [0,1,2],X12: [0,1,2],X22: [0,1,2],X32: [0,1,2],X42: [0,1,2],X13: [0,1,2],X23: [0,1,2],X33: [0,1,2],X43: [0,1,2],X14: [0,1,2],X24: [0,1,2],X34: [0,1,2],X44: [0,1,2]
+2021-01-21 19:17:32,350 MainThread - dynasty.family_checkers.familychecker - INFO - Design space (without constraints): 43046721
+2021-01-21 19:17:32,828 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 10 / 43046721
+2021-01-21 19:17:32,887 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 43046721.0 iterations in 2311227.8336883313 sec (opt: None).
+2021-01-21 19:17:33,458 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 20 / 43046721
+2021-01-21 19:17:33,511 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 43046721.0 iterations in 2497572.721807486 sec (opt: None).
+2021-01-21 19:17:33,989 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 30 / 43046721
+2021-01-21 19:17:34,039 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 43046721.0 iterations in 2423202.4738585474 sec (opt: None).
+TO

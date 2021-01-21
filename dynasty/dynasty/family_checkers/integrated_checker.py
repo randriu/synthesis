@@ -229,8 +229,8 @@ class EnumerationChecker(LiftingChecker):
                 time_estimate = estimation_timer.read() / percentage_rejected
                 logger.info(
                     f">> Performance estimation (unfeasible): "
-                    f"{iters_estimate} ({self.iterations}) iterations in {time_estimate} sec. "
-                    f"(OPT: {self._optimal_value})"
+                    f"{iters_estimate} iterations in {time_estimate} sec "
+                    f"(opt: {self._optimal_value})."
                 )
         return self.iterations
 

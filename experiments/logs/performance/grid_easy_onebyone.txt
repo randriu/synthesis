@@ -1,0 +1,26 @@
+This is Dynasty version 0.1.0.
+
+
+
+
+EnumerationChecker
+2021-01-21 19:17:32,308 MainThread - dynasty.family_checkers.familychecker - INFO - Load sketch from ../tacas21-benchmark/grid/sketch.templ with constants 
+2021-01-21 19:17:32,313 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load properties from file.
+2021-01-21 19:17:32,313 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:32,314 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:32,314 MainThread - dynasty.family_checkers.familychecker - DEBUG - Search for holes in sketch...
+2021-01-21 19:17:32,314 MainThread - dynasty.family_checkers.familychecker - DEBUG - Holes found: ['M_0_1', 'M_1_1', 'M_2_1', 'M_3_1', 'P_0_1', 'P_1_1', 'P_2_1', 'P_3_1']
+2021-01-21 19:17:32,314 MainThread - dynasty.family_checkers.familychecker - DEBUG - Load constants ''
+2021-01-21 19:17:32,315 MainThread - dynasty.family_checkers.familychecker - DEBUG - Template variables: HoleOptions M_0_1: [0,1,2,3],M_1_1: [0,1,2,3],M_2_1: [0,1,2,3],M_3_1: [0,1,2,3],P_0_1: [1,2,3,4],P_1_1: [1,2,3,4],P_2_1: [1,2,3,4],P_3_1: [1,2,3,4]
+2021-01-21 19:17:32,315 MainThread - dynasty.family_checkers.familychecker - INFO - Design space (without constraints): 65536
+2021-01-21 19:17:32,616 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 10 / 65536
+2021-01-21 19:17:32,650 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 65536.0 iterations in 2192.7426719744 sec (opt: None).
+2021-01-21 19:17:32,947 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 20 / 65536
+2021-01-21 19:17:32,980 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 65536.0 iterations in 2176.3373858816 sec (opt: None).
+2021-01-21 19:17:33,275 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 30 / 65536
+2021-01-21 19:17:33,308 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 65536.0 iterations in 2167.7449674751997 sec (opt: None).
+2021-01-21 19:17:33,604 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 40 / 65536
+2021-01-21 19:17:33,637 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 65536.0 iterations in 2164.4847874048 sec (opt: None).
+2021-01-21 19:17:33,934 MainThread - dynasty.family_checkers.integrated_checker - INFO - Iteration: 50 / 65536
+2021-01-21 19:17:33,967 MainThread - dynasty.family_checkers.integrated_checker - INFO - >> Performance estimation (unfeasible): 65536.0 iterations in 2164.6956848742398 sec (opt: None).
+TO

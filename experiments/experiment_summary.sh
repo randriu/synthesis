@@ -11,7 +11,7 @@ function print_benchmark_info() {
     mdp_size="$(python3 parse_log.py ${logfile} mdp_size)"
     dtmc_size="$(python3 parse_log.py ${logfile} dtmc_size)"
     
-    printf "    %-20s%-20s%-20s%-20s%-20s\n" "${benchmark}" ${number_of_holes} ${family_size} ${mdp_size} ${dtmc_size}
+    printf "    %-18s%-18s%-18s%-18s%-18s\n" "${benchmark}" ${number_of_holes} ${family_size} ${mdp_size} ${dtmc_size}
 }
 
 function print_ce_stats() {
@@ -28,18 +28,19 @@ function print_ce_stats() {
     ce_quality_nontrivial="$(python3 parse_log.py ${logfile} ce_quality_nontrivial)"
     ce_time_nontrivial="$(python3 parse_log.py ${logfile} ce_time_nontrivial)"
 
-    printf "    %-16s%-20s%-20s%-20s\n" "${benchmark} (${property})" "${ce_quality_maxsat} (${ce_time_maxsat})" "${ce_quality_trivial} (${ce_time_trivial})" ${ce_quality_nontrivial}
+    printf "    %-16s%-18s%-18s%-18s\n" "${benchmark} (${property})" "${ce_quality_maxsat} (${ce_time_maxsat})" "${ce_quality_trivial} (${ce_time_trivial})" ${ce_quality_nontrivial}
 }
 
 
 function print_performance_stats() {
     benchmark=$1
     printf "    %-16s" "${benchmark} (${property})"
-    for method in cegis cegar hybrid; do
+    # for method in cegis cegar hybrid; do
+    for method in onebyone cegis cegar hybrid; do
         logfile=logs/performance/${benchmark}_${property}_${method}.txt
         iters="$(python3 parse_log.py ${logfile} iters)"
         time="$(python3 parse_log.py ${logfile} time)"
-        printf "%-20s%-20s" ${iters} ${time}
+        printf "%-16s%-16s" ${iters} ${time}
     done
     printf "\n"
 }
@@ -52,7 +53,7 @@ function print_herman2_stats() {
             logfile=logs/herman2/herman2_${variant}_${problem}_${method}.txt
             iters="$(python3 parse_log.py ${logfile} iters)"
             time="$(python3 parse_log.py ${logfile} time)"
-            printf "%-20s%-20s" ${iters} ${time}    
+            printf "%-18s%-18s" ${iters} ${time}    
         done
         printf "\n"
     done
@@ -64,7 +65,7 @@ small_models=( grid maze dpm pole herman )
 
 # Table 1
 printf "\nTable 1 (benchmark info)\n\n"
-printf "%-24s%-20s%-20s%-20s%-20s\n" benchmark parameters "family size" "MDP size" "DTMC size"
+printf "%-22s%-16s%-16s%-16s%-16s\n" benchmark parameters "family size" "MDP size" "DTMC size"
 for benchmark in "${small_models[@]}"; do
     print_benchmark_info ${benchmark} logs/performance/${benchmark}_easy_hybrid.txt
 done
@@ -73,7 +74,7 @@ printf "\n"
 
 # Table 2 (counterexamples)
 printf "Table 2 (counterexamples)\n\n"
-printf "%-20s%-20s%-20s%-20s\n" benchmark maxsat trivial family
+printf "%-20s%-18s%-18s%-18s\n" benchmark maxsat trivial family
 for benchmark in "${small_models[@]}"; do
     for property in easy hard; do
         print_ce_stats ${benchmark} ${property}
@@ -83,7 +84,8 @@ printf "\n"
 
 # Table 2 (performance)
 printf "Table 2 (performance)\n\n"
-printf "%-20s%-20s%-20s%-20s%-20s%-20s%-20s%-20s\n" benchmark cegis_iters cegis_time cegar_iters cegar_time hybrid_iters hybrid_time
+# printf "%-18s%-18s%-18s%-18s%-18s%-18s%-18s%-18s\n" benchmark cegis_iters cegis_time cegar_iters cegar_time hybrid_iters hybrid_time
+printf "%-20s%-16s%-16s%-16s%-16s%-16s%-16s%-16s%-16s%-16s\n" benchmark onebyone_iters onebyone_time cegis_iters cegis_time cegar_iters cegar_time hybrid_iters hybrid_time
 for benchmark in "${small_models[@]}"; do
     for property in easy hard; do
         print_performance_stats ${benchmark} ${property}
@@ -94,12 +96,12 @@ printf "\n"
 # Table 3 (herman-2)
 
 printf "Table 3 (herman-2, smaller)\n\n"
-printf "%-20s%-20s%-20s%-20s%-20s\n" problem cegar_iters cegar_time hybrid_iters hybrid_time
+printf "%-20s%-18s%-18s%-18s%-18s\n" problem cegar_iters cegar_time hybrid_iters hybrid_time
 print_herman2_stats smaller feasibility multiple 0
 printf "\n"
 
 printf "Table 3 (herman-2, larger)\n\n"
-printf "%-20s%-20s%-20s%-20s%-20s\n" problem cegar_iters cegar_time hybrid_iters hybrid_time
+printf "%-20s%-18s%-18s%-18s%-18s\n" problem cegar_iters cegar_time hybrid_iters hybrid_time
 print_herman2_stats larger feasibility 0 5
 printf "\n"
 
