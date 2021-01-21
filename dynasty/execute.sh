@@ -138,22 +138,26 @@ function try_herman() {
 function run() {
     reset_log
 
-    timeout=1h
+    timeout=2d
     # parallel=true
-    verbose=true
-    # optimal=true
+    # verbose=true
+    optimal=true
     
-    model=("msp/dice-4" 0 2 2 0.1)
+    # model=("msp/dice-3" 0 2 2 0.1)
+    # model=("msp/dice-4" 0 2 2 0.1)
 
-    # model=("msp/dpm-main" 10 5700 5700 100.0)
+    # model=("msp/dpm-main" 10 3000 3000 500.0)
+    model=("msp/dpm-test" 10 3000 3000 500.0)
+    # model=("msp/dpm-tacas" 12 1.0 1.0 0.1)
+
     # model=("grid/big" 1 0.004 0.004 0.003)
     
     choose_model "${model[@]}"
 
-    # hybrid
+    hybrid
     # cegar
     # cegis
-    onebyone
+    # onebyone
 }
 
 # --- execution ----------------------------------------------------------------

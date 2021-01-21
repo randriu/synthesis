@@ -54,7 +54,8 @@ endmodule
 module SP
     sp : [0..4] init 0;
     // 0 - sleep, 1 - idle, 2 - active
-    // waiting states: 3 - sleep to idle, 4 - idle to active
+    // 3 - sleep to idle
+    // 4 - idle to active
 
     // immediate transitions - change to lower-energy (or same) state
     [tick1] sp <= 2 & pm <= sp -> (sp'=pm);
@@ -63,8 +64,8 @@ module SP
     [tick1] sp <= 2 & pm > sp -> (sp'=sp+3);
 
     // waiting states
-    [tick1] sp = 3 -> 0.8 : (sp'=sp-2) + 0.2 : true;
-    [tick1] sp = 4 -> 0.6 : (sp'=sp-2) + 0.4 : true;
+    [tick1] sp = 3 -> 0.5 : (sp'=sp-2) + 0.5 : true;
+    [tick1] sp = 4 -> 0.8 : (sp'=sp-2) + 0.2 : true;
 
 endmodule
 
@@ -73,8 +74,8 @@ endmodule
 
 module SR
     sr : [0..1] init 0; // 0 - idle, 1 - active
-    [tick1] sr=0 -> 0.5: true + 0.5: (sr' = 1);
-    [tick1] sr=1 -> 0.8: true + 0.2: (sr' = 0);
+    [tick1] sr=0 -> 0.4: true + 0.6: (sr' = 1);
+    [tick1] sr=1 -> 0.4: true + 0.6: (sr' = 0);
 endmodule
 
 
@@ -84,14 +85,28 @@ module SRQ
     q : [0..10000] init q_init;
     lost : [0..1] init 0;
 
+    // [tick0] sr=1 -> (q'=min(q+1,QMAX)); // request
+    // [tick1] sp=2 -> (q'=max(q-1,0)); // serve
+    // [tick1] sp!=2 -> true;
+
     [tick0] sr=1 & q < QMAX -> (q'=q+1); // request
     [tick0] sr=1 & q = QMAX -> (lost'=1); // request lost
     [tick0] sr!=1 -> true;
-
     [tick1] sp=2 -> (lost'=0) & (q'=max(q-1,0)); // serve
     [tick1] sp!=2 -> (lost'=0);
 
 endmodule
+
+
+// lost request flag
+
+// module LRF
+//     lost : [0..1] init 0;
+//     [tick0] sr=1 & q = QMAX -> (lost'=1); // request lost
+//     [tick0] sr!=1 | q != QMAX -> true;
+//     [tick1] true -> (lost'=0);
+// endmodule
+
 
 // battery
 
@@ -130,7 +145,7 @@ rewards "lost"
 endrewards
 
 rewards "power"
-    [tick1] sp=2 : 100 + 10*q; // active
-    [tick1] sp=3 : 10; // idle to active
-    [tick1] sp=4 : 5; // sleep to idle
+    [tick1] sp=2 : 100.0 + 10*q; // active
+    [tick1] sp=3 : 5.0; // idle to active
+    [tick1] sp=4 : 2.0; // sleep to idle
 endrewards

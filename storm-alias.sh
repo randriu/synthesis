@@ -355,11 +355,9 @@ dgrep() {
 diter() {
     dlog $1 | grep "iteration " | tail -n 1
 }
-
 diteri() {
     dlog $1 | grep "CEGIS: iteration " | tail -n 1
 }
-
 ditera() {
     dlog $1 | grep "CEGAR: iteration " | tail -n 1
 }
@@ -378,12 +376,14 @@ dopt() {
 dbounds() {
     dlog $1 | grep "Result for initial"
 }
-
+dces() {
+    dlog $1 | grep "generalized"
+}
 dperf() {
      dlog $1 | grep "Performance" | tail -n 1
 }
 
-dhole() {
+dholes() {
     dlog $1 | grep "hole assignment:" | awk '{print $3}'
 }
 
@@ -396,8 +396,9 @@ storm() {
     cd -
 }
 
-export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm
+export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm-test
 export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
+export MSP=$DYNASTY_DIR/workspace/examples/msp/exam-1
 
 dice() {
     storm "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
