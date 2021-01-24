@@ -1,0 +1,89 @@
+// herman's self stabilising algorithm [Her90]
+// gxn/dxp 13/07/02
+
+// the procotol is synchronous with no nondeterminism (a DTMC)
+dtmc
+
+const int STATIONS = 5;
+const int MAXMEM = 1;
+
+const double P_START=0;
+const double P_STEP=0.01;
+
+const int M0LFAIR=25;
+const int M0HFAIR=25;
+const int M1LFAIR=25;
+const int M1HFAIR=25;
+const int MxxA=1;
+const int MxxB=1;
+const int MxxC=0;
+
+module initialise
+    start : [0..1] init 0;
+    [go] start = 0 -> (start'=1);
+    [step1] start = 1 -> true;
+endmodule
+
+module controller
+    round : [0..STATIONS] init 1;
+
+    [sync] round = 0 -> (round'=1);
+    [step1] round = 1 -> (round'=2);
+    [step2] round = 2 -> (round'=3);
+    [step3] round = 3 -> (round'=4);
+    [step4] round = 4 -> (round'=5);
+    [step5] round = STATIONS -> (round'=0);
+
+endmodule
+
+// full step counter
+rewards "steps"
+    round = 0 : 1;
+endrewards
+
+// label - stable configurations (1 token)
+label "stable" = round =1 & num_tokens=1;
+
+formula num_tokens = (x1=x2?1:0)+(x2=x3?1:0)+(x3=x4?1:0)+(x4=x5?1:0)+(x5=x6?1:0)+(x6=x7?1:0)+(x7=x8?1:0)+(x8=x9?1:0)+(x9=x10?1:0)+(x10=x11?1:0)+(x11=x1?1:0);
+
+const double p0 = 0.25;
+const double p1 = 0.30;
+const double p2 = 0.35;
+const double p3 = 0.40;
+const double p4 = 0.50;
+
+module process1
+
+	 x1 : [0..1] init 0;
+	 y1 : [0..1] init 0;
+	 m1 : [0..1] init 0;
+
+	[go] true -> 1: (x1'=1);
+
+	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=25 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+
+	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=25 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+
+	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=25 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+
+	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=25 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+
+	[step1] !(x1=x11) & m1 = 0 & x1 = 0 -> (y1'=x11) & (m1'=MxxC);
+	[step1] !(x1=x11) & m1 = 0 & x1 = 1 -> (y1'=x11) & (m1'=MxxC);
+	[step1] !(x1=x11) & m1 = 1 & x1 = 0 -> (y1'=x11) & (m1'=MxxC);
+	[step1] !(x1=x11) & m1 = 1 & x1 = 1 -> (y1'=x11) & (m1'=MxxC);
+
+	[sync] true -> (x1' = y1) & (y1' = 0);
+
+endmodule
+
+module process2 = process1 [ x1=x2, y1=y2, x11=x1, m1=m2, step1=step2 ] endmodule
+module process3 = process1 [ x1=x3, y1=y3, x11=x2, m1=m3, step1=step3 ] endmodule
+module process4 = process1 [ x1=x4, y1=y4, x11=x3, m1=m4, step1=step4 ] endmodule
+module process5 = process1 [ x1=x5, y1=y5, x11=x4, m1=m5, step1=step5 ] endmodule
+module process6 = process1 [ x1=x6, y1=y6, x11=x5, m1=m6, step1=step6 ] endmodule
+module process7 = process1 [ x1=x7, y1=y7, x11=x6, m1=m7, step1=step7 ] endmodule
+module process8 = process1 [ x1=x8, y1=y8, x11=x7, m1=m8, step1=step8 ] endmodule
+module process9 = process1 [ x1=x9, y1=y9, x11=x8, m1=m9, step1=step9 ] endmodule
+module process10 = process1 [ x1=x10, y1=y10, x11=x9, m1=m10, step1=step10 ] endmodule
+module process11 = process1 [ x1=x11, y1=y11, x11=x10, m1=m11, step1=step11 ] endmodule
