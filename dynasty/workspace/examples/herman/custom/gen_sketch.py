@@ -2,6 +2,17 @@ import os
 import sys
 
 
+def construct_controller(p):
+    stations = f"\nconst int STATIONS = {p};\n"
+    head = "\nmodule controller\n"
+    round_var = "\tround : [0..STATIONS] init 1;\n\n"
+    sync = "\t[sync] round = 0 -> (round'=1);\n"
+    steps = [f"\t[step{i}] round = {i} -> (round'={i+1});" for i in range(1, p)]
+    step_p = f"\t[step{p}] round = STATIONS -> (round'=0);\n"
+    tail = "\nendmodule\n\n"
+    return stations + head + round_var + sync + "\n".join(steps) + "\n" + step_p + tail
+
+
 def construct_allowed(n):
     m0l = "M0LFAIR;" + ";".join(map(str, range(0, n))) + "\n"
     m0h = "M0HFAIR;" + ";".join(map(str, range(0, n))) + "\n"
@@ -47,7 +58,7 @@ def generate(n, p):
         os.remove("workspace/examples/herman/custom/sketch.templ")
     with open("workspace/examples/herman/custom/sketch.templ", "w") as sketch_templ:
         sketch_templ.write(
-            default_template + num_tokens + "\n" + "\n".join(probs_const) + "\n" +
+            default_template + construct_controller(p) + num_tokens + "\n" + "\n".join(probs_const) + "\n" +
             construct_process(n, p) + "\n" + "\n".join(processes)
         )
 

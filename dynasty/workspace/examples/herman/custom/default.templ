@@ -4,7 +4,6 @@
 // the procotol is synchronous with no nondeterminism (a DTMC)
 dtmc
 
-const int STATIONS = 5;
 const int MAXMEM = 1;
 
 const double P_START=0;
@@ -22,18 +21,6 @@ module initialise
     start : [0..1] init 0;
     [go] start = 0 -> (start'=1);
     [step1] start = 1 -> true;
-endmodule
-
-module controller
-    round : [0..STATIONS] init 1;
-
-    [sync] round = 0 -> (round'=1);
-    [step1] round = 1 -> (round'=2);
-    [step2] round = 2 -> (round'=3);
-    [step3] round = 3 -> (round'=4);
-    [step4] round = 4 -> (round'=5);
-    [step5] round = STATIONS -> (round'=0);
-
 endmodule
 
 // full step counter
