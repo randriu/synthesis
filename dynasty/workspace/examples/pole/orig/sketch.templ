@@ -8,7 +8,7 @@ module initialiseN
     NS : [0..100] init 0;
     NW : [0..100] init 0;
     NE : [0..100] init 0;
-    [start] true -> 0.8: (NN'=90) & (NS'=2) & (NW'=6) & (NE'=2) + 0.2: (NN'=70) & (NS'=4) & (NW'=16) & (NE'=10) + 0.0: (NN'=90) & (NS'=2) & (NW'=4) & (NE'=4);
+    [start] true -> 0.8: (NN'=90) & (NS'=2) & (NW'=6) & (NE'=2) + 0.2: (NN'=70) & (NS'=4) & (NW'=16) & (NE'=10);
 endmodule
 
 module initialiseS
@@ -16,7 +16,7 @@ module initialiseS
     SS : [0..100] init 0;
     SW : [0..100] init 0;
     SE : [0..100] init 0;
-    [start] true -> 0.8: (SN'=80) & (SS'=10) & (SW'=6) & (SE'=4) + 0.2: (SN'=60) & (SS'=10) & (SW'=16) & (SE'=14) + 0.0: (SN'=90) & (SS'=2) & (SW'=4) & (SE'=4);
+    [start] true -> 0.8: (SS'=80) & (SN'=10) & (SW'=6) & (SE'=4) + 0.2: (SS'=60) & (SN'=10) & (SW'=16) & (SE'=14);
 endmodule
 
 module initialiseW
@@ -24,7 +24,7 @@ module initialiseW
     WS : [0..100] init 0;
     WW : [0..100] init 0;
     WE : [0..100] init 0;
-    [start] true -> 0.0: (WN'=80) & (WS'=10) & (WW'=6) & (WE'=4) + 0.1: (WN'=80) & (WS'=7) & (WW'=7) & (WE'=6) + 0.9: (WN'=90) & (WS'=2) & (WW'=4) & (WE'=4);
+    [start] true -> 0.9: (WW'=90) & (WS'=2) & (WN'=4) & (WE'=4) + 0.1: (WW'=80) & (WS'=7) & (WN'=7) & (WE'=6);
 endmodule
 
 module initialiseE
@@ -32,7 +32,7 @@ module initialiseE
     ES : [0..100] init 0;
     EW : [0..100] init 0;
     EE : [0..100] init 0;
-    [start] true -> 0.2: (EN'=80) & (ES'=10) & (EW'=6) & (EE'=4) + 0.05: (EN'=60) & (ES'=10) & (EW'=16) & (EE'=14) + 0.75: (EN'=90) & (ES'=2) & (EW'=4) & (EE'=4);
+    [start] true -> 0.2: (EE'=80) & (ES'=10) & (EW'=6) & (EN'=4) + 0.05: (EE'=60) & (ES'=10) & (EW'=16) & (EN'=14) + 0.75: (EE'=90) & (ES'=2) & (EW'=4) & (EN'=4);
 endmodule
 
 module initialiseA
@@ -42,8 +42,7 @@ module initialiseA
     ANE : [0..100] init 0;
     ASE : [0..100] init 0;
     [start] true -> 0.8: (ANOT'=20) & (ANW'=20) & (ASW'=20) & (ANE'=20) & (ASE'=20)
-         + 0.2: (ANOT'=25) & (ANW'=25) & (ASW'=25) & (ANE'=0) & (ASE'=25)
-         + 0.0: (ANOT'=25) & (ANW'=25) & (ASW'=25) & (ANE'=25) & (ASE'=0);
+         + 0.2: (ANOT'=25) & (ANW'=25) & (ASW'=25) & (ANE'=0) & (ASE'=25);
 endmodule
 
 
@@ -101,7 +100,6 @@ module strategy
     act : [0..4] init 0;
 
     [lost]  dead -> true;
-
 
     [steer] act=0 & x = 1 & y = 1 -> (act' = M11);
     [steer] act=0 & x = 1 & y = 2 -> (act' = M12);
