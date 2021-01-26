@@ -137,7 +137,8 @@ function run() {
     # model=("cav/dpm-test" 10 3000 3000 500.0)
     
     # model=("cav/maze/orig" 0 1 1 1.0)
-    model=("cav/maze/new" 0 1 1 1.0)
+    # model=("cav/maze/2bit-partial" 0 1 1 1.0)
+    model=("cav/maze/2bit-full" 0 1 1 1.0)
 
     # model=("grid/big" 0 0.004 0.010 0.001)
     

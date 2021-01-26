@@ -1,0 +1,137 @@
+dtmc
+
+const int CMAX;
+const double THRESHOLD;
+
+const int M_0_1; const int M_0_2; const int M_0_3; const int M_0_4; const int M_0_5; const int M_0_6;
+const int M_1_1; const int M_1_2; const int M_1_3; const int M_1_4; const int M_1_5; const int M_1_6;
+const int M_2_1; const int M_2_2; const int M_2_3; const int M_2_4; const int M_2_5; const int M_2_6;
+const int P_0_1; const int P_0_2; const int P_0_3; const int P_0_4; const int P_0_5; const int P_0_6;
+const int P_1_1; const int P_1_2; const int P_1_3; const int P_1_4; const int P_1_5; const int P_1_6;
+const int P_2_1; const int P_2_2; const int P_2_3; const int P_2_4; const int P_2_5; const int P_2_6;
+
+// maze structure (values of variable "s")
+//  0  1  2  3  4
+//  5     6     7
+//  8     9    10
+// 11     12   13
+
+// wall detector
+formula wn = s>=0 & s<=4;
+formula we = s=4 | (s>=5 & s<=13);
+formula ws = s=1 | s=3 | (s>=11 & s<=13);
+formula ww = s=0 | (s>=5 & s<=13);
+
+// wall combinations
+// o=1 - north and west walls (0)
+// o=2 - north and south walls (1 and 3)
+// o=3 - north wall (2)
+// o=4 - north and east walls (4)
+// o=5 - east and west walls (5 to 10)
+// o=6 - south, east and west walls (11 to 13)
+formula o1 = wn & !we & !ws & ww;
+formula o2 = wn & !we & ws & !ww;
+formula o3 = wn & !we & !ws & !ww;
+formula o4 = wn & we & !ws & !ww;
+formula o5 = !wn & we & !ws & ww;
+formula o6 = !wn & we & ws & ww;
+
+// 12 is the target
+formula goal = s=12;
+
+// modules
+
+module clock
+    clk : [0..2] init 0; // 0 - route, 1 - steer, 2 - drive
+    [route] clk=0 -> (clk'=1);
+    [steer] clk=1 -> (clk'=2);
+    // drive
+    [north] clk=2 & v = 1 -> (clk'=0);
+    [east]  clk=2 & v = 2 -> (clk'=0);
+    [south] clk=2 & v = 3 -> (clk'=0);
+    [west]  clk=2 & v = 4 -> (clk'=0);
+endmodule
+
+module router
+    dir : [1..4];
+    mem : [0..1] init 0;
+
+    [route] mem = 0 & o1 -> (mem'=M_0_1) & (dir'=P_0_1);
+    [route] mem = 0 & o2 -> (mem'=M_0_2) & (dir'=P_0_2);
+    [route] mem = 0 & o3 -> (mem'=M_0_3) & (dir'=P_0_3);
+    [route] mem = 0 & o4 -> (mem'=M_0_4) & (dir'=P_0_4);
+    [route] mem = 0 & o5 -> (mem'=M_0_5) & (dir'=P_0_5);
+    [route] mem = 0 & o6 -> (mem'=M_0_6) & (dir'=P_0_6);
+    [route] mem = 1 & o1 -> (mem'=M_1_1) & (dir'=P_1_1);
+    [route] mem = 1 & o2 -> (mem'=M_1_2) & (dir'=P_1_2);
+    [route] mem = 1 & o3 -> (mem'=M_1_3) & (dir'=P_1_3);
+    [route] mem = 1 & o4 -> (mem'=M_1_4) & (dir'=P_1_4);
+    [route] mem = 1 & o5 -> (mem'=M_1_5) & (dir'=P_1_5);
+    [route] mem = 1 & o6 -> (mem'=M_1_6) & (dir'=P_1_6);
+    [route] mem = 2 & o1 -> (mem'=M_2_1) & (dir'=P_2_1);
+    [route] mem = 2 & o2 -> (mem'=M_2_2) & (dir'=P_2_2);
+    [route] mem = 2 & o3 -> (mem'=M_2_3) & (dir'=P_2_3);
+    [route] mem = 2 & o4 -> (mem'=M_2_4) & (dir'=P_2_4);
+    [route] mem = 2 & o5 -> (mem'=M_2_5) & (dir'=P_2_5);
+    [route] mem = 2 & o6 -> (mem'=M_2_6) & (dir'=P_2_6);
+endmodule
+
+module actuator
+    v : [1..4];
+    [steer] dir=1 -> 0.8: (v'=1) + 0.08: (v'=2) + 0.08: (v'=4) + 0.04: (v'=3);
+    [steer] dir=2 -> 0.8: (v'=2) + 0.08: (v'=3) + 0.08: (v'=1) + 0.04: (v'=4);
+    [steer] dir=3 -> 0.8: (v'=3) + 0.08: (v'=4) + 0.08: (v'=2) + 0.04: (v'=1);
+    [steer] dir=4 -> 0.8: (v'=4) + 0.08: (v'=1) + 0.08: (v'=3) + 0.04: (v'=2);
+endmodule
+
+module maze
+
+	s : [-1..13] init -1;
+	
+	// initialisation
+	[] s=-1 -> 1/13 : (s'=0)
+			 + 1/13 : (s'=1)
+			 + 1/13 : (s'=2)
+			 + 1/13 : (s'=3)
+			 + 1/13 : (s'=4)
+			 + 1/13 : (s'=5)
+			 + 1/13 : (s'=6)
+			 + 1/13 : (s'=7)
+			 + 1/13 : (s'=8)
+			 + 1/13 : (s'=9)
+			 + 1/13 : (s'=10)
+			 + 1/13 : (s'=11)
+			 + 1/13 : (s'=13);
+
+	// moving around the maze
+	[north] wn -> true;
+    [north] s=5 -> (s'=0);
+    [north] s=6 -> (s'=2);
+    [north] s=7 -> (s'=4);
+    [north] (s>=8 & s<= 13) -> (s'=s-3);
+    
+    [east] we -> true;
+    [east] !we -> (s'=s+1);
+
+    [south] ws -> true;
+    [south] s=0 -> (s'=5);
+    [south] s=2 -> (s'=6);
+    [south] s=4 -> (s'=7);
+    [south] s>=5 & s<=10 -> (s'=s+3);
+
+    [west] ww -> true;
+    [west] !ww -> (s'=s-1);
+
+endmodule
+
+// rewards
+
+rewards "steps"
+	[north] true : 1;
+    [east] true : 1;
+    [south] true : 1;
+    [west] true : 1;
+endrewards
+
+// label "goal" = s=12;
+// label "traps" = s=11 | s=13;
