@@ -407,9 +407,9 @@ storm() {
     cd -
 }
 
-export DPM=$DYNASTY_DIR/workspace/examples/msp/dpm-test
-export DICE=$DYNASTY_DIR/workspace/examples/msp/dice
-export MSP=$DYNASTY_DIR/workspace/examples/msp/exam-1
+export DPM=$DYNASTY_DIR/workspace/examples/cav/dpm-main
+export DICE=$DYNASTY_DIR/workspace/examples/cav/dice
+export MSP=$DYNASTY_DIR/workspace/examples/cav/exam-1
 
 dice() {
     storm "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"

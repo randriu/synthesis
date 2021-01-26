@@ -125,18 +125,18 @@ function tacas() {
 }
 
 function run() {
-    timeout=2d
+    # timeout=2d
     parallel=true
     # verbose=true
-    # optimal=true
+    optimal=true
     
     # model=("cav/dice/3" 0 2 2 0.1)
     # model=("cav/dice/4" 0 2 2 0.1)
 
-    # model=("cav/dpm-main" 10 3000 3000 500.0)
+    model=("cav/dpm-main" 10 3000 3000 500.0)
     # model=("cav/dpm-test" 10 3000 3000 500.0)
 
-    model=("grid/big" 40 0.004 0.010 0.001)
+    # model=("grid/big" 40 0.004 0.010 0.001)
     
     choose_model "${model[@]}"
 
