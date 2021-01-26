@@ -337,10 +337,10 @@ dlog() {
 }
 
 dhead() {
-    dlog $1 | head -n 20
+    dlog $1 | head -n 50
 }
 dtail() {
-    dlog $1 | tail -n 20
+    dlog $1 | tail -n 50
 }
 
 dgrep() {
@@ -402,20 +402,28 @@ bind '"\e8"':"\"db 8 \C-m\""
 
 storm() {
     cd $STORM_BLD/bin
-    local cmd="./storm --explchecks --build-overlapping-guards-label $1 --prop $2 --constants $3"
+    local cmd="./storm --explchecks --build-overlapping-guards-label $1"
     eval $cmd
     cd -
 }
 
+storm-jani() {
+    storm "--jani $DYNASTY_DIR/output_1.jani --prop $DYNASTY_DIR/workspace/examples/cav/maze/orig/compute.properties"
+}
+
+storm-eval() {
+    storm "$1 --prop $2 --constants $3"
+}
+
 export DPM=$DYNASTY_DIR/workspace/examples/cav/dpm-main
 export DICE=$DYNASTY_DIR/workspace/examples/cav/dice
-export MSP=$DYNASTY_DIR/workspace/examples/cav/exam-1
+export MAZE=$DYNASTY_DIR/workspace/examples/cav/maze
 
 dice() {
-    storm "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
+    storm-eval "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
 }
 dpm() {
-    storm "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
+    storm-eval "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
 }
 
 
