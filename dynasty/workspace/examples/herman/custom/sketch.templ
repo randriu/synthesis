@@ -6,16 +6,16 @@ dtmc
 
 const int MAXMEM = 1;
 
-const double P_START=0;
-const double P_STEP=0.01;
+const double P_START=0.02;
+const double P_STEP=0.02;
 
-const int M0LFAIR=50;
-const int M0HFAIR=50;
-const int M1LFAIR=50;
-const int M1HFAIR=50;
-const int MxxA=1;
-const int MxxB=1;
-const int MxxC=0;
+const int M0LFAIR;
+const int M0HFAIR;
+const int M1LFAIR;
+const int M1HFAIR;
+const int MxxA;
+const int MxxB;
+const int MxxC;
 
 module initialise
     start : [0..1] init 0;
@@ -31,7 +31,7 @@ endrewards
 // label - stable configurations (1 token)
 label "stable" = round =1 & num_tokens=1;
 
-const int STATIONS = 11;
+const int STATIONS = 5;
 
 module controller
 	round : [0..STATIONS] init 1;
@@ -41,18 +41,12 @@ module controller
 	[step2] round = 2 -> (round'=3);
 	[step3] round = 3 -> (round'=4);
 	[step4] round = 4 -> (round'=5);
-	[step5] round = 5 -> (round'=6);
-	[step6] round = 6 -> (round'=7);
-	[step7] round = 7 -> (round'=8);
-	[step8] round = 8 -> (round'=9);
-	[step9] round = 9 -> (round'=10);
-	[step10] round = 10 -> (round'=11);
-	[step11] round = STATIONS -> (round'=0);
+	[step5] round = STATIONS -> (round'=0);
 
 endmodule
 
 
-formula num_tokens = (x1=x2?1:0)+(x2=x3?1:0)+(x3=x4?1:0)+(x4=x5?1:0)+(x5=x6?1:0)+(x6=x7?1:0)+(x7=x8?1:0)+(x8=x9?1:0)+(x9=x10?1:0)+(x10=x11?1:0)+(x11=x1?1:0);
+formula num_tokens = (x1=x2?1:0)+(x2=x3?1:0)+(x3=x4?1:0)+(x4=x5?1:0)+(x5=x1?1:0);
 
 const double p0 = P_START;
 const double p1 = p0+P_STEP;
@@ -79,33 +73,6 @@ const double p21 = p20+P_STEP;
 const double p22 = p21+P_STEP;
 const double p23 = p22+P_STEP;
 const double p24 = p23+P_STEP;
-const double p25 = p24+P_STEP;
-const double p26 = p25+P_STEP;
-const double p27 = p26+P_STEP;
-const double p28 = p27+P_STEP;
-const double p29 = p28+P_STEP;
-const double p30 = p29+P_STEP;
-const double p31 = p30+P_STEP;
-const double p32 = p31+P_STEP;
-const double p33 = p32+P_STEP;
-const double p34 = p33+P_STEP;
-const double p35 = p34+P_STEP;
-const double p36 = p35+P_STEP;
-const double p37 = p36+P_STEP;
-const double p38 = p37+P_STEP;
-const double p39 = p38+P_STEP;
-const double p40 = p39+P_STEP;
-const double p41 = p40+P_STEP;
-const double p42 = p41+P_STEP;
-const double p43 = p42+P_STEP;
-const double p44 = p43+P_STEP;
-const double p45 = p44+P_STEP;
-const double p46 = p45+P_STEP;
-const double p47 = p46+P_STEP;
-const double p48 = p47+P_STEP;
-const double p49 = p48+P_STEP;
-const double p50 = p49+P_STEP;
-const double p51 = p50+P_STEP;
 
 module process1
 
@@ -115,227 +82,117 @@ module process1
 
 	[go] true -> 1: (x1'=1);
 
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=25 -> p25 : (y1'=0) & (m1'=MxxA) + 1-p25 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=26 -> p26 : (y1'=0) & (m1'=MxxA) + 1-p26 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=27 -> p27 : (y1'=0) & (m1'=MxxA) + 1-p27 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=28 -> p28 : (y1'=0) & (m1'=MxxA) + 1-p28 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=29 -> p29 : (y1'=0) & (m1'=MxxA) + 1-p29 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=30 -> p30 : (y1'=0) & (m1'=MxxA) + 1-p30 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=31 -> p31 : (y1'=0) & (m1'=MxxA) + 1-p31 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=32 -> p32 : (y1'=0) & (m1'=MxxA) + 1-p32 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=33 -> p33 : (y1'=0) & (m1'=MxxA) + 1-p33 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=34 -> p34 : (y1'=0) & (m1'=MxxA) + 1-p34 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=35 -> p35 : (y1'=0) & (m1'=MxxA) + 1-p35 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=36 -> p36 : (y1'=0) & (m1'=MxxA) + 1-p36 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=37 -> p37 : (y1'=0) & (m1'=MxxA) + 1-p37 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=38 -> p38 : (y1'=0) & (m1'=MxxA) + 1-p38 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=39 -> p39 : (y1'=0) & (m1'=MxxA) + 1-p39 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=40 -> p40 : (y1'=0) & (m1'=MxxA) + 1-p40 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=41 -> p41 : (y1'=0) & (m1'=MxxA) + 1-p41 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=42 -> p42 : (y1'=0) & (m1'=MxxA) + 1-p42 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=43 -> p43 : (y1'=0) & (m1'=MxxA) + 1-p43 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=44 -> p44 : (y1'=0) & (m1'=MxxA) + 1-p44 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=45 -> p45 : (y1'=0) & (m1'=MxxA) + 1-p45 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=46 -> p46 : (y1'=0) & (m1'=MxxA) + 1-p46 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=47 -> p47 : (y1'=0) & (m1'=MxxA) + 1-p47 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=48 -> p48 : (y1'=0) & (m1'=MxxA) + 1-p48 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=49 -> p49 : (y1'=0) & (m1'=MxxA) + 1-p49 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 0 & M0LFAIR=50 -> p50 : (y1'=0) & (m1'=MxxA) + 1-p50 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=25 -> p25 : (y1'=0) & (m1'=MxxA) + 1-p25 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=26 -> p26 : (y1'=0) & (m1'=MxxA) + 1-p26 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=27 -> p27 : (y1'=0) & (m1'=MxxA) + 1-p27 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=28 -> p28 : (y1'=0) & (m1'=MxxA) + 1-p28 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=29 -> p29 : (y1'=0) & (m1'=MxxA) + 1-p29 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=30 -> p30 : (y1'=0) & (m1'=MxxA) + 1-p30 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=31 -> p31 : (y1'=0) & (m1'=MxxA) + 1-p31 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=32 -> p32 : (y1'=0) & (m1'=MxxA) + 1-p32 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=33 -> p33 : (y1'=0) & (m1'=MxxA) + 1-p33 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=34 -> p34 : (y1'=0) & (m1'=MxxA) + 1-p34 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=35 -> p35 : (y1'=0) & (m1'=MxxA) + 1-p35 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=36 -> p36 : (y1'=0) & (m1'=MxxA) + 1-p36 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=37 -> p37 : (y1'=0) & (m1'=MxxA) + 1-p37 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=38 -> p38 : (y1'=0) & (m1'=MxxA) + 1-p38 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=39 -> p39 : (y1'=0) & (m1'=MxxA) + 1-p39 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=40 -> p40 : (y1'=0) & (m1'=MxxA) + 1-p40 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=41 -> p41 : (y1'=0) & (m1'=MxxA) + 1-p41 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=42 -> p42 : (y1'=0) & (m1'=MxxA) + 1-p42 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=43 -> p43 : (y1'=0) & (m1'=MxxA) + 1-p43 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=44 -> p44 : (y1'=0) & (m1'=MxxA) + 1-p44 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=45 -> p45 : (y1'=0) & (m1'=MxxA) + 1-p45 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=46 -> p46 : (y1'=0) & (m1'=MxxA) + 1-p46 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=47 -> p47 : (y1'=0) & (m1'=MxxA) + 1-p47 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=48 -> p48 : (y1'=0) & (m1'=MxxA) + 1-p48 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=49 -> p49 : (y1'=0) & (m1'=MxxA) + 1-p49 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 0 & x1 = 1 & M0HFAIR=50 -> p50 : (y1'=0) & (m1'=MxxA) + 1-p50 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=25 -> p25 : (y1'=0) & (m1'=MxxA) + 1-p25 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=26 -> p26 : (y1'=0) & (m1'=MxxA) + 1-p26 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=27 -> p27 : (y1'=0) & (m1'=MxxA) + 1-p27 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=28 -> p28 : (y1'=0) & (m1'=MxxA) + 1-p28 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=29 -> p29 : (y1'=0) & (m1'=MxxA) + 1-p29 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=30 -> p30 : (y1'=0) & (m1'=MxxA) + 1-p30 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=31 -> p31 : (y1'=0) & (m1'=MxxA) + 1-p31 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=32 -> p32 : (y1'=0) & (m1'=MxxA) + 1-p32 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=33 -> p33 : (y1'=0) & (m1'=MxxA) + 1-p33 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=34 -> p34 : (y1'=0) & (m1'=MxxA) + 1-p34 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=35 -> p35 : (y1'=0) & (m1'=MxxA) + 1-p35 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=36 -> p36 : (y1'=0) & (m1'=MxxA) + 1-p36 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=37 -> p37 : (y1'=0) & (m1'=MxxA) + 1-p37 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=38 -> p38 : (y1'=0) & (m1'=MxxA) + 1-p38 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=39 -> p39 : (y1'=0) & (m1'=MxxA) + 1-p39 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=40 -> p40 : (y1'=0) & (m1'=MxxA) + 1-p40 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=41 -> p41 : (y1'=0) & (m1'=MxxA) + 1-p41 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=42 -> p42 : (y1'=0) & (m1'=MxxA) + 1-p42 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=43 -> p43 : (y1'=0) & (m1'=MxxA) + 1-p43 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=44 -> p44 : (y1'=0) & (m1'=MxxA) + 1-p44 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=45 -> p45 : (y1'=0) & (m1'=MxxA) + 1-p45 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=46 -> p46 : (y1'=0) & (m1'=MxxA) + 1-p46 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=47 -> p47 : (y1'=0) & (m1'=MxxA) + 1-p47 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=48 -> p48 : (y1'=0) & (m1'=MxxA) + 1-p48 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=49 -> p49 : (y1'=0) & (m1'=MxxA) + 1-p49 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 0 & M1LFAIR=50 -> p50 : (y1'=0) & (m1'=MxxA) + 1-p50 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=25 -> p25 : (y1'=0) & (m1'=MxxA) + 1-p25 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=26 -> p26 : (y1'=0) & (m1'=MxxA) + 1-p26 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=27 -> p27 : (y1'=0) & (m1'=MxxA) + 1-p27 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=28 -> p28 : (y1'=0) & (m1'=MxxA) + 1-p28 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=29 -> p29 : (y1'=0) & (m1'=MxxA) + 1-p29 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=30 -> p30 : (y1'=0) & (m1'=MxxA) + 1-p30 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=31 -> p31 : (y1'=0) & (m1'=MxxA) + 1-p31 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=32 -> p32 : (y1'=0) & (m1'=MxxA) + 1-p32 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=33 -> p33 : (y1'=0) & (m1'=MxxA) + 1-p33 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=34 -> p34 : (y1'=0) & (m1'=MxxA) + 1-p34 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=35 -> p35 : (y1'=0) & (m1'=MxxA) + 1-p35 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=36 -> p36 : (y1'=0) & (m1'=MxxA) + 1-p36 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=37 -> p37 : (y1'=0) & (m1'=MxxA) + 1-p37 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=38 -> p38 : (y1'=0) & (m1'=MxxA) + 1-p38 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=39 -> p39 : (y1'=0) & (m1'=MxxA) + 1-p39 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=40 -> p40 : (y1'=0) & (m1'=MxxA) + 1-p40 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=41 -> p41 : (y1'=0) & (m1'=MxxA) + 1-p41 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=42 -> p42 : (y1'=0) & (m1'=MxxA) + 1-p42 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=43 -> p43 : (y1'=0) & (m1'=MxxA) + 1-p43 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=44 -> p44 : (y1'=0) & (m1'=MxxA) + 1-p44 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=45 -> p45 : (y1'=0) & (m1'=MxxA) + 1-p45 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=46 -> p46 : (y1'=0) & (m1'=MxxA) + 1-p46 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=47 -> p47 : (y1'=0) & (m1'=MxxA) + 1-p47 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=48 -> p48 : (y1'=0) & (m1'=MxxA) + 1-p48 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=49 -> p49 : (y1'=0) & (m1'=MxxA) + 1-p49 : (y1'=1) & (m1'=MxxB);
-	[step1]  (x1=x11) & m1 = 1 & x1 = 1 & M1HFAIR=50 -> p50 : (y1'=0) & (m1'=MxxA) + 1-p50 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 0 & M0LFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 0 & x1 = 1 & M0HFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 0 & M1LFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=1 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=2 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=3 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=4 -> p4 : (y1'=0) & (m1'=MxxA) + 1-p4 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=5 -> p5 : (y1'=0) & (m1'=MxxA) + 1-p5 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=6 -> p6 : (y1'=0) & (m1'=MxxA) + 1-p6 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=7 -> p7 : (y1'=0) & (m1'=MxxA) + 1-p7 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=8 -> p8 : (y1'=0) & (m1'=MxxA) + 1-p8 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=9 -> p9 : (y1'=0) & (m1'=MxxA) + 1-p9 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=10 -> p10 : (y1'=0) & (m1'=MxxA) + 1-p10 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=11 -> p11 : (y1'=0) & (m1'=MxxA) + 1-p11 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=12 -> p12 : (y1'=0) & (m1'=MxxA) + 1-p12 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=13 -> p13 : (y1'=0) & (m1'=MxxA) + 1-p13 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=14 -> p14 : (y1'=0) & (m1'=MxxA) + 1-p14 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=15 -> p15 : (y1'=0) & (m1'=MxxA) + 1-p15 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=16 -> p16 : (y1'=0) & (m1'=MxxA) + 1-p16 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=17 -> p17 : (y1'=0) & (m1'=MxxA) + 1-p17 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=18 -> p18 : (y1'=0) & (m1'=MxxA) + 1-p18 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=19 -> p19 : (y1'=0) & (m1'=MxxA) + 1-p19 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=20 -> p20 : (y1'=0) & (m1'=MxxA) + 1-p20 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=21 -> p21 : (y1'=0) & (m1'=MxxA) + 1-p21 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=22 -> p22 : (y1'=0) & (m1'=MxxA) + 1-p22 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=23 -> p23 : (y1'=0) & (m1'=MxxA) + 1-p23 : (y1'=1) & (m1'=MxxB);
+	[step1]  (x1=x5) & m1 = 1 & x1 = 1 & M1HFAIR=24 -> p24 : (y1'=0) & (m1'=MxxA) + 1-p24 : (y1'=1) & (m1'=MxxB);
 
-	[step1] !(x1=x11) & m1 = 0 & x1 = 0 -> (y1'=x11) & (m1'=MxxC);
-	[step1] !(x1=x11) & m1 = 0 & x1 = 1 -> (y1'=x11) & (m1'=MxxC);
-	[step1] !(x1=x11) & m1 = 1 & x1 = 0 -> (y1'=x11) & (m1'=MxxC);
-	[step1] !(x1=x11) & m1 = 1 & x1 = 1 -> (y1'=x11) & (m1'=MxxC);
+	[step1] !(x1=x5) & m1 = 0 & x1 = 0 -> (y1'=x5) & (m1'=MxxC);
+	[step1] !(x1=x5) & m1 = 0 & x1 = 1 -> (y1'=x5) & (m1'=MxxC);
+	[step1] !(x1=x5) & m1 = 1 & x1 = 0 -> (y1'=x5) & (m1'=MxxC);
+	[step1] !(x1=x5) & m1 = 1 & x1 = 1 -> (y1'=x5) & (m1'=MxxC);
 
 	[sync] true -> (x1' = y1) & (y1' = 0);
 
 endmodule
 
-module process2 = process1 [ x1=x2, y1=y2, x11=x1, m1=m2, step1=step2 ] endmodule
-module process3 = process1 [ x1=x3, y1=y3, x11=x2, m1=m3, step1=step3 ] endmodule
-module process4 = process1 [ x1=x4, y1=y4, x11=x3, m1=m4, step1=step4 ] endmodule
-module process5 = process1 [ x1=x5, y1=y5, x11=x4, m1=m5, step1=step5 ] endmodule
-module process6 = process1 [ x1=x6, y1=y6, x11=x5, m1=m6, step1=step6 ] endmodule
-module process7 = process1 [ x1=x7, y1=y7, x11=x6, m1=m7, step1=step7 ] endmodule
-module process8 = process1 [ x1=x8, y1=y8, x11=x7, m1=m8, step1=step8 ] endmodule
-module process9 = process1 [ x1=x9, y1=y9, x11=x8, m1=m9, step1=step9 ] endmodule
-module process10 = process1 [ x1=x10, y1=y10, x11=x9, m1=m10, step1=step10 ] endmodule
-module process11 = process1 [ x1=x11, y1=y11, x11=x10, m1=m11, step1=step11 ] endmodule
+module process2 = process1 [ x1=x2, y1=y2, x5=x1, m1=m2, step1=step2 ] endmodule
+module process3 = process1 [ x1=x3, y1=y3, x5=x2, m1=m3, step1=step3 ] endmodule
+module process4 = process1 [ x1=x4, y1=y4, x5=x3, m1=m4, step1=step4 ] endmodule
+module process5 = process1 [ x1=x5, y1=y5, x5=x4, m1=m5, step1=step5 ] endmodule
