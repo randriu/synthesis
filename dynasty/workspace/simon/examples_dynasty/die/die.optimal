@@ -1,4 +1,0 @@
-//R{"steps"} = ? [ F s=7 ]
-P=? [F s=7 & d=1 ]
-max
-relative 0.0

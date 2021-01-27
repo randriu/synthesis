@@ -124,27 +124,62 @@ function tacas() {
     try_models hybrid
 }
 
+
 function run() {
-    # timeout=1h
+    timeout=3h
     # parallel=true
     # verbose=true
     optimal=true
     
-    # model=("cav/dice/3" 0 2 2 0.1)
-    # model=("cav/dice/4" 0 2 2 0.1)
+    # dpm ##########
 
-    # model=("cav/dpm-main" 10 3000 3000 500.0)
-    # model=("cav/dpm-test" 10 3000 3000 500.0)
+    # model=("cav/dpm/demo" 10 1 1 1.0)
+    # model=("cav/dpm/orig" 10 5000 5000 1.0)
+
+    # maze ##########
+
+    # model=("cav/maze/orig-partial" 0 1 1 1.0)
+    # model=("cav/maze/orig-full" 0 1 1 1.0)
+
+    # model=("cav/maze/fixed-partial" 0 1 1 1.0)
+    # model=("cav/maze/fixed-full" 0 6.50 6.50 1.0)
     
-    # model=("cav/maze/orig" 0 1 1 1.0)
-    # model=("cav/maze/2bit-partial" 0 1 1 1.0)
-    model=("cav/maze/2bit-full" 0 1 1 1.0)
+    # model=("cav/maze/new-partial" 0 1 1 1.0)
+    # model=("cav/maze/new-full" 0 1 1 1.0)
 
-    # model=("grid/big" 0 0.004 0.010 0.001)
+    # herman ##########
+
+    # model=("cav/herman/25-orig" 0 3.5 3.5 1.0)
+    # model=("cav/herman/25-int" 0 3.89 3.89 1.0)
+    
+    # grid ##########
+
+    # model=("cav/grid/big" 40 0.928 0.928 1.0)
+
+    # pole ##########
+
+    # model=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
+
+    # selected benchmark #######################################################
+
+    dpm=("cav/dpm/orig" 10 1 1 1.0) #?
+    maze=("cav/maze/fixed-full" 0 7.32 7.32 1.0)
+    herman=("cav/herman/25-orig" 0 3.5 3.5 1.0)
+    pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
+    grid=("cav/grid/big" 40 0.928 0.928 1.0)
+
+    models=( dpm maze herman pole grid )
+
+    for model in "${models[@]}"; do
+        echo "--- $model" >> ${log_dir}/log.txt
+        choose_model `eval echo '${'${model}'[@]}'`
+        try_thresholds onebyone
+        cat ${log_file} | tail -n 5 >> ${log_dir}/log.txt
+    done
     
     choose_model "${model[@]}"
 
-    hybrid
+    # hybrid
     # cegar
     # cegis
     # onebyone
@@ -156,6 +191,7 @@ reset_log
 
 # test_release
 # tacas
+# cav
 run
 
 exit
