@@ -27,6 +27,11 @@ function reset_log() {
     > ${log_grep_file}
 }
 
+function log() {
+    echo "$@"
+    echo "$@" >> ${log_dir}/log.txt
+}
+
 function choose_model() {
     preset=("$@")
     model=${preset[0]}
@@ -124,10 +129,31 @@ function tacas() {
     try_models hybrid
 }
 
+function cav() {
+    timeout=2d
+    # parallel=true
+    optimal=true
+
+    dpm=("cav/dpm/orig-bat100" 10 140 140 1.0)
+    maze=("cav/maze/fixed-full" 0 7.32 7.32 1.0)
+    herman=("cav/herman/25-orig" 0 3.5 3.5 1.0)
+    pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
+    grid=("cav/grid/big" 40 0.928 0.928 1.0)
+
+    for method in hybrid onebyone; do
+        log "----- ${method} -----"
+        for model in dpm maze herman pole grid; do
+            log "--- ${model}"
+            choose_model `eval echo '${'${model}'[@]}'`
+            eval $method
+            cat ${log_file} | tail -n 12 >> ${log_dir}/log.txt
+        done
+    done
+}
 
 function run() {
     timeout=3h
-    # parallel=true
+    parallel=true
     # verbose=true
     optimal=true
     
@@ -135,6 +161,8 @@ function run() {
 
     # model=("cav/dpm/demo" 10 1 1 1.0)
     # model=("cav/dpm/orig" 10 5000 5000 1.0)
+    # model=("cav/dpm/orig-bat100" 10 140 140 1.0)
+    # model=("cav/dpm/orig-bat100" 10 138 138 1.0)
 
     # maze ##########
 
@@ -162,27 +190,27 @@ function run() {
 
     # selected benchmark #######################################################
 
-    dpm=("cav/dpm/orig" 10 1 1 1.0) #?
+    dpm=("cav/dpm/orig-bat100" 10 140 140 1.0)
     maze=("cav/maze/fixed-full" 0 7.32 7.32 1.0)
     herman=("cav/herman/25-orig" 0 3.5 3.5 1.0)
     pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
     grid=("cav/grid/big" 40 0.928 0.928 1.0)
 
-    models=( dpm maze herman pole grid )
+    # models=( dpm maze herman pole grid )
 
-    for model in "${models[@]}"; do
-        echo "--- $model" >> ${log_dir}/log.txt
-        choose_model `eval echo '${'${model}'[@]}'`
-        try_thresholds onebyone
-        cat ${log_file} | tail -n 5 >> ${log_dir}/log.txt
-    done
+    # for model in "${models[@]}"; do
+    #     echo "--- $model" >> ${log_dir}/log.txt
+    #     choose_model `eval echo '${'${model}'[@]}'`
+    #     try_thresholds onebyone
+    #     cat ${log_file} | tail -n 5 >> ${log_dir}/log.txt
+    # done
     
     choose_model "${model[@]}"
 
     # hybrid
     # cegar
     # cegis
-    # onebyone
+    onebyone
 }
 
 # --- execution ----------------------------------------------------------------
@@ -191,8 +219,8 @@ reset_log
 
 # test_release
 # tacas
-# cav
-run
+cav
+# run
 
 exit
 
