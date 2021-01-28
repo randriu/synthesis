@@ -10,7 +10,7 @@ parallel=false
 optimal=false
 
 # workspace settings
-models_dir="workspace/examples"
+projects_dir="workspace/examples"
 log_dir="workspace/log"
 log_file="${log_dir}/log_${core}.txt"
 log_grep_file="${log_dir}/log_grep_${core}.txt"
@@ -27,14 +27,15 @@ function reset_log() {
     > ${log_grep_file}
 }
 
-function log() {
-    echo "$@"
-    echo "$@" >> ${log_dir}/log.txt
-}
+# function log() {
+#     echo "$@"
+#     echo "$@" >> ${log_dir}/log.txt
+# }
 
 function choose_model() {
-    preset=("$@")
-    model=${preset[0]}
+    local arg=$1
+    local preset=(`eval echo '${'${arg}'[@]}'`)
+    project=${preset[0]}
     cmax=${preset[1]}
     t_min=${preset[2]}
     t_max=${preset[3]}
@@ -43,7 +44,7 @@ function choose_model() {
 
 function python_dynasty() {
     local method=$1
-    local dynasty="python dynasty.py --project ${models_dir}/${model}/ $method --short-summary"
+    local dynasty="python dynasty.py --project ${projects_dir}/${project}/ $method --short-summary"
     local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     local optimality=""
     if [ ${optimal} = "true" ]; then
@@ -69,6 +70,8 @@ function dynasty() {
 
 function try_thresholds() {
     local method=$1
+    local model=$2
+    choose_model $model
     for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
         dynasty $method
     done
@@ -76,16 +79,16 @@ function try_thresholds() {
 }
 
 function onebyone() {
-    try_thresholds onebyone
+    try_thresholds onebyone $1
 }
 function cegis() {
-    try_thresholds cegis
+    try_thresholds cegis $1
 }
 function cegar() {
-    try_thresholds cegar
+    try_thresholds cegar $1
 }
 function hybrid() {
-    try_thresholds hybrid
+    try_thresholds hybrid $1
 }
 
 function try_models() {
@@ -93,7 +96,7 @@ function try_models() {
     echo "----- $method"
     for model in "${models[@]}"; do
         echo "--- $model"
-        choose_model `eval echo '${'${model}'[@]}'`
+        choose_model $model
         try_thresholds $method
     done
 }
@@ -107,8 +110,7 @@ function test_release() {
     # optimal=true
 
     model=("herman/release-test" 2 0.60 0.75 0.15)
-    choose_model "${model[@]}"
-    cegar
+    cegar model
     echo "^ should be at 15 and 19 sec"
 }
 
@@ -122,17 +124,17 @@ function tacas() {
     pole=("pole/orig" 0 3.350 3.355 0.005)
     herman=("herman/orig" 2 1.2 1.8 0.6)
 
-    # models=( grid maze dpm pole herman )
-    models=( dpm )
+    models=( grid maze dpm pole herman )
     # try_models onebyone
     # try_models cegar
     try_models hybrid
 }
 
 function cav() {
-    timeout=2d
+    mkdir -p $log_dir/cav
+
+    timeout=3s
     # parallel=true
-    optimal=true
 
     dpm=("cav/dpm/orig-bat100" 10 140 140 1.0)
     maze=("cav/maze/fixed-full" 0 7.32 7.32 1.0)
@@ -140,14 +142,28 @@ function cav() {
     pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
     grid=("cav/grid/big" 40 0.928 0.928 1.0)
 
-    for method in hybrid onebyone; do
-        log "----- ${method} -----"
-        for model in dpm maze herman pole grid; do
-            log "--- ${model}"
-            choose_model `eval echo '${'${model}'[@]}'`
-            eval $method
-            cat ${log_file} | tail -n 12 >> ${log_dir}/log.txt
-        done
+    optimal=false
+    for model in dpm maze herman pole grid; do
+        log_file=$log_dir/cav/hybrid_f_$model.txt
+        hybrid $model
+    done
+    optimal=true
+    for model in dpm maze herman pole grid; do
+        log_file=$log_dir/cav/hybrid_0_$model.txt
+        hybrid $model
+    done
+    optimal=true
+    for model in dpm maze herman pole grid; do
+        log_file=$log_dir/cav/onebyone_$model.txt
+        onebyone $model &
+    done
+    wait
+}
+
+function cav_summary() {
+    for log in $log_dir/cav/*.txt; do
+        echo "--- ${log} --"
+        cat $log | tail -n 12
     done
 }
 
@@ -195,22 +211,13 @@ function run() {
     herman=("cav/herman/25-orig" 0 3.5 3.5 1.0)
     pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
     grid=("cav/grid/big" 40 0.928 0.928 1.0)
-
-    # models=( dpm maze herman pole grid )
-
-    # for model in "${models[@]}"; do
-    #     echo "--- $model" >> ${log_dir}/log.txt
-    #     choose_model `eval echo '${'${model}'[@]}'`
-    #     try_thresholds onebyone
-    #     cat ${log_file} | tail -n 5 >> ${log_dir}/log.txt
-    # done
     
-    choose_model "${model[@]}"
+    # running ##########
 
-    # hybrid
-    # cegar
-    # cegis
-    onebyone
+    model=grid
+
+    hybrid $model
+    # onebyone $model
 }
 
 # --- execution ----------------------------------------------------------------
@@ -218,9 +225,12 @@ function run() {
 reset_log
 
 # test_release
-# tacas
-cav
 # run
+
+# tacas
+
+# cav
+cav_summary
 
 exit
 
