@@ -32,6 +32,36 @@ export DYNASTY_LOG=$DYNASTY_DIR/workspace/log
 
 ### TACAS 2021 #################################################################
 
+clean_up() {
+  echo "[INFO] CLEANING HAS STARTED..."
+
+    if [ -d "$PREREQUISITES" ];
+    then
+        echo "[INFO] Removing prerequisites..."
+        rm -rf $PREREQUISITES
+    else
+        echo "[WARN] Prerequisites not found continue with cleaning..."
+    fi
+
+    if [ -d "$STORM_DIR" ];
+    then
+        echo "[INFO] Removing storm repository located ./storm..."
+        rm -rf $STORM_DIR
+    else
+        echo "[WARN] storm repository not found continue with cleaning..."
+    fi
+
+    if [ -d "$STORMPY_DIR" ];
+    then
+        echo "[INFO] Removing stormpy repository located ./stormpy..."
+        rm -rf $STORMPY_DIR
+    else
+        echo "[WARN] stormpy repository not found continue with cleaning..."
+    fi
+
+    echo "[INFO] CLEANING FINISHED!"
+}
+
 tacas21-download-dependencies() {
     cd artifact
 
@@ -107,6 +137,9 @@ tacas21-install() {
 ### dependencies ###############################################################
 
 dynasty-download() {
+    # before download (make sure that env is clean)
+    clean_up
+
     local target_dir=$1
     mkdir -p ${target_dir}/prerequisites
 
