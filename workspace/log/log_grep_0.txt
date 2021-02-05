@@ -1,2 +1,0 @@
-> T = [0.75] - CEGAR: U (17 iters, 15.54 sec)
-> T = [0.6] - CEGAR: U (23 iters, 18.86 sec)

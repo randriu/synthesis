@@ -2,8 +2,8 @@
 
 set -ex
 
-export SYNTHESIS_TACAS21=false
-export SYNTHESIS_INSTALL_DEPENDENCIES=false
+SYNTHESIS_TACAS21=false
+SYNTHESIS_INSTALL_DEPENDENCIES=false
 
 THREADS=$(nproc)
 # THREADS=1 # uncomment this to disable multi-core compilation
@@ -13,11 +13,6 @@ SYNTHESIS=`pwd`
 PREREQUISITES=$SYNTHESIS/prerequisites
 DOWNLOADS=$PREREQUISITES/downloads
 SYNTHESIS_ENV=$SYNTHESIS/env
-
-virtualenv -p python3 $SYNTHESIS_ENV
-source $SYNTHESIS_ENV/bin/activate
-pip3 install pysmt z3-solver click
-deactivate
 
 #unzip
 cd $PREREQUISITES
@@ -32,6 +27,12 @@ mv storm-$STORM_VERSION storm
 unzip $DOWNLOADS/stormpy.zip
 mv stormpy-$STORM_VERSION stormpy
 rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
+
+# set up python environment
+virtualenv -p python3 $SYNTHESIS_ENV
+source $SYNTHESIS_ENV/bin/activate
+pip3 install pysmt z3-solver click
+deactivate
 
 # install prerequisites (carl, carl-parser)
 cd $PREREQUISITES
@@ -48,7 +49,7 @@ cd ../..
 cd pycarl
 source $SYNTHESIS_ENV/bin/activate
 python3 setup.py build_ext --jobs $THREADS --disable-parser develop
-#[TEST] python setup.py test
+#[TEST] python3 setup.py test
 deactivate
 cd ..
 
@@ -67,7 +68,7 @@ cd ../..
 # stormpy
 cd stormpy
 source $SYNTHESIS_ENV/bin/activate
-python3 setup.py build_ext --jobs $COMPILE_JOBS develop
+python3 setup.py build_ext --jobs $THREADS develop
 #[TEST] python3 setup.py test
 deactivate
 cd ..
@@ -78,6 +79,6 @@ source $SYNTHESIS_ENV/bin/activate
 python3 setup.py install
 #[TEST] python3 setup.py test
 deactivate
-cd $OLDPWD
+cd ..
 
 # tacas21-install

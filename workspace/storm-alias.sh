@@ -61,10 +61,6 @@ clean_up() {
     echo "[INFO] CLEANING FINISHED!"
 }
 
-tacas21-new() {
-    
-}
-
 tacas21-prepare-artifact() {
     sudo apt install -y git
     git clone https://github.com/gargantophob/synthesis.git
