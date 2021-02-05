@@ -11,5 +11,3 @@ __pycache__/
 *.jani
 build/
 
-workspace/log/*
-

@@ -1,4 +1,6 @@
 env/
-prerequisites/
 storm/
 stormpy/
+
+*.jani
+*.log
