@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # command-line argument: core index
-core=$1
+core=0
+if [ -n "$1" ]; then
+    core=$1
+fi
 
 # default parameters
 timeout=100d
@@ -10,8 +13,9 @@ parallel=false
 optimal=false
 
 # workspace settings
-projects_dir="workspace/examples"
-log_dir="workspace/log"
+dynasty_exe="dynasty/dynasty.py"
+projects_dir="dynasty/workspace/examples"
+log_dir="dynasty/workspace/log"
 log_file="${log_dir}/log_${core}.txt"
 log_grep_file="${log_dir}/log_grep_${core}.txt"
 
@@ -32,11 +36,12 @@ function reset_log() {
 #     echo "$@" >> ${log_dir}/log.txt
 # }
 
-function choose_model() {
+function choose_project() {
     local arg=$1
     local preset=(`eval echo '${'${arg}'[@]}'`)
     project=${preset[0]}
     cmax=${preset[1]}
+    echo $cmax
     t_min=${preset[2]}
     t_max=${preset[3]}
     t_step=${preset[4]}
@@ -44,14 +49,14 @@ function choose_model() {
 
 function python_dynasty() {
     local method=$1
-    local dynasty="python dynasty.py --project ${projects_dir}/${project}/ $method --short-summary"
+    local dynasty_call="python3 ${dynasty_exe} --project ${projects_dir}/${project}/ $method --short-summary"
     local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     local optimality=""
     if [ ${optimal} = "true" ]; then
         optimality="--optimality sketch.optimal --properties optimal.properties"
     fi
-    echo \$ ${dynasty} ${constants} ${optimality}
-    timeout ${timeout} ${dynasty} ${constants} ${optimality}
+    echo \$ ${dynasty_call} ${constants} ${optimality}
+    timeout ${timeout} ${dynasty_call} ${constants} ${optimality}
 }
 
 function dynasty() {
@@ -70,8 +75,8 @@ function dynasty() {
 
 function try_thresholds() {
     local method=$1
-    local model=$2
-    choose_model $model
+    local project=$2
+    choose_project $project
     for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
         dynasty $method
     done
@@ -109,8 +114,8 @@ function test_release() {
     # verbose=true
     # optimal=true
 
-    model=("herman/release-test" 2 0.60 0.75 0.15)
-    cegar model
+    herman=("herman/release-test" 2 0.60 0.75 0.15)
+    cegar herman
     echo "^ should be at 15 and 19 sec"
 }
 
@@ -133,7 +138,7 @@ function tacas() {
 function cav() {
     mkdir -p $log_dir/cav
 
-    timeout=3s
+    timeout=7d
     # parallel=true
 
     dpm=("cav/dpm/orig-bat100" 10 140 140 1.0)
@@ -163,12 +168,15 @@ function cav() {
 function cav_summary() {
     for log in $log_dir/cav/*.txt; do
         echo "--- ${log} --"
+        head $log -n 100 >> ${log}_2
+        tail $log -n 100 >> ${log}_2
+        mv ${log}_2 ${log}
         cat $log | tail -n 12
     done
 }
 
 function run() {
-    timeout=3h
+    timeout=3s
     parallel=true
     # verbose=true
     optimal=true
@@ -224,15 +232,15 @@ function run() {
 
 reset_log
 
-# test_release
+test_release
 # run
 
 # tacas
 
 # cav
-cav_summary
+# cav_summary
 
-exit
+# exit
 
 # --- halted -------------------------------------------------------------------
 

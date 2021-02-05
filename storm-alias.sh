@@ -76,7 +76,7 @@ tacas21-download-dependencies() {
     PACK_URIS=$DEP_DIR/packages.uri
     mkdir -p $PACK_DIR
     sudo apt-get update
-    apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake | grep -oP "(?<=').*(?=')" > $PACK_URIS
+    sudo apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake | grep -oP "(?<=').*(?=')" > $PACK_URIS
     cd $PACK_DIR
     wget -i $PACK_URIS
     cd $ROOT_DIR
@@ -117,16 +117,16 @@ tacas21-install() {
     # install dependencies
     unzip dependencies.zip
     cd dependencies
-    sudo ./install_dependencies.sh
+    bash install_dependencies.sh
     cd ..
     # apply patch and recompile
-    sudo rsync -av patch/ dependencies/dependencies
+    rsync -av patch/ dependencies/dependencies
     cd dependencies/dependencies/storm/build
-    sudo cmake ..
-    sudo make storm-main --jobs $COMPILE_JOBS
+    cmake ..
+    make storm-main --jobs $COMPILE_JOBS
     cd -
     cd dependencies/dependencies/stormpy
-    sudo pip3 install -ve .
+    pip3 install -ve .
     cd -
     # install dynasty
     cd dynasty
@@ -341,10 +341,10 @@ function dynasty() {
     if [ -n "$1" ]; then
         core=$1
     fi
-    local exp_sh=$DYNASTY_DIR/execute.sh
+    local exp_sh=$SYNTHESIS/execute.sh
     local run_sh=$DYNASTY_LOG/run_${core}.sh
 
-    cd $DYNASTY_DIR
+    cd $SYNTHESIS
     mkdir -p $DYNASTY_LOG
     cp $exp_sh $run_sh
     enva
