@@ -1,6 +1,2 @@
-env/
 storm/
 stormpy/
-
-*.jani
-*.log

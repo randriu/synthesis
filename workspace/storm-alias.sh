@@ -103,7 +103,7 @@ function dynasty() {
     local exp_sh=$WORKSPACE/execute.sh
     local run_sh=$DYNASTY_LOG/run_${core}.sh
 
-    cd $SYNTHESIS
+    cd $WORKSPACE
     mkdir -p $DYNASTY_LOG
     cp $exp_sh $run_sh
     source $SYNTHESIS_ENV/bin/activate
