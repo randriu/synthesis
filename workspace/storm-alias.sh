@@ -31,46 +31,14 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 ### TACAS 2021 #################################################################
 
-clean_up() {
-  echo "[INFO] CLEANING HAS STARTED..."
-
-    if [ -d "$PREREQUISITES" ];
-    then
-        echo "[INFO] Removing prerequisites..."
-        rm -rf $PREREQUISITES
-    else
-        echo "[WARN] Prerequisites not found continue with cleaning..."
-    fi
-
-    if [ -d "$STORM_DIR" ];
-    then
-        echo "[INFO] Removing storm repository located ./storm..."
-        rm -rf $STORM_DIR
-    else
-        echo "[WARN] storm repository not found continue with cleaning..."
-    fi
-
-    if [ -d "$STORMPY_DIR" ];
-    then
-        echo "[INFO] Removing stormpy repository located ./stormpy..."
-        rm -rf $STORMPY_DIR
-    else
-        echo "[WARN] stormpy repository not found continue with cleaning..."
-    fi
-
-    echo "[INFO] CLEANING FINISHED!"
-}
-
 tacas21-prepare-artifact() {
     sudo apt install -y git
     git clone https://github.com/gargantophob/synthesis.git
-    cd synthesis
-    
-    cd artifact
+    cd synthesis/prerequisites
+    unzip tacas-dependencies.zip
+    cd tacas-dependencies
 
-    ROOT_DIR=$PWD
-    ART_DIR=$ROOT_DIR/dependencies
-    DEP_DIR=$ART_DIR/dependencies
+    DEP_DIR=$PWD
     PACK_DIR=$DEP_DIR/apt-packages
     PIP_DIR=$DEP_DIR/pip-packages
     STORM_VERSION=1.6.3
@@ -82,52 +50,18 @@ tacas21-prepare-artifact() {
     sudo apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake | grep -oP "(?<=').*(?=')" > $PACK_URIS
     cd $PACK_DIR
     wget -i $PACK_URIS
-    cd $ROOT_DIR
+    cd $DEP_DIR
 
     # download pip packages
     pip3 download -d $PIP_DIR -r python-requirements
 
-    # download carl & storm
-    wget -O $DEP_DIR/carl.zip https://github.com/smtrat/carl/archive/master14.zip
-    wget -O $DEP_DIR/pycarl.zip https://github.com/moves-rwth/pycarl/archive/master.zip
-    wget -O $DEP_DIR/storm.zip https://github.com/moves-rwth/storm/archive/$STORM_VERSION.zip
-    wget -O $DEP_DIR/stormpy.zip https://github.com/moves-rwth/stormpy/archive/$STORM_VERSION.zip
-
-    # copy storm adjustments
-    cp -r storm_3rdparty_CMakeLists.txt StormEigen $DEP_DIR
-
-    # copy installation scripts
-    cp install_carl.sh install_storm.sh python-requirements $DEP_DIR
-    cp install_dependencies.sh $ART_DIR
-
     # zip everything
-    zip -r ../dependencies.zip dependencies/*
-    rm -rf dependencies
     cd ..
+    zip -r tacas-dependencies.zip tacas-dependencies
+    rm -rf tacas-dependencies
 
     cd ..
     zip -r synthesis.zip synthesis
-}
-
-tacas21-install() {
-    # install dependencies
-    unzip dependencies.zip
-    cd dependencies
-    bash install_dependencies.sh
-    cd ..
-    # apply patch and recompile
-    rsync -av patch/ dependencies/dependencies
-    cd dependencies/dependencies/storm/build
-    cmake ..
-    make storm-main --jobs $COMPILE_JOBS
-    cd -
-    cd dependencies/dependencies/stormpy
-    pip3 install -ve .
-    cd -
-    # install dynasty
-    cd dynasty
-    python3 setup.py install
-    cd -
 }
 
 ### dependencies ###############################################################
