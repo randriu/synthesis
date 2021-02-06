@@ -433,23 +433,7 @@ namespace storm {
                 }
             } else {
                 // Reward formula: one reward model
-                assert(this->formula_safety[formula_index]);
-                assert(dtmc->hasRewardModel(this->formula_reward_name[formula_index]));
-                storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[formula_index]);
-                assert(reward_model_dtmc.hasOnlyStateRewards());
-
-                std::vector<ValueType> state_rewards_subdtmc(dtmc_states+2);
-                double default_reward = 0;
-                for(StateType state = 0; state < dtmc_states; state++) {
-                    double reward = use_mdp_bounds ? dtmc_bound[state] : default_reward;
-                    state_rewards_subdtmc[state] = reward;
-
-                    std::vector<std::pair<StateType,ValueType>> r;
-                    r.emplace_back(sink_state_true, 1);
-                    matrix_subdtmc.push_back(r);
-                }
-                storm::models::sparse::StandardRewardModel<ValueType> reward_model_subdtmc(state_rewards_subdtmc, boost::none, boost::none);
-                reward_models_subdtmc.emplace(this->formula_reward_name[formula_index], reward_model_subdtmc);
+                throw "reward support is not implemented yet";
             }
 
             // Add self-loops to sink states
@@ -481,11 +465,7 @@ namespace storm {
             }
             if(this->formula_reward[index]) {
                 // - expand state rewards
-                storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[index]);
-                storm::models::sparse::StandardRewardModel<ValueType> & reward_model_subdtmc = (reward_models_subdtmc.find(this->formula_reward_name[index]))->second;
-                for(StateType state : to_expand) {
-                    reward_model_subdtmc.setStateReward(state, reward_model_dtmc.getStateReward(state));
-                }
+                throw "reward support is not implemented yet";
             }
 
             // Construct sub-DTMC
