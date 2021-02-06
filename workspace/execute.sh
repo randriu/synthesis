@@ -125,6 +125,7 @@ function run() {
     pole=("pole/orig" 0 16.7 16.7 1.0)
     dice=("dice/copy" 0 2 2 1.0)
     # dice=("dice/copy" 0 0.5 0.5 1.0)
+    # python3 /home/maria/synthesis/dynasty/dynasty.py --project /home/maria/synthesis/workspace/examples/dice/copy/ hybrid --short-summary --properties reward.properties
     
     # running ##########
 
