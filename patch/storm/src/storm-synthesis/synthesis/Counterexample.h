@@ -124,6 +124,7 @@ namespace storm {
              * @param labeling Prototype labeling.
              * @param matrix_dtmc Original transition matrix.
              * @param matrix_subdtmc Rerouting of the transition matrix wrt. unexpanded states.
+             * @param reward_models_subdtmc Reward models for the initial sub-DTMC.
              * @param to_expand States expanded during this wave.
              * @return true if the rerouting still satisfies the formula
              */

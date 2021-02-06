@@ -1,5 +1,4 @@
 // author: Roman Andriushchenko
-// git check
 
 #include "storm-synthesis/synthesis/Counterexample.h"
 
@@ -379,7 +378,7 @@ namespace storm {
             std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
             ) {
 
-            // Typedef for matrices
+            // Typedefs for matrices
             // typedef std::vector<std::pair<StateType,ValueType>> row;
             // typedef std::vector<row> matrix;
 

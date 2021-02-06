@@ -37,7 +37,6 @@ function choose_project() {
     local preset=(`eval echo '${'${arg}'[@]}'`)
     project=${preset[0]}
     cmax=${preset[1]}
-    echo $cmax
     t_min=${preset[2]}
     t_max=${preset[3]}
     t_step=${preset[4]}
@@ -115,21 +114,36 @@ function test_release() {
     echo "^ should be at 15 and 19 sec"
 }
 
-function tacas() {
-    timeout=10m
+
+function run() {
+    # timeout=3s
     parallel=true
+    verbose=true
+    # optimal=true
+    
+    dpm=("dpm/orig-bat100" 3 140 140 1.0)
+    pole=("pole/orig" 0 16.7 16.7 1.0)
+    dice=("dice/copy" 0 2 2 1.0)
+    # dice=("dice/copy" 0 0.5 0.5 1.0)
+    
+    # running ##########
 
-    grid=("grid/big" 40 0.931 0.927 -0.004)
-    maze=("maze/orig" 50 0.1612764 0.1612766 0.0000002)
-    dpm=("dpm/half" 12 0.078 0.0818 0.0038)
-    pole=("pole/orig" 0 3.350 3.355 0.005)
-    herman=("herman/orig" 2 1.2 1.8 0.6)
+    model=dice
 
-    models=( grid maze dpm pole herman )
-    # try_models onebyone
-    # try_models cegar
-    try_models hybrid
+    hybrid $model
+    # onebyone $model
 }
+
+# --- execution ----------------------------------------------------------------
+
+reset_log
+
+# test_release
+run
+
+# exit
+
+# --- archive ------------------------------------------------------------------
 
 function cav() {
     mkdir -p $log_dir/cav
@@ -170,73 +184,3 @@ function cav_summary() {
         cat $log | tail -n 12
     done
 }
-
-function run() {
-    timeout=3s
-    parallel=true
-    # verbose=true
-    optimal=true
-    
-    # dpm ##########
-
-    # model=("cav/dpm/demo" 10 1 1 1.0)
-    # model=("cav/dpm/orig" 10 5000 5000 1.0)
-    # model=("cav/dpm/orig-bat100" 10 140 140 1.0)
-    # model=("cav/dpm/orig-bat100" 10 138 138 1.0)
-
-    # maze ##########
-
-    # model=("cav/maze/orig-partial" 0 1 1 1.0)
-    # model=("cav/maze/orig-full" 0 1 1 1.0)
-
-    # model=("cav/maze/fixed-partial" 0 1 1 1.0)
-    # model=("cav/maze/fixed-full" 0 6.50 6.50 1.0)
-    
-    # model=("cav/maze/new-partial" 0 1 1 1.0)
-    # model=("cav/maze/new-full" 0 1 1 1.0)
-
-    # herman ##########
-
-    # model=("cav/herman/25-orig" 0 3.5 3.5 1.0)
-    # model=("cav/herman/25-int" 0 3.89 3.89 1.0)
-    
-    # grid ##########
-
-    # model=("cav/grid/big" 40 0.928 0.928 1.0)
-
-    # pole ##########
-
-    # model=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
-
-    # selected benchmark #######################################################
-
-    dpm=("cav/dpm/orig-bat100" 10 140 140 1.0)
-    maze=("cav/maze/fixed-full" 0 7.32 7.32 1.0)
-    herman=("cav/herman/25-orig" 0 3.5 3.5 1.0)
-    pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
-    grid=("cav/grid/big" 40 0.928 0.928 1.0)
-    
-    # running ##########
-
-    model=grid
-
-    hybrid $model
-    # onebyone $model
-}
-
-# --- execution ----------------------------------------------------------------
-
-reset_log
-
-test_release
-# run
-
-# tacas
-
-# cav
-# cav_summary
-
-# exit
-
-# --- halted -------------------------------------------------------------------
-

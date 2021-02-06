@@ -18,7 +18,15 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 ### storm patch ################################################################
 
 dynasty-patch-create() {
-    echo "NOT IMPLEMENTED YET"
+
+    local storm_src=$SYNTHESIS/storm/src
+    local patch_storm_src=$SYNTHESIS/patch/storm/src
+
+    rsync -av $storm_src/CMakeLists.txt $patch_storm_src/CMakeLists.txt
+    rsync -av $storm_src/storm-synthesis $patch_storm_src/
+    rsync -av $storm_src/storm-cli-utilities/CMakeLists.txt $patch_storm_src/storm-cli-utilities/CMakeLists.txt
+
+
 }
 
 dynasty-patch() {
@@ -103,8 +111,8 @@ function dynasty() {
     local exp_sh=$WORKSPACE/execute.sh
     local run_sh=$DYNASTY_LOG/run_${core}.sh
 
-    cd $WORKSPACE
     mkdir -p $DYNASTY_LOG
+    cd $DYNASTY_LOG
     cp $exp_sh $run_sh
     source $SYNTHESIS_ENV/bin/activate
     bash $run_sh $core
@@ -118,10 +126,10 @@ function db() {
     dynasty $1 & disown
 }
 
-alias dpid='pgrep -f "^python dynasty.py .*"'
-alias dtime='ps -aux | grep "python dynasty.py"'
-alias dshow='pgrep -af "^python dynasty.py .*"'
-alias dcount='pgrep -afc "^python dynasty.py .*"'
+alias dpid='pgrep -f "^python3 .*dynasty.py .*"'
+alias dtime='ps -aux | grep "python3 dynasty.py"'
+alias dshow='pgrep -af "^python3 dynasty.py .*"'
+alias dcount='pgrep -afc "^python3 dynasty.py .*"'
 alias dkill='dpid | xargs kill'
 
 dlog() {
