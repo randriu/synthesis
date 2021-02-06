@@ -25,6 +25,7 @@ Compilation of the tool and of all of its prerequisites will take a couple of ho
 Having installed the tool, you can test it by running the dynasty tool to evaluate a simple synthesis problem:
 
 ```sh
+source env/bin/activate
 python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid
 ```
 

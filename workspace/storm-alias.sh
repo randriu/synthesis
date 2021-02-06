@@ -32,119 +32,27 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 ### TACAS 2021 #################################################################
 
 tacas21-prepare-artifact() {
-    sudo apt install -y git
-    git clone https://github.com/gargantophob/synthesis.git
     cd synthesis/prerequisites/tacas-dependencies
 
     DEP_DIR=$PWD
 
     # download apt-packages
-    PACK_DIR=$DEP_DIR/apt-packages
-    PACK_URIS=$DEP_DIR/packages.uri
-    mkdir -p $PACK_DIR
+    mkdir -p apt-packages
     sudo apt-get update
-    sudo apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake python3-virtualenv | grep -oP "(?<=').*(?=')" > $PACK_URIS
-    cd $PACK_DIR
-    wget -i $PACK_URIS
-    rm $PACK_URIS
+    sudo apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake python3-virtualenv | grep -oP "(?<=').*(?=')" > packages.uri
+    cd $apt-packages
+    wget -i ../packages.uri
     cd $DEP_DIR
 
     # download pip packages
-    PIP_DIR=$DEP_DIR/pip-packages
-    pip3 download -d $PIP_DIR -r python-requirements
+    pip3 download -d pip-packages -r python-requirements
     cd ..
 
     # zip everything
     zip -r tacas-dependencies.zip tacas-dependencies
+    rm -rf tacas-dependencies
     cd ..
     zip -r synthesis.zip synthesis
-}
-
-### dependencies ###############################################################
-
-dynasty-download() {
-    # before download (make sure that env is clean)
-    clean_up
-
-    local target_dir=$1
-    mkdir -p ${target_dir}/prerequisites
-
-    # carl
-    cd ${target_dir}/prerequisites
-    git clone -b master14 https://github.com/smtrat/carl
-    cd -
-    # created folder: prerequisites/carl
-
-    # pycarl
-    cd ${target_dir}/prerequisites
-    git clone https://github.com/moves-rwth/pycarl.git
-    cd -
-    # created folder: prerequisites/pycarl
-
-    # storm
-    cd $target_dir
-    wget https://zenodo.org/record/4288652/files/moves-rwth/storm-1.6.3.zip
-    unzip storm-1.6.3.zip && rm storm-1.6.3.zip
-    mv moves-rwth-storm-e763b83 storm
-    cd -
-    # created folder: storm
-
-    # stormpy
-    cd $target_dir
-    wget https://github.com/moves-rwth/stormpy/archive/1.6.3.zip
-    unzip 1.6.3.zip && rm 1.6.3.zip
-    mv stormpy-1.6.3 stormpy
-    cd -
-    # created folder: stormpy
-}
-
-dynasty-dependencies() {
-    sudo apt update
-    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
-    sudo apt -y install texlive-latex-extra
-
-    # not installed on sarka:
-        # carl:
-            # libcln-dev (+, requires texinfo)
-            # libginac-dev (+)
-            # libeigen3-dev (+)
-        # storm:
-            # libglpk-dev (+)
-            # libxerces-c-dev (we probably do not need --gspn)
-
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
-    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-}
-
-synthesis-dependencies() {
-    
-    if [ $SYNTHESIS_TACAS21 == "true" ]; then
-        unzip dependencies.zip
-        cp -r dependencies/prerequisites dependencies/storm dependencies/stormpy .
-        cd dependencies/dependencies
-        sudo dpkg -i apt-packages/*.deb
-        pip3 install --no-index -f pip-packages -r python-requirements
-        sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
-        source $HOME/.profile
-
-        virtualenv -p python3 $SYNTHESIS_ENV
-        source $SYNTHESIS_ENV/bin/activate
-        pip3 install --no-index -f pip-packages -r python-requirements
-        deactivate
-        cd -
-    else
-        if [ $SYNTHESIS_INSTALL_DEPENDENCIES == "true" ]; then
-            dynasty-dependencies
-        fi
-        dynasty-download $SYNTHESIS
-        pip3 install virtualenv
-
-        virtualenv -p python3 $SYNTHESIS_ENV
-        source $SYNTHESIS_ENV/bin/activate
-        pip3 install pysmt z3-solver click pytest
-        deactivate
-    fi
-    
 }
 
 ### storm patch ################################################################
@@ -233,7 +141,7 @@ synthesis-full() {
 
 ### development ################################################################
 
-#recompilation
+# recompilation
 
 storm-rebuild() {
     storm-config
