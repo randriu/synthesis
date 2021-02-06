@@ -2,12 +2,11 @@
 
 set -ex
 
-TACAS=true
+INSTALL_TACAS21=true
 INSTALL_DEPENDENCIES=false
 
 THREADS=$(nproc)
 # THREADS=1 # uncomment this to disable multi-core compilation
-STORM_VERSION=1.6.3
 
 SYNTHESIS=`pwd`
 PREREQUISITES=$SYNTHESIS/prerequisites
@@ -22,9 +21,9 @@ unzip $DOWNLOADS/pycarl.zip
 mv pycarl-master pycarl
 cd ..
 unzip $DOWNLOADS/storm.zip
-mv storm-$STORM_VERSION storm
+mv storm-* storm
 unzip $DOWNLOADS/stormpy.zip
-mv stormpy-$STORM_VERSION stormpy
+mv stormpy-* stormpy
 
 # patch
 rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
@@ -49,20 +48,28 @@ if [ "$INSTALL_DEPENDENCIES" = true ]; do
 fi
 
 # tacas dependencies
-if [ "$TACAS" = true ]; do
+if [ "$INSTALL_TACAS21" = true ]; do
+    sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
+    source $HOME/.profile
     cd $PREREQUISITES
     unzip tacas-dependencies.zip
     cd tacas-dependencies
+    unzip storm-eigen.zip
     pip3 install --no-index -f pip-packages -r python-requirements
     sudo dpkg -i apt-packages/*.deb
-    sudo apt install -y python3-virtualenv
     cd ../..
 fi
 
 # set up python environment
 virtualenv -p python3 $SYNTHESIS_ENV
 source $SYNTHESIS_ENV/bin/activate
-pip3 install pysmt z3-solver click
+if [ "$INSTALL_TACAS21" = true ]; do
+    cd $PREREQUISITES/tacas-dependencies
+    pip3 install --no-index -f pip-packages -r python-requirements
+    cd ../..
+else
+    pip3 install pytest pytest-runner numpy scipy pysmt z3-solver click
+fi
 deactivate
 
 # install prerequisites
@@ -88,7 +95,7 @@ cd ..
 
 # storm
 mkdir -p storm/build
-if [ "$TACAS" = true ]; do
+if [ "$INSTALL_TACAS21" = true ]; do
     cp $PREREQUISITES/tacas-dependencies/storm_3rdparty_CMakeLists.txt storm/resources/3rdparty/CMakeLists.txt
     mkdir -p storm/build/include/resources/3rdparty/
     cp -r $PREREQUISITES/tacas-dependencies/StormEigen/ storm/build/include/resources/3rdparty/

@@ -34,32 +34,28 @@ export DYNASTY_DIR=$SYNTHESIS/dynasty
 tacas21-prepare-artifact() {
     sudo apt install -y git
     git clone https://github.com/gargantophob/synthesis.git
-    cd synthesis/prerequisites
-    unzip tacas-dependencies.zip
-    cd tacas-dependencies
+    cd synthesis/prerequisites/tacas-dependencies
 
     DEP_DIR=$PWD
-    PACK_DIR=$DEP_DIR/apt-packages
-    PIP_DIR=$DEP_DIR/pip-packages
-    STORM_VERSION=1.6.3
 
     # download apt-packages
+    PACK_DIR=$DEP_DIR/apt-packages
     PACK_URIS=$DEP_DIR/packages.uri
     mkdir -p $PACK_DIR
     sudo apt-get update
-    sudo apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake | grep -oP "(?<=').*(?=')" > $PACK_URIS
+    sudo apt-get install --print-uris libgmp-dev libglpk-dev libhwloc-dev z3 libboost-all-dev libeigen3-dev libginac-dev libpython3-dev automake python3-virtualenv | grep -oP "(?<=').*(?=')" > $PACK_URIS
     cd $PACK_DIR
     wget -i $PACK_URIS
+    rm $PACK_URIS
     cd $DEP_DIR
 
     # download pip packages
+    PIP_DIR=$DEP_DIR/pip-packages
     pip3 download -d $PIP_DIR -r python-requirements
+    cd ..
 
     # zip everything
-    cd ..
     zip -r tacas-dependencies.zip tacas-dependencies
-    rm -rf tacas-dependencies
-
     cd ..
     zip -r synthesis.zip synthesis
 }

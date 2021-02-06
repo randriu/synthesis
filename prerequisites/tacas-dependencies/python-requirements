@@ -1,0 +1,7 @@
+pytest
+pytest-runner
+numpy
+scipy
+z3-solver
+click
+pysmt
