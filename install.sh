@@ -8,8 +8,12 @@
 
 set -ex
 
-INSTALL_TACAS21=true
+INSTALL_TACAS21=false
 INSTALL_DEPENDENCIES=false
+
+if [ "$INSTALL_TACAS21" = true ] || [ "$INSTALL_DEPENDENCIES" = true ]; then
+    if [[ ! $(sudo echo 0) ]]; then echo "sudo authentication failed"; exit; fi
+fi
 
 THREADS=$(nproc)
 # THREADS=1 # uncomment this to disable multi-core compilation
@@ -20,7 +24,7 @@ DOWNLOADS=$PREREQUISITES/downloads
 TACAS_DEPENDENCIES=$PREREQUISITES/tacas-dependencies
 SYNTHESIS_ENV=$SYNTHESIS/env
 
-#unzip
+#unzip downloaded prerequisites
 cd $PREREQUISITES
 unzip $DOWNLOADS/carl.zip
 mv carl-master14 carl
@@ -36,7 +40,7 @@ mv stormpy-* stormpy
 rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
 
 # dependencies
-if [ "$INSTALL_DEPENDENCIES" = true ]; do
+if [ "$INSTALL_DEPENDENCIES" = true ]; then
     # not installed on sarka (+ means there is an included resourse):
         # carl:
             # libcln-dev (+, requires texinfo)
@@ -54,12 +58,10 @@ if [ "$INSTALL_DEPENDENCIES" = true ]; do
 fi
 
 # tacas dependencies
-if [ "$INSTALL_TACAS21" = true ]; do
+if [ "$INSTALL_TACAS21" = true ]; then
     sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
     source $HOME/.profile
-    cd $PREREQUISITES
-    unzip tacas-dependencies.zip
-    cd tacas-dependencies
+    cd $TACAS_DEPENDENCIES
     unzip storm-eigen.zip
     pip3 install --no-index -f pip-packages -r python-requirements
     sudo dpkg -i apt-packages/*.deb
@@ -69,7 +71,7 @@ fi
 # set up python environment
 virtualenv -p python3 $SYNTHESIS_ENV
 source $SYNTHESIS_ENV/bin/activate
-if [ "$INSTALL_TACAS21" = true ]; do
+if [ "$INSTALL_TACAS21" = true ]; then
     cd $TACAS_DEPENDENCIES
     pip3 install --no-index -f pip-packages -r python-requirements
     cd $SYNTHESIS
@@ -97,7 +99,7 @@ cd $SYNTHESIS
 
 # storm
 mkdir -p $SYNTHESIS/storm/build
-if [ "$INSTALL_TACAS21" = true ]; do
+if [ "$INSTALL_TACAS21" = true ]; then
     cp $TACAS_DEPENDENCIES/storm_3rdparty_CMakeLists.txt $SYNTHESIS/storm/resources/3rdparty/CMakeLists.txt
     mkdir -p $SYNTHESIS/storm/build/include/resources/3rdparty/
     cp -r $TACAS_DEPENDENCIES/StormEigen/ $SYNTHESIS/storm/build/include/resources/3rdparty/
