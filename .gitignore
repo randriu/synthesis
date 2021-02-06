@@ -1,2 +1,6 @@
 storm/
 stormpy/
+
+*.log
+*.jani
+
