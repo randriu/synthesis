@@ -1,12 +1,6 @@
-# Abstract for the artifact submission.
-
-This artifact includes an implementation of the novel method for synthesis of probabilistic systems proposed in the TACAS 2021 submission #87 (Inductive Synthesis for Probabilistic Programs Reaches New Horizons). The artifact further includes an implementation of state-of-the-art methods for synthesis of probabilistic systems that are used in the experimental part of the paper to evaluate the performance of the proposed methods, and the benchmarks used in the evaluation. The artifact allows users to replicate all the experiments presented in the paper, in particular, the results presented in Tables 1-3. It further suggests additional experiments that allow to explore the discussed methods beyond the presented experiment suit.
-
-This artifact will be made publicly available at [zenodo](https://zenodo.org/) and represents the currently developed branch of the dynasty (https://github.com/moves-rwth/dynasty) tool for the synthesis of probabilistic systems.
- 
 # Artifact for submission 87
 
-This is an artifact supplemented with the TACAS 2021 submission __Roman Andriushchenko, Milan Češka, Sebastian Junges, and Joost-Pieter Katoen:__ **Inductive Synthesis for Probabilistic ProgramsReaches New Horizons**. The tool represents a branch of the [dynasty](https://github.com/moves-rwth/dynasty) tool for probabilistic synthesis and contains the dynasty code as well as its adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy) (prerequisites for dynasty).
+This is an artifact supplemented with the TACAS 2021 submission __Roman Andriushchenko, Milan Češka, Sebastian Junges, and Joost-Pieter Katoen:__ **Inductive Synthesis for Probabilistic ProgramsReaches New Horizons**. The tool represents a branch of the [dynasty](https://github.com/moves-rwth/dynasty) tool for probabilistic synthesis and contains the dynasty code as well as its adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy) (prerequisites for dynasty). This artifact is made publicly available at [zenodo](https://zenodo.org/record/4425438).
 
 **Disclaimer.** Since the initial submission of the paper manuscript, the implementation of the tool has been subject to multiple improvements and optimizations, with the most drastic changes concerning the CEGAR method and the CEGAR loop of the integrated method. As a consequence of this, the experimental evaluation of the synthesis methods has been very slightly reworked in the revised manuscript to better highlight the differences between the synthesis approaches. The conclusions drawn from the presented experiments remain the same, although in multiple cases the novel integrated method has demonstrated even more distinguished results.
 
@@ -15,14 +9,16 @@ This is an artifact supplemented with the TACAS 2021 submission __Roman Andriush
 Installation is performed automatically by running the installation script `install.sh`:
 
 ```sh
-sudo ./install.sh
+./install.sh
 ```
 
-Compilation of the tool and of all of its prerequisites will take a couple of hours. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see exported variable COMPILE_JOBS in the script install.sh).
+Compilation of the tool and of all of its prerequisites will take a couple of hours. Be aware that upgrading the OS of the VM may cause problem
+
+To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see exported variable THREADS in the script install.sh).
 
 ## Initial testing of the artifact
 
-Having installed the tool, you can test it by running the dynasty tool to evaluate a simple synthesis problem:
+Having installed the tool, you can test it by activating the python envorinment and running the dynasty tool to evaluate a simple synthesis problem:
 
 ```sh
 source env/bin/activate
@@ -44,7 +40,13 @@ feasible: no
 
 ## Reproducing presented experiments
 
-Reproducing all of the experiments discussed in the paper is a time-consuming procedure that can take hundreds of hours. We recommend the reviewers to first run 
+Reproducing all of the experiments discussed in the paper is a time-consuming procedure that can take hundreds of hours. We recommend the reviewers to navigate to `experiments` folder:
+
+```sh
+cd experiments
+```
+
+and then run 
 
 ```sh
 ./experiment.sh --quick
@@ -56,7 +58,7 @@ This will run a small subset of the experiments, namely performance of CEGAR and
 ./experiment.sh
 ```
 
-Notice that the latter call merely evaluates *more* benchmarks with longer timeouts. We recommend running this script only overnight: at default settings and with VM having 4 CPU cores, this evaluation should take around 6 hours. To understand the experiments and alternatives settings, please consult the remaining sections in which we advise you how to create tables with different user-set timeouts and even how to run individual experiments.
+Notice that the latter call merely evaluates *more* synthesis problems with longer timeouts. We recommend running this script only overnight: at default settings and with VM having 4 CPU cores, this evaluation should take around 6 hours. To understand the experiments and alternatives settings, please consult the remaining sections in which we advise you how to create tables with different user-set timeouts and even how to run individual experiments.
 
 **Please note** that all of the discussed synthesis methods -- CEGIS, CEGAR and the novel integrated method -- are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different numbers of iterations as well as execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs CEGAR or overall quality of MaxSat counterexamples vs those obtained by a novel approach -- should be preserved.
 
@@ -78,7 +80,13 @@ Finally, note that the `experiment.sh` script evaluates experiments concurrently
 
 ## How to run synthesis manually
 
-The remainder of this README explains how to run dynasty tool manually to help you set up your own experiments. First, recall the dynasty call mentioned above:
+The remainder of this README explains how to run dynasty tool manually to help you set up your own experiments. First, do not forget to activate python environment:
+
+```sh
+source env/bin/activate
+```
+
+Recall the dynasty call mentioned above:
 
 ```sh
 python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid

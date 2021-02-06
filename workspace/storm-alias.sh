@@ -1,20 +1,8 @@
 #!/bin/bash
 
-# merlin:
-# wget https://www.stud.fit.vutbr.cz/~xandri03/synthesis.zip
-# git:
-# https://github.com/gargantophob/synthesis/archive/master.zip
-# zenodo 0.1:
-# wget https://zenodo.org/record/4422544/files/synthesis.zip
-# zenodo 0.11: https://zenodo.org/record/4425438
-# wget https://zenodo.org/record/4425438/files/synthesis.zip
-# zenodo 0.12: TODO
-
 # compilation parameters
 
 export COMPILE_JOBS=$(nproc)
-export SYNTHESIS_TACAS21=true
-export SYNTHESIS_INSTALL_DEPENDENCIES=false
 
 # environment variables
 
@@ -23,10 +11,8 @@ export PREREQUISITES=$SYNTHESIS/prerequisites
 export SYNTHESIS_ENV=$SYNTHESIS/env
 
 export STORM_DIR=$SYNTHESIS/storm
-export STORM_SRC=$STORM_DIR/src
 export STORM_BLD=$STORM_DIR/build
 
-export STORMPY_DIR=$SYNTHESIS/stormpy
 export DYNASTY_DIR=$SYNTHESIS/dynasty
 
 ### TACAS 2021 #################################################################
@@ -65,50 +51,29 @@ dynasty-patch() {
     rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
 }
 
-### preparing prerequisites ####################################################
-
-carl-build() {
-    mkdir -p $PREREQUISITES/carl/build
-    cd $PREREQUISITES/carl/build
-    cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
-    make lib_carl --jobs $COMPILE_JOBS
-    # make test
-    cd $OLDPWD
-}
-
-pycarl-build() {
-    cd $PREREQUISITES/pycarl
-    source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --carl-dir $PREREQUISITES/carl/build --jobs $COMPILE_JOBS develop
-    # python setup.py test
-    deactivate
-    cd $OLDPWD
-}
-
 ### storm and stormpy ##########################################################
 
 storm-config() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD
     cmake ..
-    # cmake -DSTORM_USE_LTO=OFF ..
-    cd -
+    cd ~-
 }
 
 storm-build() {
     cd $STORM_BLD
     make storm-main --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
-    cd -
+    cd ~-
 }
 
 stormpy-build() {
-    cd $STORMPY_DIR
+    cd $SYNTHESIS/stormpy
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
-    # python setup.py test
+    # python3 setup.py test
     deactivate
-    cd -
+    cd ~-
 }
 
 dynasty-install() {
@@ -117,26 +82,13 @@ dynasty-install() {
     python3 setup.py install
     # python3 setup.py test
     deactivate
-    cd $OLDPWD
+    cd ~-
 }
-
-# aggregated functions
 
 synthesis-install() {
-    carl-build
-    pycarl-build
-
-    dynasty-patch
-    storm-config
-    storm-build
-    stormpy-build
-
-    dynasty-install
-}
-
-synthesis-full() {
-    synthesis-dependencies
-    synthesis-install
+    cd $SYNTHESIS
+    bash install.sh
+    cd ~-
 }
 
 ### development ################################################################
@@ -160,18 +112,14 @@ alias sb='storm-build'
 alias pb='stormpy-build'
 alias sr='storm-rebuild'
 
-alias synthesis='cd $SYNTHESIS'
 
-alias enva='source $SYNTHESIS_ENV/bin/activate'
-alias envd='deactivate'
-
-alias tb='cd $DYNASTY_DIR; enva; subl $SYNTHESIS/dynasty/dynasty/family_checkers/integrated_checker.py; subl $SYNTHESIS/dynasty/execute.sh'
-alias tf='envd'
-
-### execution $$################################################################
+### executing dynasty ##########################################################
 
 export WORKSPACE=$SYNTHESIS/workspace
 export DYNASTY_LOG=$WORKSPACE/log
+
+alias enva='source $SYNTHESIS_ENV/bin/activate'
+alias envd='deactivate'
 
 function dynasty() {
     local core=0
@@ -184,9 +132,9 @@ function dynasty() {
     cd $SYNTHESIS
     mkdir -p $DYNASTY_LOG
     cp $exp_sh $run_sh
-    enva
+    source $SYNTHESIS_ENV/bin/activate
     bash $run_sh $core
-    envd
+    deactivate
     cd ~-
 }
 function d() {
@@ -205,16 +153,15 @@ alias dkill='dpid | xargs kill'
 dlog() {
     cat $DYNASTY_LOG/log_$1.txt
 }
+dgrep() {
+    cat $DYNASTY_LOG/log_grep_$1.txt
+}
 
 dhead() {
     dlog $1 | head -n 50
 }
 dtail() {
     dlog $1 | tail -n 50
-}
-
-dgrep() {
-    cat $DYNASTY_LOG/log_grep_$1.txt
 }
 
 diter() {
@@ -241,7 +188,7 @@ dopt() {
 dbounds() {
     dlog $1 | grep "Result for initial"
 }
-dces() {
+dce() {
     dlog $1 | grep "generalized"
 }
 dperf() {
@@ -268,7 +215,7 @@ bind '"\e6"':"\"db 6 \C-m\""
 bind '"\e7"':"\"db 7 \C-m\""
 bind '"\e8"':"\"db 8 \C-m\""
 
-### tmp ################################################################
+### executing storm  ###########################################################
 
 storm() {
     cd $STORM_BLD/bin
