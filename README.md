@@ -38,19 +38,13 @@ feasible: no
 
 ## Reproducing presented experiments
 
-Reproducing all of the experiments discussed in the paper is a time-consuming procedure that can take hundreds of hours. We recommend the reviewers to navigate to `experiments` folder:
-
-```sh
-cd experiments
-```
-
-and then run 
+Reproducing all of the experiments discussed in the paper is a time-consuming procedure that can take hundreds of hours. We recommend the reviewers to first run:
 
 ```sh
 ./experiment.sh --quick
 ```
 
-This will run a small subset of the experiments, namely performance of CEGAR and the hybrid methods on the basic benchmark, as reported in Table 2, as well the quality of counterexamples for the novel approach (columns `trivial` and `family`). Reproducing these experiments should take about 30 minutes and even less if you enable multiple cores on your VM to allow concurrent evaluation of experiments. To reproduce all experiments, one may then run 
+from the `experiments` folder. This will run a small subset of the experiments, namely performance of CEGAR and the hybrid methods on the basic benchmark, as reported in Table 2, as well the quality of counterexamples for the novel approach (columns `trivial` and `family`). Reproducing these experiments should take about 30 minutes and even less if you enable multiple cores on your VM to allow concurrent evaluation of experiments. To reproduce all experiments, one may then run 
 
 ```sh
 ./experiment.sh
