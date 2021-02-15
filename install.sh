@@ -69,14 +69,14 @@ if [ "$INSTALL_TACAS21" = true ]; then
 fi
 
 # set up python environment
-virtualenv -p python3 $SYNTHESIS_ENV
+python3 -m venv $SYNTHESIS_ENV # modified sc-gpu1 server
 source $SYNTHESIS_ENV/bin/activate
 if [ "$INSTALL_TACAS21" = true ]; then
     cd $TACAS_DEPENDENCIES
     pip3 install --no-index -f pip-packages -r python-requirements
     cd $SYNTHESIS
 else
-    pip3 install pytest pytest-runner numpy scipy pysmt z3-solver click
+    pip3 install pytest pytest-runner numpy scipy pysmt z3-solver click wheel #+ wheel added
 fi
 deactivate
 
@@ -105,7 +105,8 @@ if [ "$INSTALL_TACAS21" = true ]; then
     cp -r $TACAS_DEPENDENCIES/StormEigen/ $SYNTHESIS/storm/build/include/resources/3rdparty/
 fi
 cd $SYNTHESIS/storm/build
-cmake ..
+#installation sc-gpu1 server (lto problem solution)
+cmake -DCMAKE_AR=$(which gcc-ar) -DCMAKE_RANLIB=$(which gcc-ranlib) -DCMAKE_NM=$(which gcc-nm) ..
 make storm-main --jobs $THREADS
 #[TEST] make check --jobs $THREADS
 cd $SYNTHESIS
