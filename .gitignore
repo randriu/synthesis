@@ -1,7 +1,7 @@
-storm/
-stormpy/
+# storm/
+# stormpy/
 env/
 
 *.log
 *.jani
-
+rebuild.sh
