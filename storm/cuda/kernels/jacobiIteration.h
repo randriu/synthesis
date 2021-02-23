@@ -6,7 +6,7 @@
 
 #include "cudaForStorm.h"
 
-#define NNZ_PER_WG 32
+#define NNZ_PER_WG 128
 
 bool jacobiIteration_solver_double(
                 uint_fast64_t const maxIterationCount, 

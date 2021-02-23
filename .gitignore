@@ -4,4 +4,6 @@ env/
 
 *.log
 *.jani
+
 rebuild.sh
+.vscode/

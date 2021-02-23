@@ -553,6 +553,8 @@ cleanup:
     std::cout << "--------------------------------------------------------------\n";
     std::cout << "METRICS\n";
     std::cout << "Jacobi Iterations: " << iterationCount << "\n";
+    std::cout << "Matrix dimension: " << matrixRowCount << "\n";
+    std::cout << "Matrix nnz count: " << matrixNnzCount << "\n";
     std::cout << "--------------------------------------------------------------\n";
 
     return !errorOccured;

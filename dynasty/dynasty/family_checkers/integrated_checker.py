@@ -71,7 +71,16 @@ def check_dtmc(dtmc, formula, quantitative=False):
         formula = formula.clone()
         formula.remove_bound()
 
-    result = stormpy.model_checking(dtmc, formula)
+    env = stormpy.Environment()
+    env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+    env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+
+    timer = Timer()
+    timer.start()
+    result = stormpy.model_checking(dtmc, formula, environment=env)
+    timer.stop()
+    logger.debug(f"DTMC Model Checking: {round(timer.read(), 2)}")
+   
     at_init = result.at(dtmc.initial_states[0])
     satisfied = at_init if not quantitative else is_satisfied(formula, at_init)
     return satisfied, result
@@ -235,8 +244,12 @@ class EnumerationChecker(LiftingChecker):
         return self.iterations
 
     def _check_optimal_property(self, dtmc):
+        env = stormpy.Environment()
+        env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+        env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+
         # Model checking of the optimality property
-        result = stormpy.model_checking(dtmc, self._optimality_setting.criterion)
+        result = stormpy.model_checking(dtmc, self._optimality_setting.criterion, environment=env)
         optimal_value = result.at(dtmc.initial_states[0])
 
         # Check whether the improvement was achieved
@@ -1292,11 +1305,14 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             # )
 
     def _check_optimal_property(self, family_ref, assignment, cex_generator=None, optimal_value=None):
+        env = stormpy.Environment()
+        env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+        env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
 
         if optimal_value is None:
             assert family_ref.dtmc is not None
             # Model checking of the optimality property
-            result = stormpy.model_checking(family_ref.dtmc, self._optimality_setting.criterion)
+            result = stormpy.model_checking(family_ref.dtmc, self._optimality_setting.criterion, environment=env)
             optimal_value = result.at(family_ref.dtmc.initial_states[0])
 
         # Check whether the improvement was achieved
