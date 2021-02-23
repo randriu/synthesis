@@ -675,6 +675,11 @@ namespace storm {
         }
         
         template<typename ValueType>
+        std::vector<typename SparseMatrix<ValueType>::index_type> const& SparseMatrix<ValueType>::getRowIndications() const {
+            return this->rowIndications;
+        }
+        
+        template<typename ValueType>
         std::vector<typename SparseMatrix<ValueType>::index_type> const& SparseMatrix<ValueType>::getRowGroupIndices() const {
             // If there is no current row grouping, we need to create it.
             if (!this->rowGroupIndices) {

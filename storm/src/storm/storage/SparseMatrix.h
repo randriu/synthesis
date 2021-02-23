@@ -603,6 +603,13 @@ namespace storm {
             std::vector<MatrixEntry<index_type, value_type >> const& getColumnsAndValues() const;
              
             /*!
+             * Returns a vector containing the indices at which each given row begins.
+             *
+             * @return The values and the corresponding columns of this matrix.
+             */
+            std::vector<index_type> const& getRowIndications() const; 
+
+            /*!
              * Swaps the grouping of rows of this matrix.
              *
              * @return The old grouping of rows of this matrix.

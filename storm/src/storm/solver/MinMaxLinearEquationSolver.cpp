@@ -6,6 +6,7 @@
 #include "storm/solver/IterativeMinMaxLinearEquationSolver.h"
 #include "storm/solver/TopologicalMinMaxLinearEquationSolver.h"
 #include "storm/solver/TopologicalCudaMinMaxLinearEquationSolver.h"
+#include "storm/solver/CudaMinMaxLinearEquationSolver.h"
 #include "storm/solver/LpMinMaxLinearEquationSolver.h"
 #include "storm/solver/AcyclicMinMaxLinearEquationSolver.h"
 
@@ -214,6 +215,8 @@ namespace storm {
                 result = std::make_unique<LpMinMaxLinearEquationSolver<ValueType>>(std::make_unique<storm::utility::solver::LpSolverFactory<ValueType>>());
             } else if (method == MinMaxMethod::Acyclic) {
                 result = std::make_unique<AcyclicMinMaxLinearEquationSolver<ValueType>>();
+            } else if (method == MinMaxMethod::CudaValueIteration) {
+                result = std::make_unique<CudaMinMaxLinearEquationSolver<ValueType>>();
             } else {
                 STORM_LOG_THROW(false, storm::exceptions::InvalidSettingsException, "Unsupported technique.");
             }
