@@ -16,14 +16,10 @@ class EdgeColoring:
         )
 
     def _hole_assignment_to_string(self, v):
-        return "{}".format(
-            ", ".join(["{}: {}".format(x, y) for x, y in zip(self.hole_options.keys(), v) if y is not None])
-        )
+        return f"{', '.join(['{}: {}'.format(x, y) for x, y in zip(self.hole_options.keys(), v) if y is not None])}"
 
     def _full_hole_assignment(self, partial_hole_assignment):
-        result = []
-        for key in self.hole_options:
-            result.append(partial_hole_assignment.get(key, None))
+        # result = [partial_hole_assignment.get(key, None) for key in self.hole_options]
         return tuple(self._full_hole_assignment(partial_hole_assignment))
 
     def get_or_make_color(self, full_hole_assignment):

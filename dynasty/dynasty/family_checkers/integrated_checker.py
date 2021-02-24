@@ -80,9 +80,9 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
 
 def readable_assignment(assignment):
-    # return {k: v.__str__() for (k, v) in assignment.items()} if assignment is not None else None
     return ",".join(
-        [f"{k}={[int(v.__str__()) for v in vs] if len(vs) > 1 else int(vs[0].__str__())}" for (k, vs) in assignment.items()]
+        [f"{name}={JaniQuotientBuilder.convert_expr_to_num(assignment[name][idx])}" for (name, values) in
+         assignment.items() for idx, value in enumerate(values)]
     ) if assignment is not None else None
 
 
@@ -733,7 +733,7 @@ class Family:
 
             if not feasible and isinstance(feasible, bool):
                 logger.debug(f"Formula {formula_index}: UNSAT")
-                undecided_formulae_indices = None # this seems dangerous, see assignment to self.formulae_indicies and then calling analyzed()
+                undecided_formulae_indices = None  # TODO: Check safeness -- probably ok -> family is destroyed
                 if self._optimality_setting is not None and formula_index == len(self.formulae) - 1:
                     if not undecided_formulae_indices:
                         decided, optimal_value = self.check_optimal_property(feasible)
@@ -804,7 +804,7 @@ class Family:
     def pick_whole_family(self):
         assignment = HoleOptions()
         for hole, vals in self.options.items():
-            assignment[hole] = [int(str(val)) for val in vals]
+            assignment[hole] = vals
         self.member_assignment = assignment
 
     def check_optimal_property(self, feasible):
@@ -999,7 +999,8 @@ class FamilyHybrid(Family):
             indexed_assignment = Family._hole_options.index_map(self.member_assignment)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
             collected_edge_indices = stormpy.FlatSet(
-                Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet()))
+                Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
+            )
             for c in subcolors:
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
