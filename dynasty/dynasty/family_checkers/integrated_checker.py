@@ -80,10 +80,11 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
 
 def readable_assignment(assignment):
-    return ",".join(
-        [f"{name}={JaniQuotientBuilder.convert_expr_to_num(assignment[name][idx])}" for (name, values) in
-         assignment.items() for idx, value in enumerate(values)]
-    ) if assignment is not None else None
+    read_assignment = {}
+    for (name, values) in assignment.items():
+        read_assignment[name] = \
+            [JaniQuotientBuilder.convert_expr_to_num(assignment[name][idx]) for idx, value in enumerate(values)]
+    return ",".join([f"{k}={v if len(v) > 1 else v[0]}" for k, v in read_assignment.items()])
 
 
 class Statistic:
