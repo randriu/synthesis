@@ -116,6 +116,7 @@ namespace storm {
             this->matrixRowCount = A.getRowCount();
             this->matrixNnzCount = A.getNonzeroEntryCount();
 
+            // TODO: useless copy use pointer
             auto data = A.getColumnsAndValues();
             for (auto it = std::make_move_iterator(data.begin()),
                      end = std::make_move_iterator(data.end()); it != end; ++it) {
@@ -127,6 +128,7 @@ namespace storm {
             for (uint_fast64_t i = 0; i < this->matrixRowCount; ++i) 
                 matrixRowSizes.push_back(A.getRow(i).getNumberOfEntries());
 
+            // TODO: useless getRowIndications and use pointer
             this->rowStartIndices.push_back(0);
             for (uint_fast64_t i = 1; i <= this->matrixRowCount; ++i) 
                 this->rowStartIndices.push_back(rowStartIndices.at(i-1) + matrixRowSizes.at(i-1));

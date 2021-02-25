@@ -1,4 +1,4 @@
-#include "jacobiIteration.h"
+#include "cudaSynthesis.h"
 
 #include <thrust/functional.h>
 #include <thrust/transform.h>
@@ -560,20 +560,38 @@ cleanup:
     return !errorOccured;
 }
 
-bool jacobiIteration_solver_double(uint_fast64_t const maxIterationCount, 
-                double const precision,
-                uint_fast64_t const matrixRowCount,
-                uint_fast64_t const matrixNnzCount,
-                uint_fast64_t const matrixBlockCount,
-                std::vector<double> & x,
-                std::vector<double> const& b,
-                std::vector<double> const& nnzValues,
-                std::vector<double> const& D,
-                std::vector<uint_fast64_t> const& columnIndices,
-                std::vector<uint_fast64_t> const& rowStartIndices,
-                std::vector<uint_fast64_t> const& rowBlocks,
-                size_t& iterationCount,
-                bool const relativePrecisionCheck) {
+template <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+bool valueIteration_solver(
+                uint_fast64_t const maxIterationCount,
+                ValueType const precision, 
+                std::vector<uint_fast64_t> const& matrixRowIndices, 
+                std::vector<uint_fast64_t> const& columnIndices, 
+                std::vector<ValueType> const& nnzValues, 
+                std::vector<ValueType> x, 
+                std::vector<ValueType> const& b, 
+                std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, 
+                size_t& iterationCount) 
+{
+    std::cout << "CUDA ValueIteration method\n";
+
+    // ValueType            alpha      = 1.0f;
+    // ValueType            beta       = 0.0f;
+    // // CUSPARSE APIs
+    // cusparseHandle_t     handle     = NULL;
+    // cusparseSpMatDescr_t matA;
+    // cusparseDnVecDescr_t vecX, vecY;
+    // void*                dBuffer    = NULL;
+    // size_t               bufferSize = 0;
+    //TODO:
+
+    return false;
+}
+
+/*******************************************************************************/
+/*                    Jacobi Iteration API                                     */
+/*******************************************************************************/
+
+bool jacobiIteration_solver_double(uint_fast64_t const maxIterationCount, double const precision, uint_fast64_t const matrixRowCount, uint_fast64_t const matrixNnzCount, uint_fast64_t const matrixBlockCount, std::vector<double> & x, std::vector<double> const& b, std::vector<double> const& nnzValues, std::vector<double> const& D, std::vector<uint_fast64_t> const& columnIndices, std::vector<uint_fast64_t> const& rowStartIndices, std::vector<uint_fast64_t> const& rowBlocks, size_t& iterationCount, bool const relativePrecisionCheck) {
     if (relativePrecisionCheck) {
         return jacobiIteration_solver<true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowCount, matrixNnzCount, matrixBlockCount, x, b, nnzValues, D, columnIndices, rowStartIndices, rowBlocks, iterationCount);
     } else {
@@ -581,23 +599,54 @@ bool jacobiIteration_solver_double(uint_fast64_t const maxIterationCount,
     }
 }
 
-bool jacobiIteration_solver_float(uint_fast64_t const maxIterationCount, 
-                float const precision,
-                uint_fast64_t const matrixRowCount,
-                uint_fast64_t const matrixNnzCount,
-                uint_fast64_t const matrixBlockCount,
-                std::vector<float> & x,
-                std::vector<float> const& b,
-                std::vector<float> const& nnzValues,
-                std::vector<float> const& D,
-                std::vector<uint_fast64_t> const& columnIndices,
-                std::vector<uint_fast64_t> const& rowStartIndices,
-                std::vector<uint_fast64_t> const& rowBlocks,
-                size_t& iterationCount,
-                bool const relativePrecisionCheck) {
+bool jacobiIteration_solver_float(uint_fast64_t const maxIterationCount, float const precision, uint_fast64_t const matrixRowCount, uint_fast64_t const matrixNnzCount, uint_fast64_t const matrixBlockCount, std::vector<float> & x, std::vector<float> const& b, std::vector<float> const& nnzValues, std::vector<float> const& D, std::vector<uint_fast64_t> const& columnIndices, std::vector<uint_fast64_t> const& rowStartIndices, std::vector<uint_fast64_t> const& rowBlocks, size_t& iterationCount, bool const relativePrecisionCheck) {
     if (relativePrecisionCheck) {
         return jacobiIteration_solver<true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowCount, matrixNnzCount, matrixBlockCount, x, b, nnzValues, D, columnIndices, rowStartIndices, rowBlocks, iterationCount);
     } else {
         return jacobiIteration_solver<false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowCount, matrixNnzCount, matrixBlockCount, x, b, nnzValues, D, columnIndices, rowStartIndices, rowBlocks, iterationCount);
+    }
+}
+
+/*******************************************************************************/
+/*                    Value Iteration API                                      */
+/*******************************************************************************/
+
+bool valueIteration_solver_uint64_double_minimize(uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double> x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount) {
+    if (relativePrecisionCheck) {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<false, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    } else {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<false, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    }
+}
+
+bool valueIteration_solver_uint64_double_maximize(uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double> x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount) {
+    if (relativePrecisionCheck) {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<true, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    } else {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<true, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    }
+}
+
+bool valueIteration_solver_uint64_float_minimize(uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float> x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount){
+    if (relativePrecisionCheck) {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<false, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    } else {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<false, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    }
+}
+
+bool valueIteration_solver_uint64_float_maximize(uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float> x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount){
+    if (relativePrecisionCheck) {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<true, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+    } else {
+        // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
+        return valueIteration_solver<true, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
     }
 }

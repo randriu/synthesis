@@ -761,11 +761,11 @@ if(ENABLE_CUDA)
 
     set(STORM_CUDA_LIB_NAME "storm-cuda")
 
-    file(GLOB_RECURSE STORM_CUDA_KERNEL_FILES ${PROJECT_SOURCE_DIR}/cuda/kernels/jacobiIteration.cu)
-    file(GLOB_RECURSE STORM_CUDA_HEADER_FILES ${PROJECT_SOURCE_DIR}/cuda/kernels/jacobiIteration.h)
-    file(GLOB_RECURSE STORM_CUDA_HEADER_FILES ${PROJECT_SOURCE_DIR}/cuda/kernels/cudaForStorm.h)
-    # file(GLOB_RECURSE STORM_CUDA_KERNEL_FILES ${PROJECT_SOURCE_DIR}/cuda/kernels/*.cu)
-    # file(GLOB_RECURSE STORM_CUDA_HEADER_FILES ${PROJECT_SOURCE_DIR}/cuda/kernels/*.h)
+    file(GLOB_RECURSE STORM_CUDA_KERNEL_FILES 
+            ${PROJECT_SOURCE_DIR}/cuda/kernels/cudaSynthesis.cu)
+    file(GLOB_RECURSE STORM_CUDA_HEADER_FILES 
+            ${PROJECT_SOURCE_DIR}/cuda/kernels/cudaForStorm.h
+            ${PROJECT_SOURCE_DIR}/cuda/kernels/cudaSynthesis.h)
 
     source_group(kernels FILES ${STORM_CUDA_KERNEL_FILES} ${STORM_CUDA_HEADER_FILES})
     include_directories(${PROJECT_SOURCE_DIR}/cuda/kernels/)

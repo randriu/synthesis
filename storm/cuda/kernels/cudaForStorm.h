@@ -13,8 +13,8 @@
     #include "version.h"
 #endif
 
-// Linear equation solver using Jacobi iteration method
-#include "jacobiIteration.h"
+// GPU accelarated synthesis (MDP & MC modelchecking)
+#include "cudaSynthesis.h"
 
 // Utility Functions
 #include "utility.h"

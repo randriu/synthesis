@@ -9,7 +9,7 @@
 
 #include "storm-config.h"
 #ifdef STORM_HAVE_CUDASYNTHESIS
-#	include "cudaForStorm.h"
+#include "cudaForStorm.h"
 #endif
 
 namespace storm {
@@ -84,11 +84,9 @@ namespace storm {
             
 
             if (dir == OptimizationDirection::Minimize) {
-                //TODO:call minimize GPU solver
-                result = false;
+                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations);
             } else {
-                //TODO:call maximize GPU solver
-                result = false;   
+                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations);
             }
 
             if (!result) {
