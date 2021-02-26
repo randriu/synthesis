@@ -80,6 +80,7 @@ def check_dtmc(dtmc, formula, quantitative=False):
 
 
 def readable_assignment(assignment):
+    assignment = {} if assignment is None else assignment
     read_assignment = {}
     for (name, values) in assignment.items():
         read_assignment[name] = \
@@ -1011,7 +1012,7 @@ class FamilyHybrid(Family):
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             # assert absence of deadlocks or overlapping guards
-            assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
+            # assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
             assert self.dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
             assert len(self.dtmc.initial_states) == 1  # to avoid ambiguity
 
