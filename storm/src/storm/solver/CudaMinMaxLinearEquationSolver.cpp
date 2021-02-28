@@ -61,28 +61,6 @@ namespace storm {
             bool result = false;
             size_t globalIterations = 0;
 
-            std::cout << "matrix:\n";
-            std::cout << *(this->A) << "\n";
-            std::cout << sizeof(matrix.rowStartIndices) << "\n";
-
-            std::cout << "rowStartIndices:\n";
-            for (int i = 0; i < matrix.rowStartIndices->size(); i++) {
-                std::cout << matrix.rowStartIndices->at(i) << ", ";
-            }std::cout << "\n";
-            std::cout << "columnIndices:\n";
-            for (int i = 0; i < matrix.columnIndices.size(); i++) {
-                std::cout << matrix.columnIndices.at(i) << ", ";
-            }std::cout << "\n";
-            std::cout << "nnzValues:\n";
-            for (int i = 0; i < matrix.nnzValues.size(); i++) {
-                std::cout << matrix.nnzValues.at(i) << ", ";
-            }std::cout << "\n";
-            std::cout << "rowGroupIndices:\n";
-            for (int i = 0; i < matrix.rowGroupIndices->size(); i++) {
-                std::cout << matrix.rowGroupIndices->at(i) << ", ";
-            }std::cout << "\n";
-            
-
             if (dir == OptimizationDirection::Minimize) {
                 result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations);
             } else {
