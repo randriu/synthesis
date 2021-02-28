@@ -756,7 +756,7 @@ if(ENABLE_CUDA)
     #create library
     find_package(CUDA REQUIRED)
     # set(CUSP_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/resources/3rdparty/cusplibrary")
-    # find_package(Cusp REQUIRED)
+    find_package(Cub REQUIRED)
     find_package(Thrust REQUIRED)
 
     set(STORM_CUDA_LIB_NAME "storm-cuda")
@@ -775,16 +775,16 @@ if(ENABLE_CUDA)
 
     #############################################################
     ##
-    ##	CUSP
+    ##	CUB
     ##
     #############################################################
-    # if(CUSP_FOUND)
-        # include_directories(${CUSP_INCLUDE_DIR})
-        # cuda_include_directories(${CUSP_INCLUDE_DIR})
-        # message(STATUS "Storm (CudaPlugin) - Found CUSP Version ${CUSP_VERSION} in location ${CUSP_INCLUDE_DIR}.")
-    # else()
-        # message(FATAL_ERROR "Storm (CudaPlugin) - Could not find CUSP.")
-    # endif()
+    if(CUB_FOUND)
+        include_directories(${CUB_INCLUDE_DIR})
+        cuda_include_directories(${CUB_INCLUDE_DIR})
+        message(STATUS "Storm (CudaPlugin) - Found Cub Version ${CUB_VERSION} in location ${CUB_INCLUDE_DIR}.")
+    else()
+        message(FATAL_ERROR "Storm (CudaPlugin) - Could not find Cub. Check your CUDA installation.")
+    endif()
 
     #############################################################
     ##
