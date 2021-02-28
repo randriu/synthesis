@@ -14,6 +14,24 @@
 #define FULL_WARP_MASK 0xffffffff
 #define USE_CUSPARSE
 
+#define CHECK_CUDA(ans) { cudaAssert((ans), __FILE__, __LINE__); }
+inline void cudaAssert(cudaError_t code, const char *file, int line, bool abort=true)
+{
+   if (code != cudaSuccess) {
+      fprintf(stderr,"CUDA API assert: %s %s %d\n", cudaGetErrorString(code), file, line);
+      if (abort) exit(code);
+   }
+}
+
+#define CHECK_CUSPARSE(func) { cusparseAssert((func), __FILE__, __LINE__); }                                                  
+inline void cusparseAssert(cusparseStatus_t code, const char *file, int line, bool abort=true)
+{                                                                             
+    if (code != CUSPARSE_STATUS_SUCCESS) {                                   
+        fprintf(stderr,"CUSPARSE API assert: %s %s %d\n", cusparseGetErrorString(code), file, line);    
+        if (abort) exit(code);                                             
+    }                                                                          
+}
+
 /*******************************************************************************/
 /*                             DEVICE CODE                                     */
 /*******************************************************************************/
@@ -271,6 +289,10 @@ bool jacobiIteration_solver(
 {
     std::cout << "CUDA Jacobi method\n";
 
+    bool errorOccured = false;
+    bool converged = false;
+    iterationCount = 0;
+
     uint_fast64_t* device_columnIndices = nullptr;
     uint_fast64_t* device_rowStartIndices = nullptr; 
     uint_fast64_t* device_rowBlocks = nullptr;
@@ -280,13 +302,6 @@ bool jacobiIteration_solver(
     ValueType* device_b = nullptr;
     ValueType* device_D = nullptr;
     ValueType* device_nnzValues = nullptr;
-
-    bool converged = false;
-    iterationCount = 0;
-
-    // Device memory allocation
-    cudaError_t cudaMallocResult;
-    bool errorOccured = false;
 
     dim3 gatherGridDim(ceil(double(matrixRowCount)/NNZ_PER_WG));
 
@@ -301,146 +316,47 @@ bool jacobiIteration_solver(
     size_t               bufferSize = 0;
 #endif
 
-    cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_columnIndices), sizeof(uint_fast64_t) * columnIndices.size());
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Matrix Column Indices, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
-
-    cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_rowStartIndices), sizeof(uint_fast64_t) * (matrixRowCount + 1));
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Row Start Indices, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
-
+    // Device memory allocation
+    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_columnIndices), sizeof(uint_fast64_t) * columnIndices.size()) );
+    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_rowStartIndices), sizeof(uint_fast64_t) * (matrixRowCount + 1)) );
+    
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * matrixRowCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * matrixRowCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_b), sizeof(ValueType) * matrixRowCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_D), sizeof(ValueType) * matrixRowCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_nnzValues), sizeof(ValueType) * matrixNnzCount) );
 #ifndef USE_CUSPARSE
-    cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_rowBlocks), sizeof(uint_fast64_t) * (matrixBlockCount + 1));
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Row Blocks, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
+    CHECK_CUDA( cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_rowBlocks), sizeof(uint_fast64_t) * (matrixBlockCount + 1)) );
 #endif
 
-    cudaMallocResult = cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * matrixRowCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector x, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * matrixRowCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector x swap, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_b), sizeof(ValueType) * matrixRowCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector b, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_D), sizeof(ValueType) * matrixRowCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector D, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_nnzValues), sizeof(ValueType) * matrixNnzCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector of Matrix Values, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanup;
-    }
     // Memory allocated, copy data to device
-    cudaError_t cudaCopyResult;
-
-    cudaCopyResult = cudaMemcpy(device_columnIndices, columnIndices.data(), sizeof(uint_fast64_t) * columnIndices.size(), cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Matrix Column Indices, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
-
-    cudaCopyResult = cudaMemcpy(device_rowStartIndices, rowStartIndices.data(), sizeof(uint_fast64_t) * (matrixRowCount + 1), cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Matrix Row Start Indices, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
-
+    CHECK_CUDA( cudaMemcpy(device_columnIndices, columnIndices.data(), sizeof(uint_fast64_t) * columnIndices.size(), cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_rowStartIndices, rowStartIndices.data(), sizeof(uint_fast64_t) * (matrixRowCount + 1), cudaMemcpyHostToDevice) );
+    
+    CHECK_CUDA( cudaMemcpy(device_x, x.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemset(device_xSwap, 0, sizeof(ValueType) * matrixRowCount) );
+    CHECK_CUDA( cudaMemcpy(device_b, b.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_D, D.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_nnzValues, nnzValues.data(), sizeof(ValueType) * matrixNnzCount, cudaMemcpyHostToDevice) );
 #ifndef USE_CUSPARSE
-    cudaCopyResult = cudaMemcpy(device_rowBlocks, rowBlocks.data(), sizeof(uint_fast64_t) * (matrixBlockCount + 1), cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Matrix Row Blocks, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
+    CHECK_CUDA( cudaMemcpy(device_rowBlocks, rowBlocks.data(), sizeof(uint_fast64_t) * (matrixBlockCount + 1), cudaMemcpyHostToDevice) );
 #endif
-    
-    cudaCopyResult = cudaMemcpy(device_x, x.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Vector x, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
 
-    cudaCopyResult = cudaMemset(device_xSwap, 0, sizeof(ValueType) * matrixRowCount);
-    if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not zero the Swap Vector x, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
-
-    cudaCopyResult = cudaMemcpy(device_b, b.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Vector b, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
-
-    cudaCopyResult = cudaMemcpy(device_D, D.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Vector D, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
-    
-    cudaCopyResult = cudaMemcpy(device_nnzValues, nnzValues.data(), sizeof(ValueType) * matrixNnzCount, cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Matrix, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-    }
-
+    // CUSPARSE settings
 #ifdef USE_CUSPARSE
-    // CUSPARSE APIs
-    cusparseCreate(&handle); 
-    // Create sparse matrix A in CSR format
-    cusparseCreateCsr(&matA, matrixRowCount, matrixRowCount, matrixNnzCount, (void*)device_rowStartIndices, (void*)device_columnIndices, (void*)device_nnzValues, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_DATATYPE);
-    // Create dense vector X
-    cusparseCreateDnVec(&vecX, matrixRowCount, (void*)device_x, CUDA_DATATYPE);
-    // Create dense vector Y
-    cusparseCreateDnVec(&vecY, matrixRowCount, (void*)device_xSwap, CUDA_DATATYPE);
-    // allocate an external buffer
-    cusparseSpMV_bufferSize(
-        handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-        &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE,
-        CUSPARSE_CSRMV_ALG2, &bufferSize); 
-    cudaMalloc(&dBuffer, bufferSize); 
+    CHECK_CUSPARSE( cusparseCreate(&handle) ); 
+    CHECK_CUSPARSE( cusparseCreateCsr(&matA, matrixRowCount, matrixRowCount, matrixNnzCount, (void*)device_rowStartIndices, (void*)device_columnIndices, (void*)device_nnzValues, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_DATATYPE) );
+    CHECK_CUSPARSE( cusparseCreateDnVec(&vecX, matrixRowCount, (void*)device_x, CUDA_DATATYPE) );
+    CHECK_CUSPARSE( cusparseCreateDnVec(&vecY, matrixRowCount, (void*)device_xSwap, CUDA_DATATYPE) );
+    CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, &bufferSize) ); 
+    CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) ); 
 #endif
 
     // Data is on device, start Kernel
     while (!converged && iterationCount < maxIterationCount) {
         // call kernels 
 #ifdef USE_CUSPARSE        
-        cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer);
+        CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer) );
 #else
         csr_spmv_adaptive_kernel<ValueType><<<matrixBlockCount, NNZ_PER_WG>>>(device_columnIndices, device_rowStartIndices, device_rowBlocks, device_nnzValues, device_x, device_xSwap); 
 #endif
@@ -462,8 +378,8 @@ bool jacobiIteration_solver(
 
 #ifdef USE_CUSPARSE
         // set new values for vecX and vecY
-        cusparseDnVecSetValues(vecX, (void*)device_x);
-        cusparseDnVecSetValues(vecY, (void*)device_xSwap);
+        CHECK_CUSPARSE( cusparseDnVecSetValues(vecX, (void*)device_x) );
+        CHECK_CUSPARSE( cusparseDnVecSetValues(vecY, (void*)device_xSwap) );
 #endif
     }
 
@@ -473,93 +389,24 @@ bool jacobiIteration_solver(
     }
     
     // Get x (result) back from the device
-	cudaCopyResult = cudaMemcpy(x.data(), device_x, sizeof(ValueType) * matrixRowCount, cudaMemcpyDeviceToHost);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not copy back data for result vector x, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanup;
-	}
+	CHECK_CUDA( cudaMemcpy(x.data(), device_x, sizeof(ValueType) * matrixRowCount, cudaMemcpyDeviceToHost) );
 
     // All code related to freeing memory and clearing up the device
-cleanup:
-    cudaError_t cudaFreeResult;
-
-    if (device_columnIndices != nullptr) {
-        cudaFreeResult = cudaFree(device_columnIndices);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Matrix Column Indices, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_columnIndices = nullptr;
-    }
-    if (device_rowStartIndices != nullptr) {
-        cudaFreeResult = cudaFree(device_rowStartIndices);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Row Start Indices, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_rowStartIndices = nullptr;
-    }
-    if (device_rowBlocks != nullptr) {
-        cudaFreeResult = cudaFree(device_rowBlocks);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Row Blocks, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_rowBlocks = nullptr;
-    }
-    if (device_x != nullptr) {
-        cudaFreeResult = cudaFree(device_x);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Vector x, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_x = nullptr;
-    }
-    if (device_xSwap != nullptr) {
-        cudaFreeResult = cudaFree(device_xSwap);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Vector x swap, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_xSwap = nullptr;
-    }
-    if (device_b != nullptr) {
-        cudaFreeResult = cudaFree(device_b);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Vector b, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_b = nullptr;
-    }
-    if (device_D != nullptr) {
-        cudaFreeResult = cudaFree(device_D);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Vector D, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_D = nullptr;
-    }
-    if (device_nnzValues != nullptr) {
-        cudaFreeResult = cudaFree(device_nnzValues);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Matrix Values, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_nnzValues = nullptr;
-    }
+    CHECK_CUDA( cudaFree(device_columnIndices) );
+    CHECK_CUDA( cudaFree(device_rowStartIndices) );
+    CHECK_CUDA( cudaFree(device_rowBlocks) );
+    CHECK_CUDA( cudaFree(device_x) );
+    CHECK_CUDA( cudaFree(device_xSwap) );
+    CHECK_CUDA( cudaFree(device_b) );
+    CHECK_CUDA( cudaFree(device_D) );
+    CHECK_CUDA( cudaFree(device_nnzValues) );
 
 #ifdef USE_CUSPARSE
-    //TODO: check if succesfull
-
-    // destroy matrix/vector descriptors
-    cusparseDestroySpMat(matA);
-    cusparseDestroyDnVec(vecX);
-    cusparseDestroyDnVec(vecY);
-    cusparseDestroy(handle);
-    
-    // device memory deallocation
-    cudaFree(dBuffer);
+    CHECK_CUSPARSE( cusparseDestroySpMat(matA) );
+    CHECK_CUSPARSE( cusparseDestroyDnVec(vecX) );
+    CHECK_CUSPARSE( cusparseDestroyDnVec(vecY) );
+    CHECK_CUSPARSE( cusparseDestroy(handle) );
+    CHECK_CUDA( cudaFree(dBuffer) );
 #endif
 
     std::cout << "--------------------------------------------------------------\n";
@@ -604,8 +451,6 @@ bool valueIteration_solver(
     const uint_fast64_t matrixColCount = nondeterministicChoiceIndices.size() - 1;
     const uint_fast64_t matrixNnzCount = nnzValues.size();
 
-    ValueType* mulres = (ValueType*)malloc(sizeof(ValueType) * matrixRowCount);
-
     // CUSPARSE APIs
     ValueType            alpha      = 1.0f;
     ValueType            beta       = 0.0f;
@@ -620,151 +465,44 @@ bool valueIteration_solver(
     size_t   tempStorageBytes = 0;
 
     // Device memory allocation
-    cudaError_t cudaMallocResult;
+    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_columnIndices), sizeof(uint_fast64_t) * matrixNnzCount) );
+    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_matrixRowIndices), sizeof(uint_fast64_t) * (matrixRowCount + 1)) );
+    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_nondeterministicChoiceIndices), sizeof(uint_fast64_t) * (matrixColCount + 1)) );
 
-    cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_columnIndices), sizeof(uint_fast64_t) * matrixNnzCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Matrix Column Indices, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanupvi;
-    }
-
-    cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_matrixRowIndices), sizeof(uint_fast64_t) * (matrixRowCount + 1));
-	if (cudaMallocResult != cudaSuccess) {
-		std::cout << "Could not allocate memory for Matrix Row Indices, Error Code " << cudaMallocResult << "." << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-	cudaMallocResult = cudaMalloc<uint_fast64_t>((&device_nondeterministicChoiceIndices), sizeof(uint_fast64_t) * (matrixColCount + 1));
-    if (cudaMallocResult != cudaSuccess) {
-		std::cout << "Could not allocate memory for Nondeterministic Choice Indices, Error Code " << cudaMallocResult << "." << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_nnzValues), sizeof(ValueType) * matrixNnzCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector of Matrix Values, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanupvi;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * matrixColCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector x, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanupvi;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * matrixColCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector xSwap, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanupvi;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_b), sizeof(ValueType) * matrixRowCount);
-    if (cudaMallocResult != cudaSuccess) {
-        std::cout << "Could not allocate memory for Vector b, Error Code " << cudaMallocResult << "." << std::endl;
-        errorOccured = true;
-        goto cleanupvi;
-    }
-
-    cudaMallocResult = cudaMalloc<ValueType>((&device_multiplyResult), sizeof(ValueType) * matrixRowCount);
-	if (cudaMallocResult != cudaSuccess) {
-		std::cout << "Could not allocate memory for Vector multiplyResult, Error Code " << cudaMallocResult << "." << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_nnzValues), sizeof(ValueType) * matrixNnzCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * matrixColCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * matrixColCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_b), sizeof(ValueType) * matrixRowCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_multiplyResult), sizeof(ValueType) * matrixRowCount) );
 
     // Memory allocated, copy data to device
-    cudaError_t cudaCopyResult;
+    CHECK_CUDA( cudaMemcpy(device_columnIndices, columnIndices.data(), sizeof(uint_fast64_t) * matrixNnzCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_matrixRowIndices, matrixRowIndices.data(), sizeof(uint_fast64_t) * (matrixRowCount + 1), cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_nondeterministicChoiceIndices, nondeterministicChoiceIndices.data(), sizeof(uint_fast64_t) * (matrixColCount + 1), cudaMemcpyHostToDevice) );
 
-    cudaCopyResult = cudaMemcpy(device_columnIndices, columnIndices.data(), sizeof(uint_fast64_t) * matrixNnzCount, cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Matrix Column Indices, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-    }
+    CHECK_CUDA( cudaMemcpy(device_nnzValues, nnzValues.data(), sizeof(ValueType) * matrixNnzCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_x, x.data(), sizeof(ValueType) * matrixColCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemset(device_xSwap, 0, sizeof(ValueType) * matrixColCount) );
+    CHECK_CUDA( cudaMemcpy(device_b, b.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemset(device_multiplyResult, 0, sizeof(ValueType) * matrixRowCount) );
 
-	cudaCopyResult = cudaMemcpy(device_matrixRowIndices, matrixRowIndices.data(), sizeof(uint_fast64_t) * (matrixRowCount + 1), cudaMemcpyHostToDevice);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not copy data for Matrix Row Indices, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-    cudaCopyResult = cudaMemcpy(device_nondeterministicChoiceIndices, nondeterministicChoiceIndices.data(), sizeof(uint_fast64_t) * (matrixColCount + 1), cudaMemcpyHostToDevice);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not copy data for Vector b, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-    cudaCopyResult = cudaMemcpy(device_nnzValues, nnzValues.data(), sizeof(ValueType) * matrixNnzCount, cudaMemcpyHostToDevice);
-    if (cudaCopyResult != cudaSuccess) {
-        std::cout << "Could not copy data for Matrix, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-    }
-
-    cudaCopyResult = cudaMemcpy(device_x, x.data(), sizeof(ValueType) * matrixColCount, cudaMemcpyHostToDevice);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not copy data for Vector x, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-	// Preset the xSwap to zeros...
-    cudaCopyResult = cudaMemset(device_xSwap, 0, sizeof(ValueType) * matrixColCount);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not zero the Swap Vector x, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-    cudaCopyResult = cudaMemcpy(device_b, b.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not copy data for Vector b, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-    cudaCopyResult = cudaMemset(device_multiplyResult, 0, sizeof(ValueType) * matrixRowCount);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not zero the multiply Result, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
-
-    // CUSPARSE APIs
-
-    cusparseCreate(&handle);
-    // Create sparse matrix A in CSR format
-    cusparseCreateCsr(&matA, matrixRowCount, matrixColCount, matrixNnzCount, (void*)device_matrixRowIndices, (void*)device_columnIndices, (void*)device_nnzValues, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_DATATYPE);
-    // Create dense vector X
-    cusparseCreateDnVec(&vecX, matrixColCount, (void*)device_x, CUDA_DATATYPE);
-    // Create dense vector Y
-    cusparseCreateDnVec(&vecY, matrixRowCount, (void*)device_multiplyResult, CUDA_DATATYPE);
-    // allocate an external buffer
-    cusparseSpMV_bufferSize(
-        handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-        &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE,
-        CUSPARSE_CSRMV_ALG2, &bufferSize); 
-    cudaMalloc(&dBuffer, bufferSize); 
+    // CUSPARSE settings
+    CHECK_CUSPARSE( cusparseCreate(&handle) );
+    CHECK_CUSPARSE( cusparseCreateCsr(&matA, matrixRowCount, matrixColCount, matrixNnzCount, (void*)device_matrixRowIndices, (void*)device_columnIndices, (void*)device_nnzValues, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_64I, CUSPARSE_INDEX_BASE_ZERO, CUDA_DATATYPE) );
+    CHECK_CUSPARSE( cusparseCreateDnVec(&vecX, matrixColCount, (void*)device_x, CUDA_DATATYPE) );
+    CHECK_CUSPARSE( cusparseCreateDnVec(&vecY, matrixRowCount, (void*)device_multiplyResult, CUDA_DATATYPE) );
+    CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, &bufferSize) ); 
+    CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) ); 
 
     // CUB Memory allocation
-
-    if (Maximize) cub::DeviceSegmentedReduce::Max(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1);
-    else cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
-    
-    cudaMalloc(&dTempStorage, tempStorageBytes);
+    if (Maximize)   cub::DeviceSegmentedReduce::Max(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1);
+    else            cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
+    CHECK_CUDA( cudaMalloc(&dTempStorage, tempStorageBytes) );
 
     // Data is on device, start Kernel
     while(!converged && iterationCount < maxIterationCount) {
         /* SPARSE MULT: transition matrix * x vector */
-        cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer);
+        CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer) );
 
         /* SAXPY: multiplyResult + b inplace to multiplyResult */
         thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
@@ -789,7 +527,7 @@ bool valueIteration_solver(
 
         // Swap pointers, device_x always contains the most current result
 		std::swap(device_x, device_xSwap);
-        cusparseDnVecSetValues(vecX, (void*)device_x);
+        CHECK_CUSPARSE( cusparseDnVecSetValues(vecX, (void*)device_x) );
     }
 
     if (!converged && (iterationCount == maxIterationCount)) {
@@ -797,92 +535,26 @@ bool valueIteration_solver(
 		errorOccured = true;
     }
 
-    cudaCopyResult = cudaMemcpy(x.data(), device_x, sizeof(ValueType) * matrixColCount, cudaMemcpyDeviceToHost);
-	if (cudaCopyResult != cudaSuccess) {
-		std::cout << "Could not copy back data for result vector x, Error Code " << cudaCopyResult << std::endl;
-		errorOccured = true;
-		goto cleanupvi;
-	}
+    // Get x (result) back from the device
+    CHECK_CUDA( cudaMemcpy(x.data(), device_x, sizeof(ValueType) * matrixColCount, cudaMemcpyDeviceToHost) );
+
+    // CUSPARSE free
+    CHECK_CUSPARSE( cusparseDestroySpMat(matA) );
+    CHECK_CUSPARSE( cusparseDestroyDnVec(vecX) );
+    CHECK_CUSPARSE( cusparseDestroyDnVec(vecY) );
+    CHECK_CUSPARSE( cusparseDestroy(handle) );
 
 	// All code related to freeing memory and clearing up the device
-cleanupvi:
-    cudaError_t cudaFreeResult;
-
-    if (device_matrixRowIndices != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_matrixRowIndices);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Matrix Row Indices, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_matrixRowIndices = nullptr;
-	}
-	if (device_columnIndices != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_columnIndices);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Matrix Column Indices, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_columnIndices = nullptr;
-	}
-    if (device_nondeterministicChoiceIndices != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_nondeterministicChoiceIndices);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Nondeterministic Choice Indices, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_nondeterministicChoiceIndices = nullptr;
-	}
-    if (device_nnzValues != nullptr) {
-        cudaFreeResult = cudaFree(device_nnzValues);
-        if (cudaFreeResult != cudaSuccess) {
-            std::cout << "Could not free Memory of Matrix Values, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-        }
-        device_nnzValues = nullptr;
-    }
-	if (device_x != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_x);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Vector x, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_x = nullptr;
-	}
-	if (device_xSwap != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_xSwap);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Vector x swap, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_xSwap = nullptr;
-	}
-	if (device_b != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_b);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Vector b, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_b = nullptr;
-	}
-	if (device_multiplyResult != nullptr) {
-		cudaError_t cudaFreeResult = cudaFree(device_multiplyResult);
-		if (cudaFreeResult != cudaSuccess) {
-			std::cout << "Could not free Memory of Vector multiplyResult, Error Code " << cudaFreeResult << "." << std::endl;
-			errorOccured = true;
-		}
-		device_multiplyResult = nullptr;
-	}
-
-    // CUSPARSE 
-    //TODO: check if succesfull
-    cusparseDestroySpMat(matA);
-    cusparseDestroyDnVec(vecX);
-    cusparseDestroyDnVec(vecY);
-    cusparseDestroy(handle);
-
-    // device memory deallocation
-    cudaFree(dBuffer);
-    cudaFree(dTempStorage);
+    CHECK_CUDA( cudaFree(device_matrixRowIndices) );
+    CHECK_CUDA( cudaFree(device_columnIndices) );
+    CHECK_CUDA( cudaFree(device_nondeterministicChoiceIndices) );
+    CHECK_CUDA( cudaFree(device_nnzValues) );
+    CHECK_CUDA( cudaFree(device_x) );
+    CHECK_CUDA( cudaFree(device_xSwap) );
+    CHECK_CUDA( cudaFree(device_b) );
+    CHECK_CUDA( cudaFree(device_multiplyResult) );
+    CHECK_CUDA( cudaFree(dBuffer) );
+    CHECK_CUDA( cudaFree(dTempStorage) );
 
     return !errorOccured;
 }
