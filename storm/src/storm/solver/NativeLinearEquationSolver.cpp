@@ -116,10 +116,9 @@ namespace storm {
             this->matrixRowCount = A.getRowCount();
             this->matrixNnzCount = A.getNonzeroEntryCount();
 
-            // TODO: useless copy use pointer
-            auto data = A.getColumnsAndValues();
-            for (auto it = std::make_move_iterator(data.begin()),
-                     end = std::make_move_iterator(data.end()); it != end; ++it) {
+            auto *data = &(A.getColumnsAndValues());
+            for (auto it = std::make_move_iterator(data->begin()),
+                     end = std::make_move_iterator(data->end()); it != end; ++it) {
                 this->columnIndices.push_back(std::move(it->getColumn()));
                 this->nnzValues.push_back(std::move(it->getValue()));
             }
@@ -128,10 +127,7 @@ namespace storm {
             for (uint_fast64_t i = 0; i < this->matrixRowCount; ++i) 
                 matrixRowSizes.push_back(A.getRow(i).getNumberOfEntries());
 
-            // TODO: useless getRowIndications and use pointer
-            this->rowStartIndices.push_back(0);
-            for (uint_fast64_t i = 1; i <= this->matrixRowCount; ++i) 
-                this->rowStartIndices.push_back(rowStartIndices.at(i-1) + matrixRowSizes.at(i-1));
+            this->rowStartIndices = &(A.getRowIndications());
 
             this->rowBlocks.push_back(0);
             auto sum = 0;
@@ -746,7 +742,7 @@ namespace storm {
             bool const relative = env.solver().native().getRelativeTerminationCriterion();
             size_t iterations = 0;
 
-            result = __jacobiIteration_solver<ValueType, uint_fast64_t>(maxIter, precision, LUMatrix.matrixRowCount, LUMatrix.matrixNnzCount, LUMatrix.matrixBlockCount, x, b, LUMatrix.nnzValues, jacobiDecomposition->DVector, LUMatrix.columnIndices, LUMatrix.rowStartIndices, LUMatrix.rowBlocks, iterations, relative);
+            result = __jacobiIteration_solver<ValueType, uint_fast64_t>(maxIter, precision, LUMatrix.matrixRowCount, LUMatrix.matrixNnzCount, LUMatrix.matrixBlockCount, x, b, LUMatrix.nnzValues, jacobiDecomposition->DVector, LUMatrix.columnIndices, *LUMatrix.rowStartIndices, LUMatrix.rowBlocks, iterations, relative);
 #else
             std::cout << "WARNING: Using CPU based LinearEquationSolver!" << std::endl;
             STORM_LOG_INFO("Performance Warning: Using CPU based LinearEquationSolver!");

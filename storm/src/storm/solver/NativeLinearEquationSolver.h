@@ -124,7 +124,7 @@ namespace storm {
                 uint_fast64_t matrixNnzCount;
                 uint_fast64_t matrixBlockCount;
                 
-                std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> rowStartIndices;
+                const std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type>* rowStartIndices;
                 std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> columnIndices;
                 // if some rows contain small nnz, they'll be gathered into one block  
                 std::vector<typename storm::storage::SparseMatrix<ValueType>::index_type> rowBlocks; 
