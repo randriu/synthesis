@@ -3,6 +3,9 @@
 #include <thrust/functional.h>
 #include <thrust/transform.h>
 #include <thrust/device_ptr.h>
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
+#include <thrust/copy.h>
 #include <thrust/reduce.h>
 
 #include <cub/device/device_segmented_reduce.cuh>
@@ -429,7 +432,9 @@ bool valueIteration_solver(
                 std::vector<ValueType> & x, 
                 std::vector<ValueType> const& b, 
                 std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, 
-                size_t& iterationCount) 
+                size_t& iterationCount, 
+                bool const extractScheduler, 
+                std::vector<uint_fast64_t>* choices) 
 {
     std::cout << "CUDA ValueIteration method\n";
 
@@ -444,6 +449,7 @@ bool valueIteration_solver(
     ValueType* device_nnzValues = nullptr;
     ValueType* device_x = nullptr;
     ValueType* device_xSwap = nullptr;
+    ValueType* device_diff = nullptr;
     ValueType* device_b = nullptr;
 	ValueType* device_multiplyResult = nullptr;
 
@@ -472,6 +478,7 @@ bool valueIteration_solver(
     CHECK_CUDA( cudaMalloc<ValueType>((&device_nnzValues), sizeof(ValueType) * matrixNnzCount) );
     CHECK_CUDA( cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * matrixColCount) );
     CHECK_CUDA( cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * matrixColCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_diff), sizeof(ValueType) * matrixColCount) );
     CHECK_CUDA( cudaMalloc<ValueType>((&device_b), sizeof(ValueType) * matrixRowCount) );
     CHECK_CUDA( cudaMalloc<ValueType>((&device_multiplyResult), sizeof(ValueType) * matrixRowCount) );
 
@@ -483,6 +490,7 @@ bool valueIteration_solver(
     CHECK_CUDA( cudaMemcpy(device_nnzValues, nnzValues.data(), sizeof(ValueType) * matrixNnzCount, cudaMemcpyHostToDevice) );
     CHECK_CUDA( cudaMemcpy(device_x, x.data(), sizeof(ValueType) * matrixColCount, cudaMemcpyHostToDevice) );
     CHECK_CUDA( cudaMemset(device_xSwap, 0, sizeof(ValueType) * matrixColCount) );
+    CHECK_CUDA( cudaMemset(device_diff, 0, sizeof(ValueType) * matrixColCount) );
     CHECK_CUDA( cudaMemcpy(device_b, b.data(), sizeof(ValueType) * matrixRowCount, cudaMemcpyHostToDevice) );
     CHECK_CUDA( cudaMemset(device_multiplyResult, 0, sizeof(ValueType) * matrixRowCount) );
 
@@ -498,6 +506,9 @@ bool valueIteration_solver(
     if (Maximize)   cub::DeviceSegmentedReduce::Max(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1);
     else            cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
     CHECK_CUDA( cudaMalloc(&dTempStorage, tempStorageBytes) );
+
+    thrust::device_ptr<ValueType> devicePtrThrust_diff(device_diff);
+    thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + matrixColCount);
 
     // Data is on device, start Kernel
     while(!converged && iterationCount < maxIterationCount) {
@@ -515,13 +526,13 @@ bool valueIteration_solver(
             cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1) ;
 
         /* INF_NORM: check for convergence */
-        // Transform: x = abs(x - xSwap)/ xSwap
+        // Transform: diff = abs(x - xSwap)/ xSwap
 		thrust::device_ptr<ValueType> devicePtrThrust_x(device_x);
 		thrust::device_ptr<ValueType> devicePtrThrust_x_end(device_x + matrixColCount);
 		thrust::device_ptr<ValueType> devicePtrThrust_xSwap(device_xSwap);
-		thrust::transform(devicePtrThrust_x, devicePtrThrust_x_end, devicePtrThrust_xSwap, devicePtrThrust_x, equalModuloPrecision<ValueType, Relative>());
+		thrust::transform(devicePtrThrust_x, devicePtrThrust_x_end, devicePtrThrust_xSwap, devicePtrThrust_diff, equalModuloPrecision<ValueType, Relative>());
 		// Reduce: get Max over x and check for res < Precision
-		ValueType maxX = thrust::reduce(devicePtrThrust_x, devicePtrThrust_x_end, -std::numeric_limits<ValueType>::max(), thrust::maximum<ValueType>());
+		ValueType maxX = thrust::reduce(devicePtrThrust_diff, devicePtrThrust_diff_end, -std::numeric_limits<ValueType>::max(), thrust::maximum<ValueType>());
 		converged = (maxX < precision);
         ++iterationCount;
 
@@ -533,6 +544,44 @@ bool valueIteration_solver(
     if (!converged && (iterationCount == maxIterationCount)) {
 		iterationCount = 0;
 		errorOccured = true;
+    }
+
+    // repeat last iteration to extract scheduler
+    if (extractScheduler) {
+        /* SPARSE MULT: transition matrix * last x before convergence */
+        CHECK_CUDA( cudaMemcpy(x.data(), device_xSwap, sizeof(ValueType) * matrixColCount, cudaMemcpyDeviceToHost) );
+
+        CHECK_CUSPARSE( cusparseDnVecSetValues(vecX, (void*)device_xSwap) );
+        CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer) );
+        
+        /* SAXPY: multiplyResult + b inplace to multiplyResult */
+        thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
+        thrust::device_ptr<ValueType> devicePtrThrust_multiplyResult(device_multiplyResult);
+        thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + matrixRowCount, devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
+        
+        // CUB Memory allocation
+        CHECK_CUDA( cudaFree(dTempStorage) );
+        dTempStorage = NULL;
+        tempStorageBytes = 0;
+
+        std::vector<cub::KeyValuePair<int, ValueType>> host_choices(matrixColCount);
+        thrust::device_vector<cub::KeyValuePair<int, ValueType>> deviceChoiceValue(matrixColCount);
+        cub::KeyValuePair<int, ValueType>* device_choices = thrust::raw_pointer_cast(&deviceChoiceValue[0]);
+
+        if (Maximize)   cub::DeviceSegmentedReduce::ArgMax(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1);
+        else            cub::DeviceSegmentedReduce::ArgMin(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
+        CHECK_CUDA( cudaMalloc(&dTempStorage, tempStorageBytes) );
+    
+        /* MAX/MIN_REDUCE: reduce multiplyResult to a new [(choice,value),...] vector */
+        (Maximize) ?
+        cub::DeviceSegmentedReduce::ArgMax(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1) :
+        cub::DeviceSegmentedReduce::ArgMin(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1) ; 
+    
+        /* Copy form device to host and set scheduler choices */
+        thrust::copy(deviceChoiceValue.begin(), deviceChoiceValue.end(), host_choices.begin());
+        for (int i = 0; i < host_choices.size(); i++) {
+            choices->at(i) = host_choices[i].key;
+        } 
     }
 
     // Get x (result) back from the device
@@ -583,42 +632,42 @@ bool jacobiIteration_solver_float(uint_fast64_t const maxIterationCount, float c
 /*                    Value Iteration API                                      */
 /*******************************************************************************/
 
-bool valueIteration_solver_uint64_double_minimize(uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount) {
+bool valueIteration_solver_uint64_double_minimize(uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<false, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<false, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<false, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<false, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     }
 }
 
-bool valueIteration_solver_uint64_double_maximize(uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount) {
+bool valueIteration_solver_uint64_double_maximize(uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<true, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<true, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<true, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<true, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     }
 }
 
-bool valueIteration_solver_uint64_float_minimize(uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount){
+bool valueIteration_solver_uint64_float_minimize(uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices){
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<false, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<false, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<false, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<false, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     }
 }
 
-bool valueIteration_solver_uint64_float_maximize(uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount){
+bool valueIteration_solver_uint64_float_maximize(uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices){
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<true, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<true, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
-        return valueIteration_solver<true, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount); 
+        return valueIteration_solver<true, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices); 
     }
 }

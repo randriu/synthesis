@@ -60,11 +60,16 @@ namespace storm {
             CSRMatrix matrix(this->A);
             bool result = false;
             size_t globalIterations = 0;
+            bool const extractScheduler = this->isTrackSchedulerSet();
+
+            if (extractScheduler) {
+               this->schedulerChoices = std::vector<uint_fast64_t>(this->A->getRowGroupCount()); 
+            }
 
             if (dir == OptimizationDirection::Minimize) {
-                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations);
+                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
             } else {
-                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations);
+                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
             }
 
             if (!result) {
@@ -79,6 +84,11 @@ namespace storm {
             STORM_LOG_ERROR("This version of storm does not support CUDA acceleration. Internal Error!");
             throw storm::exceptions::InvalidStateException() << "This version of storm does not support CUDA acceleration. Internal Error!";
 #endif
+
+            std::cout << "--------------------------------------------------------------\n";
+            std::cout << "METRICS\n";
+            std::cout << "VI Iterations: " << globalIterations << "\n";
+            std::cout << "--------------------------------------------------------------\n";
 
             return result;
         }
