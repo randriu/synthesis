@@ -102,7 +102,7 @@ uint_fast64_t prev_power_of_2 (uint_fast64_t x) {
  */
 template<typename ValueType>
 __inline__ __device__ 
-ValueType warp_reduce (ValueType val) {
+ValueType sumSingleWarpReg (ValueType val) {
 
     val += __shfl_down_sync(FULL_WARP_MASK, val, 16);
     val += __shfl_down_sync(FULL_WARP_MASK, val, 8);
@@ -112,6 +112,73 @@ ValueType warp_reduce (ValueType val) {
 
     return val;
 }
+
+
+/**
+ * @brief 
+ * 
+ * @tparam ValueType 
+ * @param val 
+ * @param threads_per_row 
+ */
+ template<typename ValueType>
+ __inline__ __device__ 
+ ValueType minSingleWarpReg (ValueType val, ValueType minMaxInitializer, uint32_t threads_per_row) {
+    ValueType localMin = minMaxInitializer;
+    
+    switch (threads_per_row) {
+        case 32:
+            localMin = __shfl_down_sync(FULL_WARP_MASK, val, 16); 
+            val = (val < localMin) ? val : localMin;
+        case 16:
+            localMin = __shfl_down_sync(FULL_WARP_MASK, val, 8); 
+            val = (val < localMin) ? val : localMin;
+        case 8:
+            localMin = __shfl_down_sync(FULL_WARP_MASK, val, 4); 
+            val = (val < localMin) ? val : localMin;
+        case 4:
+            localMin = __shfl_down_sync(FULL_WARP_MASK, val, 2); 
+            val = (val < localMin) ? val : localMin;
+        case 2:
+            localMin = __shfl_down_sync(FULL_WARP_MASK, val, 1); 
+            val = (val < localMin) ? val : localMin;
+    }
+
+    return val;
+ }
+
+ /**
+ * @brief 
+ * 
+ * @tparam ValueType 
+ * @param val 
+ * @param threads_per_row  
+ */
+ template<typename ValueType>
+ __inline__ __device__ 
+ ValueType maxSingleWarpReg (ValueType val, ValueType minMaxInitializer, uint32_t threads_per_row) {
+    ValueType localMax = minMaxInitializer;
+    
+    switch (threads_per_row) {
+        case 32:
+            localMax = __shfl_down_sync(FULL_WARP_MASK, val, 16); 
+            val = (val > localMax) ? val : localMax;
+        case 16:
+            localMax = __shfl_down_sync(FULL_WARP_MASK, val, 8); 
+            val = (val > localMax) ? val : localMax;
+        case 8:
+            localMax = __shfl_down_sync(FULL_WARP_MASK, val, 4); 
+            val = (val > localMax) ? val : localMax;
+        case 4:
+            localMax = __shfl_down_sync(FULL_WARP_MASK, val, 2); 
+            val = (val > localMax) ? val : localMax;
+        case 2:
+            localMax = __shfl_down_sync(FULL_WARP_MASK, val, 1); 
+            val = (val > localMax) ? val : localMax;
+    }
+
+    return val;
+ }
 
 /**
  * @brief 
@@ -237,7 +304,7 @@ __global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const ui
                     sum += data[element] * x[col_ids[element]];
                 }
 
-                sum = warp_reduce<ValueType>(sum);
+                sum = sumSingleWarpReg<ValueType>(sum);
 
                 if(thread_id == 0)
                     y[block_row_begin] = sum;
@@ -267,6 +334,64 @@ __global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const ui
             if(thread_id == 0) 
                 y[block_row_begin] = cache[thread_id];
         }
+    }
+}
+
+template <typename ValueType, unsigned int ROWS_PER_BLOCK, unsigned int THREADS_PER_ROW, bool Maximize>
+__launch_bounds__(ROWS_PER_BLOCK * THREADS_PER_ROW,1)
+__global__ void
+storm_cuda_opt_vector_reduce_kernel(const uint_fast64_t num_rows, const uint_fast64_t * __restrict__ nondeterministicChoiceIndices, ValueType * __restrict__ x, const ValueType * __restrict__ y, const ValueType minMaxInitializer)
+{
+    __shared__ volatile uint_fast64_t ptrs[ROWS_PER_BLOCK][2];
+    
+    const uint_fast64_t THREADS_PER_BLOCK = ROWS_PER_BLOCK * THREADS_PER_ROW;
+
+    const uint_fast64_t thread_id   = THREADS_PER_BLOCK * blockIdx.x + threadIdx.x; // global thread index
+    const uint_fast64_t thread_lane = threadIdx.x & (THREADS_PER_ROW - 1);          // thread index within the vector
+    const uint_fast64_t vector_id   = thread_id   /  THREADS_PER_ROW;               // global vector index
+    const uint_fast64_t vector_lane = threadIdx.x /  THREADS_PER_ROW;               // vector index within the block
+    const uint_fast64_t num_vectors = ROWS_PER_BLOCK * gridDim.x;                   // total number of active vectors
+
+    for(uint_fast64_t row = vector_id; row < num_rows; row += num_vectors) {
+        // use two threads to fetch Ap[row] and Ap[row+1]
+        // this is considerably faster than the straightforward version
+        if(thread_lane < 2)
+            ptrs[vector_lane][thread_lane] = nondeterministicChoiceIndices[row + thread_lane];
+
+        const uint_fast64_t row_start = ptrs[vector_lane][0];                   //same as: row_start = Ap[row];
+        const uint_fast64_t row_end   = ptrs[vector_lane][1];                   //same as: row_end   = Ap[row+1];
+
+        // initialize local Min/Max
+        ValueType localMinMaxElement = minMaxInitializer;
+
+        if (THREADS_PER_ROW == 32 && row_end - row_start > 32) {
+            // ensure aligned memory access to Aj and Ax
+
+            uint_fast64_t jj = row_start - (row_start & (THREADS_PER_ROW - 1)) + thread_lane;
+
+            // accumulate local sums
+            if(jj >= row_start && jj < row_end) {
+				if(Maximize) { localMinMaxElement = (localMinMaxElement < y[jj]) ? y[jj] : localMinMaxElement; } 
+                else         { localMinMaxElement = (localMinMaxElement > y[jj]) ? y[jj] : localMinMaxElement; }
+			}
+
+            // accumulate local sums
+            for(jj += THREADS_PER_ROW; jj < row_end; jj += THREADS_PER_ROW)
+                if(Maximize) { localMinMaxElement = (localMinMaxElement < y[jj]) ? y[jj] : localMinMaxElement; } 
+                else         { localMinMaxElement = (localMinMaxElement > y[jj]) ? y[jj] : localMinMaxElement; }
+        } else {
+            // accumulate local sums
+            for(uint_fast64_t jj = row_start + thread_lane; jj < row_end; jj += THREADS_PER_ROW)
+                if(Maximize) { localMinMaxElement = (localMinMaxElement < y[jj]) ? y[jj] : localMinMaxElement; } 
+                else         { localMinMaxElement = (localMinMaxElement > y[jj]) ? y[jj] : localMinMaxElement; }
+        }
+
+        // reduce local min/max to row min/max
+        localMinMaxElement = (Maximize) ? maxSingleWarpReg<ValueType>(localMinMaxElement, minMaxInitializer, THREADS_PER_ROW) : 
+                                          minSingleWarpReg<ValueType>(localMinMaxElement, minMaxInitializer, THREADS_PER_ROW) ;
+
+        if (thread_lane == 0)
+            x[row] = localMinMaxElement;
     }
 }
 
@@ -422,6 +547,33 @@ bool jacobiIteration_solver(
     return !errorOccured;
 }
 
+template <typename ValueType, bool Maximize, unsigned int THREADS_PER_VECTOR>
+void __storm_cuda_opt_vector_reduce(const uint_fast64_t num_rows, const uint_fast64_t * nondeterministicChoiceIndices, ValueType * x, const ValueType * y)
+{
+	const ValueType minMaxInitializer = (Maximize) ? -std::numeric_limits<ValueType>::max() : std::numeric_limits<ValueType>::max();
+
+    const size_t THREADS_PER_BLOCK  = 128;
+    const size_t VECTORS_PER_BLOCK  = THREADS_PER_BLOCK / THREADS_PER_VECTOR;
+
+    const size_t NUM_BLOCKS = ceil(double(num_rows) / VECTORS_PER_BLOCK);
+
+    storm_cuda_opt_vector_reduce_kernel<ValueType, VECTORS_PER_BLOCK, THREADS_PER_VECTOR, Maximize> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> 
+        (num_rows, nondeterministicChoiceIndices, x, y, minMaxInitializer);
+}
+
+template <bool Maximize, typename ValueType>
+void storm_cuda_opt_vector_reduce(const uint_fast64_t num_rows, const uint_fast64_t num_entries, const uint_fast64_t * nondeterministicChoiceIndices, ValueType * x, const ValueType * y)
+{
+    const uint_fast64_t rows_per_group = num_entries / num_rows;
+
+    if (rows_per_group <=  2) { __storm_cuda_opt_vector_reduce<ValueType, Maximize, 2>(num_rows, nondeterministicChoiceIndices, x, y); return; }
+    if (rows_per_group <=  4) { __storm_cuda_opt_vector_reduce<ValueType, Maximize, 4>(num_rows, nondeterministicChoiceIndices, x, y); return; }
+    if (rows_per_group <=  8) { __storm_cuda_opt_vector_reduce<ValueType, Maximize, 8>(num_rows, nondeterministicChoiceIndices, x, y); return; }
+    if (rows_per_group <= 16) { __storm_cuda_opt_vector_reduce<ValueType, Maximize,16>(num_rows, nondeterministicChoiceIndices, x, y); return; }
+    
+    __storm_cuda_opt_vector_reduce<ValueType, Maximize,32>(num_rows, nondeterministicChoiceIndices, x, y);
+}
+
 template <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
 bool valueIteration_solver(
                 uint_fast64_t const maxIterationCount,
@@ -502,11 +654,6 @@ bool valueIteration_solver(
     CHECK_CUSPARSE( cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, &bufferSize) ); 
     CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) ); 
 
-    // CUB Memory allocation
-    if (Maximize)   cub::DeviceSegmentedReduce::Max(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1);
-    else            cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
-    CHECK_CUDA( cudaMalloc(&dTempStorage, tempStorageBytes) );
-
     // Thrust pointer initialization
     thrust::device_ptr<ValueType> devicePtrThrust_diff(device_diff);
     thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + matrixColCount);
@@ -522,10 +669,8 @@ bool valueIteration_solver(
 		thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + matrixRowCount, devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
 
         /* MAX/MIN_REDUCE: reduce multiplyResult to a new x vector */
-        (Maximize) ? 
-            cub::DeviceSegmentedReduce::Max(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1) : 
-            cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1) ;
-
+        storm_cuda_opt_vector_reduce<Maximize, ValueType>(matrixColCount, matrixRowCount, device_nondeterministicChoiceIndices, device_xSwap, device_multiplyResult);
+        
         /* INF_NORM: check for convergence */
         // Transform: diff = abs(x - xSwap)/ xSwap
 		thrust::device_ptr<ValueType> devicePtrThrust_x(device_x);
