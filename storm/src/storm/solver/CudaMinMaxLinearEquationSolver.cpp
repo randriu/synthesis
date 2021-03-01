@@ -88,6 +88,8 @@ namespace storm {
             std::cout << "--------------------------------------------------------------\n";
             std::cout << "METRICS\n";
             std::cout << "VI Iterations: " << globalIterations << "\n";
+            std::cout << "Matrix MDP states: " << this->A->getColumnCount() << "\n";
+            std::cout << "Matrix row count: " << this->A->getRowCount() << "\n";
             std::cout << "--------------------------------------------------------------\n";
 
             return result;

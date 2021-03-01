@@ -507,8 +507,11 @@ bool valueIteration_solver(
     else            cub::DeviceSegmentedReduce::Min(dTempStorage, tempStorageBytes, device_multiplyResult, device_xSwap, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
     CHECK_CUDA( cudaMalloc(&dTempStorage, tempStorageBytes) );
 
+    // Thrust pointer initialization
     thrust::device_ptr<ValueType> devicePtrThrust_diff(device_diff);
     thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + matrixColCount);
+    thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
+    thrust::device_ptr<ValueType> devicePtrThrust_multiplyResult(device_multiplyResult);
 
     // Data is on device, start Kernel
     while(!converged && iterationCount < maxIterationCount) {
@@ -516,8 +519,6 @@ bool valueIteration_solver(
         CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer) );
 
         /* SAXPY: multiplyResult + b inplace to multiplyResult */
-        thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
-		thrust::device_ptr<ValueType> devicePtrThrust_multiplyResult(device_multiplyResult);
 		thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + matrixRowCount, devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
 
         /* MAX/MIN_REDUCE: reduce multiplyResult to a new x vector */
@@ -555,8 +556,6 @@ bool valueIteration_solver(
         CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer) );
         
         /* SAXPY: multiplyResult + b inplace to multiplyResult */
-        thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
-        thrust::device_ptr<ValueType> devicePtrThrust_multiplyResult(device_multiplyResult);
         thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + matrixRowCount, devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
         
         // CUB Memory allocation
@@ -565,8 +564,8 @@ bool valueIteration_solver(
         tempStorageBytes = 0;
 
         std::vector<cub::KeyValuePair<int, ValueType>> host_choices(matrixColCount);
-        thrust::device_vector<cub::KeyValuePair<int, ValueType>> deviceChoiceValue(matrixColCount);
-        cub::KeyValuePair<int, ValueType>* device_choices = thrust::raw_pointer_cast(&deviceChoiceValue[0]);
+        thrust::device_vector<cub::KeyValuePair<int, ValueType>> device_choicesValues(matrixColCount);
+        cub::KeyValuePair<int, ValueType>* device_choices = thrust::raw_pointer_cast(&device_choicesValues[0]);
 
         if (Maximize)   cub::DeviceSegmentedReduce::ArgMax(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1);
         else            cub::DeviceSegmentedReduce::ArgMin(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1); 
@@ -578,7 +577,7 @@ bool valueIteration_solver(
         cub::DeviceSegmentedReduce::ArgMin(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, matrixColCount, device_nondeterministicChoiceIndices, device_nondeterministicChoiceIndices + 1) ; 
     
         /* Copy form device to host and set scheduler choices */
-        thrust::copy(deviceChoiceValue.begin(), deviceChoiceValue.end(), host_choices.begin());
+        thrust::copy(device_choicesValues.begin(), device_choicesValues.end(), host_choices.begin());
         for (int i = 0; i < host_choices.size(); i++) {
             choices->at(i) = host_choices[i].key;
         } 
