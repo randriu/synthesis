@@ -126,10 +126,10 @@ function db() {
     dynasty $1 & disown
 }
 
-alias dpid='pgrep -f "^python3 .*dynasty.py .*"'
-alias dtime='ps -aux | grep "python3 dynasty.py"'
-alias dshow='pgrep -af "^python3 dynasty.py .*"'
-alias dcount='pgrep -afc "^python3 dynasty.py .*"'
+alias dpid='pgrep -f "^python3 .*/dynasty.py .*"'
+alias dtime='ps -aux | grep "python3 .*/dynasty.py"'
+alias dshow='pgrep -af "^python3 .*/dynasty.py .*"'
+alias dcount='pgrep -afc "^python3 .*/dynasty.py .*"'
 alias dkill='dpid | xargs kill'
 
 dlog() {
@@ -214,9 +214,10 @@ storm-eval() {
     storm "$1 --prop $2 --constants $3"
 }
 
-export DPM=$DYNASTY_DIR/workspace/examples/cav/dpm-main
-export DICE=$DYNASTY_DIR/workspace/examples/cav/dice
-export MAZE=$DYNASTY_DIR/workspace/examples/cav/maze
+export DPM=$SYNTHESIS/workspace/examples/cav/dpm-main
+export DICE=$SYNTHESIS/workspace/examples/cav/dice
+export MAZE=$SYNTHESIS/workspace/examples/cav/maze
+export WALK=$SYNTHESIS/workspace/examples/random-walk
 
 dice() {
     storm-eval "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
@@ -225,4 +226,10 @@ dpm() {
     storm-eval "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
 }
 
+walk() {
+    storm-eval "-pc --prism $WALK/sketch.templ" $WALK/compute.properties "CMAX=10,THRESHOLD=0"
+}
 
+walk2() {
+    storm-eval "-pc --prism $WALK/sketch2.templ" $WALK/compute.properties "CMAX=10,THRESHOLD=0"
+}

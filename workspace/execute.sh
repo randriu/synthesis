@@ -115,23 +115,49 @@ function test_release() {
 }
 
 
-function run() {
-    # timeout=3s
+function test_rewards() {
+    timeout=1h
     parallel=true
-    verbose=true
-    # optimal=true
+    # verbose=true
+    optimal=true
     
-    dpm=("dpm/orig-bat100" 3 140 140 1.0)
-    pole=("pole/orig" 0 16.7 16.7 1.0)
-    dice=("dice/copy" 0 2 2 1.0)
-    # dice=("dice/copy" 0 0.5 0.5 1.0)
-    # python3 /home/maria/synthesis/dynasty/dynasty.py --project /home/maria/synthesis/workspace/examples/dice/copy/ hybrid --short-summary --properties reward.properties
+    dice=("test_rewards/dice/5" 0 1 1 1.0)
+    pole=("test_rewards/pole/orig" 0 1 1 1.0)
+    maze1=("test_rewards/maze/concise" 0 1 1 1.0)
+    maze2=("test_rewards/maze/orig" 0 1 1 1.0)
+    herman1=("test_rewards/herman/orig" 0 1 1 1.0)
+    herman2=("test_rewards/herman/5" 0 1 1 1.0)
+    dpm=("test_rewards/dpm/demo" 0 1 1 1.0)
+
+    grid=("tests/grid" 40 1 1 1.0)
     
     # running ##########
 
-    model=dice
+    # model=pole
 
-    hybrid $model
+    # for model in dice pole maze1 maze2 herman1 herman2 dpm; do
+    #     echo $model
+    #     hybrid $model
+    # done
+    hybrid grid
+    # onebyone $model
+}
+
+function run() {
+    # timeout=3s
+    parallel=true
+    # verbose=true
+    # optimal=true
+    
+    model=("dpm/orig-bat100" 3 140 140 1.0)
+    # model=("pole/orig" 0 16.7 16.7 1.0)
+    # dice=("dice/5" 0 16.7 16.7 1.0)
+    
+    # running ##########
+
+    # model=pole
+
+    hybrid model
     # onebyone $model
 }
 
@@ -140,7 +166,8 @@ function run() {
 reset_log
 
 # test_release
-run
+# run
+test_rewards
 
 # exit
 

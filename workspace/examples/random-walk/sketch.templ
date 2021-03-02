@@ -1,0 +1,64 @@
+ctmc
+
+const int CMAX;
+const double THRESHOLD;
+
+// 2D grid size
+const int X_MIN = 0;
+const int X_MAX = 2;
+const int Y_MIN = 0;
+const int Y_MAX = 4;
+
+// initial position
+const int X_INIT = 1;
+const int Y_INIT = 2;
+
+// movement speed
+const double r_up = 2;
+const double r_down = 2;
+const double r_right = 0.5;
+const double r_left = 0.5;
+
+// bounds detectors
+formula exit_up = (y = Y_MAX);
+formula exit_down = (y = Y_MIN);
+formula exit_right = (x = X_MAX);
+formula exit_left = (x = X_MIN);
+formula exit = (exit_up | exit_down | exit_right | exit_left);
+
+// update module
+module random_walk
+    x : [X_MIN..X_MAX] init X_INIT;
+    y : [Y_MIN..Y_MAX] init Y_INIT;
+    
+    [] exit -> true;
+
+    // E[t | exit] = ?
+    [] !exit -> r_left : (x'=x-1);
+    [] !exit -> r_down : (y'=y-1);
+    [] !exit -> r_right : (x'=x+1);
+    [] !exit -> r_up : (y'=y+1);
+
+    // E[t | exit_up] = cannot go left, cannot go right, can go up, cannot go down in the bottom state = 25
+    // [] !exit -> r_up : (y'=y+1);
+    // [] !exit & y!=Y_MIN+1 -> r_down : (y'=y-1);
+
+    // E[t | exit_down] = cannot go left, cannot go right, cannot go up in the top state, can go down = infty
+    // [] !exit -> r_down : (y'=y-1);
+    // [] !exit & y!=Y_MAX-1 -> r_up : (y'=y+1);
+
+    // E[t | exit_left] = can go left, cannot go right, cannot go up in the top state, cannot go down in the bottom state = 100
+    // [] !exit -> r_left : (x'=x-1);
+    // [] !exit & y!=Y_MAX-1 -> r_up : (y'=y+1);
+    // [] !exit -> r_up : (y'=y+1);
+    // [] !exit & y!=Y_MIN+1 -> r_down : (y'=y-1);
+
+    // E[t | exit_right] = cannot go left, cann go right, cannot go up in the top state, cannot go down in the bottom state = 100
+    // [] !exit -> r_right : (x'=x+1);
+    // [] !exit & y!=Y_MAX-1 -> r_up : (y'=y+1);
+    // [] !exit & y!=Y_MIN+1 -> r_down : (y'=y-1);
+endmodule
+
+rewards "steps"
+    true : 1;
+endrewards
