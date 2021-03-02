@@ -31,13 +31,6 @@ mv carl-master14 carl
 unzip $DOWNLOADS/pycarl.zip
 mv pycarl-master pycarl
 cd $SYNTHESIS
-unzip $DOWNLOADS/storm.zip
-mv storm-* storm
-unzip $DOWNLOADS/stormpy.zip
-mv stormpy-* stormpy
-
-# patch
-rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
 
 # dependencies
 if [ "$INSTALL_DEPENDENCIES" = true ]; then
