@@ -171,7 +171,7 @@ class JaniQuotientBuilder:
         new_automaton.add_edge(new_edge)
         return new_automaton
 
-    def _construct_new_edge(self, edge, templ_edge, new_automaton, orig_combination=None):
+    def _construct_new_edge(self, edge, templ_edge, new_automaton):
         expand_d, dests = self._get_expand_d(edge)
 
         if expand_d:
@@ -183,34 +183,31 @@ class JaniQuotientBuilder:
                 new_dests = [
                     (d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations
                 ]
-
-                assert len(combination) == len(orig_combination) if orig_combination is not None else True
-                merge_combination = [] if orig_combination is not None else combination
-                for x, y in zip(combination, orig_combination or []):
-                    assert x is None or y is None
-                    merge_combination.append(x if x is not None else y)
-
-                new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, tuple(merge_combination))
+                new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, tuple(combination))
         else:
-            new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, dests, orig_combination)
+            new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, dests, None)
 
         return new_automaton
 
     def _construct_edges(self, edge, new_automaton):
         expand_td, expand_guard = self._construct_expands(edge)
+        expand_d, dests = self._get_expand_d(edge)
 
         guard_expr = stormpy.Expression(edge.template_edge.guard)
         if expand_td or expand_guard:
             for combination in itertools.product(
-                    *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard) else [None])
-                      for c in self._open_constants.values()]
+                    *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard or c in expand_d)
+                        else [None]) for c in self._open_constants.values()]
             ):
                 substitution = self._get_substitution(combination)
                 templ_edge = stormpy.storage.JaniTemplateEdge(
                     guard_expr.substitute(substitution) if len(expand_guard) > 0 else guard_expr
                 )
                 templ_edge = self._modify_dst_with_remember(edge, combination, templ_edge, substitution)
-                new_automaton = self._construct_new_edge(edge, templ_edge, new_automaton, combination)
+                new_dests = [
+                    (d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations
+                ] if expand_d else dests
+                new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, combination)
         else:
             assert len(expand_guard) == 0
             templ_edge = stormpy.storage.JaniTemplateEdge(guard_expr)
