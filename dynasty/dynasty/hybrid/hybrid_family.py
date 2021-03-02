@@ -136,7 +136,7 @@ class FamilyHybrid(Family):
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             # assert absence of deadlocks or overlapping guards
-            # assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
+            assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
             assert self.dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
             assert len(self.dtmc.initial_states) == 1  # to avoid ambiguity
 
