@@ -12,7 +12,7 @@ from dynasty.family_checkers.cegis import Synthesiser
 from dynasty import version
 from dynasty.jani.quotient_container import Engine
 
-from dynasty.family_checkers.integrated_checker import Hybrid
+from dynasty.hybrid.hybrid import Hybrid
 
 logger = logging.getLogger(__name__)
 
