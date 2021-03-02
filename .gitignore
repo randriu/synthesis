@@ -1,6 +1,7 @@
-storm/
-stormpy/
+storm/build/
+stormpy/build/
+stormpy/.pytest_cache/
+stormpy/.eggs/
 
 *.log
 *.jani
-
