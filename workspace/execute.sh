@@ -121,25 +121,23 @@ function test_rewards() {
     # verbose=true
     optimal=true
     
-    dice=("test_rewards/dice/5" 0 1 1 1.0)
-    pole=("test_rewards/pole/orig" 0 1 1 1.0)
-    maze1=("test_rewards/maze/concise" 0 1 1 1.0)
-    maze2=("test_rewards/maze/orig" 0 1 1 1.0)
-    herman1=("test_rewards/herman/orig" 0 1 1 1.0)
-    herman2=("test_rewards/herman/5" 0 1 1 1.0)
-    dpm=("test_rewards/dpm/demo" 0 1 1 1.0)
-
-    grid=("tests/grid" 40 1 1 1.0)
+    dice=("tests/tests-optimality/dice/5" 0 1 1 1.0)
+    pole=("tests/tests-optimality/pole/orig" 0 1 1 1.0)
+    maze1=("tests/tests-optimality/maze/concise" 0 1 1 1.0)
+    maze2=("tests/tests-optimality/maze/orig" 0 1 1 1.0)
+    herman1=("tests/tests-optimality/herman/orig" 0 1 1 1.0)
+    herman2=("tests/tests-optimality/herman/5" 0 1 1 1.0)
+    dpm=("tests/tests-optimality/dpm/demo" 0 1 1 1.0)
+    grid=("tests/tests-optimality/grid" 40 1 1 1.0)
     
     # running ##########
 
     # model=pole
 
-    # for model in dice pole maze1 maze2 herman1 herman2 dpm; do
-    #     echo $model
-    #     hybrid $model
-    # done
-    hybrid grid
+    for model in dice pole maze1 maze2 herman1 herman2 dpm grid; do
+        echo $model
+        hybrid $model
+    done
     # onebyone $model
 }
 
