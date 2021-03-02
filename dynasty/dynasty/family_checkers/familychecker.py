@@ -1,5 +1,6 @@
 import logging
 import operator
+import re
 
 from collections import OrderedDict
 from enum import Enum
@@ -148,6 +149,7 @@ class FamilyChecker:
         self.expression_manager = None
         self.holes = None
         self.hole_options = None
+        self.parameters = []
         self.sketch = None
         self.symmetries = None
         self.differents = None
@@ -174,11 +176,8 @@ class FamilyChecker:
         with open(path) as file:
             for line in file:
                 line = line.rstrip()
-                if not line or line == "":
-                    continue
-                if line.startswith("//"):
-                    continue
-                properties.append(line)
+                if line and not line.startswith("//"):
+                    properties.append(line)
         self._load_properties(program, properties, constant_str)
 
     def _load_properties(self, program, properties, constant_str=""):
@@ -203,19 +202,21 @@ class FamilyChecker:
                     self.properties.append(prop)
         _constants_map = self._constants_map(constant_str, program)
 
-    @staticmethod
-    def _parse_template_defs(location):
+    def _parse_template_defs(self, location):
         definitions = OrderedDict()
+        param_regex = r"^[+-]?(\d*[.])?\d+<=[\w\d]+<=[+-]?(\d*[.])?\d+$"
         with open(location) as file:
             for line in file:
                 line = line.rstrip()
-                if not line or line == "":
-                    continue
-                if line.startswith("#"):
-                    continue
+                if re.match(param_regex, line):
+                    entries = line.strip().split("<=")
+                    assert entries[0] <= entries[2]
+                    self.parameters.append(entries[1])
+                    definitions[entries[1]] = [entries[0], entries[2]]
+                elif line and not line.startswith('#'):
+                    entries = line.strip().split(";")
+                    definitions[entries[0]] = entries[1:]
 
-                entries = line.strip().split(";")
-                definitions[entries[0]] = entries[1:]
         return definitions
 
     def _register_unconstrained_design_space(self, size):
@@ -234,14 +235,12 @@ class FamilyChecker:
         constants_map = dict()
         ordered_holes = list(self.holes.keys())
         for k in ordered_holes:
-            v = definitions[k]
-
             ep = stormpy.storage.ExpressionParser(self.expression_manager)
             ep.set_identifier_mapping(dict())
+
+            v = definitions[k]
             if len(v) == 1:
-
                 constants_map[self.holes[k].expression_variable] = ep.parse(v[0])
-
                 del self.holes[k]
             else:
                 self.hole_options[k] = [ep.parse(x) for x in v]
