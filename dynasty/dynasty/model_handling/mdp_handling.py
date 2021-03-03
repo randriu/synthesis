@@ -277,7 +277,7 @@ class ModelHandling:
         if is_dtmc:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
-            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
 
         # assert not self._formulae[index].has_bound
 
