@@ -1,6 +1,9 @@
 // author: Roman Andriushchenko
 
 #include "storm-synthesis/synthesis/Counterexample.h"
+#include "storm/environment/Environment.h"
+#include "storm/solver/SolverSelectionOptions.h"
+#include "storm/environment/solver/NativeSolverEnvironment.h"
 
 #include <queue>
 #include <deque>
@@ -503,9 +506,13 @@ namespace storm {
             std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
             
             // Model check
+            Environment env;
+            env.solver().setLinearEquationSolverType(storm::solver::EquationSolverType::Native);
+            env.solver().native().setMethod(storm::solver::NativeLinearEquationSolverMethod::Jacobi);
+
             bool onlyInitialStatesRelevant = false;
             storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> task(*(this->formula_modified[index]), onlyInitialStatesRelevant);
-            std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(subdtmc, task);
+            std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(env, subdtmc, task);
             storm::modelchecker::ExplicitQualitativeCheckResult & result = result_ptr->asExplicitQualitativeCheckResult();
             bool satisfied = result[initial_state];
 
