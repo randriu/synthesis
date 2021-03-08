@@ -507,8 +507,8 @@ namespace storm {
             
             // Model check
             Environment env;
-            env.solver().setLinearEquationSolverType(storm::solver::EquationSolverType::Native);
-            env.solver().native().setMethod(storm::solver::NativeLinearEquationSolverMethod::Jacobi);
+            // env.solver().setLinearEquationSolverType(storm::solver::EquationSolverType::Native);
+            // env.solver().native().setMethod(storm::solver::NativeLinearEquationSolverMethod::Jacobi);
 
             bool onlyInitialStatesRelevant = false;
             storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> task(*(this->formula_modified[index]), onlyInitialStatesRelevant);
@@ -526,6 +526,7 @@ namespace storm {
             this->total.start();
 
             // Get DTMC info
+            std::cout << "*****************************CE generation started\n";
             StateType dtmc_states = this->dtmc->getNumberOfStates();
 
             this->preparing_subdtmc.start();
@@ -567,6 +568,7 @@ namespace storm {
             this->constructing_counterexample.stop();
 
             this->total.stop();
+            std::cout << "*****************************CE generation stop\n";
 
             return critical_holes;
         }

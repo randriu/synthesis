@@ -205,6 +205,8 @@ namespace storm {
             std::cout << "--------------------------------------------------------------\n";
             std::cout << "METRICS\n";
             std::cout << "Jacobi Iterations: " << iterations << "\n";
+            std::cout << "dimension: " << A->getRowCount() << "\n";
+            std::cout << "nnz count: " << A->getNonzeroEntryCount() << "\n";
             std::cout << "--------------------------------------------------------------\n";
 
             return status == SolverStatus::Converged;

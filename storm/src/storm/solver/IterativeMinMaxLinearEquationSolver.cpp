@@ -303,7 +303,7 @@ namespace storm {
             storm::solver::Multiplier<ValueType> const& multiplier = *this->multiplierA;
             
             // Allow aliased multiplications.
-            bool useGaussSeidelMultiplication = multiplicationStyle == storm::solver::MultiplicationStyle::GaussSeidel;
+            bool useGaussSeidelMultiplication = false;//multiplicationStyle == storm::solver::MultiplicationStyle::GaussSeidel;
             
             // Proceed with the iterations as long as the method did not converge or reach the maximum number of iterations.
             uint64_t iterations = currentIterations;

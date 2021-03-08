@@ -79,6 +79,9 @@ namespace storm {
             }
             
             // Handle the case where there is just one large SCC
+            std::cout << "Number of SCCs: " << this->sortedSccDecomposition->size() << "\n";
+            size_t trivialSCCsCount = 0;
+            size_t nonTrivialSCCsCount = 0;
             bool returnValue = true;
             if (this->sortedSccDecomposition->size() == 1) {
                 returnValue = solveFullyConnectedEquationSystem(sccSolverEnvironment, x, b);
@@ -91,8 +94,10 @@ namespace storm {
                 progress.startNewMeasurement(0);
                 for (auto const& scc : *this->sortedSccDecomposition) {
                     if (scc.size() == 1) {
+                        trivialSCCsCount+=1;
                         returnValue = solveTrivialScc(*scc.begin(), x, b) && returnValue;
                     } else {
+                        nonTrivialSCCsCount+=1;
                         sccAsBitVector.clear();
                         for (auto const& state : scc) {
                             sccAsBitVector.set(state, true);
@@ -112,6 +117,8 @@ namespace storm {
                 clearCache();
             }
 
+            std::cout << "non trivial SCCs: " << nonTrivialSCCsCount << "\n";
+            std::cout << "trivial SCCs: " << trivialSCCsCount << "\n";
             
 
             

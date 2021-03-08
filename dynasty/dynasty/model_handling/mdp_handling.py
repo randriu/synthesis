@@ -5,6 +5,7 @@ import os
 import math
 import subprocess
 
+from ..profiler import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -278,15 +279,20 @@ class ModelHandling:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+            # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
         # assert not self._formulae[index].has_bound
 
         logger.info(f"Start checking direction 1: {self._formulae[index]}")
         # TODO allow qualitative model checking with scheduler extraction.
+        timer = Timer()
+        timer.start()
         prime_result = stormpy.model_checking(
             self._submodel, self._formulae[index], only_initial_states=False,
             extract_scheduler=extract_scheduler, environment=env
         )
+        timer.stop()
+        logger.debug(f"MDP model checking run-time: {timer.read()}")
 
         if is_dtmc:
             maximise = True
@@ -316,10 +322,14 @@ class ModelHandling:
         if check_dir_2(absolute_min, absolute_max):
             self._mc_mdp_executions += 1
             logger.info(f"Start checking direction 2: {self._alt_formulae[index]}")
+            timer = Timer()
+            timer.start()
             second_result = stormpy.model_checking(
                 self._submodel, self._alt_formulae[index], only_initial_states=False,
                 extract_scheduler=extract_scheduler, environment=env
             )
+            timer.stop()
+            logger.debug(f"MDP model checking run-time (2nd): {timer.read()}")
 
             if maximise:
                 lower_result = second_result
