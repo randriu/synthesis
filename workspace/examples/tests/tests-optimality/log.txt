@@ -1,0 +1,14 @@
+python3 dynasty/dynasty.py --project workspace/examples/tests/tests-optimality/dice/5/ hybrid --short-summary --constants CMAX=0,THRESHOLD=1.0 --optimality sketch.optimal --properties optimal.properties
+> T = [0.4999, 0.4999, 1.6666666667] - Hybrid: opt = 1.666667 ((6351, 4491) iters, 51.1 sec)
+
+python3 dynasty/dynasty.py --project workspace/examples/tests/tests-optimality/pole/orig/ hybrid --short-summary --constants CMAX=0,THRESHOLD=1.0 --optimality sketch.optimal --properties optimal.properties
+> T = [16.6565984197] - Hybrid: opt = 16.656598 ((5739, 7851) iters, 529.54 sec)
+
+python3 dynasty/dynasty.py --project workspace/examples/tests/tests-optimality/herman/5/ hybrid --short-summary --constants CMAX=0,THRESHOLD=1.0 --optimality sketch.optimal --properties optimal.properties
+> T = [18.1930600768] - Hybrid: opt = 18.19306 ((1, 453) iters, 10.69 sec)
+
+python3 dynasty/dynasty.py --project workspace/examples/tests/tests-optimality/dpm/demo/ hybrid --short-summary --constants CMAX=0,THRESHOLD=1.0 --optimality sketch.optimal --properties optimal.properties
+> T = [1.0, 9100.0642457578] - Hybrid: opt = 9100.064246 ((83, 9175) iters, 95.66 sec)
+
+python3 dynasty/dynasty.py --project workspace/examples/tests/tests-optimality/grid/ hybrid --short-summary --constants CMAX=40,THRESHOLD=1.0 --optimality sketch.optimal --properties optimal.properties
+> T = [0.9267670118] - Hybrid: opt = 0.926767 ((179, 3222) iters, 40.25 sec)

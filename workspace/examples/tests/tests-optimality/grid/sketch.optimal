@@ -1,0 +1,3 @@
+P=? [ F "goal" & c<CMAX ]
+max
+relative 0.00
