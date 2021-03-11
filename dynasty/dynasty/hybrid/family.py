@@ -3,6 +3,9 @@ import z3
 
 from collections import OrderedDict
 
+import stormpy
+import stormpy.pars
+
 from ..family_checkers.familychecker import HoleOptions
 from ..family_checkers.quotientbased import LiftingChecker
 from ..jani.jani_quotient_builder import JaniQuotientBuilder
@@ -41,6 +44,7 @@ class Family:
     _holes = None  # ordered dictionary
     _hole_options = None
     _hole_option_indices = None
+    _parameters = None
 
     # - indexed hole options
     hole_list = None
@@ -50,6 +54,7 @@ class Family:
     # - jani representation + sparse MDP representation
     _quotient_container = None
     _quotient_mdp = None
+    _quotient_builder = None
 
     # - SMT encoding (used to enable restrictions)
     _solver = None
@@ -88,7 +93,9 @@ class Family:
         hole_clauses = dict()
         for var, hole in Family._solver_meta_vars.items():
             hole_clauses[hole] = z3.Or(
-                [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
+                [var == (idx if hole in self._parameters else Family._hole_option_indices[hole][option])
+                 for idx, option in enumerate(self.options[hole])
+                 ]
             )
         self.encoding = z3.And(list(hole_clauses.values()))
 
@@ -99,13 +106,14 @@ class Family:
 
     @staticmethod
     def initialize(
-            _sketch, _holes, _hole_options, symmetries, differents, _formulae,
+            _sketch, _holes, _hole_options, _parameters, symmetries, differents, _formulae,
             _mc_formulae, _mc_formulae_alt, _thresholds, _accept_if_above, optimality_setting
     ):
 
         Family._sketch = _sketch
         Family._holes = _holes
         Family._hole_options = _hole_options
+        Family._parameters = _parameters
 
         # map holes to their indices
         Family.hole_list = list(Family._holes.keys())
@@ -117,10 +125,8 @@ class Family:
         Family._hole_option_indices = dict()
         for hole, options in Family._hole_options.items():
             indices = dict()
-            k = 0
-            for option in options:
-                indices[option] = k
-                k += 1
+            for idx, option in enumerate(options):
+                indices[option] = idx
             Family._hole_option_indices[hole] = indices
 
         # initialize z3 solver
@@ -157,8 +163,10 @@ class Family:
         Family._optimality_setting = optimality_setting
 
         # build quotient MDP
-        quotient_builder = JaniQuotientBuilder(Family._sketch, Family._holes)
-        Family._quotient_container = quotient_builder.construct(Family._hole_options, remember=set())
+        Family._quotient_builder = JaniQuotientBuilder(Family._sketch, Family._holes)
+        Family._quotient_container = Family._quotient_builder.construct(
+            Family._hole_options, Family._parameters, remember=set()
+        )
         Family._quotient_container.prepare(Family._mc_formulae, Family._mc_formulae_alt)
         Family._quotient_mdp = Family._quotient_container.mdp_handling.full_mdp
         Family._quotient_mdp_stats = (
@@ -243,7 +251,16 @@ class Family:
 
         logger.debug(f"Constructing quotient MDP for family {self.options}.")
         indexed_options = Family._hole_options.index_map(self.options)
-        Family._quotient_container.consider_subset(self.options, indexed_options)
+        if self._parameters:
+            # When family includes parameters, then it is required again construct new quotient_container
+            Family._quotient_container = Family._quotient_builder.construct(
+                self.options, Family._parameters, remember=set()
+            )
+            Family._quotient_container.prepare(
+                Family._mc_formulae, Family._mc_formulae_alt
+            )
+        else:
+            Family._quotient_container.consider_subset(self.options, indexed_options)
         self.mdp = Family._quotient_container.mdp_handling.mdp
         self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
         logger.debug(f"Constructed MDP of size {self.mdp.nr_states}.")
@@ -252,6 +269,15 @@ class Family:
         )
 
         Profiler.stop()
+
+    # def _construct_region(self):
+    #     region_valuation = {}
+    #     for parameter in self.mdp.collect_probability_parameters():
+    #         region_valuation[parameter] = (
+    #             stormpy.RationalRF(self.options[parameter.name][0].evaluate_as_double()),
+    #             stormpy.RationalRF(self.options[parameter.name][1].evaluate_as_double())
+    #         )
+    #     return stormpy.pars.ParameterRegion(region_valuation)
 
     def model_check_formula(self, formula_index):
         """
@@ -293,12 +319,11 @@ class Family:
         # assert not self.analyzed  # sanity check
         assert self.constructed
 
-        logger.debug(f"CEGAR: analyzing family {self.options} of size {self.size}.")
+        options = {k: [round(v.evaluate_as_double(), 10) for v in vs] for k, vs in self.options.items()}
+        logger.debug(f">> CEGAR: analyzing family {options} of size {self.size}.")
 
         undecided_formulae_indices = []
         optimal_value = None
-        # for formula_index in self.formulae_indices[:-1] \
-        #         if superfamily and self._optimality_setting is not None else self.formulae_indices:
         for formula_index in self.formulae_indices:
             # logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             Family.mdp_checks_inc()
@@ -340,15 +365,65 @@ class Family:
             return True, optimal_value
         return None, optimal_value
 
+    def _round_robin_split(self):
+        def create_expression(num):
+            return self._sketch.expression_manager.create_rational(stormpy.Rational(num))
+
+        def interval_len(option):
+            return (self.options[option][1].evaluate_as_double() - self.options[option][0].evaluate_as_double()) / 1.00
+
+        def split_options_at_half(options):
+            return options[:len(options) // 2], options[len(options) // 2:]
+
+        def get_sub_intervals(start, end, n):
+            w = (end - start) / n
+            # print(f">> {[[start + i * w, start + (i + 1) * w] for i in range(n)]}")
+            return [[create_expression(start + i * w), create_expression(start + (i + 1) * w)] for i in range(n)]
+
+        def construct_split_queue(sub_options):
+            for sub_option in sub_options:
+                split_queue.append(HoleOptions(self.options))
+                split_queue[-1][hole] = sub_option
+
+        options_lengths = [(k, interval_len(k) if k in self._parameters else len(v)) for k, v in self.options.items()]
+        sorted_options = sorted(options_lengths, key=lambda x: x[1], reverse=True)
+        hole, length = None, 0
+        for name, option_len in sorted_options:
+            if (name not in self._parameters and option_len == 1) or \
+                    (name in self._parameters and option_len <= 1.0e-15):  # Has significance at DFS - depth of search
+                continue
+            hole, length = name, option_len
+            # print(f">> {hole}: {option_len}")
+            break
+
+        split_queue = []
+        sub_intervals_n = 2
+        if hole and hole in self._parameters:
+            sub_intervals = get_sub_intervals(
+                self.options[hole][0].evaluate_as_double(), self.options[hole][1].evaluate_as_double(), sub_intervals_n
+            )
+            construct_split_queue(sub_intervals)
+        elif hole:
+            left_part, right_part = split_options_at_half(self.options[hole])
+            construct_split_queue([left_part, right_part])
+        else:
+            split_queue = None
+        assert len(split_queue) == sub_intervals_n if hole in self._parameters else True
+        assert len(split_queue) == 2 if hole and hole not in self._parameters else True
+        return split_queue
+
     def prepare_split(self):
         # logger.debug(f"Preparing to split family {self.options}")
         assert self.constructed and not self.split_ready
         Profiler.start("ar - splitting")
-        Family._quotient_container.scheduler_color_analysis()
-        if len(Family._quotient_container.inconsistencies) == 2:
-            self.suboptions = LiftingChecker.split_hole_options(
-                self.options, Family._quotient_container, Family._hole_options, True
-            )
+        if self._parameters:
+            self.suboptions = self._round_robin_split()
+        else:
+            Family._quotient_container.scheduler_color_analysis()
+            if len(Family._quotient_container.inconsistencies) == 2:
+                self.suboptions = LiftingChecker.split_hole_options(
+                    self.options, Family._quotient_container, Family._hole_options, True
+                )
         Profiler.stop()
 
     def split(self):

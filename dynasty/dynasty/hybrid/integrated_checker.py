@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 quotientbased_logger.disabled = False
 quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
-model_handling_logger.disabled = True
+model_handling_logger.disabled = False
 
-ONLY_CEGAR = False
+ONLY_CEGAR = True
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
@@ -253,6 +253,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             # When the violation property is not checking, we have to add its index
             if vp_index not in family.formulae_indices:
                 family.formulae_indices.append(vp_index)
+                # TODO: It is required to do this model checking?
                 family.model_check_formula(vp_index)
                 family.bounds[vp_index] = Family.quotient_container().latest_result.result
 
@@ -336,6 +337,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
                     and self.input_has_optimality_property():
                 self._check_optimal_property(family, assignment, counterexample_generator)
+                # TODO: Is this required to obtain correct results?
+                if not violated_formulae_indices:
+                    violated_formulae_indices.append(len(self.formulae) - 1)
             elif not violated_formulae_indices:
                 Profiler.add_ce_stats(counterexample_generator.stats)
                 return True
@@ -395,7 +399,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         Profiler.start("_")
         logger.debug("Constructing quotient MDP of the superfamily.")
         FamilyHybrid.initialize(
-            self.sketch, self.holes, self.hole_options, self.symmetries,
+            self.sketch, self.holes, self.hole_options, self.parameters, self.symmetries,
             self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
             self.thresholds, self._accept_if_above, self._optimality_setting
         )
@@ -430,11 +434,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
         self.families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
-        while self.families:
+        while self.families and satisfying_assignment is None:
             logger.debug(f"Current number of families: {len(self.families)}")
 
-            # pick a family
-            family = self.families.pop(-1)
+            # pick a family - DFS or BFS
+            family = self.families.pop(0)
             if not self.stage_cegar:
                 # CEGIS
                 feasible = self.analyze_family_cegis(family)
@@ -453,14 +457,16 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     self.families.append(family)
                     continue
             else:  # CEGAR
-                assert family.split_ready
+                # Ignores families, that contain parameters which have the length shorter than threshold
+                if not family.split_ready:
+                    continue
+                # assert family.split_ready
 
                 # family has already been analysed: discard the parent and refine
                 logger.debug("Splitting the family.")
-                subfamily_left, subfamily_right = family.split()
-                subfamilies = [subfamily_left, subfamily_right]
+                subfamilies = family.split()
                 logger.debug(
-                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
+                    f"Constructed subfamilies of sizes {[family.size for family in subfamilies]}."
                 )
 
                 # analyze both subfamilies

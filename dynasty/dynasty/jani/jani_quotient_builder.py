@@ -30,6 +30,7 @@ class JaniQuotientBuilder:
         self.edge_coloring = None
         self.holes_options = {}
         self.holes_memory_vars = {}
+        self.parameters = []
         self.init_allin1_by_replace = True
         self._fill_constants_to_automata()
         self.holes_memory_ep = self._make_holes_memory_ep()
@@ -121,6 +122,8 @@ class JaniQuotientBuilder:
         return {
             c.expression_variable: self.holes_options[c.name][v]
             for c, v in zip(self._open_constants.values(), combination) if v is not None
+            # for c, v in zip(self._open_constants.values(), combination)
+            # if v is not None and c.name not in self.parameters
         }
 
     def _modify_dst_with_remember(self, edge, combination, templ_edge, substitution):
@@ -174,6 +177,7 @@ class JaniQuotientBuilder:
     def _construct_new_edge(self, edge, templ_edge, new_automaton):
         expand_d, dests = self._get_expand_d(edge)
 
+        # expand_d = []
         if expand_d:
             for combination in itertools.product(
                     *[(range(len(self.holes_options[c.name])) if c in expand_d else [None])
@@ -195,6 +199,7 @@ class JaniQuotientBuilder:
 
         guard_expr = stormpy.Expression(edge.template_edge.guard)
         if expand_td or expand_guard:
+            # without c in expand_d
             for combination in itertools.product(
                     *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard or c in expand_d)
                         else [None]) for c in self._open_constants.values()]
@@ -287,8 +292,9 @@ class JaniQuotientBuilder:
 
         return jani_program
 
-    def construct(self, holes_options, remember=None, init_all_in_one=None):
+    def construct(self, holes_options, parameters, remember=None, init_all_in_one=None):
         self.holes_options = holes_options
+        self.parameters = parameters
         self.init_all_in_one = init_all_in_one if init_all_in_one is not None else {}
         self.remember = remember if remember is not None else {}
         assert len(self.remember) == 0, "Remember options have not been tested in a long time"
@@ -316,13 +322,13 @@ class JaniQuotientBuilder:
         jani_program.finalize()
         jani_program.check_valid()
 
-        filename = f"output_{self._counter}.jani"
-        logger.debug(f"Write to {filename}")
-        with open(filename, "w") as F:
+        # filename = f"output_{self._counter}.jani"
+        # logger.debug(f"Write to {filename}")
+        # with open(filename, "w") as F:
             # jani_program.make_standard_compliant()
-            F.write(str(jani_program))
-            pass
-        logger.debug("done writing file.")
+            # F.write(str(jani_program))
+            # pass
+        # logger.debug("done writing file.")
 
         color_to_edge_indices = dict()
         for aut_index, automaton in enumerate(jani_program.automata):
@@ -330,6 +336,6 @@ class JaniQuotientBuilder:
                 new_list = color_to_edge_indices.get(edge.color, stormpy.FlatSet())
                 new_list.insert(jani_program.encode_automaton_and_edge_index(aut_index, edge_index))
                 color_to_edge_indices[edge.color] = new_list
-        print(",".join([f'{k}: {v}' for k, v in color_to_edge_indices.items()]))
+        logger.debug(",".join([f'{k}: {v}' for k, v in color_to_edge_indices.items()]))
 
         return JaniQuotientContainer(jani_program, self.edge_coloring, self.holes_options, color_to_edge_indices)

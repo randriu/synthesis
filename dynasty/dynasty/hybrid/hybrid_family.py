@@ -55,7 +55,7 @@ class FamilyHybrid(Family):
 
     def split(self):
         assert self.split_ready
-        return FamilyHybrid(self, self.suboptions[0]), FamilyHybrid(self, self.suboptions[1])
+        return [FamilyHybrid(self, sub_option) for sub_option in self.suboptions]
 
     @property
     def state_to_hole_indices(self):

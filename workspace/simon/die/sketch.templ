@@ -1,6 +1,10 @@
-dtmc
+mdp
 
-const double p;
+const double p=0.50;
+const double p3;
+const double p4;
+const double p5;
+const double p6;
 
 const int x3;
 const int x4;
@@ -13,9 +17,9 @@ module die
         // value of the dice
         d : [0..6] init 0;
 
-        [] s=0 -> p : (s'=1) + (1-p) : (s'=2);
-        [] s=1 -> p : (s'=x3) + (1-p) : (s'=x4);
-        [] s=2 -> p : (s'=x5) + (1-p) : (s'=x6);
+        [] s=0 -> p : (s'=1) + p : (s'=2);
+        [] s=1 -> p3 : (s'=x3) + p4 : (s'=x4);
+        [] s=2 -> p5 : (s'=x5) + p6 : (s'=x6);
         [] s=3 -> p : (s'=1) + (1-p) : (s'=7) & (d'=1);
         [] s=4 -> p : (s'=7) & (d'=3) + (1-p) : (s'=7) & (d'=2);
         [] s=5 -> p : (s'=2) + (1-p) : (s'=7) & (d'=4);

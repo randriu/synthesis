@@ -5,6 +5,8 @@ import os
 import math
 import subprocess
 
+from ..profiler import Timer
+
 
 logger = logging.getLogger(__name__)
 
@@ -283,6 +285,7 @@ class ModelHandling:
 
         logger.info(f"Start checking direction 1: {self._formulae[index]}")
         # TODO allow qualitative model checking with scheduler extraction.
+
         prime_result = stormpy.model_checking(
             self._submodel, self._formulae[index], only_initial_states=False,
             extract_scheduler=extract_scheduler, environment=env
@@ -334,3 +337,17 @@ class ModelHandling:
         return ExplicitMCResult(
             prime_result, second_result, maximise, absolute_min=absolute_min, absolute_max=absolute_max
         )
+
+    # def _region_model_checking(self, index, env, region):
+    #     assert region is not None
+    #     region_checker = stormpy.pars.create_region_checker(env, self._submodel, self._formulae[index])
+    #     max_res = region_checker.get_bound_all_states(env, region, True)
+    #     min_res = region_checker.get_bound_all_states(env, region, False)
+    #     absolute_max = max([max_res.at(x) for x in self._submodel.initial_states])
+    #     absolute_min = min([min_res.at(x) for x in self._submodel.initial_states])
+    #     maximise = self._formulae[index].optimality_type == stormpy.OptimizationDirection.Maximize
+    #     print(f">> Done MDP Region Model Checking. Result for initial state is: {absolute_min} -- {absolute_max}")
+    #     # region_checker.perform_region_refinement(env, region, None)
+    #     return ExplicitMCResult(
+    #         max_res, min_res, maximise, absolute_min=absolute_min, absolute_max=absolute_max
+    #     )
