@@ -1,6 +1,3 @@
-# author: Roman Andriushchenko
-# co-author: Simon Stupinsky
-
 import logging
 
 import stormpy
@@ -41,9 +38,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     ce_quality = False
     ce_maxsat = False
 
-    def __init__(self):
-        QuotientBasedFamilyChecker.__init__(self)
-        CEGISChecker.__init__(self)
+    def __init__(self, *args):
+        QuotientBasedFamilyChecker.__init__(self, *args)
+        CEGISChecker.__init__(self, *args)
         self.families = []
         self.iterations_cegis = 0
         self.iterations_cegar = 0

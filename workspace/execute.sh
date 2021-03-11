@@ -10,7 +10,6 @@ fi
 timeout=100d
 verbose=false
 parallel=false
-optimal=false
 
 # workspace settings
 dynasty_exe="$SYNTHESIS/dynasty/dynasty.py"
@@ -46,10 +45,6 @@ function python_dynasty() {
     local method=$1
     local dynasty_call="python3 ${dynasty_exe} --project ${projects_dir}/${project}/ $method --short-summary"
     local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    local optimality=""
-    if [ ${optimal} = "true" ]; then
-        optimality="--optimality sketch.optimal --properties optimal.properties"
-    fi
     echo \$ ${dynasty_call} ${constants} ${optimality}
     timeout ${timeout} ${dynasty_call} ${constants} ${optimality}
 }
@@ -119,7 +114,6 @@ function test_rewards() {
     timeout=1h
     parallel=true
     # verbose=true
-    optimal=true
     
     dice=("tests/tests-optimality/dice/5" 0 1 1 1.0)
     pole=("tests/tests-optimality/pole/orig" 0 1 1 1.0)
@@ -134,7 +128,8 @@ function test_rewards() {
 
     # model=pole
 
-    for model in dice pole maze1 maze2 herman1 herman2 dpm grid; do
+    # for model in dice pole maze1 maze2 herman1 herman2 dpm grid; do
+    for model in dice; do
         echo $model
         hybrid $model
     done
@@ -142,20 +137,20 @@ function test_rewards() {
 }
 
 function run() {
-    # timeout=3s
+    # timeout=1s
     parallel=true
     # verbose=true
     # optimal=true
     
-    model=("dpm/orig-bat100" 3 140 140 1.0)
+    # model=("dpm/orig-bat100" 3 140 140 1.0)
     # model=("pole/orig" 0 16.7 16.7 1.0)
-    # dice=("dice/5" 0 16.7 16.7 1.0)
+    dice=("dice/test" 0 16.7 16.7 1.0)
     
     # running ##########
 
     # model=pole
 
-    hybrid model
+    hybrid dice
     # onebyone $model
 }
 
@@ -164,8 +159,8 @@ function run() {
 reset_log
 
 # test_release
-# run
-test_rewards
+run
+# test_rewards
 
 # exit
 
@@ -183,17 +178,14 @@ function cav() {
     pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
     grid=("cav/grid/big" 40 0.928 0.928 1.0)
 
-    optimal=false
     for model in dpm maze herman pole grid; do
         log_file=$log_dir/cav/hybrid_f_$model.txt
         hybrid $model
     done
-    optimal=true
     for model in dpm maze herman pole grid; do
         log_file=$log_dir/cav/hybrid_0_$model.txt
         hybrid $model
     done
-    optimal=true
     for model in dpm maze herman pole grid; do
         log_file=$log_dir/cav/onebyone_$model.txt
         onebyone $model &
