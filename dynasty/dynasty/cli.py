@@ -178,7 +178,7 @@ def dynasty(
 
 
 def main():
-    setup_logger("dynasty.log")
+    setup_logger(None)
     dynasty()
 
 
