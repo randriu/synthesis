@@ -320,7 +320,7 @@ class Family:
         assert self.constructed
 
         options = {k: [round(v.evaluate_as_double(), 10) for v in vs] for k, vs in self.options.items()}
-        logger.debug(f">> CEGAR: analyzing family {options} of size {self.size}.")
+        logger.debug(f"CEGAR: analyzing family {options} of size {self.size}.")
 
         undecided_formulae_indices = []
         optimal_value = None
@@ -370,7 +370,7 @@ class Family:
             return self._sketch.expression_manager.create_rational(stormpy.Rational(num))
 
         def interval_len(option):
-            return (self.options[option][1].evaluate_as_double() - self.options[option][0].evaluate_as_double()) / 1.00
+            return (self.options[option][1].evaluate_as_double() - self.options[option][0].evaluate_as_double()) / 1.0
 
         def split_options_at_half(options):
             return options[:len(options) // 2], options[len(options) // 2:]
@@ -386,15 +386,16 @@ class Family:
                 split_queue[-1][hole] = sub_option
 
         options_lengths = [(k, interval_len(k) if k in self._parameters else len(v)) for k, v in self.options.items()]
-        sorted_options = sorted(options_lengths, key=lambda x: x[1], reverse=True)
-        hole, length = None, 0
-        for name, option_len in sorted_options:
-            if (name not in self._parameters and option_len == 1) or \
-                    (name in self._parameters and option_len <= 1.0e-15):  # Has significance at DFS - depth of search
-                continue
-            hole, length = name, option_len
-            # print(f">> {hole}: {option_len}")
-            break
+        singletons = set(filter(lambda x: x[0] not in self._parameters and x[1] == 1, options_lengths))
+        options_lengths = list(set(options_lengths) - singletons)
+        sorted_options = sorted(options_lengths, key=lambda x: (x[1], x[0]), reverse=True)
+        absolute_diff = \
+            self._quotient_container.latest_result.absolute_max - self._quotient_container.latest_result.absolute_min
+        print(f">> {absolute_diff}")
+        (hole, length) = sorted_options.pop(0) if sorted_options or not() else (None, 0)
+        if hole in self._parameters and absolute_diff <= 1.0e-10:
+            hole, length = None, 0
+        print(f">> {hole}: {length}")
 
         split_queue = []
         sub_intervals_n = 2
@@ -412,11 +413,11 @@ class Family:
         assert len(split_queue) == 2 if hole and hole not in self._parameters else True
         return split_queue
 
-    def prepare_split(self):
+    def prepare_split(self, strict=False):
         # logger.debug(f"Preparing to split family {self.options}")
         assert self.constructed and not self.split_ready
         Profiler.start("ar - splitting")
-        if self._parameters:
+        if self._parameters and not strict:
             self.suboptions = self._round_robin_split()
         else:
             Family._quotient_container.scheduler_color_analysis()
@@ -463,7 +464,7 @@ class Family:
         if feasible is None:
             logger.debug("Family is UNDECIDED for optimal property.")
             if not self.split_ready:
-                self.prepare_split()
+                self.prepare_split(strict=True)
             if self.size > 1:
                 # oracle.scheduler_color_analysis()
                 if (oracle.is_lower_bound_tight() and not is_max) or (oracle.is_upper_bound_tight() and is_max):
@@ -475,7 +476,7 @@ class Family:
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
             if not self.split_ready:
-                self.prepare_split()
+                self.prepare_split(strict=True)
             # oracle.scheduler_color_analysis()
             improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \

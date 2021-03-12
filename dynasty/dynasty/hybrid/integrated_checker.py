@@ -434,18 +434,20 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
         self.families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
-        while self.families and satisfying_assignment is None:
+
+        undecided_families = 0
+
+        while self.families and not (satisfying_assignment is not None and self._optimality_setting is None):
             logger.debug(f"Current number of families: {len(self.families)}")
 
-            # pick a family - DFS or BFS
-            family = self.families.pop(0)
+            # pick a family
+            family = self.families.pop(-1)
             if not self.stage_cegar:
                 # CEGIS
                 feasible = self.analyze_family_cegis(family)
                 if feasible and isinstance(feasible, bool):
                     logger.debug("CEGIS: some is SAT.")
                     satisfying_assignment = family.member_assignment
-                    break
                 elif not feasible and isinstance(feasible, bool):
                     logger.debug("CEGIS: all UNSAT.")
                     self.stage_step(family.size)
@@ -459,6 +461,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             else:  # CEGAR
                 # Ignores families, that contain parameters which have the length shorter than threshold
                 if not family.split_ready:
+                    undecided_families += 1
                     continue
                 # assert family.split_ready
 
@@ -485,8 +488,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                             self._check_optimal_property(
                                 subfamily, satisfying_assignment, cex_generator=None, optimal_value=optimal_value
                             )
-                        elif satisfying_assignment is not None and self._optimality_setting is None:
-                            break
                     elif not feasible and isinstance(feasible, bool):
                         logger.debug("CEGAR: all UNSAT.")
                         models_pruned += subfamily.size
@@ -500,6 +501,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         if PRINT_PROFILING:
             Profiler.print()
 
+        logger.debug(f">> {undecided_families}")
         if self._optimal_value is not None:
             assert not self.families
             logger.info(f"Found optimal assignment: {self._optimal_value}")

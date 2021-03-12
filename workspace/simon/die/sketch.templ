@@ -1,15 +1,13 @@
 mdp
 
 const double p=0.50;
-const double p3;
-const double p4;
-const double p5;
-const double p6;
+const double p1;
+//const double p2;
 
-const int x3;
-const int x4;
-const int x5;
-const int x6;
+const int x3=3;
+const int x4=4;
+const int x5=5;
+const int x6=6;
 
 module die
         // local state
@@ -18,8 +16,8 @@ module die
         d : [0..6] init 0;
 
         [] s=0 -> p : (s'=1) + p : (s'=2);
-        [] s=1 -> p3 : (s'=x3) + p4 : (s'=x4);
-        [] s=2 -> p5 : (s'=x5) + p6 : (s'=x6);
+        [] s=1 -> p1 : (s'=x3) + 1-p1 : (s'=x4);
+        [] s=2 -> p1 : (s'=x5) + 1-p1 : (s'=x6);
         [] s=3 -> p : (s'=1) + (1-p) : (s'=7) & (d'=1);
         [] s=4 -> p : (s'=7) & (d'=3) + (1-p) : (s'=7) & (d'=2);
         [] s=5 -> p : (s'=2) + (1-p) : (s'=7) & (d'=4);
