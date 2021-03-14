@@ -167,7 +167,7 @@ class Family:
         Family._quotient_container = Family._quotient_builder.construct(
             Family._hole_options, Family._parameters, remember=set()
         )
-        Family._quotient_container.prepare(Family._mc_formulae, Family._mc_formulae_alt)
+        Family._quotient_container.prepare(Family._mc_formulae, Family._mc_formulae_alt, param=bool(Family._parameters))
         Family._quotient_mdp = Family._quotient_container.mdp_handling.full_mdp
         Family._quotient_mdp_stats = (
             Family._quotient_mdp_stats[0] + Family._quotient_mdp.nr_states, Family._quotient_mdp_stats[1] + 1
@@ -251,16 +251,7 @@ class Family:
 
         logger.debug(f"Constructing quotient MDP for family {self.options}.")
         indexed_options = Family._hole_options.index_map(self.options)
-        if self._parameters:
-            # When family includes parameters, then it is required again construct new quotient_container
-            Family._quotient_container = Family._quotient_builder.construct(
-                self.options, Family._parameters, remember=set()
-            )
-            Family._quotient_container.prepare(
-                Family._mc_formulae, Family._mc_formulae_alt
-            )
-        else:
-            Family._quotient_container.consider_subset(self.options, indexed_options)
+        Family._quotient_container.consider_subset(self.options, indexed_options)
         self.mdp = Family._quotient_container.mdp_handling.mdp
         self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
         logger.debug(f"Constructed MDP of size {self.mdp.nr_states}.")
@@ -270,14 +261,14 @@ class Family:
 
         Profiler.stop()
 
-    # def _construct_region(self):
-    #     region_valuation = {}
-    #     for parameter in self.mdp.collect_probability_parameters():
-    #         region_valuation[parameter] = (
-    #             stormpy.RationalRF(self.options[parameter.name][0].evaluate_as_double()),
-    #             stormpy.RationalRF(self.options[parameter.name][1].evaluate_as_double())
-    #         )
-    #     return stormpy.pars.ParameterRegion(region_valuation)
+    def _construct_region(self):
+        region_valuation = {}
+        for parameter in self.mdp.collect_probability_parameters():
+            region_valuation[parameter] = (
+                stormpy.RationalRF(self.options[parameter.name][0].evaluate_as_double()),
+                stormpy.RationalRF(self.options[parameter.name][1].evaluate_as_double())
+            )
+        return stormpy.pars.ParameterRegion(region_valuation)
 
     def model_check_formula(self, formula_index):
         """
@@ -287,7 +278,7 @@ class Family:
         assert self.constructed
 
         threshold = float(Family._thresholds[formula_index])
-        Family._quotient_container.analyse(threshold, formula_index)
+        Family._quotient_container.analyse(threshold, formula_index, region=self._construct_region())
 
         mc_result = Family._quotient_container.decided(threshold)
         accept_if_above = Family._accept_if_above[formula_index]
@@ -391,11 +382,11 @@ class Family:
         sorted_options = sorted(options_lengths, key=lambda x: (x[1], x[0]), reverse=True)
         absolute_diff = \
             self._quotient_container.latest_result.absolute_max - self._quotient_container.latest_result.absolute_min
-        print(f">> {absolute_diff}")
+        # print(f">> {absolute_diff}")
         (hole, length) = sorted_options.pop(0) if sorted_options or not() else (None, 0)
         if hole in self._parameters and absolute_diff <= 1.0e-10:
             hole, length = None, 0
-        print(f">> {hole}: {length}")
+        # print(f">> {hole}: {length}")
 
         split_queue = []
         sub_intervals_n = 2

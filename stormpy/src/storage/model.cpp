@@ -286,6 +286,8 @@ void define_sparse_parametric_model(py::module& m) {
         .def("is_sink_state", &SparseModel<RationalFunction>::isSinkState, py::arg("state"))
         .def("__str__", &getModelInfoPrinter)
         .def("to_dot", [](SparseModel<RationalFunction>& model) { std::stringstream ss; model.writeDotToStream(ss); return ss.str(); }, "Write dot to a string")
+        .def("has_choice_origins", [](SparseModel<RationalFunction> const& model) {return model.hasChoiceOrigins();}, "has choice origins?")
+        .def_property_readonly("choice_origins", [](SparseModel<RationalFunction> const& model) {return model.getChoiceOrigins();})
     ;
 
     py::class_<SparseDtmc<RationalFunction>, std::shared_ptr<SparseDtmc<RationalFunction>>>(m, "SparseParametricDtmc", "pDTMC in sparse representation", modelRatFunc)

@@ -490,6 +490,8 @@ def construct_submodel(model, states, actions, keep_unreachable_states=True, opt
     """
     if isinstance(model, storage._SparseModel):
         return core._construct_subsystem_double(model, states, actions, keep_unreachable_states, options)
+    elif isinstance(model, storage._SparseParametricModel):
+        return core._construct_subsystem_parametric(model, states, actions, keep_unreachable_states, options)
     else:
         raise NotImplementedError()
 

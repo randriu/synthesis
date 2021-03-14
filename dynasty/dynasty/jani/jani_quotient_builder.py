@@ -121,9 +121,9 @@ class JaniQuotientBuilder:
     def _get_substitution(self, combination):
         return {
             c.expression_variable: self.holes_options[c.name][v]
-            for c, v in zip(self._open_constants.values(), combination) if v is not None
-            # for c, v in zip(self._open_constants.values(), combination)
-            # if v is not None and c.name not in self.parameters
+            for c, v in zip(self._open_constants.values(), combination)
+            if v is not None and c.name not in self.parameters
+            # for c, v in zip(self._open_constants.values(), combination) if v is not None
         }
 
     def _modify_dst_with_remember(self, edge, combination, templ_edge, substitution):
@@ -177,19 +177,20 @@ class JaniQuotientBuilder:
     def _construct_new_edge(self, edge, templ_edge, new_automaton):
         expand_d, dests = self._get_expand_d(edge)
 
-        # expand_d = []
-        if expand_d:
-            for combination in itertools.product(
-                    *[(range(len(self.holes_options[c.name])) if c in expand_d else [None])
-                      for c in self._open_constants.values()]
-            ):
-                substitution = self._get_substitution(combination)
-                new_dests = [
-                    (d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations
-                ]
-                new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, tuple(combination))
-        else:
-            new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, dests, None)
+        # Ignores substitution of parameters by their values
+
+        # if expand_d:
+        #     for combination in itertools.product(
+        #             *[(range(len(self.holes_options[c.name])) if c in expand_d else [None])
+        #               for c in self._open_constants.values()]
+        #     ):
+        #         substitution = self._get_substitution(combination)
+        #         new_dests = [
+        #             (d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations
+        #         ]
+        #         new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, tuple(combination))
+        # else:
+        new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, dests, None)
 
         return new_automaton
 
@@ -199,9 +200,9 @@ class JaniQuotientBuilder:
 
         guard_expr = stormpy.Expression(edge.template_edge.guard)
         if expand_td or expand_guard:
-            # without c in expand_d
+            # c in expand_d in loop condition
             for combination in itertools.product(
-                    *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard or c in expand_d)
+                    *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard)
                         else [None]) for c in self._open_constants.values()]
             ):
                 substitution = self._get_substitution(combination)

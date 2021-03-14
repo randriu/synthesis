@@ -4,8 +4,8 @@
 #include "storm/transformer/SubsystemBuilder.h"
 
 // Thin wrappers.
-template<typename VT>
-storm::transformer::SubsystemBuilderReturnType<VT> constructSubsystem(storm::models::sparse::Model<VT> const& originalModel, storm::storage::BitVector const& subsystemStates, storm::storage::BitVector const& subsystemActions, bool keepUnreachableStates, storm::transformer::SubsystemBuilderOptions options) {
+template<typename ValueType>
+storm::transformer::SubsystemBuilderReturnType<ValueType> constructSubsystem(storm::models::sparse::Model<ValueType> const& originalModel, storm::storage::BitVector const& subsystemStates, storm::storage::BitVector const& subsystemActions, bool keepUnreachableStates, storm::transformer::SubsystemBuilderOptions options) {
     return storm::transformer::buildSubsystem(originalModel, subsystemStates, subsystemActions, keepUnreachableStates, options);
 }
 
@@ -22,11 +22,18 @@ void define_transformation(py::module& m) {
     m.def("_transform_to_discrete_time_model", &transformContinuousToDiscreteTimeSparseModel<double>, "Transform continuous time model to discrete time model", py::arg("model"), py::arg("formulae") = std::vector<std::shared_ptr<storm::logic::Formula const>>());
     m.def("_transform_to_discrete_time_parametric_model", &transformContinuousToDiscreteTimeSparseModel<storm::RationalFunction>, "Transform parametric continuous time model to parametric discrete time model", py::arg("model"), py::arg("formulae") = std::vector<std::shared_ptr<storm::logic::Formula const>>());
 
-    py::class_<storm::transformer::SubsystemBuilderReturnType<double>>(m, "SubsystemBuilderReturnTypeDouble", "Result of the construction of a subsystem")
+    py::class_<storm::transformer::SubsystemBuilderReturnType<double>>(m, "SubsystemBuilderReturnTypeDouble", "Result of the construction of a subsystem (double)")
             .def_readonly("model", &storm::transformer::SubsystemBuilderReturnType<double>::model, "the submodel")
             .def_readonly("new_to_old_state_mapping", &storm::transformer::SubsystemBuilderReturnType<double>::newToOldStateIndexMapping, "for each state in result, the state index in the original model")
             .def_readonly("new_to_old_action_mapping", &storm::transformer::SubsystemBuilderReturnType<double>::newToOldActionIndexMapping, "for each action in result, the action index in the original model")
             .def_readonly("kept_actions", &storm::transformer::SubsystemBuilderReturnType<double>::keptActions, "Actions of the subsystem available in the original system")
+    ;
+
+    py::class_<storm::transformer::SubsystemBuilderReturnType<storm::RationalFunction>>(m, "SubsystemBuilderReturnTypeParametric", "Result of the construction of a subsystem (parametric)")
+            .def_readonly("model", &storm::transformer::SubsystemBuilderReturnType<storm::RationalFunction>::model, "the submodel")
+            .def_readonly("new_to_old_state_mapping", &storm::transformer::SubsystemBuilderReturnType<storm::RationalFunction>::newToOldStateIndexMapping, "for each state in result, the state index in the original model")
+            .def_readonly("new_to_old_action_mapping", &storm::transformer::SubsystemBuilderReturnType<storm::RationalFunction>::newToOldActionIndexMapping, "for each action in result, the action index in the original model")
+            .def_readonly("kept_actions", &storm::transformer::SubsystemBuilderReturnType<storm::RationalFunction>::keptActions, "Actions of the subsystem available in the original system")
     ;
 
     py::class_<storm::transformer::SubsystemBuilderOptions>(m, "SubsystemBuilderOptions", "Options for constructing the subsystem")
@@ -39,6 +46,7 @@ void define_transformation(py::module& m) {
 
 
     m.def("_construct_subsystem_double", &constructSubsystem<double>, "build a subsystem of a sparse model");
+    m.def("_construct_subsystem_parametric", &constructSubsystem<storm::RationalFunction>, "build a subsystem of a sparse model");
 
     // Non-Markovian chain elimination
     py::enum_<storm::transformer::EliminationLabelBehavior>(m, "EliminationLabelBehavior", "Behavior of labels while eliminating non-Markovian chains")

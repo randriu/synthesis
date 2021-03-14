@@ -488,6 +488,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                             self._check_optimal_property(
                                 subfamily, satisfying_assignment, cex_generator=None, optimal_value=optimal_value
                             )
+                        break
                     elif not feasible and isinstance(feasible, bool):
                         logger.debug("CEGAR: all UNSAT.")
                         models_pruned += subfamily.size

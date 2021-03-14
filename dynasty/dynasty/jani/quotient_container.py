@@ -452,17 +452,17 @@ class JaniQuotientContainer:
             return list(self._inconsistencies[1])[0], None, None
         return None, None, None
 
-    def prepare(self, formulae, alt_formulae, engine=Engine.Sparse):
+    def prepare(self, formulae, alt_formulae, engine=Engine.Sparse, param=False):
         start_time = time.time()
         if engine in [Engine.Hybrid, Engine.Dd]:
             self._mdp_handling.build_symbolic_model(self._jani_program, formulae, alt_formulae)
         else:
             assert engine == Engine.Sparse
-            self._mdp_handling.build_model(self._jani_program, formulae, alt_formulae)
+            self._mdp_handling.build_model(self._jani_program, formulae, alt_formulae, param)
         end_time = time.time()
         self._build_time += end_time - start_time
 
-    def analyse(self, threshold=None, index=0, engine=Engine.Sparse):
+    def analyse(self, threshold=None, index=0, engine=Engine.Sparse, region=None):
         start_time = time.time()
         if self._mdp_handling.submodel_is_dtmc():
             self.dtmcs_checked += 1
@@ -473,7 +473,7 @@ class JaniQuotientContainer:
         else:
             assert engine == Engine.Sparse
             self._latest_result = self._mdp_handling.mc_model(
-                index, compute_action_values=False, check_dir_2=always_true
+                index, compute_action_values=False, check_dir_2=always_true, region=region
                 # check_dir_2=is_inside_function(threshold) if threshold is not None else always_true
             )  # TODO: is_inside_function?
         end_time = time.time()

@@ -141,7 +141,7 @@ class ModelHandling:
         self._submodel = result
         return self._model
 
-    def build_model(self, jani_program, formulae, alt_formulae):
+    def build_model(self, jani_program, formulae, alt_formulae, param=False):
         if self._model:
             logger.warning("Rebuilding a model...")
         logger.info("Build model...")
@@ -153,7 +153,8 @@ class ModelHandling:
         self._formulae = formulae
         self._alt_formulae = alt_formulae
         self._expression_manager = jani_program.expression_manager
-        result = stormpy.build_sparse_model_with_options(jani_program, options)
+        result = stormpy.build_sparse_parametric_model_with_options(jani_program, options) if param else \
+            stormpy.build_sparse_model_with_options(jani_program, options)
         logger.info(
             f"done. Model has {result.nr_states} states, "
             f"{result.nr_choices} actions and {result.nr_transitions} transitions"
@@ -252,12 +253,13 @@ class ModelHandling:
         internal_res.filter(stormpy.create_filter_initial_states_symbolic(self._submodel))
         return SymbolicMCResult(internal_res.min, internal_res.max)
 
-    def mc_model(self, index=0, compute_action_values=False, check_dir_2=always_true):
+    def mc_model(self, index=0, compute_action_values=False, check_dir_2=always_true, region=None):
         """
 
         :param index:
         :param compute_action_values:
         :param check_dir_2:
+        :param region:
         :return:
         """
         assert len(self._formulae) > index
@@ -265,7 +267,8 @@ class ModelHandling:
         is_dtmc = False
         extract_scheduler = True
 
-        if self._submodel.nr_choices == self._submodel.nr_states:
+        if self._submodel.nr_choices == self._submodel.nr_states and \
+                not isinstance(self._submodel, stormpy.storage._SparseParametricModel):
             is_dtmc = True
             self._mc_dtmc_calls += 1
             extract_scheduler = False
@@ -283,13 +286,18 @@ class ModelHandling:
 
         # assert not self._formulae[index].has_bound
 
+        maximise = self._formulae[index].optimality_type == stormpy.OptimizationDirection.Maximize
+
         logger.info(f"Start checking direction 1: {self._formulae[index]}")
         # TODO allow qualitative model checking with scheduler extraction.
-
-        prime_result = stormpy.model_checking(
-            self._submodel, self._formulae[index], only_initial_states=False,
-            extract_scheduler=extract_scheduler, environment=env
-        )
+        if region:
+            checker = stormpy.pars.create_region_checker(env, self._submodel, self._formulae[index])
+            prime_result = checker.get_bound_all_states(env, region, maximise)
+        else:
+            prime_result = stormpy.model_checking(
+                self._submodel, self._formulae[index], only_initial_states=False,
+                extract_scheduler=extract_scheduler, environment=env
+            )
 
         if is_dtmc:
             maximise = True
@@ -305,24 +313,26 @@ class ModelHandling:
         absolute_max = math.inf
         second_result = None
 
-        if self._formulae[index].optimality_type == stormpy.OptimizationDirection.Maximize:
-            maximise = True
+        if maximise:
             upper_result = prime_result
             absolute_max = max([upper_result.at(x) for x in self._submodel.initial_states])
 
         else:
             assert (self._formulae[index].optimality_type == stormpy.OptimizationDirection.Minimize)
-            maximise = False
             lower_result = prime_result
             absolute_min = min([lower_result.at(x) for x in self._submodel.initial_states])
 
         if check_dir_2(absolute_min, absolute_max):
             self._mc_mdp_executions += 1
             logger.info(f"Start checking direction 2: {self._alt_formulae[index]}")
-            second_result = stormpy.model_checking(
-                self._submodel, self._alt_formulae[index], only_initial_states=False,
-                extract_scheduler=extract_scheduler, environment=env
-            )
+            if region:
+                checker = stormpy.pars.create_region_checker(env, self._submodel, self._alt_formulae[index])
+                second_result = checker.get_bound_all_states(env, region, not maximise)
+            else:
+                second_result = stormpy.model_checking(
+                    self._submodel, self._alt_formulae[index], only_initial_states=False,
+                    extract_scheduler=extract_scheduler, environment=env
+                )
 
             if maximise:
                 lower_result = second_result

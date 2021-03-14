@@ -34,6 +34,10 @@ storm::modelchecker::ExplicitQuantitativeCheckResult<double> getBound_mdp(std::s
     return checker->getBound(env, region, maximise ?  storm::solver::OptimizationDirection::Maximize : storm::solver::OptimizationDirection::Minimize)->asExplicitQuantitativeCheckResult<double>();
 }
 
+std::unique_ptr<storm::modelchecker::RegionCheckResult<storm::RationalFunction>> performRegionRefinements(std::shared_ptr<RegionModelChecker>& checker, storm::Environment const& env, Region const& region, boost::optional<storm::RationalFunction> const& coverageThreshold, boost::optional<uint64_t> depthThreshold, storm::modelchecker::RegionResultHypothesis const& hypothesis) {
+    return checker->performRegionRefinement(env, region, coverageThreshold, depthThreshold, hypothesis);
+}
+
 std::set<storm::Polynomial> gatherDerivatives(storm::models::sparse::Model<storm::RationalFunction> const& model, carl::Variable const& var) {
     std::set<storm::Polynomial> derivatives;
     for (auto it : model.getTransitionMatrix()) {
@@ -94,7 +98,8 @@ void define_pla(py::module& m) {
     regionModelChecker.def("check_region", &checkRegion, "Check region", py::arg("environment"), py::arg("region"), py::arg("hypothesis") = storm::modelchecker::RegionResultHypothesis::Unknown, py::arg("initialResult") = storm::modelchecker::RegionResult::Unknown, py::arg("sampleVertices") = false)
         .def("get_bound", &getBoundAtInit, "Get bound", py::arg("environment"), py::arg("region"), py::arg("maximise")= true)
         .def("get_split_suggestion", &RegionModelChecker::getRegionSplitEstimate, "Get estimate")
-        .def("specify", &specify, "specify arguments",py::arg("environment"), py::arg("model"), py::arg("formula"), py::arg("generate_splitting_estimate") = false, py::arg("allow_model_simplification") = true);
+        .def("specify", &specify, "specify arguments",py::arg("environment"), py::arg("model"), py::arg("formula"), py::arg("generate_splitting_estimate") = false, py::arg("allow_model_simplification") = true)
+        .def("perform_region_refinement", &performRegionRefinements, "Refines the region", py::arg("environment"), py::arg("region"), py::arg("coverageThreshold"), py::arg("depthThreshold") = boost::none, py::arg("hypothesis") = storm::modelchecker::RegionResultHypothesis::Unknown);
     ;
 
 
