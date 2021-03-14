@@ -21,7 +21,7 @@ class HybridTestSuite(unittest.TestCase):
         process = subprocess.Popen(['python3',
             DynastyUtils.getPathToDynastyExecutable(),
             '--project',
-            DynastyUtils.getPathToWorkspaceExamples() + '/tests/tests-optimality/herman/5/',
+            DynastyUtils.getPathToWorkspaceExamples() + '/herman/5/',
             'hybrid',
             '--short-summary',
             '--constants',
