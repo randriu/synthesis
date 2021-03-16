@@ -15,6 +15,11 @@ std::shared_ptr<storm::modelchecker::CheckResult> modelCheckingSparseEngine(std:
 }
 
 template<typename ValueType>
+std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> modelCheckingSparseEngineMdpFamilies(std::shared_ptr<storm::models::sparse::Mdp<ValueType>> family, CheckTask<ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies, storm::Environment const& env) {
+    return storm::api::verifyWithSparseEngineMdpFamilies<ValueType>(env, family, task, subfamilies);
+}
+
+template<typename ValueType>
 std::shared_ptr<storm::modelchecker::CheckResult> modelCheckingFullyObservableSparseEngine(std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> model, CheckTask<ValueType> const& task, storm::Environment const& env) {
     return storm::api::verifyWithSparseEngine<ValueType>(env, model->template as<storm::models::sparse::Mdp<ValueType>>(), task);
 }
@@ -82,6 +87,7 @@ void define_modelchecking(py::module& m) {
     m.def("_model_checking_fully_observable", &modelCheckingFullyObservableSparseEngine<double>, py::arg("model"), py::arg("task"), py::arg("environment")  = storm::Environment());
     m.def("_exact_model_checking_fully_observable", &modelCheckingFullyObservableSparseEngine<storm::RationalNumber>, py::arg("model"), py::arg("task"), py::arg("environment")  = storm::Environment());
     m.def("_model_checking_sparse_engine", &modelCheckingSparseEngine<double>, "Perform model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment") = storm::Environment());
+    m.def("_model_checking_sparse_engine_mdp_families", &modelCheckingSparseEngineMdpFamilies<double>, "Perform model checking of multiple families (CEGAR) using the sparse engine", py::arg("family"), py::arg("task"), py::arg("subfamilies"), py::arg("environment") = storm::Environment());
     m.def("_exact_model_checking_sparse_engine",  &modelCheckingSparseEngine<storm::RationalNumber>, "Perform model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment") = storm::Environment());
     m.def("_parametric_model_checking_sparse_engine", &modelCheckingSparseEngine<storm::RationalFunction>, "Perform parametric model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment") = storm::Environment());
     m.def("_model_checking_dd_engine", &modelCheckingDdEngine<storm::dd::DdType::Sylvan, double>, "Perform model checking using the dd engine", py::arg("model"), py::arg("task"), py::arg("environment") = storm::Environment());

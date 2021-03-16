@@ -61,6 +61,13 @@ namespace storm {
                  * @return True iff the precision has been set.
                  */
                 bool isPrecisionSet() const;
+
+                /*!
+                 * Retrieves whether the multipleInstances has been set.
+                 *
+                 * @return True iff the precision has been set.
+                 */
+                bool isMultipleInstancesSet() const;
                 
                 /*!
                  * Retrieves the precision that is used for detecting convergence.
@@ -107,6 +114,7 @@ namespace storm {
                 static const std::string valueIterationMultiplicationStyleOptionName;
                 static const std::string intervalIterationSymmetricUpdatesOptionName;
                 static const std::string forceBoundsOptionName;
+                static const std::string solveMultipleInstancesOptionName;
             };
             
         }

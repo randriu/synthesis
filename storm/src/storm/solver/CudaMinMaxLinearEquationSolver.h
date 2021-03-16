@@ -35,6 +35,7 @@ namespace storm {
             virtual bool internalSolveEquations(Environment const& env, OptimizationDirection dir, std::vector<ValueType>& x, std::vector<ValueType> const& b) const override;
 
         private:
+            bool isMultipleInstancesSet () const;
             /**
              * @brief 
              * 

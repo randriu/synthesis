@@ -4,6 +4,8 @@
 #include "storm/exceptions/IllegalArgumentException.h"
 #include "storm/exceptions/InvalidStateException.h"
 #include "storm/exceptions/InvalidEnvironmentException.h"
+#include "storm/settings/SettingsManager.h"
+#include "storm/settings/modules/MinMaxEquationSolverSettings.h"
 
 #include "storm/environment/solver/MinMaxSolverEnvironment.h"
 
@@ -28,6 +30,13 @@ namespace storm {
         template<typename ValueType>
         CudaMinMaxLinearEquationSolver<ValueType>::CudaMinMaxLinearEquationSolver(storm::storage::SparseMatrix<ValueType>&& A) : StandardMinMaxLinearEquationSolver<ValueType>(std::move(A)) {
             // Intentionally left empty.
+        }
+
+        template<typename ValueType>
+        bool CudaMinMaxLinearEquationSolver<ValueType>::isMultipleInstancesSet() const {
+            auto minMaxSettings = storm::settings::getModule<storm::settings::modules::MinMaxEquationSolverSettings>();
+
+            return minMaxSettings.isMultipleInstancesSet(); 
         }
 
         template<typename ValueType>
@@ -66,6 +75,7 @@ namespace storm {
                this->schedulerChoices = std::vector<uint_fast64_t>(this->A->getRowGroupCount()); 
             }
 
+            std::cout << "choices: " << storm::utility::vector::toString(*matrix.rowGroupIndices) << "\n";
             if (dir == OptimizationDirection::Minimize) {
                 result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
             } else {

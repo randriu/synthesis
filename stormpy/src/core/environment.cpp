@@ -59,7 +59,9 @@ void define_environment(py::module& m) {
 
     py::class_<storm::MinMaxSolverEnvironment>(m, "MinMaxSolverEnvironment", "Environment for Min-Max-Solvers")
         .def_property("method", &storm::MinMaxSolverEnvironment::getMethod, [](storm::MinMaxSolverEnvironment& mmenv, storm::solver::MinMaxMethod const& m) { mmenv.setMethod(m, false); } )
-        .def_property("precision", &storm::MinMaxSolverEnvironment::getPrecision,  &storm::MinMaxSolverEnvironment::setPrecision);
+        .def_property("precision", &storm::MinMaxSolverEnvironment::getPrecision,  &storm::MinMaxSolverEnvironment::setPrecision)
+        .def("set_solve_multiple_mdps", &storm::MinMaxSolverEnvironment::setSolveMultipleInstances, "solving multiple mdps at once (CEGAR)", py::arg("new_value") = true)
+    ;
 
 
 

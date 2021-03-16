@@ -30,6 +30,8 @@
 #include "storm/exceptions/InvalidPropertyException.h"
 #include "storm/storage/expressions/Expressions.h"
 
+#include "storm/environment/solver/MinMaxSolverEnvironment.h"
+
 #include "storm/storage/MaximalEndComponentDecomposition.h"
 
 #include "storm/exceptions/InvalidPropertyException.h"
@@ -38,6 +40,11 @@ namespace storm {
     namespace modelchecker {
         template<typename SparseMdpModelType>
         SparseMdpPrctlModelChecker<SparseMdpModelType>::SparseMdpPrctlModelChecker(SparseMdpModelType const& model) : SparsePropositionalModelChecker<SparseMdpModelType>(model) {
+            // Intentionally left empty.
+        }
+
+        template<typename SparseMdpModelType>
+        SparseMdpPrctlModelChecker<SparseMdpModelType>::SparseMdpPrctlModelChecker(SparseMdpModelType const& model, std::vector<std::vector<uint_fast64_t>> const& subfamilies) : SparsePropositionalModelChecker<SparseMdpModelType>(model), subfamilies(std::move(subfamilies)) {
             // Intentionally left empty.
         }
         
@@ -109,17 +116,78 @@ namespace storm {
         
         template<typename SparseMdpModelType>
         std::unique_ptr<CheckResult> SparseMdpPrctlModelChecker<SparseMdpModelType>::computeUntilProbabilities(Environment const& env, CheckTask<storm::logic::UntilFormula, ValueType> const& checkTask) {
-            storm::logic::UntilFormula const& pathFormula = checkTask.getFormula();
             STORM_LOG_THROW(checkTask.isOptimizationDirectionSet(), storm::exceptions::InvalidPropertyException, "Formula needs to specify whether minimal or maximal values are to be computed on nondeterministic model.");
-            std::unique_ptr<CheckResult> leftResultPointer = this->check(env, pathFormula.getLeftSubformula());
-            std::unique_ptr<CheckResult> rightResultPointer = this->check(env, pathFormula.getRightSubformula());
-            ExplicitQualitativeCheckResult const& leftResult = leftResultPointer->asExplicitQualitativeCheckResult();
-            ExplicitQualitativeCheckResult const& rightResult = rightResultPointer->asExplicitQualitativeCheckResult();
-            auto ret = storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::computeUntilProbabilities(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), leftResult.getTruthValuesVector(), rightResult.getTruthValuesVector(), checkTask.isQualitativeSet(), checkTask.isProduceSchedulersSet(), checkTask.getHint());
-            std::unique_ptr<CheckResult> result(new ExplicitQuantitativeCheckResult<ValueType>(std::move(ret.values)));
-            if (checkTask.isProduceSchedulersSet() && ret.scheduler) {
-                result->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(ret.scheduler));
-            }
+            
+            storm::logic::UntilFormula const& pathFormula = checkTask.getFormula();
+            storm::OptimizationDirection dir = checkTask.getOptimizationDirection();
+            std::unique_ptr<CheckResult> result;
+            
+            std::cout << "formula: "; 
+            pathFormula.writeToStream(std::cout);
+            std::cout << "\n";
+            
+            if (env.solver().minMax().isSolveMultipleInstancesSet()) {
+                std::cout << "***************************************************************************************************\n";
+                auto subfamilies = this->getSubfamilies(); 
+                auto superFamily = this->getModel();
+                std::vector<std::vector<ValueType>> initVectors;
+                size_t rowsCount = superFamily.getTransitionMatrix().getRowCount();
+
+                std::cout << "super MDP\n" << superFamily.getTransitionMatrix() << "\n";
+                for (std::vector<uint_fast64_t>&subfamily : subfamilies) {
+                    std::cout << "subfamily: " << storm::utility::vector::toString(subfamily) << "\n";
+                    
+                    // find init vectors
+                    storm::storage::BitVector validRows(rowsCount, false);
+                    for(uint_fast64_t index: subfamily) { validRows.set(index, true); }
+                    storm::storage::SparseMatrix<ValueType> transitionMatrix((superFamily.getTransitionMatrix()).restrictRows(validRows, true));
+                    storm::storage::SparseMatrix<ValueType> backwardTransitionMatrix(transitionMatrix.transpose(true));
+
+                    std::cout << "subfamily matrix\n" << transitionMatrix << "\n";
+                    std::cout << "choices: " << storm::utility::vector::toString(transitionMatrix.getRowGroupIndices()) << "\n";
+
+                    std::unique_ptr<CheckResult> leftResultPointer = this->check(env, pathFormula.getLeftSubformula());
+                    std::unique_ptr<CheckResult> rightResultPointer = this->check(env, pathFormula.getRightSubformula());
+                    ExplicitQualitativeCheckResult const& leftResult = leftResultPointer->asExplicitQualitativeCheckResult();
+                    ExplicitQualitativeCheckResult const& rightResult = rightResultPointer->asExplicitQualitativeCheckResult();
+                    storm::storage::BitVector phiStates = leftResult.getTruthValuesVector();
+                    storm::storage::BitVector psiStates = rightResult.getTruthValuesVector();
+                    
+                    storm::storage::BitVector statesWithProbability1;
+                    ValueType minMaxInitializer;
+                    if(dir == storm::solver::OptimizationDirection::Minimize) {
+                        statesWithProbability1 = (storm::utility::graph::performProb01Min(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitionMatrix, phiStates, psiStates)).second;
+                        minMaxInitializer = std::numeric_limits<ValueType>::max();
+                    } else {
+                        statesWithProbability1 = (storm::utility::graph::performProb01Max(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitionMatrix, phiStates, psiStates)).second;
+                        minMaxInitializer = -std::numeric_limits<ValueType>::max();
+                    }
+
+                    std::vector<ValueType> x(superFamily.getTransitionMatrix().getColumnCount(), 0.0);
+                    storm::utility::vector::setVectorValues<ValueType>(x, statesWithProbability1, storm::utility::one<ValueType>());
+                    std::cout << "x: " << storm::utility::vector::toString(x) << "\n";
+
+                    validRows.complement();
+                    std::vector<ValueType> b(rowsCount, 0.0); 
+                    storm::utility::vector::setVectorValues<ValueType>(b, validRows, minMaxInitializer);
+                    std::cout << "b: " << storm::utility::vector::toString(b) << "\n";
+
+                } 
+                std::cout << "***************************************************************************************************\n";
+
+                result.reset(new ExplicitQuantitativeCheckResult<ValueType>());
+            } else {
+                std::unique_ptr<CheckResult> leftResultPointer = this->check(env, pathFormula.getLeftSubformula());
+                std::unique_ptr<CheckResult> rightResultPointer = this->check(env, pathFormula.getRightSubformula());
+                ExplicitQualitativeCheckResult const& leftResult = leftResultPointer->asExplicitQualitativeCheckResult();
+                ExplicitQualitativeCheckResult const& rightResult = rightResultPointer->asExplicitQualitativeCheckResult();
+                auto ret = storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::computeUntilProbabilities(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), leftResult.getTruthValuesVector(), rightResult.getTruthValuesVector(), checkTask.isQualitativeSet(), checkTask.isProduceSchedulersSet(), checkTask.getHint());
+                result.reset(new ExplicitQuantitativeCheckResult<ValueType>(std::move(ret.values)));
+                if (checkTask.isProduceSchedulersSet() && ret.scheduler) {
+                    result->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(ret.scheduler));
+                }
+            } 
+            
             return result;
         }
         
@@ -278,6 +346,11 @@ namespace storm {
             } else {
                 return std::unique_ptr<CheckResult>(new ExplicitParetoCurveCheckResult<ValueType>(initialState, std::move(res)));
             }
+        }
+
+        template<typename SparseMdpModelType>
+        std::vector<std::vector<uint_fast64_t>> const& SparseMdpPrctlModelChecker<SparseMdpModelType>::getSubfamilies() const {
+            return subfamilies;
         }
         
         template class SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<double>>;

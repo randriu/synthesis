@@ -27,6 +27,8 @@ namespace storm {
         void setMultiplicationStyle(storm::solver::MultiplicationStyle value);
         bool isSymmetricUpdatesSet() const;
         void setSymmetricUpdates(bool value);
+        bool isSolveMultipleInstancesSet() const;
+        void setSolveMultipleInstances(bool value);
         
     private:
         storm::solver::MinMaxMethod minMaxMethod;
@@ -36,6 +38,7 @@ namespace storm {
         bool considerRelativeTerminationCriterion;
         storm::solver::MultiplicationStyle multiplicationStyle;
         bool symmetricUpdates;
+        bool multipleInstances;
     };
 }
 

@@ -276,6 +276,54 @@ def model_checking(model, property, only_initial_states=False, extract_scheduler
         return check_model_dd(model, property, only_initial_states=only_initial_states,
                               environment=environment)
 
+def model_checking_families(family, property, subfamilies, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
+    """
+    Perform model checking on families for property.
+    :param family: Superfamily.
+    :param property: Property to check for.
+    :param only_initial_states: If True, only results for initial states are computed, otherwise for all states.
+    :param extract_scheduler: If True, try to extract a scheduler
+    :param families: Sub-families of superfamily to by checked
+    :return: Model checking results.
+    :rtype: vector[CheckResult]
+    """
+    if family.is_sparse_model:
+        return check_families_sparse(family, property, subfamilies, only_initial_states=only_initial_states,
+                                  extract_scheduler=extract_scheduler, force_fully_observable=force_fully_observable, environment=environment)
+    else:
+        raise StormError("Model checking of multiple familes based on dd engine is not supported right now.")
+
+def check_families_sparse(family, property, subfamilies, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
+    """
+    Perform model checking on families for property.
+    :param family: Superfamily.
+    :param property: Property to check for.
+    :param only_initial_states: If True, only results for initial states are computed, otherwise for all states.
+    :param extract_scheduler: If True, try to extract a scheduler
+    :param force_fully_observable: If True, treat a POMDP as an MDP
+    :param families: Sub-families of superfamily to by checked
+    :return: Model checking results.
+    :rtype: vector[CheckResult]
+    """
+    if isinstance(property, Property):
+        formula = property.raw_formula
+    else:
+        formula = property
+
+    if force_fully_observable:
+        raise NotImplementedError("")
+
+    if family.supports_parameters:
+        raise NotImplementedError("")
+    else:
+
+        if family.is_exact:
+            raise NotImplementedError("")
+        else:
+            task = core.CheckTask(formula, only_initial_states)
+            task.set_produce_schedulers(extract_scheduler)
+            return core._model_checking_sparse_engine_mdp_families(family, task, subfamilies, environment=environment)
+
 
 def check_model_sparse(model, property, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
     """

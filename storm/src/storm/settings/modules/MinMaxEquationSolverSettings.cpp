@@ -19,6 +19,7 @@ namespace storm {
             const std::string MinMaxEquationSolverSettings::absoluteOptionName = "absolute";
             const std::string MinMaxEquationSolverSettings::valueIterationMultiplicationStyleOptionName = "vimult";
             const std::string MinMaxEquationSolverSettings::intervalIterationSymmetricUpdatesOptionName = "symmetricupdates";
+            const std::string MinMaxEquationSolverSettings::solveMultipleInstancesOptionName = "multipleInstances";
 
             MinMaxEquationSolverSettings::MinMaxEquationSolverSettings() : ModuleSettings(moduleName) {
                 std::vector<std::string> minMaxSolvingTechniques = {"vi", "value-iteration", "pi", "policy-iteration", "lp", "linear-programming", "rs", "ratsearch", "ii", "interval-iteration", "svi", "sound-value-iteration", "ovi", "optimistic-value-iteration", "topological", "vi-to-pi", "acyclic", "cuda-vi"};
@@ -37,6 +38,7 @@ namespace storm {
                 
                 this->addOption(storm::settings::OptionBuilder(moduleName, intervalIterationSymmetricUpdatesOptionName, false, "If set, interval iteration performs an update on both, lower and upper bound in each iteration").setIsAdvanced().build());
                 
+                this->addOption(storm::settings::OptionBuilder(moduleName, solveMultipleInstancesOptionName, false, "TODO").setIsAdvanced().build());
             }
             
             storm::solver::MinMaxMethod MinMaxEquationSolverSettings::getMinMaxEquationSolvingMethod() const {
@@ -86,6 +88,10 @@ namespace storm {
             
             bool MinMaxEquationSolverSettings::isPrecisionSet() const {
                 return this->getOption(precisionOptionName).getHasOptionBeenSet();
+            }
+
+            bool MinMaxEquationSolverSettings::isMultipleInstancesSet() const {
+                return this->getOption(solveMultipleInstancesOptionName).getHasOptionBeenSet();
             }
             
             double MinMaxEquationSolverSettings::getPrecision() const {
