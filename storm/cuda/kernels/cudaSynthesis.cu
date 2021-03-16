@@ -704,7 +704,6 @@ bool valueIteration_solver(
         thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + matrixRowCount, devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
         
         // CUB Memory allocation
-        CHECK_CUDA( cudaFree(dTempStorage) );
         dTempStorage = NULL;
         tempStorageBytes = 0;
 
@@ -744,6 +743,7 @@ bool valueIteration_solver(
     CHECK_CUDA( cudaFree(device_nnzValues) );
     CHECK_CUDA( cudaFree(device_x) );
     CHECK_CUDA( cudaFree(device_xSwap) );
+    CHECK_CUDA( cudaFree(device_diff) );
     CHECK_CUDA( cudaFree(device_b) );
     CHECK_CUDA( cudaFree(device_multiplyResult) );
     CHECK_CUDA( cudaFree(dBuffer) );
