@@ -1,3 +1,4 @@
+.idea
 storm/build/
 stormpy/build/
 stormpy/.pytest_cache/
