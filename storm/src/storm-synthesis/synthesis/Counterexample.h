@@ -23,13 +23,13 @@ namespace storm {
          * @param selected_edge_indices Allowed edges in the resulting DTMC.
          * @return A DTMC with a DTMC-MDP state mapping.
          */
-        template<typename ValueType = double, typename StateType = uint_fast64_t>
+        template<typename ValueType, typename StateType = uint_fast64_t>
         std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<StateType>> DtmcFromMdp(
             storm::models::sparse::Mdp<ValueType> const& mdp,
             storm::storage::FlatSet<uint_fast64_t> const& selected_edge_indices
             );
 
-        template<typename ValueType = double, typename StateType = uint_fast64_t>
+        template<typename ValueType, typename StateType = uint_fast64_t, typename DtmcType = double>
         class Counterexample {
         public:
 
@@ -51,7 +51,7 @@ namespace storm {
                 uint_fast64_t hole_count,
                 std::vector<std::set<uint_fast64_t>> const& mdp_holes,
                 std::vector<std::shared_ptr<storm::logic::Formula const>> const& formulae,
-                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> const& mdp_bounds
+                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const>> const& mdp_bounds
                 );
 
             /*!
@@ -61,8 +61,8 @@ namespace storm {
              */
             void replaceFormulaThreshold(
                 uint_fast64_t formula_index,
-                ValueType formula_threshold,
-                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bound
+                double formula_threshold,
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const> mdp_bound
             );
 
             /*!
@@ -76,7 +76,7 @@ namespace storm {
              * @param state_map DTMC-MDP state mapping.
              */
             void prepareDtmc(
-                storm::models::sparse::Dtmc<ValueType> const& dtmc,
+                storm::models::sparse::Dtmc<DtmcType> const& dtmc,
                 std::vector<uint_fast64_t> const& state_map
                 );
             
@@ -112,10 +112,10 @@ namespace storm {
             void prepareSubdtmc(
                 uint_fast64_t index,
                 bool use_mdp_bounds,
-                std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
-                std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
+                std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_dtmc,
+                std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling & labeling_subdtmc,
-                std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
+                std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<DtmcType>> & reward_models_subdtmc
                 );
 
             /**
@@ -130,10 +130,10 @@ namespace storm {
              */
             bool expandAndCheck(
                 uint_fast64_t index,
-                std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
-                std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
+                std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_dtmc,
+                std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling const& labeling_subdtmc,
-                std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc,
+                std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<DtmcType>> & reward_models_subdtmc,
                 std::vector<StateType> const& to_expand
                 );
 
@@ -158,12 +158,12 @@ namespace storm {
             // Modified operator formulae to apply to sub-dtmcs: P~?[F "__target__"]
             std::vector<std::shared_ptr<storm::logic::Formula>> formula_modified;
             // Bounds from MDP model checking
-            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds;
+            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const>> mdp_bounds;
             // Flags for target states
             std::vector<std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const>> mdp_targets;
             
             // Transition matrix of a DTMC under investigation
-            std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> dtmc;
+            std::shared_ptr<storm::models::sparse::Dtmc<DtmcType>> dtmc;
             // DTMC to MDP state mapping
             std::vector<uint_fast64_t> state_map;
             // For each hole, a wave when it was registered (0 = unregistered).

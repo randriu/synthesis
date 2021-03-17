@@ -27,7 +27,7 @@ quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = False
 
-ONLY_CEGAR = True
+ONLY_CEGAR = False
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
@@ -308,9 +308,14 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
-        counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
-            family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
-        )
+        if family.mdp.has_parameters:
+            counterexample_generator = stormpy.synthesis.SynthesisCounterexampleParametric(
+                family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
+            )
+        else:
+            counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
+                family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
+            )
         Profiler.stop()
 
         # process family members
@@ -321,10 +326,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         while assignment is not None:
             self.iterations_cegis += 1
             logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
-            logger.debug(f"CEGIS: picked family member: {assignment}.")
+            assignment_print = {k: round(v[0].evaluate_as_double(), 10) for k, v in assignment.items()}
+            logger.debug(f"CEGIS: picked family member: {assignment_print}.")
 
             # collect indices of violated formulae
-            violated_formulae_indices = []
+            family.violated_formulae_indices = []
             for formula_index in family.formulae_indices:
                 # logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
                 Profiler.start("is - DTMC model checking")
@@ -333,14 +339,14 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 Profiler.stop()
                 logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
                 if not sat:
-                    violated_formulae_indices.append(formula_index)
-            if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
+                    family.violated_formulae_indices.append(formula_index)
+            if (not family.violated_formulae_indices or family.violated_formulae_indices == [len(self.formulae) - 1]) \
                     and self.input_has_optimality_property():
                 self._check_optimal_property(family, assignment, counterexample_generator)
                 # TODO: Is this required to obtain correct results?
-                if not violated_formulae_indices:
-                    violated_formulae_indices.append(len(self.formulae) - 1)
-            elif not violated_formulae_indices:
+                if not family.violated_formulae_indices:
+                    family.violated_formulae_indices.append(len(self.formulae) - 1)
+            elif not family.violated_formulae_indices:
                 Profiler.add_ce_stats(counterexample_generator.stats)
                 return True
 
@@ -352,8 +358,8 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
             Profiler.start("is - constructing CE")
             conflicts = []
-            for formula_index in violated_formulae_indices:
-                # logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
+            for formula_index in family.violated_formulae_indices:
+                logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
                 conflict_indices = counterexample_generator.construct_conflict(formula_index)
                 # conflict = counterexample_generator.construct(formula_index, self.use_nontrivial_bounds)
                 conflict_holes = [Family.hole_list[index] for index in conflict_indices]

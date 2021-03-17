@@ -149,13 +149,13 @@ namespace storm {
             return std::make_pair(dtmc,dtmc2mdp_state);
         }
 
-        template <typename ValueType, typename StateType>
-        Counterexample<ValueType,StateType>::Counterexample (
+        template <typename ValueType, typename StateType, typename DtmcType>
+        Counterexample<ValueType,StateType, DtmcType>::Counterexample (
             storm::models::sparse::Mdp<ValueType> const& quotient_mdp,
             uint_fast64_t hole_count,
             std::vector<std::set<uint_fast64_t>> const& mdp_holes,
             std::vector<std::shared_ptr<storm::logic::Formula const>> const& formulae,
-            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> const& mdp_bounds
+            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const>> const& mdp_bounds
             ) : quotient_mdp(quotient_mdp), hole_count(hole_count), mdp_holes(mdp_holes), mdp_bounds(mdp_bounds) {
             
             this->total.start();
@@ -213,11 +213,11 @@ namespace storm {
             this->total.stop();
         }
 
-        template <typename ValueType, typename StateType>
-        void Counterexample<ValueType,StateType>::replaceFormulaThreshold(
+        template <typename ValueType, typename StateType, typename DtmcType>
+        void Counterexample<ValueType,StateType,DtmcType>::replaceFormulaThreshold(
                 uint_fast64_t formula_index,
-                ValueType formula_threshold,
-                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bound
+                double formula_threshold,
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const> mdp_bound
             ) {
             assert(formula_index < this->formulae_count);
             this->mdp_bounds[formula_index] = mdp_bound;
@@ -227,9 +227,9 @@ namespace storm {
             of.setThreshold(threshold_expression);
         }
 
-        template <typename ValueType, typename StateType>
-        void Counterexample<ValueType,StateType>::prepareDtmc(
-            storm::models::sparse::Dtmc<ValueType> const& dtmc,
+        template <typename ValueType, typename StateType, typename DtmcType>
+        void Counterexample<ValueType,StateType,DtmcType>::prepareDtmc(
+            storm::models::sparse::Dtmc<DtmcType> const& dtmc,
             std::vector<uint_fast64_t> const& state_map
             ) {
             this->total.start();
@@ -240,11 +240,11 @@ namespace storm {
             this->wave_states.clear();
 
             // Get DTMC info
-            this->dtmc = std::make_shared<storm::models::sparse::Dtmc<ValueType>>(dtmc);
+            this->dtmc = std::make_shared<storm::models::sparse::Dtmc<DtmcType>>(dtmc);
             this->state_map = state_map;
             uint_fast64_t dtmc_states = this->dtmc->getNumberOfStates();
             StateType initial_state = *(this->dtmc->getInitialStates().begin());
-            storm::storage::SparseMatrix<ValueType> const& transition_matrix = this->dtmc->getTransitionMatrix();
+            storm::storage::SparseMatrix<DtmcType> const& transition_matrix = this->dtmc->getTransitionMatrix();
 
             // Mark all holes as unregistered
             for(uint_fast64_t index = 0; index < this->hole_count; index++) {
@@ -368,14 +368,14 @@ namespace storm {
             this->total.stop();
         }
 
-        template <typename ValueType, typename StateType>
-        void Counterexample<ValueType,StateType>::prepareSubdtmc (
+        template <typename ValueType, typename StateType, typename DtmcType>
+        void Counterexample<ValueType,StateType,DtmcType>::prepareSubdtmc (
             uint_fast64_t formula_index,
             bool use_mdp_bounds,
-            std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
-            std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
+            std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_dtmc,
+            std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling & labeling_subdtmc,
-            std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
+            std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<DtmcType>> & reward_models_subdtmc
             ) {
 
             // Typedefs for matrices
@@ -385,7 +385,7 @@ namespace storm {
             // Get DTMC info
             StateType dtmc_states = dtmc->getNumberOfStates();
             
-            storm::storage::SparseMatrix<ValueType> const& transition_matrix = dtmc->getTransitionMatrix();
+            storm::storage::SparseMatrix<DtmcType> const& transition_matrix = dtmc->getTransitionMatrix();
             
             // Introduce expanded state space
             uint_fast64_t sink_state_false = dtmc_states;
@@ -393,7 +393,7 @@ namespace storm {
 
             // Construct a copy of the original matrix
             for(StateType state = 0; state < dtmc_states; state++) {
-                std::vector<std::pair<StateType,ValueType>> r;
+                std::vector<std::pair<StateType,DtmcType>> r;
                 for(auto entry: transition_matrix.getRow(state)) {
                     r.emplace_back(entry.getColumn(), entry.getValue());
                 }
@@ -405,7 +405,7 @@ namespace storm {
             // - being the target state
             std::vector<double> dtmc_bound(dtmc_states);
             labeling_subdtmc.addLabel(this->target_label);
-            std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bound = this->mdp_bounds[formula_index];
+            std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const> mdp_bound = this->mdp_bounds[formula_index];
             std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const> mdp_target = this->mdp_targets[formula_index];
             for(StateType state = 0; state < dtmc_states; state++) {
                 StateType mdp_state = this->state_map[state];
@@ -425,7 +425,7 @@ namespace storm {
                 // Probability formula: no reward models
                 double default_bound = this->formula_safety[formula_index] ? 0 : 1;
                 for(StateType state = 0; state < dtmc_states; state++) {
-                    std::vector<std::pair<StateType,ValueType>> r;
+                    std::vector<std::pair<StateType,DtmcType>> r;
                     double probability = use_mdp_bounds ? dtmc_bound[state] : default_bound;
                     r.emplace_back(sink_state_false, 1-probability);
                     r.emplace_back(sink_state_true, probability);
@@ -436,38 +436,38 @@ namespace storm {
                 // throw "reward support is not implemented yet";
                 assert(this->formula_safety[formula_index]);
                 assert(dtmc->hasRewardModel(this->formula_reward_name[formula_index]));
-                storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[formula_index]);
+                storm::models::sparse::StandardRewardModel<DtmcType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[formula_index]);
                 assert(reward_model_dtmc.hasOnlyStateRewards());
 
-                std::vector<ValueType> state_rewards_subdtmc(dtmc_states+2);
+                std::vector<DtmcType> state_rewards_subdtmc(dtmc_states+2);
                 double default_reward = 0;
                 for(StateType state = 0; state < dtmc_states; state++) {
                     double reward = use_mdp_bounds ? dtmc_bound[state] : default_reward;
-                    state_rewards_subdtmc[state] = reward;
+                    state_rewards_subdtmc[state] = static_cast<DtmcType>(reward);
 
-                    std::vector<std::pair<StateType,ValueType>> r;
+                    std::vector<std::pair<StateType,DtmcType>> r;
                     r.emplace_back(sink_state_true, 1);
                     matrix_subdtmc.push_back(r);
                 }
-                storm::models::sparse::StandardRewardModel<ValueType> reward_model_subdtmc(state_rewards_subdtmc, boost::none, boost::none);
+                storm::models::sparse::StandardRewardModel<DtmcType> reward_model_subdtmc(state_rewards_subdtmc, boost::none, boost::none);
                 reward_models_subdtmc.emplace(this->formula_reward_name[formula_index], reward_model_subdtmc);
             }
 
             // Add self-loops to sink states
             for(StateType state = sink_state_false; state <= sink_state_true; state++) {
-                std::vector<std::pair<StateType,ValueType>> r;
+                std::vector<std::pair<StateType,DtmcType>> r;
                 r.emplace_back(state, 1);
                 matrix_subdtmc.push_back(r);
             }
         }
 
-        template <typename ValueType, typename StateType>
-        bool Counterexample<ValueType,StateType>::expandAndCheck (
+        template <typename ValueType, typename StateType, typename DtmcType>
+        bool Counterexample<ValueType,StateType,DtmcType>::expandAndCheck (
             uint_fast64_t index,
-            std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
-            std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
+            std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_dtmc,
+            std::vector<std::vector<std::pair<StateType,DtmcType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling const& labeling_subdtmc,
-            std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc,
+            std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<DtmcType>> & reward_models_subdtmc,
             std::vector<StateType> const& to_expand
         ) {
 
@@ -483,37 +483,37 @@ namespace storm {
             if(this->formula_reward[index]) {
                 // - expand state rewards
                 // throw "reward support is not implemented yet";
-                storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[index]);
-                storm::models::sparse::StandardRewardModel<ValueType> & reward_model_subdtmc = (reward_models_subdtmc.find(this->formula_reward_name[index]))->second;
+                storm::models::sparse::StandardRewardModel<DtmcType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[index]);
+                storm::models::sparse::StandardRewardModel<DtmcType> & reward_model_subdtmc = (reward_models_subdtmc.find(this->formula_reward_name[index]))->second;
                 for(StateType state : to_expand) {
                     reward_model_subdtmc.setStateReward(state, reward_model_dtmc.getStateReward(state));
                 }
             }
 
             // Construct sub-DTMC
-            storm::storage::SparseMatrixBuilder<ValueType> transitionMatrixBuilder(0, 0, 0, false, false, 0);
+            storm::storage::SparseMatrixBuilder<DtmcType> transitionMatrixBuilder(0, 0, 0, false, false, 0);
             for(StateType state = 0; state < dtmc_states+2; state++) {
                 for(auto row_entry: matrix_subdtmc[state]) {
                     transitionMatrixBuilder.addNextValue(state, row_entry.first, row_entry.second);
                 }
             }
-            storm::storage::SparseMatrix<ValueType> sub_matrix = transitionMatrixBuilder.build();
+            storm::storage::SparseMatrix<DtmcType> sub_matrix = transitionMatrixBuilder.build();
             assert(sub_matrix.isProbabilistic());
-            storm::storage::sparse::ModelComponents<ValueType> components(sub_matrix, labeling_subdtmc, reward_models_subdtmc);
-            std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
+            storm::storage::sparse::ModelComponents<DtmcType> components(sub_matrix, labeling_subdtmc, reward_models_subdtmc);
+            std::shared_ptr<storm::models::sparse::Model<DtmcType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
             
             // Model check
             bool onlyInitialStatesRelevant = false;
-            storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> task(*(this->formula_modified[index]), onlyInitialStatesRelevant);
-            std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(subdtmc, task);
+            storm::modelchecker::CheckTask<storm::logic::Formula, DtmcType> task(*(this->formula_modified[index]), onlyInitialStatesRelevant);
+            std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<DtmcType>(subdtmc, task);
             storm::modelchecker::ExplicitQualitativeCheckResult & result = result_ptr->asExplicitQualitativeCheckResult();
             bool satisfied = result[initial_state];
 
             return satisfied;
         }
 
-        template <typename ValueType, typename StateType>
-        std::vector<uint_fast64_t> Counterexample<ValueType,StateType>::constructCounterexample (
+        template <typename ValueType, typename StateType, typename DtmcType>
+        std::vector<uint_fast64_t> Counterexample<ValueType,StateType, DtmcType>::constructCounterexample (
             uint_fast64_t formula_index, bool use_mdp_bounds
             ) {
             this->total.start();
@@ -523,10 +523,10 @@ namespace storm {
 
             this->preparing_subdtmc.start();
             // Prepare to construct sub-DTMCs
-            std::vector<std::vector<std::pair<StateType,ValueType>>> matrix_dtmc;
-            std::vector<std::vector<std::pair<StateType,ValueType>>> matrix_subdtmc;
+            std::vector<std::vector<std::pair<StateType,DtmcType>>> matrix_dtmc;
+            std::vector<std::vector<std::pair<StateType,DtmcType>>> matrix_subdtmc;
             storm::models::sparse::StateLabeling labeling_subdtmc(dtmc_states+2);
-            std::unordered_map<std::string, storm::models::sparse::StandardRewardModel<ValueType>> reward_models_subdtmc;
+            std::unordered_map<std::string, storm::models::sparse::StandardRewardModel<DtmcType>> reward_models_subdtmc;
             this->prepareSubdtmc(
                 formula_index, use_mdp_bounds, matrix_dtmc,
                 matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
@@ -564,8 +564,8 @@ namespace storm {
             return critical_holes;
         }
 
-        template <typename ValueType, typename StateType>
-        std::vector<double> Counterexample<ValueType,StateType>::stats (
+        template <typename ValueType, typename StateType, typename DtmcType>
+        std::vector<double> Counterexample<ValueType,StateType, DtmcType>::stats (
         ) {
             std::vector<double> time_stats;
             double time_total = this->total.getTimeInMilliseconds();
@@ -579,9 +579,17 @@ namespace storm {
             return time_stats;
         }
 
-         // Explicitly instantiate functions and classes.
-        template class Counterexample<double, uint_fast64_t>;
-        template std::pair<std::shared_ptr<storm::models::sparse::Model<double>>,std::vector<uint_fast64_t>> DtmcFromMdp<double, uint_fast64_t>(storm::models::sparse::Mdp<double> const&, storm::storage::FlatSet<uint_fast64_t> const&);
+        // Explicitly instantiate classes.
+        template class Counterexample<double>;
+        template class Counterexample<storm::RationalFunction>;
+
+        // Explicitly instantiate functions.
+        template std::pair<std::shared_ptr<storm::models::sparse::Model<double>>,std::vector<uint_fast64_t>> DtmcFromMdp<double>(
+            storm::models::sparse::Mdp<double> const&, storm::storage::FlatSet<uint_fast64_t> const&
+        );
+        template std::pair<std::shared_ptr<storm::models::sparse::Model<storm::RationalFunction>>,std::vector<uint_fast64_t>> DtmcFromMdp<storm::RationalFunction>(
+            storm::models::sparse::Mdp<storm::RationalFunction> const&, storm::storage::FlatSet<uint_fast64_t> const&
+        );
 
     } // namespace research
 } // namespace storm

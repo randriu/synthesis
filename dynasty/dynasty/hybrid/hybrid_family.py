@@ -3,6 +3,8 @@ import z3
 
 import stormpy
 
+from ..family_checkers.familychecker import HoleOptions
+from ..model_handling.mdp_handling import MC_ACCURACY_THRESHOLD
 from ..profiler import Profiler
 from .helpers import check_dtmc
 from .family import Family
@@ -25,6 +27,10 @@ class FamilyHybrid(Family):
         # dtmc corresponding to the constructed assignment
         self.dtmc = None
         self.dtmc_state_map = None
+        self.param_dtmc = None
+        self.instantiator = None
+        self.points = None
+        self.violated_formulae_indices = None
 
     def initialize(*args):
         Family.initialize(*args)
@@ -131,9 +137,20 @@ class FamilyHybrid(Family):
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
             # construct the DTMC by exploring the quotient MDP for this subfamily
-            self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
+            if self.mdp.has_parameters:
+                self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_param_mdp(self.mdp, collected_edge_indices)
+            else:
+                self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
             Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
+
+            self.points = {}
+            for p in self.dtmc.collect_probability_parameters():
+                assert len(self.member_assignment[p.name]) == 1
+                self.points[p] = stormpy.RationalRF(self.member_assignment[p.name][0].evaluate_as_double())
+            self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
+            self.param_dtmc = self.dtmc
+            self.dtmc = self.instantiator.instantiate(self.points)
 
             # assert absence of deadlocks or overlapping guards
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
@@ -143,6 +160,56 @@ class FamilyHybrid(Family):
         # success
         return self.member_assignment
 
+    def construct_and_check_mdp(self, prob_params, hole_options, epsilons, construct=False):
+        for param in prob_params:
+            param_value = self.member_assignment[param.name][0].evaluate_as_double()
+            hole_options[param.name] = [
+                self._sketch.expression_manager.create_rational(stormpy.Rational(param_value - epsilons[param.name])),
+                self._sketch.expression_manager.create_rational(stormpy.Rational(param_value + epsilons[param.name])),
+            ]
+        self.options = hole_options
+        if construct:
+            indexed_options = Family._hole_options.index_map(self.options, self._parameters)
+            Family._quotient_container.consider_subset(self.options, indexed_options)
+
+        absolute_diff = 0.0
+        unsat = False
+        for formula_index in self.violated_formulae_indices:
+            Family.mdp_checks_inc()
+            unsat, _ = self.model_check_formula(formula_index)
+            if unsat:
+                absolute_diff = self._quotient_container.latest_result.absolute_max - \
+                    self._quotient_container.latest_result.absolute_min
+                break
+        return unsat, absolute_diff
+
+    def get_parameter_bounds(self, hole_options):
+        eps = 1.0e-9
+        last_ref_eps = 0
+        # TODO: Is right collecting params from param_dtmc or mdp?
+        prob_params = self.mdp.collect_probability_parameters()
+        epsilons = {param.name: eps for param in prob_params}
+        saved_orig_options = self.options
+        exists_sat, absolute_diff = self.construct_and_check_mdp(prob_params, hole_options, epsilons, construct=True)
+        while exists_sat and absolute_diff <= MC_ACCURACY_THRESHOLD:
+            epsilons = {k: v / 2 for idx, (k, v) in enumerate(epsilons.items()) if idx == last_ref_eps}
+            last_ref_eps = last_ref_eps + 1 if last_ref_eps + 1 < len(epsilons.keys()) else 0
+            exists_sat = self.construct_and_check_mdp(prob_params, hole_options, epsilons, construct=True)
+        lower_bounds, upper_bounds = {}, {}
+        for param in prob_params:
+            assert len(self.options[param.name]) == 2
+            lower_bounds[param.name] = self.options[param.name][0].evaluate_as_double()
+            upper_bounds[param.name] = self.options[param.name][1].evaluate_as_double()
+        self.options = saved_orig_options
+        return lower_bounds, upper_bounds
+
+    @staticmethod
+    def construct_parametric_clauses(cex_clauses, lower_bounds, upper_bounds):
+        for var, hole in Family._solver_meta_vars.items():
+            if hole in Family._parameters:
+                cex_clauses[hole] = z3.And(var >= lower_bounds[hole], var <= upper_bounds[hole])
+        return cex_clauses
+
     def exclude_member(self, conflicts):
         """
         Exclude the subfamily induced by the selected assignment and a set of conflicts.
@@ -150,15 +217,26 @@ class FamilyHybrid(Family):
         assert self.member_assignment is not None
 
         for conflict in conflicts:
-            counterexample_clauses = dict()
+            if set(conflict).intersection(set(Family._parameters)):
+                print(f"CONFLICT: {conflict}")
+                exit(1)
+            cex_clauses = dict()
+            hole_options = HoleOptions()
             for var, hole in Family._solver_meta_vars.items():
-                if Family._hole_indices[hole] in conflict:
+                if hole in Family._parameters:
+                    hole_options[hole] = [None]
+                elif Family._hole_indices[hole] in conflict:
+                    assert len(self.member_assignment[hole]) == 1
+                    hole_options[hole] = self.member_assignment[hole]
                     option_index = Family._hole_option_indices[hole][self.member_assignment[hole][0]]
-                    counterexample_clauses[hole] = (var == option_index)
+                    cex_clauses[hole] = (var == option_index)
                 else:
+                    hole_options[hole] = self.options[hole]
                     all_options = [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
-                    counterexample_clauses[hole] = z3.Or(all_options)
-            counterexample_encoding = z3.Not(z3.And(list(counterexample_clauses.values())))
+                    cex_clauses[hole] = z3.Or(all_options)
+            lower_bounds, upper_bounds = self.get_parameter_bounds(hole_options)
+            cex_clauses = self.construct_parametric_clauses(cex_clauses, lower_bounds, upper_bounds)
+            counterexample_encoding = z3.Not(z3.And(list(cex_clauses.values())))
             Family._solver.add(counterexample_encoding)
         self.member_assignment = None
 

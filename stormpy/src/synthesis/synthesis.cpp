@@ -2,6 +2,10 @@
 
 #include "storm-synthesis/synthesis/Counterexample.h"
 
+template<typename ValueType>
+using Counterexample = storm::synthesis::Counterexample<ValueType>;
+
+
 // Define python bindings
 void define_synthesis(py::module& m) {
 
@@ -24,13 +28,22 @@ void define_synthesis(py::module& m) {
         storm::models::sparse::Mdp<double> const& mdp,
         storm::storage::FlatSet<uint_fast64_t> const& automataAndEdgeIndices
         )
-            {return storm::synthesis::DtmcFromMdp<>(mdp,automataAndEdgeIndices);},
+            {return storm::synthesis::DtmcFromMdp<double>(mdp,automataAndEdgeIndices);},
             "Restrict an MDP to selected edge indices",
             py::arg("mdp"), py::arg("automata_and_edge_indices")
         );
 
-    // Counterexample generation
-    py::class_<storm::synthesis::Counterexample<>>(
+    m.def("dtmc_from_param_mdp", [](
+    storm::models::sparse::Mdp<storm::RationalFunction> const& mdp,
+    storm::storage::FlatSet<uint_fast64_t> const& automataAndEdgeIndices
+    )
+        {return storm::synthesis::DtmcFromMdp<storm::RationalFunction>(mdp,automataAndEdgeIndices);},
+        "Restrict an MDP to selected edge indices",
+        py::arg("mdp"), py::arg("automata_and_edge_indices")
+    );
+
+    // Counterexample generation - double models
+    py::class_<Counterexample<double>>(
         m, "SynthesisCounterexample", "[synthesis research] Counterexample generation"
     )
         .def(
@@ -41,32 +54,74 @@ void define_synthesis(py::module& m) {
                 std::vector<std::shared_ptr<storm::logic::Formula const>> const&,
                 std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const>> const&
             >(),
-            "Preprocess the quotiendt MDP.",
+            "Preprocess the quotient MDP.",
             py::arg("quotient_mdp"), py::arg("hole_count"), py::arg("mdp_holes"), py::arg("formulae"), py::arg("mdp_bounds")
             )
         .def(
             "replace_formula_threshold",
-            &storm::synthesis::Counterexample<>::replaceFormulaThreshold,
+            &storm::synthesis::Counterexample<double>::replaceFormulaThreshold,
             "Replace the formula threshold as well as the corresponding MDP bound.",
             py::arg("formula_index"), py::arg("formula_threshold"), py::arg("mdp_bound")
             )
         .def(
             "prepare_dtmc",
-            &storm::synthesis::Counterexample<>::prepareDtmc,
+            &storm::synthesis::Counterexample<double>::prepareDtmc,
             "Prepare a DTMC for counterexample construction.",
             py::arg("dtmc"), py::arg("state_mdp")
             )
         .def(
             "construct_conflict",
-            &storm::synthesis::Counterexample<>::constructCounterexample,
+            &storm::synthesis::Counterexample<double>::constructCounterexample,
             "Construct a counterexample to a prepared DTMC.",
             py::arg("formula_index"), py::arg("use_bounds") = true
         )
         .def_property_readonly(
             "stats",
-            [](storm::synthesis::Counterexample<> & counterexample) {
+            [](storm::synthesis::Counterexample<double> & counterexample) {
                 return counterexample.stats();
             },
             "Read stats."
-        );  
+        );
+
+
+    // Counterexample generation - parametric models
+    py::class_<Counterexample<storm::RationalFunction>>(
+        m, "SynthesisCounterexampleParametric", "[synthesis research] Counterexample generation"
+    )
+        .def(
+            py::init<
+                storm::models::sparse::Mdp<storm::RationalFunction> const&,
+                uint_fast64_t,
+                std::vector<std::set<uint_fast64_t>> const&,
+                std::vector<std::shared_ptr<storm::logic::Formula const>> const&,
+                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<double> const>> const&
+            >(),
+            "Preprocess the quotient MDP.",
+            py::arg("quotient_mdp"), py::arg("hole_count"), py::arg("mdp_holes"), py::arg("formulae"), py::arg("mdp_bounds")
+            )
+        .def(
+            "replace_formula_threshold",
+            &storm::synthesis::Counterexample<storm::RationalFunction>::replaceFormulaThreshold,
+            "Replace the formula threshold as well as the corresponding MDP bound.",
+            py::arg("formula_index"), py::arg("formula_threshold"), py::arg("mdp_bound")
+            )
+        .def(
+            "prepare_dtmc",
+            &storm::synthesis::Counterexample<storm::RationalFunction>::prepareDtmc,
+            "Prepare a DTMC for counterexample construction.",
+            py::arg("dtmc"), py::arg("state_mdp")
+            )
+        .def(
+            "construct_conflict",
+            &storm::synthesis::Counterexample<storm::RationalFunction>::constructCounterexample,
+            "Construct a counterexample to a prepared DTMC.",
+            py::arg("formula_index"), py::arg("use_bounds") = true
+        )
+        .def_property_readonly(
+            "stats",
+            [](storm::synthesis::Counterexample<storm::RationalFunction> & counterexample) {
+                return counterexample.stats();
+            },
+            "Read stats."
+        );
 }

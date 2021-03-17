@@ -117,14 +117,11 @@ class HoleOptions(OrderedDict):
     def size(self):
         return prod([len(v) for v in self.values()])
 
-    def index_map(self, sub_options):
+    def index_map(self, sub_options, params=None):
+        params = [] if params is None else params
         result = OrderedDict()
-        for k, values in sub_options.items():
-            result[k] = []
-            for v in values:
-                for index, ref in enumerate(self.get(k)):
-                    if ref == v:
-                        result[k].append(index)
+        for k, vs in sub_options.items():
+            result[k] = [0, 1] if k in params else [idx for v in vs for idx, ref in enumerate(self.get(k)) if ref == v]
         return result
 
     def pick_one_in_family(self):

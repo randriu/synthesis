@@ -10,6 +10,7 @@ from ..family_checkers.familychecker import HoleOptions
 from ..family_checkers.quotientbased import LiftingChecker
 from ..jani.jani_quotient_builder import JaniQuotientBuilder
 from ..jani.quotient_container import ThresholdSynthesisResult
+from ..model_handling.mdp_handling import MC_ACCURACY_THRESHOLD
 from ..profiler import Profiler
 
 logger = logging.getLogger(__name__)
@@ -92,11 +93,12 @@ class Family:
         # encode this family
         hole_clauses = dict()
         for var, hole in Family._solver_meta_vars.items():
-            hole_clauses[hole] = z3.Or(
-                [var == (idx if hole in self._parameters else Family._hole_option_indices[hole][option])
-                 for idx, option in enumerate(self.options[hole])
-                 ]
-            )
+            if hole in self._parameters:
+                hole_clauses[hole] = z3.And(var >= self.options[hole][0], var <= self.options[hole][1])
+            else:
+                hole_clauses[hole] = z3.Or(
+                    [var == (Family._hole_option_indices[hole][option]) for _, option in enumerate(self.options[hole])]
+                )
         self.encoding = z3.And(list(hole_clauses.values()))
 
         # a family that has never been MDP-analyzed is not ready to be split
@@ -134,14 +136,10 @@ class Family:
         Family._solver_meta_vars = OrderedDict()
         variables = dict()
         for k, v in Family._hole_options.items():
-            # create integer variable
-            var = z3.Int(k)
-            # store the variable
+            var = z3.Real(k) if v[0].type.is_rational else z3.Int(k)
+            Family._solver.add((var >= v[0], var <= v[1]) if k in Family._parameters else (var >= 0, var < len(v)))
             Family._solver_meta_vars[var] = k
             variables[k] = var
-            # add constraints for the hole assignments
-            Family._solver.add(var >= 0)
-            Family._solver.add(var < len(v))
 
         # encode restrictions
         if symmetries is not None:
@@ -244,13 +242,13 @@ class Family:
 
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """
-        if self.constructed:
-            return
+        # if self.constructed:
+        #     return
 
         Profiler.start("ar - MDP construction")
 
         logger.debug(f"Constructing quotient MDP for family {self.options}.")
-        indexed_options = Family._hole_options.index_map(self.options)
+        indexed_options = Family._hole_options.index_map(self.options, self._parameters)
         Family._quotient_container.consider_subset(self.options, indexed_options)
         self.mdp = Family._quotient_container.mdp_handling.mdp
         self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
@@ -384,7 +382,7 @@ class Family:
             self._quotient_container.latest_result.absolute_max - self._quotient_container.latest_result.absolute_min
         # print(f">> {absolute_diff}")
         (hole, length) = sorted_options.pop(0) if sorted_options or not() else (None, 0)
-        if hole in self._parameters and absolute_diff <= 1.0e-10:
+        if hole in self._parameters and absolute_diff <= MC_ACCURACY_THRESHOLD:
             hole, length = None, 0
         # print(f">> {hole}: {length}")
 
@@ -436,7 +434,12 @@ class Family:
         assignment = HoleOptions()
         self.member_assignment = None
         for var, hole in Family._solver_meta_vars.items():
-            assignment[hole] = [Family._hole_options[hole][sat_model[var].as_long()]]
+            if hole in Family._parameters:
+                assignment[hole] = [Family._quotient_builder.expression_manager.create_rational(stormpy.Rational(
+                    float(sat_model[var].numerator_as_long()) / float(sat_model[var].denominator_as_long())
+                ))]
+            else:
+                assignment[hole] = [Family._hole_options[hole][sat_model[var].as_long()]]
         self.member_assignment = assignment
 
         return self.member_assignment

@@ -10,6 +10,9 @@ from ..profiler import Timer
 
 logger = logging.getLogger(__name__)
 
+MC_ACCURACY = 1.0e-10
+MC_ACCURACY_THRESHOLD = MC_ACCURACY + -9e-11
+
 
 def always_true(_, __):
     return True
@@ -278,7 +281,7 @@ class ModelHandling:
 
         # TODO set from the outside.
         env = stormpy.Environment()
-        env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(0.0000000001)  # +
+        env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(MC_ACCURACY)  # +
         if is_dtmc:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
