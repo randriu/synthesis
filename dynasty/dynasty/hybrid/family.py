@@ -276,7 +276,9 @@ class Family:
         assert self.constructed
 
         threshold = float(Family._thresholds[formula_index])
-        Family._quotient_container.analyse(threshold, formula_index, region=self._construct_region())
+        Family._quotient_container.analyse(
+            threshold, formula_index, region=self._construct_region() if self.mdp.has_parameters else None
+        )
 
         mc_result = Family._quotient_container.decided(threshold)
         accept_if_above = Family._accept_if_above[formula_index]
@@ -381,7 +383,7 @@ class Family:
         absolute_diff = \
             self._quotient_container.latest_result.absolute_max - self._quotient_container.latest_result.absolute_min
         # print(f">> {absolute_diff}")
-        (hole, length) = sorted_options.pop(0) if sorted_options or not() else (None, 0)
+        (hole, length) = sorted_options.pop(0) if sorted_options else (None, 0)
         if hole in self._parameters and absolute_diff <= MC_ACCURACY_THRESHOLD:
             hole, length = None, 0
         # print(f">> {hole}: {length}")

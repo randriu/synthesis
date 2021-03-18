@@ -294,7 +294,9 @@ class ModelHandling:
         logger.info(f"Start checking direction 1: {self._formulae[index]}")
         # TODO allow qualitative model checking with scheduler extraction.
         if region:
-            checker = stormpy.pars.create_region_checker(env, self._submodel, self._formulae[index])
+            checker = stormpy.pars.create_region_checker(
+                env, self._submodel, self._formulae[index], allow_model_simplification=True
+            )
             prime_result = checker.get_bound_all_states(env, region, maximise)
         else:
             prime_result = stormpy.model_checking(
@@ -329,7 +331,9 @@ class ModelHandling:
             self._mc_mdp_executions += 1
             logger.info(f"Start checking direction 2: {self._alt_formulae[index]}")
             if region:
-                checker = stormpy.pars.create_region_checker(env, self._submodel, self._alt_formulae[index])
+                checker = stormpy.pars.create_region_checker(
+                    env, self._submodel, self._alt_formulae[index], allow_model_simplification=True
+                )
                 second_result = checker.get_bound_all_states(env, region, not maximise)
             else:
                 second_result = stormpy.model_checking(
