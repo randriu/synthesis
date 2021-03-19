@@ -33,13 +33,6 @@ namespace storm {
         }
 
         template<typename ValueType>
-        bool CudaMinMaxLinearEquationSolver<ValueType>::isMultipleInstancesSet() const {
-            auto minMaxSettings = storm::settings::getModule<storm::settings::modules::MinMaxEquationSolverSettings>();
-
-            return minMaxSettings.isMultipleInstancesSet(); 
-        }
-
-        template<typename ValueType>
         CudaMinMaxLinearEquationSolver<ValueType>::CSRMatrix::CSRMatrix(storm::storage::SparseMatrix<ValueType> const* A) {
 
             this->matrixRowCount = A->getRowCount();
@@ -60,6 +53,8 @@ namespace storm {
 
         template<typename ValueType>
 		bool CudaMinMaxLinearEquationSolver<ValueType>::internalSolveEquations(Environment const& env, OptimizationDirection dir, std::vector<ValueType>& x, std::vector<ValueType> const& b) const {
+            bool result = false;
+            
 #ifdef STORM_HAVE_CUDASYNTHESIS
 
             ValueType precision = storm::utility::convertNumber<ValueType>(env.solver().minMax().getPrecision());
@@ -67,19 +62,18 @@ namespace storm {
             bool relative = env.solver().minMax().getRelativeTerminationCriterion();
 
             CSRMatrix matrix(this->A);
-            bool result = false;
             size_t globalIterations = 0;
             bool const extractScheduler = this->isTrackSchedulerSet();
+            bool const solveMultipleInstances = env.solver().minMax().isSolveMultipleInstancesSet(); 
 
             if (extractScheduler) {
                this->schedulerChoices = std::vector<uint_fast64_t>(this->A->getRowGroupCount()); 
             }
 
-            std::cout << "choices: " << storm::utility::vector::toString(*matrix.rowGroupIndices) << "\n";
             if (dir == OptimizationDirection::Minimize) {
-                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
+                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(solveMultipleInstances, maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
             } else {
-                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
+                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(solveMultipleInstances, maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, globalIterations, extractScheduler, &this->schedulerChoices.get());
             }
 
             if (!result) {

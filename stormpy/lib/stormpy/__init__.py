@@ -276,7 +276,7 @@ def model_checking(model, property, only_initial_states=False, extract_scheduler
         return check_model_dd(model, property, only_initial_states=only_initial_states,
                               environment=environment)
 
-def model_checking_families(family, property, subfamilies, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
+def model_checking_families(family, property, subfamilies, initValues, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
     """
     Perform model checking on families for property.
     :param family: Superfamily.
@@ -288,12 +288,12 @@ def model_checking_families(family, property, subfamilies, only_initial_states=F
     :rtype: vector[CheckResult]
     """
     if family.is_sparse_model:
-        return check_families_sparse(family, property, subfamilies, only_initial_states=only_initial_states,
+        return check_families_sparse(family, property, subfamilies, initValues, only_initial_states=only_initial_states,
                                   extract_scheduler=extract_scheduler, force_fully_observable=force_fully_observable, environment=environment)
     else:
         raise StormError("Model checking of multiple familes based on dd engine is not supported right now.")
 
-def check_families_sparse(family, property, subfamilies, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
+def check_families_sparse(family, property, subfamilies, initValues, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
     """
     Perform model checking on families for property.
     :param family: Superfamily.
@@ -322,7 +322,7 @@ def check_families_sparse(family, property, subfamilies, only_initial_states=Fal
         else:
             task = core.CheckTask(formula, only_initial_states)
             task.set_produce_schedulers(extract_scheduler)
-            return core._model_checking_sparse_engine_mdp_families(family, task, subfamilies, environment=environment)
+            return core._model_checking_sparse_engine_mdp_families(family, task, subfamilies, initValues, environment=environment)
 
 
 def check_model_sparse(model, property, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):

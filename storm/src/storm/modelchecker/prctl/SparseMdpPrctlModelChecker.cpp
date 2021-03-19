@@ -44,7 +44,7 @@ namespace storm {
         }
 
         template<typename SparseMdpModelType>
-        SparseMdpPrctlModelChecker<SparseMdpModelType>::SparseMdpPrctlModelChecker(SparseMdpModelType const& model, std::vector<std::vector<uint_fast64_t>> const& subfamilies) : SparsePropositionalModelChecker<SparseMdpModelType>(model), subfamilies(std::move(subfamilies)) {
+        SparseMdpPrctlModelChecker<SparseMdpModelType>::SparseMdpPrctlModelChecker(SparseMdpModelType const& model, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues) : SparsePropositionalModelChecker<SparseMdpModelType>(model), subfamilies(std::move(subfamilies)), initValues(std::move(initValues)) {
             // Intentionally left empty.
         }
         
@@ -127,55 +127,83 @@ namespace storm {
             std::cout << "\n";
             
             if (env.solver().minMax().isSolveMultipleInstancesSet()) {
-                std::cout << "***************************************************************************************************\n";
-                auto subfamilies = this->getSubfamilies(); 
-                auto superFamily = this->getModel();
-                std::vector<std::vector<ValueType>> initVectors;
-                size_t rowsCount = superFamily.getTransitionMatrix().getRowCount();
+                std::cout << "************************************************************************************************************************************\n";
+                std::vector<std::vector<uint_fast64_t>> const& subfamilies = this->getSubfamilies(); 
+                std::vector<storm::storage::BitVector> const& initValues = this->getInitValues();
+                storm::storage::BitVector validVectors;
+                uint_fast64_t resultSize = 0;
 
-                std::cout << "super MDP\n" << superFamily.getTransitionMatrix() << "\n";
-                for (std::vector<uint_fast64_t>&subfamily : subfamilies) {
-                    std::cout << "subfamily: " << storm::utility::vector::toString(subfamily) << "\n";
+                auto superFamily = this->getModel();
+                size_t rowsCount = superFamily.getTransitionMatrix().getRowCount();
+                size_t columnCount = superFamily.getTransitionMatrix().getColumnCount();
+                std::vector<uint_fast64_t> const& choices = superFamily.getTransitionMatrix().getRowGroupIndices();
+                
+                std::vector<ValueType> xVectors;
+                std::vector<ValueType> bVectors;
+                std::vector<uint_fast64_t> subfamiliesChoices;
+                ValueType minMaxInitializer = (dir == storm::solver::OptimizationDirection::Minimize) ? std::numeric_limits<ValueType>::infinity() : -std::numeric_limits<ValueType>::infinity();
+
+                size_t subfamilyNumber = 0;
+
+                // std::cout << "super MDP\n" << superFamily.getTransitionMatrix() << "\n";
+                for (std::vector<uint_fast64_t>const& subfamily : subfamilies) {
+                    // std::cout << "subfamily: " << storm::utility::vector::toString(subfamily) << "\n";
                     
-                    // find init vectors
                     storm::storage::BitVector validRows(rowsCount, false);
                     for(uint_fast64_t index: subfamily) { validRows.set(index, true); }
-                    storm::storage::SparseMatrix<ValueType> transitionMatrix((superFamily.getTransitionMatrix()).restrictRows(validRows, true));
-                    storm::storage::SparseMatrix<ValueType> backwardTransitionMatrix(transitionMatrix.transpose(true));
-
-                    std::cout << "subfamily matrix\n" << transitionMatrix << "\n";
-                    std::cout << "choices: " << storm::utility::vector::toString(transitionMatrix.getRowGroupIndices()) << "\n";
-
-                    std::unique_ptr<CheckResult> leftResultPointer = this->check(env, pathFormula.getLeftSubformula());
-                    std::unique_ptr<CheckResult> rightResultPointer = this->check(env, pathFormula.getRightSubformula());
-                    ExplicitQualitativeCheckResult const& leftResult = leftResultPointer->asExplicitQualitativeCheckResult();
-                    ExplicitQualitativeCheckResult const& rightResult = rightResultPointer->asExplicitQualitativeCheckResult();
-                    storm::storage::BitVector phiStates = leftResult.getTruthValuesVector();
-                    storm::storage::BitVector psiStates = rightResult.getTruthValuesVector();
                     
-                    storm::storage::BitVector statesWithProbability1;
-                    ValueType minMaxInitializer;
-                    if(dir == storm::solver::OptimizationDirection::Minimize) {
-                        statesWithProbability1 = (storm::utility::graph::performProb01Min(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitionMatrix, phiStates, psiStates)).second;
-                        minMaxInitializer = std::numeric_limits<ValueType>::max();
-                    } else {
-                        statesWithProbability1 = (storm::utility::graph::performProb01Max(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitionMatrix, phiStates, psiStates)).second;
-                        minMaxInitializer = -std::numeric_limits<ValueType>::max();
-                    }
+                    storm::storage::SparseMatrix<ValueType> transitionMatrix((superFamily.getTransitionMatrix()).restrictRows(validRows, true));
+                    // std::cout << "subfamily matrix\n" << transitionMatrix << "\n";
 
-                    std::vector<ValueType> x(superFamily.getTransitionMatrix().getColumnCount(), 0.0);
+                    storm::storage::BitVector statesWithProbability1(columnCount, false); 
+                    storm::storage::BitVector tmp = (superFamily.getTransitionMatrix()).getRowGroupFilter(validRows, false);
+                    resultSize += tmp.getNumberOfSetBits();
+                    validVectors.concat(tmp);
+
+                    // std::bitset<64> valid(tmp.getAsInt(0,64));
+                    // std::cout << "valid: " << valid << "\n";
+                    
+                    uint_fast64_t index = 0;
+                    for(uint_fast64_t i=0; i < columnCount; i++) {
+                        if (tmp.get(i) == true) { statesWithProbability1.set(i, (initValues.at(subfamilyNumber)).get(index++)); }
+                    }
+                    
+                    // compute x vector for first iteration
+                    std::vector<ValueType> x(columnCount, 0.0);
                     storm::utility::vector::setVectorValues<ValueType>(x, statesWithProbability1, storm::utility::one<ValueType>());
-                    std::cout << "x: " << storm::utility::vector::toString(x) << "\n";
+                    xVectors.insert(xVectors.end(), x.begin(), x.end());
 
                     validRows.complement();
                     std::vector<ValueType> b(rowsCount, 0.0); 
                     storm::utility::vector::setVectorValues<ValueType>(b, validRows, minMaxInitializer);
-                    std::cout << "b: " << storm::utility::vector::toString(b) << "\n";
+                    bVectors.insert(bVectors.end(), b.begin(), b.end());
 
+                    // std::cout << "x: " << storm::utility::vector::toString(x) << "\n";
+                    // std::cout << "b: " << storm::utility::vector::toString(b) << "\n";
+                    
+                    for(size_t i = 0; i < columnCount; i++) { subfamiliesChoices.push_back(choices.at(i) + (subfamilyNumber * rowsCount) ); }
+                    
+                    subfamilyNumber ++;
                 } 
-                std::cout << "***************************************************************************************************\n";
+                subfamiliesChoices.push_back(subfamilyNumber * rowsCount);
+                superFamily.getTransitionMatrix().setRowGroupIndices(subfamiliesChoices);
 
-                result.reset(new ExplicitQuantitativeCheckResult<ValueType>());
+                // std::cout << "x inits: " << storm::utility::vector::toString(xVectors) << "\n";
+                // std::cout << "b inits: " << storm::utility::vector::toString(bVectors) << "\n";
+                // std::cout << "choices: " << storm::utility::vector::toString(subfamiliesChoices) << "\n";
+                
+                auto ret = storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(env, storm::solver::SolveGoal<ValueType>(dir), superFamily.getTransitionMatrix(), bVectors, xVectors, subfamiliesChoices, subfamilyNumber, checkTask.isQualitativeSet(), checkTask.isProduceSchedulersSet(), checkTask.getHint());
+                
+                std::vector<ValueType> subfamiliesResults(resultSize);
+                storm::utility::vector::selectVectorValues(subfamiliesResults, validVectors, ret.values);
+                
+                std::cout << "final result: " <<  storm::utility::vector::toString(subfamiliesResults) << "\n";
+                std::cout << "**************************************************************************************************************************************************\n";
+
+                result.reset(new ExplicitQuantitativeCheckResult<ValueType>(std::move(subfamiliesResults)));
+                if (checkTask.isProduceSchedulersSet() && ret.scheduler) {
+                    result->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(ret.scheduler));
+                }    
             } else {
                 std::unique_ptr<CheckResult> leftResultPointer = this->check(env, pathFormula.getLeftSubformula());
                 std::unique_ptr<CheckResult> rightResultPointer = this->check(env, pathFormula.getRightSubformula());
@@ -351,6 +379,11 @@ namespace storm {
         template<typename SparseMdpModelType>
         std::vector<std::vector<uint_fast64_t>> const& SparseMdpPrctlModelChecker<SparseMdpModelType>::getSubfamilies() const {
             return subfamilies;
+        }
+
+        template<typename SparseMdpModelType>
+        std::vector<storm::storage::BitVector> const& SparseMdpPrctlModelChecker<SparseMdpModelType>::getInitValues() const {
+            return initValues;
         }
         
         template class SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<double>>;

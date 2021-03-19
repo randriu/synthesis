@@ -1,6 +1,7 @@
 #include "storm/modelchecker/prctl/helper/SparseMdpPrctlHelper.h"
 
 #include <boost/container/flat_map.hpp>
+#include <bitset>
 
 #include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
 #include "storm/modelchecker/hints/ExplicitModelCheckerHint.h"
@@ -585,6 +586,31 @@ namespace storm {
             }
             
             template<typename ValueType>
+            MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, uint_fast64_t numberOfFamilies, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint) {
+                
+                std::vector<ValueType> result(transitionMatrix.getRowGroupCount() * numberOfFamilies, storm::utility::zero<ValueType>());
+                
+                // If requested, we will produce a scheduler.
+                std::unique_ptr<storm::storage::Scheduler<ValueType>> scheduler;
+                if (produceScheduler) {
+                    scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(transitionMatrix.getRowGroupCount() * numberOfFamilies);
+                }
+                
+                storm::solver::GeneralMinMaxLinearEquationSolverFactory<ValueType> minMaxLinearEquationSolverFactory;
+                std::unique_ptr<storm::solver::MinMaxLinearEquationSolver<ValueType>> solver = storm::solver::configureMinMaxLinearEquationSolver(env, std::move(goal), minMaxLinearEquationSolverFactory, std::move(transitionMatrix));
+                // Solve the corresponding system of equations.
+                solver->solveEquations(env, x, b);
+
+                // If requested, return the requested scheduler.
+                // if (produceScheduler) {
+                //     scheduler = solver->getSchedulerChoices();
+                // }
+
+                return MDPSparseModelCheckingHelperReturnType<ValueType>(std::move(x), std::move(scheduler));
+
+            }
+
+            template<typename ValueType>
             MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType>::computeUntilProbabilities(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& phiStates, storm::storage::BitVector const& psiStates, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint) {
                 STORM_LOG_THROW(!qualitative || !produceScheduler, storm::exceptions::InvalidSettingsException, "Cannot produce scheduler when performing qualitative model checking only.");
                 
@@ -657,6 +683,9 @@ namespace storm {
                     extendScheduler(*scheduler, goal, qualitativeStateSets, transitionMatrix, backwardTransitions, phiStates, psiStates);
                 }
                 
+                std::cout << "result: \n" << storm::utility::vector::toString(result) << "\n";
+                // std::cout << "scheduler: \n";
+                // (scheduler.get())->printToStream(std::cout);
                 // Sanity check for created scheduler.
                 STORM_LOG_ASSERT(!produceScheduler || scheduler, "Expected that a scheduler was obtained.");
                 STORM_LOG_ASSERT((!produceScheduler && !scheduler) || !scheduler->isPartialScheduler(), "Expected a fully defined scheduler");

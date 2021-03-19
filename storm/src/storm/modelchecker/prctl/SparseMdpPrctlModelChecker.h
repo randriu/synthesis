@@ -17,7 +17,7 @@ namespace storm {
             typedef typename SparseMdpModelType::RewardModelType RewardModelType;
             
             explicit SparseMdpPrctlModelChecker(SparseMdpModelType const& model);
-            explicit SparseMdpPrctlModelChecker(SparseMdpModelType const& model, std::vector<std::vector<uint_fast64_t>> const& subfamilies);
+            explicit SparseMdpPrctlModelChecker(SparseMdpModelType const& model, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues);
             /*!
              * Returns false, if this task can certainly not be handled by this model checker (independent of the concrete model).
              * @param requiresSingleInitialState if not nullptr, this flag is set to true iff checking this formula requires a model with a single initial state
@@ -42,8 +42,10 @@ namespace storm {
             virtual std::unique_ptr<CheckResult> checkQuantileFormula(Environment const& env, CheckTask<storm::logic::QuantileFormula, ValueType> const& checkTask) override;
         
             std::vector<std::vector<uint_fast64_t>> const& getSubfamilies() const;
+            std::vector<storm::storage::BitVector> const& getInitValues() const;
         private:
             std::vector<std::vector<uint_fast64_t>> subfamilies;
+            std::vector<storm::storage::BitVector> initValues;
         };
     } // namespace modelchecker
 } // namespace storm

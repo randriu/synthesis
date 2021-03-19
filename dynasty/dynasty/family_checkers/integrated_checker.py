@@ -29,7 +29,7 @@ quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = False
 
-ONLY_CEGAR = False
+ONLY_CEGAR = True
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
@@ -605,6 +605,7 @@ class Family:
             Family._quotient_mdp_stats[0] + Family._quotient_mdp.nr_states, Family._quotient_mdp_stats[1] + 1
         )
         logger.debug(f"Constructed MDP of size {Family._quotient_mdp.nr_states}.")
+        print(Family._quotient_mdp.transition_matrix)
 
     @property
     def size(self):
@@ -676,8 +677,8 @@ class Family:
 
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """
-        if self.constructed:
-            return
+        # if self.constructed:
+        #     return
 
         Profiler.start("ar - MDP construction")
 
@@ -690,6 +691,8 @@ class Family:
         Family._quotient_mdp_stats = (
             Family._quotient_mdp_stats[0] + self.mdp.nr_states, Family._quotient_mdp_stats[1] + 1
         )
+        print(self.choice_map)
+        print(self.mdp.transition_matrix)
 
         Profiler.stop()
 
@@ -1498,6 +1501,33 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 logger.debug("Splitting the family.")
                 subfamily_left, subfamily_right = family.split()
                 subfamilies = [subfamily_left, subfamily_right]
+                
+                if (self.iterations_cegar == 1):
+                    env = stormpy.Environment()
+                    env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
+                    env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+
+                    subfamilies[0].construct()
+                    subfamilies[1].construct()  
+                    # print(self.formulae[0].subformula)
+
+                    xinitleft = None
+                    xinitright = None
+
+                    if (stormpy.OptimizationDirection.Minimize == self.formulae[0].optimality_type):
+                        xinitleft = (stormpy.prob01min_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
+                        xinitright = (stormpy.prob01min_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
+                    else:
+                        xinitleft = (stormpy.prob01max_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
+                        xinitright = (stormpy.prob01max_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
+                    # print((stormpy.prob01min_states(subfamily_left.mdp, self.formulae[0].subformula))[1])                     
+                    # print((stormpy.prob01min_states(subfamily_right.mdp, self.formulae[0].subformula))[1])                     
+                    # print(stormpy.prob01max_states(subfamily_left, self.formulae[0].subformula))                     
+                    prime_result = stormpy.model_checking_families(Family.quotient_mdp(), self.formulae[0], [subfamily_left.choice_map, subfamily_right.choice_map], [xinitleft, xinitright],
+                        only_initial_states=False, extract_scheduler=False, environment=env
+                    )
+                    print(prime_result)
+
                 logger.debug(
                     f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
                 )

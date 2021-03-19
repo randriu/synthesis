@@ -269,12 +269,12 @@ namespace storm {
         }
 
         template<typename ValueType>                                                                                                    
-        std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> verifyWithSparseEngineMdpFamilies(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> const& family, storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies) {
-            std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> result;
-            storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> modelchecker(*family, subfamilies);
+        std::unique_ptr<storm::modelchecker::CheckResult> verifyWithSparseEngineMdpFamilies(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> const& family, storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues) {
+            std::unique_ptr<storm::modelchecker::CheckResult> result;
+            storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> modelchecker(*family, subfamilies, initValues);
+            
             if (modelchecker.canHandle(task)) {
-                // TODO Split results into vectors
-                modelchecker.check(env, task);
+                result = modelchecker.check(env, task);
             }     
             return result;
         }

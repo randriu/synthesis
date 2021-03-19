@@ -278,8 +278,9 @@ class ModelHandling:
         if is_dtmc:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
-            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
-            # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+            # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+            # env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
+            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
         # assert not self._formulae[index].has_bound
 
@@ -287,6 +288,9 @@ class ModelHandling:
         # TODO allow qualitative model checking with scheduler extraction.
         timer = Timer()
         timer.start()
+        # stormpy.model_checking_families(self._submodel, self._formulae[index], [[1,2],[3,4]], only_initial_states=False,
+        #     extract_scheduler=extract_scheduler, environment=env
+        # ) 
         prime_result = stormpy.model_checking(
             self._submodel, self._formulae[index], only_initial_states=False,
             extract_scheduler=extract_scheduler, environment=env
