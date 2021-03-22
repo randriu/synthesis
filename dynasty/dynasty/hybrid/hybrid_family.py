@@ -145,12 +145,13 @@ class FamilyHybrid(Family):
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             self.points = {}
-            for p in self.dtmc.collect_probability_parameters():
-                assert len(self.member_assignment[p.name]) == 1
-                self.points[p] = stormpy.RationalRF(self.member_assignment[p.name][0].evaluate_as_double())
-            self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
-            self.param_dtmc = self.dtmc
-            self.dtmc = self.instantiator.instantiate(self.points)
+            if self.dtmc.has_parameters:
+                for p in self.dtmc.collect_probability_parameters():
+                    assert len(self.member_assignment[p.name]) == 1
+                    self.points[p] = stormpy.RationalRF(self.member_assignment[p.name][0].evaluate_as_double())
+                self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
+                self.param_dtmc = self.dtmc
+                self.dtmc = self.instantiator.instantiate(self.points)
 
             # assert absence of deadlocks or overlapping guards
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
@@ -234,8 +235,9 @@ class FamilyHybrid(Family):
                     hole_options[hole] = self.options[hole]
                     all_options = [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
                     cex_clauses[hole] = z3.Or(all_options)
-            lower_bounds, upper_bounds = self.get_parameter_bounds(hole_options)
-            cex_clauses = self.construct_parametric_clauses(cex_clauses, lower_bounds, upper_bounds)
+            if Family._parameters:
+                lower_bounds, upper_bounds = self.get_parameter_bounds(hole_options)
+                cex_clauses = self.construct_parametric_clauses(cex_clauses, lower_bounds, upper_bounds)
             counterexample_encoding = z3.Not(z3.And(list(cex_clauses.values())))
             Family._solver.add(counterexample_encoding)
         self.member_assignment = None

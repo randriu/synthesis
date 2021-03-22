@@ -245,7 +245,7 @@ namespace storm {
             if (maybeStates.empty()) {
                 return std::make_unique<storm::modelchecker::ExplicitQuantitativeCheckResult<ConstantType>>(resultsForNonMaybeStates);
             }
-            
+
             parameterLifter->specifyRegion(region, dirForParameters);
             
             // Set up the solver
@@ -273,7 +273,7 @@ namespace storm {
                 }
                 solver->setTerminationCondition(std::move(termCond));
             }
-            
+
             // Invoke the solver
             if (stepBound) {
                 STORM_LOG_ASSERT(*stepBound > 0, "Expected positive step bound.");
@@ -289,7 +289,7 @@ namespace storm {
                     player1SchedChoices = solver->getPlayer1SchedulerChoices();
                 }
             }
-            
+
             // Get the result for the complete model (including maybestates)
             std::vector<ConstantType> result = resultsForNonMaybeStates;
             auto maybeStateResIt = x.begin();
@@ -297,8 +297,15 @@ namespace storm {
                 result[maybeState] = *maybeStateResIt;
                 ++maybeStateResIt;
             }
-            
-            return std::make_unique<storm::modelchecker::ExplicitQuantitativeCheckResult<ConstantType>>(std::move(result));
+
+            std::shared_ptr<storm::storage::Scheduler<ConstantType>> scheduler;
+            if (storm::solver::maximize(dirForParameters))  {
+                scheduler = std::make_shared<storm::storage::Scheduler<ConstantType>>(getCurrentMaxScheduler().get());
+            } else {
+                scheduler = std::make_shared<storm::storage::Scheduler<ConstantType>>(getCurrentMinScheduler().get());
+            }
+
+            return std::make_unique<storm::modelchecker::ExplicitQuantitativeCheckResult<ConstantType>>(std::move(result), scheduler);
         }
         
         template <typename SparseModelType, typename ConstantType>
