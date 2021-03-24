@@ -256,7 +256,7 @@ class ModelHandling:
         internal_res.filter(stormpy.create_filter_initial_states_symbolic(self._submodel))
         return SymbolicMCResult(internal_res.min, internal_res.max)
 
-    def mc_model(self, index=0, compute_action_values=False, check_dir_2=always_true, region=None):
+    def mc_model(self, index=0, compute_action_values=False, check_dir_2=always_true, model=None):
         """
 
         :param index:
@@ -265,13 +265,13 @@ class ModelHandling:
         :param region:
         :return:
         """
+        model = self._submodel if model is None else model
         assert len(self._formulae) > index
         assert not compute_action_values
         is_dtmc = False
         extract_scheduler = True
 
-        if self._submodel.nr_choices == self._submodel.nr_states and \
-                not isinstance(self._submodel, stormpy.storage._SparseParametricModel):
+        if model.nr_choices == model.nr_states and not isinstance(model, stormpy.storage._SparseParametricModel):
             is_dtmc = True
             self._mc_dtmc_calls += 1
             extract_scheduler = False
@@ -293,21 +293,15 @@ class ModelHandling:
 
         logger.info(f"Start checking direction 1: {self._formulae[index]}")
         # TODO allow qualitative model checking with scheduler extraction.
-        if region:
-            checker = stormpy.pars.create_region_checker(
-                env, self._submodel, self._formulae[index], allow_model_simplification=True
-            )
-            prime_result = checker.get_bound_all_states(env, region, maximise)
-        else:
-            prime_result = stormpy.model_checking(
-                self._submodel, self._formulae[index], only_initial_states=False,
-                extract_scheduler=extract_scheduler, environment=env
-            )
+        prime_result = stormpy.model_checking(
+            model, self._formulae[index], only_initial_states=False,
+            extract_scheduler=extract_scheduler, environment=env
+        )
 
         if is_dtmc:
             maximise = True
-            absolute_min = min([prime_result.at(x) for x in self._submodel.initial_states])
-            absolute_max = max([prime_result.at(x) for x in self._submodel.initial_states])
+            absolute_min = min([prime_result.at(x) for x in model.initial_states])
+            absolute_max = max([prime_result.at(x) for x in model.initial_states])
             logger.info(f"Done DTMC Checking. Result for initial state is: {absolute_min} -- {absolute_max}")
 
             return ExplicitMCResult(
@@ -320,34 +314,28 @@ class ModelHandling:
 
         if maximise:
             upper_result = prime_result
-            absolute_max = max([upper_result.at(x) for x in self._submodel.initial_states])
+            absolute_max = max([upper_result.at(x) for x in model.initial_states])
 
         else:
             assert (self._formulae[index].optimality_type == stormpy.OptimizationDirection.Minimize)
             lower_result = prime_result
-            absolute_min = min([lower_result.at(x) for x in self._submodel.initial_states])
+            absolute_min = min([lower_result.at(x) for x in model.initial_states])
 
         if check_dir_2(absolute_min, absolute_max):
             self._mc_mdp_executions += 1
             logger.info(f"Start checking direction 2: {self._alt_formulae[index]}")
-            if region:
-                checker = stormpy.pars.create_region_checker(
-                    env, self._submodel, self._alt_formulae[index], allow_model_simplification=True
-                )
-                second_result = checker.get_bound_all_states(env, region, not maximise)
-            else:
-                second_result = stormpy.model_checking(
-                    self._submodel, self._alt_formulae[index], only_initial_states=False,
-                    extract_scheduler=extract_scheduler, environment=env
-                )
+            second_result = stormpy.model_checking(
+                model, self._alt_formulae[index], only_initial_states=False,
+                extract_scheduler=extract_scheduler, environment=env
+            )
 
             if maximise:
                 lower_result = second_result
-                absolute_min = min([lower_result.at(x) for x in self._submodel.initial_states])
+                absolute_min = min([lower_result.at(x) for x in model.initial_states])
             else:
                 assert not maximise
                 upper_result = second_result
-                absolute_max = max([upper_result.at(x) for x in self._submodel.initial_states])
+                absolute_max = max([upper_result.at(x) for x in model.initial_states])
 
         logger.info(f"Done Checking. Result for initial state is: {absolute_min} -- {absolute_max}")
 

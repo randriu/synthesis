@@ -87,6 +87,7 @@ class Family:
         """
         self.options = Family._hole_options.copy() if parent is None else options
         self.mdp = Family._quotient_mdp if parent is None else None
+        self.instantiated_mdp = None
         self.choice_map = [i for i in range(Family._quotient_mdp.nr_choices)] if parent is None else None
         self.formulae_indices = list(range(len(Family._formulae))) if parent is None else parent.formulae_indices
 
@@ -259,14 +260,25 @@ class Family:
 
         Profiler.stop()
 
-    def _construct_region(self):
-        region_valuation = {}
-        for parameter in self.mdp.collect_probability_parameters():
-            region_valuation[parameter] = (
-                stormpy.RationalRF(self.options[parameter.name][0].evaluate_as_double()),
-                stormpy.RationalRF(self.options[parameter.name][1].evaluate_as_double())
-            )
-        return stormpy.pars.ParameterRegion(region_valuation)
+    # def _construct_region(self):
+    #     region_valuation = {}
+    #     for parameter in self.mdp.collect_probability_parameters():
+    #         region_valuation[parameter] = (
+    #             stormpy.RationalRF(self.options[parameter.name][0].evaluate_as_double()),
+    #             stormpy.RationalRF(self.options[parameter.name][1].evaluate_as_double())
+    #         )
+    #     return stormpy.pars.ParameterRegion(region_valuation)
+
+    def _instatiate_parametric_model(self):
+        self.points = {}
+        # if self.mdp.has_parameters:
+        for p in self.mdp.collect_probability_parameters():
+            if p.name.endswith("0"):
+                self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][0].evaluate_as_double())
+            elif p.name.endswith("1"):
+                self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][1].evaluate_as_double())
+        self.instantiator = stormpy.pars.ModelInstantiator(self.mdp)
+        self.instantiated_mdp = self.instantiator.instantiate(self.points)
 
     def model_check_formula(self, formula_index):
         """
@@ -276,9 +288,8 @@ class Family:
         assert self.constructed
 
         threshold = float(Family._thresholds[formula_index])
-        Family._quotient_container.analyse(
-            threshold, formula_index, region=self._construct_region() if self.mdp.has_parameters else None
-        )
+        self._instatiate_parametric_model()
+        Family._quotient_container.analyse(threshold, formula_index, model=self.instantiated_mdp)
 
         mc_result = Family._quotient_container.decided(threshold)
         accept_if_above = Family._accept_if_above[formula_index]

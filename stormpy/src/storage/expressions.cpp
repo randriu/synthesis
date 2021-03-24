@@ -27,6 +27,8 @@ void define_expressions(py::module& m) {
         .def("create_rational_variable", &storm::expressions::ExpressionManager::declareRationalVariable, "create Rational variable", py::arg("name"), py::arg("auxiliary") = false)
         .def("get_variable", &storm::expressions::ExpressionManager::getVariable, "get variably by name", py::arg("name"))
         .def("get_variables", &storm::expressions::ExpressionManager::getVariables, "Retrieves the set of all variables known to this manager.")
+        .def("has_variable", &storm::expressions::ExpressionManager::hasVariable, "check variable by name", py::arg("name"))
+        .def("get_variable_expression", &storm::expressions::ExpressionManager::getVariableExpression, "get variable expression by name", py::arg("name"))
             ;
 
     // Variable
@@ -75,7 +77,8 @@ void define_expressions(py::module& m) {
 
     // Expression
     py::class_<storm::expressions::Expression, std::shared_ptr<storm::expressions::Expression>> expression(m, "Expression", "Holds an expression");
-    expression.def(py::init<Expression>(), "other_expression"_a)
+    expression.def(py::init<Expression>(), "other_expression"_a);
+    expression.def(py::init<Variable>(), "variable"_a)
         .def("contains_variables", &storm::expressions::Expression::containsVariables, "Check if the expression contains variables.")
         .def("contains_variable", &storm::expressions::Expression::containsVariable, "Check if the expression contains any of the given variables.", py::arg("variables"))
         .def("get_variables" , &storm::expressions::Expression::getVariables, "Get the variables")

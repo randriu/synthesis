@@ -128,7 +128,7 @@ class FamilyHybrid(Family):
         if self.member_assignment is not None:
 
             # collect edges relevant for this assignment
-            indexed_assignment = Family._hole_options.index_map(self.member_assignment)
+            indexed_assignment = Family._hole_options.index_map(self.member_assignment, self._parameters)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
             collected_edge_indices = stormpy.FlatSet(
                 Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
@@ -145,13 +145,13 @@ class FamilyHybrid(Family):
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             self.points = {}
-            if self.dtmc.has_parameters:
-                for p in self.dtmc.collect_probability_parameters():
-                    assert len(self.member_assignment[p.name]) == 1
-                    self.points[p] = stormpy.RationalRF(self.member_assignment[p.name][0].evaluate_as_double())
-                self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
-                self.param_dtmc = self.dtmc
-                self.dtmc = self.instantiator.instantiate(self.points)
+            # if self.dtmc.has_parameters:
+            for p in self.dtmc.collect_probability_parameters():
+                assert len(self.member_assignment[p.name[:-2]]) == 1
+                self.points[p] = stormpy.RationalRF(self.member_assignment[p.name[:-2]][0].evaluate_as_double())
+            self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
+            self.param_dtmc = self.dtmc
+            self.dtmc = self.instantiator.instantiate(self.points)
 
             # assert absence of deadlocks or overlapping guards
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
@@ -163,8 +163,8 @@ class FamilyHybrid(Family):
 
     def construct_and_check_mdp(self, prob_params, hole_options, epsilons, construct=False):
         for param in prob_params:
-            param_value = self.member_assignment[param.name][0].evaluate_as_double()
-            hole_options[param.name] = [
+            param_value = self.member_assignment[param.name[:-2]][0].evaluate_as_double()
+            hole_options[param.name[:-2]] = [
                 self._sketch.expression_manager.create_rational(stormpy.Rational(param_value - epsilons[param.name])),
                 self._sketch.expression_manager.create_rational(stormpy.Rational(param_value + epsilons[param.name])),
             ]
@@ -198,9 +198,9 @@ class FamilyHybrid(Family):
             exists_sat = self.construct_and_check_mdp(prob_params, hole_options, epsilons, construct=True)
         lower_bounds, upper_bounds = {}, {}
         for param in prob_params:
-            assert len(self.options[param.name]) == 2
-            lower_bounds[param.name] = self.options[param.name][0].evaluate_as_double()
-            upper_bounds[param.name] = self.options[param.name][1].evaluate_as_double()
+            assert len(self.options[param.name[:-2]]) == 2
+            lower_bounds[param.name[:-2]] = self.options[param.name[:-2]][0].evaluate_as_double()
+            upper_bounds[param.name[:-2]] = self.options[param.name[:-2]][1].evaluate_as_double()
         self.options = saved_orig_options
         return lower_bounds, upper_bounds
 

@@ -109,8 +109,7 @@ class JaniQuotientContainer:
 
         color_0_indices = self._color_to_edge_indices.get(0)
         collected_edge_indices = stormpy.FlatSet(color_0_indices)
-        for c in subcolors:
-            collected_edge_indices.insert_set(self._color_to_edge_indices.get(c))
+        [collected_edge_indices.insert_set(self._color_to_edge_indices.get(c)) for c in subcolors]
 
         logger.debug("restrict MDP")
         self._mdp_handling.restrict(collected_edge_indices, color_0_indices)
@@ -462,7 +461,7 @@ class JaniQuotientContainer:
         end_time = time.time()
         self._build_time += end_time - start_time
 
-    def analyse(self, threshold=None, index=0, engine=Engine.Sparse, region=None):
+    def analyse(self, threshold=None, index=0, engine=Engine.Sparse, model=None):
         start_time = time.time()
         if self._mdp_handling.submodel_is_dtmc():
             self.dtmcs_checked += 1
@@ -473,7 +472,7 @@ class JaniQuotientContainer:
         else:
             assert engine == Engine.Sparse
             self._latest_result = self._mdp_handling.mc_model(
-                index, compute_action_values=False, check_dir_2=always_true, region=region
+                index, compute_action_values=False, check_dir_2=always_true, model=model
                 # check_dir_2=is_inside_function(threshold) if threshold is not None else always_true
             )  # TODO: is_inside_function?
         end_time = time.time()

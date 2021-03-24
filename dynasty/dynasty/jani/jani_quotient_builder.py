@@ -120,10 +120,11 @@ class JaniQuotientBuilder:
 
     def _get_substitution(self, combination):
         return {
-            c.expression_variable: self.holes_options[c.name][v]
-            for c, v in zip(self._open_constants.values(), combination)
-            if v is not None and c.name not in self.parameters
-            # for c, v in zip(self._open_constants.values(), combination) if v is not None
+            c.expression_variable: self.holes_options[c.name][v] if c.name not in self.parameters else
+               self.expression_manager.get_variable_expression(c.name + "_" + str(v)) if
+                    self.expression_manager.has_variable(c.name + "_" + str(v)) else
+                        stormpy.Expression(self.expression_manager.create_rational_variable(c.name + "_" + str(v)))
+            for c, v in zip(self._open_constants.values(), combination) if v is not None
         }
 
     def _modify_dst_with_remember(self, edge, combination, templ_edge, substitution):
@@ -172,6 +173,7 @@ class JaniQuotientBuilder:
         if combination is not None:
             new_edge.color = self.edge_coloring.get_or_make_color(combination)
         new_automaton.add_edge(new_edge)
+        assert new_edge.color == 0 if combination is None else True
         return new_automaton
 
     def _construct_new_edge(self, edge, templ_edge, new_automaton):
@@ -179,18 +181,18 @@ class JaniQuotientBuilder:
 
         # Ignores substitution of parameters by their values
 
-        # if expand_d:
-        #     for combination in itertools.product(
-        #             *[(range(len(self.holes_options[c.name])) if c in expand_d else [None])
-        #               for c in self._open_constants.values()]
-        #     ):
-        #         substitution = self._get_substitution(combination)
-        #         new_dests = [
-        #             (d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations
-        #         ]
-        #         new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, tuple(combination))
-        # else:
-        new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, dests, None)
+        if expand_d:
+            for combination in itertools.product(
+                    *[(range(len(self.holes_options[c.name])) if c in expand_d else [None])
+                      for c in self._open_constants.values()]
+            ):
+                substitution = self._get_substitution(combination)
+                new_dests = [
+                    (d.target_location_index, d.probability.substitute(substitution)) for d in edge.destinations
+                ]
+                new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, new_dests, tuple(combination))
+        else:
+            new_automaton = self._add_new_edge(new_automaton, edge, templ_edge, dests, None)
 
         return new_automaton
 
@@ -202,7 +204,7 @@ class JaniQuotientBuilder:
         if expand_td or expand_guard:
             # c in expand_d in loop condition
             for combination in itertools.product(
-                    *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard)
+                    *[(range(len(self.holes_options[c.name])) if (c in expand_td or c in expand_guard or c in expand_d)
                         else [None]) for c in self._open_constants.values()]
             ):
                 substitution = self._get_substitution(combination)
@@ -337,6 +339,6 @@ class JaniQuotientBuilder:
                 new_list = color_to_edge_indices.get(edge.color, stormpy.FlatSet())
                 new_list.insert(jani_program.encode_automaton_and_edge_index(aut_index, edge_index))
                 color_to_edge_indices[edge.color] = new_list
-        logger.debug(",".join([f'{k}: {v}' for k, v in color_to_edge_indices.items()]))
+        print(",".join([f'{k}: {v}' for k, v in color_to_edge_indices.items()]))
 
         return JaniQuotientContainer(jani_program, self.edge_coloring, self.holes_options, color_to_edge_indices)
