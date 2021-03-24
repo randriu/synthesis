@@ -63,22 +63,22 @@ namespace storm {
          * @return false 
          */
         template <typename IndexType, typename ValueType>
-        bool __valueIteration_solver_minimize(bool const, uint_fast64_t const, double const, bool const, std::vector<uint_fast64_t> const&, std::vector<uint_fast64_t> const&, std::vector<ValueType> const&, std::vector<ValueType>& x, std::vector<ValueType> const&, std::vector<uint_fast64_t> const&, size_t&, bool const, std::vector<uint_fast64_t>*) {
+        bool __valueIteration_solver_minimize(bool const, uint_fast64_t const, double const, bool const, std::vector<uint_fast64_t> const&, std::vector<uint_fast64_t> const&, std::vector<ValueType> const&, std::vector<ValueType>& x, std::vector<ValueType> const&, std::vector<uint_fast64_t> const&, std::vector<uint_fast64_t> const&, size_t&, bool const, std::vector<uint_fast64_t>*) {
             //
             STORM_LOG_THROW(false, storm::exceptions::NotImplementedException, "Unsupported template arguments.");
         }
         template <>
-        inline bool __valueIteration_solver_minimize<uint_fast64_t, double>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
+        inline bool __valueIteration_solver_minimize<uint_fast64_t, double>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
 #ifdef STORM_HAVE_CUDASYNTHESIS
-            return valueIteration_solver_uint64_double_minimize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);
+            return valueIteration_solver_uint64_double_minimize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices);
 #else
             STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Storm is compiled without CUDA support.");
 #endif
         }
         template <>
-        inline bool __valueIteration_solver_minimize<uint_fast64_t, float>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
+        inline bool __valueIteration_solver_minimize<uint_fast64_t, float>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
 #ifdef STORM_HAVE_CUDASYNTHESIS
-            return valueIteration_solver_uint64_float_minimize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);
+            return valueIteration_solver_uint64_float_minimize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices);
 #else
             STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Storm is compiled without CUDA support.");
 #endif
@@ -93,21 +93,21 @@ namespace storm {
          * @return false 
          */
         template <typename IndexType, typename ValueType>
-        bool __valueIteration_solver_maximize(bool const, uint_fast64_t const, double const, bool const, std::vector<uint_fast64_t> const&, std::vector<uint_fast64_t> const&, std::vector<ValueType> const& , std::vector<ValueType>&, std::vector<ValueType> const&, std::vector<uint_fast64_t> const&, size_t&, bool const, std::vector<uint_fast64_t>*) {
+        bool __valueIteration_solver_maximize(bool const, uint_fast64_t const, double const, bool const, std::vector<uint_fast64_t> const&, std::vector<uint_fast64_t> const&, std::vector<ValueType> const& , std::vector<ValueType>&, std::vector<ValueType> const&, std::vector<uint_fast64_t> const&, std::vector<uint_fast64_t> const&, size_t&, bool const, std::vector<uint_fast64_t>*) {
             STORM_LOG_THROW(false, storm::exceptions::NotImplementedException, "Unsupported template arguments.");
         }
         template <>
-        inline bool __valueIteration_solver_maximize<uint_fast64_t, double>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
+        inline bool __valueIteration_solver_maximize<uint_fast64_t, double>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
 #ifdef STORM_HAVE_CUDASYNTHESIS
-            return valueIteration_solver_uint64_double_maximize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);
+            return valueIteration_solver_uint64_double_maximize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices);
 #else
             STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Storm is compiled without CUDA support.");
 #endif
         }
         template <>
-        inline bool __valueIteration_solver_maximize<uint_fast64_t, float>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
+        inline bool __valueIteration_solver_maximize<uint_fast64_t, float>(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount, double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
 #ifdef STORM_HAVE_CUDASYNTHESIS
-            return valueIteration_solver_uint64_float_maximize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);
+            return valueIteration_solver_uint64_float_maximize(solveMultipleInstances, maxIterationCount, precision, relativePrecisionCheck, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices);
 #else
             STORM_LOG_THROW(false, storm::exceptions::NotSupportedException, "Storm is compiled without CUDA support.");
 #endif

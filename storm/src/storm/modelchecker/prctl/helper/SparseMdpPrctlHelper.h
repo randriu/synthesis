@@ -15,6 +15,9 @@
 
 #include "storm/adapters/RationalFunctionAdapter.h"
 
+#include "storm/models/sparse/Mdp.h"
+
+
 namespace storm {
     
     class Environment;
@@ -45,8 +48,10 @@ namespace storm {
 
                 static MDPSparseModelCheckingHelperReturnType<ValueType> computeUntilProbabilities(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& phiStates, storm::storage::BitVector const& psiStates, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint = ModelCheckerHint());
                 
-                static MDPSparseModelCheckingHelperReturnType<ValueType> computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, uint_fast64_t numberOfFamilies, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint = ModelCheckerHint());
+                static MDPSparseModelCheckingHelperReturnType<ValueType> computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, std::vector<uint_fast64_t> const& keys, uint_fast64_t numberOfFamilies, size_t resultSize, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint = ModelCheckerHint());
                 
+                static uint_fast64_t getNumberOfFamiliesToVerify(std::shared_ptr<storm::models::sparse::Mdp<ValueType>> const& family, const bool extractScheduler);
+
                 static MDPSparseModelCheckingHelperReturnType<ValueType> computeGloballyProbabilities(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& psiStates, bool qualitative, bool produceScheduler, bool useMecBasedTechnique = false);
                 
                 template<typename RewardModelType>

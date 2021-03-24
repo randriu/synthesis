@@ -510,6 +510,8 @@ def compute_prob01max_states(model, phi_states, psi_states):
     else:
         return core._compute_prob01states_max_double(model, phi_states, psi_states)
 
+def get_number_of_subfamilies_to_solve(model, extract_scheduler):
+    return core._get_number_of_subfamiliesToSolve(model, extract_scheduler)
 
 def topological_sort(model, forward=True, initial=[]):
     """

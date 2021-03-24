@@ -18,6 +18,7 @@
 #include "storm/modelchecker/abstraction/BisimulationAbstractionRefinementModelChecker.h"
 #include "storm/modelchecker/exploration/SparseExplorationModelChecker.h"
 #include "storm/modelchecker/reachability/SparseDtmcEliminationModelChecker.h"
+#include "storm/modelchecker/results/ExplicitQuantitativeCheckResult.h"
 
 #include "storm/models/symbolic/Dtmc.h"
 #include "storm/models/symbolic/Mdp.h"
@@ -269,14 +270,48 @@ namespace storm {
         }
 
         template<typename ValueType>                                                                                                    
-        std::unique_ptr<storm::modelchecker::CheckResult> verifyWithSparseEngineMdpFamilies(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> const& family, storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues) {
-            std::unique_ptr<storm::modelchecker::CheckResult> result;
+        std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> verifyWithSparseEngineMdpFamilies(storm::Environment const& env, std::shared_ptr<storm::models::sparse::Mdp<ValueType>> const& family, storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues) {
+            std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> finalResults;
             storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> modelchecker(*family, subfamilies, initValues);
-            
+
+
+            std::unique_ptr<storm::modelchecker::CheckResult> result; // results for all subfamilies in one vector
             if (modelchecker.canHandle(task)) {
                 result = modelchecker.check(env, task);
             }     
-            return result;
+
+            // split results for subfamilies
+
+            std::vector<uint_fast64_t> familiesOffsets;
+            familiesOffsets.push_back(0);
+            for (uint_fast64_t i = 1; i <= initValues.size(); i++) { 
+                familiesOffsets.push_back((initValues.at(i-1)).size() + familiesOffsets.at(i-1)); 
+            }
+
+            if (result->isExplicitQuantitativeCheckResult()) {
+                std::vector<ValueType> const& resultValues = result->asExplicitQuantitativeCheckResult<ValueType>().getValueVector();
+                storm::storage::Scheduler<ValueType> *scheduler = (task.isProduceSchedulersSet()) ? &(result->asExplicitQuantitativeCheckResult<ValueType>().getScheduler()) : NULL;
+                
+                for (uint_fast64_t i = 0, family = 0; i < familiesOffsets.size() - 1; i++, family++) {
+                    std::vector<ValueType> subfamilyResults;
+                    std::unique_ptr<storm::storage::Scheduler<ValueType>> subfamilyScheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(initValues.at(family).size());
+                    
+                    for(uint_fast64_t j = familiesOffsets.at(i), index = 0; j < familiesOffsets.at(i+1); j++, index++) {
+                        subfamilyResults.push_back(resultValues.at(j));
+                        if(scheduler) {
+                            subfamilyScheduler->setChoice(scheduler->getChoice(j), index);
+                        }
+                    }
+                    std::cout << "subfamily: " <<  storm::utility::vector::toString(subfamilyResults) << "\n";
+                    subfamilyScheduler->printToStream(std::cout);
+
+                    std::unique_ptr<storm::modelchecker::CheckResult> newResult( new storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>(std::move(subfamilyResults)) );
+                    newResult->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(subfamilyScheduler));
+                    finalResults.push_back(std::move(newResult));
+                }
+            }
+
+            return finalResults;
         }
 
         template<typename ValueType>

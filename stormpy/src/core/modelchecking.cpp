@@ -3,6 +3,7 @@
 #include "storm/models/symbolic/StandardRewardModel.h"
 #include "storm/modelchecker/results/CheckResult.h"
 #include "storm/modelchecker/csl/helper/SparseCtmcCslHelper.h"
+#include "storm/modelchecker/prctl/helper/SparseMdpPrctlHelper.h"
 #include "storm/environment/Environment.h"
 
 template<typename ValueType>
@@ -15,7 +16,7 @@ std::shared_ptr<storm::modelchecker::CheckResult> modelCheckingSparseEngine(std:
 }
 
 template<typename ValueType>
-std::shared_ptr<storm::modelchecker::CheckResult> modelCheckingSparseEngineMdpFamilies(std::shared_ptr<storm::models::sparse::Mdp<ValueType>> family, CheckTask<ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues, storm::Environment const& env) {
+std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> modelCheckingSparseEngineMdpFamilies(std::shared_ptr<storm::models::sparse::Mdp<ValueType>> family, CheckTask<ValueType> const& task, std::vector<std::vector<uint_fast64_t>> const& subfamilies, std::vector<storm::storage::BitVector> const& initValues, storm::Environment const& env) {
     return storm::api::verifyWithSparseEngineMdpFamilies<ValueType>(env, family, task, subfamilies, initValues);
 }
 
@@ -62,6 +63,11 @@ std::pair<storm::storage::BitVector, storm::storage::BitVector> computeProb01max
     return storm::utility::graph::performProb01Max(model, phiStates, psiStates);
 }
 
+template<typename ValueType>
+uint_fast64_t getNumberOfSubfamiliesToSolve(std::shared_ptr<storm::models::sparse::Mdp<ValueType>> model, const bool extract_scheduler) {
+    return storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::getNumberOfFamiliesToVerify(model, extract_scheduler);
+}
+
 // Define python bindings
 void define_modelchecking(py::module& m) {
 
@@ -102,4 +108,5 @@ void define_modelchecking(py::module& m) {
     m.def("_compute_prob01states_max_double", &computeProb01max<double>, "Compute prob-0-1 states (max)", py::arg("model"), py::arg("phi_states"), py::arg("psi_states"));
     m.def("_compute_prob01states_min_rationalfunc", &computeProb01min<storm::RationalFunction>, "Compute prob-0-1 states (min)", py::arg("model"), py::arg("phi_states"), py::arg("psi_states"));
     m.def("_compute_prob01states_max_rationalfunc", &computeProb01max<storm::RationalFunction>, "Compute prob-0-1 states (max)", py::arg("model"), py::arg("phi_states"), py::arg("psi_states"));
+    m.def("_get_number_of_subfamiliesToSolve", &getNumberOfSubfamiliesToSolve<double>, "Returns the number of subfamilies which can be solved in parallel.", py::arg("model"), py::arg("extract_scheduler"));
 }

@@ -134,35 +134,37 @@ namespace storm {
                 uint_fast64_t resultSize = 0;
 
                 auto superFamily = this->getModel();
-                size_t rowsCount = superFamily.getTransitionMatrix().getRowCount();
-                size_t columnCount = superFamily.getTransitionMatrix().getColumnCount();
-                std::vector<uint_fast64_t> const& choices = superFamily.getTransitionMatrix().getRowGroupIndices();
-                
+                auto matrix = superFamily.getTransitionMatrix();
+                size_t rowsCount = matrix.getRowCount();
+                size_t columnCount = matrix.getColumnCount();
+                std::vector<uint_fast64_t> const& choices = matrix.getRowGroupIndices();
+                std::vector<uint_fast64_t> keys;
+
+                for(uint_fast64_t group = 0; group < columnCount; group++) {
+                    size_t groupSize = matrix.getRowGroupSize(group);
+                    while(groupSize--) { keys.push_back(group); }
+                } 
+
                 std::vector<ValueType> xVectors;
                 std::vector<ValueType> bVectors;
                 std::vector<uint_fast64_t> subfamiliesChoices;
+                std::vector<uint_fast64_t> subfamiliesKeys;
                 ValueType minMaxInitializer = (dir == storm::solver::OptimizationDirection::Minimize) ? std::numeric_limits<ValueType>::infinity() : -std::numeric_limits<ValueType>::infinity();
 
                 size_t subfamilyNumber = 0;
 
-                // std::cout << "super MDP\n" << superFamily.getTransitionMatrix() << "\n";
+                // std::cout << "super MDP\n" << matrix << "\n";
                 for (std::vector<uint_fast64_t>const& subfamily : subfamilies) {
                     // std::cout << "subfamily: " << storm::utility::vector::toString(subfamily) << "\n";
-                    
                     storm::storage::BitVector validRows(rowsCount, false);
                     for(uint_fast64_t index: subfamily) { validRows.set(index, true); }
                     
-                    storm::storage::SparseMatrix<ValueType> transitionMatrix((superFamily.getTransitionMatrix()).restrictRows(validRows, true));
-                    // std::cout << "subfamily matrix\n" << transitionMatrix << "\n";
-
                     storm::storage::BitVector statesWithProbability1(columnCount, false); 
-                    storm::storage::BitVector tmp = (superFamily.getTransitionMatrix()).getRowGroupFilter(validRows, false);
-                    resultSize += tmp.getNumberOfSetBits();
+                    storm::storage::BitVector tmp = (matrix).getRowGroupFilter(validRows, false);
+                    resultSize += initValues.at(subfamilyNumber).size(); //tmp.getNumberOfSetBits();
+                    // std::cout << "subfamily " << subfamilyNumber << " size " << tmp.getNumberOfSetBits() << "\n";
                     validVectors.concat(tmp);
 
-                    // std::bitset<64> valid(tmp.getAsInt(0,64));
-                    // std::cout << "valid: " << valid << "\n";
-                    
                     uint_fast64_t index = 0;
                     for(uint_fast64_t i=0; i < columnCount; i++) {
                         if (tmp.get(i) == true) { statesWithProbability1.set(i, (initValues.at(subfamilyNumber)).get(index++)); }
@@ -178,32 +180,33 @@ namespace storm {
                     storm::utility::vector::setVectorValues<ValueType>(b, validRows, minMaxInitializer);
                     bVectors.insert(bVectors.end(), b.begin(), b.end());
 
-                    // std::cout << "x: " << storm::utility::vector::toString(x) << "\n";
-                    // std::cout << "b: " << storm::utility::vector::toString(b) << "\n";
-                    
                     for(size_t i = 0; i < columnCount; i++) { subfamiliesChoices.push_back(choices.at(i) + (subfamilyNumber * rowsCount) ); }
+                    for(size_t i = 0; i < rowsCount; i++) { subfamiliesKeys.push_back(keys.at(i) + (subfamilyNumber * columnCount) ); }
                     
                     subfamilyNumber ++;
                 } 
                 subfamiliesChoices.push_back(subfamilyNumber * rowsCount);
-                superFamily.getTransitionMatrix().setRowGroupIndices(subfamiliesChoices);
+                matrix.setRowGroupIndices(subfamiliesChoices);
+                matrix.setRowGroupIndicesAsKeys(subfamiliesKeys);
 
                 // std::cout << "x inits: " << storm::utility::vector::toString(xVectors) << "\n";
                 // std::cout << "b inits: " << storm::utility::vector::toString(bVectors) << "\n";
                 // std::cout << "choices: " << storm::utility::vector::toString(subfamiliesChoices) << "\n";
+                // std::cout << "keys:    " << storm::utility::vector::toString(subfamiliesKeys) << "\n";
                 
-                auto ret = storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(env, storm::solver::SolveGoal<ValueType>(dir), superFamily.getTransitionMatrix(), bVectors, xVectors, subfamiliesChoices, subfamilyNumber, checkTask.isQualitativeSet(), checkTask.isProduceSchedulersSet(), checkTask.getHint());
+                auto ret = storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(env, storm::solver::SolveGoal<ValueType>(dir), matrix, bVectors, xVectors, subfamiliesChoices, keys, subfamilyNumber, resultSize, checkTask.isQualitativeSet(), checkTask.isProduceSchedulersSet(), checkTask.getHint());
                 
                 std::vector<ValueType> subfamiliesResults(resultSize);
                 storm::utility::vector::selectVectorValues(subfamiliesResults, validVectors, ret.values);
                 
-                std::cout << "final result: " <<  storm::utility::vector::toString(subfamiliesResults) << "\n";
-                std::cout << "**************************************************************************************************************************************************\n";
+                // std::cout << "final result: " <<  storm::utility::vector::toString(subfamiliesResults) << "\n";
 
                 result.reset(new ExplicitQuantitativeCheckResult<ValueType>(std::move(subfamiliesResults)));
                 if (checkTask.isProduceSchedulersSet() && ret.scheduler) {
                     result->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(ret.scheduler));
-                }    
+                    // result->asExplicitQuantitativeCheckResult<ValueType>().getScheduler().printToStream(std::cout);
+                }
+                std::cout << "\n**************************************************************************************************************************************************\n";
             } else {
                 std::unique_ptr<CheckResult> leftResultPointer = this->check(env, pathFormula.getLeftSubformula());
                 std::unique_ptr<CheckResult> rightResultPointer = this->check(env, pathFormula.getRightSubformula());

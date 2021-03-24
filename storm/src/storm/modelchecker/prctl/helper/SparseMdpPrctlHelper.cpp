@@ -49,6 +49,11 @@
 #include "storm/exceptions/UncheckedRequirementException.h"
 #include "storm/exceptions/NotSupportedException.h"
 
+#ifdef STORM_HAVE_CUDASYNTHESIS
+#include <cuda.h>
+#include <cuda_runtime.h>
+#endif
+
 namespace storm {
     namespace modelchecker {
         namespace helper {
@@ -586,25 +591,29 @@ namespace storm {
             }
             
             template<typename ValueType>
-            MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, uint_fast64_t numberOfFamilies, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint) {
+            MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, std::vector<uint_fast64_t> const& keys, uint_fast64_t numberOfFamilies, size_t resultSize, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint) {
                 
                 std::vector<ValueType> result(transitionMatrix.getRowGroupCount() * numberOfFamilies, storm::utility::zero<ValueType>());
                 
                 // If requested, we will produce a scheduler.
                 std::unique_ptr<storm::storage::Scheduler<ValueType>> scheduler;
                 if (produceScheduler) {
-                    scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(transitionMatrix.getRowGroupCount() * numberOfFamilies);
+                    scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(resultSize);
                 }
                 
                 storm::solver::GeneralMinMaxLinearEquationSolverFactory<ValueType> minMaxLinearEquationSolverFactory;
                 std::unique_ptr<storm::solver::MinMaxLinearEquationSolver<ValueType>> solver = storm::solver::configureMinMaxLinearEquationSolver(env, std::move(goal), minMaxLinearEquationSolverFactory, std::move(transitionMatrix));
                 // Solve the corresponding system of equations.
+                solver->setTrackScheduler(produceScheduler);
                 solver->solveEquations(env, x, b);
 
                 // If requested, return the requested scheduler.
-                // if (produceScheduler) {
-                //     scheduler = solver->getSchedulerChoices();
-                // }
+                if (produceScheduler) {
+                    uint_fast64_t state = 0;
+                    for(auto choice: solver->getSchedulerChoices()) {
+                        scheduler->setChoice(choice, state++);
+                    }
+                }
 
                 return MDPSparseModelCheckingHelperReturnType<ValueType>(std::move(x), std::move(scheduler));
 
@@ -684,8 +693,8 @@ namespace storm {
                 }
                 
                 std::cout << "result: \n" << storm::utility::vector::toString(result) << "\n";
-                // std::cout << "scheduler: \n";
-                // (scheduler.get())->printToStream(std::cout);
+                std::cout << "scheduler: \n";
+                (scheduler.get())->printToStream(std::cout);
                 // Sanity check for created scheduler.
                 STORM_LOG_ASSERT(!produceScheduler || scheduler, "Expected that a scheduler was obtained.");
                 STORM_LOG_ASSERT((!produceScheduler && !scheduler) || !scheduler->isPartialScheduler(), "Expected a fully defined scheduler");
@@ -1205,6 +1214,39 @@ namespace storm {
                 return MDPSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(scheduler));
             }
             
+            template<typename ValueType>  
+            uint_fast64_t SparseMdpPrctlHelper<ValueType>::getNumberOfFamiliesToVerify(std::shared_ptr<storm::models::sparse::Mdp<ValueType>> const& family, const bool extractScheduler) {
+
+                storm::storage::SparseMatrix<ValueType> const& matrix = (*family).getTransitionMatrix();
+                const uint_fast64_t matrixRowCount = matrix.getRowCount();
+                const uint_fast64_t matrixColCount = matrix.getColumnCount();
+                const uint_fast64_t matrixGroupCount = matrix.getRowGroupCount();
+                const uint_fast64_t matrixNnzCount = matrix.getNonzeroEntryCount();
+
+                // Memory needed for CSR Matrix storage 
+                uint_fast64_t matrixMemory = 
+                    ( sizeof(ValueType) * matrixNnzCount )              + 
+                    ( sizeof(uint_fast64_t) * (matrixRowCount + 1) )    + 
+                    ( sizeof(uint_fast64_t) * matrixNnzCount ); 
+                // Memory needed for one subfamily
+                uint_fast64_t subfamilyMemory =
+                    ( sizeof(ValueType) * matrixColCount * 3 )           +   // device_x, device_xSwap, device_diff
+                    ( sizeof(ValueType) * matrixRowCount * 2 )           +   // device_b, device_device_multiplyResult
+                    ( sizeof(uint_fast64_t) * (matrixColCount + 1) );        // device_nondeterministicChoiceIndices
+
+                if (extractScheduler) {
+                    subfamilyMemory =                                    subfamilyMemory +
+                                            ( sizeof(uint_fast64_t) * matrixColCount ) +   // choicesAsKeys
+                        ( (sizeof(uint_fast64_t) + sizeof(ValueType)) * matrixColCount );    // device_choicesValues
+                }
+                
+                size_t freeMemory;
+                size_t totalMemory;
+                cudaMemGetInfo(&freeMemory, &totalMemory);
+
+                return ( (freeMemory - matrixMemory) / subfamilyMemory );
+            }
+
             template<typename ValueType>
             std::unique_ptr<CheckResult> SparseMdpPrctlHelper<ValueType>::computeConditionalProbabilities(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& targetStates, storm::storage::BitVector const& conditionStates) {
                 

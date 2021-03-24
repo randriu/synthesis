@@ -688,6 +688,12 @@ namespace storm {
             }
             return rowGroupIndices.get();
         }
+
+        template<typename ValueType>
+        std::vector<typename SparseMatrix<ValueType>::index_type> const& SparseMatrix<ValueType>::getRowGroupIndicesAsKeys() const {
+            // TODO: throw excepction if none
+            return rowGroupIndicesAsKeys.get();
+        }
         
         template<typename ValueType>
         std::vector<typename SparseMatrix<ValueType>::index_type> SparseMatrix<ValueType>::swapRowGroupIndices(std::vector<index_type>&& newRowGrouping) {
@@ -703,6 +709,11 @@ namespace storm {
         void SparseMatrix<ValueType>::setRowGroupIndices(std::vector<index_type> const& newRowGroupIndices) {
             trivialRowGrouping = false;
             rowGroupIndices = newRowGroupIndices;
+        }
+
+        template<typename ValueType>
+        void SparseMatrix<ValueType>::setRowGroupIndicesAsKeys(std::vector<index_type> const& newRowGroupIndices) {
+            rowGroupIndicesAsKeys = newRowGroupIndices;
         }
 
         template<typename ValueType>
