@@ -308,7 +308,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
         Profiler.start("_")
-        if family.mdp.has_parameters:
+        if isinstance(family.mdp, stormpy.storage.SparseParametricMdp):
             counterexample_generator = stormpy.synthesis.SynthesisCounterexampleParametric(
                 family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
             )

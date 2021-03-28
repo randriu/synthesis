@@ -137,7 +137,7 @@ class FamilyHybrid(Family):
                 collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
 
             # construct the DTMC by exploring the quotient MDP for this subfamily
-            if self.mdp.has_parameters:
+            if isinstance(self.mdp, stormpy.storage.SparseParametricMdp):
                 self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_param_mdp(self.mdp, collected_edge_indices)
             else:
                 self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
@@ -218,9 +218,9 @@ class FamilyHybrid(Family):
         assert self.member_assignment is not None
 
         for conflict in conflicts:
-            if set(conflict).intersection(set(Family._parameters)):
-                print(f"CONFLICT: {conflict}")
-                exit(1)
+            # if set(conflict).intersection(set(Family._parameters)):
+                # print(f"CONFLICT: {conflict}")
+                # exit(1)
             cex_clauses = dict()
             hole_options = HoleOptions()
             for var, hole in Family._solver_meta_vars.items():
