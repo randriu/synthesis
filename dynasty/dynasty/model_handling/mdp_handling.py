@@ -278,9 +278,8 @@ class ModelHandling:
         if is_dtmc:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
-            # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
-            # env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
-            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+            # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
         # assert not self._formulae[index].has_bound
 
@@ -348,3 +347,115 @@ class ModelHandling:
         return ExplicitMCResult(
             prime_result, second_result, maximise, absolute_min=absolute_min, absolute_max=absolute_max
         )
+
+    def mc_models(self, families_to_analyze, index=0, compute_action_values=False, check_dir_2=always_true):
+        """
+
+        :param index:
+        :param compute_action_values:
+        :param check_dir_2:
+        :return:
+        """
+        assert not compute_action_values
+        
+        # TODO set from the outside.
+        env = stormpy.Environment()
+        env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(0.0000000001)  # +
+        
+        # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+        # for family in families_to_analyze:
+        #     tmp = stormpy.model_checking(
+        #         family.mdp, self._formulae[index], only_initial_states=False,
+        #         extract_scheduler=True, environment=env
+        #     )
+
+        env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+        env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
+    
+        extract_scheduler = True
+        choices = []
+        inits = []
+        absolute_max = []
+        absolute_min = []
+        results = []
+
+        for family in families_to_analyze:
+            self._mc_mdp_calls += 1
+            self._mc_mdp_executions += 1
+            choices.append(family.choice_map)
+            if (stormpy.OptimizationDirection.Minimize == self._formulae[index].optimality_type):
+                xinit = (stormpy.prob01min_states(family.mdp, self._formulae[0].subformula))[1]
+            else:
+                xinit = (stormpy.prob01max_states(family.mdp, self._formulae[0].subformula))[1]
+            
+            inits.append(xinit)
+
+        logger.info(f"Start checking direction 1: {self._formulae[index]}")
+        # TODO allow qualitative model checking with scheduler extraction.
+        timer = Timer()
+        timer.start()
+        prime_results = stormpy.model_checking_families(self.full_mdp, self._formulae[index], choices, inits, only_initial_states=False,
+                extract_scheduler=extract_scheduler, environment=env) 
+        timer.stop()
+        logger.debug(f"MDP model checking run-time: {timer.read()}")
+
+        second_result = None
+
+        if self._formulae[index].optimality_type == stormpy.OptimizationDirection.Maximize:
+            maximise = True
+            upper_results = prime_results
+            
+            family_index = 0
+            for upper_result in upper_results:
+                absoluteMax = max([upper_result.at(x) for x in families_to_analyze[family_index].mdp.initial_states])
+                absolute_max.append(absoluteMax)
+                family_index += 1
+
+        else:
+            assert (self._formulae[index].optimality_type == stormpy.OptimizationDirection.Minimize)
+            maximise = False
+            lower_results = prime_results
+
+            family_index = 0
+            for lower_result in lower_results:
+                absoluteMin = min([lower_result.at(x) for x in families_to_analyze[family_index].mdp.initial_states])
+                absolute_min.append(absoluteMin)
+                family_index += 1
+
+        if check_dir_2(None, None):
+            logger.info(f"Start checking direction 2: {self._alt_formulae[index]}")
+            timer = Timer()
+            timer.start()
+
+            second_results = stormpy.model_checking_families(self.full_mdp, self._alt_formulae[index], choices, inits, only_initial_states=False,
+                extract_scheduler=extract_scheduler, environment=env
+            ) 
+
+            timer.stop()
+            logger.debug(f"MDP model checking run-time (2nd): {timer.read()}")
+
+            if maximise:
+                lower_results = second_results
+
+                family_index = 0
+                for lower_result in lower_results:
+                    self._mc_mdp_executions += 1
+                    absoluteMin = min([lower_result.at(x) for x in families_to_analyze[family_index].mdp.initial_states])
+                    absolute_min.append(absoluteMin)
+                    family_index += 1
+            else:
+                assert not maximise
+                upper_results = second_results
+
+                family_index = 0
+                for upper_result in upper_results:
+                    self._mc_mdp_executions += 1
+                    absoluteMax = max([upper_result.at(x) for x in families_to_analyze[family_index].mdp.initial_states])
+                    absolute_max.append(absoluteMax)
+                    family_index += 1
+
+        for i in range(0, len(prime_results)):
+            results.append(ExplicitMCResult(prime_results[i], second_results[i], maximise, absolute_min=absolute_min[i], absolute_max=absolute_max[i]))
+            logger.info(f"Done Checking. Result for family {i} is: {absolute_min[i]} -- {absolute_max[i]}")
+
+        return results

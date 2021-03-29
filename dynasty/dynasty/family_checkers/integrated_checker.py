@@ -5,6 +5,7 @@ import logging
 import operator
 import itertools
 import z3
+import time
 
 import stormpy
 import stormpy.synthesis
@@ -25,12 +26,13 @@ from .familychecker import HoleOptions
 logger = logging.getLogger(__name__)
 
 quotientbased_logger.disabled = False
-quotient_container_logger.disabled = True
+quotient_container_logger.disabled = False
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = False
 
-ONLY_CEGAR = True
+ONLY_CEGAR = True #
 ONLY_CEGIS = False
+CEGAR_MULTIPLE = True 
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
 PRINT_PROFILING = False
@@ -481,6 +483,7 @@ class Family:
     _holes = None  # ordered dictionary
     _hole_options = None
     _hole_option_indices = None
+    _parameters = []
 
     # - indexed hole options
     hole_list = None
@@ -536,6 +539,8 @@ class Family:
         self.bounds = [None] * len(Family._formulae)  # assigned when analysis is initiated
         self.suboptions = None
         self.member_assignment = None
+        self.result_latest = None
+        self.splitted = False
 
     @staticmethod
     def initialize(
@@ -677,8 +682,10 @@ class Family:
 
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """
-        # if self.constructed:
-        #     return
+        if self.constructed:
+            Family._quotient_container.mdp_handling._submodel = self.mdp
+            Family._quotient_container.mdp_handling._mapping_to_original = self.choice_map
+            return
 
         Profiler.start("ar - MDP construction")
 
@@ -691,8 +698,8 @@ class Family:
         Family._quotient_mdp_stats = (
             Family._quotient_mdp_stats[0] + self.mdp.nr_states, Family._quotient_mdp_stats[1] + 1
         )
-        print(self.choice_map)
-        print(self.mdp.transition_matrix)
+        print(self.choice_map) # 
+        print(self.mdp.transition_matrix) #
 
         Profiler.stop()
 
@@ -704,15 +711,17 @@ class Family:
         assert self.constructed
 
         threshold = float(Family._thresholds[formula_index])
-        Family._quotient_container.analyse(threshold, formula_index)
+        result = Family._quotient_container.analyse(threshold, formula_index)
+        self.result_latest = result
 
-        mc_result = Family._quotient_container.decided(threshold)
+        mc_result = Family._quotient_container.decided(threshold, result)
         accept_if_above = Family._accept_if_above[formula_index]
         if mc_result == ThresholdSynthesisResult.UNDECIDED:
             feasibility = None
         else:
             feasibility = (mc_result == ThresholdSynthesisResult.ABOVE) == accept_if_above
-        bounds = Family._quotient_container.latest_result.result
+        # bounds = Family._quotient_container.latest_result.result
+        bounds = result.result
 
         # +
         # bounds_alt = Family._quotient_container.latest_result.alt_result
@@ -721,6 +730,82 @@ class Family:
         # print("> MDP result (alt): ", bounds_alt.at(init_state))
 
         return feasibility, bounds
+
+    @staticmethod
+    def model_check_formula_families(families_to_analyze):
+        """
+        Model check the underlying quotient MDPs against a given formula.
+        Return feasibility (SAT = True, UNSAT = False, ? = None) as well as the model checking result
+        for all analyzed families.
+        """
+        resfeasibilities = []
+        resbounds = []
+
+        threshold = float(Family._thresholds[0])
+        
+        results = []
+        
+        
+        start_time = time.time()
+        # submodel_is_dtmc()
+        # if family.mdp.nr_choices == family.mdp.nr_states:
+        #     Family._quotient_container.dtmcs_checked += 1
+        results = Family._quotient_container._mdp_handling.mc_models(families_to_analyze, compute_action_values=False)
+        end_time = time.time()
+        Family._quotient_container._mc_time += end_time - start_time
+
+        family_index = 0
+        for result in results:
+            families_to_analyze[family_index].result_latest = result
+            
+            mc_result = Family._quotient_container.decided(threshold, result)
+            accept_if_above = Family._accept_if_above[0]
+            if mc_result == ThresholdSynthesisResult.UNDECIDED:
+                feasibility = None
+            else:
+                feasibility = (mc_result == ThresholdSynthesisResult.ABOVE) == accept_if_above
+            bounds = result.result
+
+            resfeasibilities.append(feasibility)
+            resbounds.append(bounds)
+            family_index += 1
+        
+        return resfeasibilities, resbounds
+
+
+    @staticmethod
+    def analyze_families(families_to_analyze):
+        result = []
+        optimal_value = None
+        feasible, bounds = Family.model_check_formula_families(families_to_analyze)
+        family_index = 0
+        for family in families_to_analyze:
+            
+            Family.mdp_checks_inc()
+            Family._quotient_container.mdp_handling._submodel = family.mdp
+            Family._quotient_container.mdp_handling._mapping_to_original = family.choice_map
+            Family._quotient_container._latest_result = family.result_latest
+            
+            f_feasible = feasible[family_index]
+            family.bounds[0] = bounds[family_index]
+
+            if not f_feasible and isinstance(f_feasible, bool):
+                if family._optimality_setting is not None:
+                    decided, optimal_value = family.check_optimal_property(f_feasible)
+                result.append((False, optimal_value))
+            elif f_feasible is None:
+                result.append((None, optimal_value))
+            else:
+                if family._optimality_setting is not None:
+                    decided, optimal_value = family.check_optimal_property(f_feasible)
+                    if decided is None:
+                        result.append((None, optimal_value))
+                    else:
+                        family.pick_assignment() if family.size == 1 else family.pick_whole_family()
+                        result.append((True, optimal_value))
+            family_index += 1
+        
+        return result
 
     def analyze(self):
         """
@@ -782,6 +867,54 @@ class Family:
             self.pick_assignment() if self.size == 1 else self.pick_whole_family()
             return True, optimal_value
         return None, optimal_value
+
+    def _round_robin_split(self):
+        def create_expression(num):
+            return self._sketch.expression_manager.create_rational(stormpy.Rational(num))
+
+        def interval_len(option):
+            return (self.options[option][1].evaluate_as_double() - self.options[option][0].evaluate_as_double()) / 1.0
+
+        def split_options_at_half(options):
+            return options[:len(options) // 2], options[len(options) // 2:]
+
+        def get_sub_intervals(start, end, n):
+            w = (end - start) / n
+            # print(f">> {[[start + i * w, start + (i + 1) * w] for i in range(n)]}")
+            return [[create_expression(start + i * w), create_expression(start + (i + 1) * w)] for i in range(n)]
+
+        def construct_split_queue(sub_options):
+            for sub_option in sub_options:
+                split_queue.append(HoleOptions(self.options))
+                split_queue[-1][hole] = sub_option
+
+        options_lengths = [(k, interval_len(k) if k in self._parameters else len(v)) for k, v in self.options.items()]
+        singletons = set(filter(lambda x: x[0] not in self._parameters and x[1] == 1, options_lengths))
+        options_lengths = list(set(options_lengths) - singletons)
+        sorted_options = sorted(options_lengths, key=lambda x: (x[1], x[0]), reverse=True)
+        absolute_diff = \
+            self._quotient_container.latest_result.absolute_max - self._quotient_container.latest_result.absolute_min
+        # print(f">> {absolute_diff}")
+        (hole, length) = sorted_options.pop(0) if sorted_options else (None, 0)
+        # if hole in self._parameters and absolute_diff <= MC_ACCURACY_THRESHOLD:
+        #     hole, length = None, 0
+        # print(f">> {hole}: {length}")
+
+        split_queue = []
+        sub_intervals_n = 2
+        if hole and hole in self._parameters:
+            sub_intervals = get_sub_intervals(
+                self.options[hole][0].evaluate_as_double(), self.options[hole][1].evaluate_as_double(), sub_intervals_n
+            )
+            construct_split_queue(sub_intervals)
+        elif hole:
+            left_part, right_part = split_options_at_half(self.options[hole])
+            construct_split_queue([left_part, right_part])
+        else:
+            split_queue = None
+        assert len(split_queue) == sub_intervals_n if hole in self._parameters else True
+        assert len(split_queue) == 2 if hole and hole not in self._parameters else True
+        return split_queue
 
     def prepare_split(self):
         # logger.debug(f"Preparing to split family {self.options}")
@@ -1426,6 +1559,63 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         Profiler.add_ce_stats(counterexample_generator.stats)
         return False
 
+    def get_subfamilies_to_analyze(self, numberOfSubfamilies):
+        families_to_analyze = []
+        count = numberOfSubfamilies
+        processed = 0
+
+        # get as many families as can be processed in parallel
+        for family in self.families:
+            if (count-2) >= 0:
+                subfams = family._round_robin_split()
+                # flag that tells us that the family was splitted
+                family.splitted = True
+                # construct subfamilies
+                if subfams != None:
+                    subfamily_left = Family(family, subfams[0])
+                    subfamily_right = Family(family, subfams[1])
+                    subfamily_left.construct()
+                    subfamily_right.construct()
+                    # add subfamilies into list to analyse 
+                    families_to_analyze.append(subfamily_left)
+                    families_to_analyze.append(subfamily_right)
+                    count -= 2
+                    processed += 1
+                else:
+                    continue
+            else:
+                break
+
+        # if there is still a place for another subfamily on GPU
+        if ( count >=2 ): 
+            # fill empty place on GPU
+            for family_to_split in families_to_analyze:
+                if (count-2) >= 0:
+                    subfams = family_to_split._round_robin_split()
+                    family_to_split.splitted = True
+                    # construct subfamilies
+                    if subfams != None:
+                        subfamily_left = Family(family_to_split, subfams[0])
+                        subfamily_right = Family(family_to_split, subfams[1])
+                        subfamily_left.construct()
+                        subfamily_right.construct()
+                        # add subfamilies into list to analyse 
+                        families_to_analyze.append(subfamily_left)
+                        families_to_analyze.append(subfamily_right)
+                        count -= 2
+                    else:
+                        continue
+                else:
+                    break
+                
+                if count == 0:
+                    break
+
+        # keep just these undecided families which have no place on GPU
+        self.families = self.families[processed:]
+
+        return families_to_analyze
+
     def run_feasibility(self):
         """
         Run feasibility synthesis. Return either a satisfying assignment (feasible) or None (unfeasible).
@@ -1470,14 +1660,17 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         self.stage_step(0)
 
         # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
+        gpu_families_count = stormpy.get_number_of_subfamilies_to_solve(Family.quotient_mdp(), extract_scheduler=True)
+
         self.families = [family]
         logger.debug("Initiating CEGAR--CEGIS loop")
         while self.families:
             logger.debug(f"Current number of families: {len(self.families)}")
 
             # pick a family
-            family = self.families.pop(-1)
+            family = self.families[-1]
             if not self.stage_cegar:
+                self.families.pop(-1)
                 # CEGIS
                 feasible = self.analyze_family_cegis(family)
                 if feasible and isinstance(feasible, bool):
@@ -1495,70 +1688,112 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     self.families.append(family)
                     continue
             else:  # CEGAR
-                assert family.split_ready
+                if CEGAR_MULTIPLE:
+                # if False:
+                    families_to_analyze = self.get_subfamilies_to_analyze(gpu_families_count)
+                    models_pruned = 0
 
-                # family has already been analysed: discard the parent and refine
-                logger.debug("Splitting the family.")
-                subfamily_left, subfamily_right = family.split()
-                subfamilies = [subfamily_left, subfamily_right]
-                
-                if (self.iterations_cegar == 1):
-                    env = stormpy.Environment()
-                    env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
-                    env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+                    results_for_families = Family.analyze_families(families_to_analyze)
+                    for i in range(0, len(results_for_families)):
+                        self.iterations_cegar += 1
 
-                    subfamilies[0].construct()
-                    subfamilies[1].construct()  
-                    # print(self.formulae[0].subformula)
+                        feasible = (results_for_families[i])[0]
+                        optimal_value = (results_for_families[i])[1]
 
-                    xinitleft = None
-                    xinitright = None
+                        if feasible and isinstance(feasible, bool):
+                            logger.debug("CEGAR: all SAT.")
+                            satisfying_assignment = families_to_analyze[i].member_assignment
+                            if optimal_value is not None:
+                                self._check_optimal_property(
+                                    families_to_analyze[i], satisfying_assignment, cex_generator=None, optimal_value=optimal_value
+                                )
+                            elif satisfying_assignment is not None and self._optimality_setting is None:
+                                break
+                        elif not feasible and isinstance(feasible, bool):
+                            logger.debug("CEGAR: all UNSAT.")
+                            models_pruned += families_to_analyze[i].size
+                            continue
+                        else:  # feasible is None:
+                            logger.debug("CEGAR: undecided.")
+                            if not families_to_analyze[i].splitted:
+                                logger.debug("CEGAR: family to split.")
+                                self.families.append(families_to_analyze[i])
+                            continue
+                    self.stage_step(models_pruned)
+                    
+                else:
+                    self.families.pop(-1)
+                    assert family.split_ready
 
-                    if (stormpy.OptimizationDirection.Minimize == self.formulae[0].optimality_type):
-                        xinitleft = (stormpy.prob01min_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
-                        xinitright = (stormpy.prob01min_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
-                    else:
-                        xinitleft = (stormpy.prob01max_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
-                        xinitright = (stormpy.prob01max_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
-                    # print((stormpy.prob01min_states(subfamily_left.mdp, self.formulae[0].subformula))[1])                     
-                    # print((stormpy.prob01min_states(subfamily_right.mdp, self.formulae[0].subformula))[1])                     
-                    # print(stormpy.prob01max_states(subfamily_left, self.formulae[0].subformula))                     
-                    prime_result = stormpy.model_checking_families(Family.quotient_mdp(), self.formulae[0], [subfamily_left.choice_map, subfamily_right.choice_map], [xinitleft, xinitright],
-                        only_initial_states=False, extract_scheduler=False, environment=env
+                    # family has already been analysed: discard the parent and refine
+                    logger.debug("Splitting the family.")
+                    subfamily_left, subfamily_right = family.split()
+                    subfamilies = [subfamily_left, subfamily_right]
+                    
+                    # if (self.iterations_cegar == 1):
+                    #     env = stormpy.Environment()
+                    #     env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
+                    #     env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+
+                    #     # sbfmls = family._round_robin_split()
+                    #     # sbfml_left = Family(family, sbfmls[0])
+                    #     # sbfml_right = Family(family, sbfmls[1])
+                    #     # sbfml_left.construct()
+                    #     # sbfml_right.construct()
+
+                    #     # nextLevel = sbfml_left._round_robin_split()
+
+                    #     subfamilies[0].construct()
+                    #     subfamilies[1].construct()  
+                    #     print(self.mc_formulae[0])
+                    #     print(self.mc_formulae_alt[0])
+
+                    #     xinitleft = None
+                    #     xinitright = None
+
+                    #     if (stormpy.OptimizationDirection.Minimize == self.mc_formulae[0].optimality_type):
+                    #         xinitleft = (stormpy.prob01min_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
+                    #         xinitright = (stormpy.prob01min_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
+                    #     else:
+                    #         xinitleft = (stormpy.prob01max_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
+                    #         xinitright = (stormpy.prob01max_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
+
+                    #     prime_result = stormpy.model_checking_families(Family.quotient_mdp(), self.mc_formulae[0], [subfamily_left.choice_map, subfamily_right.choice_map], [xinitleft, xinitright],
+                    #         only_initial_states=False, extract_scheduler=True, environment=env
+                    #     )
+                    #     print(prime_result)
+                    
+                    logger.debug(
+                        f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
                     )
-                    print(prime_result)
 
-                logger.debug(
-                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
-                )
-
-                # analyze both subfamilies
-                models_pruned = 0
-                for subfamily in subfamilies:
-                    self.iterations_cegar += 1
-                    logger.debug(f"CEGAR: iteration {self.iterations_cegar}.")
-                    subfamily.construct()
-                    Profiler.start("ar - MDP model checking")
-                    feasible, optimal_value = subfamily.analyze()
-                    Profiler.stop()
-                    if feasible and isinstance(feasible, bool):
-                        logger.debug("CEGAR: all SAT.")
-                        satisfying_assignment = subfamily.member_assignment
-                        if optimal_value is not None:
-                            self._check_optimal_property(
-                                subfamily, satisfying_assignment, cex_generator=None, optimal_value=optimal_value
-                            )
-                        elif satisfying_assignment is not None and self._optimality_setting is None:
-                            break
-                    elif not feasible and isinstance(feasible, bool):
-                        logger.debug("CEGAR: all UNSAT.")
-                        models_pruned += subfamily.size
-                        continue
-                    else:  # feasible is None:
-                        logger.debug("CEGAR: undecided.")
-                        self.families.append(subfamily)
-                        continue
-                self.stage_step(models_pruned)
+                    # analyze both subfamilies
+                    models_pruned = 0
+                    for subfamily in subfamilies:
+                        self.iterations_cegar += 1
+                        logger.debug(f"CEGAR: iteration {self.iterations_cegar}.")
+                        subfamily.construct()
+                        Profiler.start("ar - MDP model checking")
+                        feasible, optimal_value = subfamily.analyze()
+                        Profiler.stop()
+                        if feasible and isinstance(feasible, bool):
+                            logger.debug("CEGAR: all SAT.")
+                            satisfying_assignment = subfamily.member_assignment
+                            if optimal_value is not None:
+                                self._check_optimal_property(
+                                    subfamily, satisfying_assignment, cex_generator=None, optimal_value=optimal_value
+                                )
+                            elif satisfying_assignment is not None and self._optimality_setting is None:
+                                break
+                        elif not feasible and isinstance(feasible, bool):
+                            logger.debug("CEGAR: all UNSAT.")
+                            models_pruned += subfamily.size
+                            continue
+                        else:  # feasible is None:
+                            logger.debug("CEGAR: undecided.")
+                            self.families.append(subfamily)
+                            continue
+                    self.stage_step(models_pruned)
 
         if PRINT_PROFILING:
             Profiler.print()

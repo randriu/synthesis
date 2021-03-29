@@ -601,6 +601,8 @@ namespace storm {
              * @return The grouping of rows of this matrix.
              */
             std::vector<index_type> const& getRowGroupIndicesAsKeys() const;
+
+            size_t getSchedulerSize() const;
            
             /*!
              * Returns the values and the corresponding columns of this matrix.
@@ -638,6 +640,8 @@ namespace storm {
              * @param newRowGroupIndices The new row group indices.
              */
             void setRowGroupIndicesAsKeys(std::vector<index_type> const& newRowGroupIndices);
+
+            void setSchedulerSize(size_t schedulerSize);
             
             /*!
              * Retrieves whether the matrix has a trivial row grouping.
@@ -1238,6 +1242,8 @@ namespace storm {
 
             // A vector indicating the row groups of the matrix in thrust format. This needs to be mutible in case we create it on-the-fly.
             mutable boost::optional<std::vector<index_type>> rowGroupIndicesAsKeys;
+            
+            mutable boost::optional<size_t> schedulerSize;
         };
         
 #ifdef STORM_HAVE_CARL

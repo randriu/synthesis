@@ -694,6 +694,11 @@ namespace storm {
             // TODO: throw excepction if none
             return rowGroupIndicesAsKeys.get();
         }
+
+        template<typename ValueType>
+        size_t SparseMatrix<ValueType>::getSchedulerSize() const {
+            return schedulerSize.get();
+        }        
         
         template<typename ValueType>
         std::vector<typename SparseMatrix<ValueType>::index_type> SparseMatrix<ValueType>::swapRowGroupIndices(std::vector<index_type>&& newRowGrouping) {
@@ -709,6 +714,11 @@ namespace storm {
         void SparseMatrix<ValueType>::setRowGroupIndices(std::vector<index_type> const& newRowGroupIndices) {
             trivialRowGrouping = false;
             rowGroupIndices = newRowGroupIndices;
+        }
+
+        template<typename ValueType>
+        void SparseMatrix<ValueType>::setSchedulerSize(size_t schedulerSize) {
+            this->schedulerSize = schedulerSize;
         }
 
         template<typename ValueType>

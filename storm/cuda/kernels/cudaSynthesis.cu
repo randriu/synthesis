@@ -766,6 +766,7 @@ bool valueIteration_solver(
 
 template <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
 bool valueIteration_solver_multipleMDPs(
+                size_t const schedulerSize,
                 uint_fast64_t const maxIterationCount,
                 ValueType const precision, 
                 std::vector<uint_fast64_t> const& matrixRowIndices, 
@@ -851,7 +852,7 @@ bool valueIteration_solver_multipleMDPs(
 
     // Thrust pointer initialization
     thrust::device_ptr<ValueType> devicePtrThrust_diff(device_diff);
-    thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + matrixColCount);
+    thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + matrixBsizeCount);
     thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
     thrust::device_ptr<ValueType> devicePtrThrust_multiplyResult(device_multiplyResult);
 
@@ -886,7 +887,7 @@ bool valueIteration_solver_multipleMDPs(
         /* INF_NORM: check for convergence */
         // Transform: diff = abs(x - xSwap)/ xSwap
 		thrust::device_ptr<ValueType> devicePtrThrust_x(device_x);
-		thrust::device_ptr<ValueType> devicePtrThrust_x_end(device_x + matrixColCount);
+		thrust::device_ptr<ValueType> devicePtrThrust_x_end(device_x + matrixBsizeCount);
 		thrust::device_ptr<ValueType> devicePtrThrust_xSwap(device_xSwap);
 		thrust::transform(devicePtrThrust_x, devicePtrThrust_x_end, devicePtrThrust_xSwap, devicePtrThrust_diff, equalModuloPrecision<ValueType, Relative>());
 		// Reduce: get Max over x and check for res < Precision
@@ -928,7 +929,7 @@ bool valueIteration_solver_multipleMDPs(
         // thrust::copy(keys.begin(), newKeysEnd, std::ostream_iterator<uint_fast64_t>( std::cout, " "));
         // std::cout << std::endl;
         
-        uint_fast64_t schedulerSize = choicesAsKeys.back() - 1;
+        // uint_fast64_t schedulerSize = choicesAsKeys.back() - 1;
         thrust::device_vector<uint_fast64_t> rowGroups(schedulerSize + 1);
         rowGroups[0] = 0;
         // compute new groups without unwanted choices
@@ -1016,58 +1017,58 @@ bool jacobiIteration_solver_float(uint_fast64_t const maxIterationCount, float c
 /*                    Value Iteration API                                      */
 /*******************************************************************************/
 
-bool valueIteration_solver_uint64_double_minimize(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
+bool valueIteration_solver_uint64_double_minimize(size_t const schedulerSize, bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<false, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<false, true, double, CUDA_R_64F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<false, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<false, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<false, false, double, CUDA_R_64F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<false, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     }
 }
 
-bool valueIteration_solver_uint64_double_maximize(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
+bool valueIteration_solver_uint64_double_maximize(size_t const schedulerSize, bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,double const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<double> const& nnzValues, std::vector<double>& x, std::vector<double> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices) {
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<true, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<true, true, double, CUDA_R_64F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<true, true, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<true, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<true, false, double, CUDA_R_64F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<true, false, double, CUDA_R_64F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     }
 }
 
-bool valueIteration_solver_uint64_float_minimize(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices){
+bool valueIteration_solver_uint64_float_minimize(size_t const schedulerSize, bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices){
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<false, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<false, true, float, CUDA_R_32F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<false, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<false, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<false, false, float, CUDA_R_32F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<false, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     }
 }
 
-bool valueIteration_solver_uint64_float_maximize(bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices){
+bool valueIteration_solver_uint64_float_maximize(size_t const schedulerSize, bool const solveMultipleInstances, uint_fast64_t const maxIterationCount,float const precision, bool const relativePrecisionCheck, std::vector<uint_fast64_t> const& matrixRowIndices, std::vector<uint_fast64_t> const& columnIndices, std::vector<float> const& nnzValues, std::vector<float>& x, std::vector<float> const& b, std::vector<uint_fast64_t> const& nondeterministicChoiceIndices, std::vector<uint_fast64_t> const& choicesAsKeys, size_t& iterationCount, bool const extractScheduler, std::vector<uint_fast64_t>* choices){
     if (relativePrecisionCheck) {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<true, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<true, true, float, CUDA_R_32F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<true, true, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     } else {
         // <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
         return (solveMultipleInstances) ?
-                valueIteration_solver_multipleMDPs<true, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
+                valueIteration_solver_multipleMDPs<true, false, float, CUDA_R_32F>(schedulerSize, maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, choicesAsKeys, iterationCount, extractScheduler, choices)
                :valueIteration_solver<true, false, float, CUDA_R_32F>(maxIterationCount, precision, matrixRowIndices, columnIndices, nnzValues, x, b, nondeterministicChoiceIndices, iterationCount, extractScheduler, choices);  
     }
 }

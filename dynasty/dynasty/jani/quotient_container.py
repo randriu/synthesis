@@ -382,17 +382,18 @@ class JaniQuotientContainer:
         # That is inefficient for now as we need it just for this single task, but
         # I guess we will use it multiple times.
 
-    def decided(self, threshold):
+    def decided(self, threshold, latest_result=None):
+        _result = self._latest_result if latest_result is None else latest_result
         logger.debug(
-            f"Absolute minimum: {self._latest_result.absolute_min},"
-            f" Absolute maximum {self._latest_result.absolute_max}, "
+            f"Absolute minimum: {_result.absolute_min},"
+            f" Absolute maximum {_result.absolute_max}, "
             f"threshold: {threshold}"
         )
-        if threshold > self._latest_result.absolute_max:
-            logger.debug(f"Absolute maximum {self._latest_result.absolute_max} is below threshold {threshold}")
+        if threshold > _result.absolute_max:
+            logger.debug(f"Absolute maximum {_result.absolute_max} is below threshold {threshold}")
             return ThresholdSynthesisResult.BELOW
-        elif threshold <= self._latest_result.absolute_min:
-            logger.debug(f"Absolute minimum {self._latest_result.absolute_min} is above threshold {threshold}")
+        elif threshold <= _result.absolute_min:
+            logger.debug(f"Absolute minimum {_result.absolute_min} is above threshold {threshold}")
             return ThresholdSynthesisResult.ABOVE
         logger.debug("Threshold is between")
         return ThresholdSynthesisResult.UNDECIDED

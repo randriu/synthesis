@@ -130,7 +130,7 @@ namespace storm {
                 std::cout << "************************************************************************************************************************************\n";
                 std::vector<std::vector<uint_fast64_t>> const& subfamilies = this->getSubfamilies(); 
                 std::vector<storm::storage::BitVector> const& initValues = this->getInitValues();
-                storm::storage::BitVector validVectors;
+                std::vector<storm::storage::BitVector> validVectors;
                 uint_fast64_t resultSize = 0;
 
                 auto superFamily = this->getModel();
@@ -163,7 +163,7 @@ namespace storm {
                     storm::storage::BitVector tmp = (matrix).getRowGroupFilter(validRows, false);
                     resultSize += initValues.at(subfamilyNumber).size(); //tmp.getNumberOfSetBits();
                     // std::cout << "subfamily " << subfamilyNumber << " size " << tmp.getNumberOfSetBits() << "\n";
-                    validVectors.concat(tmp);
+                    validVectors.push_back(tmp);
 
                     uint_fast64_t index = 0;
                     for(uint_fast64_t i=0; i < columnCount; i++) {
@@ -188,6 +188,7 @@ namespace storm {
                 subfamiliesChoices.push_back(subfamilyNumber * rowsCount);
                 matrix.setRowGroupIndices(subfamiliesChoices);
                 matrix.setRowGroupIndicesAsKeys(subfamiliesKeys);
+                matrix.setSchedulerSize(resultSize);
 
                 // std::cout << "x inits: " << storm::utility::vector::toString(xVectors) << "\n";
                 // std::cout << "b inits: " << storm::utility::vector::toString(bVectors) << "\n";
@@ -197,7 +198,12 @@ namespace storm {
                 auto ret = storm::modelchecker::helper::SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(env, storm::solver::SolveGoal<ValueType>(dir), matrix, bVectors, xVectors, subfamiliesChoices, keys, subfamilyNumber, resultSize, checkTask.isQualitativeSet(), checkTask.isProduceSchedulersSet(), checkTask.getHint());
                 
                 std::vector<ValueType> subfamiliesResults(resultSize);
-                storm::utility::vector::selectVectorValues(subfamiliesResults, validVectors, ret.values);
+
+                size_t finalOffset = 0;
+                for (uint_fast64_t i = 0; i < subfamilyNumber; i++) {
+                    storm::utility::vector::selectVectorValues<ValueType>(subfamiliesResults.data() + finalOffset, validVectors.at(i), ret.values.data() + (columnCount * i));
+                    finalOffset += initValues.at(i).size();
+                }
                 
                 // std::cout << "final result: " <<  storm::utility::vector::toString(subfamiliesResults) << "\n";
 

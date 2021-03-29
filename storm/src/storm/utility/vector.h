@@ -176,6 +176,14 @@ namespace storm {
                 }
             }
 
+            template<class T>
+            void selectVectorValues(T* vector, storm::storage::BitVector const& positions, T const* values) {
+                uint_fast64_t targetIndex = 0;
+                for(auto position: positions) {
+                    vector[targetIndex++] = values[position];
+                }
+            }
+
             /*!
              * Selects groups of elements from a vector at the specified positions and writes them consecutively into another vector.
              *

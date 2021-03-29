@@ -63,20 +63,21 @@ namespace storm {
 
             CSRMatrix matrix(this->A);
             size_t globalIterations = 0;
+            uint_fast64_t schedulerSize;
             bool const extractScheduler = this->isTrackSchedulerSet();
             bool const solveMultipleInstances = env.solver().minMax().isSolveMultipleInstancesSet(); 
             
             const std::vector<uint_fast64_t>* rowGroupIndicesAsKeys = (solveMultipleInstances) ? &(this->A->getRowGroupIndicesAsKeys()) : NULL;
-            
+
             if (extractScheduler) {
-                uint_fast64_t schedulerSize = (solveMultipleInstances) ? rowGroupIndicesAsKeys->back() - 1 : this->A->getRowGroupCount();
+                schedulerSize = (solveMultipleInstances) ? this->A->getSchedulerSize() : this->A->getRowGroupCount();
                 this->schedulerChoices = std::vector<uint_fast64_t>(schedulerSize); 
             }
 
             if (dir == OptimizationDirection::Minimize) {
-                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(solveMultipleInstances, maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, *rowGroupIndicesAsKeys, globalIterations, extractScheduler, &this->schedulerChoices.get());
+                result = __valueIteration_solver_minimize<uint_fast64_t, ValueType>(schedulerSize, solveMultipleInstances, maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, *rowGroupIndicesAsKeys, globalIterations, extractScheduler, &this->schedulerChoices.get());
             } else {
-                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(solveMultipleInstances, maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, *rowGroupIndicesAsKeys, globalIterations, extractScheduler, &this->schedulerChoices.get());
+                result = __valueIteration_solver_maximize<uint_fast64_t, ValueType>(schedulerSize, solveMultipleInstances, maxIters, precision, relative, *matrix.rowStartIndices, matrix.columnIndices, matrix.nnzValues, x, b, *matrix.rowGroupIndices, *rowGroupIndicesAsKeys, globalIterations, extractScheduler, &this->schedulerChoices.get());
             }
 
             if (!result) {
