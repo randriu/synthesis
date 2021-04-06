@@ -145,13 +145,13 @@ class FamilyHybrid(Family):
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
 
             self.points = {}
-            # if self.dtmc.has_parameters:
-            for p in self.dtmc.collect_probability_parameters():
-                assert len(self.member_assignment[p.name[:-2]]) == 1
-                self.points[p] = stormpy.RationalRF(self.member_assignment[p.name[:-2]][0].evaluate_as_double())
-            self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
-            self.param_dtmc = self.dtmc
-            self.dtmc = self.instantiator.instantiate(self.points)
+            if isinstance(self.dtmc, stormpy.storage.SparseParametricDtmc):
+                for p in self.dtmc.collect_probability_parameters():
+                    assert len(self.member_assignment[p.name[:-2]]) == 1
+                    self.points[p] = stormpy.RationalRF(self.member_assignment[p.name[:-2]][0].evaluate_as_double())
+                self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
+                self.param_dtmc = self.dtmc
+                self.dtmc = self.instantiator.instantiate(self.points)
 
             # assert absence of deadlocks or overlapping guards
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0

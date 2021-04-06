@@ -271,14 +271,14 @@ class Family:
 
     def _instatiate_parametric_model(self):
         self.points = {}
-        # if self.mdp.has_parameters:
-        for p in self.mdp.collect_probability_parameters():
-            if p.name.endswith("0"):
-                self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][0].evaluate_as_double())
-            elif p.name.endswith("1"):
-                self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][1].evaluate_as_double())
-        self.instantiator = stormpy.pars.ModelInstantiator(self.mdp)
-        self.instantiated_mdp = self.instantiator.instantiate(self.points)
+        if isinstance(self.mdp, stormpy.storage.SparseParametricMdp):
+            for p in self.mdp.collect_probability_parameters():
+                if p.name.endswith("0"):
+                    self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][0].evaluate_as_double())
+                elif p.name.endswith("1"):
+                    self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][1].evaluate_as_double())
+            self.instantiator = stormpy.pars.ModelInstantiator(self.mdp)
+            self.instantiated_mdp = self.instantiator.instantiate(self.points)
 
     def model_check_formula(self, formula_index):
         """
@@ -352,6 +352,8 @@ class Family:
                         undecided_formulae_indices += [formula_index] if decided is None else []
                     else:
                         undecided_formulae_indices.append(formula_index)
+                if not self.split_ready:
+                    self.prepare_split()
 
         # if self._optimality_setting is not None:
         #     if not undecided_formulae_indices and isinstance(undecided_formulae_indices, list):
@@ -471,7 +473,8 @@ class Family:
         if feasible is None:
             logger.debug("Family is UNDECIDED for optimal property.")
             if not self.split_ready:
-                self.prepare_split(strict=True)
+                # self.prepare_split(strict=True)
+                Family._quotient_container.scheduler_color_analysis()
             if self.size > 1:
                 # oracle.scheduler_color_analysis()
                 if (oracle.is_lower_bound_tight() and not is_max) or (oracle.is_upper_bound_tight() and is_max):
@@ -483,7 +486,8 @@ class Family:
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
             if not self.split_ready:
-                self.prepare_split(strict=True)
+                # self.prepare_split(strict=True)
+                Family._quotient_container.scheduler_color_analysis()
             # oracle.scheduler_color_analysis()
             improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
