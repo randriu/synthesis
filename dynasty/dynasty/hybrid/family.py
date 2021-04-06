@@ -472,11 +472,8 @@ class Family:
         decided = None
         if feasible is None:
             logger.debug("Family is UNDECIDED for optimal property.")
-            if not self.split_ready:
-                # self.prepare_split(strict=True)
-                Family._quotient_container.scheduler_color_analysis()
+            Family._quotient_container.scheduler_color_analysis()
             if self.size > 1:
-                # oracle.scheduler_color_analysis()
                 if (oracle.is_lower_bound_tight() and not is_max) or (oracle.is_upper_bound_tight() and is_max):
                     logger.debug(f'Found a tight {"upper" if is_max else "lower"} bound.')
                     optimal_value = oracle.upper_bound() if is_max else oracle.lower_bound()
@@ -485,10 +482,7 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
-            if not self.split_ready:
-                # self.prepare_split(strict=True)
-                Family._quotient_container.scheduler_color_analysis()
-            # oracle.scheduler_color_analysis()
+            Family._quotient_container.scheduler_color_analysis()
             improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
                 else oracle.lower_bound()
