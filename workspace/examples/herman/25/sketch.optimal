@@ -1,3 +1,4 @@
-R{"steps"}=? [F "stable"]
-min
+//R{"steps"}=? [F "stable"]
+P=? [ F "stable" & syncs <= 1 ]
+max
 relative 0.00

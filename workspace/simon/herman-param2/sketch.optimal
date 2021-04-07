@@ -1,3 +1,4 @@
 R{"steps"}=? [F "stable"]
+//P=? [ F "stable" & syncs <= 1 ]
 min
-relative 0.05
+relative 0.0

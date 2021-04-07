@@ -206,7 +206,7 @@ class FamilyHybrid(Family):
 
     def construct_parametric_clauses(self, cex_clauses, lower_bounds, upper_bounds):
         for var, hole in Family._solver_meta_vars.items():
-            if hole in self.mdp.collect_probability_parameters():
+            if hole in Family._parameters and hole in lower_bounds:
                 cex_clauses[hole] = z3.And(var >= lower_bounds[hole], var <= upper_bounds[hole])
         return cex_clauses
 
