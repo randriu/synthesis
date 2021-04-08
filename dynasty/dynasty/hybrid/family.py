@@ -278,7 +278,6 @@ class Family:
                 elif p.name.endswith("1"):
                     self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][1].evaluate_as_double())
             self.instantiator = stormpy.pars.ModelInstantiator(self.mdp)
-            print(f"{self.mdp}")
             self.instantiated_mdp = self.instantiator.instantiate(self.points)
 
     def model_check_formula(self, formula_index):
