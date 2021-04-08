@@ -277,7 +277,8 @@ class Family:
 
         threshold = float(Family._thresholds[formula_index])
         Family._quotient_container.analyse(
-            threshold, formula_index, region=self._construct_region() if self.mdp.has_parameters else None
+            threshold, formula_index,
+            region=self._construct_region() if isinstance(self.mdp, stormpy.SparseParametricMdp) else None
         )
 
         mc_result = Family._quotient_container.decided(threshold)
