@@ -278,6 +278,7 @@ class Family:
                 elif p.name.endswith("1"):
                     self.points[p] = stormpy.RationalRF(self.options[p.name[:-2]][1].evaluate_as_double())
             self.instantiator = stormpy.pars.ModelInstantiator(self.mdp)
+            print(f"{self.mdp}")
             self.instantiated_mdp = self.instantiator.instantiate(self.points)
 
     def model_check_formula(self, formula_index):
@@ -327,7 +328,7 @@ class Family:
         undecided_formulae_indices = []
         optimal_value = None
         for formula_index in self.formulae_indices:
-            # logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
+            logger.debug(f"CEGAR: model checking MDP against a formula with index {formula_index}.")
             Family.mdp_checks_inc()
             feasible, self.bounds[formula_index] = self.model_check_formula(formula_index)
 
