@@ -20,6 +20,7 @@ const double THRESHOLD;
 // ----- synthesized parameters ------------------------------------------------
 
 const double p31;
+const double p42;
 
 // queue size
 const int QMAX;
@@ -66,7 +67,7 @@ module SP
 
     // waiting states
     [tick1] sp = 3 -> p31 : (sp'=sp-2) + (1-p31) : true;
-    [tick1] sp = 4 -> 0.6 : (sp'=sp-2) + 0.4 : true;
+    [tick1] sp = 4 -> p42 : (sp'=sp-2) + (1-p42) : true;
 
 endmodule
 
@@ -132,7 +133,7 @@ rewards "lost"
 endrewards
 
 rewards "power"
-    [tick1] sp=2 : 100 + 10*q + (1-p31)*10; // active
-    [tick1] sp=3 : 10 + (1-p31)*10; // idle to active
-    [tick1] sp=4 : 5 + (1-p31)*10; // sleep to idle
+    [tick1] sp=2 : 100 + 10*q + ((p31*10)*(p42*10)); // active
+    [tick1] sp=3 : 10 + ((p31*10)*(p42*10)); // idle to active
+    [tick1] sp=4 : 5 + ((p31*10)*(p42*10)); // sleep to idle
 endrewards

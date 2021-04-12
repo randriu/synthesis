@@ -385,7 +385,7 @@ class Family:
             self._quotient_container.latest_result.absolute_max - self._quotient_container.latest_result.absolute_min
         # print(f">> {absolute_diff}")
         (hole, length) = sorted_options.pop(0) if sorted_options else (None, 0)
-        if hole in self._parameters and absolute_diff <= MC_ACCURACY_THRESHOLD:
+        if hole in self._parameters and absolute_diff < MC_ACCURACY_THRESHOLD:
             hole, length = None, 0
         # print(f">> {hole}: {length}")
 
@@ -461,7 +461,7 @@ class Family:
         if feasible is None:
             logger.debug("Family is UNDECIDED for optimal property.")
             if not self.split_ready:
-                self.prepare_split(strict=True)
+                Family._quotient_container.scheduler_color_analysis()
             if self.size > 1:
                 # oracle.scheduler_color_analysis()
                 if (oracle.is_lower_bound_tight() and not is_max) or (oracle.is_upper_bound_tight() and is_max):
@@ -472,10 +472,10 @@ class Family:
                 decided = True
         elif feasible:
             logger.debug(f'All {"above" if is_max else "below"} within analyses of family for optimal property.')
-            if not self.split_ready:
-                self.prepare_split(strict=True)
-            # oracle.scheduler_color_analysis()
-            improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
+            # if not self.split_ready:
+            #     Family._quotient_container.scheduler_color_analysis()
+            # improved_tight = oracle.is_upper_bound_tight() if is_max else oracle.is_lower_bound_tight()
+            improved_tight = False
             optimal_value = oracle.upper_bound() if (improved_tight and is_max) or (not improved_tight and not is_max) \
                 else oracle.lower_bound()
             if improved_tight:

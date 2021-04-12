@@ -4,7 +4,7 @@ import z3
 import stormpy
 
 from ..family_checkers.familychecker import HoleOptions
-from ..model_handling.mdp_handling import MC_ACCURACY_THRESHOLD
+from ..model_handling.mdp_handling import MC_ACCURACY, MC_ACCURACY_THRESHOLD
 from ..profiler import Profiler
 from .helpers import check_dtmc
 from .family import Family
@@ -146,7 +146,8 @@ class FamilyHybrid(Family):
 
             self.points = {}
             if isinstance(self.dtmc, stormpy.SparseParametricDtmc):
-                for p in self.dtmc.collect_probability_parameters():
+                # for p in self.dtmc.collect_probability_parameters():
+                for p in Family._quotient_mdp.collect_probability_parameters():
                     assert len(self.member_assignment[p.name]) == 1
                     self.points[p] = stormpy.RationalRF(self.member_assignment[p.name][0].evaluate_as_double())
                 self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
@@ -192,10 +193,10 @@ class FamilyHybrid(Family):
         epsilons = {param.name: eps for param in prob_params}
         saved_orig_options = self.options
         exists_sat, absolute_diff = self.construct_and_check_mdp(prob_params, hole_options, epsilons, construct=True)
-        while exists_sat and absolute_diff <= MC_ACCURACY_THRESHOLD:
-            epsilons = {k: v / 2 for idx, (k, v) in enumerate(epsilons.items()) if idx == last_ref_eps}
+        while exists_sat and absolute_diff >= MC_ACCURACY_THRESHOLD:
+            epsilons = {k: v / 10.0 if idx == last_ref_eps else v for idx, (k, v) in enumerate(epsilons.items())}
             last_ref_eps = last_ref_eps + 1 if last_ref_eps + 1 < len(epsilons.keys()) else 0
-            exists_sat = self.construct_and_check_mdp(prob_params, hole_options, epsilons, construct=True)
+            exists_sat, absolute_diff = self.construct_and_check_mdp(prob_params, hole_options, epsilons, construct=True)
         lower_bounds, upper_bounds = {}, {}
         for param in prob_params:
             assert len(self.options[param.name]) == 2

@@ -27,7 +27,7 @@ quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = False
 
-ONLY_CEGAR = False
+ONLY_CEGAR = True
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
@@ -254,7 +254,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             if vp_index not in family.formulae_indices:
                 family.formulae_indices.append(vp_index)
                 # TODO: It is required to do this model checking?
-                family.model_check_formula(vp_index)
+                # family.model_check_formula(vp_index)
                 family.bounds[vp_index] = Family.quotient_container().latest_result.result
 
         # Change the value of threshold of the violation formulae within constructed quotient MDP
@@ -488,7 +488,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     feasible, optimal_value = subfamily.analyze()
                     Profiler.stop()
                     if feasible and isinstance(feasible, bool):
-                        logger.debug("CEGAR: all SAT.")
+                        logger.debug(f"CEGAR: all SAT. {optimal_value}")
                         satisfying_assignment = subfamily.member_assignment
                         if optimal_value is not None:
                             self._check_optimal_property(
