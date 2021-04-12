@@ -254,7 +254,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             if vp_index not in family.formulae_indices:
                 family.formulae_indices.append(vp_index)
                 # TODO: It is required to do this model checking?
-                family.model_check_formula(vp_index)
+                # family.model_check_formula(vp_index)
                 family.bounds[vp_index] = Family.quotient_container().latest_result.result
 
         # Change the value of threshold of the violation formulae within constructed quotient MDP
