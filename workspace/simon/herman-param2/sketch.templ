@@ -9,7 +9,10 @@ const int CMAX=2;
 const int STATIONS = 5;
 const int MAXMEM = 1;
 
-const double p;
+const double p0;
+const double p1;
+const double p2;
+const double p3;
 
 const int M0LFAIR=0;
 const int M0HFAIR=0;
@@ -30,7 +33,6 @@ module controller
     syncs : [0..CMAX] init 0; //+
     [sync] round = 0 -> (round'=1) & (syncs'=min(syncs+1,CMAX));
 
-    [sync] round = 0 -> (round'=1);
     [step1] round = 1 -> (round'=2);
     [step2] round = 2 -> (round'=3);
     [step3] round = 3 -> (round'=4);
@@ -52,13 +54,13 @@ module process1
     [go] true -> 1: (x1'=1); 
     // [go] true -> 0.5: (x1'=0) + 0.5: (x1'=1);
 
-    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=0 -> p : (y1'=0) & (m1'=MxxA) + 1-p : (y1'=1) & (m1'=MxxB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 0 & M0LFAIR=0 -> p0 : (y1'=0) & (m1'=MxxA) + 1-p0 : (y1'=1) & (m1'=MxxB);
 
-    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=0 -> p : (y1'=0) & (m1'=MxxA) + 1-p : (y1'=1) & (m1'=MxxB);
+    [step1]  (x1=x7) & m1 = 0 & x1 = 1 & M0HFAIR=0 -> p1 : (y1'=0) & (m1'=MxxA) + 1-p1 : (y1'=1) & (m1'=MxxB);
     
-    [step1]  (x1=x7) & m1 = 1 & x1 = 0 & M1LFAIR=0 -> p : (y1'=0) & (m1'=MxxA) + 1-p : (y1'=1) & (m1'=MxxB);
+    [step1]  (x1=x7) & m1 = 1 & x1 = 0 & M1LFAIR=0 -> p2 : (y1'=0) & (m1'=MxxA) + 1-p2 : (y1'=1) & (m1'=MxxB);
     
-    [step1]  (x1=x7) & m1 = 1 & x1 = 1 & M1HFAIR=0 -> p : (y1'=0) & (m1'=MxxA) + 1-p : (y1'=1) & (m1'=MxxB);
+    [step1]  (x1=x7) & m1 = 1 & x1 = 1 & M1HFAIR=0 -> p3 : (y1'=0) & (m1'=MxxA) + 1-p3 : (y1'=1) & (m1'=MxxB);
 
     [step1] !(x1=x7) & m1 = 0 & x1 = 0 -> (y1'=x7) & (m1'=MxxC);
     [step1] !(x1=x7) & m1 = 0 & x1 = 1 -> (y1'=x7) & (m1'=MxxC);

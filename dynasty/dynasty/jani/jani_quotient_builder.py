@@ -171,6 +171,7 @@ class JaniQuotientBuilder:
             edge.source_location_index, edge.action_index, edge.rate, templ_edge, dests
         )
         if combination is not None:
+            print(combination)
             new_edge.color = self.edge_coloring.get_or_make_color(combination)
         new_automaton.add_edge(new_edge)
         assert new_edge.color == 0 if combination is None else True

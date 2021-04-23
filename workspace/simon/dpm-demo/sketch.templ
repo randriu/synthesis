@@ -14,8 +14,8 @@ dtmc
 const int q_init = 0;
 
 // dummy constants
-const int CMAX;
-const double THRESHOLD;
+const int CMAX=0;
+const double THRESHOLD=0.0;
 
 // ----- synthesized parameters ------------------------------------------------
 
@@ -23,11 +23,11 @@ const double p31;
 const double p42;
 
 // queue size
-const int QMAX;
+const int QMAX=8;
 // observation level thresholds
-const double T1; const double T2; const double T3;
+const double T1=0.2; const double T2=0.5; const double T3=0.9;
 // profiles desired at observation levels
-const int P1; const int P2; const int P3; const int P4;
+const int P1; const int P2=2; const int P3=2; const int P4=2;
 
 // ----- modules ---------------------------------------------------------------
 
@@ -133,7 +133,7 @@ rewards "lost"
 endrewards
 
 rewards "power"
-    [tick1] sp=2 : 100 + 10*q + ((p31*10)*(p42*10)); // active
-    [tick1] sp=3 : 10 + ((p31*10)*(p42*10)); // idle to active
-    [tick1] sp=4 : 5 + ((p31*10)*(p42*10)); // sleep to idle
+    [tick1] sp=2 : 100 + 10*q; // active
+    [tick1] sp=3 : 10; // idle to active
+    [tick1] sp=4 : 5; // sleep to idle
 endrewards

@@ -11,7 +11,7 @@ from ..profiler import Timer
 logger = logging.getLogger(__name__)
 
 MC_ACCURACY = 1.0e-10
-MC_ACCURACY_THRESHOLD = MC_ACCURACY / 10.0
+MC_ACCURACY_THRESHOLD = MC_ACCURACY / 10.0  # / 2.0 for word results
 
 
 def always_true(_, __):

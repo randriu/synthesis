@@ -130,6 +130,7 @@ class FamilyHybrid(Family):
             # collect edges relevant for this assignment
             indexed_assignment = Family._hole_options.index_map(self.member_assignment, self._parameters)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
+            subcolors = {1, 4, 5, 6}
             collected_edge_indices = stormpy.FlatSet(
                 Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
             )
@@ -138,7 +139,7 @@ class FamilyHybrid(Family):
 
             # construct the DTMC by exploring the quotient MDP for this subfamily
             if isinstance(self.mdp, stormpy.storage.SparseParametricMdp):
-                self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_param_mdp(self.mdp, collected_edge_indices)
+                self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_param_mdp(Family._quotient_mdp, collected_edge_indices)
             else:
                 self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
             Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
@@ -146,8 +147,8 @@ class FamilyHybrid(Family):
 
             self.points = {}
             if isinstance(self.dtmc, stormpy.storage.SparseParametricDtmc):
-                # for p in self.dtmc.collect_probability_parameters():
-                for p in Family._quotient_mdp.collect_probability_parameters():
+                for p in self.dtmc.collect_probability_parameters():
+                # for p in Family._quotient_mdp.collect_probability_parameters():
                     assert len(self.member_assignment[p.name[:-2]]) == 1
                     self.points[p] = stormpy.RationalRF(self.member_assignment[p.name[:-2]][0].evaluate_as_double())
                 self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
