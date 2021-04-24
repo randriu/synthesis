@@ -27,7 +27,7 @@ quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = False
 
-ONLY_CEGAR = True
+ONLY_CEGAR = False
 ONLY_CEGIS = False
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
