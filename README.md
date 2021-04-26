@@ -4,26 +4,26 @@ intro
 
 The tool represents a branch of the [dynasty](https://github.com/moves-rwth/dynasty) tool for probabilistic synthesis and contains the dynasty code as well as its adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy) (prerequisites for dynasty).
 
-## Installation of the artifact
+## Installation of the tool
 
-Installation is performed automatically by running the installation script `install.sh`:
+Pre-installed tool is available in [this Ubuntu 20.04 LTS virtual machine](). If you wish to install PAYNT on your system, simply run the installation script (requires network connection):
 
 ```sh
 ./install.sh
 ```
 
-Compilation of the tool and of all of its prerequisites will take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see exported variable `THREADS` in the script `install.sh`).
+The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`).
 
 ## Initial testing of the artifact
 
-Having installed the tool, you can quickly test it by activating the python envorinment and running the dynasty tool to evaluate a simple synthesis problem:
+Having the tool installed, you can quickly test it by activating the python envorinment and running asking PAYNT to evaluate a simple synthesis problem:
 
 ```sh
 source env/bin/activate
-python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid
+python3 paynt/paynt.py --project cav21-benchmark/grid --properties easy.properties hybrid
 ```
 
-The syntax of the command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the CAV'21 paper and synthesize it wrt. the easy property using the hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
+The syntax of the command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the CAV'21 paper and synthesize it wrt. the easy property using the advanced hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
 formula 1: P>=931/1000 [F ("goal" & (c < 40))]
@@ -35,6 +35,9 @@ average DTMC size: 1232, DTMC checks: 215, iterations: 215
 
 feasible: no
 ```
+
+
+
 
 ## Reproducing presented experiments
 

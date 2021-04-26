@@ -62,19 +62,19 @@ source ../env/bin/activate
 # navigate to paynt
 cd ../paynt
 
-## 1-by-1 enumeration
+## experiments
 
 echo "-- evaluating 1-by-1 enumeration"
 for benchmark in "${benchmarks[@]}"; do
     paynt onebyone "${benchmark}" "hard" "onebyone" "${timeout}"
 done
 
-echo "-- evaluating hybrid method (hard)"
+echo "-- evaluating hybrid method (hard problem)"
 for benchmark in "${benchmarks[@]}"; do
     paynt hybrid_hard "${benchmark}" "hard" "hybrid" "${timeout}"
 done
 
-echo "-- evaluating hybrid method (easy)"
+echo "-- evaluating hybrid method (easy problem)"
 for benchmark in "${benchmarks[@]}"; do
     paynt hybrid_easy "${benchmark}" "easy" "hybrid" "${timeout}"
 done

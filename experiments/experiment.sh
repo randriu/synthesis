@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # implicit synthesis timeout
-timeout=0
-if [ -n "$1"]; then
+timeout=1s
+if [ -n "$1" ]; then
     timeout=$1
 fi
 
