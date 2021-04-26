@@ -3,10 +3,10 @@ import pytest
 import logging
 import click.testing
 
-import dynasty
-import dynasty.cli
+import paynt
+import paynt.cli
 logger = logging.getLogger(__name__)
-dynasty.cli.setup_logger("dynasty_tests.log")
+paynt.cli.setup_logger("paynt_tests.log")
 
 
 benchmarks_feasibility = [
@@ -40,8 +40,8 @@ def test_feasibility_script(project, sketch, constants, allowed, properties, res
                method
                ]
     runner = click.testing.CliRunner()
-    logger.info("dynasty.py " + " ".join(command))
-    result = runner.invoke(dynasty.cli.dynasty, command)
+    logger.info("paynt.py " + " ".join(command))
+    result = runner.invoke(paynt.cli.paynt, command)
     assert result.exit_code == 0, result.output
 #    assert os.path.isfile(target_file)
 #    os.remove(target_file)
@@ -74,8 +74,8 @@ def test_optimal_feasibility_script(project, sketch, constants, allowed, propert
                method
                ]
     runner = click.testing.CliRunner()
-    logger.info("dynasty.py " + " ".join(command))
-    result = runner.invoke(dynasty.cli.dynasty, command)
+    logger.info("paynt.py " + " ".join(command))
+    result = runner.invoke(paynt.cli.paynt, command)
     assert result.exit_code == 0, result.output
 #    assert os.path.isfile(target_file)
 #    os.remove(target_file)

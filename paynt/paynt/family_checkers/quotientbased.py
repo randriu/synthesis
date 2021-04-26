@@ -6,12 +6,12 @@ import math
 import stormpy
 import stormpy.core
 
-import dynasty.jani
-from dynasty.jani.jani_quotient_builder import *
-from dynasty.jani.quotient_container import ThresholdSynthesisResult as ThresholdSynthesisResult
-from dynasty.jani.quotient_container import Engine as Engine, ModelHandling
-from dynasty.annotated_property import AnnotatedProperty
-from dynasty.family_checkers.familychecker import FamilyChecker, HoleOptions
+import paynt.jani
+from paynt.jani.jani_quotient_builder import *
+from paynt.jani.quotient_container import ThresholdSynthesisResult as ThresholdSynthesisResult
+from paynt.jani.quotient_container import Engine as Engine, ModelHandling
+from paynt.annotated_property import AnnotatedProperty
+from paynt.family_checkers.familychecker import FamilyChecker, HoleOptions
 
 logger = logging.getLogger(__file__)
 
@@ -124,7 +124,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
                 self._analyse_suboptions(oracle, hole_options[0], threshold)
             # TODO select right threshold.
             threshold_synthesis_result = oracle.decided(threshold)
-            if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
+            if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
                 logger.debug("Undecided.")
                 oracle.scheduler_color_analysis()
                 hole_options = self.split_hole_options(
@@ -190,7 +190,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
             else:
                 self._analyse_suboptions(oracle, hole_options[0], threshold)
             threshold_synthesis_result = oracle.decided(threshold)
-            if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
+            if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
                 logger.debug("Undecided.")
                 improved = False
                 if hole_options[0].size() > 1:
@@ -319,7 +319,7 @@ class LiftingChecker(QuotientBasedFamilyChecker):
             else:
                 self._analyse_suboptions(oracle, hole_options[0], threshold)
             threshold_synthesis_result = oracle.decided(threshold)
-            if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
+            if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.UNDECIDED:
                 logger.debug("Undecided.")
 
                 if hole_options[0].size() > 2:
@@ -579,24 +579,24 @@ class ConsistentSchedChecker(QuotientBasedFamilyChecker):
             if mode == 0:
                 # Plain feasibility checking.
                 threshold_synthesis_result = oracle.decided(threshold)
-                if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.ABOVE and self._accept_if_above:
+                if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.ABOVE and self._accept_if_above:
                     return True, selected_hole_option.pick_one_in_family(), None
-                if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.BELOW and not self._accept_if_above:
+                if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.BELOW and not self._accept_if_above:
                     return True, selected_hole_option.pick_one_in_family(), None
             elif mode == 1:
                 # Optimal feasibility checking.
                 threshold_synthesis_result = oracle.decided(threshold)
-                if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.ABOVE and self._optimality_setting.direction == "max":
+                if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.ABOVE and self._optimality_setting.direction == "max":
                     threshold = oracle.upper_bound()
                     best_result = selected_hole_option.pick_one_in_family()
-                if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.BELOW and self._optimality_setting.direction == "min":
+                if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.BELOW and self._optimality_setting.direction == "min":
                     threshold = oracle.lower_bound()
                     best_result = selected_hole_option.pick_one_in_family()
             elif mode == 2:
                 threshold_synthesis_result = oracle.decided(threshold)
-                if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.ABOVE:
+                if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.ABOVE:
                     above.append(selected_hole_option)
-                if threshold_synthesis_result == dynasty.jani.quotient_container.ThresholdSynthesisResult.BELOW:
+                if threshold_synthesis_result == paynt.jani.quotient_container.ThresholdSynthesisResult.BELOW:
                     below.append(selected_hole_option)
 
             logger.info("Ran for {}, expect total up to: {}".format(prep_time + time.time() - iter_start, prep_time + (

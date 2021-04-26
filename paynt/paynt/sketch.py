@@ -1,5 +1,6 @@
 import logging
 
+import os
 import re
 import numpy
 
@@ -12,6 +13,40 @@ from .family_checkers.familychecker import HoleOptions
 logger = logging.getLogger(__name__)
 
 class Sketch():
+
+    @classmethod
+    def load_sketch(cls, sketch_path):
+        # read lines
+        with open(sketch_path) as f:
+            sketch_lines = f.readlines()
+
+        # strip hole definitions
+        hole_re = re.compile(r'^hole\s+(.*?)\s+(.*?)\s+in\s+\{(.*?)\};$')
+        sketch_output = []
+        hole_definitions = OrderedDict()
+        for line in sketch_lines:
+            match = hole_re.search(line)
+            if match is not None:
+                hole_type = match.group(1)
+                hole_name = match.group(2)
+                hole_options = match.group(3).replace(" ","")
+                hole_definitions[hole_name] = hole_options
+                line = f"const {hole_type} {hole_name};"
+            sketch_output.append(line)
+
+        # store stripped sketch to a temporary file
+        tmp_path = sketch_path + ".tmp"
+        with open(tmp_path, 'w') as f:
+            for line in sketch_output:
+                print(line, end="", file=f)
+        
+        # parse temprorary sketch
+        program = stormpy.parse_prism_program(tmp_path)
+
+        # delete temporary sketch
+        os.remove(tmp_path)
+
+        return program,hole_definitions
 
     @classmethod
     def parse_properties(cls, program, properites_path):
@@ -90,14 +125,6 @@ class Sketch():
         jani = jani.define_constants(constants_map)
         return jani, properties, optimality_criterion
     
-    @classmethod        
-    def identify_holes(cls, jani):
-        holes = OrderedDict()
-        for c in jani.constants:
-            if not c.defined:
-                holes[c.name] = c
-        return holes
-    
     @classmethod
     def annotate_properties(cls, program, jani, constant_str, properties, optimality_criterion):
         constants_map = cls.constants_map(program, jani, constant_str)
@@ -114,62 +141,65 @@ class Sketch():
         return properties, optimality_criterion
 
     @classmethod
-    def load_template_definitions(cls, allowed_path, program, jani, holes):
-        hole_options = HoleOptions()
+    def parse_hole_definitions(cls, program, hole_definitions, jani):
+
+        # identify undefined constants
+        constants = OrderedDict()
+        for c in jani.constants:
+            if not c.defined:
+                constants[c.name] = c
+
+        # ensure that all undefined constants are indeed holes
+        assert len(constants) == len(hole_definitions.keys())
 
         # parse allowed options
         definitions = OrderedDict()
-        with open(allowed_path) as file:
-            for line in file:
-                line = line.rstrip()
-                if not line or line == "":
-                    continue
-                if line.startswith("#"):
-                    continue
-                entries = line.strip().split(";")
-                definitions[entries[0]] = entries[1:]
+        for hole,definition in hole_definitions.items():
+            definitions[hole] = definition.split(",")
 
+        hole_options = HoleOptions()
         constants_map = dict()
-        ordered_holes = list(holes.keys())
+        ordered_holes = list(constants.keys())
         for k in ordered_holes:
             v = definitions[k]
             ep = stormpy.storage.ExpressionParser(program.expression_manager)
             ep.set_identifier_mapping(dict())
             if len(v) == 1:
-                constants_map[holes[k].expression_variable] = ep.parse(v[0])
-                del holes[k]
+                constants_map[constants[k].expression_variable] = ep.parse(v[0])
+                del constants[k]
             else:
                 hole_options[k] = [ep.parse(x) for x in v]
 
         # Eliminate holes with just a single option.
         jani = jani.define_constants(constants_map).substitute_constants()
-        assert hole_options.keys() == holes.keys()
+        assert hole_options.keys() == constants.keys()
 
-        logger.debug(f"Template variables: {hole_options}")
-        design_space = numpy.prod([len(v) for v in hole_options.values()])
-        logger.info(f"Design space (without constraints): {design_space}")
+        return jani, constants, hole_options
 
-        return jani, hole_options
-
-    def __init__(self, sketch_path, allowed_path, properties_path, constant_str):
+    def __init__(self, sketch_path, properties_path, constant_str):
         logger.info(f"Loading sketch from {sketch_path} with constants {constant_str}")
-        self.program = stormpy.parse_prism_program(sketch_path)
+        self.program, hole_definitions = self.load_sketch(sketch_path)
         
         logger.info(f"Loading properties from {properties_path} with constants {constant_str}")
-        self.properties, self.optimality_criterion, self.optimality_epsilon = self.parse_properties(self.program, properties_path)
+        properties, optimality_criterion, self.optimality_epsilon = self.parse_properties(
+            self.program, properties_path)
 
         logger.debug("Constructing JANI program...")
-        self.jani, self.properties, self.optimality_criterion = self.construct_jani(
-            self.program, self.properties, self.optimality_criterion, constant_str)
-        assert self.program.expression_manager == self.jani.expression_manager # sanity check
-
-        logger.debug("Searching for holes in sketch ...")
-        self.holes = self.identify_holes(self.jani)
-        logger.debug(f"Holes found: {list(self.holes.keys())}")
+        jani, properties, optimality_criterion = self.construct_jani(
+            self.program, properties, optimality_criterion, constant_str)
+        assert self.program.expression_manager == jani.expression_manager # sanity check
 
         logger.debug("Annotating properties ...")
         self.properties, self.optimality_criterion = self.annotate_properties(
-            self.program, self.jani, constant_str, self.properties, self.optimality_criterion)
-        logger.info(f"Loading hole options from {allowed_path}")
-        self.jani, self.hole_options = self.load_template_definitions(allowed_path, self.program, self.jani, self.holes)
+            self.program, jani, constant_str, properties, optimality_criterion)
+        
+        logger.debug("Parsing hole definitions ...")
+        self.jani, self.holes, self.hole_options = self.parse_hole_definitions(self.program, hole_definitions, jani)
+        logger.debug(f"Holes found: {list(self.hole_options.keys())}")
+
+        logger.debug(f"Template variables: {self.hole_options}")
+        design_space = numpy.prod([len(v) for v in self.hole_options.values()])
+        logger.info(f"Design space (without constraints): {design_space}")
+
+        
 

@@ -3,10 +3,10 @@ import unittest
 import subprocess
 import logging
 
-from ..utils.dynasty_utils import DynastyUtils
+from ..utils.paynt_utils import PayntUtils
 
 """
-HybridTestSuite, which ensures that dynasty works on the smoke level.
+HybridTestSuite, which ensures that paynt works on the smoke level.
 """
 class HybridTestSuite(unittest.TestCase):
 
@@ -19,9 +19,9 @@ class HybridTestSuite(unittest.TestCase):
     def test_hybrid_herman_5(self):
         # 2.exercise phase
         process = subprocess.Popen(['python3',
-            DynastyUtils.getPathToDynastyExecutable(),
+            PayntUtils.getPathToPayntExecutable(),
             '--project',
-            DynastyUtils.getPathToWorkspaceExamples() + '/herman/5/',
+            PayntUtils.getPathToWorkspaceExamples() + '/herman/5/',
             'hybrid',
             '--short-summary',
             '--constants',

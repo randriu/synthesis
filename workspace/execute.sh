@@ -137,7 +137,7 @@ function test_rewards() {
 }
 
 function run() {
-    timeout=1m
+    # timeout=2
     parallel=true
     # verbose=true
     # optimal=true
@@ -158,8 +158,8 @@ function run() {
 
 reset_log
 
-test_release
-# run
+# test_release
+run
 # test_rewards
 
 # exit
