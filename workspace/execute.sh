@@ -137,14 +137,14 @@ function test_rewards() {
 }
 
 function run() {
-    # timeout=1s
+    timeout=1m
     parallel=true
     # verbose=true
     # optimal=true
     
     # model=("dpm/orig-bat100" 3 140 140 1.0)
     # model=("pole/orig" 0 16.7 16.7 1.0)
-    dice=("dice/test" 0 16.7 16.7 1.0)
+    dice=("dice/5" 0 16.7 16.7 1.0)
     
     # running ##########
 

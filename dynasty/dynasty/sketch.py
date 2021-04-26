@@ -167,7 +167,6 @@ class Sketch():
         self.holes = self.identify_holes(self.jani)
         logger.debug(f"Holes found: {list(self.holes.keys())}")
 
-        # annotate all properties
         logger.debug("Annotating properties ...")
         self.properties, self.optimality_criterion = self.annotate_properties(
             self.program, self.jani, constant_str, self.properties, self.optimality_criterion)

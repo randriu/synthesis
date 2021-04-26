@@ -1,9 +1,7 @@
 import sys
 import logging
-import pickle
 import click
 import os
-import time
 
 from dynasty import version
 from dynasty.family_checkers.familychecker import FamilyCheckMethod
