@@ -13,11 +13,11 @@ export SYNTHESIS_ENV=$SYNTHESIS/env
 export STORM_DIR=$SYNTHESIS/storm
 export STORM_BLD=$STORM_DIR/build
 
-export DYNASTY_DIR=$SYNTHESIS/dynasty
+export DYNASTY_DIR=$SYNTHESIS/paynt
 
 ### storm patch ################################################################
 
-dynasty-patch-create() {
+paynt-patch-create() {
 
     local storm_src=$SYNTHESIS/storm/src
     local patch_storm_src=$SYNTHESIS/patch/storm/src
@@ -29,7 +29,7 @@ dynasty-patch-create() {
 
 }
 
-dynasty-patch() {
+paynt-patch() {
     rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
 }
 
@@ -58,7 +58,7 @@ stormpy-build() {
     cd ~-
 }
 
-dynasty-install() {
+paynt-install() {
     cd $DYNASTY_DIR
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py install
@@ -95,7 +95,7 @@ alias pb='stormpy-build'
 alias sr='storm-rebuild'
 
 
-### executing dynasty ##########################################################
+### executing paynt ##########################################################
 
 export WORKSPACE=$SYNTHESIS/workspace
 export DYNASTY_LOG=$WORKSPACE/log
@@ -103,7 +103,7 @@ export DYNASTY_LOG=$WORKSPACE/log
 alias enva='source $SYNTHESIS_ENV/bin/activate'
 alias envd='deactivate'
 
-function dynasty() {
+function paynt() {
     local core=0
     if [ -n "$1" ]; then
         core=$1
@@ -120,16 +120,16 @@ function dynasty() {
     cd ~-
 }
 function d() {
-    dynasty $1
+    paynt $1
 }
 function db() {
-    dynasty $1 & disown
+    paynt $1 & disown
 }
 
-alias dpid='pgrep -f "^python3 .*/dynasty.py .*"'
-alias dtime='ps -aux | grep "python3 .*/dynasty.py"'
-alias dshow='pgrep -af "^python3 .*/dynasty.py .*"'
-alias dcount='pgrep -afc "^python3 .*/dynasty.py .*"'
+alias dpid='pgrep -f "^python3 .*/paynt.py .*"'
+alias dtime='ps -aux | grep "python3 .*/paynt.py"'
+alias dshow='pgrep -af "^python3 .*/paynt.py .*"'
+alias dcount='pgrep -afc "^python3 .*/paynt.py .*"'
 alias dkill='dpid | xargs kill'
 
 dlog() {

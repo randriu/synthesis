@@ -3,7 +3,7 @@ import time
 
 import stormpy
 
-import dynasty.cegis.stats
+import paynt.cegis.stats
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class Verifier:
         self._dont_care_set = None
         self.properties = None
         self.qualitative_properties = None
-        self.stats = dynasty.cegis.stats.Stats()
+        self.stats = paynt.cegis.stats.Stats()
         self.cex_options = stormpy.SMTCounterExampleGeneratorOptions()
         self._optimality = None
         self._opt_value = None

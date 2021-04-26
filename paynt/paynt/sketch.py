@@ -7,7 +7,7 @@ import stormpy
 
 from collections import OrderedDict
 from .annotated_property import AnnotatedProperty
-from dynasty.family_checkers.familychecker import HoleOptions
+from .family_checkers.familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 

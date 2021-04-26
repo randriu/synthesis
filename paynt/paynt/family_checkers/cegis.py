@@ -8,9 +8,9 @@ from collections import OrderedDict
 
 import stormpy
 
-from dynasty.cegis.stats import SynthetiserStats as SynthetiserStates
-from dynasty.cegis.verifier import Verifier
-from dynasty.family_checkers.familychecker import FamilyChecker
+from paynt.cegis.stats import SynthetiserStats as SynthetiserStates
+from paynt.cegis.verifier import Verifier
+from paynt.family_checkers.familychecker import FamilyChecker
 
 logger = logging.getLogger(__name__)
 

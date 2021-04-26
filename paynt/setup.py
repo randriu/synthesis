@@ -17,7 +17,7 @@ def obtain_version():
     """
     verstr = "unknown"
     try:
-        verstrline = open('dynasty/_version.py', "rt").read()
+        verstrline = open('paynt/_version.py', "rt").read()
     except EnvironmentError:
         pass  # Okay, there is no version file.
     else:
@@ -26,7 +26,7 @@ def obtain_version():
         if mo:
             verstr = mo.group(1)
         else:
-            raise RuntimeError("unable to find version in dynasty/_version.py")
+            raise RuntimeError("unable to find version in paynt/_version.py")
     return verstr
 
 
@@ -73,14 +73,14 @@ setup(
     url="https://github.com/moves-rwth/sketching",
     description="Dynasty: probabilistic program sketches with PCTL formulae",
     long_description="Dynasty is a prototype implementation for synthesis in probabilistic program sketches and PCTL formulae",
-    packages=["dynasty", "dynasty.cegis", "dynasty.family_checkers", "dynasty.jani", "dynasty.model_handling"],
+    packages=["paynt", "paynt.cegis", "paynt.family_checkers", "paynt.jani", "paynt.model_handling"],
     install_requires=[ 'click', 'stormpy', 'z3-solver'],
     extras_require={},
     package_data={
-        'dynasty': [],
+        'paynt': [],
     },
     scripts=[
-        'dynasty.py'],
+        'paynt.py'],
     cmdclass={
         'develop': ConfigDevelop,
         'install': ConfigInstall,

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# downloaded prerequisites
+# download prerequisites
 # git clone -b master14 https://github.com/smtrat/carl
 # git clone https://github.com/moves-rwth/pycarl.git
 # wget https://zenodo.org/record/4288652/files/moves-rwth/storm-1.6.3.zip
@@ -24,7 +24,7 @@ DOWNLOADS=$PREREQUISITES/downloads
 TACAS_DEPENDENCIES=$PREREQUISITES/tacas-dependencies
 SYNTHESIS_ENV=$SYNTHESIS/env
 
-#unzip downloaded prerequisites
+# unzip downloaded prerequisites
 cd $PREREQUISITES
 unzip $DOWNLOADS/carl.zip
 mv carl-master14 carl
@@ -111,8 +111,8 @@ python3 setup.py build_ext --jobs $THREADS develop
 deactivate
 cd $SYNTHESIS
 
-# dynasty
-cd $SYNTHESIS/dynasty
+# paynt
+cd $SYNTHESIS/paynt
 source $SYNTHESIS_ENV/bin/activate
 python3 setup.py install
 #[TEST] python3 setup.py test
@@ -123,4 +123,4 @@ cd $SYNTHESIS
 
 # test
 # source env/bin/activate
-# python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid
+# python3 paynt/paynt.py --project tacas21-benchmark/grid --properties easy.properties hybrid

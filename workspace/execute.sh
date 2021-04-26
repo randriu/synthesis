@@ -12,7 +12,7 @@ verbose=false
 parallel=false
 
 # workspace settings
-dynasty_exe="$SYNTHESIS/dynasty/dynasty.py"
+paynt_exe="$SYNTHESIS/paynt/paynt.py"
 projects_dir="$SYNTHESIS/workspace/examples"
 log_dir="$SYNTHESIS/workspace/log"
 log_file="${log_dir}/log_${core}.txt"
@@ -41,15 +41,15 @@ function choose_project() {
     t_step=${preset[4]}
 }
 
-function python_dynasty() {
+function python_paynt() {
     local method=$1
-    local dynasty_call="python3 ${dynasty_exe} --project ${projects_dir}/${project}/ $method --short-summary"
+    local paynt_call="python3 ${paynt_exe} --project ${projects_dir}/${project}/ $method --short-summary"
     local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    echo \$ ${dynasty_call} ${constants} ${optimality}
-    timeout ${timeout} ${dynasty_call} ${constants} ${optimality}
+    echo \$ ${paynt_call} ${constants} ${optimality}
+    timeout ${timeout} ${paynt_call} ${constants} ${optimality}
 }
 
-function dynasty() {
+function paynt() {
     local method=$1
     local parallelity=""
     if [ ${parallel} = "true" ]; then
@@ -59,7 +59,7 @@ function dynasty() {
     if [ ${verbose} = "false" ]; then
         verbosity=${verbosity}' | grep "^> "'
     fi
-    command="python_dynasty $method | ${verbosity} ${parallelity}"
+    command="python_paynt $method | ${verbosity} ${parallelity}"
     eval ${command}
 }
 
@@ -68,7 +68,7 @@ function try_thresholds() {
     local project=$2
     choose_project $project
     for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
-        dynasty $method
+        paynt $method
     done
     wait
 }
@@ -158,8 +158,8 @@ function run() {
 
 reset_log
 
-# test_release
-run
+test_release
+# run
 # test_rewards
 
 # exit

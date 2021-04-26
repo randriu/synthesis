@@ -3,14 +3,14 @@ import logging
 import click
 import os
 
-from dynasty import version
-from dynasty.family_checkers.familychecker import FamilyCheckMethod
+from paynt import version
+from paynt.family_checkers.familychecker import FamilyCheckMethod
 
-from dynasty.sketch import Sketch
-from dynasty.hybrid.enumeration import EnumerationChecker
-from dynasty.hybrid.cegis import CEGISChecker
-from dynasty.hybrid.ar import ARChecker
-from dynasty.hybrid.integrated_checker import IntegratedChecker
+from paynt.sketch import Sketch
+from paynt.hybrid.enumeration import EnumerationChecker
+from paynt.hybrid.cegis import CEGISChecker
+from paynt.hybrid.ar import ARChecker
+from paynt.hybrid.integrated_checker import IntegratedChecker
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def setup_logger(log_path):
 @click.option('--ce-quality', '-ceq', help="Compute counter-examples qualities.", is_flag=True, default=False)
 @click.option('--ce-maxsat', '-cem', help="Compute quality of maxsat counter-examples.", is_flag=True, default=False)
 @click.argument("method", type=click.Choice(['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid']))  # +
-def dynasty(
+def paynt(
         project, sketch, allowed, properties, constants, method, short_summary, ce_quality, ce_maxsat
 ):
     print("This is Dynasty version {}.".format(version()))
@@ -124,8 +124,8 @@ def dynasty(
 
 
 def main():
-    setup_logger("dynasty.log")
-    dynasty()
+    setup_logger("paynt.log")
+    paynt()
 
 if __name__ == "__main__":
     main()
