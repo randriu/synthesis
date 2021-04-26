@@ -1,8 +1,8 @@
-# Artifact for submission 87
+# PAYNT
 
-This is an artifact supplemented with the TACAS 2021 submission __Roman Andriushchenko, Milan Češka, Sebastian Junges, and Joost-Pieter Katoen:__ **Inductive Synthesis for Probabilistic ProgramsReaches New Horizons**. The tool represents a branch of the [dynasty](https://github.com/moves-rwth/dynasty) tool for probabilistic synthesis and contains the dynasty code as well as its adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy) (prerequisites for dynasty). This artifact is made publicly available at [zenodo](https://zenodo.org/record/4425438).
+intro
 
-**Disclaimer.** Since the initial submission of the paper manuscript, the implementation of the tool has been subject to multiple improvements and optimizations, with the most drastic changes concerning the CEGAR method and the CEGAR loop of the integrated method. As a consequence of this, the experimental evaluation of the synthesis methods has been very slightly reworked in the revised manuscript to better highlight the differences between the synthesis approaches. The conclusions drawn from the presented experiments remain the same, although in multiple cases the novel integrated method has demonstrated even more distinguished results.
+The tool represents a branch of the [dynasty](https://github.com/moves-rwth/dynasty) tool for probabilistic synthesis and contains the dynasty code as well as its adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy) (prerequisites for dynasty).
 
 ## Installation of the artifact
 
@@ -16,14 +16,14 @@ Compilation of the tool and of all of its prerequisites will take a couple of ho
 
 ## Initial testing of the artifact
 
-Having installed the tool, you can test it by activating the python envorinment and running the dynasty tool to evaluate a simple synthesis problem:
+Having installed the tool, you can quickly test it by activating the python envorinment and running the dynasty tool to evaluate a simple synthesis problem:
 
 ```sh
 source env/bin/activate
 python3 dynasty/dynasty.py --project tacas21-benchmark/grid --properties easy.properties hybrid
 ```
 
-The syntax of the command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the TACAS'21 paper and synthesize it wrt. the easy property using the hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
+The syntax of the command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the CAV'21 paper and synthesize it wrt. the easy property using the hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
 formula 1: P>=931/1000 [F ("goal" & (c < 40))]
@@ -44,7 +44,7 @@ Reproducing all of the experiments discussed in the paper is a time-consuming pr
 ./experiment.sh --quick
 ```
 
-from the `experiments` folder. This will run a small subset of the experiments, namely performance of CEGAR and the hybrid methods on the basic benchmark, as reported in Table 2, as well the quality of counterexamples for the novel approach (columns `trivial` and `family`). Reproducing these experiments should take about 30 minutes and even less if you enable multiple cores on your VM to allow concurrent evaluation of experiments. To reproduce all experiments, one may then run 
+from the `experiments` folder. This will run a small subset of the experiments, namely performance of the hybrid synthesis method on the basic benchmark, as reported in Table 1. Reproducing these experiments should take about 30 minutes and even less if you enable multiple cores on your VM to allow concurrent evaluation of experiments. To reproduce all experiments, one may then run 
 
 ```sh
 ./experiment.sh
@@ -69,6 +69,10 @@ Choosing concrete values for the timeouts will define how many experiments you w
 Regarding the `TIMEOUT_LARGE_MODELS` value, choosing `0s` will allow you to ignore these experiments completely. Option `TIMEOUT_LARGE_MODELS=30m` is the minimum value that will safely allow the integrated method to finish. Experiments on large models with this timeout will amount to three hours. For the CEGAR method, you will obtain very rough estimates of their performance.  Unfortunately, these estimates will be very poor: obtaining good estimates requires running CEGAR for at least five hours (recommended default value), resulting in the overall runtime of 21 hours. In our evaluation, we used `TIMEOUT_LARGE_MODELS=24h`.
 
 Finally, note that the `experiment.sh` script evaluates experiments concurrently based on the number `nproc` of CPU cores available on your VM. Therefore, supplying your VM with multiple cores will greatly reduce computation time. For instance, having a VM with 4 CPU cores and choosing recommended settings `TIMEOUT_SMALL_MODELS=20m` and `TIMEOUT_LARGE_MODELS=5h` will allow you to reproduce almost all experiments and obtain relatively good estimates of the CEGAR behaviour in only about 6 hours of uptime. Also note that all of the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
+
+
+
+
 
 ## How to run synthesis manually
 

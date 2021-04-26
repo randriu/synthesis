@@ -491,7 +491,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         if PRINT_PROFILING:
             Profiler.print()
 
-        if self._optimal_value is not None:
+        if self.input_has_optimality_property() and self._optimal_value is not None:
             assert not self.families
             logger.info(f"Found optimal assignment: {self._optimal_value}")
             return self._optimal_assignment, self._optimal_value

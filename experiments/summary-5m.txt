@@ -1,0 +1,10 @@
+
+Table 1 
+
+model                 parameters      family size     avg. MC size    1-by-1          hybrid (hard)   hybrid (easy)   
+    dpm               16              43046721        -               29161776.0*     -               -               
+    maze              22              9437184         -               134024.0*       -               -               
+    herman            7               3125000         -               84864.0*        -               -               
+    pole              17              1327104         5641            79432.0*        -               6.69            
+    grid              8               65536           1224            1364.0*         51.91           24.1            
+

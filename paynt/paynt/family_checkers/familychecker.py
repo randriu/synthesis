@@ -155,58 +155,22 @@ class FamilyChecker:
 
         self.properties = sketch.properties
 
-        optimality_direction = "min" if sketch.optimality_criterion.raw_formula.optimality_type == stormpy.OptimizationDirection.Minimize else "max"
-        self._optimal_value = 0.0 if optimality_direction == "max" else 999999999999999999
-        self._optimality_setting = OptimalitySetting(sketch.optimality_criterion, optimality_direction, sketch.optimality_epsilon)
-        self._optimal_assignment = None
+        self._optimality_setting = None
+        if sketch.optimality_criterion is not None:
+            optimality_direction = None
+            opt_type = sketch.optimality_criterion.raw_formula.optimality_type
+            if opt_type == stormpy.OptimizationDirection.Minimize:
+                optimality_direction = "min"
+                self._optimal_value = 999999999999999999
+            else:
+                optimality_direction = "max"
+                self._optimal_value = 0.0
+            self._optimality_setting = OptimalitySetting(sketch.optimality_criterion, optimality_direction, sketch.optimality_epsilon)
+            self._optimal_assignment = None
 
         self.qualitative_properties = None
         self._engine = Engine.Sparse # FIXME: dd engine
         self.stats_keyword = "genericfamilychecker-stats" # ?
-
-    # symmetries and differents (deprecated?)
-    # def load_restrictions(self, location):
-    #     logger.debug("Load restrictions")
-    #     mode = "none"
-    #     symmetries = list()
-    #     differents = list()
-    #     with open(location) as file:
-    #         for line in file:
-    #             line = line.rstrip()
-    #             if not line or line == "":
-    #                 continue
-    #             if line.startswith("#"):
-    #                 continue
-    #             if line.startswith("!symmetries"):
-    #                 mode = "symmetries"
-    #                 continue
-    #             if line.startswith("!different"):
-    #                 mode = "different"
-    #                 continue
-    #             if mode == "symmetries":
-    #                 entries = line.strip().split(";")
-    #                 for e in entries:
-    #                     if e != "":
-    #                         symmetries.append(e.strip().split(","))
-    #                 continue
-    #             if mode == "different":
-    #                 entries = line.strip().split(";")
-    #                 for e in entries:
-    #                     if e == "":
-    #                         continue
-    #                     differents.append(e.strip().split(","))
-    #             else:
-    #                 raise RuntimeError("Restriction file does not set appropriate mode")
-    #     for symmetry in symmetries:
-    #         for hole_name in symmetry:
-    #             if hole_name not in self.holes:
-    #                 raise ValueError(f"Key {hole_name} not in template, but in list of symmetries")
-    #     for different in differents:
-    #         for hole_name in different:
-    #             if hole_name not in self.holes:
-    #                 raise ValueError(f"Key {hole_name} not in template, but in list of differents")
-    #     self.symmetries = symmetries
-    #     self.differents = differents
 
     def input_has_multiple_properties(self):
         if self._optimality_setting is not None:

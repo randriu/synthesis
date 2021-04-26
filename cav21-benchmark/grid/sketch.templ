@@ -1,16 +1,16 @@
 dtmc
 
-const int M_0_1;
-const int M_1_1;
-const int M_2_1;
-const int M_3_1;
-const int P_0_1;
-const int P_1_1;
-const int P_2_1;
-const int P_3_1;
+hole int M_0_1 in {0,1,2,3};
+hole int M_1_1 in {0,1,2,3};
+hole int M_2_1 in {0,1,2,3};
+hole int M_3_1 in {0,1,2,3};
+hole int P_0_1 in {1,2,3,4};
+hole int P_1_1 in {1,2,3,4};
+hole int P_2_1 in {1,2,3,4};
+hole int P_3_1 in {1,2,3,4};
 
-const int CMAX;
-const double THRESHOLD;
+const int CMAX = 40;
+//const double THRESHOLD;
 
 module countermodule
     c : [0..CMAX] init 0;

@@ -19,8 +19,8 @@
 
 dtmc
 
-const int CMAX;
-const double THRESHOLD;
+const int CMAX = 0;
+//const double THRESHOLD;
 
 // o=0 - observation in initial state
 // o=1 - west and north walls (s0)
@@ -29,30 +29,30 @@ const double THRESHOLD;
 // o=4 - east and north wall (s4)
 // o=5 - east and west walls (s5, s6, s7, s8, s9 and s10)
 // o=6 - east, west and south walls (s11 and s12)
-const int M_0_1;
-const int M_0_2;
-const int M_0_3;
-const int M_0_4;
-const int M_0_5;
-const int M_0_6;
-const int M_1_1;
-const int M_1_2;
-const int M_1_3;
-const int M_1_4;
-const int M_1_5;
-const int M_1_6;
-const int P_0_1;
-const int P_0_2;
-const int P_0_3;
-const int P_0_4;
-const int P_0_5;
-const int P_0_6;
-const int P_1_1;
-const int P_1_2;
-const int P_1_3;
-const int P_1_4;
-const int P_1_5;
-const int P_1_6;
+hole int M_0_1 in {0,1};
+hole int M_0_2 in {0,1};
+hole int M_0_3 in {0,1};
+hole int M_0_4 in {0,1};
+hole int M_0_5 in {0,1};
+hole int M_0_6 in {0,1};
+hole int M_1_1 in {0,1};
+hole int M_1_2 in {0,1};
+hole int M_1_3 in {0,1};
+hole int M_1_4 in {0,1};
+hole int M_1_5 in {0,1};
+hole int M_1_6 in {0,1};
+hole int P_0_1 in {2,3};
+hole int P_0_2 in {2,4};
+hole int P_0_3 in {2,3,4};
+hole int P_0_4 in {3,4};
+hole int P_0_5 in {1,3};
+hole int P_0_6 in {1};
+hole int P_1_1 in {2,3};
+hole int P_1_2 in {2,4};
+hole int P_1_3 in {2,3,4};
+hole int P_1_4 in {3,4};
+hole int P_1_5 in {1,3};
+hole int P_1_6 in {1};
 
 module actuator
     v : [0..4] init 0;

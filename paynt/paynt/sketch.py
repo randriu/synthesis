@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import numpy
+import uuid
 
 import stormpy
 
@@ -35,7 +36,7 @@ class Sketch():
             sketch_output.append(line)
 
         # store stripped sketch to a temporary file
-        tmp_path = sketch_path + ".tmp"
+        tmp_path = sketch_path + str(uuid.uuid4())
         with open(tmp_path, 'w') as f:
             for line in sketch_output:
                 print(line, end="", file=f)
@@ -192,10 +193,10 @@ class Sketch():
         logger.debug("Annotating properties ...")
         self.properties, self.optimality_criterion = self.annotate_properties(
             self.program, jani, constant_str, properties, optimality_criterion)
-        
+
         logger.debug("Parsing hole definitions ...")
         self.jani, self.holes, self.hole_options = self.parse_hole_definitions(self.program, hole_definitions, jani)
-        logger.debug(f"Holes found: {list(self.hole_options.keys())}")
+        logger.debug(f"Sketch has {len(self.hole_options.keys())} holes: {list(self.hole_options.keys())}")
 
         logger.debug(f"Template variables: {self.hole_options}")
         design_space = numpy.prod([len(v) for v in self.hole_options.values()])
