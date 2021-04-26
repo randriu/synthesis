@@ -1,22 +1,14 @@
 # PAYNT
 
-intro
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs. PAYNT inputs a program with holes (so-called sketch) and a specification, and outputs concrete hole assignment allowing to satisfy the specification, if such assignment exists. Internally, PAYNT interprets incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemend in python and uses [stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT.
 
-The tool represents a branch of the [dynasty](https://github.com/moves-rwth/dynasty) tool for probabilistic synthesis and contains the dynasty code as well as its adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy) (prerequisites for dynasty).
+## Image with the pre-installed tool
 
-## Installation of the tool
-
-Pre-installed tool is available in [this Ubuntu 20.04 LTS virtual machine](). If you wish to install PAYNT on your system, simply run the installation script (requires network connection):
-
-```sh
-./install.sh
-```
-
-The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`).
+Pre-installed tool is available in [this Ubuntu 20.04 LTS virtual machine](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README.
 
 ## Initial testing of the artifact
 
-Having the tool installed, you can quickly test it by activating the python envorinment and running asking PAYNT to evaluate a simple synthesis problem:
+Having the tool installed, you can quickly test it by activating the python envorinment and asking PAYNT to evaluate a simple synthesis problem:
 
 ```sh
 source env/bin/activate
@@ -36,42 +28,68 @@ average DTMC size: 1232, DTMC checks: 215, iterations: 215
 feasible: no
 ```
 
+Python environment can be deactivated by runnning
 
+```sh
+deactivate
+```
 
 
 ## Reproducing presented experiments
 
-Reproducing all of the experiments discussed in the paper is a time-consuming procedure that can take hundreds of hours. We recommend the reviewers to first run:
+### Reproducing Table 1
+
+Table 1 reported in our CAV'21 submission presents results of 15 different experiments: 5 benchmarks evaluated using one-by-one enumeration and using advanced synthesis method, where the latter approach is investigated wrt. a hard and an easy property. To run these 15 evaluations, simply navigate to `experiments` folder and run the script:
 
 ```sh
-./experiment.sh --quick
+cd experiments
+./experiment.sh timeout
 ```
 
-from the `experiments` folder. This will run a small subset of the experiments, namely performance of the hybrid synthesis method on the basic benchmark, as reported in Table 1. Reproducing these experiments should take about 30 minutes and even less if you enable multiple cores on your VM to allow concurrent evaluation of experiments. To reproduce all experiments, one may then run 
+Here, `timeout` is a timeout value for each individual experiment, e.g. '5m' or '2h'. The script will evaluate the benchmarks and, for each experiment, produce a logfile available in `experiments/logs` folder. As soon as all experiments are finished, the script will parse these logfiles and output a table similar to Table 1. This table will be also stored to `experiment/logs/summary.txt`.
+
+### How to select the timeout value
+
+Based on the runtimes reported in the table, you can select a timeout value that will allow you to complete as many experiments as posssible within your allocated time. Since 1-by-1 enumeration typically requires more than a day to complete, you might be interested in at least completing synthesis via advanced methods (10 of the 15 presented experiments). Here are some suggested values:
+
+`timeout=5m` will complete 4/10 experiments within 1 hour
+`timeout=20m` will complete 6/10 experiments within 3.5 hours
+`timeout=1h` will complete 7/10 experiments within 8.5 hours
+`timeout=2h` will complete 9/10 experiments within 14 hours (recommended value)
+`timeout=12h` will complete 10/10 experiments within 2.5 days
+
+If the experiment associated with one-by-one enumeration hits a timeout, the runtime will be estimated based on the number of rejected assignments. However, in order to obtain reliable estimates, enumeration must run of a significant period of time, i.e. for at a couple of hours. If advanced synthesis method will hit a timeout, then, since its performance cannot be estimated in a meaningful way, the corresponding table entry will contain '-'.
+Finally, statistics about average MC size are taken from logs associated with advanced synthesis (easy property) and, if the corresponding computation was interrupted, the table entry will again display '-'.
+
+Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight.
+
+TODO LOG FILES ARE AVAILABLE
+
+**Please note** that all of the discussed synthesis methods, specifically advanced methods (CEGIS, CEGAR, hybrid) are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs 1-by-1 enumeration or comparative runtimes of synthesizing wrt. easy vs hard property -- should be preserved. Also remember that the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
+
+### Reproducing Figure 5
+
+Figure 5 was created manually based on the PAYNT output of optimal synthesis (hard property) for __Maze__ model. To check the result, you need to let at least the advanced method finish (recommended value `timeout=2h` will guarantee this even on slower CPUs). Alternatively, you can specifically run computation of this model (do not forget to activate python environment):
 
 ```sh
-./experiment.sh
+python3 paynt/paynt.py --project cav21-benchmark/maze --properties hard.properties hybrid
 ```
 
-Notice that the latter call merely evaluates *more* synthesis problems with longer timeouts. We recommend running this script only overnight: at default settings and with VM having 4 CPU cores, this evaluation should take around 6 hours. To understand the experiments and alternatives settings, please consult the remaining sections in which we advise you how to create tables with different user-set timeouts and even how to run individual experiments.
+The last lines of the output (or the last lines of the corresponding log file) should contain the synthesis summary. In particular, PAYNT will display the hole assignment that induces an optimal controller:
 
-**Please note** that all of the discussed synthesis methods -- CEGIS, CEGAR and the novel integrated method -- are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different numbers of iterations as well as execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs CEGAR or overall quality of MaxSat counterexamples vs those obtained by a novel approach -- should be preserved.
+```sh
+hole assignment: M_0_1=1,M_0_2=0,M_0_3=1,M_0_4=0,M_0_5=0,M_0_6=0,M_1_1=1,M_1_2=1,M_1_3=1,M_1_4=0,M_1_5=1,M_1_6=0,P_0_1=2,P_0_2=4,P_0_3=3,P_0_4=4,P_0_5=1,P_1_1=2,P_1_2=2,P_1_3=3,P_1_4=4,P_1_5=3
+```
 
-## How experiments are evaluated automatically
+The holes are of the form `M_m_c` or `P_m_c`, where `m` is a memory value (one bit, 0 or 1) and `o` represents one of six possible wall configurations (observations):
 
-The script `experiment.sh` executes all 63 experiments and creates a separate log for each experiment (see `experiments/logs/` folder). Afterwards, these logs are parsed to generate Tables 1, 2 and 3 reported in the paper. These automatically generated tables are stored in experiments/summary.txt file and are printed to the standard output as well.
+- `o=1` corresponds to red states (0)
+- `o=2` corresponds to orange states (1,3)
+- `o=3` corresponds to green states (2)
+- `o=4` corresponds to gray states (4)
+- `o=5` corresponds to purple states (4)
+- `o=4` corresponds to gray states (4)
 
-Due to the fact that reproducing _all_ of the experiments discussed in the paper would take hundreds of hours, we provide two timeout values defined right at the beginning of the `experiment.sh` script: `TIMEOUT_SMALL_MODELS` and `TIMEOUT_LARGE_MODELS`. While the former value is applied when evaluating smaller benchmarks (Grid, Maze, DPM, Pole, Herman and the smaller variant of Herman-2), the latter is applied only to the larger variant of Herman-2 (see the right part of Table 3). The timeout value is applied to each individual experiment. If the experiment hits the timeout, the corresponding log file will be terminated by "TO" line and the corresponding entry in the auto-generated table will contain a dash '-'. However, if the CEGAR execution hits a timeout, its performance is estimated based on the number of rejected members, and the corresponding table entry will contain this estimate with a star '\*', mirroring the notation adapted in the paper.
-
-Choosing concrete values for the timeouts will define how many experiments you will be able to replicate. The following are some possible values for the smaller `TIMEOUT_SMALL_MODELS` to help you decide:
-
-- `2m` -- two minutes is the 'minimum' value that will allow you to replicate 36/48 experiments that consider smaller benchmarks -- this execution will take roughly 40 minutes.
-- `20m` (recommended default value) -- this setting will result in a computation that lasts approximately 5 hours and will replicate 44/48 experiments
-- `2h` -- this setting (used during our preparation of the paper) will occupy your CPU for 23 hours and will successfully replicate all 48/48 experiments
-
-Regarding the `TIMEOUT_LARGE_MODELS` value, choosing `0s` will allow you to ignore these experiments completely. Option `TIMEOUT_LARGE_MODELS=30m` is the minimum value that will safely allow the integrated method to finish. Experiments on large models with this timeout will amount to three hours. For the CEGAR method, you will obtain very rough estimates of their performance.  Unfortunately, these estimates will be very poor: obtaining good estimates requires running CEGAR for at least five hours (recommended default value), resulting in the overall runtime of 21 hours. In our evaluation, we used `TIMEOUT_LARGE_MODELS=24h`.
-
-Finally, note that the `experiment.sh` script evaluates experiments concurrently based on the number `nproc` of CPU cores available on your VM. Therefore, supplying your VM with multiple cores will greatly reduce computation time. For instance, having a VM with 4 CPU cores and choosing recommended settings `TIMEOUT_SMALL_MODELS=20m` and `TIMEOUT_LARGE_MODELS=5h` will allow you to reproduce almost all experiments and obtain relatively good estimates of the CEGAR behaviour in only about 6 hours of uptime. Also note that all of the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
 
 
 
@@ -195,5 +213,10 @@ P>=0.926 [ F "goal" & c<CMAX ]
 then the synthesizer will be able to provide a satisfying parameter assignment. Also note that assignments provided by individual synthesis methods may differ since in this case the family contains multiple feasible solutions.
 
 
+```sh
+./install.sh
+```
+
+The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`).
 
 
