@@ -61,15 +61,13 @@ Based on the runtimes reported in the table, you can select a timeout value that
 If the experiment associated with one-by-one enumeration hits a timeout, the runtime will be estimated based on the number of rejected assignments. However, in order to obtain reliable estimates, enumeration must run of a significant period of time, i.e. for at a couple of hours. If advanced synthesis method will hit a timeout, then, since its performance cannot be estimated in a meaningful way, the corresponding table entry will contain '-'.
 Finally, statistics about average MC size are taken from logs associated with advanced synthesis (easy property) and, if the corresponding computation was interrupted, the table entry will again display '-'.
 
-Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight.
-
-TODO LOG FILES ARE AVAILABLE
+Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight. The log files for
 
 **Please note** that all of the discussed synthesis methods, specifically advanced methods (CEGIS, CEGAR, hybrid) are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs 1-by-1 enumeration or comparative runtimes of synthesizing wrt. easy vs hard property -- should be preserved. Also remember that the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
 
 ### Reproducing Figure 5
 
-Figure 5 was created manually based on the PAYNT output of optimal synthesis (hard property) for __Maze__ model. To check the result, you need to let at least the advanced method finish (recommended value `timeout=2h` will guarantee this even on slower CPUs). Alternatively, you can specifically run computation of this model (do not forget to activate python environment):
+Figure 5 was created manually based on the output of PAYNT when synthesizing an optimal controller (hard property) for __Maze__ model. To check the result, you need to let at least the advanced method finish (recommended value `timeout=2h` will guarantee this even on slower CPUs). Alternatively, you can specifically run computation of this model (do not forget to activate python environment):
 
 ```sh
 python3 paynt/paynt.py --project cav21-benchmark/maze --properties hard.properties hybrid
@@ -81,7 +79,7 @@ The last lines of the output (or the last lines of the corresponding log file) s
 hole assignment: M_0_1=1,M_0_2=0,M_0_3=1,M_0_4=0,M_0_5=0,M_0_6=0,M_1_1=1,M_1_2=1,M_1_3=1,M_1_4=0,M_1_5=1,M_1_6=0,P_0_1=2,P_0_2=4,P_0_3=3,P_0_4=4,P_0_5=1,P_1_1=2,P_1_2=2,P_1_3=3,P_1_4=4,P_1_5=3
 ```
 
-The holes are of the form `M_m_c` or `P_m_c`, where `m` is a memory value (one bit, 0 or 1) and `o` represents one of six possible wall configurations (observations):
+The holes are of the form `M_m_o` or `P_m_o`, where `m` is a memory value (one bit, 0 or 1) and `o` represents one of six possible wall configurations (observations) encoded in colours on Figure 5:
 
 - `o=1` corresponds to red states (0)
 - `o=2` corresponds to orange states (1,3)
@@ -90,7 +88,7 @@ The holes are of the form `M_m_c` or `P_m_c`, where `m` is a memory value (one b
 - `o=5` corresponds to purple states (4)
 - `o=4` corresponds to gray states (4)
 
-
+Semantics of hole `M_m_c` is ''
 
 
 
