@@ -203,7 +203,7 @@ The resulting sketch describes a *design space* of 10 x 5 x 4 x 3<sup>4</sup> = 
 ### Specification of the required behaviour
 
 The goal is to find the concrete power manager, i.e., the instantiation of the holes, that minimizes power consumption while the expected number of lost requests during the operation time of the server is below 1. 
-Such specification is formalized as a list of temporal logic formulae in the `PRISM` syntax (the specification is also available within the benchmark directory [here](cav21-benchmark/dpm-demo/sketch.properties)):
+Such specification is formalized as a list of temporal logic formulae in the `PRISM` syntax (the specification is also available within the benchmark directory [here](cav21-benchmark/dpm-demo/sketch.properties):
 
 ```shell
 R{"lost"}<= 1 [ F "finished" ]  R{"power"}min=? [ F "finished" ]
