@@ -7,7 +7,7 @@ if [ -n "$1" ]; then
 fi
 
 # setting this value to >1 will enable concurrent evaluation of experiments
-threads=4
+threads=$(nproc)
 
 # run experiments
 printf "> starting experimental evaluation ...\n"
