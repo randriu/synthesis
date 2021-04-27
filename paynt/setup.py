@@ -1,8 +1,6 @@
 from distutils.core import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
-from setuptools.command.test import test
-from wheel import bdist_wheel
 import sys
 import re
 
@@ -62,25 +60,28 @@ class ConfigInstall(install):
     def run(self):
         install.run(self)
 
+
 setup(
-    name="Dynasty",
+    name="paynt",
     version=obtain_version(),
     author="Sebastian Junges",
     author_email="sebastian.junges@cs.rwth-aachen.de",
     maintainer="Sebastian Junges",
     maintainer_email="sebastian.junges@cs.rwth-aachen.de",
     license="GPLv3",
-    url="https://github.com/moves-rwth/sketching",
-    description="Dynasty: probabilistic program sketches with PCTL formulae",
-    long_description="Dynasty is a prototype implementation for synthesis in probabilistic program sketches and PCTL formulae",
-    packages=["paynt", "paynt.cegis", "paynt.family_checkers", "paynt.jani", "paynt.model_handling"],
-    install_requires=[ 'click', 'stormpy', 'z3-solver'],
+    url="https://github.com/gargantophob/synthesis",
+    description="PAYNT (Probabilistic progrAm sYNThesizer)",
+    long_description=
+    "PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs.",
+    packages=["paynt", "paynt.cegis", "paynt.family_checkers", "paynt.jani", "paynt.model_handling", "paynt.hybrid"],
+    install_requires=['click', 'stormpy', 'z3-solver'],
     extras_require={},
     package_data={
         'paynt': [],
     },
     scripts=[
-        'paynt.py'],
+        'paynt.py'
+    ],
     cmdclass={
         'develop': ConfigDevelop,
         'install': ConfigInstall,

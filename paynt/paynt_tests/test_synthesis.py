@@ -9,7 +9,7 @@ HybridTestSuite, which ensures that paynt works on the smoke level.
 """
 
 
-class HybridTestSuite(unittest.TestCase):
+class SynthesisTestSuite(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):

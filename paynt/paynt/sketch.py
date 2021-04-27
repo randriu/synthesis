@@ -13,7 +13,8 @@ from .family_checkers.familychecker import HoleOptions
 
 logger = logging.getLogger(__name__)
 
-class Sketch():
+
+class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path):
@@ -28,11 +29,9 @@ class Sketch():
         for line in sketch_lines:
             match = hole_re.search(line)
             if match is not None:
-                hole_type = match.group(1)
                 hole_name = match.group(2)
-                hole_options = match.group(3).replace(" ","")
-                hole_definitions[hole_name] = hole_options
-                line = f"const {hole_type} {hole_name};"
+                hole_definitions[hole_name] = match.group(3).replace(" ", "")
+                line = f"const {match.group(1)} {hole_name};"
             sketch_output.append(line)
 
         # store stripped sketch to a temporary file
@@ -40,14 +39,14 @@ class Sketch():
         with open(tmp_path, 'w') as f:
             for line in sketch_output:
                 print(line, end="", file=f)
-        
-        # parse temprorary sketch
+
+        # parse temporary sketch
         program = stormpy.parse_prism_program(tmp_path)
 
         # delete temporary sketch
         os.remove(tmp_path)
 
-        return program,hole_definitions
+        return program, hole_definitions
 
     @classmethod
     def parse_properties(cls, program, properites_path):
@@ -55,7 +54,7 @@ class Sketch():
         lines = []
         with open(properites_path) as file:
             for line in file:
-                line = line.replace(" ","")
+                line = line.replace(" ", "")
                 if not line or line == "" or line.startswith("//"):
                     continue
                 lines.append(line)
@@ -63,7 +62,7 @@ class Sketch():
         # strip relative error
         lines_correct = []
         relative_error_re = re.compile(r'^(.*)\{(.*?)\}(=\?.*?$)')
-        relative_error_str = None    
+        relative_error_str = None
         for line in lines:
             match = relative_error_re.search(line)
             if match is not None:
@@ -71,7 +70,7 @@ class Sketch():
                 line = match.group(1) + match.group(3)
             lines_correct.append(line)
         optimality_epsilon = float(relative_error_str) if relative_error_str is not None else 0
-                
+
         # parse all properties
         properties = []
         optimality_criterion = None
@@ -88,7 +87,6 @@ class Sketch():
                     optimality_criterion = prop
 
         return properties, optimality_criterion, optimality_epsilon
-                    
 
     @classmethod
     def constants_map(cls, program, jani, constant_str):
@@ -125,16 +123,16 @@ class Sketch():
         constants_map = cls.constants_map(program, jani, constant_str)
         jani = jani.define_constants(constants_map)
         return jani, properties, optimality_criterion
-    
+
     @classmethod
     def annotate_properties(cls, program, jani, constant_str, properties, optimality_criterion):
         constants_map = cls.constants_map(program, jani, constant_str)
         properties = [
             AnnotatedProperty(
                 stormpy.Property(f"property-{i}", p.raw_formula.clone().substitute(constants_map)),
-                jani, add_prerequisites=False #FIXME: check prerequisites?
+                jani, add_prerequisites=False  # FIXME: check prerequisites?
             ) for i, p in enumerate(properties)
-            ]
+        ]
         if optimality_criterion is not None:
             optimality_criterion = stormpy.Property(
                 "optimality_property", optimality_criterion.raw_formula.clone().substitute(constants_map)
@@ -155,7 +153,7 @@ class Sketch():
 
         # parse allowed options
         definitions = OrderedDict()
-        for hole,definition in hole_definitions.items():
+        for hole, definition in hole_definitions.items():
             definitions[hole] = definition.split(",")
 
         hole_options = HoleOptions()
@@ -180,7 +178,7 @@ class Sketch():
     def __init__(self, sketch_path, properties_path, constant_str):
         logger.info(f"Loading sketch from {sketch_path} with constants {constant_str}")
         self.program, hole_definitions = self.load_sketch(sketch_path)
-        
+
         logger.info(f"Loading properties from {properties_path} with constants {constant_str}")
         properties, optimality_criterion, self.optimality_epsilon = self.parse_properties(
             self.program, properties_path)
@@ -188,7 +186,7 @@ class Sketch():
         logger.debug("Constructing JANI program...")
         jani, properties, optimality_criterion = self.construct_jani(
             self.program, properties, optimality_criterion, constant_str)
-        assert self.program.expression_manager == jani.expression_manager # sanity check
+        assert self.program.expression_manager == jani.expression_manager  # sanity check
 
         logger.debug("Annotating properties ...")
         self.properties, self.optimality_criterion = self.annotate_properties(
@@ -201,6 +199,3 @@ class Sketch():
         logger.debug(f"Template variables: {self.hole_options}")
         design_space = numpy.prod([len(v) for v in self.hole_options.values()])
         logger.info(f"Design space (without constraints): {design_space}")
-
-        
-

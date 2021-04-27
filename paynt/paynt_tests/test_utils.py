@@ -10,7 +10,7 @@ PayntUtils class, which provides auxiliary methods for the tests
 
 
 class PayntTestUtils:
-    ROOT_DIR = "./../../"
+    ROOT_DIR = "./../.."
 
     @staticmethod
     def get_path_to_paynt_executable():
@@ -19,7 +19,6 @@ class PayntTestUtils:
 
     @staticmethod
     def get_path_to_workspace_examples():
-        print(PayntTestUtils.ROOT_DIR)
         assert "workspace" in os.listdir(PayntTestUtils.ROOT_DIR)
         assert "examples" in os.listdir(PayntTestUtils.ROOT_DIR + "/workspace")
         return PayntTestUtils.ROOT_DIR + "/workspace/examples"

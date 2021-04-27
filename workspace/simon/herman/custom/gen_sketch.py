@@ -43,7 +43,8 @@ def construct_process(n, p):
     return head + x1 + y1 + m1 + init + "\n".join(guards_eq) + "\n\n" + "\n".join(quards_neq) + "\n" + sync + tail
 
 
-def generate(n, p):
+def generate(n, p, step):
+    p_step = f"const double P_STEP={step};\n"
     num_tokens = "\nformula num_tokens = " + "".join([f"(x{i}=x{i+1}?1:0)+" for i in range(1, p)] + [f"(x{p}=x1?1:0);"])
     probs_const = ["\nconst double p0 = P_START;"] + [f"const double p{i} = p{i - 1}+P_STEP;" for i in range(1, n + 1)]
     processes = [
@@ -58,10 +59,10 @@ def generate(n, p):
         os.remove("workspace/examples/herman/custom/sketch.templ")
     with open("workspace/examples/herman/custom/sketch.templ", "w") as sketch_templ:
         sketch_templ.write(
-            default_template + construct_controller(p) + num_tokens + "\n" + "\n".join(probs_const) + "\n" +
+            default_template + p_step + construct_controller(p) + num_tokens + "\n" + "\n".join(probs_const) + "\n" +
             construct_process(n, p) + "\n" + "\n".join(processes)
         )
 
 
 if __name__ == '__main__':
-    generate(int(sys.argv[1]), int(sys.argv[2]))
+    generate(int(sys.argv[1]), int(sys.argv[2]), float(sys.argv[3]))
