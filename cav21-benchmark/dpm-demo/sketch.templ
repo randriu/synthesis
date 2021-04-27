@@ -15,16 +15,22 @@ const int q_init = 0;
 
 // dummy constants
 const int CMAX;
-const double THRESHOLD;
 
 // ----- synthesized parameters ------------------------------------------------
 
-// queue size
-const int QMAX;
-// observation level thresholds
-const int T1; const int T2; const int T3;
 // profiles desired at observation levels
-const int P1; const int P2; const int P3; const int P4;
+hole int P1 in {0,1,2};
+hole int P2 in {0,1,2};
+hole int P3 in {0,1,2};
+hole int P4 in {0,1,2};
+
+// observation level thresholds
+hole double T1 in {0.0,0.1,0.2,0.3,0.4};
+hole double T2 in {0.5};
+hole double T3 in {0.6,0.7,0.8};
+
+// queue size
+hole int QMAX in {1,2,3,4,5,6,7,8,9,10};
 
 // ----- modules ---------------------------------------------------------------
 
