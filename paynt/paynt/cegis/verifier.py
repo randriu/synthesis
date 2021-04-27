@@ -22,9 +22,9 @@ class Verifier:
         self.sketch = None
 
     def initialise(self, sketch, properties, qualitative_properties, dont_care_set, add_cuts=True):
-        self.properties = properties
+        self.properties = properties if properties is not None else []
         self.sketch = sketch
-        self.qualitative_properties = qualitative_properties
+        self.qualitative_properties = qualitative_properties if qualitative_properties is not None else []
         self._dont_care_set = dont_care_set
         self._set_cex_options(add_cuts)
 

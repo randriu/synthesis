@@ -5,7 +5,6 @@
 dtmc
 
 const int CMAX;
-const double THRESHOLD;
 
 const int STATIONS = 5;
 const int MAXMEM = 1;
@@ -44,13 +43,13 @@ const double p27 = p26+P_STEP;
 const double p28 = p27+P_STEP;
 const double p29 = p28+P_STEP;
 
-const int M0LFAIR;
-const int M0HFAIR;
-const int M1LFAIR;
-const int M1HFAIR;
-const int MxxA;
-const int MxxB;
-const int MxxC;
+hole int M0LFAIR in {0,1,2,3,4};
+hole int M0HFAIR in {0,1,2,3,4};
+hole int M1LFAIR in {0,1,2,3,4};
+hole int M1HFAIR in {0,1,2,3,4};
+hole int MxxA in {0,1};
+hole int MxxB in {0,1};
+hole int MxxC in {0,1};
 
 module initialise
     start : [0..1] init 0;

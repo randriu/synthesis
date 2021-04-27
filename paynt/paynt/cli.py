@@ -3,18 +3,18 @@ import logging
 import click
 import os
 
-from paynt import version
-from paynt.family_checkers.familychecker import FamilyCheckMethod
-
-from paynt.sketch import Sketch
-from paynt.hybrid.enumeration import EnumerationChecker
-from paynt.hybrid.cegis import CEGISChecker
-from paynt.hybrid.ar import ARChecker
-from paynt.hybrid.integrated_checker import IntegratedChecker
+from . import version
+from .family_checkers.familychecker import FamilyCheckMethod
+from .hybrid.enumeration import EnumerationChecker
+from .hybrid.cegis import CEGISChecker
+from .hybrid.ar import ARChecker
+from .hybrid.integrated_checker import IntegratedChecker
+from .sketch import Sketch
 
 logger = logging.getLogger(__name__)
 
 STAGE_SCORE_LIMIT = 99999
+
 
 def setup_logger(log_path):
     """
@@ -42,6 +42,7 @@ def setup_logger(log_path):
         root.addHandler(h)
     return handlers
 
+
 # def dump_stats_to_file(path, keyword, constants, description, *args):
 #     logger.debug("Storing stats...")
 #     pickle.dump((keyword, constants, description, *args), open(path, "wb"))
@@ -55,12 +56,13 @@ def setup_logger(log_path):
 @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
 @click.option('--ce-quality', '-ceq', help="Compute counter-examples qualities.", is_flag=True, default=False)
 @click.option('--ce-maxsat', '-cem', help="Compute quality of maxsat counter-examples.", is_flag=True, default=False)
-@click.argument("method", type=click.Choice(['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid']))  # +
+@click.argument("method", type=click.Choice(
+    ['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid'], case_sensitive=False))  # +
 def paynt(
         project, sketch, properties, constants, method, short_summary, ce_quality, ce_maxsat
 ):
     print("This is Dynasty version {}.".format(version()))
-    
+
     # parse sketch
     if not os.path.isdir(project):
         raise ValueError(f"The project folder {project} is not a directory")
@@ -72,7 +74,7 @@ def paynt(
     # FIXME: differentiate between solvers
     approach = FamilyCheckMethod.from_string(method)
     assert approach == FamilyCheckMethod.Hybrid
-    
+
     # FIXME: set hybrid parameters
     # FIXME: set the stage score limit
     # RA: do we need a stage score limit? hybrid method seems to behave well without one
@@ -124,6 +126,7 @@ def paynt(
 def main():
     setup_logger("paynt.log")
     paynt()
+
 
 if __name__ == "__main__":
     main()
