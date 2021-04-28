@@ -14,8 +14,8 @@ Most of the algorithms are described in
 
 An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available on [zenodo](https://doi.org/10.5281/zenodo.4726056). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
 
-username: cav21
-password: cav21
+- username: cav21
+- password: cav21
 
 Home folder `/home/cav21` contains the paper, this README and folder `synthesis` containing the artifact.
 
