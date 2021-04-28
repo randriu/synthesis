@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy), python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -10,7 +10,7 @@ Most of the algorithms are described in
 - [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
 - [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
 
-## Image with the pre-installed tool
+### Image with the pre-installed tool
 
 An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available on [zenodo](https://doi.org/10.5281/zenodo.4726056). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
 
@@ -46,8 +46,7 @@ optimal: 9100.064246
 hole assignment: P1=1,P2=0,P3=0,P4=2,T1=0.0,T3=0.8,QMAX=5
 ```
 The contents of such summary will be again discussed later.
-Nonetheless, we can see that the tool reports a hole assignment that yields the optimal program.
-
+Nonetheless, we can already notice the last line where tool reports a hole assignment that yields the optimal program.
 The python environment can be deactivated by runnning
 
 ```sh
@@ -57,7 +56,7 @@ deactivate
 ### Contents of this README
 
 The remainder of this README fully describes how to synthesize probabilistic programs using PAYNT.
-In particular, we will discuss
+In particular, we will describe
 - how to run PAYNT
 - how to read the output of PAYNT
 - how to create your own sketches and specifications
@@ -65,6 +64,16 @@ In particular, we will discuss
 In the end, we will discuss how to install and test PAYNT on your system.
 Finally, file [experiments/README_evaluation.md](./experiments/README_evaluation.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
 The file also contains exploration of synthesis problems beyond the presented experiment suite.
+
+### Structure of this repository
+
+- `install.sh` is a script allowing to automatically install dependencies and compile the tool on your system
+- `paynt` is the main directory that contains all PAYNT source files; the directory additionally includes tests (`paynt/paynt_tests`) as well as configuration files
+- `storm` and `stormpy` directories contain the source code of Storm and Stormpy, including our modules for synthesis
+- other dependencies are collected in `prerequisites`.
+- directory `cav21-benchmark` includes the benchmarks evaluated in the paper.
+- directory `experiments` includes the scripts that allow to reconstruct experiments in our paper; for details, please refer to `experiments/README_evaluation.md`
+- `workspace` is a directory that includes the various versions of benchmarks, e.g. those used in previous publications; some of these benchmarks are explored in advanced experiments described in `experiments/README_evaluation.md`
 
 ## Synthesizing probabilistic programs with PAYNT
 
@@ -293,10 +302,3 @@ To install the tool on your system, download the repository, navigate to the roo
 
 The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`). The corresponding VM containing pre-compiled tool was created by installing the tool using the script above.
 
-## Repository Structure
-The directory [cav21-benchmark](./cav21-benchmark) includes the benchmarks evaluated in the paper.
-The directory [experiments](./experiments) includes the scripts to recreate the experiments in our paper and [manual](./experiments/README_evaluation.md) for their reproduction.
-The main project [directory](./paynt) includes all PAYNT source [files](./paynt/paynt), test [files](./paynt/paynt_tests) and also configuration files.
-The fixed installation dependencies for installing PAYNT are in the [prereuisites](./prerequisites), as well as in the [storm](./storm) and [stormpy](./stormpy) directories.
-The [workspace](./workspace) directory includes the various versions of benchmarks used, e.g. in the previous publications, and some of them we present in the last section of evaluation [README](./experiments/README_evaluation.md).
-Last but not least, at the top of the repository is located our [paper](./cav21-paper.pdf), [README.md](./README.md) file and the [script](./install.sh) to install the tool on your system.
