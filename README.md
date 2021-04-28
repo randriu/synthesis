@@ -295,3 +295,11 @@ To install the tool on your system, download the repository, navigate to the roo
 ```
 
 The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`). The corresponding VM containing pre-compiled tool was created by installing the tool using the script above.
+
+## Repository Structure
+The directory [cav21-benchmark](./cav21-benchmark) includes the benchmarks evaluated in the paper.
+The directory [experiments](./experiments) includes the scripts to recreate the experiments in our paper and [manual](./experiments/README_evaluation.md) for their reproduction.
+The main project [directory](./paynt) includes all PAYNT source [files](./paynt/paynt), test [files](./paynt/paynt_tests) and also configuration files.
+The fixed installation dependencies for installing PAYNT are in the [prereuisites](./prerequisites), as well as in the [storm](./storm) and [stormpy](./stormpy) directories.
+The [workspace](./workspace) directory includes the various versions of benchmarks used, e.g. in the previous publications, and some of them we present in the last section of evaluation [README](./experiments/README_evaluation.md).
+Last but not least, at the top of the repository is located our [paper](./cav21-paper.pdf), [README.md](./README.md) file and the [script](./install.sh) to install the tool on your system.
