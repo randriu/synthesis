@@ -59,7 +59,7 @@ class Statistic:
 
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
-        assignment = f"hole assignment: {self.assignment}\n" if self.assignment is not None else ""
+        assignment = f"hole assignment: {self.assignment}\n" if self.assignment else ""
 
         summary = f"{formulae}\n{opt_formula}\n{timing}\n{design_space}\n" \
                   f"{family_stats}{self.ce_quality}\n{result}\n{assignment}"

@@ -227,13 +227,13 @@ python3 paynt/paynt.py --project workspace/examples/dpm/half/ --properties optim
 ###### Epsilon Minimal Synthesis (~60sec)
 
 ```shell
-python3 paynt/paynt.py --project workspace/examples/pole/orig/ --properties optimal.properties --constants CMAX=6,THRESHOLD=10.0 hybrid
+python3 paynt/paynt.py --project workspace/examples/pole/orig/ --properties optimal.properties --constants CMAX=6 hybrid
 ```
 
-###### Unfeasible Synthesis (~180sec)
+###### Unfeasible Synthesis (~155sec)
 
 ```shell
-python3 paynt/paynt.py --project workspace/examples/pole/orig/ --constants CMAX=6,THRESHOLD=7.85 cegar
+python3 paynt/paynt.py --project workspace/examples/pole/orig/ --constants CMAX=40 hybrid
 ```
 
 ##### Grid
@@ -261,19 +261,6 @@ python3 paynt/paynt.py --project workspace/examples/kydie/ cegis
 python3 paynt/paynt.py --project workspace/examples/kydie/ onebyone
 ```
 
-##### Pole
-
-###### Unfeasible Synthesis (~155sec)
-
-```shell
-python3 paynt/paynt.py --project workspace/examples/pole/orig/ --constants CMAX=40 hybrid
-```
-
-###### Epsilon Minimal Synthesis (~450sec)
-
-```shell
-python3 paynt/paynt.py --project workspace/examples/pole/orig/ --properties sketch.properties --constants CMAX=2 hybrid
-```
 
 For more observation, for instance, you can try to edit the values of the constants in the commands and observe how they affect the results and duration of the synthesis.
 But be careful again because the problem of a double state explosion can very easily manifest itself and make the synthesis process much more difficult.
