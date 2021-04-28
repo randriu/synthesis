@@ -15,18 +15,19 @@ PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
 
 ## Image with the pre-installed tool
 
-An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available in [here](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
+An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available [here](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
 
-username: tacas21
-password: tacas21
+username: cav21
+password: cav21
 
-``/home/tacas21/synthesis``
+Home folder `/home/cav21` contains the paper, this README and folder `synthesis` containing the artifact.
 
 ## Getting started with PAYNT 
 
-Having the tool installed, you can quickly test it by activating the python environment and asking PAYNT to evaluate a simple synthesis problem:
+Having the tool installed, you can quickly test it by navigating to the tool folder, activating the python environment and asking PAYNT to evaluate a simple synthesis problem:
 
 ```sh
+cd /home/cav21/synthesis
 source env/bin/activate
 python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properites hybrid
 ```
@@ -287,6 +288,10 @@ Our tests currently cover more than `90%` of the source code lines, even though 
 
 ## Installation
 
-T
+To install the tool on your system, download the repository, navigate to the root folder of the tool and simply run
 
-The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`).
+```shell
+./install.sh
+```
+
+The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`). The corresponding VM containing pre-compiled tool was created by installing the tool using the script above.
