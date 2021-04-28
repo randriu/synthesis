@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT.
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -10,12 +10,9 @@ Most of the algorithms are described in
 - [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
 - [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
 
-PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
-
-
 ## Image with the pre-installed tool
 
-An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available [here](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
+An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available on [zenodo](https://doi.org/10.5281/zenodo.4726056). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
 
 username: cav21
 password: cav21
