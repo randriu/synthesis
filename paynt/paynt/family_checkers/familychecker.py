@@ -156,6 +156,7 @@ class FamilyChecker:
         self.properties = sketch.properties
 
         self._optimality_setting = None
+        self._optimal_value = None
         if sketch.optimality_criterion is not None:
             optimality_direction = None
             opt_type = sketch.optimality_criterion.raw_formula.optimality_type

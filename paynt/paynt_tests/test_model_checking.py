@@ -72,12 +72,9 @@ def test_mdp_model_checking(project, constants_str):
 
     for idx, _ in enumerate(mc_formulae):
         result, latest_result = mdp_model_checking(mdp, idx, thresholds, quotient_container, accept_if_above)
-        # assert result == expected_results[project][idx]["result"]
-        # assert latest_result.absolute_min == expected_results[project][idx]["absolute_min"]
-        # assert latest_result.absolute_max == expected_results[project][idx]["absolute_max"]
-
-        print(f"MC Model Checking Result: {result}")
-        print(f"MC Model Checking Bounds: {latest_result.absolute_min} -- {latest_result.absolute_max}")
+        assert result == expected_results[project][idx]["result"]
+        assert latest_result.absolute_min == expected_results[project][idx]["absolute_min"]
+        assert latest_result.absolute_max == expected_results[project][idx]["absolute_max"]
 
 if __name__ == '__main__':
     test_mdp_model_checking(sys.argv[1], sys.argv[2])

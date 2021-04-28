@@ -1,12 +1,27 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs. PAYNT inputs a program with holes (so-called sketch) and a specification (see below for more information), and outputs concrete hole assignment allowing to satisfy the specification, if such assignment exists. Internally, PAYNT interprets incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT.
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a specification (see below for more information), and outputs a concrete hole assignment that yields a program that satisfies the specification, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT.
+
+PAYNT is described in 
+- [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
+
+Most of the algorithms are described in 
+- [2] Inductive Synthesis for Probabilistic Programs Reaches New Horizons by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, TACAS 2021
+- [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
+- [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
+
+PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
+
 
 ## Image with the pre-installed tool
 
-Pre-installed tool is available in [this Ubuntu 20.04 LTS virtual machine](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README.
+An image with the pre-installed tool is available in [this Ubuntu 20.04 LTS virtual machine](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README.
 
-## Initial testing of the artifact
+** How to boot the VM ** 
+- Virtualbox, no password.
+- Where to navigate.
+
+## Getting started with PAYNT 
 
 Having the tool installed, you can quickly test it by activating the python environment and asking PAYNT to evaluate a simple synthesis problem:
 
@@ -27,86 +42,29 @@ average DTMC size: 1232, DTMC checks: 215, iterations: 215
 
 feasible: no
 ```
+Importantly, the tool reports that it could not find a feasible solution.
 
-Python environment can be deactivated by runnning
+
+The python environment can be deactivated by runnning
 
 ```sh
 deactivate
 ```
 
+## Running PAYNT
 
-## Reproducing presented experiments
-
-### Reproducing Table 1
-
-Table 1 reported in our CAV'21 submission presents results of 15 different experiments: 5 benchmarks evaluated using one-by-one enumeration and using advanced synthesis method, where the latter approach is investigated wrt. a hard and an easy property. To run these 15 evaluations, simply navigate to `experiments` folder and run the script:
-
-```sh
-cd experiments
-./experiment.sh timeout
-```
-
-Here, `timeout` is a timeout value for each individual experiment, e.g. '5m' or '2h'. The script will evaluate the benchmarks and, for each experiment, produce a logfile available in `experiments/logs` folder. As soon as all experiments are finished, the script will parse these logfiles and output a table similar to Table 1. This table will be also stored to `experiment/logs/summary.txt`.
-
-### How to select the timeout value
-
-Based on the runtimes reported in the table, you can select a timeout value that will allow you to complete as many experiments as possible within your allocated time. Since 1-by-1 enumeration typically requires more than a day to complete, you might be interested in at least completing synthesis via advanced methods (10 of the 15 presented experiments). Here are some suggested values:
-
-`timeout=5m` will complete 4/10 experiments within 1 hour
-`timeout=20m` will complete 6/10 experiments within 3.5 hours
-`timeout=1h` will complete 7/10 experiments within 8.5 hours
-`timeout=2h` will complete 9/10 experiments within 14 hours (recommended value)
-`timeout=12h` will complete 10/10 experiments within 2.5 days
-
-If the experiment associated with one-by-one enumeration hits a timeout, the runtime will be estimated based on the number of rejected assignments. However, in order to obtain reliable estimates, enumeration must run of a significant period of time, i.e. for a couple of hours. If advanced synthesis method will hit a timeout, then, since its performance cannot be estimated in a meaningful way, the corresponding table entry will contain '-'.
-Finally, statistics about average MC size are taken from logs associated with advanced synthesis (easy property) and, if the corresponding computation was interrupted, the table entry will again display '-'.
-
-Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight. The log files for [TBA]
-
-**Please note** that all of the discussed synthesis methods, specifically advanced methods (CEGIS, CEGAR, hybrid) are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctutations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs 1-by-1 enumeration or comparative runtimes of synthesizing wrt. easy vs hard property -- should be preserved. Also remember that the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
-
-### Reproducing Figure 5
-
-Figure 5 was created manually based on the output of PAYNT when synthesizing an optimal controller (hard property) for __Maze__ model. To check the result, you need to let at least the advanced method finish (recommended value `timeout=2h` will guarantee this even on slower CPUs). Alternatively, you can specifically run computation of this model (do not forget to activate python environment):
-
-```sh
-python3 paynt/paynt.py --project cav21-benchmark/maze --properties hard.properties hybrid
-```
-
-The last lines of the output (or the last lines of the corresponding log file) should contain the synthesis summary. In particular, PAYNT will display the hole assignment that induces an optimal controller:
-
-```sh
-hole assignment: M_0_1=1,M_0_2=0,M_0_3=1,M_0_4=0,M_0_5=0,M_0_6=0,M_1_1=1,M_1_2=1,M_1_3=1,M_1_4=0,M_1_5=1,M_1_6=0,P_0_1=2,P_0_2=4,P_0_3=3,P_0_4=4,P_0_5=1,P_1_1=2,P_1_2=2,P_1_3=3,P_1_4=4,P_1_5=3
-```
-
-The holes are of the form `P_m_o` or `M_m_o`, where `m` is a memory value (one bit, 0 or 1) and `o` represents one of six possible wall configurations (observations) encoded in colours on Figure 5:
-
-- `o=1` corresponds to red states (0)
-- `o=2` corresponds to orange states (1,3)
-- `o=3` corresponds to green states (2)
-- `o=4` corresponds to gray states (4)
-- `o=5` corresponds to purple states (4)
-- `o=4` corresponds to gray states (4)
-
-Semantics of hole `P_m_o` is 'direction chosen when observing `o` with memory value `m`. The direction is an integer from 1 to 4 representing north, east, south and west respectively. Similarly, semantics of hole `M_m_o` is 'memory update after moving from location `o` with memory value `m`. You can see that, for instance, in location 0, hole assignments `P_0_1 = P_1_1 = 2` and `M_0_1 = M_1_1 = 1` imply that the robot will always go east and will set its memory bit to 1. Note that there are multiple optimal controllers and you might obtain e.g. symmetric hole assignments (i.e. the one in which 0's and 1's are swapped in memory updates) that imply expected time 8.13 steps to reach the exit.
-
-## Syntax of the PAYNT's command
+### Syntax of the PAYNT's command
 PAYNT is started using the command in the following form:
 
 ```shell
 python3 paynt/paynt.py [OPTIONS] [hybrid|cegar|cegis|onebyone]
 ```
-where the options can be: 
-
+where the most important options are can be: 
 - ``--project PATH``: specifies the path to the benchmark folder [required]
 - ``--sketch FILE_IN_PATH``: specifies the file containing the template description in the PRISM guarded command language [default: ``PATH/sketch.templ``]
 - ``--properties FILE_IN_PATH``: specifies the file containing specifications to synthesise against [default: ``PATH/sketch.properties``]
-- ``--constants TEXT``: specifies the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
-- ``--short-summary``: prints also short summary of the synthesis results consisting of primary information
-- ``--ce-quality``: evaluates the counter-example quality when usage the hybrid approach
-- ``--ce-maxsat``: enables the construction of counter-examples using MaxSat approach and also their evaluation
-- ``--help``: shows the help message of the PAYNT and exit the program
-
+- ``--constants TEXT``: specifies the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1`` as standard for Prism programs.
+- 
 For instance, PAYNT can be run most simply as follows: 
 
 ```shell
@@ -118,6 +76,13 @@ PAYNT inspects the content of this folder to find the required files for the syn
 The first file contains the template description, and the second one the specifications.
 The `--constants` option specifies the value for an undefined variable in the sketch, which is not considered as a synthesised hole.
 Finally, the last argument specifies the selected synthesis method: `hybrid`.
+
+PAYNT has some advanced options for developers.
+- ``--short-summary``: prints also short summary of the synthesis results consisting of primary information
+- ``--ce-quality``: evaluates the counter-example quality when usage the hybrid approach. For recreating experiments in [2].
+- ``--ce-maxsat``: enables the construction of counter-examples using MaxSat approach and also their evaluation. For recreating experiments in [2].
+- ``--help``: shows the help message of the PAYNT and exit the program
+
 
 ## Understanding the synthesis process in PAYNT
 
@@ -138,16 +103,10 @@ hole assignment: P1=1,P2=0,P3=0,P4=2,T1=0.0,T3=0.8,QMAX=5
 This summary consists of some information about the result of the performed synthesis process: benchmark statistics, synthesis time, number of iterations, MDP-related info, DTMC-related info, whether the synthesis problem is feasible etc.
 The first lines contain the synthesised specifications, as well as the optimal property with its settings if it was entered.
 We can see that this particular DPM benchmark contains 7 holes (parameters) and 12.1K family members.
-On average, each member has on average 1.3K states when was constructed MDP at AR and 172 states when analysing DTMC at CEGIS.
+On average, each member has on average 1.3K states when constructed via the (quotient) MDP in the AR method and 172 states when analysing the underlying DTMC (in CEGIS). 
 We can also see that the problem found the optimal solution satisfying also given formula and that on our machine took 3 AR, 1354 CEGIS iterations and 23 seconds to prove this.
 The last lines show the synthesised solution with concrete instantiations of holes and the found optimal value.
-Notice that only the hybrid method contains both MDP- and DTMC-related information since CEGIS never deals with MDPs, and AR with DTMCs.
-
-Furthermore, when running benchmark using the hybrid approach, you can specify an additional `--ce-quality` option that evaluates the counterexample quality. 
-The summary will contain two additional rows with information about the quality as well as the construction times of the counterexamples.
-You will notice that the quality of the MaxSat method will be reported as 0, since this value was not computed at all. 
-We do not compute the MaxSat quality implicitly since this computation is often very time-demanding and would complicate collecting data about the novel approach for CE construction. 
-To enable evaluation of the MaxSat approach, you can specify an additional option `--ce-maxsat`.
+Notice that only the hybrid method contains both MDP- and DTMC-related information since CEGIS never deals with MDPs, and AR only works via the MDP.
 
 ### Sketching language
 
@@ -161,7 +120,7 @@ A `PRISM` program consists of one or more reactive modules that may interact wit
 
 If the `guard` evaluates to true, an update of the variables is chosen according to the probability distribution given by expressions `p_1` through `p_n`. The `actions` are used to force two or more modules to make the command simultaneously (i.e. to synchronise).
 
-Recall that sketch is a `PRISM` program with holes and allows us to compactly describe a set of candidates program.
+Recall that the sketch is a `PRISM` program with holes and allows us to compactly describe a set of candidates program.
 The holes can appear in guards and updates. Replacing each hole with one of its options yields a complete program with the semantics given by a finite-state Markov chain. 
 
 We exemplify the usage of PAYNT by the following synthesis problem.
@@ -237,99 +196,25 @@ The corresponding sketch describes around 43M available solutions with an the av
 While enumeration needs more than ~1 month to find the optimal power manager, PAYNT solves it within 10 hours.
 
 
-## Exploring synthesis problems beyond the presented experiment suit
+## Evaluating PAYNT 
+The [evaluate.md](./cav21-benchmark/evaluate.md) describes the way of recreating the experiments in [1].
+Further, it contains the exploring synthesis problems beyond the presented experiment suite.
+For more information about these parts, please examine the specified file.
 
-In order to further investigate the performance of the synthesis methods, we suggest performing some additional experiments that focus on three different aspects having the essential impact on the runtime of the synthesis process. 
-These experiments will be based on experimenting with the provided [cav21-benchmark](./cav21-benchmark).
-Therefore, before proceeding with the suggestions below, make sure to make a copy of this directory if you haven't evaluated the experiment suit presented in the paper via the [script](./experiments/experiment.sh) for running experiments.
 
-#### Modifying the family size
-Changing the family size of particular models can require nontrivial changes in the model definition and thus a certain level of understanding of the models. 
-However, there are some models where the family size can be easily changed. For example, the size of the larger variant of the model can be modified in the following way:
-Go to the following [sketch](./cav21-benchmark/herman/sketch.templ) and reduce the domains of the selected options (holes), e.g., modify the part of the file (lines `47-53`) in the following way:
-
-```shell
-hole int M0LFAIR in {0,1,2,3};
-hole int M0HFAIR in {0,1,2,3};
-hole int M1LFAIR in {0,1,2,3};
-hole int M1HFAIR in {0,1,2,3};
-hole int MxxA in {0,1};
-hole int MxxB in {0,1};
-hole int MxxC in {0,1};
-```
-
-This greatly reduces the number of randomization strategies of the protocol and thus the family size. 
-We can now run optimal synthesis to find the best solution in the reduced family:
+## Testing PAYNT
+As we report in the paper, PAYNT is tested with unit tests and regression tests.
+These tests currently cover more than 90% of the source code lines.
+The unit tests which cover the specific logic components to maintain their correct functionality.
+You can run the regression and unit tests (~5 minutes) with the following sequence of commands:
 
 ```shell
-python3 paynt/paynt.py --project cav21-benchmark/herman --properties hard.properties hybrid
-python3 paynt/paynt.py --project cav21-benchmark/herman --properties hard.properties cegar
+cd paynt/paynt_tests
+python3 -m pytest --cov=./../paynt/ --cov-report term-missing test_synthesis.py test_model_checking.py
 ```
 
-Notice that this family contains only 2<sup>11</sup> members (as opposed to 3M members in the original model. 
-You can see that the optimal value is now 24 (expected) steps and that the summary also contains the parameter assignment for this optimal member. 
-If we enlarge this family by adding more strategies:
-
-```shell
-hole int M0LFAIR in {0,1,2,3,4,5,6};
-hole int M0HFAIR in {0,1,2,3,4,5,6};
-hole int M1LFAIR in {0,1,2,3,4,5,6};
-hole int M1HFAIR in {0,1,2,3,4,5,6};
-hole int MxxA in {0,1};
-hole int MxxB in {0,1};
-hole int MxxC in {0,1};
-```
-
-computing the optimal value now takes some more time, but the obtained value is now around 12.4 (we recommend computing it using the hybrid approach), meaning that we have found a member that can stabilize much faster. 
-What happened here is that we have added some strategies to our protocol (the family now has around 19k members) and, fortunately, some of these strategies were better (wrt. the specification) than existing ones. 
-Feel free to experiment with these parameter domains -- you can even try to assign different domains to different parameters `MxyFAIR` -- but be aware that the family blows up really fast and that CEGAR will struggle even with families having as few as 80k members.
-
-#### Modifying the (average) size of the family members
-Most of our models ([Grid](./cav21-benchmark/grid), [Maze](./cav21-benchmark/maze), [DPM](./cav21-benchmark/dpm) and [Herman](./cav21-benchmark/herman)) include parameter `CMAX` allowing users to change size of the particular family members (i.e. the underlying DTMCs) -- increasing this parameter increases the average size of the members. 
-Please note that most properties are linked with this parameter and thus changing the parameter can change feasibility outcome and can even make some properties invalid. 
-For example, you can try to analyze [Maze](./cav21-benchmark/maze) benchmark: 
-
-```shell
-python3 paynt/paynt.py --project cav21-benchmark/maze --properties easy.properties hybrid
-python3 paynt/paynt.py --project cav21-benchmark/maze --properties easy.properties cegar
-```
-and then modify the parameter `CMAX` (line `22`) in [sketch](./cav21-benchmark/maze/sketch.templ):
-
-```
-const int CMAX = 100;
-```
-
-and rerun the two commands above. 
-You can inspect that, although the number of iterations has not changed (the family size remained the same) the size of underlying DTMCs as well as the size of quotient MDPs has increased and therefore the synthesis now takes significantly more time.
-
-#### Modifying threshold of the given property
-
-The property thresholds for the synthesis problems can be changed in files `.properties` that are stored in particular benchmark folders. 
-For example, you can try to run 
-
-```shell
-python3 paynt/paynt.py --project cav21-benchmark/grid --properties easy.properties hybrid
-python3 paynt/paynt.py --project cav21-benchmark/grid --properties easy.properties cegis
-```
-
-and then modify the property threshold in the [file](./cav21-benchmark/grid/easy.properties):
-
-```
-P>=0.927 [ F "goal" & c<CMAX ]
-```
-
-and rerun the command above. 
-You can see that this specification is much harder to synthesize, yet overall the problem is still unfeasible. 
-If we decrease the threshold even further:
-
-```
-P>=0.926 [ F "goal" & c<CMAX ]
-```
-
-then the synthesizer will be able to provide a satisfying parameter assignment. 
-Also note that assignments provided by individual synthesis methods may differ since in this case the family contains multiple feasible solutions.
-
-#### TBD -- add more.
+This command prints the coverage report, displaying the resulting coverage for individual source files.
+Our tests currently cover more than `90%` of the source code lines, even though the result shows `82%` because `~10%` of the source code is only temporary functions for debugging purposes that have no functionality.
 
 ## Installation
 

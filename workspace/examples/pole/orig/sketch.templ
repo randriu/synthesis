@@ -1,7 +1,6 @@
 dtmc
 
 const int CMAX;
-const double THRESHOLD;
 
 module initialiseN
     NN : [0..100] init 0;
@@ -64,35 +63,35 @@ const int MAXX = MAXQ;
 const int MAXY = MAXQ;
 formula dead = (x = 0 | y = 0 | x = MAXX | y = MAXY);
 
-const int M11;
-const int M12;
-const int M13;
-const int M14;
-const int M15;
+hole int M11 in {2,4};
+hole int M12 in {2,4};
+hole int M13 in {2};
+hole int M14 in {2,3};
+hole int M15 in {2,3};
 
-const int M21;
-const int M22;
-const int M23;
-const int M24;
-const int M25;
+hole int M21 in {2,4};
+hole int M22 in {2,4};
+hole int M23 in {2,3,4};
+hole int M24 in {2,3};
+hole int M25 in {2,3};
 
-const int M31;
-const int M32;
-const int M33;
-const int M34;
-const int M35;
+hole int M31 in {4};
+hole int M32 in {1,2,4};
+hole int M33 in {1,2,3,4};
+hole int M34 in {1,2,3};
+hole int M35 in {3};
 
-const int M41;
-const int M42;
-const int M43;
-const int M44;
-const int M45;
+hole int M41 in {4};
+hole int M42 in {1,4};
+hole int M43 in {1,3,4};
+hole int M44 in {1,3};
+hole int M45 in {3};
 
-const int M51;
-const int M52;
-const int M53;
-const int M54;
-const int M55;
+hole int M51 in {1,4};
+hole int M52 in {1};
+hole int M53 in {1};
+hole int M54 in {1};
+hole int M55 in {1,3};
 
 
 

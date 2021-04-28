@@ -73,8 +73,10 @@ class SynthesisTestSuite(unittest.TestCase):
             'python3',
             PayntTestUtils.get_path_to_paynt_executable(),
             '--project', PayntTestUtils.get_path_to_workspace_examples() + '/grid/orig/',
+            '--properties', 'optimal.properties',
             f'{method}',
             '--short-summary',
+            '--constants', 'CMAX=2,THRESHOLD=0.0'
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         stdout, stderr = process.communicate()
