@@ -57,7 +57,8 @@ def setup_logger(log_path):
 @click.option('--ce-quality', '-ceq', help="Compute counter-examples qualities.", is_flag=True, default=False)
 @click.option('--ce-maxsat', '-cem', help="Compute quality of maxsat counter-examples.", is_flag=True, default=False)
 @click.argument("method", type=click.Choice(
-    ['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid'], case_sensitive=False))  # +
+    ['cegar', 'onebyone', 'cegis', 'hybrid'], case_sensitive=False))
+    # ['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid'], case_sensitive=False))
 def paynt(
         project, sketch, properties, constants, method, short_summary, ce_quality, ce_maxsat
 ):
