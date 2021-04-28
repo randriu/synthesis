@@ -61,7 +61,7 @@ def setup_logger(log_path):
 def paynt(
         project, sketch, properties, constants, method, short_summary, ce_quality, ce_maxsat
 ):
-    print("This is Dynasty version {}.".format(version()))
+    print("This is Paynt version {}.".format(version()))
 
     # parse sketch
     if not os.path.isdir(project):
