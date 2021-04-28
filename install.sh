@@ -8,10 +8,10 @@
 
 set -ex
 
-INSTALL_TACAS21=false
-INSTALL_DEPENDENCIES=false
+INSTALL_OFFLINE=false
+INSTALL_DEPENDENCIES=true
 
-if [ "$INSTALL_TACAS21" = true ] || [ "$INSTALL_DEPENDENCIES" = true ]; then
+if [ "$INSTALL_OFFLINE" = true ] || [ "$INSTALL_DEPENDENCIES" = true ]; then
     if [[ ! $(sudo echo 0) ]]; then echo "sudo authentication failed"; exit; fi
 fi
 
@@ -46,12 +46,12 @@ if [ "$INSTALL_DEPENDENCIES" = true ]; then
     sudo apt update
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
     sudo apt -y install texlive-latex-extra
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip virtualenv
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 fi
 
-# tacas dependencies
-if [ "$INSTALL_TACAS21" = true ]; then
+# offline dependencies
+if [ "$INSTALL_OFFLINE" = true ]; then
     sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
     source $HOME/.profile
     cd $TACAS_DEPENDENCIES
@@ -64,7 +64,7 @@ fi
 # set up python environment
 virtualenv -p python3 $SYNTHESIS_ENV
 source $SYNTHESIS_ENV/bin/activate
-if [ "$INSTALL_TACAS21" = true ]; then
+if [ "$INSTALL_OFFLINE" = true ]; then
     cd $TACAS_DEPENDENCIES
     pip3 install --no-index -f pip-packages -r python-requirements
     cd $SYNTHESIS
