@@ -10,7 +10,11 @@ cd experiments
 ./experiment.sh timeout
 ```
 
-Here, `timeout` is a timeout value for each individual experiment, e.g. '5m' or '2h'. The script will evaluate the benchmarks and, for each experiment, produce a logfile available in `experiments/logs` folder. As soon as all experiments are finished, the script will parse these logfiles and output a table similar to Table 1. This table will be also stored to `experiment/logs/summary.txt`.
+Here, `timeout` is a timeout value for each individual experiment, e.g. '5m' or '2h'.
+The script will evaluate the benchmarks and, for each experiment, produce a logfile available in `experiments/logs` folder.
+As soon as all experiments are finished, the script will parse these logfiles and output a table similar to Table 1.
+Furthermore, the script will print the last lines of log `experiments/logs/hybrid_hard/maze_hybrid.txt` associated with optimal synthesis of __Maze__ model -- these lines will be of interest later when reproducing results reported in Figure 5.
+This output will be also stored to `experiments/logs/summary.txt`.
 
 #### How to select the timeout value
 
@@ -25,19 +29,23 @@ Based on the runtimes reported in the table, you can select a timeout value that
 If the experiment associated with one-by-one enumeration hits a timeout, the runtime will be estimated based on the number of rejected assignments. However, in order to obtain reliable estimates, enumeration must run of a significant period of time, i.e. for a couple of hours. If advanced synthesis method hit a timeout, then, since its performance cannot be estimated in a meaningful way, the corresponding table entry will contain '-'.
 Finally, statistics about average MC size are taken from logs associated with advanced synthesis (easy property) and, if the corresponding computation was interrupted, the table entry will again display '-'.
 
-Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight. The sample log files for execution on our machine with a 12-hour timeout are available inside the supplied VM at `~synthesis/experiments/logs.zip`.
+Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight. The sample log files (including the generated summary) for execution on our machine with a 12-hour timeout are available inside the supplied VM at `~synthesis/experiments/logs.zip`.
 
 **Please note** that all of the discussed synthesis methods, specifically advanced methods (CEGIS, CEGAR, hybrid) are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctuations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs 1-by-1 enumeration or comparative runtimes of synthesizing wrt. easy vs hard property -- should be preserved. Also remember that the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
 
 ### Reproducing Figure 5
 
-Figure 5 was created manually based on the output of PAYNT when synthesizing an optimal controller (hard property) for the __Maze__ model. To check the result, you need to let at least the advanced method finish (recommended value `timeout=2h` will guarantee this even on slower CPUs). Alternatively, you can specifically run computation of this model (do not forget to activate python environment):
+Figure 5 was created manually based on the output of PAYNT when synthesizing an optimal controller (hard property) for the __Maze__ model.
+To check the result, you need to let at least the advanced method finish (recommended value `timeout=2h` will guarantee this even on slower CPUs).
+In such a case, the summary produced by the script will contain the synthesis result.
+Alternatively, you can specifically run computation of this model (do not forget to activate python environment):
 
 ```sh
 python3 paynt/paynt.py --project cav21-benchmark/maze --properties hard.properties hybrid
 ```
 
-The last lines of the output (or the last lines of the corresponding log file) should contain the synthesis summary. In particular, PAYNT will display the hole assignment that induces an optimal controller:
+The last lines of the output (or the last lines of the corresponding log file) should contain the synthesis summary.
+In particular, PAYNT will display the hole assignment that induces an optimal controller:
 
 ```sh
 hole assignment: M_0_1=1,M_0_2=0,M_0_3=1,M_0_4=0,M_0_5=0,M_0_6=0,M_1_1=1,M_1_2=1,M_1_3=1,M_1_4=0,M_1_5=1,M_1_6=0,P_0_1=2,P_0_2=4,P_0_3=3,P_0_4=4,P_0_5=1,P_1_1=2,P_1_2=2,P_1_3=3,P_1_4=4,P_1_5=3
@@ -259,6 +267,5 @@ python3 paynt/paynt.py --project workspace/examples/kydie/ cegis
 python3 paynt/paynt.py --project workspace/examples/kydie/ onebyone
 ```
 
-
 For more observation, for instance, you can try to edit the values of the constants in the commands and observe how they affect the results and duration of the synthesis.
-But be careful again because the problem of a double state explosion can very easily manifest itself and make the synthesis process much more difficult.
+As usually, be aware that the problem of a double state explosion manifest itself very easily and make the synthesis process much more difficult.

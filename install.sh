@@ -69,7 +69,7 @@ if [ "$INSTALL_OFFLINE" = true ]; then
     pip3 install --no-index -f pip-packages -r python-requirements
     cd $SYNTHESIS
 else
-    pip3 install pytest pytest-runner numpy scipy pysmt z3-solver click
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
 fi
 deactivate
 

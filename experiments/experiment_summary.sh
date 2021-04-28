@@ -5,6 +5,7 @@
 benchmarks=( dpm maze herman pole grid )
 
 # Table 1
+
 printf "\nTable 1 \n\n"
 printf "%-22s%-16s%-16s%-16s%-16s%-16s%-16s\n" model "parameters" "family size" "avg. MC size" "1-by-1" "hybrid (hard)" "hybrid (easy)"
 for benchmark in "${benchmarks[@]}"; do
@@ -26,3 +27,8 @@ done
 printf "\n"
 
 
+# Figure 5
+
+printf "\nFigure 5 \n\n"
+printf "Printing the last lines of maze log file 'logs/hybrid_hard/maze_hybrid.txt:'\n"
+tail logs/hybrid_hard/maze_hybrid.txt
