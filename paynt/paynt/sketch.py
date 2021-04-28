@@ -149,7 +149,7 @@ class Sketch:
                 constants[c.name] = c
 
         # ensure that all undefined constants are indeed holes
-        assert len(constants) == len(hole_definitions.keys())
+        assert len(constants) == len(hole_definitions.keys()), "most likely some constants were unspecified"
 
         # parse allowed options
         definitions = OrderedDict()

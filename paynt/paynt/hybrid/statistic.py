@@ -41,8 +41,8 @@ class Statistic:
 
     def get_long_summary(self):
         formulae = self.formulae if self.optimal_value is None else self.formulae[:-1]
-        formulae = "\n".join([f"formula {i + 1}: {formula}" for i, formula in enumerate(formulae)])
-        opt_formula = f"optimal setting: {self.opt_setting}" if self.optimal_value else ""
+        formulae = "\n".join([f"formula {i + 1}: {formula}" for i, formula in enumerate(formulae)]) + "\n"
+        formulae += f"optimal setting: {self.opt_setting}\n" if self.optimal_value else ""
 
         timing = f"method: {self.method}, synthesis time: {round(self.timer.time, 2)} s"
         design_space = f"number of holes: {self.holes_count}, family size: {self.family_size}"
@@ -61,7 +61,7 @@ class Statistic:
         result = f"feasible: {feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
         assignment = f"hole assignment: {self.assignment}\n" if self.assignment else ""
 
-        summary = f"{formulae}\n{opt_formula}\n{timing}\n{design_space}\n" \
+        summary = f"{formulae}\n{timing}\n{design_space}\n" \
                   f"{family_stats}{self.ce_quality}\n{result}\n{assignment}"
         return summary
 

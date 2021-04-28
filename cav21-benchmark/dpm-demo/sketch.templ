@@ -13,9 +13,6 @@ dtmc
 // initial queue size
 const int q_init = 0;
 
-// dummy constants
-const int CMAX;
-
 // ----- synthesized parameters ------------------------------------------------
 
 // profiles desired at observation levels
@@ -127,11 +124,7 @@ rewards "served"
     [tick1] q > 0 & sp=2 : 1;
 endrewards
 
-// rewards "lost"
-//    [tick0] q=QMAX & sr=1 : 1;
-// endrewards
-
-rewards "lost"
+rewards "requests_lost"
     [tick1] lost=1 : 1;
 endrewards
 

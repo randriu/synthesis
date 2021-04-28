@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a specification (see below for more information), and outputs a concrete hole assignment that yields a program that satisfies the specification, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT.
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy) -- python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), prerequisites for PAYNT.
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -15,11 +15,12 @@ PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
 
 ## Image with the pre-installed tool
 
-An image with the pre-installed tool is available in [this Ubuntu 20.04 LTS virtual machine](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README.
+An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available in [here](). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
 
-** How to boot the VM ** 
-- Virtualbox, no password.
-- Where to navigate.
+username: tacas21
+password: tacas21
+
+``/home/tacas21/synthesis``
 
 ## Getting started with PAYNT 
 
@@ -27,23 +28,27 @@ Having the tool installed, you can quickly test it by activating the python envi
 
 ```sh
 source env/bin/activate
-python3 paynt/paynt.py --project cav21-benchmark/grid --properties easy.properties hybrid
+python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properites hybrid
 ```
 
-The syntax of the command is explained in the last chapter of this README. For now, we can see that we investigate the __Grid__ benchmark discussed in the CAV'21 paper and synthesize it wrt. the easy property using the advanced hybrid approach. The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
+The syntax of the command is described in more detail in the following chapters of this README.
+For now, we can see that we ask PAYNT to look at the sketch (located in directory ``cav21-benchmark/dpm-demo``) for the dynamic power manager discussed in Section 2 in [1] and synthesize it wrt. specification in file ``cav21-benchmark/dpm-demo/sketch.properties`` using the advanced hybrid approach.
+The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
-formula 1: P>=931/1000 [F ("goal" & (c < 40))]
+formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
+optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
 
-method: Hybrid, synthesis time: 3.03 s
-number of holes: 8, family size: 65536
-super MDP size: 11535, average MDP size: 11490, MPD checks: 5, iterations: 5
-average DTMC size: 1232, DTMC checks: 215, iterations: 215
+method: Hybrid, synthesis time: 12.39 s
+number of holes: 7, family size: 12150
+super MDP size: 1502, average MDP size: 1502, MPD checks: 2, iterations: 1
+average DTMC size: 172, DTMC checks: 2708, iterations: 1354
 
-feasible: no
+optimal: 9100.064246
+hole assignment: P1=1,P2=0,P3=0,P4=2,T1=0.0,T3=0.8,QMAX=5
 ```
-Importantly, the tool reports that it could not find a feasible solution.
-
+The contents of such summary will be again discussed later.
+Nonetheless, we can see that the tool reports a hole assignment that yields the optimal program.
 
 The python environment can be deactivated by runnning
 
@@ -51,62 +56,104 @@ The python environment can be deactivated by runnning
 deactivate
 ```
 
-## Running PAYNT
+### Contents of this README
 
-### Syntax of the PAYNT's command
-PAYNT is started using the command in the following form:
+The remainder of this README fully describes how to synthesize probabilistic programs using PAYNT.
+In particular, we will discuss
+- how to run PAYNT
+- how to read the output of PAYNT
+- how to create your own sketches and specifications
+
+In the end, we will discuss how to install and test PAYNT on your system.
+Finally, file [experiments/README_experiments.md](./experiments/README_experiments.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
+The file also contains exploration of synthesis problems beyond the presented experiment suite.
+
+## Synthesizing probabilistic programs with PAYNT
+
+### Running PAYNT
+PAYNT is executed using the command in the following form:
 
 ```shell
 python3 paynt/paynt.py [OPTIONS] [hybrid|cegar|cegis|onebyone]
 ```
-where the most important options are can be: 
-- ``--project PATH``: specifies the path to the benchmark folder [required]
-- ``--sketch FILE_IN_PATH``: specifies the file containing the template description in the PRISM guarded command language [default: ``PATH/sketch.templ``]
-- ``--properties FILE_IN_PATH``: specifies the file containing specifications to synthesise against [default: ``PATH/sketch.properties``]
-- ``--constants TEXT``: specifies the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1`` as standard for Prism programs.
+where the most important options are: 
+- ``--project PROJECT``: specifies the path to the benchmark folder [required]
+- ``--sketch FILE_IN_PROJECT``: specifies the file containing the template description in the PRISM guarded command language [default: ``sketch.templ``]
+- ``--properties FILE_IN_PROJECT``: specifies the file containing specifications to synthesise against [default: ``sketch.properties``]
+- ``--constants STRING``: specifies the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1`` as standard for PRISM programs.
 - 
-For instance, PAYNT can be run most simply as follows: 
+For instance, here is a simple PAYNT call:
 
 ```shell
-python3 paynt/paynt.py --project cav21-benchmark/dpm-demo --constants CMAX=2 hybrid
+python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --properties easy.properties hybrid
 ```
 
-The `--project` option specifies the path to the benchmark folder.
-PAYNT inspects the content of this folder to find the required files for the synthesis process: `sketch.templ` and `sketch.properties`.
-The first file contains the template description, and the second one the specifications.
-The `--constants` option specifies the value for an undefined variable in the sketch, which is not considered as a synthesised hole.
+The `--project` option specifies the path to the benchmark folder: now we will investigate the __Grid__ model discussed in [1].
+PAYNT inspects the content of this folder and locates the required files for the synthesis process: the sketch and the specification list.
+In the example above, the sketch file is `cav21-benchmark/grid/sketch.templ` (in this case, `--sketch` option could have been omitted), the specification file is `cav21-benchmark/grid/easy.properties` and the sketch does not have undefined constants, only holes.
 Finally, the last argument specifies the selected synthesis method: `hybrid`.
 
 PAYNT has some advanced options for developers.
-- ``--short-summary``: prints also short summary of the synthesis results consisting of primary information
-- ``--ce-quality``: evaluates the counter-example quality when usage the hybrid approach. For recreating experiments in [2].
-- ``--ce-maxsat``: enables the construction of counter-examples using MaxSat approach and also their evaluation. For recreating experiments in [2].
 - ``--help``: shows the help message of the PAYNT and exit the program
+- ``--short-summary``: also prints a one-line short summary of the synthesis
+- ``--ce-maxsat``: enables the construction of counter-examples using MaxSat approach and also their evaluation. For recreating experiments in [2].
+- ``--ce-quality``: evaluates the counter-example quality when using the hybrid approach. Used to recreate experiments in [2].
 
 
-## Understanding the synthesis process in PAYNT
+### Reading the output of PAYNT
 
-The PAYNT's command produces the following summary printed at the end of the synthesis process:
+Running PAYNT produces a sequence of log and a summary printed at the end of the synthesis process.
+For instance, if we run
+
+```sh
+python3 paynt/paynt.py --project cav21-benchmark/dpm-demo hybrid
+```
+we obtain the following summary:
 
 ```shell
-formula 1: R[exp]{"rewardmodel_lost"}<=1 [F "finished"]
+formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
 optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
-method: Hybrid, synthesis time: 23.26 s
+
+method: Hybrid, synthesis time: 12.39 s
 number of holes: 7, family size: 12150
-super MDP size: 1502, average MDP size: 1365, MPD checks: 6, iterations: 3
+super MDP size: 1502, average MDP size: 1502, MPD checks: 2, iterations: 1
 average DTMC size: 172, DTMC checks: 2708, iterations: 1354
 
 optimal: 9100.064246
 hole assignment: P1=1,P2=0,P3=0,P4=2,T1=0.0,T3=0.8,QMAX=5
 ```
 
-This summary consists of some information about the result of the performed synthesis process: benchmark statistics, synthesis time, number of iterations, MDP-related info, DTMC-related info, whether the synthesis problem is feasible etc.
-The first lines contain the synthesised specifications, as well as the optimal property with its settings if it was entered.
-We can see that this particular DPM benchmark contains 7 holes (parameters) and 12.1K family members.
-On average, each member has on average 1.3K states when constructed via the (quotient) MDP in the AR method and 172 states when analysing the underlying DTMC (in CEGIS). 
-We can also see that the problem found the optimal solution satisfying also given formula and that on our machine took 3 AR, 1354 CEGIS iterations and 23 seconds to prove this.
-The last lines show the synthesised solution with concrete instantiations of holes and the found optimal value.
-Notice that only the hybrid method contains both MDP- and DTMC-related information since CEGIS never deals with MDPs, and AR only works via the MDP.
+This summary contains information about the synthesized sketch as well as the results of the synthesis process.
+The first lines repeat the synthesised specifications and, if included, the optimizing property.
+Next, the synthesis was carried out using the hybrid method and it on our machine it took 12.47 seconds.
+We can see that this particular DPM benchmark contains 7 holes (parameters) and 12K family members.
+The following lines are statistics about deductive (MDP-based) or inductive (counterexample-based) analysis, including sizes of analyzed MDPs/DTMCs, number of particular model checking calls, overall iterations count etc.
+Notice that only the hybrid method contains both MDP- and DTMC-related information since CEGIS never deals with MDPs, and AR works exclusively with MDPs.
+
+Finally, the last lines show the synthesis result.
+In our case, PAYNT printed a hole assignment yielding optimal solution as well as the induced optimal value.
+To double-check that there are indeed no assignments having expected power consumption less than 9100, we can modify the specification file `cav21-benchmark/dpm-demo/sketch.properties` as follows:
+
+```math
+R{"requests_lost"} <= 1 [ F "finished" ]
+R{"power"}<=9100 [ F "finished" ]
+```
+
+Running PAYNT again will produce the following result
+
+```shell
+formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
+formula 2: R[exp]{"power"}<=9100 [F "finished"]
+
+method: Hybrid, synthesis time: 12.33 s
+number of holes: 7, family size: 12150
+super MDP size: 1502, average MDP size: 1502, MPD checks: 2, iterations: 1
+average DTMC size: 172, DTMC checks: 2700, iterations: 1350
+
+feasible: no
+```
+from which we can see that PAYNT indeed proved non-existence of a better solution.
+
 
 ### Sketching language
 
@@ -194,12 +241,6 @@ PAYNT computes this optimal solution in one minute. Despite of the relatively sm
 We further consider a more complex variant of the synthesis problem inspired by the well-studied model of a dynamical power manager ([DPM](https://ieeexplore.ieee.org/document/7372021)) for complex electronic systems. 
 The corresponding sketch describes around 43M available solutions with an the average MC size of 3.6k states (the [sketch](./cav21-benchmark/dpm/sketch.templ) and [specification](./cav21-benchmark/dpm/hard.properties) are available in benchmark [directory](./cav21-benchmark/dpm)). 
 While enumeration needs more than ~1 month to find the optimal power manager, PAYNT solves it within 10 hours.
-
-
-## Evaluating PAYNT 
-The [evaluate.md](./cav21-benchmark/evaluate.md) describes the way of recreating the experiments in [1].
-Further, it contains the exploring synthesis problems beyond the presented experiment suite.
-For more information about these parts, please examine the specified file.
 
 
 ## Testing PAYNT
