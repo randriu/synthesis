@@ -1,5 +1,5 @@
 ## Evaluating PAYNT 
-We provide scripts to recreate the experiments in our paper [1] (see [README.md](../README.md)).
+We provide scripts to recreate the experiments in our paper [1], see [README.md](../README.md)).
 
 ### Reproducing [1, Table 1]
 
@@ -16,18 +16,16 @@ Here, `timeout` is a timeout value for each individual experiment, e.g. '5m' or 
 
 Based on the runtimes reported in the table, you can select a timeout value that will allow you to complete as many experiments as possible within your allocated time. Since 1-by-1 enumeration typically requires more than a day to complete, you might be interested in at least completing synthesis via advanced methods (10 of the 15 presented experiments). Here are some suggested values:
 
-`timeout=5m` will complete 4/10 experiments within 1 hour
-`timeout=20m` will complete 6/10 experiments within 3.5 hours
-`timeout=1h` will complete 7/10 experiments within 8.5 hours
-`timeout=2h` will complete 9/10 experiments within 14 hours (recommended value)
-`timeout=12h` will complete 10/10 experiments within 2.5 days
+- `timeout=5m` will complete 4/10 experiments within 1 hour
+- `timeout=20m` will complete 6/10 experiments within 3.5 hours
+- `timeout=1h` will complete 7/10 experiments within 8.5 hours
+- `timeout=2h` will complete 9/10 experiments within 14 hours (recommended value)
+- `timeout=12h` will complete 10/10 experiments within 2.5 days
 
 If the experiment associated with one-by-one enumeration hits a timeout, the runtime will be estimated based on the number of rejected assignments. However, in order to obtain reliable estimates, enumeration must run of a significant period of time, i.e. for a couple of hours. If advanced synthesis method hit a timeout, then, since its performance cannot be estimated in a meaningful way, the corresponding table entry will contain '-'.
 Finally, statistics about average MC size are taken from logs associated with advanced synthesis (easy property) and, if the corresponding computation was interrupted, the table entry will again display '-'.
 
-Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight. 
-
-The log files for [TBA]
+Finally, note that the evaluation of experiments is executed concurrently based on the number `nproc` of (logical) CPUs available on your system/VM. As a result, for a VM having 4 CPU cores, choosing recommended timeout value `timeout=2h` will allow to complete 9/10 experiments associated with advanced synthesis approaches as well as produce reliable estimates for 1-by-1 enumeration within 3-4 hours. It might be a good idea to let the script run overnight. The sample log files for execution on our machine with a 12-hour timeout are available inside the supplied VM at `~synthesis/experiments/logs.zip`.
 
 **Please note** that all of the discussed synthesis methods, specifically advanced methods (CEGIS, CEGAR, hybrid) are subject to some nondeterminism during their execution, and therefore during your particular evaluation you might obtain slightly different execution times. Furthermore, the switching nature of the integrated method heavily depends on the timing, which can again result in fluctuations in the observed measurements. However, the qualitative conclusions -- e.g. overall performance of hybrid vs 1-by-1 enumeration or comparative runtimes of synthesizing wrt. easy vs hard property -- should be preserved. Also remember that the provided runtimes for different timeout settings were estimated based on the experience with our CPU (Intel i5-8300H, 4 cores at 2.3 GHz) and that the evaluation might last longer/shorter on your machine.
 

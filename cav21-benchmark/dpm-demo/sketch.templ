@@ -16,6 +16,7 @@ const int q_init = 0;
 // ----- synthesized parameters ------------------------------------------------
 
 // profiles desired at observation levels
+// 0 - sleep, 1 - idle, 2 - active
 hole int P1 in {0,1,2};
 hole int P2 in {0,1,2};
 hole int P3 in {0,1,2};
@@ -45,10 +46,10 @@ endmodule
 
 module PM
     pm  :  [0..2] init 0; // 0 - sleep, 1 - idle, 2 - active
-    [tick0] q*10 <= T1*QMAX -> (pm'=P1);
-    [tick0] q*10 > T1*QMAX & q*10 <= T2*QMAX -> (pm'=P2);
-    [tick0] q*10 > T2*QMAX & q*10 <= T3*QMAX -> (pm'=P3);
-    [tick0] q*10 > T3*QMAX -> (pm'=P4);
+    [tick0] q <= T1*QMAX -> (pm'=P1);
+    [tick0] q > T1*QMAX & q <= T2*QMAX -> (pm'=P2);
+    [tick0] q > T2*QMAX & q <= T3*QMAX -> (pm'=P3);
+    [tick0] q > T3*QMAX -> (pm'=P4);
 endmodule
 
 

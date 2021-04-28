@@ -65,7 +65,7 @@ In particular, we will discuss
 - how to create your own sketches and specifications
 
 In the end, we will discuss how to install and test PAYNT on your system.
-Finally, file [experiments/README_experiments.md](./experiments/README_experiments.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
+Finally, file [experiments/README_evaluation.md](./experiments/README_evaluation.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
 The file also contains exploration of synthesis problems beyond the presented experiment suite.
 
 ## Synthesizing probabilistic programs with PAYNT
@@ -114,50 +114,28 @@ we obtain the following summary:
 formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
 optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
 
-method: Hybrid, synthesis time: 12.39 s
+method: Hybrid, synthesis time: 67.62 s
 number of holes: 7, family size: 12150
-super MDP size: 1502, average MDP size: 1502, MPD checks: 2, iterations: 1
-average DTMC size: 172, DTMC checks: 2708, iterations: 1354
+super MDP size: 1502, average MDP size: 956, MPD checks: 116, iterations: 59
+average DTMC size: 234, DTMC checks: 14206, iterations: 7103
 
 optimal: 9100.064246
-hole assignment: P1=1,P2=0,P3=0,P4=2,T1=0.0,T3=0.8,QMAX=5
+hole assignment: P1=1,P2=2,P3=2,P4=2,T1=0.0,T3=0.8,QMAX=5
 ```
 
 This summary contains information about the synthesized sketch as well as the results of the synthesis process.
 The first lines repeat the synthesised specifications and, if included, the optimizing property.
-Next, the synthesis was carried out using the hybrid method and it on our machine it took 12.47 seconds.
+Next, the synthesis was carried out using the hybrid method and it on our machine it took 68 seconds.
 We can see that this particular DPM benchmark contains 7 holes (parameters) and 12K family members.
 The following lines are statistics about deductive (MDP-based) or inductive (counterexample-based) analysis, including sizes of analyzed MDPs/DTMCs, number of particular model checking calls, overall iterations count etc.
 Notice that only the hybrid method contains both MDP- and DTMC-related information since CEGIS never deals with MDPs, and AR works exclusively with MDPs.
 
 Finally, the last lines show the synthesis result.
 In our case, PAYNT printed a hole assignment yielding optimal solution as well as the induced optimal value.
-To double-check that there are indeed no assignments having expected power consumption less than 9100, we can modify the specification file `cav21-benchmark/dpm-demo/sketch.properties` as follows:
-
-```math
-R{"requests_lost"} <= 1 [ F "finished" ]
-R{"power"}<=9100 [ F "finished" ]
-```
-
-Running PAYNT again will produce the following result
-
-```shell
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-formula 2: R[exp]{"power"}<=9100 [F "finished"]
-
-method: Hybrid, synthesis time: 12.33 s
-number of holes: 7, family size: 12150
-super MDP size: 1502, average MDP size: 1502, MPD checks: 2, iterations: 1
-average DTMC size: 172, DTMC checks: 2700, iterations: 1350
-
-feasible: no
-```
-from which we can see that PAYNT indeed proved non-existence of a better solution.
-
 
 ### Sketching language
 
-PAYNT takes as an input a sketch -- program description in `PRISM` (or `JANI`) language containing some undefined parameters (holes) with associated options from domains -- and a specification given as a list of temporal logic constraints (interpreted as a conjunction of theses constrains) possibly including an optimal objective. Before explaining the sketching language, let us briefly present the key ideas of the `PRISM` language -- the full documentation of the language is available [here](https://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction).
+PAYNT takes as an input a sketch -- program description in `PRISM` (or `JANI`) language containing some undefined parameters (holes) with associated options from domains -- and a specification given as a list of temporal logic constraints (interpreted as a conjunction of theses constrains) possibly including an optimal objective. Before explaining the sketching language, let us briefly present the key ideas of the `PRISM` language -- the full documentation of the language is available [in the PRISM manual](https://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction).
 
 A `PRISM` program consists of one or more reactive modules that may interact with each other using synchronisation. A module has a set of (bounded) variables that span its state space. Possible transitions between states of a module are described by a set of guarded commands of the form:
 
@@ -188,63 +166,114 @@ In other words, the PM observes the queue occupancy of the intervals: [0, T<sub>
 The values of these levels are unknown and thus are defined using four holes.
 For each occupancy level, the PM changes to the associated power profile P<sub>1</sub>, ..., P<sub>4</sub> in {0,1,2}, where numbers 0 through 2 encode the profiles *sleeping*, *idle* and *active}*, respectively. 
 The strategy which profile to used for the particular occupy is also unknown and thus defined using another four holes. 
-Finally, the queue capacity Q<sub>max</sub> is also unknown and thus the sketch includes in total 9 holes. The following sketch describes the PM (the modules implementing the other components of the server are omitted here for brevity -- the entire sketch is available in benchmark [template](cav21-benchmark/dpm-demo/sketch.templ)).
+Finally, the queue capacity Q<sub>max</sub> is also unknown and thus the sketch includes in total 9 holes.
+In the sketch, the definition of the hole takes place outside of any module (typically in the beginning of the program) and must include its data type (int or double) as well as the domain:
 
+```math
+// profiles desired at observation levels
+// 0 - sleep, 1 - idle, 2 - active
+hole int P1 in {0,1,2};
+hole int P2 in {0,1,2};
+hole int P3 in {0,1,2};
+hole int P4 in {0,1,2};
+
+// observation level thresholds
+hole double T1 in {0.0,0.1,0.2,0.3,0.4};
+hole double T2 in {0.5};
+hole double T3 in {0.6,0.7,0.8};
+
+// queue size
+hole int QMAX in {1,2,3,4,5,6,7,8,9,10};
+```
+
+The following sketch fragment describes the module for the described power manager. The modules implementing other components of the server are omitted here for brevity -- the entire sketch is available in [this file](cav21-benchmark/dpm-demo/sketch.templ).
 
 ```math
 module PM
-    [ToDo] Add domains of the holes
     pm  :  [0..2] init 0; // 0 - sleep, 1 - idle, 2 - active
-    [sync0] q <= T1*QMAX -> (pm'=P1);
-    [sync0] q > T1*QMAX & q <= T2*QMAX -> (pm'=P2);
-    [sync0] q > T2*QMAX & q <= T3*QMAX -> (pm'=P3);
-    [sync0] q > T3*QMAX -> (pm'=P4);
+    [tick0] q <= T1*QMAX -> (pm'=P1);
+    [tick0] q > T1*QMAX & q <= T2*QMAX -> (pm'=P2);
+    [tick0] q > T2*QMAX & q <= T3*QMAX -> (pm'=P3);
+    [tick0] q > T3*QMAX -> (pm'=P4);
 endmodule
 ```
 
-The sketch also includes the domains for each hole. Note that these domains ensures that T<sub>1</sub> < T<sub>2</sub> < T<sub>3</sub>, however PAYNT further supports restrictions --- additional constraints on parameter combinations. 
+Note that the domains of the holes defined above ensure that T<sub>1</sub> < T<sub>2</sub> < T<sub>3</sub>, however PAYNT further supports restrictions --- additional constraints on parameter combinations. 
 The resulting sketch describes a *design space* of 10 x 5 x 4 x 3<sup>4</sup> = 16,200 different power managers where the average size of the underlying MC (of the complete system) is around 900 states. 
-
 
 ### Specification of the required behaviour
 
-The goal is to find the concrete power manager, i.e., the instantiation of the holes, that minimizes power consumption while the expected number of lost requests during the operation time of the server is below 1. 
-Such specification is formalized as a list of temporal logic formulae in the `PRISM` syntax (the specification is also available within the benchmark directory [here](cav21-benchmark/dpm-demo/sketch.properties):
+The goal is to find the concrete power manager, i.e., the instantiation of the holes, that minimizes power consumption while the expected number of lost requests during the operation time of the server is at most 1. 
+In general, a specification is formalized as a list of temporal logic formulae in the [`PRISM` syntax](https://www.prismmodelchecker.org/manual/PropertySpecification/Introduction).
+Here is a specification available within the benchmark directory [here](cav21-benchmark/dpm-demo/sketch.properties):
 
-```shell
-R{"lost"}<= 1 [ F "finished" ]  R{"power"}min=? [ F "finished" ]
+```math
+R{"requests_lost"}<= 1 [ F "finished" ]
+R{"power"}min=? [ F "finished" ]
 ```
 
-For the given the sketch and specification, PAYNT effectively explores the design space and finds a hole assignment inducing a program that satisfies the specification, provided such assignment exists. 
+We can see that the speicification file can additionally contain at most one optimizing property.
+Furthermore, one can specify relative precision for satisfying such criterion (epsilon-optimality), e.g.
+
+```math
+R{"power"}min{0.05}=? [ F "finished" ]
+```
+
+For the given sketch and specification, PAYNT effectively explores the design space and finds a hole assignment inducing a program that satisfies the specification, provided that such assignment exists.
 Otherwise, it reports that such design does not exist.
-Executing the following command:
-
-```shell
-python3 paynt/paynt.py --project cav21-benchmark/dpm-demo --constants CMAX=10 hybrid
-```
+If the specification also includes an optimizing criterion, PAYNT will find hole assignments that satisfies constraints in the specification __and__ has an optimal behaviour.
 
 ### Interpretation of the synthesis results
 
 PAYNT produces the following output containing the hole assignment and the quality wrt. the specification of the corresponding program:
 
 ```math
-hole assignment: QMAX=5,T1=0,T3=0.7,P1=1,P2=2,P3=2,P4=2
-R[exp]{"lost"}=0.6822759696 [F "finished"]
-R[exp]{"power"}min=9100.064246 [F "finished"]
+optimal: 9100.064246
+hole assignment: P1=1,P2=2,P3=2,P4=2,T1=0.0,T3=0.8,QMAX=5
 ```
 
-The obtained optimal power manager has queue capacity 5 with thresholds (after rounding) at 0, 2 and 3.
+The obtained optimal power manager has queue capacity 5 with thresholds (after rounding) at 0, 2 and 4.
 In addition, the power manager always maintains an active profile unless the request queue is empty, in which case the device is put into an idle state.
-This solution leads to the expected number of lost requests of around 0.68 < 1 and the power consumption of 9,100 units. 
-PAYNT computes this optimal solution in one minute. Despite of the relatively small family size, PAYNT is about three times faster than a naive enumeration of all solutions. 
+This solution guarantees expected number of lost requests to be at most one and has the power consumption of 9,100 units. 
+To double-check that there are no controllers having expected power consumption less than 9100, we can modify the specification file `cav21-benchmark/dpm-demo/sketch.properties` as follows:
 
-We further consider a more complex variant of the synthesis problem inspired by the well-studied model of a dynamical power manager ([DPM](https://ieeexplore.ieee.org/document/7372021)) for complex electronic systems. 
-The corresponding sketch describes around 43M available solutions with an the average MC size of 3.6k states (the [sketch](./cav21-benchmark/dpm/sketch.templ) and [specification](./cav21-benchmark/dpm/hard.properties) are available in benchmark [directory](./cav21-benchmark/dpm)). 
-While enumeration needs more than ~1 month to find the optimal power manager, PAYNT solves it within 10 hours.
+```math
+R{"requests_lost"} <= 1 [ F "finished" ]
+R{"power"}<=9100 [ F "finished" ]
+```
 
+Running PAYNT again (with hybrid synthesis approach) will produce the following result
+
+```shell
+formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
+formula 2: R[exp]{"power"}<=9100 [F "finished"]
+
+method: Hybrid, synthesis time: 67.52 s
+number of holes: 7, family size: 12150
+super MDP size: 1502, average MDP size: 962, MPD checks: 116, iterations: 59
+average DTMC size: 237, DTMC checks: 14126, iterations: 7063
+
+feasible: no
+```
+from which we can see that PAYNT indeed proved non-existence of a better solution.
+
+We might further consider a more complex program sketch __Grid__ (discussed in [1]), where we synthesize controller for a robot in an unpredictable environment.
+
+```shell
+python3 paynt/paynt.py --project cav21-benchmark/grid --properties easy.properties hybrid
+```
+
+This sketch describes a family of 65K members, where each member has, on average 1225 states.
+Even though this is a much larger family with much larger chains than in the sketch considered before, the pruning ability of the advanced hybrid approach allows PAYNT to handle this specification in a matter of seconds.
+Meanwhile, one-by-one enumeration
+
+```shell
+python3 paynt/paynt.py --project cav21-benchmark/grid --properties easy.properties onebyone
+```
+might take up to 20 minutes.
 
 ## Testing PAYNT
-As we report in the paper, PAYNT is tested with unit tests and regression tests.
+As reported in the paper, PAYNT is tested with unit tests and regression tests.
 These tests currently cover more than 90% of the source code lines.
 The unit tests which cover the specific logic components to maintain their correct functionality.
 You can run the regression and unit tests (~5 minutes) with the following sequence of commands:
@@ -253,10 +282,11 @@ You can run the regression and unit tests (~5 minutes) with the following sequen
 cd paynt/paynt_tests
 python3 -m pytest --cov=./../paynt/ --cov-report term-missing test_synthesis.py test_model_checking.py
 ```
-
 This command prints the coverage report, displaying the resulting coverage for individual source files.
 Our tests currently cover more than `90%` of the source code lines, even though the result shows `82%` because `~10%` of the source code is only temporary functions for debugging purposes that have no functionality.
 
 ## Installation
+
+T
 
 The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`).
