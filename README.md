@@ -26,7 +26,7 @@ Having the tool installed, you can quickly test it by navigating to the tool fol
 ```sh
 cd /home/cav21/synthesis
 source env/bin/activate
-python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properites hybrid
+python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properties hybrid
 ```
 
 The syntax of the command is described in more detail in the following chapters of this README.
