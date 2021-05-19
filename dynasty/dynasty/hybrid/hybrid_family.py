@@ -128,7 +128,7 @@ class FamilyHybrid(Family):
         if self.member_assignment is not None:
 
             # collect edges relevant for this assignment
-            indexed_assignment = Family._hole_options.index_map(self.member_assignment)
+            indexed_assignment = Family._hole_options.index_map(self.member_assignment, Family._parameters)
             subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
             collected_edge_indices = stormpy.FlatSet(
                 Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
@@ -146,13 +146,15 @@ class FamilyHybrid(Family):
 
             self.points = {}
             if isinstance(self.dtmc, stormpy.SparseParametricDtmc):
-                # for p in self.dtmc.collect_probability_parameters():
-                for p in Family._quotient_mdp.collect_probability_parameters():
+                for p in self.dtmc.collect_probability_parameters():
+                # for p in Family._quotient_mdp.collect_probability_parameters():
                     assert len(self.member_assignment[p.name]) == 1
                     self.points[p] = stormpy.RationalRF(self.member_assignment[p.name][0].evaluate_as_double())
-                self.instantiator = stormpy.pars.ModelInstantiator(self.dtmc)
                 self.param_dtmc = self.dtmc
+                self.instantiator = stormpy.pars.ModelInstantiator(self.param_dtmc)
                 self.dtmc = self.instantiator.instantiate(self.points)
+                print(self.dtmc.transition_matrix)
+                exit(1)
 
             # assert absence of deadlocks or overlapping guards
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
