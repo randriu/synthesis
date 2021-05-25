@@ -480,10 +480,6 @@ namespace storm {
             
             this->reportStatus(result.status, result.iterations);
             
-            std::cout << "--------------------------------------------------------------\n";
-            std::cout << "METRICS\n";
-            std::cout << "VI Iterations: " << result.iterations << "\n";
-            std::cout << "--------------------------------------------------------------\n";
             
             // If requested, we store the scheduler for retrieval.
             if (this->isTrackSchedulerSet()) {

@@ -123,22 +123,22 @@ namespace storm {
                 this->nnzValues.push_back(std::move(it->getValue()));
             }
 
-            std::vector<uint_fast64_t> matrixRowSizes;
-            for (uint_fast64_t i = 0; i < this->matrixRowCount; ++i) 
-                matrixRowSizes.push_back(A.getRow(i).getNumberOfEntries());
+            // std::vector<uint_fast64_t> matrixRowSizes;
+            // for (uint_fast64_t i = 0; i < this->matrixRowCount; ++i) 
+            //     matrixRowSizes.push_back(A.getRow(i).getNumberOfEntries());
 
             this->rowStartIndices = &(A.getRowIndications());
 
             this->rowBlocks.push_back(0);
-            auto sum = 0;
-            for (auto i = 0; i < this->matrixRowCount; ++i) {
-                sum += matrixRowSizes.at(i);
-                if (sum > nnzInWG) {
-                    this->rowBlocks.push_back(i);
-                    sum = matrixRowSizes.at(i);
-                }
-            }
-            this->rowBlocks.push_back(this->matrixRowCount);
+            // auto sum = 0;
+            // for (auto i = 0; i < this->matrixRowCount; ++i) {
+            //     sum += matrixRowSizes.at(i);
+            //     if (sum > nnzInWG) {
+            //         this->rowBlocks.push_back(i);
+            //         sum = matrixRowSizes.at(i);
+            //     }
+            // }
+            // this->rowBlocks.push_back(this->matrixRowCount);
 
             this->matrixBlockCount = rowBlocks.size() - 1;
         }
@@ -195,19 +195,12 @@ namespace storm {
             if (currentX == this->cachedRowVector.get()) {
                 std::swap(x, *currentX);
             }
-            
+
             if (!this->isCachingEnabled()) {
                 clearCache();
             }
 
             this->reportStatus(status, iterations);
-
-            std::cout << "--------------------------------------------------------------\n";
-            std::cout << "METRICS\n";
-            std::cout << "Jacobi Iterations: " << iterations << "\n";
-            std::cout << "dimension: " << A->getRowCount() << "\n";
-            std::cout << "nnz count: " << A->getNonzeroEntryCount() << "\n";
-            std::cout << "--------------------------------------------------------------\n";
 
             return status == SolverStatus::Converged;
         }
@@ -745,6 +738,9 @@ namespace storm {
             size_t iterations = 0;
 
             result = __jacobiIteration_solver<ValueType, uint_fast64_t>(maxIter, precision, LUMatrix.matrixRowCount, LUMatrix.matrixNnzCount, LUMatrix.matrixBlockCount, x, b, LUMatrix.nnzValues, jacobiDecomposition->DVector, LUMatrix.columnIndices, *LUMatrix.rowStartIndices, LUMatrix.rowBlocks, iterations, relative);
+            
+            if (result) 
+                this->reportStatus(SolverStatus::Converged, iterations);
 #else
             std::cout << "WARNING: Using CPU based LinearEquationSolver!" << std::endl;
             STORM_LOG_INFO("Performance Warning: Using CPU based LinearEquationSolver!");

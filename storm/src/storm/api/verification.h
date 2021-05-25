@@ -274,14 +274,12 @@ namespace storm {
             std::vector<std::shared_ptr<storm::modelchecker::CheckResult>> finalResults;
             storm::modelchecker::SparseMdpPrctlModelChecker<storm::models::sparse::Mdp<ValueType>> modelchecker(*family, subfamilies, initValues);
 
-
             std::unique_ptr<storm::modelchecker::CheckResult> result; // results for all subfamilies in one vector
             if (modelchecker.canHandle(task)) {
                 result = modelchecker.check(env, task);
             }     
 
             // split results for subfamilies
-
             std::vector<uint_fast64_t> familiesOffsets;
             familiesOffsets.push_back(0);
             for (uint_fast64_t i = 1; i <= initValues.size(); i++) { 
@@ -302,8 +300,6 @@ namespace storm {
                             subfamilyScheduler->setChoice(scheduler->getChoice(j), index);
                         }
                     }
-                    std::cout << "subfamily: " <<  storm::utility::vector::toString(subfamilyResults) << "\n";
-                    subfamilyScheduler->printToStream(std::cout);
 
                     std::unique_ptr<storm::modelchecker::CheckResult> newResult( new storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>(std::move(subfamilyResults)) );
                     newResult->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(subfamilyScheduler));

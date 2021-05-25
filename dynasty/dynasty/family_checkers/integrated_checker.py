@@ -26,13 +26,13 @@ from .familychecker import HoleOptions
 logger = logging.getLogger(__name__)
 
 quotientbased_logger.disabled = False
-quotient_container_logger.disabled = False
+quotient_container_logger.disabled = True
 jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = False
 
-ONLY_CEGAR = True #
+ONLY_CEGAR = False 
 ONLY_CEGIS = False
-CEGAR_MULTIPLE = True 
+CEGAR_MULTIPLE = False 
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
 PRINT_PROFILING = False
@@ -74,8 +74,13 @@ def check_dtmc(dtmc, formula, quantitative=False):
         formula.remove_bound()
 
     env = stormpy.Environment()
-    env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
-    env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+    logger.info(f"Metrics MC model-checking: {dtmc.nr_transitions/dtmc.nr_states}")
+    if (dtmc.nr_transitions/dtmc.nr_states > 3.6):
+        logger.info(f"MC CUDA model-checking")
+        env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+        env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+    else:
+        logger.info(f"MC CPU model-checking")
 
     timer = Timer()
     timer.start()
@@ -247,8 +252,13 @@ class EnumerationChecker(LiftingChecker):
 
     def _check_optimal_property(self, dtmc):
         env = stormpy.Environment()
-        env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
-        env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+        logger.info(f"Metrics MC model-checking: {dtmc.nr_transitions/dtmc.nr_states}")
+        if (dtmc.nr_transitions/dtmc.nr_states > 3.6):
+            logger.info(f"MC CUDA model-checking")
+            env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+            env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+        else:
+            logger.info(f"MC CPU model-checking")
 
         # Model checking of the optimality property
         result = stormpy.model_checking(dtmc, self._optimality_setting.criterion, environment=env)
@@ -610,7 +620,7 @@ class Family:
             Family._quotient_mdp_stats[0] + Family._quotient_mdp.nr_states, Family._quotient_mdp_stats[1] + 1
         )
         logger.debug(f"Constructed MDP of size {Family._quotient_mdp.nr_states}.")
-        print(Family._quotient_mdp.transition_matrix)
+        logger.debug(f"Constructed MDP of transitions {Family._quotient_mdp.nr_transitions}.")
 
     @property
     def size(self):
@@ -683,8 +693,8 @@ class Family:
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """
         if self.constructed:
-            Family._quotient_container.mdp_handling._submodel = self.mdp
-            Family._quotient_container.mdp_handling._mapping_to_original = self.choice_map
+            Family._quotient_container.mdp_handling._submodel = self.mdp #
+            Family._quotient_container.mdp_handling._mapping_to_original = self.choice_map #
             return
 
         Profiler.start("ar - MDP construction")
@@ -695,11 +705,10 @@ class Family:
         self.mdp = Family._quotient_container.mdp_handling.mdp
         self.choice_map = Family._quotient_container.mdp_handling.mapping_to_original
         logger.debug(f"Constructed MDP of size {self.mdp.nr_states}.")
+        logger.debug(f"Constructed MDP of transitions {self.mdp.nr_transitions}.")
         Family._quotient_mdp_stats = (
             Family._quotient_mdp_stats[0] + self.mdp.nr_states, Family._quotient_mdp_stats[1] + 1
         )
-        print(self.choice_map) # 
-        print(self.mdp.transition_matrix) #
 
         Profiler.stop()
 
@@ -916,16 +925,19 @@ class Family:
         assert len(split_queue) == 2 if hole and hole not in self._parameters else True
         return split_queue
 
-    def prepare_split(self):
+    def prepare_split(self, naive_split=False):
         # logger.debug(f"Preparing to split family {self.options}")
-        assert self.constructed and not self.split_ready
-        Profiler.start("ar - splitting")
-        Family._quotient_container.scheduler_color_analysis()
-        if len(Family._quotient_container.inconsistencies) == 2:
-            self.suboptions = LiftingChecker.split_hole_options(
-                self.options, Family._quotient_container, Family._hole_options, True
-            )
-        Profiler.stop()
+        if naive_split:
+            self.suboptions = self._round_robin_split()
+        else:
+            assert self.constructed and not self.split_ready
+            Profiler.start("ar - splitting")
+            Family._quotient_container.scheduler_color_analysis()
+            if len(Family._quotient_container.inconsistencies) == 2:
+                self.suboptions = LiftingChecker.split_hole_options(
+                    self.options, Family._quotient_container, Family._hole_options, True
+                )
+            Profiler.stop()
 
     def split(self):
         assert self.split_ready
@@ -1156,6 +1168,7 @@ class FamilyHybrid(Family):
             self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
             Family._dtmc_stats = (Family._dtmc_stats[0] + self.dtmc.nr_states, Family._dtmc_stats[1] + 1)
             logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
+            logger.debug(f"Constructed DTMC of transitions {self.dtmc.nr_transitions}.")
 
             # assert absence of deadlocks or overlapping guards
             assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
@@ -1442,11 +1455,16 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
     def _check_optimal_property(self, family_ref, assignment, cex_generator=None, optimal_value=None):
         env = stormpy.Environment()
-        env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
-        env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
 
         if optimal_value is None:
             assert family_ref.dtmc is not None
+            logger.info(f"Metrics MC model-checking: {family_ref.dtmc.nr_transitions/family_ref.dtmc.nr_states}")
+            if (family_ref.dtmc.nr_transitions/family_ref.dtmc.nr_states > 3.6):
+                logger.info(f"MC CUDA model-checking")
+                env.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+                env.solver_environment.native_solver_environment.method = stormpy.NativeLinearEquationSolverMethod.cudajacobi
+            else:
+                logger.info(f"MC CPU model-checking")
             # Model checking of the optimality property
             result = stormpy.model_checking(family_ref.dtmc, self._optimality_setting.criterion, environment=env)
             optimal_value = result.at(family_ref.dtmc.initial_states[0])
@@ -1565,20 +1583,20 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         processed = 0
 
         # get as many families as can be processed in parallel
-        for family in self.families:
+        for family in reversed(self.families):
             if (count-2) >= 0:
                 subfams = family._round_robin_split()
                 # flag that tells us that the family was splitted
                 family.splitted = True
                 # construct subfamilies
                 if subfams != None:
-                    subfamily_left = Family(family, subfams[0])
-                    subfamily_right = Family(family, subfams[1])
+                    subfamily_left = FamilyHybrid(family, subfams[0])
+                    subfamily_right = FamilyHybrid(family, subfams[1])
                     subfamily_left.construct()
                     subfamily_right.construct()
                     # add subfamilies into list to analyse 
-                    families_to_analyze.append(subfamily_left)
                     families_to_analyze.append(subfamily_right)
+                    families_to_analyze.append(subfamily_left)
                     count -= 2
                     processed += 1
                 else:
@@ -1586,33 +1604,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             else:
                 break
 
-        # if there is still a place for another subfamily on GPU
-        if ( count >=2 ): 
-            # fill empty place on GPU
-            for family_to_split in families_to_analyze:
-                if (count-2) >= 0:
-                    subfams = family_to_split._round_robin_split()
-                    family_to_split.splitted = True
-                    # construct subfamilies
-                    if subfams != None:
-                        subfamily_left = Family(family_to_split, subfams[0])
-                        subfamily_right = Family(family_to_split, subfams[1])
-                        subfamily_left.construct()
-                        subfamily_right.construct()
-                        # add subfamilies into list to analyse 
-                        families_to_analyze.append(subfamily_left)
-                        families_to_analyze.append(subfamily_right)
-                        count -= 2
-                    else:
-                        continue
-                else:
-                    break
-                
-                if count == 0:
-                    break
-
-        # keep just these undecided families which have no place on GPU
-        self.families = self.families[processed:]
+        self.families = self.families[:-processed]
 
         return families_to_analyze
 
@@ -1689,14 +1681,15 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     continue
             else:  # CEGAR
                 if CEGAR_MULTIPLE:
-                # if False:
                     families_to_analyze = self.get_subfamilies_to_analyze(gpu_families_count)
                     models_pruned = 0
-
+                    logger.debug(
+                        f"Constructed {len(families_to_analyze)} subfamilies."
+                    )
                     results_for_families = Family.analyze_families(families_to_analyze)
-                    for i in range(0, len(results_for_families)):
-                        self.iterations_cegar += 1
-
+                    
+                    self.iterations_cegar += 1
+                    for i in range(len(results_for_families)-1, -1, -1):
                         feasible = (results_for_families[i])[0]
                         optimal_value = (results_for_families[i])[1]
 
@@ -1729,40 +1722,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     logger.debug("Splitting the family.")
                     subfamily_left, subfamily_right = family.split()
                     subfamilies = [subfamily_left, subfamily_right]
-                    
-                    # if (self.iterations_cegar == 1):
-                    #     env = stormpy.Environment()
-                    #     env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
-                    #     env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
-
-                    #     # sbfmls = family._round_robin_split()
-                    #     # sbfml_left = Family(family, sbfmls[0])
-                    #     # sbfml_right = Family(family, sbfmls[1])
-                    #     # sbfml_left.construct()
-                    #     # sbfml_right.construct()
-
-                    #     # nextLevel = sbfml_left._round_robin_split()
-
-                    #     subfamilies[0].construct()
-                    #     subfamilies[1].construct()  
-                    #     print(self.mc_formulae[0])
-                    #     print(self.mc_formulae_alt[0])
-
-                    #     xinitleft = None
-                    #     xinitright = None
-
-                    #     if (stormpy.OptimizationDirection.Minimize == self.mc_formulae[0].optimality_type):
-                    #         xinitleft = (stormpy.prob01min_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
-                    #         xinitright = (stormpy.prob01min_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
-                    #     else:
-                    #         xinitleft = (stormpy.prob01max_states(subfamily_left.mdp, self.formulae[0].subformula))[1]
-                    #         xinitright = (stormpy.prob01max_states(subfamily_right.mdp, self.formulae[0].subformula))[1]
-
-                    #     prime_result = stormpy.model_checking_families(Family.quotient_mdp(), self.mc_formulae[0], [subfamily_left.choice_map, subfamily_right.choice_map], [xinitleft, xinitright],
-                    #         only_initial_states=False, extract_scheduler=True, environment=env
-                    #     )
-                    #     print(prime_result)
-                    
                     logger.debug(
                         f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
                     )

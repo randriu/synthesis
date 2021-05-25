@@ -79,7 +79,6 @@ namespace storm {
             }
             
             // Handle the case where there is just one large SCC
-            std::cout << "Number of SCCs: " << this->sortedSccDecomposition->size() << "\n";
             size_t trivialSCCsCount = 0;
             size_t nonTrivialSCCsCount = 0;
             bool returnValue = true;
@@ -117,10 +116,8 @@ namespace storm {
                 clearCache();
             }
 
-            std::cout << "non trivial SCCs: " << nonTrivialSCCsCount << "\n";
-            std::cout << "trivial SCCs: " << trivialSCCsCount << "\n";
-            
-
+            STORM_LOG_INFO("Non-trivial SCCs count is " << nonTrivialSCCsCount);
+            STORM_LOG_INFO("Trivial SCCs count is " << trivialSCCsCount);
             
             return returnValue;
         }

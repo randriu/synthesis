@@ -278,8 +278,13 @@ class ModelHandling:
         if is_dtmc:
             env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
-            env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
-            # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+            logger.info(f"Metrics MDP model-checking: {self._submodel.nr_transitions/self._submodel.nr_states}")
+            if (self._submodel.nr_transitions/self._submodel.nr_states > 4.0):
+                logger.info(f"MDP CUDA model-checking")
+                env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
+            else:
+                logger.info(f"MDP CPU model-checking")
+                env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
         # assert not self._formulae[index].has_bound
 
@@ -287,9 +292,6 @@ class ModelHandling:
         # TODO allow qualitative model checking with scheduler extraction.
         timer = Timer()
         timer.start()
-        # stormpy.model_checking_families(self._submodel, self._formulae[index], [[1,2],[3,4]], only_initial_states=False,
-        #     extract_scheduler=extract_scheduler, environment=env
-        # ) 
         prime_result = stormpy.model_checking(
             self._submodel, self._formulae[index], only_initial_states=False,
             extract_scheduler=extract_scheduler, environment=env
@@ -358,17 +360,9 @@ class ModelHandling:
         """
         assert not compute_action_values
         
-        # TODO set from the outside.
         env = stormpy.Environment()
         env.solver_environment.minmax_solver_environment.precision = stormpy.Rational(0.0000000001)  # +
         
-        # env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-        # for family in families_to_analyze:
-        #     tmp = stormpy.model_checking(
-        #         family.mdp, self._formulae[index], only_initial_states=False,
-        #         extract_scheduler=True, environment=env
-        #     )
-
         env.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.cuda_vi
         env.solver_environment.minmax_solver_environment.set_solve_multiple_mdps()
     
@@ -390,14 +384,14 @@ class ModelHandling:
             
             inits.append(xinit)
 
-        logger.info(f"Start checking direction 1: {self._formulae[index]}")
+        logger.info(f"MULTIPLE VI ({len(families_to_analyze)}) START")
         # TODO allow qualitative model checking with scheduler extraction.
         timer = Timer()
         timer.start()
         prime_results = stormpy.model_checking_families(self.full_mdp, self._formulae[index], choices, inits, only_initial_states=False,
                 extract_scheduler=extract_scheduler, environment=env) 
         timer.stop()
-        logger.debug(f"MDP model checking run-time: {timer.read()}")
+        logger.info(f"MULTIPLE VI ({len(families_to_analyze)}) END: {timer.read()}")
 
         second_result = None
 

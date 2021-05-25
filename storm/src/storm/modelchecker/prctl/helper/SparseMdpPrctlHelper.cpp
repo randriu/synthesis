@@ -591,10 +591,7 @@ namespace storm {
             }
             
             template<typename ValueType>
-            MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, std::vector<uint_fast64_t> const& keys, uint_fast64_t numberOfFamilies, size_t resultSize, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint) {
-                
-                std::vector<ValueType> result(transitionMatrix.getRowGroupCount() * numberOfFamilies, storm::utility::zero<ValueType>());
-                
+            MDPSparseModelCheckingHelperReturnType<ValueType> SparseMdpPrctlHelper<ValueType>::computeUntilProbabilitiesMultipleMDPs(Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> && transitionMatrix, std::vector<ValueType> const& b, std::vector<ValueType> & x, std::vector<uint_fast64_t> const& choices, std::vector<uint_fast64_t> const& keys, uint_fast64_t numberOfFamilies, size_t resultSize, bool qualitative, bool produceScheduler, ModelCheckerHint const& hint) {
                 // If requested, we will produce a scheduler.
                 std::unique_ptr<storm::storage::Scheduler<ValueType>> scheduler;
                 if (produceScheduler) {
@@ -692,9 +689,6 @@ namespace storm {
                     extendScheduler(*scheduler, goal, qualitativeStateSets, transitionMatrix, backwardTransitions, phiStates, psiStates);
                 }
                 
-                std::cout << "result: \n" << storm::utility::vector::toString(result) << "\n";
-                std::cout << "scheduler: \n";
-                (scheduler.get())->printToStream(std::cout);
                 // Sanity check for created scheduler.
                 STORM_LOG_ASSERT(!produceScheduler || scheduler, "Expected that a scheduler was obtained.");
                 STORM_LOG_ASSERT((!produceScheduler && !scheduler) || !scheduler->isPartialScheduler(), "Expected a fully defined scheduler");

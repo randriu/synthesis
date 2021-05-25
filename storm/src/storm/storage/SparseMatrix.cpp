@@ -453,7 +453,7 @@ namespace storm {
         }
         
         template<typename ValueType>
-        SparseMatrix<ValueType>::SparseMatrix(SparseMatrix<ValueType>&& other) : rowCount(other.rowCount), columnCount(other.columnCount), entryCount(other.entryCount), nonzeroEntryCount(other.nonzeroEntryCount), columnsAndValues(std::move(other.columnsAndValues)), rowIndications(std::move(other.rowIndications)), trivialRowGrouping(other.trivialRowGrouping), rowGroupIndices(std::move(other.rowGroupIndices)) {
+        SparseMatrix<ValueType>::SparseMatrix(SparseMatrix<ValueType>&& other) : rowCount(other.rowCount), columnCount(other.columnCount), entryCount(other.entryCount), nonzeroEntryCount(other.nonzeroEntryCount), columnsAndValues(std::move(other.columnsAndValues)), rowIndications(std::move(other.rowIndications)), trivialRowGrouping(other.trivialRowGrouping), rowGroupIndices(std::move(other.rowGroupIndices)), rowGroupIndicesAsKeys(std::move(other.rowGroupIndicesAsKeys)), schedulerSize(other.schedulerSize) {
             // Now update the source matrix
             other.rowCount = 0;
             other.columnCount = 0;

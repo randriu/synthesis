@@ -505,6 +505,27 @@ namespace storm {
             storm::storage::sparse::ModelComponents<ValueType> components(sub_matrix, labeling_subdtmc, reward_models_subdtmc);
             std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
             
+            // find out if it is a case that whole dtmc is counterexample
+            size_t dimension = sub_matrix.getColumnCount();
+            size_t nnzCount = sub_matrix.getNonzeroEntryCount();
+            // eliminate dummy states transitions
+            for (StateType i = 0; i < matrix_subdtmc.size() - 2; i++) {
+                for (StateType j = 0; j < matrix_subdtmc.at(i).size(); j++){
+                    StateType col = matrix_subdtmc.at(i).at(j).first;
+                    ValueType val = matrix_subdtmc.at(i).at(j).second;
+                    if ( val != 0 && (col == (dimension-1) || col == (dimension-2)) ) { nnzCount--; }
+                }
+            }
+            for (StateType i = matrix_subdtmc.size() - 2; i < matrix_subdtmc.size(); i++) {
+                for (StateType j = 0; j < matrix_subdtmc.at(i).size(); j++){
+                    ValueType val = matrix_subdtmc.at(i).at(j).second;
+                    if (val != 0) nnzCount--;
+                }
+            }
+            
+            if (nnzCount == this->dtmc->getTransitionMatrix().getNonzeroEntryCount()) {
+                return false;
+            }
             // Model check
             Environment env;
             // env.solver().setLinearEquationSolverType(storm::solver::EquationSolverType::Native);
@@ -526,7 +547,6 @@ namespace storm {
             this->total.start();
 
             // Get DTMC info
-            std::cout << "*****************************CE generation started\n";
             StateType dtmc_states = this->dtmc->getNumberOfStates();
 
             this->preparing_subdtmc.start();
@@ -568,7 +588,6 @@ namespace storm {
             this->constructing_counterexample.stop();
 
             this->total.stop();
-            std::cout << "*****************************CE generation stop\n";
 
             return critical_holes;
         }

@@ -206,28 +206,26 @@ ValueType sumSingleWarpReg (ValueType val) {
  * @param y 
  */
 template<typename ValueType>
-__global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const uint_fast64_t *row_ptr, const uint_fast64_t *row_blocks, const ValueType *data, const ValueType *x, ValueType *y) {
+__global__ void csr_spmv_adaptable_kernel (const uint_fast64_t *col_ids, const uint_fast64_t *row_ptr, const uint_fast64_t *row_blocks, const ValueType *data, const ValueType *x, ValueType *y) {
 
-    const uint_fast64_t block_row_begin = row_blocks[blockIdx.x];
-    const uint_fast64_t block_row_end = row_blocks[blockIdx.x + 1];
-    const uint_fast64_t nnz_per_block = row_ptr[block_row_end] - row_ptr[block_row_begin]; 
+    const uint_fast64_t block_begin = row_blocks[blockIdx.x];
+    const uint_fast64_t block_end = row_blocks[blockIdx.x + 1];
+    const uint_fast64_t nnz_per_block = row_ptr[block_end] - row_ptr[block_begin]; 
 
-    __shared__ ValueType cache[NNZ_PER_WG];
+    __shared__ ValueType multRes[NNZ_PER_WG];
 
-    if (block_row_end - block_row_begin > 1) {
+    if (block_end - block_begin > 1) {
         // CSR-Stream case...
-        const uint_fast64_t i = threadIdx.x;
-        const uint_fast64_t block_data_begin = row_ptr[block_row_begin];
-        const uint_fast64_t thread_data_begin = block_data_begin + i;
-
+        const uint_fast64_t thread_id = threadIdx.x;
+        const uint_fast64_t block_data_begin = row_ptr[block_begin];
+        const uint_fast64_t thread_data_begin = block_data_begin + thread_id;
         /**
-         * Some block of rows may contain less than NNZ_PER_WG elements. But at 
+         * Block of rows may contain less than NNZ_PER_WG elements. But at 
          * most NNZ_PER_WG elements. (NNZ_PER_WG == blockDim.x -- Each thread has
          * one non-zero element to process.)
          */
-
-        if (i < nnz_per_block) 
-            cache[i] = data[thread_data_begin] * x[col_ids[thread_data_begin]];
+        if (thread_id < nnz_per_block) 
+            multRes[thread_id] = data[thread_data_begin] * x[col_ids[thread_data_begin]];
         __syncthreads ();
         
         /**
@@ -236,60 +234,51 @@ __global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const ui
          * is more non-zero elements in one row than one row is reduced by multiple 
          * threads.
          */
-        const uint_fast64_t threads_for_reduction = prev_power_of_2(blockDim.x/(block_row_end - block_row_begin));
-            
+        const uint_fast64_t threads_for_reduction = prev_power_of_2(blockDim.x/(block_end - block_begin));
         if (threads_for_reduction > 1) {
             // Reduce all non zeroes of row by multiple thread
-            const uint_fast64_t thread_in_block = i % threads_for_reduction;
-            const uint_fast64_t local_row = block_row_begin + i/threads_for_reduction;
+            const uint_fast64_t thread_in_block = thread_id % threads_for_reduction;
+            const uint_fast64_t local_row = block_begin + thread_id/threads_for_reduction;
 
             ValueType sum = 0.0;
 
-            if (local_row < block_row_end) {
-                const uint_fast64_t local_first_element = row_ptr[local_row] - row_ptr[block_row_begin];
-                const uint_fast64_t local_last_element = row_ptr[local_row + 1] - row_ptr[block_row_begin];
+            if (local_row < block_end) {
+                const uint_fast64_t local_first_element = row_ptr[local_row] - row_ptr[block_begin];
+                const uint_fast64_t local_last_element = row_ptr[local_row + 1] - row_ptr[block_begin];
 
-                for(uint_fast64_t local_element = local_first_element + thread_in_block;
-                    local_element < local_last_element;
-                    local_element += threads_for_reduction) 
-                    {
-                        sum += cache[local_element];    
-                    }
+                for(uint_fast64_t local_element = local_first_element + thread_in_block; local_element < local_last_element; local_element += threads_for_reduction) {
+                    sum += multRes[local_element];    
+                }
             }
             __syncthreads();
-            cache[i] = sum;
+            multRes[thread_id] = sum;
 
-            // Now each row has "threads_for_reduction" values in cache
+            // Now each row has "threads_for_reduction" values in multRes
             for (int j = threads_for_reduction / 2; j > 0; j >>= 1) {
                 // Reduce for each row
                 __syncthreads();
 
-                const bool use_result = thread_in_block < j && i + j < NNZ_PER_WG;
+                const bool use_result = thread_in_block < j && thread_id + j < NNZ_PER_WG;
 
-                if (use_result)
-                    sum += cache[i+j];
+                sum = (use_result) ? sum + multRes[thread_id + j] : sum;
                 __syncthreads();
 
                 if(use_result)
-                    cache[i] = sum;
+                    multRes[thread_id] = sum;
             }
           
-            if(thread_in_block == 0 && local_row < block_row_end)
+            if(thread_in_block == 0 && local_row < block_end)
                 y[local_row] = sum;
         
         } else {
             // Reduce all non zeros of row by single thread
-            uint_fast64_t local_row = block_row_begin + i;
-
-            while (local_row < block_row_end) {
+            uint_fast64_t local_row = block_begin + thread_id;
+            while (local_row < block_end) {
                 ValueType sum = 0.0;
 
-                for (uint_fast64_t j = row_ptr[local_row] - block_data_begin;
-                    j < row_ptr[local_row + 1] - block_data_begin;
-                    j++) 
-                    {
-                        sum += cache[j];
-                    }
+                for (uint_fast64_t j = row_ptr[local_row] - block_data_begin; j < row_ptr[local_row + 1] - block_data_begin; j++) {
+                    sum += multRes[j];
+                }
                 y[local_row] = sum;
                 local_row += NNZ_PER_WG;
             }
@@ -301,7 +290,7 @@ __global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const ui
          * NNZ_PER_WG (blockDim.x) <= nnz_per_block (also blockDim.x > nnz_per_block 
          * is possible). 
          */
-        const uint_fast64_t nnz_per_block = row_ptr[block_row_end] - row_ptr[block_row_begin]; 
+        const uint_fast64_t nnz_per_block = row_ptr[block_end] - row_ptr[block_begin]; 
 
         if (nnz_per_block <= 64) {
             // CSR-Vector case...
@@ -311,8 +300,8 @@ __global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const ui
 
             if (warp_id == 0) {
                 // only one warp processes a whole row
-                const uint_fast64_t row_start = row_ptr[block_row_begin];
-                const uint_fast64_t row_end = row_ptr[block_row_end];
+                const uint_fast64_t row_start = row_ptr[block_begin];
+                const uint_fast64_t row_end = row_ptr[block_end];
 
                 for(uint_fast64_t element = row_start + thread_id; element < row_end; element += warpSize) {
                     sum += data[element] * x[col_ids[element]];
@@ -321,91 +310,87 @@ __global__ void csr_spmv_adaptive_kernel (const uint_fast64_t *col_ids, const ui
                 sum = sumSingleWarpReg<ValueType>(sum);
 
                 if(thread_id == 0)
-                    y[block_row_begin] = sum;
+                    y[block_begin] = sum;
             }
         }  else {
             // CSR-VectorL case...
             const uint_fast64_t thread_id = threadIdx.x;
              
-            const uint_fast64_t row_start = row_ptr[block_row_begin];
-            const uint_fast64_t row_end = row_ptr[block_row_end];
+            const uint_fast64_t row_start = row_ptr[block_begin];
+            const uint_fast64_t row_end = row_ptr[block_end];
             
             ValueType sum = 0.0;
             for(uint_fast64_t element = row_start + thread_id; element < row_end; element += blockDim.x)
                 sum += data[element] * x[col_ids[element]];
 
-            cache[thread_id] = sum;
+            multRes[thread_id] = sum;
             __syncthreads();
 
             for(int stride = blockDim.x / 2; stride > 0;  stride >>= 1) {
                 if(thread_id < stride) 
-                    cache[thread_id] += cache[thread_id + stride];
+                    multRes[thread_id] += multRes[thread_id + stride];
                 __syncthreads();
             }
 
             __syncthreads();
 
             if(thread_id == 0) 
-                y[block_row_begin] = cache[thread_id];
+                y[block_begin] = multRes[thread_id];
         }
     }
 }
 
-template <typename ValueType, unsigned int ROWS_PER_BLOCK, unsigned int THREADS_PER_ROW, bool Maximize>
-__launch_bounds__(ROWS_PER_BLOCK * THREADS_PER_ROW,1)
+template <typename ValueType, unsigned int GROUPS_PER_BLOCK, unsigned int THREADS_PER_GROUP, bool Maximize>
+__launch_bounds__(GROUPS_PER_BLOCK * THREADS_PER_GROUP,1) 
 __global__ void
-storm_cuda_opt_vector_reduce_kernel(const uint_fast64_t num_groups, const uint_fast64_t * __restrict__ nondeterministicChoiceIndices, ValueType * __restrict__ x, const ValueType * __restrict__ y, const ValueType minMaxInitializer)
+segmented_vector_reduce_kernel(const uint_fast64_t num_groups, const uint_fast64_t * __restrict__ nondeterministicChoiceIndices, ValueType * __restrict__ result, const ValueType * __restrict__ input, const ValueType minMaxInitializer)
 {
-    __shared__ volatile uint_fast64_t ptrs[ROWS_PER_BLOCK][2];
+    __shared__ volatile uint_fast64_t groups_pointers[GROUPS_PER_BLOCK][2];
     
-    const uint_fast64_t THREADS_PER_BLOCK = ROWS_PER_BLOCK * THREADS_PER_ROW;
+    const uint_fast64_t THREADS_PER_BLOCK = GROUPS_PER_BLOCK * THREADS_PER_GROUP;
 
-    const uint_fast64_t thread_id   = THREADS_PER_BLOCK * blockIdx.x + threadIdx.x; // global thread index
-    const uint_fast64_t thread_lane = threadIdx.x & (THREADS_PER_ROW - 1);          // thread index within the vector
-    const uint_fast64_t vector_id   = thread_id   /  THREADS_PER_ROW;               // global vector index
-    const uint_fast64_t vector_lane = threadIdx.x /  THREADS_PER_ROW;               // vector index within the block
-    const uint_fast64_t num_vectors = ROWS_PER_BLOCK * gridDim.x;                   // total number of active vectors
+    const uint_fast64_t thread_id   = THREADS_PER_BLOCK * blockIdx.x + threadIdx.x;// global thread index
+    const uint_fast64_t thread_lane = threadIdx.x & (THREADS_PER_GROUP - 1);       // thread index within the group
+    const uint_fast64_t group_id   = thread_id   /  THREADS_PER_GROUP;             // global vector index
+    const uint_fast64_t group_lane = threadIdx.x /  THREADS_PER_GROUP;             // vector index within the block
+    const uint_fast64_t num_states = GROUPS_PER_BLOCK * gridDim.x;                 // total number of active groups
 
-    for(uint_fast64_t row = vector_id; row < num_groups; row += num_vectors) {
-        // use two threads to fetch Ap[row] and Ap[row+1]
-        // this is considerably faster than the straightforward version
+    for(uint_fast64_t row = group_id; row < num_groups; row += num_states) {
         if(thread_lane < 2)
-            ptrs[vector_lane][thread_lane] = nondeterministicChoiceIndices[row + thread_lane];
+            groups_pointers[group_lane][thread_lane] = nondeterministicChoiceIndices[row + thread_lane];
 
-        const uint_fast64_t row_start = ptrs[vector_lane][0];                   //same as: row_start = Ap[row];
-        const uint_fast64_t row_end   = ptrs[vector_lane][1];                   //same as: row_end   = Ap[row+1];
+        const uint_fast64_t group_start = groups_pointers[group_lane][0];
+        const uint_fast64_t group_end   = groups_pointers[group_lane][1];
 
         // initialize local Min/Max
-        ValueType localMinMaxElement = minMaxInitializer;
+        ValueType localMinMax = minMaxInitializer;
 
-        if (THREADS_PER_ROW == 32 && row_end - row_start > 32) {
-            // ensure aligned memory access to Aj and Ax
+        if (THREADS_PER_GROUP == 32 && group_end - group_start > 32) {
+            // ensure aligned memory access
+            uint_fast64_t index = group_start - (group_start & (THREADS_PER_GROUP - 1)) + thread_lane;
 
-            uint_fast64_t jj = row_start - (row_start & (THREADS_PER_ROW - 1)) + thread_lane;
-
-            // accumulate local sums
-            if(jj >= row_start && jj < row_end) {
-				if(Maximize) { localMinMaxElement = (localMinMaxElement < y[jj]) ? y[jj] : localMinMaxElement; } 
-                else         { localMinMaxElement = (localMinMaxElement > y[jj]) ? y[jj] : localMinMaxElement; }
+            if(index >= group_start && index < group_end) {
+				if(Maximize) { localMinMax = (localMinMax < input[index]) ? input[index] : localMinMax; } 
+                else         { localMinMax = (localMinMax > input[index]) ? input[index] : localMinMax; }
 			}
-
             // accumulate local sums
-            for(jj += THREADS_PER_ROW; jj < row_end; jj += THREADS_PER_ROW)
-                if(Maximize) { localMinMaxElement = (localMinMaxElement < y[jj]) ? y[jj] : localMinMaxElement; } 
-                else         { localMinMaxElement = (localMinMaxElement > y[jj]) ? y[jj] : localMinMaxElement; }
+            for(index += THREADS_PER_GROUP; index < group_end; index += THREADS_PER_GROUP) {
+                if(Maximize) { localMinMax = (localMinMax < input[index]) ? input[index] : localMinMax; } 
+                else         { localMinMax = (localMinMax > input[index]) ? input[index] : localMinMax; }
+            }
         } else {
             // accumulate local sums
-            for(uint_fast64_t jj = row_start + thread_lane; jj < row_end; jj += THREADS_PER_ROW)
-                if(Maximize) { localMinMaxElement = (localMinMaxElement < y[jj]) ? y[jj] : localMinMaxElement; } 
-                else         { localMinMaxElement = (localMinMaxElement > y[jj]) ? y[jj] : localMinMaxElement; }
+            for(uint_fast64_t index = group_start + thread_lane; index < group_end; index += THREADS_PER_GROUP)
+                if(Maximize) { localMinMax = (localMinMax < input[index]) ? input[index] : localMinMax; } 
+                else         { localMinMax = (localMinMax > input[index]) ? input[index] : localMinMax; }
         }
 
         // reduce local min/max to row min/max
-        localMinMaxElement = (Maximize) ? maxSingleWarpReg<ValueType>(localMinMaxElement, minMaxInitializer, THREADS_PER_ROW) : 
-                                          minSingleWarpReg<ValueType>(localMinMaxElement, minMaxInitializer, THREADS_PER_ROW) ;
+        localMinMax = (Maximize) ? maxSingleWarpReg<ValueType>(localMinMax, minMaxInitializer, THREADS_PER_GROUP) : 
+                                   minSingleWarpReg<ValueType>(localMinMax, minMaxInitializer, THREADS_PER_GROUP) ;
 
         if (thread_lane == 0)
-            x[row] = (localMinMaxElement == minMaxInitializer) ? 0.0 : localMinMaxElement;
+            result[row] = (localMinMax == minMaxInitializer) ? 0.0 : localMinMax;
     }
 }
 
@@ -429,7 +414,6 @@ bool jacobiIteration_solver(
                 std::vector<uint_fast64_t> const& rowBlocks,
                 size_t& iterationCount)
 {
-    std::cout << "CUDA Jacobi method\n";
 
     bool errorOccured = false;
     bool converged = false;
@@ -500,7 +484,7 @@ bool jacobiIteration_solver(
 #ifdef USE_CUSPARSE        
         CHECK_CUSPARSE( cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_DATATYPE, CUSPARSE_CSRMV_ALG2, dBuffer) );
 #else
-        csr_spmv_adaptive_kernel<ValueType><<<matrixBlockCount, NNZ_PER_WG>>>(device_columnIndices, device_rowStartIndices, device_rowBlocks, device_nnzValues, device_x, device_xSwap); 
+        csr_spmv_adaptable_kernel<ValueType><<<matrixBlockCount, NNZ_PER_WG>>>(device_columnIndices, device_rowStartIndices, device_rowBlocks, device_nnzValues, device_x, device_xSwap); 
 #endif
         gather<ValueType><<<gatherGridDim, NNZ_PER_WG>>>(device_b, device_D, device_xSwap, matrixRowCount);
 
@@ -551,41 +535,32 @@ bool jacobiIteration_solver(
     CHECK_CUDA( cudaFree(dBuffer) );
 #endif
 
-    std::cout << "--------------------------------------------------------------\n";
-    std::cout << "METRICS\n";
-    std::cout << "Jacobi Iterations: " << iterationCount << "\n";
-    std::cout << "Matrix dimension: " << matrixRowCount << "\n";
-    std::cout << "Matrix nnz count: " << matrixNnzCount << "\n";
-    std::cout << "--------------------------------------------------------------\n";
-
     return !errorOccured;
 }
 
-template <typename ValueType, bool Maximize, unsigned int THREADS_PER_VECTOR>
-void __storm_cuda_opt_vector_reduce(const uint_fast64_t num_groups, const uint_fast64_t * nondeterministicChoiceIndices, ValueType * x, const ValueType * y)
+template <typename ValueType, bool Maximize, unsigned int THREADS_PER_GROUP>
+void __segmented_vector_reduce(const uint_fast64_t num_groups, const uint_fast64_t * nondeterministicChoiceIndices, ValueType * x, const ValueType * y)
 {
 	const ValueType minMaxInitializer = (Maximize) ? -std::numeric_limits<ValueType>::infinity() : std::numeric_limits<ValueType>::infinity();
 
     const size_t THREADS_PER_BLOCK  = 128;
-    const size_t VECTORS_PER_BLOCK  = THREADS_PER_BLOCK / THREADS_PER_VECTOR;
+    const size_t GROUPS_PER_BLOCK  = THREADS_PER_BLOCK / THREADS_PER_GROUP;
+    const size_t NUM_BLOCKS = ceil(double(num_groups) / GROUPS_PER_BLOCK);
 
-    const size_t NUM_BLOCKS = ceil(double(num_groups) / VECTORS_PER_BLOCK);
-
-    storm_cuda_opt_vector_reduce_kernel<ValueType, VECTORS_PER_BLOCK, THREADS_PER_VECTOR, Maximize> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> 
-        (num_groups, nondeterministicChoiceIndices, x, y, minMaxInitializer);
+    segmented_vector_reduce_kernel<ValueType, GROUPS_PER_BLOCK, THREADS_PER_GROUP, Maximize> <<<NUM_BLOCKS, THREADS_PER_BLOCK>>> (num_groups, nondeterministicChoiceIndices, x, y, minMaxInitializer);
 }
 
 template <bool Maximize, typename ValueType>
-void storm_cuda_opt_vector_reduce(const uint_fast64_t num_groups, const uint_fast64_t num_entries, const uint_fast64_t * nondeterministicChoiceIndices, ValueType * x, const ValueType * y)
+void segmented_vector_reduce(const uint_fast64_t num_groups, const uint_fast64_t num_entries, const uint_fast64_t * nondeterministicChoiceIndices, ValueType * x, const ValueType * y)
 {
-    const uint_fast64_t rows_per_group = num_entries / num_groups;
+    const uint_fast64_t threads_per_group = num_entries / num_groups;
 
-    if (rows_per_group <=  2) { __storm_cuda_opt_vector_reduce<ValueType, Maximize, 2>(num_groups, nondeterministicChoiceIndices, x, y); return; }
-    if (rows_per_group <=  4) { __storm_cuda_opt_vector_reduce<ValueType, Maximize, 4>(num_groups, nondeterministicChoiceIndices, x, y); return; }
-    if (rows_per_group <=  8) { __storm_cuda_opt_vector_reduce<ValueType, Maximize, 8>(num_groups, nondeterministicChoiceIndices, x, y); return; }
-    if (rows_per_group <= 16) { __storm_cuda_opt_vector_reduce<ValueType, Maximize,16>(num_groups, nondeterministicChoiceIndices, x, y); return; }
+    if (threads_per_group <=  2) { __segmented_vector_reduce<ValueType, Maximize, 2>(num_groups, nondeterministicChoiceIndices, x, y); return; }
+    if (threads_per_group <=  4) { __segmented_vector_reduce<ValueType, Maximize, 4>(num_groups, nondeterministicChoiceIndices, x, y); return; }
+    if (threads_per_group <=  8) { __segmented_vector_reduce<ValueType, Maximize, 8>(num_groups, nondeterministicChoiceIndices, x, y); return; }
+    if (threads_per_group <= 16) { __segmented_vector_reduce<ValueType, Maximize,16>(num_groups, nondeterministicChoiceIndices, x, y); return; }
     
-    __storm_cuda_opt_vector_reduce<ValueType, Maximize,32>(num_groups, nondeterministicChoiceIndices, x, y);
+    __segmented_vector_reduce<ValueType, Maximize,32>(num_groups, nondeterministicChoiceIndices, x, y);
 }
 
 template <bool Maximize, bool Relative, typename ValueType, cudaDataType CUDA_DATATYPE>
@@ -602,7 +577,6 @@ bool valueIteration_solver(
                 bool const extractScheduler, 
                 std::vector<uint_fast64_t>* choices) 
 {
-    std::cout << "CUDA ValueIteration method\n";
 
     bool errorOccured = false;
     bool converged = false;
@@ -683,7 +657,7 @@ bool valueIteration_solver(
 		thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + matrixRowCount, devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
 
         /* MAX/MIN_REDUCE: reduce multiplyResult to a new x vector */
-        storm_cuda_opt_vector_reduce<Maximize, ValueType>(matrixColCount, matrixRowCount, device_nondeterministicChoiceIndices, device_xSwap, device_multiplyResult);
+        segmented_vector_reduce<Maximize, ValueType>(matrixColCount, matrixRowCount, device_nondeterministicChoiceIndices, device_xSwap, device_multiplyResult);
         
         /* INF_NORM: check for convergence */
         // Transform: diff = abs(x - xSwap)/ xSwap
@@ -780,7 +754,6 @@ bool valueIteration_solver_multipleMDPs(
                 bool const extractScheduler, 
                 std::vector<uint_fast64_t>* choices) 
 {
-    std::cout << "CUDA ValueIteration method Multiple\n";
 
     bool errorOccured = false;
     bool converged = false;
@@ -798,7 +771,7 @@ bool valueIteration_solver_multipleMDPs(
 	ValueType* device_multiplyResult = nullptr;
 
     const uint_fast64_t matrixRowCount = matrixRowIndices.size() - 1;
-    const uint_fast64_t matrixBsizeCount = nondeterministicChoiceIndices.size() - 1;
+    const uint_fast64_t subfamiliesMatrixSize = nondeterministicChoiceIndices.size() - 1;
     const uint_fast64_t familiesCount = b.size() / matrixRowCount;
     const uint_fast64_t matrixColCount = x.size() / familiesCount;
     const uint_fast64_t matrixNnzCount = nnzValues.size();
@@ -820,24 +793,24 @@ bool valueIteration_solver_multipleMDPs(
     // Device memory allocation
     CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_columnIndices), sizeof(uint_fast64_t) * matrixNnzCount) );
     CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_matrixRowIndices), sizeof(uint_fast64_t) * (matrixRowCount + 1)) );
-    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_nondeterministicChoiceIndices), sizeof(uint_fast64_t) * (matrixBsizeCount + 1)) );
+    CHECK_CUDA( cudaMalloc<uint_fast64_t>((&device_nondeterministicChoiceIndices), sizeof(uint_fast64_t) * (subfamiliesMatrixSize + 1)) );
 
     CHECK_CUDA( cudaMalloc<ValueType>((&device_nnzValues), sizeof(ValueType) * matrixNnzCount) );
-    CHECK_CUDA( cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * matrixBsizeCount) );
-    CHECK_CUDA( cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * matrixBsizeCount) );
-    CHECK_CUDA( cudaMalloc<ValueType>((&device_diff), sizeof(ValueType) * matrixBsizeCount) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_x), sizeof(ValueType) * subfamiliesMatrixSize) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_xSwap), sizeof(ValueType) * subfamiliesMatrixSize) );
+    CHECK_CUDA( cudaMalloc<ValueType>((&device_diff), sizeof(ValueType) * subfamiliesMatrixSize) );
     CHECK_CUDA( cudaMalloc<ValueType>((&device_b), sizeof(ValueType) * matrixRowCount * familiesCount) );
     CHECK_CUDA( cudaMalloc<ValueType>((&device_multiplyResult), sizeof(ValueType) * matrixRowCount * familiesCount) );
 
     // Memory allocated, copy data to device
     CHECK_CUDA( cudaMemcpy(device_columnIndices, columnIndices.data(), sizeof(uint_fast64_t) * matrixNnzCount, cudaMemcpyHostToDevice) );
     CHECK_CUDA( cudaMemcpy(device_matrixRowIndices, matrixRowIndices.data(), sizeof(uint_fast64_t) * (matrixRowCount + 1), cudaMemcpyHostToDevice) );
-    CHECK_CUDA( cudaMemcpy(device_nondeterministicChoiceIndices, nondeterministicChoiceIndices.data(), sizeof(uint_fast64_t) * (matrixBsizeCount + 1), cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemcpy(device_nondeterministicChoiceIndices, nondeterministicChoiceIndices.data(), sizeof(uint_fast64_t) * (subfamiliesMatrixSize + 1), cudaMemcpyHostToDevice) );
 
     CHECK_CUDA( cudaMemcpy(device_nnzValues, nnzValues.data(), sizeof(ValueType) * matrixNnzCount, cudaMemcpyHostToDevice) );
-    CHECK_CUDA( cudaMemcpy(device_x, x.data(), sizeof(ValueType) * matrixBsizeCount, cudaMemcpyHostToDevice) );
-    CHECK_CUDA( cudaMemset(device_xSwap, 0, sizeof(ValueType) * matrixBsizeCount) );
-    CHECK_CUDA( cudaMemset(device_diff, 0, sizeof(ValueType) * matrixBsizeCount) );
+    CHECK_CUDA( cudaMemcpy(device_x, x.data(), sizeof(ValueType) * subfamiliesMatrixSize, cudaMemcpyHostToDevice) );
+    CHECK_CUDA( cudaMemset(device_xSwap, 0, sizeof(ValueType) * subfamiliesMatrixSize) );
+    CHECK_CUDA( cudaMemset(device_diff, 0, sizeof(ValueType) * subfamiliesMatrixSize) );
     CHECK_CUDA( cudaMemcpy(device_b, b.data(), sizeof(ValueType) * matrixRowCount * familiesCount, cudaMemcpyHostToDevice) );
     CHECK_CUDA( cudaMemset(device_multiplyResult, 0, sizeof(ValueType) * matrixRowCount * familiesCount) );
 
@@ -848,11 +821,10 @@ bool valueIteration_solver_multipleMDPs(
     CHECK_CUSPARSE( cusparseCreateDnMat(&matC, matrixRowCount, familiesCount, matrixRowCount, device_multiplyResult, CUDA_DATATYPE, CUSPARSE_ORDER_COL) );
     CHECK_CUSPARSE( cusparseSpMM_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, matB, &beta, matC, CUDA_DATATYPE, CUSPARSE_SPMM_ALG_DEFAULT, &bufferSize) ); 
     CHECK_CUDA( cudaMalloc(&dBuffer, bufferSize) ); 
-    std::cout << "buffer size: " << bufferSize << "\n";
 
     // Thrust pointer initialization
     thrust::device_ptr<ValueType> devicePtrThrust_diff(device_diff);
-    thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + matrixBsizeCount);
+    thrust::device_ptr<ValueType> devicePtrThrust_diff_end(device_diff + subfamiliesMatrixSize);
     thrust::device_ptr<ValueType> devicePtrThrust_b(device_b);
     thrust::device_ptr<ValueType> devicePtrThrust_multiplyResult(device_multiplyResult);
 
@@ -862,32 +834,14 @@ bool valueIteration_solver_multipleMDPs(
     while(!converged && iterationCount < maxIterationCount) {
         /* SPARSE MULT: transition matrix * x vector */
         CHECK_CUSPARSE( cusparseSpMM(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, matB, &beta, matC, CUDA_DATATYPE, CUSPARSE_SPMM_ALG_DEFAULT, dBuffer) );
-        
-        // cudaMemcpy(tmp.data(), device_multiplyResult, sizeof(ValueType) * matrixRowCount * familiesCount, cudaMemcpyDeviceToHost);
-        // std::cout << "mult: ";
-        // for(int i = 0; i< tmp.size(); i++) {
-        //     std::cout << tmp.at(i) << " ";
-        // } std::cout << "\n";
         /* SAXPY: multiplyResult + b inplace to multiplyResult */
 		thrust::transform(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + (matrixRowCount * familiesCount), devicePtrThrust_b, devicePtrThrust_multiplyResult, thrust::plus<ValueType>());
-        // cudaMemcpy(tmp.data(), device_multiplyResult, sizeof(ValueType) * matrixRowCount * familiesCount, cudaMemcpyDeviceToHost);
-        // std::cout << "add : ";
-        // for(int i = 0; i< tmp.size(); i++) {
-        //     std::cout << tmp.at(i) << " ";
-        // } std::cout << "\n";
-
         /* MAX/MIN_REDUCE: reduce multiplyResult to a new x vector */
-        storm_cuda_opt_vector_reduce<Maximize, ValueType>(matrixBsizeCount, (matrixRowCount * familiesCount), device_nondeterministicChoiceIndices, device_xSwap, device_multiplyResult);
-        // cudaMemcpy(x.data(), device_xSwap, sizeof(ValueType) * matrixBsizeCount, cudaMemcpyDeviceToHost);
-        // std::cout << "redu: ";
-        // for(int i = 0; i< x.size(); i++) {
-        //     std::cout << x.at(i) << " ";
-        // } std::cout << "\n";
-
+        segmented_vector_reduce<Maximize, ValueType>(subfamiliesMatrixSize, (matrixRowCount * familiesCount), device_nondeterministicChoiceIndices, device_xSwap, device_multiplyResult);
         /* INF_NORM: check for convergence */
         // Transform: diff = abs(x - xSwap)/ xSwap
 		thrust::device_ptr<ValueType> devicePtrThrust_x(device_x);
-		thrust::device_ptr<ValueType> devicePtrThrust_x_end(device_x + matrixBsizeCount);
+		thrust::device_ptr<ValueType> devicePtrThrust_x_end(device_x + subfamiliesMatrixSize);
 		thrust::device_ptr<ValueType> devicePtrThrust_xSwap(device_xSwap);
 		thrust::transform(devicePtrThrust_x, devicePtrThrust_x_end, devicePtrThrust_xSwap, devicePtrThrust_diff, equalModuloPrecision<ValueType, Relative>());
 		// Reduce: get Max over x and check for res < Precision
@@ -922,23 +876,11 @@ bool valueIteration_solver_multipleMDPs(
         // remove recognized keys and values
         thrust::device_vector<uint_fast64_t>::iterator newKeysEnd = thrust::remove_if(keys.begin(), keys.end(), devicePtrThrust_multiplyResult, is_minus_one<ValueType>());
         thrust::device_ptr<ValueType> newValuesEnd = thrust::remove(devicePtrThrust_multiplyResult, devicePtrThrust_multiplyResult + (matrixRowCount * familiesCount), ValueType(-1.0));
-
-        // std::cout << "results  values:" << std::endl;
-        // thrust::copy(devicePtrThrust_multiplyResult, newValuesEnd, std::ostream_iterator<ValueType>( std::cout, " "));
-        // std::cout << std::endl << "results keys:" << std::endl;
-        // thrust::copy(keys.begin(), newKeysEnd, std::ostream_iterator<uint_fast64_t>( std::cout, " "));
-        // std::cout << std::endl;
-        
-        // uint_fast64_t schedulerSize = choicesAsKeys.back() - 1;
         thrust::device_vector<uint_fast64_t> rowGroups(schedulerSize + 1);
         rowGroups[0] = 0;
         // compute new groups without unwanted choices
         thrust::reduce_by_key(keys.begin(), newKeysEnd, thrust::make_constant_iterator<uint_fast64_t>(1), thrust::make_discard_iterator(), rowGroups.begin() + 1, thrust::equal_to<uint_fast64_t>(), thrust::plus<uint_fast64_t>());
         thrust::inclusive_scan(thrust::device, rowGroups.begin() + 1, rowGroups.begin() + schedulerSize + 1, rowGroups.begin() + 1);
-        
-        // std::cout << "row Groups:" << std::endl;
-        // thrust::copy(rowGroups.begin(), rowGroups.begin() + schedulerSize + 1, std::ostream_iterator<uint_fast64_t>( std::cout, " "));
-        // std::cout << std::endl;
 
         // CUB Memory allocation
         dTempStorage = NULL;
@@ -952,7 +894,6 @@ bool valueIteration_solver_multipleMDPs(
         if (Maximize)   cub::DeviceSegmentedReduce::ArgMax(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, schedulerSize, cho, cho + 1);
         else            cub::DeviceSegmentedReduce::ArgMin(dTempStorage, tempStorageBytes, device_multiplyResult, device_choices, schedulerSize, cho, cho + 1); 
         CHECK_CUDA( cudaMalloc(&dTempStorage, tempStorageBytes) );
-        std::cout << "tempStorageBytes: " << tempStorageBytes << "\n";
     
         /* MAX/MIN_REDUCE: reduce multiplyResult to a new [(choice,value),...] vector */
         (Maximize) ?
@@ -961,15 +902,13 @@ bool valueIteration_solver_multipleMDPs(
     
         /* Copy form device to host and set scheduler choices */
         thrust::copy(device_choicesValues.begin(), device_choicesValues.end(), host_choices.begin());
-        // std::cout << "scheduler: "; 
         for (int i = 0; i < host_choices.size(); i++) {
             choices->at(i) = host_choices[i].key;
-            // std::cout << host_choices[i].key << " ";
-        } // std::cout << "\n";
+        } 
     }
 
     // Get x (result) back from the device
-    CHECK_CUDA( cudaMemcpy(x.data(), device_x, sizeof(ValueType) * matrixBsizeCount, cudaMemcpyDeviceToHost) );
+    CHECK_CUDA( cudaMemcpy(x.data(), device_x, sizeof(ValueType) * subfamiliesMatrixSize, cudaMemcpyDeviceToHost) );
 
     // CUSPARSE free
     CHECK_CUSPARSE( cusparseDestroySpMat(matA) );

@@ -11,3 +11,4 @@ __pycache__/
 *.jani
 build/
 
+check_model.py
