@@ -1,8 +1,8 @@
-.idea
 storm/build/
 stormpy/build/
 stormpy/.pytest_cache/
 stormpy/.eggs/
+env/
 
 *.log
 *.jani
