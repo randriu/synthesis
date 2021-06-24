@@ -1,61 +1,16 @@
+
 import logging
 import operator
 
+import math
 from collections import OrderedDict
 from enum import Enum
 from functools import reduce
 
 import stormpy
-
 from ..jani.quotient_container import Engine
 
 logger = logging.getLogger(__name__)
-
-
-def prod(iterable):
-    return reduce(operator.mul, iterable, 1)
-
-
-class FamilyCheckMethod(Enum):
-    """
-    Enum to select the type of algorithm to use.
-    """
-    Lifting = 0,
-    SchedulerIteration = 1,
-    DtmcIteration = 2,
-    AllInOne = 3,
-    Hybrid = 5,
-    CEGIS = 4
-
-    @classmethod
-    def from_string(cls, input_str):
-        """
-        Construct enum from string. 
-
-        :param input_str: either of [cegar, cschedenum, onebyone, allinone, smt, cegis]
-        :return: the corresponding enum, or None
-        """
-        if input_str == "cegar":
-            # return cls.Lifting
-            FamilyCheckMethod.regime = 2  # CEGARChecker
-            return cls.Hybrid
-        elif input_str == "cschedenum":
-            return cls.SchedulerIteration
-        elif input_str == "onebyone":
-            # return cls.DtmcIteration
-            FamilyCheckMethod.regime = 0  # EnumerationChecker
-            return cls.Hybrid
-        elif input_str == "allinone":
-            return cls.AllInOne
-        elif input_str == "cegis":
-            # return cls.CEGIS
-            FamilyCheckMethod.regime = 1  # CEGISChecker
-            return cls.Hybrid
-        elif input_str == "hybrid":
-            FamilyCheckMethod.regime = 3
-            return cls.Hybrid
-        else:
-            return None
 
 
 class OptimalitySetting:
@@ -101,9 +56,11 @@ class OptimalitySetting:
         return vp
 
 
-def open_constants(model):
-    return OrderedDict([(c.name, c) for c in model.constants if not c.defined])
+def open_constants(jani):
+    return OrderedDict([(c.name, c) for c in jani.constants if not c.defined])
 
+def prod(iterable):
+    return reduce(operator.mul, iterable, 1)
 
 class HoleOptions(OrderedDict):
     def __str__(self):
@@ -148,7 +105,7 @@ class FamilyChecker:
         
         self.sketch = sketch.jani
 
-        self.holes = sketch.holes
+        self.holes = open_constants(sketch.jani)
         self.hole_options = sketch.hole_options
         self.symmetries = None
         self.differents = None

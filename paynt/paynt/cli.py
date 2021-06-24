@@ -4,17 +4,19 @@ import click
 import os
 
 from . import version
-from .family_checkers.familychecker import FamilyCheckMethod
-from .hybrid.enumeration import EnumerationChecker
+from .sketch import Sketch
+
+# from .hybrid.enumeration import EnumerationChecker
 from .hybrid.cegis import CEGISChecker
 from .hybrid.ar import ARChecker
 from .hybrid.integrated_checker import IntegratedChecker
-from .sketch import Sketch
+
+# from .synthesizers.synthesizer import Synthesizer
+from .synthesizers.synthesizer import Synthesizer
+from .synthesizers.evolutionary import EvolutionarySynthesizer
+
 
 logger = logging.getLogger(__name__)
-
-STAGE_SCORE_LIMIT = 99999
-
 
 def setup_logger(log_path):
     """
@@ -54,13 +56,10 @@ def setup_logger(log_path):
 @click.option('--properties', help="the properties", required=False, default="sketch.properties")
 @click.option("--constants", default="")
 @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
-@click.option('--ce-quality', '-ceq', help="Compute counter-examples qualities.", is_flag=True, default=False)
-@click.option('--ce-maxsat', '-cem', help="Compute quality of maxsat counter-examples.", is_flag=True, default=False)
 @click.argument("method", type=click.Choice(
-    ['cegar', 'onebyone', 'cegis', 'hybrid'], case_sensitive=False))
-    # ['cegar', 'cschedenum', 'allinone', 'onebyone', 'cegis', 'hybrid'], case_sensitive=False))
+    ['onebyone', 'cegis', 'ar', 'hybrid', 'evo'], case_sensitive=False))
 def paynt(
-        project, sketch, properties, constants, method, short_summary, ce_quality, ce_maxsat
+        project, sketch, properties, constants, method, short_summary
 ):
     print("This is Paynt version {}.".format(version()))
 
@@ -70,58 +69,25 @@ def paynt(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, properties)
     sketch = Sketch(sketch_path, properties_path, constants)
+    # TODO: differentiate between solvers
 
     # choose method
-    # FIXME: differentiate between solvers
-    approach = FamilyCheckMethod.from_string(method)
-    assert approach == FamilyCheckMethod.Hybrid
-
-    # FIXME: set hybrid parameters
-    # FIXME: set the stage score limit
-    # RA: do we need a stage score limit? hybrid method seems to behave well without one
-    IntegratedChecker.ce_quality = ce_quality
-    IntegratedChecker.ce_maxsat = ce_maxsat
-    IntegratedChecker.stage_score_limit = STAGE_SCORE_LIMIT
-
-    if FamilyCheckMethod.regime == 0:
-        algorithm = EnumerationChecker(sketch)
-    elif FamilyCheckMethod.regime == 1:
+    if method == "onebyone":
+        algorithm = Synthesizer(sketch)
+    elif method == "cegis":
         algorithm = CEGISChecker(sketch)
-    elif FamilyCheckMethod.regime == 2:
+    elif method == "ar":
         algorithm = ARChecker(sketch)
-    elif FamilyCheckMethod.regime == 3:
+    elif method == "hybrid":
         algorithm = IntegratedChecker(sketch)
+    elif method == "evo":
+        algorithm = EvolutionarySynthesizer(sketch)
     else:
         assert None
-
-    algorithm.initialise()
-    algorithm.run(short_summary)
-    print(algorithm.statistic)
-
-    # logging (deprecated?)
-    #     if result is not None:
-    #         sat, solution, optimal_value = result
-    #         if sat:
-    #             print("Satisfiable!")
-    #             if solution is not None:
-    #                 print("using " + ", ".join([str(k) + ": " + str(v) for k, v in solution.items()]))
-    #             if optimal_value is not None:
-    #                 print("and induces a value of {}".format(optimal_value))
-    #             # print(algorithm.build_instance(solution))
-    #         else:
-    #             print("Unsatisfiable!")
-    #     else:
-    #         print("Solver finished without a result provided.")
-
-    # logger.info("Finished after {} seconds.".format(end_time - start_time))
-
-    # if print_stats:
-    #     algorithm.print_stats()
-
-    # description = "-".join([str(x) for x in
-    #                         [project, sketch, allowed, restrictions, optimality, properties, check_prerequisites,
-    #                          backward_cuts, "sat" if result is not None else "unsat"]])
-    # dump_stats_to_file(stats, algorithm.stats_keyword, constants, description, algorithm.store_in_statistics())
+    
+    # synthesize
+    algorithm.run()
+    algorithm.print_stats(short_summary)
 
 
 def main():

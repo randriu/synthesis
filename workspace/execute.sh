@@ -85,6 +85,9 @@ function cegar() {
 function hybrid() {
     try_thresholds hybrid $1
 }
+function evo() {
+    try_thresholds evo $1
+}
 
 function try_models() {
     local method=$1
@@ -102,7 +105,6 @@ function test_release() {
     timeout=1m
     parallel=true
     # verbose=true
-    # optimal=true
 
     herman=("herman/release-test" 2 0.60 0.75 0.15)
     cegar herman
@@ -110,47 +112,23 @@ function test_release() {
 }
 
 
-function test_rewards() {
-    timeout=1h
-    parallel=true
-    # verbose=true
-    
-    dice=("tests/tests-optimality/dice/5" 0 1 1 1.0)
-    pole=("tests/tests-optimality/pole/orig" 0 1 1 1.0)
-    maze1=("tests/tests-optimality/maze/concise" 0 1 1 1.0)
-    maze2=("tests/tests-optimality/maze/orig" 0 1 1 1.0)
-    herman1=("tests/tests-optimality/herman/orig" 0 1 1 1.0)
-    herman2=("tests/tests-optimality/herman/5" 0 1 1 1.0)
-    dpm=("tests/tests-optimality/dpm/demo" 0 1 1 1.0)
-    grid=("tests/tests-optimality/grid" 40 1 1 1.0)
-    
-    # running ##########
-
-    # model=pole
-
-    # for model in dice pole maze1 maze2 herman1 herman2 dpm grid; do
-    for model in dice; do
-        echo $model
-        hybrid $model
-    done
-    # onebyone $model
-}
-
 function run() {
-    # timeout=2
+    # timeout=1s
     parallel=true
-    # verbose=true
-    # optimal=true
+    verbose=true
     
     # model=("dpm/orig-bat100" 3 140 140 1.0)
     # model=("pole/orig" 0 16.7 16.7 1.0)
-    dice=("dice/5" 0 16.7 16.7 1.0)
+    # dice=("dice/5" 0 16.7 16.7 1.0)
+    coin=("coin" 0 16.7 16.7 1.0)
     
     # running ##########
 
     # model=pole
 
-    hybrid dice
+    # evo dice
+    # onebyone coin
+    evo coin
     # onebyone $model
 }
 
@@ -160,45 +138,8 @@ reset_log
 
 # test_release
 run
-# test_rewards
 
 # exit
 
 # --- archive ------------------------------------------------------------------
 
-function cav() {
-    mkdir -p $log_dir/cav
-
-    timeout=7d
-    # parallel=true
-
-    dpm=("cav/dpm/orig-bat100" 10 140 140 1.0)
-    maze=("cav/maze/fixed-full" 0 7.32 7.32 1.0)
-    herman=("cav/herman/25-orig" 0 3.5 3.5 1.0)
-    pole=("cav/pole/fixed" 0 16.6566 16.6566 1.0)
-    grid=("cav/grid/big" 40 0.928 0.928 1.0)
-
-    for model in dpm maze herman pole grid; do
-        log_file=$log_dir/cav/hybrid_f_$model.txt
-        hybrid $model
-    done
-    for model in dpm maze herman pole grid; do
-        log_file=$log_dir/cav/hybrid_0_$model.txt
-        hybrid $model
-    done
-    for model in dpm maze herman pole grid; do
-        log_file=$log_dir/cav/onebyone_$model.txt
-        onebyone $model &
-    done
-    wait
-}
-
-function cav_summary() {
-    for log in $log_dir/cav/*.txt; do
-        echo "--- ${log} --"
-        head $log -n 100 >> ${log}_2
-        tail $log -n 100 >> ${log}_2
-        mv ${log}_2 ${log}
-        cat $log | tail -n 12
-    done
-}

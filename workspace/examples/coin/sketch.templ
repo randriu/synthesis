@@ -1,0 +1,35 @@
+dtmc
+
+const double p = 0.6;
+
+const int CMAX;
+const double THRESHOLD;
+
+hole int s0h in {3,4};
+hole int s0t in {3,4};
+hole int s3h in {0,1,2};
+hole int s3t in {0,1,2};
+
+//hole int s0h in {0,1,2,3,4};
+//hole int s0t in {0,1,2,3,4};
+//hole int s3h in {0,1,2,3,4};
+//hole int s3t in {0,1,2,3,4};
+hole int s4h in {0,1,2,3,4};
+hole int s4t in {0,1,2,3,4};
+
+module dice
+    s : [0..4] init 0;
+    [] s=2 | s=1 -> true;
+    [] s=0 -> p : (s' = s0h) + 1-p : (s' = s0t);
+    [] s=3 -> p : (s' = s3h) + 1-p : (s' = s3t);
+    [] s=4 -> p : (s' = s4h) + 1-p : (s' = s4t);
+endmodule
+
+formula heads = (s = 2);
+formula tails = (s = 1);
+
+formula finished = heads | tails;
+
+rewards "steps"
+    true : 1;
+endrewards

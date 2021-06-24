@@ -19,18 +19,6 @@ def safe_division(dividend, divisor):
     except (ZeroDivisionError, ValueError):
         return dividend / APPROX_ZERO
 
-
-def is_satisfied(formula, result):
-    threshold = formula.threshold_expr.evaluate_as_double()
-    op = {
-        stormpy.ComparisonType.LESS: operator.lt,
-        stormpy.ComparisonType.LEQ: operator.le,
-        stormpy.ComparisonType.GREATER: operator.gt,
-        stormpy.ComparisonType.GEQ: operator.ge
-    }[formula.comparison_type]
-    return op(result, threshold)
-
-
 def check_dtmc(dtmc, formula, quantitative=False):
     """Model check a DTMC against a (quantitative) property."""
     if quantitative:
