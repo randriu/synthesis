@@ -25,8 +25,6 @@ paynt-patch-create() {
     rsync -av $storm_src/CMakeLists.txt $patch_storm_src/CMakeLists.txt
     rsync -av $storm_src/storm-synthesis $patch_storm_src/
     rsync -av $storm_src/storm-cli-utilities/CMakeLists.txt $patch_storm_src/storm-cli-utilities/CMakeLists.txt
-
-
 }
 
 paynt-patch() {
@@ -131,6 +129,7 @@ alias dtime='ps -aux | grep "python3 .*/paynt.py"'
 alias dshow='pgrep -af "^python3 .*/paynt.py .*"'
 alias dcount='pgrep -afc "^python3 .*/paynt.py .*"'
 alias dkill='dpid | xargs kill'
+alias dclear='rm $DYNASTY_LOG/*'
 
 dlog() {
     cat $DYNASTY_LOG/log_$1.txt
