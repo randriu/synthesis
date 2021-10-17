@@ -42,7 +42,8 @@ storm-config() {
 
 storm-build() {
     cd $STORM_BLD
-    make storm-main --jobs $COMPILE_JOBS
+    # make storm-main --jobs $COMPILE_JOBS
+    make storm-main storm-synthesis --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
     cd ~-
 }
@@ -206,7 +207,7 @@ storm() {
 }
 
 storm-jani() {
-    storm "--jani $DYNASTY_DIR/output_1.jani --prop $DYNASTY_DIR/workspace/examples/cav/maze/orig/compute.properties"
+    storm "--jani $DYNASTY_DIR/output_0.jani --prop $DYNASTY_DIR/workspace/examples/cav/maze/orig/compute.properties"
 }
 
 storm-eval() {
@@ -217,6 +218,7 @@ export DPM=$SYNTHESIS/workspace/examples/cav/dpm-main
 export DICE=$SYNTHESIS/workspace/examples/cav/dice
 export MAZE=$SYNTHESIS/workspace/examples/cav/maze
 export WALK=$SYNTHESIS/workspace/examples/random-walk
+export MAZE2=$SYNTHESIS/workspace/examples/maze/orig
 
 dice() {
     storm-eval "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
@@ -231,4 +233,8 @@ walk() {
 
 walk2() {
     storm-eval "-pc --prism $WALK/sketch2.templ" $WALK/compute.properties "CMAX=10,THRESHOLD=0"
+}
+
+maze2() {
+    storm-eval "-pc --prism $MAZE2/sketch.prism" $MAZE2/sketch.properties "CMAX=10,THRESHOLD=0"
 }

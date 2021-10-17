@@ -6,6 +6,8 @@
 #include <storm-pomdp/transformer/ObservationTraceUnfolder.h>
 #include <storm/storage/expressions/ExpressionManager.h>
 
+#include "storm-synthesis/transformer/ExplicitPomdpMemoryUnfolder.h" //+
+
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> make_canonic(storm::models::sparse::Pomdp<ValueType> const& pomdp) {
     storm::transformer::MakePOMDPCanonic<ValueType> makeCanonic(pomdp);
@@ -45,6 +47,16 @@ void define_transformations_nt(py::module &m) {
             .value("simple_log", storm::transformer::PomdpFscApplicationMode::SIMPLE_LOG)
             .value("full", storm::transformer::PomdpFscApplicationMode::FULL)
             ;
+
+    //+
+    py::class_<storm::transformer::ExplicitPomdpMemoryUnfolder<double>>(m, "ExplicitPomdpMemoryUnfolder", "Explicit memory unfolder for POMDPs")
+        .def(py::init<storm::models::sparse::Pomdp<double> const&, storm::storage::PomdpMemory const&>(), "Constructor.", py::arg("pomdp"), py::arg("memory"))
+        .def("transform", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::transform, "Unfold memory into POMDP.")
+        .def("state_to_state", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::state_to_state, "TODO")
+        .def("state_to_memory", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::state_to_memory, "TODO")
+        // .def("action_map", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::action_map, "TODO")
+        // .def("memory_map", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::memory_map, "TODO")
+        ;
 
 }
 

@@ -1,6 +1,7 @@
 dtmc
 
 const int CMAX;
+const double THRESHOLD;
 
 hole int M_0_1 in {0,1};
 hole int M_0_2 in {0,1};
@@ -144,5 +145,3 @@ rewards "steps"
     [west] true : 1;
 endrewards
 
-// label "goal" = s=12;
-// label "traps" = s=11 | s=13;

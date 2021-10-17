@@ -270,7 +270,8 @@ setup(
                  CMakeExtension('gspn', subdir='gspn'),
                  CMakeExtension('pars', subdir='pars'),
                  CMakeExtension('pomdp', subdir='pomdp'),
-                 CMakeExtension('synthesis', subdir='synthesis')], #+
+                 CMakeExtension('synthesis', subdir='synthesis') #+
+                 ],
 
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,

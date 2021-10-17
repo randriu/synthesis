@@ -96,7 +96,7 @@ namespace storm {
              */
             std::vector<double> stats();
 
-        private:
+        protected:
 
             /**
              * Prepare data structures for sub-DTMC construction.

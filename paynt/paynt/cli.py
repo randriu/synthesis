@@ -4,16 +4,14 @@ import click
 import os
 
 from . import version
+
+# import pomdp stuff and then synthesis
+import stormpy.pomdp
+import stormpy.synthesis
+
 from .sketch import Sketch
 
-# from .hybrid.enumeration import EnumerationChecker
-from .hybrid.cegis import CEGISChecker
-from .hybrid.ar import ARChecker
-from .hybrid.integrated_checker import IntegratedChecker
-
-# from .synthesizers.synthesizer import Synthesizer
-from .synthesizers.synthesizer import Synthesizer
-from .synthesizers.evolutionary import EvolutionarySynthesizer
+from .synthesizers.synthesizer import Synthesizer, SynthesizerAR
 
 
 logger = logging.getLogger(__name__)
@@ -71,17 +69,15 @@ def paynt(
     sketch = Sketch(sketch_path, properties_path, constants)
     # TODO: differentiate between solvers
 
-    # choose method
+    # choose synthesis method
     if method == "onebyone":
         algorithm = Synthesizer(sketch)
     elif method == "cegis":
-        algorithm = CEGISChecker(sketch)
+        raise NotImplementedError
     elif method == "ar":
-        algorithm = ARChecker(sketch)
+        algorithm = SynthesizerAR(sketch)
     elif method == "hybrid":
-        algorithm = IntegratedChecker(sketch)
-    elif method == "evo":
-        algorithm = EvolutionarySynthesizer(sketch)
+        raise NotImplementedError
     else:
         assert None
     

@@ -13,7 +13,7 @@ add_library(storm-synthesis SHARED ${STORM_SYN_SOURCES} ${STORM_SYN_HEADERS})
 
 # Remove define symbol for shared libstorm.
 set_target_properties(storm-synthesis PROPERTIES DEFINE_SYMBOL "")
-#add_dependencies(storm resources)
+add_dependencies(storm-synthesis storm-pomdp)
 list(APPEND STORM_TARGETS storm-synthesis)
 set(STORM_TARGETS ${STORM_TARGETS} PARENT_SCOPE)
 

@@ -364,6 +364,8 @@ namespace storm {
                 }
             }
 
+            std::cout << "prepareDtmc: " << current_wave << std::endl;
+
             this->preparing_dtmc.stop();
             this->total.stop();
         }
@@ -470,16 +472,22 @@ namespace storm {
             std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc,
             std::vector<StateType> const& to_expand
         ) {
+            std::cout << "expandAndCheck " << index << " -- started" << std::endl;
 
             // Get DTMC info
             uint_fast64_t dtmc_states = this->dtmc->getNumberOfStates();
+            std::cout << "dtmc_states = " << dtmc_states<< std::endl;
+
             StateType initial_state = *(this->dtmc->getInitialStates().begin());
+            std::cout << "expandAndCheck " << index << " -- 2" << std::endl;
             
             // Expand states from the new wave: 
             // - expand transition probabilities
             for(StateType state : to_expand) {
+                // std::cout << "state  = " << state<< std::endl;
                 matrix_subdtmc[state] = std::move(matrix_dtmc[state]);
             }
+            std::cout << "expandAndCheck " << index << " -- 3" << std::endl;
             if(this->formula_reward[index]) {
                 // - expand state rewards
                 // throw "reward support is not implemented yet";
@@ -503,11 +511,18 @@ namespace storm {
             std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
             
             // Model check
+            std::cout << "expandAndCheck " << index << " -- 4" << std::endl;
             bool onlyInitialStatesRelevant = false;
+            std::cout << "expandAndCheck " << index << " -- 5" << std::endl;
             storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> task(*(this->formula_modified[index]), onlyInitialStatesRelevant);
+            std::cout << "expandAndCheck " << index << " -- 6" << std::endl;
             std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(subdtmc, task);
+            std::cout << "expandAndCheck " << index << " -- 7" << std::endl;
+            
             storm::modelchecker::ExplicitQualitativeCheckResult & result = result_ptr->asExplicitQualitativeCheckResult();
+            std::cout << "expandAndCheck " << index << " -- 8" << std::endl;
             bool satisfied = result[initial_state];
+            std::cout << "expandAndCheck " << index << " -- finished" << std::endl;
 
             return satisfied;
         }
@@ -520,7 +535,7 @@ namespace storm {
 
             // Get DTMC info
             StateType dtmc_states = this->dtmc->getNumberOfStates();
-
+            
             this->preparing_subdtmc.start();
             // Prepare to construct sub-DTMCs
             std::vector<std::vector<std::pair<StateType,ValueType>>> matrix_dtmc;
@@ -535,14 +550,22 @@ namespace storm {
 
             this->constructing_counterexample.start();
             // Explore subDTMCs wave by wave
+            std::cout << "1: " << formula_index << std::endl;
             uint_fast64_t wave_last = this->wave_states.size()-1;
+            std::cout << "wave_last = " << wave_last << std::endl;
+            std::cout << "2: " << formula_index << std::endl;
             uint_fast64_t wave = 0;
             while(true) {
                 assert(wave <= wave_last);
+                std::cout << "wave # " << wave << std::endl;
+                for(auto state: this->wave_states[wave]) {
+                    std::cout << state << std::endl;
+                }
                 bool satisfied = this->expandAndCheck(
                     formula_index, matrix_dtmc, matrix_subdtmc, labeling_subdtmc,
                     reward_models_subdtmc, this->wave_states[wave]
                 );
+                std::cout << "end" << std::endl;
                 if(!satisfied) {
                     break;
                 }
@@ -558,6 +581,7 @@ namespace storm {
                 }
             }
             this->constructing_counterexample.stop();
+            std::cout << "s: " << formula_index << std::endl;
 
             this->total.stop();
 

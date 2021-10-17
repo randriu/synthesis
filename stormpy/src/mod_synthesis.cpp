@@ -11,4 +11,5 @@ PYBIND11_MODULE(synthesis, m) {
 #endif
 
     define_synthesis(m);
+    define_transformations(m);
 }

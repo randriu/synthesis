@@ -1,6 +1,6 @@
 dtmc
 
-const double p = 0.6;
+const double p = 0.5;
 
 const int CMAX;
 const double THRESHOLD;
@@ -17,9 +17,11 @@ hole int s3t in {0,1,2};
 hole int s4h in {0,1,2,3,4};
 hole int s4t in {0,1,2,3,4};
 
+// hole double p in {0.5,0.6};
+
 module dice
     s : [0..4] init 0;
-    [] s=2 | s=1 -> true;
+    [] s=1 | s=2 -> true;
     [] s=0 -> p : (s' = s0h) + 1-p : (s' = s0t);
     [] s=3 -> p : (s' = s3h) + 1-p : (s' = s3t);
     [] s=4 -> p : (s' = s4h) + 1-p : (s' = s4t);

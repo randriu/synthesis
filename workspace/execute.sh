@@ -117,19 +117,28 @@ function run() {
     parallel=true
     verbose=true
     
-    # model=("dpm/orig-bat100" 3 140 140 1.0)
-    # model=("pole/orig" 0 16.7 16.7 1.0)
-    # dice=("dice/5" 0 16.7 16.7 1.0)
+    # dpm=("dpm/orig-bat100" 3 140 140 1.0)
+    pole=("pole/orig" 0 16.7 16.7 1.0)
+    dice=("dice/5" 0 16.7 16.7 1.0)
     coin=("coin" 0 16.7 16.7 1.0)
+    # maze=("maze/orig" 0 1 1 1.0)
+    # maze=("maze/concise" 0 1 1 1.0)
+    maze=("pomdp/maze" 0 2.5 2.5 1.0)
+    # grid=("pomdp/grid" 0 2.5 2.5 1.0)
     
     # running ##########
 
     # model=pole
+    # model=dice
+    # model=coin
+    model=maze
+    # model=grid
 
     # evo dice
     # onebyone coin
-    evo coin
-    # onebyone $model
+    # evo coin
+    
+    onebyone $model
 }
 
 # --- execution ----------------------------------------------------------------

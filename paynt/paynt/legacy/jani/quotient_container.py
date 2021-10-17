@@ -6,7 +6,7 @@ from enum import Enum
 
 import stormpy
 
-from ..model_handling.mdp_handling import ModelHandling, always_true
+from .mdp_handling import ModelHandling, always_true
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +107,7 @@ class JaniQuotientContainer:
 
         subcolors = self._edge_coloring.subcolors(indexed_suboptions)
 
+        # color_0_indices = self._color_to_edge_indices[0]
         color_0_indices = self._color_to_edge_indices.get(0)
         collected_edge_indices = stormpy.FlatSet(color_0_indices)
         for c in subcolors:
