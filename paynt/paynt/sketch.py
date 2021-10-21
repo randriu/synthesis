@@ -172,7 +172,7 @@ class HoleOptions(OrderedDict):
 
     @property
     def size(self):
-        return numpy.prod([len(v) for v in self.values()])
+        return numpy.prod([len(v)*1.0 for v in self.values()])
 
     def all_hole_combinations(self):
         return itertools.product(*self.values())
@@ -181,8 +181,7 @@ class HoleOptions(OrderedDict):
         hole_options = []
         for hole,options in self.items():
             if len(options) > 1:
-                options_str = [str(e) for e in options]
-                hole_options.append("{}: {}".format(hole,options_str))
+                hole_options.append("{}: {}".format(hole,options))
             else:
                 hole_options.append("{}={}".format(hole,options[0]))
         return ", ".join(hole_options)
@@ -400,7 +399,7 @@ class Sketch:
         self.properties = None
         self.optimality_property = None
         self.design_space = None
-        self.pomdp_memory_size = 2 # FIXME as a CLI argument
+        self.pomdp_memory_size = 3 # FIXME as a CLI argument
 
         self.prism = None
         self.jani = None

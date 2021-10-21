@@ -342,6 +342,8 @@ class SynthesizerAR(Synthesizer):
         super().__init__(sketch)
         if sketch.prism.model_type == stormpy.storage.PrismModelType.POMDP:
             self.quotient_container = POMDPQuotientContainer(sketch)
+            self.sketch.design_space = self.quotient_container.design_space
+            self.stat = Statistic(sketch, self.method_name)
         else:
             sketch.construct_jani()
             self.quotient_container = MDPQuotientContainer(sketch)
@@ -352,6 +354,8 @@ class SynthesizerAR(Synthesizer):
 
     def run(self):
         self.stat.start()
+        print(self.stat.remaining)
+        # exit()
 
         # initiate AR loop
         satisfying_assignment = None
@@ -364,12 +368,12 @@ class SynthesizerAR(Synthesizer):
             feasible,undecided_properties,undecided_bounds = mdp.check_properties(family.properties)
             properties = undecided_properties
             if feasible == False:
-                logger.debug("AR: family is UNSAT")
+                # logger.debug("AR: family is UNSAT")
                 self.stat.pruned(family.size)
                 continue
             
             if feasible == None:
-                logger.debug("AR: family is undecided")
+                # logger.debug("AR: family is undecided")
                 assert len(undecided_bounds) > 0
                 subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, undecided_bounds[0], properties)
                 families.append(subfamily1)
@@ -393,6 +397,16 @@ class SynthesizerAR(Synthesizer):
                 families.append(subfamily1)
                 families.append(subfamily2)
 
+        # FIXME POMDP hack: replace hole valuations with corresponding action labels
+        print("design space: ", self.sketch.design_space)
+        print("design space size: ", self.sketch.design_space.size)
+        if satisfying_assignment is not None and self.sketch.prism.model_type == stormpy.storage.PrismModelType.POMDP:
+            for obs in range(self.quotient_container.observations):
+                at_obs = self.quotient_container.action_labels_at_observation[obs]
+                for mem in range(self.quotient_container.memory_size):
+                    hole = self.quotient_container.holes_action[(obs,mem)]
+                    options = satisfying_assignment[hole]
+                    satisfying_assignment[hole] = [at_obs[index] for index in options]
         self.stat.finished(satisfying_assignment)
 
 
@@ -483,6 +497,7 @@ class MDPQuotientContainer(QuotientContainer):
         # success
         return MDP(self.sketch, design_space, mdp, choice_map)
 
+    @classmethod
     def prepare_split(self, mdp, mc_result, properties):
         assert not mdp.is_dtmc
 
@@ -546,21 +561,36 @@ class POMDPQuotientContainer(QuotientContainer):
         
         # construct quotient POMDP
         MarkovChain.builder_options.set_build_choice_labels(True)
-        self.quotient_pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, builder_options)
-        # exit()
+        self.quotient_pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
         assert self.quotient_pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.quotient_pomdp = stormpy.pomdp.make_canonic(self.quotient_pomdp)
-        self.observations = self.quotient_pomdp.nr_observations
 
+        # extract observation labels
+        self.observations = self.quotient_pomdp.nr_observations
+        ov = self.quotient_pomdp.observation_valuations
+        self.observation_labels = [ ov.get_string(obs) for obs in range(self.observations) ]
+        print("observation labels: ", self.observation_labels)
+
+        # compute actions available at each observation
+        # ensure that states with the same observation have the same number of available actions
+        # collect labels of actions available at each observation
         self.actions_at_observation = [0] * self.quotient_pomdp.nr_observations
+        self.action_labels_at_observation = [[] for obs in range(self.quotient_pomdp.nr_observations)]
         for state in range(self.quotient_pomdp.nr_states):
             obs = self.quotient_pomdp.observations[state]
+            # print("state = {}, obs = {}".format(state,self.observation_labels[obs]))
             if self.actions_at_observation[obs] != 0:
-                # assert that states with the same observation have the same number of available actions
                 assert self.actions_at_observation[obs] == self.quotient_pomdp.get_nr_available_actions(state)
                 continue
-            self.actions_at_observation[obs] = self.quotient_pomdp.get_nr_available_actions(state)
+            actions = self.quotient_pomdp.get_nr_available_actions(state)
+            self.actions_at_observation[obs] = actions
+            for offset in range(actions):
+                choice = self.quotient_pomdp.get_choice_index(state,offset)
+                labels = self.quotient_pomdp.choice_labeling.get_labels_of_choice(choice)
+                self.action_labels_at_observation[obs].append(labels)
         # print("actions at observations: ", self.actions_at_observation)
+        print("labels of actions at observations: ", self.action_labels_at_observation)
+
 
         # construct memory and unfold into quotient MDP
         memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, self.memory_size)
@@ -578,8 +608,9 @@ class POMDPQuotientContainer(QuotientContainer):
         self.holes_action = dict()
         self.holes_memory = dict()
         for obs in range(self.observations):
+            obs_label = self.observation_labels[obs]
             for mem in range(self.memory_size):
-                string = "(Z={},N={})".format(obs,mem)
+                string = "({},{})".format(obs_label,mem)
                 hole_action = "A" + string
                 hole_memory = "N" + string
                 self.holes_action[(obs,mem)] = hole_action
@@ -616,7 +647,7 @@ class POMDPQuotientContainer(QuotientContainer):
             # print("hole options in state {} : {}x{}".format(state, len(hole_options[hole_action]), len(hole_options[hole_memory])))
             # print("actions in state {} : {}".format(state, self.model.get_nr_available_actions(state)))
 
-        
+
         # print(self.edge_coloring)
         # print(self.action_colors)
         
@@ -669,11 +700,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
     def build(self, design_space):
         if design_space == self.sketch.design_space:
-            m = self.quotient_mdp
             return MDP(self.sketch, design_space, self.quotient_mdp)
 
-        exit()
-        
         # must restrict the super-mdp
         
         # index the suboptions
@@ -684,30 +712,16 @@ class POMDPQuotientContainer(QuotientContainer):
                 for index, ref in enumerate(self.sketch.design_space[hole]):
                     if ref == v:
                         indexed_suboptions[hole].append(index)
-    
+
         # get colors relevant to this design space
-        edge_0_indices = self.sketch.color_to_edge_indices.get(0)
-        edge_indices = stormpy.FlatSet(edge_0_indices)
-        for c in self.sketch.edge_coloring.subcolors(indexed_suboptions):
-            edge_indices.insert_set(self.sketch.color_to_edge_indices.get(c))
+        # TODO optimize this
+        relevant_colors = self.edge_coloring.subcolors(indexed_suboptions)
+        relevant_colors.add(0)
+        relevant_actions = [action for action,color in enumerate(self.action_colors) if color in relevant_colors]
+        selected_actions = stormpy.BitVector(self.quotient_mdp.nr_choices)
+        for action in relevant_actions:
+            selected_actions.set(action)
 
-        # compute (and remember) color 0 actions
-        co = self.quotient_mdp.choice_origins
-        if self._color_0_actions is None:
-            self._color_0_actions = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
-            for act_index in range(self.quotient_mdp.nr_choices):
-                if co.get_edge_index_set(act_index).is_subset_of(edge_0_indices):
-                    assert co.get_edge_index_set(act_index).is_subset_of(edge_indices)
-                    self._color_0_actions.set(act_index)
-
-        # select actions having relevant colors
-        selected_actions = stormpy.BitVector(self._color_0_actions)
-        for act_index in range(self.quotient_mdp.nr_choices):
-            if selected_actions.get(act_index):
-                continue
-            # TODO many actions are always taken. We should preprocess these.
-            if co.get_edge_index_set(act_index).is_subset_of(edge_indices):
-                selected_actions.set(act_index)
 
         # construct the submodel
         keep_unreachable_states = False
@@ -723,12 +737,41 @@ class POMDPQuotientContainer(QuotientContainer):
         assert len(choice_map) == mdp.nr_choices, \
             f"mapping contains {len(choice_map)} actions, " \
             f"but model has {mdp.nr_choices} actions"
-        assert mdp.has_choice_origins()
+        # assert mdp.has_choice_origins()
         if design_space.size == 1:
             assert mdp.nr_choices == mdp.nr_states
 
         # success
         return MDP(self.sketch, design_space, mdp, choice_map)
+
+    def prepare_split(self, mdp, mc_result, properties):
+        assert not mdp.is_dtmc
+
+        # identify the most inconsistent holes
+        # TODO POMDP does not have choice origins, so we cannot apply scheduler
+        inconsistent = [hole for hole in mdp.design_space.holes]
+        
+        # from these holes, identify the one with the largest domain
+        splitter = None
+        hole_domains = {hole:len(mdp.design_space[hole]) for hole in inconsistent}
+        max_domains = max([hole_domains[hole] for hole in inconsistent])
+        splitters = [hole for hole in inconsistent if hole_domains[hole] == max_domains]
+        splitter = splitters[0]
+        
+        # split
+        options = mdp.design_space[splitter]
+        half = len(options) // 2
+
+        suboptions = [options[:half], options[half:]]
+        design_subspaces = []
+        for suboption in suboptions:
+            hole_suboption = HoleOptions(mdp.design_space)
+            hole_suboption[splitter] = suboption
+            design_subspace = DesignSpace(hole_suboption)
+            design_subspace.set_properties(properties)
+            design_subspaces.append(design_subspace)
+
+        return design_subspaces[0], design_subspaces[1]
 
 
 

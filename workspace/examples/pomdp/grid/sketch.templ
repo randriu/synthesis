@@ -55,6 +55,13 @@ module robot
     [north]  true -> (1-slippery): (ay'=max(ay-1,ayMIN)) + slippery: (ay'=max(ay-2,ayMIN));
 endmodule
 
+rewards "steps"
+    [east] true : 1;
+    [west] true : 1;
+    [north] true : 1;
+    [south] true : 1;
+endrewards
+
 
 label "goal" = done;
 label "traps" = crash;

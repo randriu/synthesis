@@ -80,7 +80,7 @@ function cegis() {
     try_thresholds cegis $1
 }
 function cegar() {
-    try_thresholds cegar $1
+    try_thresholds ar $1
 }
 function hybrid() {
     try_thresholds hybrid $1
@@ -124,7 +124,8 @@ function run() {
     # maze=("maze/orig" 0 1 1 1.0)
     # maze=("maze/concise" 0 1 1 1.0)
     maze=("pomdp/maze" 0 2.5 2.5 1.0)
-    # grid=("pomdp/grid" 0 2.5 2.5 1.0)
+    # maze=("pomdp/maze-orig" 0 2.5 2.5 1.0)
+    grid=("pomdp/grid" 0 2.5 2.5 1.0)
     
     # running ##########
 
@@ -138,7 +139,8 @@ function run() {
     # onebyone coin
     # evo coin
     
-    onebyone $model
+    # onebyone $model
+    cegar $model
 }
 
 # --- execution ----------------------------------------------------------------

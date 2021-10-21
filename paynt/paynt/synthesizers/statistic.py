@@ -83,7 +83,8 @@ class Statistic:
 
     def status(self):
         fraction_rejected, time_estimate = self.estimate()
-        percentage_rejected = int(fraction_rejected * 100)
+        # percentage_rejected = int(fraction_rejected * 100)
+        percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.timer.read(),1)
         time_estimate = round(time_estimate,1)
         return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s"
