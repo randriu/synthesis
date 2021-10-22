@@ -1,4 +1,7 @@
 import logging
+import os
+import time
+from multiprocessing import Process
 
 import stormpy
 import stormpy.synthesis
@@ -285,6 +288,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
 
+    def cegis_parallel_loop(self, family):
+        logger.info(f"Hi guys from Process: {os.getpid()}")
+
+
+
     def analyze_family_cegis(self, family):
         """
         Analyse a family against selected formulae using precomputed MDP data
@@ -311,13 +319,17 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
         # process family members
         Profiler.start("is - pick DTMC")
-        assignment = family.pick_member()
+        member_assignment = family.pick_member_with_exclude_all_holes()
         Profiler.stop()
 
-        while assignment is not None:
+        p = Process(target=self.cegis_parallel_loop)
+        p.start()
+        p.join()
+
+        while member_assignment is not None:
             self.iterations_cegis += 1
             logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
-            logger.debug(f"CEGIS: picked family member: {assignment}.")
+            logger.debug(f"CEGIS: picked family member: {member_assignment}.")
 
             # collect indices of violated formulae
             violated_formulae_indices = []
@@ -332,7 +344,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     violated_formulae_indices.append(formula_index)
             if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
                     and self.input_has_optimality_property():
-                self._check_optimal_property(family, assignment, counterexample_generator)
+                self._check_optimal_property(family, member_assignment, counterexample_generator)
             elif not violated_formulae_indices:
                 Profiler.add_ce_stats(counterexample_generator.stats)
                 return True
@@ -358,7 +370,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
                 # compare to maxsat, state exploration, naive hole exploration, global vs local bounds
                 self.ce_quality_measure(
-                    assignment, relevant_holes, counterexample_generator,
+                    member_assignment, relevant_holes, counterexample_generator,
                     family.dtmc, family.dtmc_state_map, formula_index
                 )
 
@@ -367,7 +379,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
             # pick next member
             Profiler.start("is - pick DTMC")
-            assignment = family.pick_member()
+            member_assignment = family.pick_member_with_exclude_all_holes()
             Profiler.stop()
 
             # record stage

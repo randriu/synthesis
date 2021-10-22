@@ -143,6 +143,18 @@ class FamilyHybrid(Family):
         # success
         return self.member_assignment
 
+    def __exclude_one_conflict(self, conflict):
+        counterexample_clauses = dict()
+        for var, hole in Family._solver_meta_vars.items():
+            if Family._hole_indices[hole] in conflict:
+                option_index = Family._hole_option_indices[hole][self.member_assignment[hole][0]]
+                counterexample_clauses[hole] = (var == option_index)
+            else:
+                all_options = [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
+                counterexample_clauses[hole] = z3.Or(all_options)
+        counterexample_encoding = z3.Not(z3.And(list(counterexample_clauses.values())))
+        Family._solver.add(counterexample_encoding)
+
     def exclude_member(self, conflicts):
         """
         Exclude the subfamily induced by the selected assignment and a set of conflicts.
@@ -150,17 +162,30 @@ class FamilyHybrid(Family):
         assert self.member_assignment is not None
 
         for conflict in conflicts:
-            counterexample_clauses = dict()
-            for var, hole in Family._solver_meta_vars.items():
-                if Family._hole_indices[hole] in conflict:
-                    option_index = Family._hole_option_indices[hole][self.member_assignment[hole][0]]
-                    counterexample_clauses[hole] = (var == option_index)
-                else:
-                    all_options = [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
-                    counterexample_clauses[hole] = z3.Or(all_options)
-            counterexample_encoding = z3.Not(z3.And(list(counterexample_clauses.values())))
-            Family._solver.add(counterexample_encoding)
+            self.__exclude_one_conflict(conflict)
         self.member_assignment = None
+
+    def pick_member_with_exclude_all_holes(self):
+        """
+            Pick member from specific family and immediately exclude it from super-family. In this case
+            all holes from assigment are relevant. For instance assignment= M0LFAIR: [2],M0HFAIR: [0],M1LFAIR: [1],
+            M1HFAIR: [0],MxxA: [0],MxxB: [0],MxxC: [0] will be excluded from super-family and never used again.
+        """
+        member_assigment = self.pick_member()
+
+        # termination condition for CEGIS loop
+        if member_assigment is None:
+            return None
+
+        # every hole is relevant so we exclude specific assigment from family
+        naive_conflict = []
+        for i in range(len(Family.hole_list)):
+            naive_conflict.append(i)
+
+        # exclude specific member assigment
+        self.__exclude_one_conflict(naive_conflict)
+
+        return member_assigment
 
     def analyze_member(self, formula_index):
         assert self.dtmc is not None
