@@ -1,5 +1,4 @@
 import sys
-import logging
 import click
 import os
 
@@ -9,12 +8,11 @@ from . import version
 import stormpy.pomdp
 import stormpy.synthesis
 
-from .sketch import Sketch
-
+from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import Synthesizer, SynthesizerAR
 
-
-logger = logging.getLogger(__name__)
+import logging
+# logger = logging.getLogger(__name__)
 
 def setup_logger(log_path):
     """
@@ -29,7 +27,7 @@ def setup_logger(log_path):
     formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
 
     handlers = []
-    if log_path:
+    if log_path is not None:
         fh = logging.FileHandler(log_path)
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
