@@ -113,7 +113,7 @@ function test_release() {
 
 
 function run() {
-    # timeout=1s
+    # timeout=5s
     parallel=true
     verbose=true
     

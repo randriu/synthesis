@@ -87,7 +87,7 @@ class Property:
 
     def result_valid(self, result):
         ''' :return true if model checking result is valid '''
-        # reward properties can be satisfied only when result is defined
+        # reward properties can be satisfied only when result is finite
         return not self.reward or result != math.inf
 
     def meets_threshold(self, result):
@@ -102,20 +102,6 @@ class Property:
     def satisfied(self, result):
         ''' check if model checking result satisfies the property '''
         return self.result_valid(result) and self.meets_threshold(result)
-
-    def decided(self, result_min, result_max):
-        '''
-        process MDP model checking results
-        :return
-          True if both min and max meet the treshold (all SAT)
-          False if neither meet the threshold (all UNSAT)
-          None otherwise (undecided)
-        '''
-        a = self.meets_threshold(result_min)
-        b = self.meets_threshold(result_max)
-        if a != b:
-            return None
-        return a
 
     def update_optimum(self, new_value):
         '''
@@ -134,3 +120,17 @@ class Property:
         else:
             self.threshold = new_value * (1 + self.epsilon)
         return True
+
+    def decided(self, lower_bound, upper_bound):
+        '''
+        process MDP model checking results
+        :return
+          True if both bounds meet the treshold (all SAT)
+          False if neither meet the threshold (all UNSAT)
+          None otherwise (undecided)
+        '''
+        lb_ok = self.meets_threshold(lower_bound)
+        ub_ok = self.meets_threshold(upper_bound)
+        if lb_ok != ub_ok:
+            return None
+        return lb_ok

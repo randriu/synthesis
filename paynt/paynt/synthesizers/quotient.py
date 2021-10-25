@@ -23,58 +23,25 @@ class QuotientContainer:
 
     def __init__(self, sketch):
         self.sketch = sketch
-
-
-
-
-
-class JaniQuotientContainer(QuotientContainer):
-    
-    def __init__(self, *args):
-        super().__init__(*args)
-
-        # construct jani program
-        self.unfolder = JaniUnfolder(self.sketch)
-        self.sketch.properties = self.unfolder.properties
-        self.sketch.optimality_property = self.unfolder.optimality_property
-        self.sketch.design_space.set_properties(self.sketch.properties)
-        self.combination_coloring = self.unfolder.combination_coloring
-        self.color_to_edge_indices = self.unfolder.color_to_edge_indices
-
-        self._color_0_actions = None
-
-        # build quotient MDP       
-        self.quotient_mdp = stormpy.build_sparse_model_with_options(self.unfolder.jani_unfolded, MarkovChain.builder_options)
-
+        
+        self.quotient_mdp = None
+        self.combination_coloring = None
+        self.action_to_colors = None
+        self.color_0_actions = None
 
     def build(self, design_space):
         if design_space == self.sketch.design_space:
-            return MDP(self.sketch, design_space, self.quotient_mdp)
+            # quotient needed
+            return MDP(self.sketch, design_space, self.quotient_mdp, self)
         
-        # must restrict the super-mdp
-        
-        # get colors relevant to this design space
-        edge_0_indices = self.color_to_edge_indices.get(0)
-        edge_indices = stormpy.FlatSet(edge_0_indices)
-        for c in self.combination_coloring.subcolors(design_space):
-            edge_indices.insert_set(self.color_to_edge_indices.get(c))
-
-        # compute (and remember) color 0 actions
-        co = self.quotient_mdp.choice_origins
-        if self._color_0_actions is None:
-            self._color_0_actions = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
-            for act_index in range(self.quotient_mdp.nr_choices):
-                if co.get_edge_index_set(act_index).is_subset_of(edge_0_indices):
-                    assert co.get_edge_index_set(act_index).is_subset_of(edge_indices)
-                    self._color_0_actions.set(act_index)
-
-        # select actions having relevant colors
-        selected_actions = stormpy.BitVector(self._color_0_actions)
+        # must restrict the quotient
+        # get actions having colors associated this design space
+        relevant_colors = self.combination_coloring.subcolors(design_space)
+        selected_actions = stormpy.BitVector(self.color_0_actions)
         for act_index in range(self.quotient_mdp.nr_choices):
             if selected_actions.get(act_index):
                 continue
-            # TODO many actions are always taken. We should preprocess these.
-            if co.get_edge_index_set(act_index).is_subset_of(edge_indices):
+            if self.action_to_colors[act_index].issubset(relevant_colors):
                 selected_actions.set(act_index)
 
         # construct the submodel
@@ -88,25 +55,52 @@ class JaniQuotientContainer(QuotientContainer):
         )
         mdp = submodel_construction.model
         choice_map = submodel_construction.new_to_old_action_mapping
-        assert len(choice_map) == mdp.nr_choices, \
-            f"mapping contains {len(choice_map)} actions, " \
-            f"but model has {mdp.nr_choices} actions"
-        assert mdp.has_choice_origins()
+        assert len(choice_map) == mdp.nr_choices
         if design_space.size == 1:
             assert mdp.nr_choices == mdp.nr_states
 
         # success
-        return MDP(self.sketch, design_space, mdp, choice_map)
+        return MDP(self.sketch, design_space, mdp, self, choice_map)
 
-    @classmethod
+    def scheduler_colors(self, mdp, scheduler):
+        ''' Get all colors that correspond to scheduled choices. '''
+        colors = set()
+        for state in range(mdp.states):
+            offset = scheduler.get_choice(state).get_deterministic_choice()
+            choice = mdp.model.get_choice_index(state,offset)
+            if mdp.quotient_choice_map is not None:
+                choice = mdp.quotient_choice_map[choice]
+            choice_colors = self.action_to_colors[choice]
+            colors.update(choice_colors)
+        return colors
+
+    def scheduler_selection(self, mdp, scheduler):
+        ''' Get hole assignments used in this scheduler. '''
+        assert scheduler.memoryless
+        assert scheduler.deterministic
+
+        # collect colors of selected actions
+        colors = self.scheduler_colors(mdp, scheduler)
+        
+        # translate colors to hole assignments
+        assignments = self.combination_coloring.get_hole_assignments(colors)
+
+        # fix undefined holes
+        for hole in self.sketch.design_space.holes:
+            if hole not in assignments.keys():
+                assignments[hole] = {};
+
+        return assignments
+
     def prepare_split(self, mdp, mc_result, properties):
         assert not mdp.is_dtmc
 
         # identify the most inconsistent holes
-        hole_selection = mdp.scheduler_selection(mc_result)
-        hole_definitions = {hole:len(counts) for hole,counts in hole_selection.items()}        
+        hole_assignments = self.scheduler_selection(mdp, mc_result.scheduler)
+        hole_definitions = {hole:len(options) for hole,options in hole_assignments.items()}
         max_definitions = max([hole_definitions[hole] for hole in mdp.design_space.holes])
         inconsistent = [hole for hole in mdp.design_space.holes if hole_definitions[hole] == max_definitions]
+        # inconsistent = [hole for hole in mdp.design_space.holes]
 
         # from these holes, identify the one with the largest domain
         splitter = None
@@ -129,9 +123,34 @@ class JaniQuotientContainer(QuotientContainer):
             design_subspaces.append(design_subspace)
 
         return design_subspaces[0], design_subspaces[1]
-       
 
 
+class JaniQuotientContainer(QuotientContainer):
+    
+    def __init__(self, *args):
+        super().__init__(*args)
+
+        # unfold jani program
+        unfolder = JaniUnfolder(self.sketch)
+        self.sketch.properties = unfolder.properties
+        self.sketch.optimality_property = unfolder.optimality_property
+        self.sketch.design_space.set_properties(self.sketch.properties)
+        self.combination_coloring = unfolder.combination_coloring
+
+        # build quotient MDP       
+        self.quotient_mdp = stormpy.build_sparse_model_with_options(unfolder.jani_unfolded, MarkovChain.builder_options)
+
+        # associate action of a quotient MDP with a set of colors
+        # remember color-0 actions
+        num_choices = self.quotient_mdp.nr_choices
+        self.action_to_colors = []
+        self.color_0_actions = stormpy.BitVector(num_choices, False)
+        for act_index in range(num_choices):
+            edges = self.quotient_mdp.choice_origins.get_edge_index_set(act_index)
+            colors = {unfolder.edge_to_color[edge] for edge in edges}
+            if colors == {0}:
+                self.color_0_actions.set(act_index)
+            self.action_to_colors.append(colors)
 
     
 class POMDPQuotientContainer(QuotientContainer):
@@ -158,7 +177,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # coloring
         self.combination_coloring = None
-        self.action_colors = None
+        self.action_to_colors = None
         
         # construct quotient POMDP
         MarkovChain.builder_options.set_build_choice_labels(True)
@@ -224,12 +243,16 @@ class POMDPQuotientContainer(QuotientContainer):
                 hole_options[self.holes_action[(obs,mem)]] = list(range(self.actions_at_observation[obs]))
                 hole_options[self.holes_memory[(obs,mem)]] = list(range(self.memory_size))
         self.design_space = DesignSpace(hole_options, self.sketch.properties)
+        self.sketch.design_space = self.design_space
         # print(self.design_space)
 
         # associate actions with hole combinations (colors)
         # TODO determine reachable holes ?
         self.combination_coloring = CombinationColoring(hole_options)
-        self.action_colors = []
+        self.action_to_colors = []
+        num_choices = self.quotient_mdp.nr_choices
+        self.color_0_actions = stormpy.BitVector(num_choices, False)
+        
 
         for state in range(self.quotient_mdp.nr_states):
             obs = self.mdp_to_pomdp_observations[state]
@@ -244,11 +267,10 @@ class POMDPQuotientContainer(QuotientContainer):
             ]
             for combination in itertools.product(*combinations):            
                 color = self.combination_coloring.get_or_make_color(combination)
-                self.action_colors.append(color)
+                self.action_to_colors.append({color})
             # print("hole options in state {} : {}x{}".format(state, len(hole_options[hole_action]), len(hole_options[hole_memory])))
             # print("actions in state {} : {}".format(state, self.model.get_nr_available_actions(state)))
-
-
+        
         # print(self.combination_coloring)
         # print(self.action_colors)
         
@@ -298,70 +320,4 @@ class POMDPQuotientContainer(QuotientContainer):
         # print("")
         # print("choices: ", self.model.nr_choices)
         # print("actions: ", [self.model.get_nr_available_actions(s) for s in range(self.model.nr_states)])
-
-    def build(self, design_space):
-        if design_space == self.sketch.design_space:
-            return MDP(self.sketch, design_space, self.quotient_mdp)
-
-        # must restrict the super-mdp
-        
-        # get colors relevant to this design space
-        # TODO optimize this
-        relevant_colors = self.combination_coloring.subcolors(design_space)
-        relevant_colors.add(0)
-        relevant_actions = [action for action,color in enumerate(self.action_colors) if color in relevant_colors]
-        selected_actions = stormpy.BitVector(self.quotient_mdp.nr_choices)
-        for action in relevant_actions:
-            selected_actions.set(action)
-
-
-        # construct the submodel
-        keep_unreachable_states = False
-        subsystem_options = stormpy.SubsystemBuilderOptions()
-        subsystem_options.build_action_mapping = True
-        # subsystem_options.build_state_mapping = True #+
-        all_states = stormpy.BitVector(self.quotient_mdp.nr_states, True)
-        submodel_construction = stormpy.construct_submodel(
-            self.quotient_mdp, all_states, selected_actions, keep_unreachable_states, subsystem_options
-        )
-        mdp = submodel_construction.model
-        choice_map = submodel_construction.new_to_old_action_mapping
-        assert len(choice_map) == mdp.nr_choices, \
-            f"mapping contains {len(choice_map)} actions, " \
-            f"but model has {mdp.nr_choices} actions"
-        # assert mdp.has_choice_origins()
-        if design_space.size == 1:
-            assert mdp.nr_choices == mdp.nr_states
-
-        # success
-        return MDP(self.sketch, design_space, mdp, choice_map)
-
-    def prepare_split(self, mdp, mc_result, properties):
-        assert not mdp.is_dtmc
-
-        # identify the most inconsistent holes
-        # TODO POMDP does not have choice origins, so we cannot apply scheduler
-        inconsistent = [hole for hole in mdp.design_space.holes]
-        
-        # from these holes, identify the one with the largest domain
-        splitter = None
-        hole_domains = {hole:len(mdp.design_space[hole]) for hole in inconsistent}
-        max_domains = max([hole_domains[hole] for hole in inconsistent])
-        splitters = [hole for hole in inconsistent if hole_domains[hole] == max_domains]
-        splitter = splitters[0]
-        
-        # split
-        options = mdp.design_space[splitter]
-        half = len(options) // 2
-
-        suboptions = [options[:half], options[half:]]
-        design_subspaces = []
-        for suboption in suboptions:
-            hole_suboption = HoleOptions(mdp.design_space)
-            hole_suboption[splitter] = suboption
-            design_subspace = DesignSpace(hole_suboption)
-            design_subspace.set_properties(properties)
-            design_subspaces.append(design_subspace)
-
-        return design_subspaces[0], design_subspaces[1]
 

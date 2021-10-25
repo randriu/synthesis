@@ -58,12 +58,12 @@ class Statistic:
 
     def iteration_dtmc(self, size_dtmc):
         self.iterations_dtmc += 1
-        self.acc_size_dtmc + size_dtmc
+        self.acc_size_dtmc += size_dtmc
         self.print_status()
 
     def iteration_mdp(self, size_mdp):
         self.iterations_mdp += 1
-        self.acc_size_mdp + size_mdp
+        self.acc_size_mdp += size_mdp
         self.print_status()
 
     def check_dtmc(self):
@@ -83,11 +83,13 @@ class Statistic:
 
     def status(self):
         fraction_rejected, time_estimate = self.estimate()
-        # percentage_rejected = int(fraction_rejected * 100)
-        percentage_rejected = fraction_rejected * 100
+        percentage_rejected = int(fraction_rejected * 10000) / 100.0
+        # percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.timer.read(),1)
         time_estimate = round(time_estimate,1)
-        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s"
+        iters = self.iterations_mdp
+        avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
+        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], [{avg_size_mdp} size]"
 
     def print_status(self):
         if self.timer.read() > self.status_time:
@@ -110,8 +112,9 @@ class Statistic:
             self.assignment = str(assignment)
         self.optimal_value = optimal_value
 
-        self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.checks_dtmc)
-        self.avg_size_mdp = safe_division(self.acc_size_mdp, self.checks_mdp)
+        self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
+        print(self.acc_size_mdp)
+        self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
 
     def get_summary(self,short_summary):
         sep = "--------------------"

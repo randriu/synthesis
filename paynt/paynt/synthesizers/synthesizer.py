@@ -63,7 +63,6 @@ class SynthesizerAR(Synthesizer):
         super().__init__(sketch)
         if sketch.is_pomdp:
             self.quotient_container = POMDPQuotientContainer(sketch)
-            self.sketch.design_space = self.quotient_container.design_space
         else:
             self.quotient_container = JaniQuotientContainer(sketch)
         
@@ -75,6 +74,7 @@ class SynthesizerAR(Synthesizer):
 
     def run(self):
         self.stat.start()
+        self.stat.super_mdp_size = self.quotient_container.quotient_mdp.nr_states
 
         # initiate AR loop
         satisfying_assignment = None
@@ -119,7 +119,7 @@ class SynthesizerAR(Synthesizer):
         # FIXME POMDP hack: replace hole valuations with corresponding action labels
         print("design space: ", self.sketch.design_space)
         print("design space size: ", self.sketch.design_space.size)
-        if satisfying_assignment is not None and self.sketch.prism.model_type == stormpy.storage.PrismModelType.POMDP:
+        if satisfying_assignment is not None and self.sketch.is_pomdp:
             for obs in range(self.quotient_container.observations):
                 at_obs = self.quotient_container.action_labels_at_observation[obs]
                 for mem in range(self.quotient_container.memory_size):

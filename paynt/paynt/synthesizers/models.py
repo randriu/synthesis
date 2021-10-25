@@ -18,6 +18,8 @@ class MarkovChain:
 
     # options for the construction of chains
     builder_options = None
+    # model checking precision
+    precision = 1e-5
     # model checking environment (method & precision)
     environment = None
 
@@ -35,8 +37,10 @@ class MarkovChain:
     
         # model checking environment
         cls.environment = stormpy.Environment()
-        cls.environment.solver_environment.minmax_solver_environment.precision = stormpy.Rational(1e-5)
-        cls.set_solver_method(stormpy.MinMaxMethod.policy_iteration) # default for DTMCs
+        env = cls.environment.solver_environment.minmax_solver_environment
+        env.precision = stormpy.Rational(cls.precision)
+        # PI is the default method for DTMCs?
+        cls.set_solver_method(stormpy.MinMaxMethod.policy_iteration)
 
     @classmethod
     def set_solver_method(cls, method):
@@ -109,10 +113,11 @@ class DTMC(MarkovChain):
 
 class MDP(MarkovChain):
 
-    def __init__(self, sketch, design_space, model, quotient_choice_map = None):
+    def __init__(self, sketch, design_space, model, quotient_container, quotient_choice_map = None):
         super().__init__(sketch)
         self.design_space = design_space
         self.model = model
+        self.quotient_container = quotient_container
         self.quotient_choice_map = quotient_choice_map
         self.design_subspaces = None
 
@@ -223,58 +228,6 @@ class MDP(MarkovChain):
         improving_assignment = self.design_space.pick_any()
         return bounds_primary,improved,improving_assignment,True
 
-    def scheduler_selection(self, result):
-        scheduler = result.scheduler
-        assert scheduler.memoryless
-        assert scheduler.deterministic        
-        
-        # TODO for now, return pessimistic selection of all hole options
-        selected_hole_option_map = dict()
-        for hole,options in self.design_space.items():
-            selected_hole_option_map[hole] = {index:1 for index,_ in enumerate(options)}
-        return selected_hole_option_map
-
-        # apply scheduler
-        dtmc = self.model.apply_scheduler(scheduler, drop_unreachable_states=False)
-        assert dtmc.has_choice_origins()
-
-        # map state actions to a color
-        state_to_colors = []
-        for state in dtmc.states:
-            action_index = state.id
-            assert len(state.actions) == 1    
-            colors = []
-            for e in dtmc.choice_origins.get_edge_index_set(action_index):
-                color = self.sketch.choice_origin_to_color[e]
-                if color != 0:
-                    colors.append(color)
-            state_to_colors.append(colors)
-        # print(state_to_color)
-        
-        # map states to hole assignments in this state
-        state_to_assignments = []
-        for colors in state_to_colors:
-            assignments = self.sketch.edge_coloring.get_hole_assignments(colors)
-            state_to_assignments.append(assignments)
-        # print(state_to_assignments)
-
-        # count all hole assignments
-        selected_hole_option_map = dict()
-        for state, assignments in enumerate(state_to_assignments):
-            for hole, selected_options in assignments.items():
-                e = selected_hole_option_map.get(hole, dict())
-                for o in selected_options:
-                    former_count = e.get(o, 0)
-                    e[o] = former_count + 1
-                selected_hole_option_map[hole] = e
-        # print(selected_hole_option_map)
-
-        # fix undefined hole selections
-        selection = OrderedDict()
-        for hole in self.design_space.holes:
-            if hole not in selected_hole_option_map:
-                selected_hole_option_map[hole] = {0:1};
-
 
         return selected_hole_option_map
 
@@ -283,7 +236,7 @@ class MDP(MarkovChain):
             return self.design_space.pick_any()
 
         # extract scheduler selection
-        selection = self.scheduler_selection(result)
+        selection = self.quotient_container.scheduler_selection(self, result.scheduler)
 
         # collect positive hole assignments
         assignment = HoleOptions()
