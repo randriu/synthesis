@@ -1,4 +1,7 @@
 import logging
+import multiprocessing
+from multiprocessing.sharedctypes import copy
+
 import z3
 
 from collections import OrderedDict
@@ -12,7 +15,7 @@ from ..profiler import Profiler
 logger = logging.getLogger(__name__)
 
 
-class Family:
+class Family(object):
     """
         notation:
         hole: String
@@ -67,7 +70,7 @@ class Family:
     _quotient_mdp_stats = (0, 0)
     _dtmc_stats = (0, 0)
     _mdp_checks = 0
-    _dtmc_checks = 0
+    _dtmc_checks = multiprocessing.Value('i', 0)
 
     # - CEXs for MDP of superfamily
     # global_cex_generator = None
@@ -208,7 +211,7 @@ class Family:
 
     @staticmethod
     def dtmc_checks():
-        return Family._dtmc_checks
+        return Family._dtmc_checks.value
 
     @staticmethod
     def quotient_mdp():
@@ -232,7 +235,7 @@ class Family:
 
     @staticmethod
     def dtmc_checks_inc():
-        Family._dtmc_checks += 1
+        Family._dtmc_checks.value += 1
 
     def construct(self):
         """ Construct quotient MDP for this family using the quotient container. """

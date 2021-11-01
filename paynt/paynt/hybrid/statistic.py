@@ -28,7 +28,7 @@ class Statistic:
     ):
         self.timer.stop()
         self.feasible = assignment is not None
-        self.assignment = readable_assignment(assignment)
+        self.assignment = assignment
         self.iterations = iterations
         self.optimal_value = optimal_value
         self.family_size = family_size

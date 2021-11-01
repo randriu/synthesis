@@ -1,10 +1,12 @@
 import logging
+import multiprocessing
 import os
-import time
 from multiprocessing import Process
 
 import stormpy
 import stormpy.synthesis
+from .cegis_worker_return_obj import CegisWorkerObj
+from ..family_checkers.familychecker import HoleOptions
 
 from ..family_checkers.quotientbased import QuotientBasedFamilyChecker, logger as quotientbased_logger
 from ..jani.jani_quotient_builder import logger as jani_quotient_builder_logger
@@ -28,7 +30,7 @@ jani_quotient_builder_logger.disabled = True
 model_handling_logger.disabled = True
 
 ONLY_CEGAR = False
-ONLY_CEGIS = False
+ONLY_CEGIS = True
 NONTRIVIAL_BOUNDS = True
 PRINT_STAGE_INFO = False
 PRINT_PROFILING = False
@@ -40,6 +42,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     stage_score_limit = 99999
     ce_quality = False
     ce_maxsat = False
+    lock = multiprocessing.Lock()
 
     def __init__(self, *args):
         QuotientBasedFamilyChecker.__init__(self, *args)
@@ -288,9 +291,72 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
 
-    def cegis_parallel_loop(self, family):
-        logger.info(f"Hi guys from Process: {os.getpid()}")
+    def cegis_analyze_member_assigment(self, member_assignment, family, relevant_holes, counterexample_generator, return_process):
+        cegis_worker_obj = CegisWorkerObj()
 
+        logger.info(f"Hi guys from Process: {os.getpid()}")
+        logger.debug(f"CEGIS: picked family member: {member_assignment}.")
+
+        # collect indices of violated formulae
+        violated_formulae_indices = []
+        for formula_index in family.formulae_indices:
+            # logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
+            Profiler.start("is - DTMC model checking")
+            Family.dtmc_checks_inc()
+            sat, _ = family.analyze_member(formula_index)
+            Profiler.stop()
+            logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
+            if not sat:
+                violated_formulae_indices.append(formula_index)
+        if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
+                and self.input_has_optimality_property():
+            self._check_optimal_property(family, member_assignment, counterexample_generator)
+            cegis_worker_obj.optimal_value = self._optimal_value
+            cegis_worker_obj.optimal_assignment = HoleOptions.toJson(self._optimal_assignment)
+            cegis_worker_obj.return_value = True
+        elif not violated_formulae_indices:
+            Profiler.add_ce_stats(counterexample_generator.stats)
+            # TODO: check this...
+            cegis_worker_obj.return_value = True
+            return_process.send(cegis_worker_obj)
+
+        # some formulae UNSAT: construct counterexamples
+        # logger.debug("CEGIS: preprocessing DTMC.")
+        Profiler.start("_")
+        counterexample_generator.prepare_dtmc(family.dtmc, family.dtmc_state_map)
+        Profiler.stop()
+
+        Profiler.start("is - constructing CE")
+        conflicts = []
+        for formula_index in violated_formulae_indices:
+            # logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
+            conflict_indices = counterexample_generator.construct_conflict(formula_index)
+            # conflict = counterexample_generator.construct(formula_index, self.use_nontrivial_bounds)
+            conflict_holes = [Family.hole_list[index] for index in conflict_indices]
+            generalized_count = len(Family.hole_list) - len(conflict_holes)
+            logger.debug(
+                f"CEGIS: found conflict involving {conflict_holes} (generalized {generalized_count} holes)."
+            )
+            conflicts.append(conflict_indices)
+
+            # compare to maxsat, state exploration, naive hole exploration, global vs local bounds
+            self.ce_quality_measure(
+                member_assignment, relevant_holes, counterexample_generator,
+                family.dtmc, family.dtmc_state_map, formula_index
+            )
+
+        # record stage
+        if self.stage_step(0) and not ONLY_CEGIS:
+            # switch requested
+            Profiler.add_ce_stats(counterexample_generator.stats)
+            # TODO: check this
+            cegis_worker_obj.return_value = None
+            return_process.send(cegis_worker_obj)
+
+        cegis_worker_obj.conflicts = conflicts
+        cegis_worker_obj.return_value = "weed"
+
+        return_process.send(cegis_worker_obj)
 
 
     def analyze_family_cegis(self, family):
@@ -298,9 +364,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         Analyse a family against selected formulae using precomputed MDP data
         to construct generalized counterexamples.
         """
-
-        # TODO preprocess only formulae of interest
-
         logger.debug(f"CEGIS: analyzing family {family.options} of size {family.size}.")
 
         assert family.constructed
@@ -317,81 +380,78 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
         )
         Profiler.stop()
 
+        # TODO:
+        #  1. - for n processes pick unique member and analyze it
+        #  2. - worker returns master only conflicts, which master will then update to the Solver..
+
+        # TODO preprocess only formulae of interest
         # process family members
-        Profiler.start("is - pick DTMC")
-        member_assignment = family.pick_member_with_exclude_all_holes()
-        Profiler.stop()
+        Profiler.start("is - pick DTMCs")
 
-        p = Process(target=self.cegis_parallel_loop)
-        p.start()
-        p.join()
+        member_assignments = []
 
-        while member_assignment is not None:
-            self.iterations_cegis += 1
-            logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
-            logger.debug(f"CEGIS: picked family member: {member_assignment}.")
+        # pokial je vzdy member assignemnts nieco cize nie 'None'
+        while not None in member_assignments:
 
-            # collect indices of violated formulae
-            violated_formulae_indices = []
-            for formula_index in family.formulae_indices:
-                # logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
-                Profiler.start("is - DTMC model checking")
-                Family.dtmc_checks_inc()
-                sat, _ = family.analyze_member(formula_index)
+            pipe_list = []
+            jobs = []
+            member_assignments = []
+
+            for i in range(1):
+                self.iterations_cegis += 1
+                logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
+
+                # pick members for each worker
+                member_to_analyze = family.pick_member_with_exclude_all_holes()
+
+                if member_to_analyze is None:
+                    # full family pruned
+                    logger.debug("CEGIS: no more family members.")
+                    Profiler.add_ce_stats(counterexample_generator.stats)
+                    return False
+                else:
+                    member_assignments.append(member_to_analyze)
+
                 Profiler.stop()
-                logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
-                if not sat:
-                    violated_formulae_indices.append(formula_index)
-            if (not violated_formulae_indices or violated_formulae_indices == [len(self.formulae) - 1]) \
-                    and self.input_has_optimality_property():
-                self._check_optimal_property(family, member_assignment, counterexample_generator)
-            elif not violated_formulae_indices:
-                Profiler.add_ce_stats(counterexample_generator.stats)
-                return True
 
-            # some formulae UNSAT: construct counterexamples
-            # logger.debug("CEGIS: preprocessing DTMC.")
-            Profiler.start("_")
-            counterexample_generator.prepare_dtmc(family.dtmc, family.dtmc_state_map)
-            Profiler.stop()
+                recv_end, send_value = multiprocessing.Pipe(False)
 
-            Profiler.start("is - constructing CE")
-            conflicts = []
-            for formula_index in violated_formulae_indices:
-                # logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
-                conflict_indices = counterexample_generator.construct_conflict(formula_index)
-                # conflict = counterexample_generator.construct(formula_index, self.use_nontrivial_bounds)
-                conflict_holes = [Family.hole_list[index] for index in conflict_indices]
-                generalized_count = len(Family.hole_list) - len(conflict_holes)
-                logger.debug(
-                    f"CEGIS: found conflict involving {conflict_holes} (generalized {generalized_count} holes)."
-                )
-                conflicts.append(conflict_indices)
+                pipe_list.append(recv_end)
 
-                # compare to maxsat, state exploration, naive hole exploration, global vs local bounds
-                self.ce_quality_measure(
-                    member_assignment, relevant_holes, counterexample_generator,
-                    family.dtmc, family.dtmc_state_map, formula_index
-                )
+                job = Process(target=self.cegis_analyze_member_assigment, args=(member_assignments[i], family, relevant_holes, counterexample_generator, send_value))
+                job.start()
 
-            family.exclude_member(conflicts)
-            Profiler.stop()
+                jobs.append(job)
 
-            # pick next member
-            Profiler.start("is - pick DTMC")
-            member_assignment = family.pick_member_with_exclude_all_holes()
-            Profiler.stop()
+            for pipe in pipe_list:
+                i = 0
+                # job.join() I think join is not needed...
 
-            # record stage
-            if self.stage_step(0) and not ONLY_CEGIS:
-                # switch requested
-                Profiler.add_ce_stats(counterexample_generator.stats)
-                return None
+                # fetch somehow output from process 'conflicts'
+                returned_value_from_process = pipe.recv()
+                logger.info("CEGIS: received from process " + str(returned_value_from_process))
 
-        # full family pruned
-        logger.debug("CEGIS: no more family members.")
-        Profiler.add_ce_stats(counterexample_generator.stats)
-        return False
+                if returned_value_from_process.return_value is None:
+                    member_assignments.append(None)
+                    return None
+                elif returned_value_from_process.return_value is True:
+                    return True
+                else:
+                    # 1. set opt values if it's improvement...
+                    if self._optimality_setting.is_improvement(returned_value_from_process.optimal_value, self._optimal_value):
+                        logger.info("Find the new optimal value: " + str(returned_value_from_process.optimal_value))
+                        self._optimal_value = returned_value_from_process.optimal_value
+                        self._optimal_assignment = HoleOptions.fromJson(returned_value_from_process.optimal_assignment)
+
+                        # 2-3. update counter-example generator thresholds (`set thresholds`)
+                        # TODO: make it for all processes...
+                        self._construct_violation_property(family, counterexample_generator)
+
+                    # 4. in this case return value is conflicts to exclude
+                    if returned_value_from_process.conflicts is not []:
+                        family.exclude_member(returned_value_from_process.conflicts)
+                i += 1
+
 
     def run_feasibility(self):
         """
@@ -508,7 +568,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             logger.info(f"Found optimal assignment: {self._optimal_value}")
             return self._optimal_assignment, self._optimal_value
         elif satisfying_assignment is not None:
-            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
+            logger.info(f"Found satisfying assignment: {satisfying_assignment}")
             return satisfying_assignment, None
         else:
             logger.info("No more options.")

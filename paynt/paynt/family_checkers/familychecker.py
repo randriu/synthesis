@@ -1,5 +1,6 @@
 import logging
 import operator
+import json
 
 from collections import OrderedDict
 from enum import Enum
@@ -106,6 +107,15 @@ def open_constants(model):
 
 
 class HoleOptions(OrderedDict):
+
+    @staticmethod
+    def toJson(holeObj):
+        return json.dumps(str(holeObj))
+
+    @staticmethod
+    def fromJson(jsonData):
+        return json.loads(jsonData, object_hook=lambda d: HoleOptions(**d))
+
     def __str__(self):
         return "HoleOptions {}".format(",".join([f"{k}: [{','.join([str(x) for x in v])}]" for k, v in self.items()]))
 
