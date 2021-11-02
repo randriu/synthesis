@@ -63,7 +63,7 @@ class QuotientContainer:
         return MDP(self.sketch, design_space, mdp, self, choice_map)
 
     def scheduler_colors(self, mdp, scheduler):
-        ''' Get all colors that correspond to scheduled choices. '''
+        ''' Get all colors involved in the choices of this scheduler. '''
         colors = set()
         for state in range(mdp.states):
             offset = scheduler.get_choice(state).get_deterministic_choice()
@@ -83,14 +83,25 @@ class QuotientContainer:
         colors = self.scheduler_colors(mdp, scheduler)
         
         # translate colors to hole assignments
-        assignments = self.combination_coloring.get_hole_assignments(colors)
+        selection = self.combination_coloring.get_hole_assignments(colors)
+        return selection
 
-        # fix undefined holes
-        for hole in self.sketch.design_space.holes:
-            if hole not in assignments.keys():
-                assignments[hole] = {};
-
-        return assignments
+    def scheduler_consistent(self, mdp, scheduler):
+        '''
+        Get hole assignment induced by this scheduler and fill undefined
+        holes by some option from the design space of this mdp.
+        :return hole assignment
+        :return whether the scheduler is consistent
+        '''
+        selection = self.scheduler_selection(mdp, scheduler)
+        consistent = True
+        for hole in mdp.design_space.holes:
+            options = selection[hole]
+            if len(options) > 1:
+                consistent = False
+            if options == []:
+                selection[hole] = [mdp.design_space[hole][0]]
+        return selection,consistent
 
     def prepare_split(self, mdp, mc_result, properties):
         assert not mdp.is_dtmc
@@ -103,7 +114,6 @@ class QuotientContainer:
         # inconsistent = [hole for hole in mdp.design_space.holes]
 
         # from these holes, identify the one with the largest domain
-        splitter = None
         hole_domains = {hole:len(mdp.design_space[hole]) for hole in inconsistent}
         max_domains = max([hole_domains[hole] for hole in inconsistent])
         splitters = [hole for hole in inconsistent if hole_domains[hole] == max_domains]
@@ -116,9 +126,8 @@ class QuotientContainer:
         suboptions = [options[:half], options[half:]]
         design_subspaces = []
         for suboption in suboptions:
-            hole_suboption = HoleOptions(mdp.design_space)
-            hole_suboption[splitter] = suboption
-            design_subspace = DesignSpace(hole_suboption)
+            design_subspace = DesignSpace(mdp.design_space)
+            design_subspace[splitter] = suboption
             design_subspace.set_properties(properties)
             design_subspaces.append(design_subspace)
 
@@ -253,7 +262,6 @@ class POMDPQuotientContainer(QuotientContainer):
         num_choices = self.quotient_mdp.nr_choices
         self.color_0_actions = stormpy.BitVector(num_choices, False)
         
-
         for state in range(self.quotient_mdp.nr_states):
             obs = self.mdp_to_pomdp_observations[state]
             mem = self.mdp_to_pomdp_memory[state]

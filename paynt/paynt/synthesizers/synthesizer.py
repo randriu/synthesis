@@ -86,13 +86,14 @@ class SynthesizerAR(Synthesizer):
             self.stat.iteration_mdp(mdp.states)
             feasible,undecided_properties,undecided_bounds = mdp.check_properties(family.properties)
             properties = undecided_properties
+
             if feasible == False:
-                # logger.debug("AR: family is UNSAT")
+                # all UNSAT
                 self.stat.pruned(family.size)
                 continue
             
             if feasible == None:
-                # logger.debug("AR: family is undecided")
+                # undecided: split wrt first undecided result
                 assert len(undecided_bounds) > 0
                 subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, undecided_bounds[0], properties)
                 families.append(subfamily1)
@@ -108,24 +109,29 @@ class SynthesizerAR(Synthesizer):
                 break
             
             # must check optimality
-            opt_bounds,improved,improving_assignment,can_improve = mdp.check_optimality(self.optimality_property)
-            if improved:
+            opt_bounds,optimum,improving_assignment,can_improve = mdp.check_optimality(self.optimality_property)
+            if optimum is not None:
+                print("HERE", optimum)
+                self.optimality_property.update_optimum(optimum)
+                print(self.optimality_property.optimum)
                 satisfying_assignment = improving_assignment
             if can_improve:
                 subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, opt_bounds, properties)
                 families.append(subfamily1)
                 families.append(subfamily2)
 
-        # FIXME POMDP hack: replace hole valuations with corresponding action labels
+        # FIXME POMDP hack: replace hole valuations with corresponding action labels & print a table
         print("design space: ", self.sketch.design_space)
         print("design space size: ", self.sketch.design_space.size)
-        if satisfying_assignment is not None and self.sketch.is_pomdp:
+        if self.sketch.is_pomdp and satisfying_assignment is not None:
+            string = ""
             for obs in range(self.quotient_container.observations):
                 at_obs = self.quotient_container.action_labels_at_observation[obs]
                 for mem in range(self.quotient_container.memory_size):
                     hole = self.quotient_container.holes_action[(obs,mem)]
                     options = satisfying_assignment[hole]
                     satisfying_assignment[hole] = [at_obs[index] for index in options]
+                string += "\n"
         self.stat.finished(satisfying_assignment)
 
 

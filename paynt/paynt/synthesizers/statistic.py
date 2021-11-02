@@ -42,7 +42,7 @@ class Statistic:
 
         self.feasible = None
         self.assignment = None
-        self.optimal_value = None
+        self.optimum = None
 
         self.timer = Timer()
         self.remaining = self.design_space.size
@@ -99,18 +99,18 @@ class Statistic:
 
     def finished(self, assignment):
 
-        optimal_value = None
+        optimum = None
         if self.optimality_property is not None:
-            optimal_value = self.optimality_property.optimal_value
+            optimum = self.optimality_property.optimum
 
         self.timer.stop()
         self.feasible = False
-        self.assignment = False
+        self.assignment = None
         if assignment is not None:
             self.feasible = True
             # self.assignment = self.design_space.readable_assignment(assignment)
             self.assignment = str(assignment)
-        self.optimal_value = optimal_value
+        self.optimum = optimum
 
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
         print(self.acc_size_mdp)
@@ -141,7 +141,7 @@ class Statistic:
             family_stats += f"{dtmc_stats}\n"
 
         feasible = "yes" if self.feasible else "no"
-        result = f"feasible: {feasible}" if self.optimal_value is None else f"optimal: {round(self.optimal_value, 6)}"
+        result = f"feasible: {feasible}" if self.optimum is None else f"optimal: {round(self.optimum, 6)}"
         assignment = f"hole assignment: {str(self.assignment)}\n" if self.assignment else ""
 
         summary = f"{formulae}\n{timing}\n{design_space}\n" \
@@ -149,10 +149,10 @@ class Statistic:
         return summary
 
     def get_short_summary(self):
-        # if self.optimal_value is None:
+        # if self.optimum is None:
         #     result = "F" if self.feasible else "U"
         # else:
-        #     result = f"opt = {round(self.optimal_value, 6)}"
+        #     result = f"opt = {round(self.optimum, 6)}"
         # if self.method == "CEGAR":
         #     iters = self.iterations[0]
         # elif self.method == "CEGIS" or self.method == "1-by-1":

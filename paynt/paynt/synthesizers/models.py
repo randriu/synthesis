@@ -76,19 +76,26 @@ class DTMC(MarkovChain):
         program = sketch.restrict(assignment)
         self.build(program)
 
-    # model check dtmc against a property, return
-    # (1) whether the property was satisfied
-    # (2) value in the initial state
     def analyze_property(self, prop):
+        ''''
+        Model check dtmc against a property
+        :return value in the initial state
+        '''
         mc_result = stormpy.model_checking(
-            self.model, prop.formula, only_initial_states=False, extract_scheduler=False, environment=self.environment
+            self.model, prop.formula, only_initial_states=False,
+            extract_scheduler=False, environment=self.environment
         )
-        return prop.satisfied(value), self.at_initial_state(mc_result)
+        return self.at_initial_state(mc_result)
+
+    def check_property(self, prop):
+        ''' Check whether this DTMC satisfies the property. '''
+        result = self.analyze_property(prop)
+        return prop.satisfies_threshold(result)
 
     # check multiple properties, return False as soon as any one is violated
     def check_properties(self, properties):
         for p in properties:
-            sat,_ = self.analyze_property(p)
+            sat = self.check_property(p)
             if not sat:
                 return False
         return True
@@ -97,7 +104,7 @@ class DTMC(MarkovChain):
     def check_properties_all(self, properties):
         unsat_properties = []
         for p in properties:
-            sat,_ = self.analyze_property(p)
+            sat = self.check_property(p)
             if not sat:
                 unsat_properties.append(p)
         return unsat_properties
@@ -106,9 +113,10 @@ class DTMC(MarkovChain):
     # (1) whether the property was satisfied
     # (2) whether the optimal value was improved
     def check_optimality(self, prop):
-        sat,value = self.analyze_property(prop)
-        improved = prop.update_optimum(value)
-        return sat,improved
+        result = self.analyze_property(prop)
+        sat = prop.satisfies_threshold(result)
+        improves = prop.improves_optimum(result)
+        return sat,improves
 
 
 class MDP(MarkovChain):
@@ -143,35 +151,25 @@ class MDP(MarkovChain):
         Model check the underlying quotient MDP against a given formula. Return:
         (1) feasibility: SAT = True, UNSAT = False, undecided = None
         (2) bounds on the primary direction
-        (3) bounds on the secondary direction
+        (3) bounds on the secondary direction (None if not necessary)
         '''
 
         # check primary direction
         bounds_primary = self.analyze_property(prop)
         result_primary = self.at_initial_state(bounds_primary)
+        sat_primary = prop.satisfies_threshold(result_primary)
         if self.is_dtmc:
-            feasible = prop.decided(result_primary,result_primary)
-            return feasible,bounds_primary,bounds_primary
+            return sat_primary, bounds_primary, None
 
-        # do we need to check secodary direction?
-        if prop.minimizing:
-            absolute_min = result_primary
-            absolute_max = math.inf
-        else:
-            absolute_min = -math.inf
-            absolute_max = result_primary
-        feasible = prop.decided(absolute_min,absolute_max)
-        bounds_secondary = None
-        if feasible is None:
-            # primary direction is not sufficient
-            bounds_secondary = self.analyze_property(prop, alt = True)
-            result_secondary = self.at_initial_state(bounds_secondary)
-            if prop.minimizing:
-                absolute_max = result_secondary
-            else:
-                absolute_min = result_secondary
-            feasible = prop.decided(absolute_min,absolute_max)
+        # no need to check secodary direction if optimizing direction yields UNSAT
+        if not sat_primary:
+            return False, bounds_primary, None
 
+        # primary direction is not sufficient
+        bounds_secondary = self.analyze_property(prop, alt = True)
+        result_secondary = self.at_initial_state(bounds_secondary)
+        sat_secondary = prop.satisfies_threshold(result_secondary)
+        feasible = True if sat_secondary else None
         return feasible, bounds_primary, bounds_secondary
 
     def check_properties(self, properties):
@@ -195,56 +193,56 @@ class MDP(MarkovChain):
     def check_optimality(self, prop):
         ''' model check optimality property, return
         (1) bounds in primary direction
-        (2) whether the optimal value was improved
-        (3) improving assignment if (2) holds
-        (4) whether the optimal value (wrt eps) can be improved by refining the
-            design space
+        (2) new optimal value (or None)
+        (3) improving assignment corresponding to (2) (or None)
+        (4) whether the optimal value (wrt eps) can still be improved by
+            refining the design space
         '''
-        
-        # check property
-        feasible,bounds_primary,bounds_secondary = self.check_property(prop)
-        if feasible == False:
-            return bounds_primary,False,None,False
-        if feasible == None:
-            return bounds_primary,False,None,True
 
-        # all SAT
-        # check if primary result is tight
-        assignment_primary = self.scheduler_assignment(bounds_primary)
-        result_primary_tight = assignment_primary.size == 1
-        
-        # tight primary result is the best result in this family
-        if result_primary_tight:
-            improving_assignment = assignment_primary
-            result_primary = self.at_initial_state(bounds_primary)
-            improved = prop.update_optimum(result_primary)
-            assert improved
-            return bounds_primary,improved,improving_assignment,False
-        
-        # use secondary result as new optimum
+        # check primary direction
+        bounds_primary = self.analyze_property(prop)
+        result_primary = self.at_initial_state(bounds_primary)
+        opt_primary = prop.improves_optimum(result_primary)
+        sat_primary = prop.satisfies_threshold(result_primary)
+
+        if not opt_primary:
+            # OPT <= LB
+            return bounds_primary, None, None, False
+
+        # LB < OPT
+        # check if LB is tight
+        assignment,consistent = self.quotient_container.scheduler_consistent(self, bounds_primary.scheduler)
+        if consistent:
+            # LB is tight and LB < OPT
+            return bounds_primary, result_primary, HoleOptions(assignment), False
+
+        # UB might improve the optimum
+        bounds_secondary = self.analyze_property(prop, alt = True)
         result_secondary = self.at_initial_state(bounds_secondary)
-        improved = prop.update_optimum(result_secondary)
-        assert improved
-        improving_assignment = self.design_space.pick_any()
-        return bounds_primary,improved,improving_assignment,True
+        opt_secondary = prop.improves_optimum(result_secondary)
+        sat_secondary = prop.satisfies_threshold(result_secondary)
+
+        if not opt_secondary:
+            # LB < OPT < UB
+            if not sat_primary:
+                # T < LB < OPT < UB
+                return bounds_primary, None, None, False
+            else:
+                # LB < T < OPT < UB
+                return bounds_primary, None, None, True
+
+        # LB < UB < OPT
+        # this family definitely improves the optimum
+        assignment = self.design_space.pick_any()
+        if not sat_primary:
+            # T < LB < UB < OPT
+            return bounds_primary, result_secondary, assignment, False
+        else:
+            # LB < T, LB < UB < OPT
+            return bounds_primary, result_secondary, assignment, True
+        
 
 
-        return selected_hole_option_map
 
-    def scheduler_assignment(self, result):
-        if self.is_dtmc:
-            return self.design_space.pick_any()
-
-        # extract scheduler selection
-        selection = self.quotient_container.scheduler_selection(self, result.scheduler)
-
-        # collect positive hole assignments
-        assignment = HoleOptions()
-        for hole in self.sketch.design_space.holes:
-            option_counts = selection[hole]
-            selected_options = [index for index in option_counts.keys()  if option_counts[index]>0 ]
-            assignment[hole] = [self.sketch.design_space[hole][index] for index in selected_options]
-
-        return assignment
 
 

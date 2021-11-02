@@ -1,5 +1,5 @@
 import stormpy
-from .property import Property
+from .property import Property, OptimalityProperty
 from .holes import HoleOptions, DesignSpace
 
 import os
@@ -19,7 +19,7 @@ class Sketch:
         self.properties = None
         self.optimality_property = None
         self.design_space = None
-        self.pomdp_memory_size = 2 # FIXME as a CLI argument
+        self.pomdp_memory_size = 3 # FIXME as a CLI argument
 
         self.prism = None
         self.jani = None
@@ -175,7 +175,7 @@ class Sketch:
         # wrap properties
         properties = [Property(p) for p in properties]
         if optimality_property is not None:
-            optimality_property = Property(optimality_property, optimality_epsilon)
+            optimality_property = OptimalityProperty(optimality_property, optimality_epsilon)
 
         return properties, optimality_property
 

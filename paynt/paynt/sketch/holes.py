@@ -197,6 +197,9 @@ class CombinationColoring:
     def get_hole_assignments(self, colors):
         ''' Collect all hole assignments associated with provided colors. '''
         hole_assignments = {}
+        for hole in self.hole_options.holes:
+            hole_assignments[hole] = set()
+        
         for color in colors:
             if color == 0:
                 continue
@@ -204,7 +207,11 @@ class CombinationColoring:
             for hole, assignment in zip(self.hole_options.holes, combination):
                 if assignment is None:
                     continue
-                assignments = hole_assignments.get(hole, set())
+                assignments = hole_assignments.get(hole)
                 assignments.add(assignment)
                 hole_assignments[hole] = assignments
-        return hole_assignments
+
+        hole_options = {}
+        for hole,assignments in hole_assignments.items():
+            hole_options[hole] = list(assignments)
+        return hole_options
