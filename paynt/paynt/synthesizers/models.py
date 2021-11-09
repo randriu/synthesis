@@ -19,7 +19,7 @@ class MarkovChain:
     # options for the construction of chains
     builder_options = None
     # model checking precision
-    precision = 1e-5
+    precision = 1e-10
     # model checking environment (method & precision)
     environment = None
 

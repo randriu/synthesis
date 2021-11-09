@@ -9,9 +9,12 @@ from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
 from .quotient import JaniQuotientContainer, POMDPQuotientContainer
 
+from ..sketch.holes import DesignSpace
+
 import logging
 logger = logging.getLogger(__name__)
 
+from stormpy.synthesis import dtmc_from_mdp
 
 class Synthesizer:
     def __init__(self, sketch):
@@ -111,9 +114,7 @@ class SynthesizerAR(Synthesizer):
             # must check optimality
             opt_bounds,optimum,improving_assignment,can_improve = mdp.check_optimality(self.optimality_property)
             if optimum is not None:
-                print("HERE", optimum)
                 self.optimality_property.update_optimum(optimum)
-                print(self.optimality_property.optimum)
                 satisfying_assignment = improving_assignment
             if can_improve:
                 subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, opt_bounds, properties)
@@ -124,14 +125,12 @@ class SynthesizerAR(Synthesizer):
         print("design space: ", self.sketch.design_space)
         print("design space size: ", self.sketch.design_space.size)
         if self.sketch.is_pomdp and satisfying_assignment is not None:
-            string = ""
             for obs in range(self.quotient_container.observations):
                 at_obs = self.quotient_container.action_labels_at_observation[obs]
                 for mem in range(self.quotient_container.memory_size):
                     hole = self.quotient_container.holes_action[(obs,mem)]
                     options = satisfying_assignment[hole]
                     satisfying_assignment[hole] = [at_obs[index] for index in options]
-                string += "\n"
         self.stat.finished(satisfying_assignment)
 
 

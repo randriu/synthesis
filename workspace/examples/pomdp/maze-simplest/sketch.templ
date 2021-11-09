@@ -1,0 +1,81 @@
+//  0  1  2
+//  3     4
+//  5     6=T
+
+pomdp
+
+// can observe the walls and target
+observables
+	o
+endobservables
+// o=0: at initial state
+const double ps=0.7;
+const double pf=0.1;
+
+const int CMAX;
+const double THRESHOLD;
+
+module maze
+
+	s : [-1..6];
+	o : [0..7];
+	
+	// initialisation
+	[] s=-1 -> 1/6 : (s'=0)&(o'=1)
+			 + 1/6 : (s'=1)&(o'=2)
+			 + 1/6 : (s'=2)&(o'=3)
+			 + 1/6 : (s'=3)&(o'=4)
+			 + 1/6 : (s'=4)&(o'=4)
+			 + 1/6 : (s'=5)&(o'=5);
+	
+	// moving around the maze
+	
+	[north] s=0 -> true;
+	[east]  s=0 -> ps:(s'=1)&(o'=2) + pf:(s'=3)&(o'=4) + pf:true + pf:true;
+	[south] s=0 -> ps:(s'=3)&(o'=4) + pf:(s'=1)&(o'=2) + pf:true + pf:true;
+	[west]  s=0 -> true;
+
+	[north] s=1 -> true;
+	[east]  s=1 -> ps:(s'=2)&(o'=3) + pf:(s'=0)&(o'=1) + pf:true + pf:true;
+	[south] s=1 -> true;
+	[west]  s=1 -> ps:(s'=0)&(o'=1) + pf:(s'=2)&(o'=3) + pf:true + pf:true;
+
+	[north] s=2 -> true;
+	[east]  s=2 -> true;
+	[south] s=2 -> ps:(s'=4)&(o'=4) + pf:(s'=1)&(o'=2) + pf:true + pf:true;
+	[west]  s=2 -> ps:(s'=1)&(o'=2) + pf:(s'=4)&(o'=4) + pf:true + pf:true;
+
+	[north] s=3 -> ps:(s'=1)&(o'=2) + pf:(s'=5)&(o'=5) + pf:true + pf:true;
+	[east]  s=3 -> true;
+	[south] s=3 -> ps:(s'=5)&(o'=5) + pf:(s'=1)&(o'=2) + pf:true + pf:true;
+	[west]  s=3 -> true;
+
+	[north] s=4 -> ps:(s'=2)&(o'=3) + pf:(s'=6)&(o'=6) + pf:true + pf:true;
+	[east]  s=4 -> true;
+	[south] s=4 -> ps:(s'=6)&(o'=6) + pf:(s'=2)&(o'=3) + pf:true + pf:true;
+	[west]  s=4 -> true;
+
+	[north] s=5 -> ps:(s'=4)&(o'=4) + pf:true + pf:true + pf:true;
+	[east]  s=5 -> true;
+	[south] s=5 -> true;
+	[west]  s=5 -> true;
+
+	// loop when we reach the target
+	[done] s=6 -> true;
+
+endmodule
+
+// reward structure (number of steps to reach the target)
+rewards "steps"
+
+	[east] true : 1;
+	[west] true : 1;
+	[north] true : 1;
+	[south] true : 1;
+
+endrewards
+
+// target observation
+label "goal" = o=6;
+//label "bad" = o=6;
+

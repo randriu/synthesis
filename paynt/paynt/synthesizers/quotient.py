@@ -134,6 +134,34 @@ class QuotientContainer:
         return design_subspaces[0], design_subspaces[1]
 
 
+    def test_family(self, family, optimality_property):
+        pass
+
+        # family["A([o=1],0)"] = [0]
+        # # family["A([o=1],1)"] = [0]
+        # print(family)
+
+        # mdp = self.build(family)
+        # result = mdp.analyze_property(optimality_property)
+        # at_init = mdp.at_initial_state(result)
+        # print(" MDP min: ", at_init)
+
+        # assignment,_ = self.scheduler_consistent(mdp,result.scheduler)
+        # assignment = HoleOptions(assignment)
+        # # print(assignment)
+
+        # mdp = self.build(assignment)
+        # result2 = mdp.analyze_property(optimality_property)
+        # at_init2 = mdp.at_initial_state(result2)
+
+        # print("DTMC min: ", at_init2)
+
+        # exit()
+
+
+
+
+
 class JaniQuotientContainer(QuotientContainer):
     
     def __init__(self, *args):

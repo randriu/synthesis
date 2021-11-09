@@ -17,7 +17,7 @@ add_dependencies(storm-synthesis storm-pomdp)
 list(APPEND STORM_TARGETS storm-synthesis)
 set(STORM_TARGETS ${STORM_TARGETS} PARENT_SCOPE)
 
-target_link_libraries(storm-synthesis PUBLIC storm)
+target_link_libraries(storm-synthesis PUBLIC storm storm-pomdp)
 
 # Install storm headers to include directory.
 foreach(HEADER ${STORM_SYN_HEADERS})

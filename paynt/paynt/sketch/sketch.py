@@ -19,7 +19,7 @@ class Sketch:
         self.properties = None
         self.optimality_property = None
         self.design_space = None
-        self.pomdp_memory_size = 3 # FIXME as a CLI argument
+        self.pomdp_memory_size = 2 # FIXME as a CLI argument
 
         self.prism = None
         self.jani = None
