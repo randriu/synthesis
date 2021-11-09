@@ -19,27 +19,36 @@ export DYNASTY_DIR=$SYNTHESIS/paynt
 
 ### prerequisites ##############################################################
 
-storm-prerequisites() {
+prerequisites-prepare() {
     cd $PREREQUISITES
     unzip $DOWNLOADS/carl.zip
     mv carl-master14 carl
     unzip $DOWNLOADS/pycarl.zip
     mv pycarl-master pycarl
     cd $SYNTHESIS
+}
 
+python-environment() {
+    virtualenv -p python3 $SYNTHESIS_ENV
+    source $SYNTHESIS_ENV/bin/activate
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
+    deactivate
+}
+
+prerequisites-build() {
     # carl
     cd $PREREQUISITES
     mkdir -p carl/build
     cd carl/build
     cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
-    make lib_carl --jobs $THREADS
+    make lib_carl --jobs $COMPILE_JOBS
     #[TEST] make test
     cd $SYNTHESIS
 
     #pycarl
     cd $PREREQUISITES/pycarl
     source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --jobs $THREADS --disable-parser develop
+    python3 setup.py build_ext --jobs $COMPILE_JOBS --disable-parser develop
     #[TEST] python3 setup.py test
     deactivate
     cd $SYNTHESIS
@@ -52,14 +61,6 @@ storm-dependencies() {
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip virtualenv
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
-
-stormpy-environment() {
-    virtualenv -p python3 $SYNTHESIS_ENV
-    source $SYNTHESIS_ENV/bin/activate
-    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
-    deactivate
-}
-
 
 ### storm patch (obsolete) #####################################################
 

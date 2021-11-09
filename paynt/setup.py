@@ -73,7 +73,7 @@ setup(
     description="PAYNT (Probabilistic progrAm sYNThesizer)",
     long_description=
     "PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs.",
-    packages=["paynt", "paynt.cegis", "paynt.family_checkers", "paynt.jani", "paynt.model_handling", "paynt.hybrid"],
+    packages=["paynt", "paynt.sketch", "paynt.synthesizers"],
     install_requires=['click', 'stormpy', 'z3-solver'],
     extras_require={},
     package_data={
