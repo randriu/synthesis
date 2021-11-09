@@ -8,6 +8,8 @@ export COMPILE_JOBS=$(nproc)
 
 export SYNTHESIS=`pwd`
 export PREREQUISITES=$SYNTHESIS/prerequisites
+export DOWNLOADS=$PREREQUISITES/downloads
+
 export SYNTHESIS_ENV=$SYNTHESIS/env
 
 export STORM_DIR=$SYNTHESIS/storm
@@ -15,10 +17,53 @@ export STORM_BLD=$STORM_DIR/build
 
 export DYNASTY_DIR=$SYNTHESIS/paynt
 
-### storm patch ################################################################
+### prerequisites ##############################################################
+
+storm-prerequisites() {
+    cd $PREREQUISITES
+    unzip $DOWNLOADS/carl.zip
+    mv carl-master14 carl
+    unzip $DOWNLOADS/pycarl.zip
+    mv pycarl-master pycarl
+    cd $SYNTHESIS
+
+    # carl
+    cd $PREREQUISITES
+    mkdir -p carl/build
+    cd carl/build
+    cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
+    make lib_carl --jobs $THREADS
+    #[TEST] make test
+    cd $SYNTHESIS
+
+    #pycarl
+    cd $PREREQUISITES/pycarl
+    source $SYNTHESIS_ENV/bin/activate
+    python3 setup.py build_ext --jobs $THREADS --disable-parser develop
+    #[TEST] python3 setup.py test
+    deactivate
+    cd $SYNTHESIS
+}
+
+storm-dependencies() {
+    sudo apt update
+    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install texlive-latex-extra
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip virtualenv
+    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+}
+
+stormpy-environment() {
+    virtualenv -p python3 $SYNTHESIS_ENV
+    source $SYNTHESIS_ENV/bin/activate
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
+    deactivate
+}
+
+
+### storm patch (obsolete) #####################################################
 
 paynt-patch-create() {
-
     local storm_src=$SYNTHESIS/storm/src
     local patch_storm_src=$SYNTHESIS/patch/storm/src
 
@@ -32,14 +77,6 @@ paynt-patch() {
 }
 
 ### storm and stormpy ##########################################################
-
-env-config() {
-    virtualenv -p python3 $SYNTHESIS_ENV
-    source $SYNTHESIS_ENV/bin/activate
-    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
-    deactivate
-}
-
 
 storm-config() {
     mkdir -p $STORM_BLD

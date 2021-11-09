@@ -222,6 +222,8 @@ class POMDPQuotientContainer(QuotientContainer):
         assert self.quotient_pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.quotient_pomdp = stormpy.pomdp.make_canonic(self.quotient_pomdp)
 
+        exit()
+
         # extract observation labels
         self.observations = self.quotient_pomdp.nr_observations
         ov = self.quotient_pomdp.observation_valuations
@@ -249,7 +251,7 @@ class POMDPQuotientContainer(QuotientContainer):
         print("labels of actions at observations: ", self.action_labels_at_observation)
 
 
-        # construct memory and unfold into quotient MDP
+        # construct memory model and unfold it into quotient MDP
         memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, self.memory_size)
         # pomdp.model = stormpy.pomdp.unfold_memory(pomdp.model, memory, add_memory_labels=True, keep_state_valuations=True)
         unfolder = stormpy.pomdp.ExplicitPomdpMemoryUnfolder(self.quotient_pomdp,memory)
@@ -306,7 +308,8 @@ class POMDPQuotientContainer(QuotientContainer):
                 self.action_to_colors.append({color})
             # print("hole options in state {} : {}x{}".format(state, len(hole_options[hole_action]), len(hole_options[hole_memory])))
             # print("actions in state {} : {}".format(state, self.model.get_nr_available_actions(state)))
-        
+
+
         # print(self.combination_coloring)
         # print(self.action_colors)
         
