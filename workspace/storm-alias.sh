@@ -33,6 +33,14 @@ paynt-patch() {
 
 ### storm and stormpy ##########################################################
 
+env-config() {
+    virtualenv -p python3 $SYNTHESIS_ENV
+    source $SYNTHESIS_ENV/bin/activate
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
+    deactivate
+}
+
+
 storm-config() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD

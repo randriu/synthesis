@@ -36,5 +36,5 @@ add_custom_target(copy_storm_syn_headers DEPENDS ${STORM_SYN_OUTPUT_HEADERS} ${S
 add_dependencies(storm-synthesis copy_storm_syn_headers)
 
 # installation
-install(TARGETS storm-synthesis EXPORT storm_Targets RUNTIME DESTINATION bin LIBRARY DESTINATION lib OPTIONAL)
+install(TARGETS storm-synthesis RUNTIME DESTINATION bin LIBRARY DESTINATION lib OPTIONAL)
 
