@@ -86,6 +86,13 @@ storm-config() {
     cd ~-
 }
 
+storm-config-debug() {
+    mkdir -p $STORM_BLD
+    cd $STORM_BLD
+    cmake .. -DSTORM_DEVELOPER=ON -DSTORM_USE_LTO=OFF
+    cd ~-
+}
+
 storm-build() {
     cd $STORM_BLD
     # make storm-main --jobs $COMPILE_JOBS
@@ -230,6 +237,7 @@ dholes() {
 ### binds ###
 
 bind '"\ei"':"\"storm-config \C-m\""
+bind '"\ek"':"\"storm-config-debug \C-m\""
 bind '"\eo"':"\"storm-build \C-m\""
 bind '"\ep"':"\"stormpy-build \C-m\""
 
@@ -284,3 +292,7 @@ walk2() {
 maze2() {
     storm-eval "-pc --prism $MAZE2/sketch.prism" $MAZE2/sketch.properties "CMAX=10,THRESHOLD=0"
 }
+
+# useful flags
+# ./storm-pomdp --prism $SYNTHESIS/workspace/examples/pomdp/maze/concise/sketch.templ --constants CMAX=2,THRESHOLD=1.0 --prop $SYNTHESIS/workspace/examples/pomdp/maze/concise/sketch.properties -ec --io:exportexplicit test.drn
+

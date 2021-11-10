@@ -16,41 +16,50 @@ formula we = (x=4&y=3) | y<=2;
 formula ws = (x=1&y=3) | (x=3&y=3) | y=0;
 formula ww = (x=0&y=3) | y<=2;
 
-// corresponding observables
-observable "zn" = wn;
-observable "ze" = we;
-observable "zs" = ws;
-observable "zw" = ww;
-
 // target cell
 formula goal = x=2&y=0;
+
+// corresponding observables
+observable "wn" = clk=0 & wn;
+observable "we" = clk=0 & we;
+observable "ws" = clk=0 & ws;
+observable "ww" = clk=0 & ww;
+observable "goal" = goal;
+
 
 // modules
 
 module clock
-    clk : [-1..1] init -1; // -1 - init, 0 - steer, 1 - drive
+    // -1 - init, 0 - steer, 1 - drive
+    clk : [-1..1] init -1;
 
-    [init] clk=-1 -> (clk'=0);
+    // random placement
+    [place] clk=-1 -> (clk'=0);
     
-    // steer
+    // steering
     [go_north] clk=0 -> (clk'=1);
     [go_east]  clk=0 -> (clk'=1);
     [go_south] clk=0 -> (clk'=1);
     [go_west]  clk=0 -> (clk'=1);
 
-    // drive
-    [north] clk=2 & v = 1 -> (clk'=0);
-    [east]  clk=2 & v = 2 -> (clk'=0);
-    [south] clk=2 & v = 3 -> (clk'=0);
-    [west]  clk=2 & v = 4 -> (clk'=0);
+    // driving
+    [north] clk=1 -> (clk'=0);
+    [east]  clk=1 -> (clk'=0);
+    [south] clk=1 -> (clk'=0);
+    [west]  clk=1 -> (clk'=0);
 endmodule
 
 module steerer
-    v : [1..4];
-    [go_north] true -> 0.8: (v'=1) + 0.08: (v'=2) + 0.08: (v'=4) + 0.04: (v'=3);
-    [go_east]  true -> 0.8: (v'=2) + 0.08: (v'=3) + 0.08: (v'=1) + 0.04: (v'=4);
-    [go_south] true -> 0.8: (v'=3) + 0.08: (v'=4) + 0.08: (v'=2) + 0.04: (v'=1);
-    [go_west]  true -> 0.8: (v'=4) + 0.08: (v'=1) + 0.08: (v'=3) + 0.04: (v'=2);
+    v : [0..4] init 0;
+    [go_north] v=0 -> 0.8: (v'=1) + 0.08: (v'=2) + 0.08: (v'=4) + 0.04: (v'=3);
+    [go_east]  v=0 -> 0.8: (v'=2) + 0.08: (v'=3) + 0.08: (v'=1) + 0.04: (v'=4);
+    [go_south] v=0 -> 0.8: (v'=3) + 0.08: (v'=4) + 0.08: (v'=2) + 0.04: (v'=1);
+    [go_west]  v=0 -> 0.8: (v'=4) + 0.08: (v'=1) + 0.08: (v'=3) + 0.04: (v'=2);
+
+    [north] v=1 -> (v'=0);
+    [east]  v=2 -> (v'=0);
+    [south] v=3 -> (v'=0);
+    [west]  v=4 -> (v'=0);
 endmodule
 
 module maze
@@ -59,7 +68,7 @@ module maze
     y : [-1..3] init -1;
 	
 	// initialisation
-	[init] x=-1 ->
+	[place] x=-1 ->
           1/13 :    (x'=0)&(y'=0)
         + 1/13 :    (x'=0)&(y'=1)
 		+ 1/13 :    (x'=0)&(y'=2)

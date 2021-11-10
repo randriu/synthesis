@@ -6,7 +6,7 @@
 #include "storm/models/sparse/StandardRewardModel.h"
 
 namespace storm {
-    namespace transformer {
+    namespace synthesis {
 
         template<typename ValueType>
         class ExplicitPomdpMemoryUnfolder {

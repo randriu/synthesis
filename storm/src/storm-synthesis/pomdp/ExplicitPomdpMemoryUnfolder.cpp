@@ -1,4 +1,4 @@
-#include "storm-synthesis/transformer/ExplicitPomdpMemoryUnfolder.h"
+#include "storm-synthesis/pomdp/ExplicitPomdpMemoryUnfolder.h"
 
 #include <limits>
 #include "storm/storage/sparse/ModelComponents.h"
@@ -7,7 +7,7 @@
 #include "storm/exceptions/NotSupportedException.h"
 
 namespace storm {
-    namespace transformer {
+    namespace synthesis {
 
             
             template<typename ValueType>

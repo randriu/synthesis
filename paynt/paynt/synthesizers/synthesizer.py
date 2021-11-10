@@ -1,6 +1,5 @@
-
 import stormpy
-import stormpy.pomdp
+
 import math
 import itertools
 from collections import OrderedDict
@@ -125,7 +124,7 @@ class SynthesizerAR(Synthesizer):
         print("design space: ", self.sketch.design_space)
         print("design space size: ", self.sketch.design_space.size)
         if self.sketch.is_pomdp and satisfying_assignment is not None:
-            for obs in range(self.quotient_container.observations):
+            for obs in range(self.quotient_container.quotient_pomdp.nr_observations):
                 at_obs = self.quotient_container.action_labels_at_observation[obs]
                 for mem in range(self.quotient_container.memory_size):
                     hole = self.quotient_container.holes_action[(obs,mem)]

@@ -69,7 +69,7 @@ setup(
     maintainer="Sebastian Junges",
     maintainer_email="sebastian.junges@cs.rwth-aachen.de",
     license="GPLv3",
-    url="https://github.com/gargantophob/synthesis",
+    url="https://github.com/randriu/synthesis",
     description="PAYNT (Probabilistic progrAm sYNThesizer)",
     long_description=
     "PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs.",

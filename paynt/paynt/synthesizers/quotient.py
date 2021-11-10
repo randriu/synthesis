@@ -1,6 +1,7 @@
-
 import stormpy
+import stormpy.synthesis
 import stormpy.pomdp
+
 import math
 import itertools
 from collections import OrderedDict
@@ -215,23 +216,43 @@ class POMDPQuotientContainer(QuotientContainer):
         # coloring
         self.combination_coloring = None
         self.action_to_colors = None
+
         
         # construct quotient POMDP
         MarkovChain.builder_options.set_build_choice_labels(True)
         self.quotient_pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
         assert self.quotient_pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.quotient_pomdp = stormpy.pomdp.make_canonic(self.quotient_pomdp)
+        # ^ this also ensures that states with the same observation have the same number of available actions
+        
+        # pomdp unfolder breakpoint
+        # pomdp = self.quotient_pomdp
+        # print(pomdp.nr_states)
+        # print(pomdp.nr_choices)
+        # print(flush=True)
+        
+        # pm = stormpy.synthesis.PomdpManager(pomdp)
+        # mdp = pm.construct_mdp()
+        # print(type(mdp), dir(mdp))
+        # print(mdp.nr_states)
+        # print(mdp.nr_choices)
 
-        exit()
+        # nr_obs = pomdp.nr_observations
+        # observations = pomdp.observations
+        # print(observations)
 
+        # # ov = pomdp.observation_valuations.get_string(0)
+        # # print(ov)
+
+        # pm.inject_memory(4)
+        # exit()
+        
         # extract observation labels
-        self.observations = self.quotient_pomdp.nr_observations
         ov = self.quotient_pomdp.observation_valuations
-        self.observation_labels = [ ov.get_string(obs) for obs in range(self.observations) ]
-        print("observation labels: ", self.observation_labels)
+        self.observation_labels = [ ov.get_string(obs) for obs in range(self.quotient_pomdp.nr_observations) ]
+        # print("observation labels: ", self.observation_labels)
 
         # compute actions available at each observation
-        # ensure that states with the same observation have the same number of available actions
         # collect labels of actions available at each observation
         self.actions_at_observation = [0] * self.quotient_pomdp.nr_observations
         self.action_labels_at_observation = [[] for obs in range(self.quotient_pomdp.nr_observations)]
@@ -239,7 +260,7 @@ class POMDPQuotientContainer(QuotientContainer):
             obs = self.quotient_pomdp.observations[state]
             # print("state = {}, obs = {}".format(state,self.observation_labels[obs]))
             if self.actions_at_observation[obs] != 0:
-                assert self.actions_at_observation[obs] == self.quotient_pomdp.get_nr_available_actions(state)
+                # assert self.actions_at_observation[obs] == self.quotient_pomdp.get_nr_available_actions(state)
                 continue
             actions = self.quotient_pomdp.get_nr_available_actions(state)
             self.actions_at_observation[obs] = actions
@@ -248,13 +269,13 @@ class POMDPQuotientContainer(QuotientContainer):
                 labels = self.quotient_pomdp.choice_labeling.get_labels_of_choice(choice)
                 self.action_labels_at_observation[obs].append(labels)
         # print("actions at observations: ", self.actions_at_observation)
-        print("labels of actions at observations: ", self.action_labels_at_observation)
+        # print("labels of actions at observations: ", self.action_labels_at_observation)
 
 
         # construct memory model and unfold it into quotient MDP
         memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, self.memory_size)
         # pomdp.model = stormpy.pomdp.unfold_memory(pomdp.model, memory, add_memory_labels=True, keep_state_valuations=True)
-        unfolder = stormpy.pomdp.ExplicitPomdpMemoryUnfolder(self.quotient_pomdp,memory)
+        unfolder = stormpy.synthesis.ExplicitPomdpMemoryUnfolder(self.quotient_pomdp,memory)
         self.quotient_mdp = unfolder.transform()
         self.mdp_to_pomdp_state_map = unfolder.state_to_state()
         self.mdp_to_pomdp_memory = unfolder.state_to_memory()
@@ -266,7 +287,7 @@ class POMDPQuotientContainer(QuotientContainer):
         # create holes for each observation-memory pair
         self.holes_action = dict()
         self.holes_memory = dict()
-        for obs in range(self.observations):
+        for obs in range(self.quotient_pomdp.nr_observations):
             obs_label = self.observation_labels[obs]
             for mem in range(self.memory_size):
                 string = "({},{})".format(obs_label,mem)
@@ -277,7 +298,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # create domains for each hole
         hole_options = HoleOptions()
-        for obs in range(self.observations):
+        for obs in range(self.quotient_pomdp.nr_observations):
             for mem in range(self.memory_size):                
                 hole_options[self.holes_action[(obs,mem)]] = list(range(self.actions_at_observation[obs]))
                 hole_options[self.holes_memory[(obs,mem)]] = list(range(self.memory_size))

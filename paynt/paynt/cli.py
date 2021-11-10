@@ -4,10 +4,6 @@ import os
 
 from . import version
 
-# import pomdp stuff and then synthesis
-import stormpy.pomdp
-import stormpy.synthesis
-
 from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import Synthesizer, SynthesizerAR
 

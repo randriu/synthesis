@@ -1,6 +1,5 @@
-
 import stormpy
-import stormpy.pomdp
+
 import math
 import itertools
 from collections import OrderedDict
@@ -19,7 +18,7 @@ class MarkovChain:
     # options for the construction of chains
     builder_options = None
     # model checking precision
-    precision = 1e-10
+    precision = 1e-5
     # model checking environment (method & precision)
     environment = None
 
