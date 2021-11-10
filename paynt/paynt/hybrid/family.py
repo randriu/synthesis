@@ -1,6 +1,5 @@
 import logging
 import multiprocessing
-from multiprocessing.sharedctypes import copy
 
 import z3
 
@@ -456,3 +455,6 @@ class Family(object):
 
     def contains_interesting(self):
         return Family.is_in_family(Family.interesting_assignment, self.options)
+
+    def set_member_assignment(self, member_assignment):
+        self.member_assignment = member_assignment
