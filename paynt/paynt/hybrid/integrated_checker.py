@@ -1,12 +1,10 @@
 import logging
 import multiprocessing
-import os
 from multiprocessing import Process
 
 import stormpy
 import stormpy.synthesis
 from .cegis_worker_return_obj import CegisWorkerObj
-from ..family_checkers.familychecker import HoleOptions
 
 from ..family_checkers.quotientbased import QuotientBasedFamilyChecker, logger as quotientbased_logger
 from ..globals import Globals
@@ -16,11 +14,10 @@ from ..model_handling.mdp_handling import logger as model_handling_logger
 from ..profiler import Profiler, Timer
 from .cegis import CEGISChecker
 from .family import Family
-from .helpers import readable_assignment, safe_division
+from .helpers import safe_division
 from .hybrid_family import FamilyHybrid
 from .statistic import Statistic
 import time
-import datetime
 
 # LOGGING -------------------------------------------------------------------------------------------------- LOGGING
 
@@ -45,7 +42,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     stage_score_limit = 99999
     ce_quality = False
     ce_maxsat = False
-    lock = multiprocessing.Lock()
 
     def __init__(self, *args):
         QuotientBasedFamilyChecker.__init__(self, *args)
@@ -294,21 +290,12 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             logger.debug(f"Optimal value improved to: {self._optimal_value}")
             return True
 
-    def cegis_analyze_member_assigment(self, process_order_number, member_assignment, family, relevant_holes, return_process):
+    def cegis_analyze_member_assigment(self, process_order_number, member_assignment, family, relevant_holes, counterexample_generator, return_process):
         # init phase for each worker
         cegis_worker_obj = CegisWorkerObj()
         Profiler.initialize()
 
-        # prepare counterexample generator
-        logger.debug("CEGIS: preprocessing quotient MDP")
-        Profiler.start("CEGIS worker - construction of CE")
-        counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
-            family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
-        )
-        Profiler.stop()
-
-        logger.info(f"Hi guys from Process: {os.getpid()}")
-        logger.debug(f"CEGIS: picked family member: {member_assignment}.")
+        # logger.debug(f"CEGIS: picked family member: {member_assignment}.")
 
         # collect indices of violated formulae
         violated_formulae_indices = []
@@ -324,7 +311,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 and self.input_has_optimality_property():
             self._check_optimal_property(family, member_assignment, counterexample_generator)
             cegis_worker_obj.optimal_value = self._optimal_value
-            cegis_worker_obj.optimal_assignment = HoleOptions.toJson(self._optimal_assignment)
             cegis_worker_obj.return_value = True
         elif not violated_formulae_indices:
             Profiler.add_ce_stats(counterexample_generator.stats)
@@ -390,7 +376,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
-        Profiler.start("_")
+        Profiler.start("CEGIS master - construction of CE generator")
         counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
         )
@@ -432,7 +418,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
                 pipe_list.append(recv_end)
 
-                job = Process(target=self.cegis_analyze_member_assigment, args=(i, member_assignments[i], family, relevant_holes, send_value))
+                job = Process(target=self.cegis_analyze_member_assigment, args=(i, member_assignments[i], family, relevant_holes, counterexample_generator, send_value))
                 job.start()
 
                 jobs.append(job)
@@ -441,7 +427,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 i = 0
                 # fetch somehow output from process 'conflicts' (this is blocking operation)
                 returned_value_from_process = pipe.recv()
-                logger.info("CEGIS: received from process " + str(returned_value_from_process))
+                # logger.info("CEGIS: received from process " + str(returned_value_from_process))
 
                 if returned_value_from_process.return_value is None:
                     member_assignments.append(None)
@@ -451,14 +437,8 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 else:
                     Profiler.start("CEGIS master - set optimal value & exclude conflicts")
                     # 1. set opt values if it's improvement...
-                    if self._optimality_setting.is_improvement(returned_value_from_process.optimal_value, self._optimal_value):
-                        logger.info("Find the new optimal value: " + str(returned_value_from_process.optimal_value))
-                        self._optimal_value = returned_value_from_process.optimal_value
-                        self._optimal_assignment = HoleOptions.fromJson(returned_value_from_process.optimal_assignment)
-
-                        # 2-3. update counter-example generator thresholds (`set thresholds`)
-                        # TODO: make it for all processes...
-                        self._construct_violation_property(family, counterexample_generator)
+                    # 2-3. update counter-example generator thresholds (`set thresholds`)
+                    self._check_optimal_property(family, member_assignments[i], counterexample_generator, returned_value_from_process.optimal_value)
 
                     # 4. in this case return value is conflicts to exclude
                     if returned_value_from_process.conflicts is not []:
