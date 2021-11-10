@@ -47,7 +47,8 @@ class Profiler:
 
     labels = []
     ce_stats = []
-    timer_total = None
+    program_start_time = 0
+    program_total_time = 0
     ce_count = None
     timers = None
 
@@ -59,8 +60,7 @@ class Profiler:
     def initialize():
         Profiler.timers = {}
         Profiler.started_last = None
-        Profiler.timer_total = Timer()
-        Profiler.timer_total.start()
+        Profiler.program_start_time = time.time_ns()
 
         Profiler.labels = ["TODO", "MDP", "DTMC", "sub-DTMC", "CE"]
         Profiler.ce_count = 0
@@ -89,7 +89,7 @@ class Profiler:
 
     @staticmethod
     def print_base():
-        time_total = Profiler.timer_total.read()
+        time_total = Profiler.program_total_time
         covered = 0
         for timer_name, timer in Profiler.timers.items():
             t = timer.read()
@@ -107,7 +107,6 @@ class Profiler:
     def flush_stats_to_the_file(process_order_number):
         # file already exists we have to accumulate metrics
 
-        print(str(os.path.isfile(Profiler.get_file_name_for_worker(process_order_number))))
         if os.path.isfile(Profiler.get_file_name_for_worker(process_order_number)):
             f = open(Profiler.get_file_name_for_worker(process_order_number), "r+")
 
@@ -115,8 +114,10 @@ class Profiler:
             # read and acc timer
             for line in lines:
                 key, value = line.split(":")
-                # '>' eliminating...we need only key from dictionary
+                # print(f"BEFORE {key} has value:{Profiler.timers.get(key).time}")
+                # print(f"Number 1 ({Profiler.timers.get(key).time}) + Number 2 ({value}) = ({Profiler.timers.get(key).time + float(value)})??")
                 Profiler.timers.get(key).time += float(value)
+                # print(f"AFTER {key} has value:{Profiler.timers.get(key).time}")
 
             f = open(Profiler.get_file_name_for_worker(process_order_number), "w+")
             # update file
@@ -177,17 +178,20 @@ class Profiler:
     @staticmethod
     def delete_worker_files():
         for file in os.listdir(os.path.dirname(__file__)):
-            print(f"Deleting {file} file!")
-            os.remove(Globals.CEGIS_WORKER_DIR_NAME + "/" + file)
+            if file.startswith(Globals.CEGIS_WORKER_PREFIX_FILE_NAME):
+                # print(f"Deleting {file} file!")
+                os.remove(Globals.CEGIS_WORKER_DIR_NAME + "/" + file)
 
     @staticmethod
     def print():
         Profiler.stop()
-        Profiler.timer_total.stop()
+        # program total time in seconds
+        Profiler.program_total_time = (time.time_ns()-Profiler.program_start_time)/1000000000
+        print("Program execution time:" + str(Profiler.program_total_time) + " (s)")
 
         Profiler.get_all_data_from_files()
 
         # Profiler.print_ce()
         Profiler.print_base()
         # Profiler time total for each timer
-        # Profiler.print_only_time_spent()
+        Profiler.print_only_time_spent()

@@ -46,8 +46,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
     ce_quality = False
     ce_maxsat = False
     lock = multiprocessing.Lock()
-    start_synthesis_time = 0
-    end_synthesis_time = 0
 
     def __init__(self, *args):
         QuotientBasedFamilyChecker.__init__(self, *args)
@@ -303,7 +301,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
         # prepare counterexample generator
         logger.debug("CEGIS: preprocessing quotient MDP")
-        Profiler.start("_")
+        Profiler.start("CEGIS worker - construction of CE")
         counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
             family.mdp, len(Family.hole_list), family.state_to_hole_indices, self.formulae, family.bounds
         )
@@ -314,12 +312,11 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
         # collect indices of violated formulae
         violated_formulae_indices = []
+        Profiler.start("CEGIS worker - DTMC model checking")
         for formula_index in family.formulae_indices:
             # logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
-            Profiler.start("CEGIS - DTMC model checking")
             Family.dtmc_checks_inc()
             sat, _ = family.analyze_member(formula_index)
-            Profiler.stop()
             logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
             if not sat:
                 violated_formulae_indices.append(formula_index)
@@ -331,17 +328,17 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             cegis_worker_obj.return_value = True
         elif not violated_formulae_indices:
             Profiler.add_ce_stats(counterexample_generator.stats)
-            # TODO: check this...
             cegis_worker_obj.return_value = True
             return_process.send(cegis_worker_obj)
+        Profiler.stop()
 
         # some formulae UNSAT: construct counterexamples
         # logger.debug("CEGIS: preprocessing DTMC.")
-        Profiler.start("_")
+        Profiler.start("CEGIS worker - prepare DTMC")
         counterexample_generator.prepare_dtmc(family.dtmc, family.dtmc_state_map)
         Profiler.stop()
 
-        Profiler.start("is - constructing CE")
+        Profiler.start("CEGIS worker - find conflicts CE")
         conflicts = []
         for formula_index in violated_formulae_indices:
             # logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
@@ -419,8 +416,9 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 logger.debug(f"CEGIS: iteration {self.iterations_cegis}.")
 
                 # pick members for each worker
-                Profiler.start("CEGIS - pick DTMC")
+                Profiler.start("CEGIS master - pick DTMC")
                 member_to_analyze = family.pick_member_with_exclude_all_holes()
+                Profiler.stop()
 
                 if member_to_analyze is None:
                     # full family pruned
@@ -429,8 +427,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                     return False
                 else:
                     member_assignments.append(member_to_analyze)
-
-                Profiler.stop()
 
                 recv_end, send_value = multiprocessing.Pipe(False)
 
@@ -453,6 +449,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
                 elif returned_value_from_process.return_value is True:
                     return True
                 else:
+                    Profiler.start("CEGIS master - set optimal value & exclude conflicts")
                     # 1. set opt values if it's improvement...
                     if self._optimality_setting.is_improvement(returned_value_from_process.optimal_value, self._optimal_value):
                         logger.info("Find the new optimal value: " + str(returned_value_from_process.optimal_value))
@@ -465,13 +462,10 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
                     # 4. in this case return value is conflicts to exclude
                     if returned_value_from_process.conflicts is not []:
-                        # TODO: setter of pick_assignment of the family
                         family.set_member_assignment(member_assignments[i])
                         family.exclude_member(returned_value_from_process.conflicts)
-
+                    Profiler.stop()
                 i += 1
-
-            # TODO: here should be evalutation of files created by processes...
 
 
     def run_feasibility(self):
@@ -490,6 +484,7 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
             self.differents, self.formulae, self.mc_formulae, self.mc_formulae_alt,
             self.thresholds, self._accept_if_above, self._optimality_setting
         )
+        Profiler.stop()
 
         # get the first family to analyze
         Profiler.start("_")
@@ -587,12 +582,6 @@ class IntegratedChecker(QuotientBasedFamilyChecker, CEGISChecker):
 
         # delete files
         Profiler.delete_worker_files()
-
-        IntegratedChecker.end_synthesis_time = time.time_ns()
-        execution_time_of_the_synthesis_ns = IntegratedChecker.end_synthesis_time - IntegratedChecker.start_synthesis_time
-        execution_time_of_the_synthesis_ms = execution_time_of_the_synthesis_ns / 1000000
-        execution_time_of_the_synthesis_s = execution_time_of_the_synthesis_ms / 1000
-        print("Program execution time:" + str(execution_time_of_the_synthesis_s) + " (s)")
 
         if self.input_has_optimality_property() and self._optimal_value is not None:
             assert not self.families

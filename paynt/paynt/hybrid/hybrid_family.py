@@ -69,7 +69,7 @@ class FamilyHybrid(Family):
         if self._state_to_hole_indices is not None:
             return self._state_to_hole_indices
 
-        Profiler.start("is - MDP holes (edges)")
+        Profiler.start("CEGIS worker - MDP holes (edges)")
         # logger.debug("Constructing state-holes mapping via edge-holes mapping.")
 
         self._state_to_hole_indices = []
