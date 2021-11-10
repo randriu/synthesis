@@ -5,7 +5,7 @@ stormpy/.pytest_cache/
 stormpy/.eggs/
 
 # python env directory
-env
+env/*
 
 *.log
 *.jani
