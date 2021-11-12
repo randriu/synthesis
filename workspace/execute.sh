@@ -44,7 +44,7 @@ function choose_project() {
 function python_paynt() {
     local method=$1
     local paynt_call="python3 ${paynt_exe} --project ${projects_dir}/${project}/ $method --short-summary"
-    local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
+    # local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
     echo \$ ${paynt_call} ${constants} ${optimality}
     timeout ${timeout} ${paynt_call} ${constants} ${optimality}
 }
@@ -124,10 +124,13 @@ function run() {
     maze=("maze/orig" 0 1 1 1.0)
     # maze=("maze/concise" 0 1 1 1.0)
     
-    maze=("pomdp/maze" 0 2.5 2.5 1.0)
-    # maze=("pomdp/maze/concise" 0 1.0 1.0 1.0)
-    grid=("pomdp/grid" 0 2.5 2.5 1.0)
-    
+    # maze=("pomdp/maze" 0 2.5 2.5 1.0)
+    maze=("pomdp/maze/concise" 0 1.0 1.0 1.0)
+    maze=("pomdp/maze/concise2" 0 1.0 1.0 1.0)
+    grid=("pomdp/grid" 0 1.0 1.0 1.0)
+
+    benchmark=("pomdp/grid/avoid" 0 1.0 1.0 1.0)
+
     # running ##########
 
     # model=pole
@@ -135,6 +138,8 @@ function run() {
     # model=coin
     model=maze
     # model=grid
+
+    model=benchmark
 
     # evo dice
     # onebyone coin

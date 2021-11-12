@@ -1,0 +1,48 @@
+pomdp 
+
+observables
+    good, bad
+endobservables
+
+observable "white" = s=0 | s=5 | s=6;
+observable "orange" = s=1 | s=2;
+observable "green" = s=3 | s=4;
+
+module strategy
+     step : [0..1] init 0;
+//	 [orange_a] false -> true;
+//	 [green_a] false ->  true;
+// 
+//    [white_a] true -> (step'=0);
+//     [white_b] step=1 -> (step'=1);    
+//    [white_b] step = 0 -> 1:(step'=1); 
+//    [white_a] step > 0 -> 1:(step'=1); 
+//    
+endmodule
+
+module main
+    s : [0..6] init 0;
+    good : bool init false;
+    bad : bool init false;
+    
+    [white_a] !good & !bad & s=0 -> 1/5:(s'=0) + 3/5:(s'=1) + 1/5:(s'=2);
+    [white_b] !good & !bad & s=0 -> 1/2:(s'=0) + 1/6:(s'=5) + 2/6:(s'=6);
+    [orange_a] !good & !bad & s=1 -> 1:(s'=3);
+    [orange_b] !good & !bad & s=1 -> 2/3:(s'=3) + 1/3:(s'=4);
+    [orange_a] !good & !bad & s=2 -> 3/4:(s'=3) + 1/4:(s'=4);
+    [orange_b] !good & !bad & s=2 -> 1:(s'=4);
+    [green_a] !good & !bad & s=3 -> 2/5:(good'=true) & (s'=0) + 3/5:(bad'=true) & (s'=0);
+    [green_b] !good & !bad & s=3 -> 1:(good'=true) & (s'=0);
+    [green_a] !good & !bad & s=4 -> 3/4:(good'=true) & (s'=0) + 1/4:(bad'=true) & (s'=0);
+    [green_b] !good & !bad & s=4 -> 1:(bad'=true) & (s'=0);
+    [white_a] !good & !bad & s=5 -> 1:(s'=1);
+    [white_b] !good & !bad & s=5 -> 1/4:(s'=5) + 3/4:(s'=6);
+    [white_a] !good & !bad & s=6 -> 1:(s'=2);
+    [white_b] !good & !bad & s=6 -> 2/3:(s'=5) + 1/3:(s'=6);
+    
+    [done] good -> 1:(s'=0);
+    [done] bad -> 1:(s'=0);
+    
+endmodule
+
+label "goal" = bad;

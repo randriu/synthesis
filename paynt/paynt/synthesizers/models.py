@@ -18,7 +18,7 @@ class MarkovChain:
     # options for the construction of chains
     builder_options = None
     # model checking precision
-    precision = 1e-10
+    precision = 1e-5
     # model checking environment (method & precision)
     environment = None
 
@@ -210,7 +210,11 @@ class MDP(MarkovChain):
 
         # LB < OPT
         # check if LB is tight
-        assignment,consistent = self.quotient_container.scheduler_consistent(self, bounds_primary.scheduler)
+        if self.is_dtmc:
+            assignment = self.design_space
+            consistent = True
+        else:
+            assignment,consistent = self.quotient_container.scheduler_consistent(self, bounds_primary.scheduler)
         if consistent:
             # LB is tight and LB < OPT
             return bounds_primary, result_primary, HoleOptions(assignment), False

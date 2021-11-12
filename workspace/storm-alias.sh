@@ -14,6 +14,7 @@ export SYNTHESIS_ENV=$SYNTHESIS/env
 
 export STORM_DIR=$SYNTHESIS/storm
 export STORM_BLD=$STORM_DIR/build
+export STORM_BLD_DEBUG=$STORM_DIR/build_debug
 
 export DYNASTY_DIR=$SYNTHESIS/paynt
 
@@ -87,17 +88,22 @@ storm-config() {
 }
 
 storm-config-debug() {
-    mkdir -p $STORM_BLD
-    cd $STORM_BLD
+    mkdir -p $STORM_BLD_DEBUG
+    cd $STORM_BLD_DEBUG
     cmake .. -DSTORM_DEVELOPER=ON -DSTORM_USE_LTO=OFF
     cd ~-
 }
 
 storm-build() {
     cd $STORM_BLD
-    # make storm-main --jobs $COMPILE_JOBS
     make storm-main storm-synthesis --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
+    cd ~-
+}
+
+storm-build-debug() {
+    cd $STORM_BLD_DEBUG
+    make storm-main storm-synthesis --jobs $COMPILE_JOBS
     cd ~-
 }
 
@@ -105,6 +111,7 @@ stormpy-build() {
     cd $SYNTHESIS/stormpy
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    # python3 setup.py build_ext --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     deactivate
     cd ~-
@@ -199,46 +206,13 @@ dtail() {
     dlog $1 | tail -n 50
 }
 
-diter() {
-    dlog $1 | grep "iteration " | tail -n 1
-}
-diteri() {
-    dlog $1 | grep "CEGIS: iteration " | tail -n 1
-}
-ditera() {
-    dlog $1 | grep "CEGAR: iteration " | tail -n 1
-}
-
-dfamily() {
-    dlog $1 | grep "family size" | tail -n 1
-}
-ddtmc() {
-    dlog $1 | grep "Constructed DTMC"
-}
-
-dopt() {
-    dlog $1 | grep "Optimal value" | tail -n 1
-}
-
-dbounds() {
-    dlog $1 | grep "Result for initial"
-}
-dce() {
-    dlog $1 | grep "generalized"
-}
-dperf() {
-     dlog $1 | grep "Performance" | tail -n 1
-}
-
-dholes() {
-    dlog $1 | grep "hole assignment:" | awk '{print $3}'
-}
 
 ### binds ###
 
 bind '"\ei"':"\"storm-config \C-m\""
 bind '"\ek"':"\"storm-config-debug \C-m\""
 bind '"\eo"':"\"storm-build \C-m\""
+bind '"\el"':"\"storm-build-debug \C-m\""
 bind '"\ep"':"\"stormpy-build \C-m\""
 
 bind '"\ed"':"\"db \C-m\""

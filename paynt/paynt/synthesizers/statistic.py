@@ -113,7 +113,6 @@ class Statistic:
         self.optimum = optimum
 
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
-        print(self.acc_size_mdp)
         self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
 
     def get_summary(self,short_summary):
@@ -131,7 +130,7 @@ class Statistic:
         timing = f"method: {self.method_name}, synthesis time: {round(self.timer.time, 2)} s"
 
         mdp_stats = f"super MDP size: {self.super_mdp_size}, average MDP size: {round(self.avg_size_mdp)}, " \
-                    f"MPD checks: {self.checks_mdp}, iterations: {self.iterations_mdp}"
+                    f"iterations: {self.iterations_mdp}"
         dtmc_stats = f"average DTMC size: {round(self.avg_size_dtmc)}, " \
                      f"DTMC checks: {self.checks_dtmc}, iterations: {self.iterations_dtmc}"
         family_stats = ""

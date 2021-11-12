@@ -19,7 +19,11 @@ namespace storm {
             // inject 1 state to all observations
             void injectMemoryAll();
 
-
+            // number of actions available at this observation
+            std::vector<uint64_t> observation_actions;
+            // for each row contains its index in its row group
+            std::vector<uint64_t> prototype_row_index;
+            
             // design space associated with this POMDP
             uint64_t num_holes;
             std::vector<std::vector<uint64_t>> action_holes;
@@ -75,10 +79,6 @@ namespace storm {
             
             // original POMDP
             storm::models::sparse::Pomdp<ValueType> const& pomdp;
-            // number of actions available at this observation
-            std::vector<uint64_t> observation_actions;
-            // for each row contains its index in its row group
-            std::vector<uint64_t> prototype_row_index;
             // for each observation contains the number of allocated memory states (initially 1)
             std::vector<uint64_t> observation_memory_size;
             

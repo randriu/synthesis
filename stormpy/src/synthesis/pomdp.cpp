@@ -18,6 +18,8 @@ void define_pomdp(py::module& m) {
         .def("construct_mdp", &storm::synthesis::PomdpManager<double>::constructMdp, "Unfold POMDP into MDP.")
         .def("inject_memory", &storm::synthesis::PomdpManager<double>::injectMemory, "Inject 1 state into a selected observation.", py::arg("observation"))
         .def("inject_memory_all", &storm::synthesis::PomdpManager<double>::injectMemoryAll, "Inject 1 state into all observations.")
+        .def_property_readonly("observation_actions", [](storm::synthesis::PomdpManager<double>& manager) {return manager.observation_actions;}, "TODO")
+        .def_property_readonly("prototype_row_index", [](storm::synthesis::PomdpManager<double>& manager) {return manager.prototype_row_index;}, "TODO")
         .def_property_readonly("num_holes", [](storm::synthesis::PomdpManager<double>& manager) {return manager.num_holes;}, "TODO")
         .def_property_readonly("action_holes", [](storm::synthesis::PomdpManager<double>& manager) {return manager.action_holes;}, "TODO")
         .def_property_readonly("memory_holes", [](storm::synthesis::PomdpManager<double>& manager) {return manager.memory_holes;}, "TODO")

@@ -3,6 +3,7 @@ import stormpy.synthesis
 import stormpy.pomdp
 
 import math
+import re
 import itertools
 from collections import OrderedDict
 
@@ -194,6 +195,22 @@ class JaniQuotientContainer(QuotientContainer):
 class POMDPQuotientContainer(QuotientContainer):
 
     full_memory_size = 2
+
+    def process_label(self,label):
+        label = re.sub(r"\s+", "", label)
+        label = label[1:-1]
+
+        output = "[";
+        first = True
+        for p in label.split("&"):
+            if not p.endswith("=0"):
+                if first:
+                    first = False
+                else:
+                    output += " & "
+                output += p
+        output += "]"
+        return output
     
     def __init__(self, *args):
         super().__init__(*args)
@@ -228,7 +245,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # extract observation labels
         ov = self.pomdp.observation_valuations
-        self.observation_labels = [ ov.get_string(obs) for obs in range(self.pomdp.nr_observations) ]
+        self.observation_labels = [ov.get_string(obs) for obs in range(self.pomdp.nr_observations)]
+        self.observation_labels = [self.process_label(label) for label in self.observation_labels]
         print("observation labels: ", self.observation_labels)
 
         # compute actions available at each observation
@@ -243,11 +261,13 @@ class POMDPQuotientContainer(QuotientContainer):
         self.unfoldFullMemory(POMDPQuotientContainer.full_memory_size)
 
         # self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
+
+        # self.pomdp_manager.inject_memory(3)
         # self.pomdp_manager.inject_memory(0)
-        # self.pomdp_manager.inject_memory(4)
         # self.pomdp_manager.inject_memory_all()
         # self.pomdp_manager.inject_memory_all()
-        # self.pomdp_manager.inject_memory(0)
+        # self.pomdp_manager.inject_memory_all()
+
         # self.unfoldPartialMemory()
 
 
@@ -258,8 +278,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
         self.quotient_mdp = pm.construct_mdp()
         mdp = self.quotient_mdp
-        print(mdp.nr_states)
-        print(mdp.nr_choices)
+        print("MDP states: ", mdp.nr_states)
+        print("MDP rows: ", mdp.nr_choices)
 
         print("# holes: ", pm.num_holes)
         print("action holes: ", pm.action_holes)
@@ -269,6 +289,7 @@ class POMDPQuotientContainer(QuotientContainer):
         print("row -> action option: ", pm.row_action_option)
         print("row -> memory hole: ", pm.row_memory_hole)
         print("row -> memory option: ", pm.row_memory_option)
+        # exit()
 
         # create holes names
         self.hole_names = [""] * pm.num_holes
@@ -280,6 +301,8 @@ class POMDPQuotientContainer(QuotientContainer):
             obs_label = self.observation_labels[obs]
             for mem,hole_index in enumerate(hole_indices):
                 self.hole_names[hole_index] = "N({},{})".format(obs_label,mem)
+        # strip spaces
+        # self.hole_names = [name.replace(" ","") for name in self.hole_names]
         print(self.hole_names)
 
         # create domains for each hole

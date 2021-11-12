@@ -69,6 +69,8 @@ class SynthesizerAR(Synthesizer):
             self.quotient_container = JaniQuotientContainer(sketch)
         
         self.stat = Statistic(sketch, self.method_name)
+        print("design space: ", self.sketch.design_space)
+        print("design space size: ", self.sketch.design_space.size)
 
     @property
     def method_name(self):
@@ -119,10 +121,10 @@ class SynthesizerAR(Synthesizer):
                 subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, opt_bounds, properties)
                 families.append(subfamily1)
                 families.append(subfamily2)
+            else:
+                self.stat.pruned(family.size)
 
         # FIXME POMDP hack: replace hole valuations with corresponding action labels & print a table
-        print("design space: ", self.sketch.design_space)
-        print("design space size: ", self.sketch.design_space.size)
         if self.sketch.is_pomdp and satisfying_assignment is not None:
 
             pomdp = self.quotient_container.pomdp
@@ -140,9 +142,18 @@ class SynthesizerAR(Synthesizer):
                     action_labels_at_observation[obs].append(labels)
             # print("labels of actions at observations: ", self.action_labels_at_observation)
             
+            # map action holes to their label
+            # action_hole_labels = {}
+            # for obs in range(pomdp.nr_observations):
+            #     for action_hole in self.quotient_container.pomdp_manager.action_holes[obs]:
+            #         action_hole_labels[action_hole] = action_labels_at_observation[obs]
+
+            # self.quotient_container
             # satisfying_assignment_renamed = HoleOptions()
             # for hole_index,options in satisfying_assignment.items():
             #     hole_name = self.quotient_container.hole_names[hole_index]
+            #     if hole_index in action_hole_labels:
+            #         options = [action_hole_labels[hole_index][option] for option in options]
             #     satisfying_assignment_renamed[hole_name] = options
             # satisfying_assignment = satisfying_assignment_renamed
 
