@@ -192,14 +192,14 @@ class JaniQuotientContainer(QuotientContainer):
 
     
 class POMDPQuotientContainer(QuotientContainer):
+
+    full_memory_size = 2
     
     def __init__(self, *args):
         super().__init__(*args)
-        self.memory_size = self.sketch.pomdp_memory_size
-
+        
         # quotient POMDP stuff
-        self.quotient_pomdp = None
-        self.observations = None
+        self.pomdp = None
         self.actions_at_observation = None
 
         # (unfolded) quotient MDP stuff
@@ -217,79 +217,126 @@ class POMDPQuotientContainer(QuotientContainer):
         self.combination_coloring = None
         self.action_to_colors = None
 
-        
         # construct quotient POMDP
         MarkovChain.builder_options.set_build_choice_labels(True)
-        self.quotient_pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
-        assert self.quotient_pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-        self.quotient_pomdp = stormpy.pomdp.make_canonic(self.quotient_pomdp)
-        # ^ this also ensures that states with the same observation have the same number of available actions
-        
-        # pomdp unfolder breakpoint
-        # pomdp = self.quotient_pomdp
-        # print(pomdp.nr_states)
-        # print(pomdp.nr_choices)
-        # print(flush=True)
-        
-        # pm = stormpy.synthesis.PomdpManager(pomdp)
-        # mdp = pm.construct_mdp()
-        # print(type(mdp), dir(mdp))
-        # print(mdp.nr_states)
-        # print(mdp.nr_choices)
+        self.pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
+        assert self.pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+        self.pomdp = stormpy.pomdp.make_canonic(self.pomdp)
+        # ^ this also asserts that states with the same observation have the same number of available actions
+        print("observations: ", self.pomdp.observations)
 
-        # nr_obs = pomdp.nr_observations
-        # observations = pomdp.observations
-        # print(observations)
 
-        # # ov = pomdp.observation_valuations.get_string(0)
-        # # print(ov)
-
-        # pm.inject_memory(4)
-        # exit()
-        
         # extract observation labels
-        ov = self.quotient_pomdp.observation_valuations
-        self.observation_labels = [ ov.get_string(obs) for obs in range(self.quotient_pomdp.nr_observations) ]
-        # print("observation labels: ", self.observation_labels)
+        ov = self.pomdp.observation_valuations
+        self.observation_labels = [ ov.get_string(obs) for obs in range(self.pomdp.nr_observations) ]
+        print("observation labels: ", self.observation_labels)
 
         # compute actions available at each observation
-        # collect labels of actions available at each observation
-        self.actions_at_observation = [0] * self.quotient_pomdp.nr_observations
-        self.action_labels_at_observation = [[] for obs in range(self.quotient_pomdp.nr_observations)]
-        for state in range(self.quotient_pomdp.nr_states):
-            obs = self.quotient_pomdp.observations[state]
-            # print("state = {}, obs = {}".format(state,self.observation_labels[obs]))
+        self.actions_at_observation = [0] * self.pomdp.nr_observations
+        for state in range(self.pomdp.nr_states):
+            obs = self.pomdp.observations[state]
             if self.actions_at_observation[obs] != 0:
-                # assert self.actions_at_observation[obs] == self.quotient_pomdp.get_nr_available_actions(state)
                 continue
-            actions = self.quotient_pomdp.get_nr_available_actions(state)
-            self.actions_at_observation[obs] = actions
-            for offset in range(actions):
-                choice = self.quotient_pomdp.get_choice_index(state,offset)
-                labels = self.quotient_pomdp.choice_labeling.get_labels_of_choice(choice)
-                self.action_labels_at_observation[obs].append(labels)
-        # print("actions at observations: ", self.actions_at_observation)
-        # print("labels of actions at observations: ", self.action_labels_at_observation)
+            self.actions_at_observation[obs] = self.pomdp.get_nr_available_actions(state)
+        print("actions at observations: ", self.actions_at_observation)
 
+        self.unfoldFullMemory(POMDPQuotientContainer.full_memory_size)
+
+        # self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
+        # self.pomdp_manager.inject_memory(0)
+        # self.pomdp_manager.inject_memory(4)
+        # self.pomdp_manager.inject_memory_all()
+        # self.pomdp_manager.inject_memory_all()
+        # self.pomdp_manager.inject_memory(0)
+        # self.unfoldPartialMemory()
+
+
+    def unfoldPartialMemory(self):
+
+        pomdp = self.pomdp
+        pm = self.pomdp_manager
+
+        self.quotient_mdp = pm.construct_mdp()
+        mdp = self.quotient_mdp
+        print(mdp.nr_states)
+        print(mdp.nr_choices)
+
+        print("# holes: ", pm.num_holes)
+        print("action holes: ", pm.action_holes)
+        print("memory holes: ", pm.memory_holes)
+        print("hole options: ", pm.hole_options)
+        print("row -> action hole: ", pm.row_action_hole)
+        print("row -> action option: ", pm.row_action_option)
+        print("row -> memory hole: ", pm.row_memory_hole)
+        print("row -> memory option: ", pm.row_memory_option)
+
+        # create holes names
+        self.hole_names = [""] * pm.num_holes
+        for obs,hole_indices in enumerate(pm.action_holes):
+            obs_label = self.observation_labels[obs]
+            for mem,hole_index in enumerate(hole_indices):
+                self.hole_names[hole_index] = "A({},{})".format(obs_label,mem)
+        for obs,hole_indices in enumerate(pm.memory_holes):
+            obs_label = self.observation_labels[obs]
+            for mem,hole_index in enumerate(hole_indices):
+                self.hole_names[hole_index] = "N({},{})".format(obs_label,mem)
+        print(self.hole_names)
+
+        # create domains for each hole
+        hole_options = HoleOptions()
+        for hole_index in range(pm.num_holes):
+            hole_options[hole_index] = list(range(pm.hole_options[hole_index]))
+        self.design_space = DesignSpace(hole_options, self.sketch.properties)
+        self.sketch.design_space = self.design_space
+        print(self.design_space)
+
+        # associate actions with hole combinations (colors)
+        self.combination_coloring = CombinationColoring(hole_options)
+        self.action_to_colors = []
+        num_choices = mdp.nr_choices
+        self.color_0_actions = stormpy.BitVector(num_choices, False)
+        
+        for row in range(num_choices):
+            relevant_holes = {}
+            action_hole = pm.row_action_hole[row]
+            if action_hole != pm.num_holes:
+                relevant_holes[action_hole] = pm.row_action_option[row]
+            memory_hole = pm.row_memory_hole[row]
+            if memory_hole != pm.num_holes:
+                relevant_holes[memory_hole] = pm.row_memory_option[row]
+            if not relevant_holes:
+                self.color_0_actions.set(row)
+                self.action_to_colors.append({0})
+                continue
+
+            combination = tuple(
+                relevant_holes[hole] if hole in relevant_holes else None
+                for hole in hole_options.holes
+            )
+            color = self.combination_coloring.get_or_make_color(combination)
+            self.action_to_colors.append({color})
+
+
+    def unfoldFullMemory(self, memory_size):
 
         # construct memory model and unfold it into quotient MDP
-        memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, self.memory_size)
+        memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, memory_size)
         # pomdp.model = stormpy.pomdp.unfold_memory(pomdp.model, memory, add_memory_labels=True, keep_state_valuations=True)
-        unfolder = stormpy.synthesis.ExplicitPomdpMemoryUnfolder(self.quotient_pomdp,memory)
+        unfolder = stormpy.synthesis.ExplicitPomdpMemoryUnfolder(self.pomdp,memory)
         self.quotient_mdp = unfolder.transform()
         self.mdp_to_pomdp_state_map = unfolder.state_to_state()
         self.mdp_to_pomdp_memory = unfolder.state_to_memory()
         self.mdp_to_pomdp_observations = [
-            self.quotient_pomdp.observations[self.mdp_to_pomdp_state_map[s]]
+            self.pomdp.observations[self.mdp_to_pomdp_state_map[s]]
             for s in range(self.quotient_mdp.nr_states)
         ]
 
         # create holes for each observation-memory pair
         self.holes_action = dict()
         self.holes_memory = dict()
-        for obs in range(self.quotient_pomdp.nr_observations):
+        for obs in range(self.pomdp.nr_observations):
             obs_label = self.observation_labels[obs]
-            for mem in range(self.memory_size):
+            for mem in range(memory_size):
                 string = "({},{})".format(obs_label,mem)
                 hole_action = "A" + string
                 hole_memory = "N" + string
@@ -298,10 +345,10 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # create domains for each hole
         hole_options = HoleOptions()
-        for obs in range(self.quotient_pomdp.nr_observations):
-            for mem in range(self.memory_size):                
+        for obs in range(self.pomdp.nr_observations):
+            for mem in range(memory_size):                
                 hole_options[self.holes_action[(obs,mem)]] = list(range(self.actions_at_observation[obs]))
-                hole_options[self.holes_memory[(obs,mem)]] = list(range(self.memory_size))
+                hole_options[self.holes_memory[(obs,mem)]] = list(range(memory_size))
         self.design_space = DesignSpace(hole_options, self.sketch.properties)
         self.sketch.design_space = self.design_space
         # print(self.design_space)
@@ -334,16 +381,6 @@ class POMDPQuotientContainer(QuotientContainer):
         # print(self.combination_coloring)
         # print(self.action_colors)
         
-        # x = self.quotient_pomdp
-        # print(type(x), dir(x))
-        # print("")
-        # print("states: ", x.nr_states)
-
-        # print("")
-        # print("observations: ", self.origin.nr_observations)
-
-        # print("state -> observation: ", self.origin.observations)
-
         # print("has observation valuation: ", x.has_observation_valuations())
         # ov = x.observation_valuations
         # print(type(ov), dir(ov))
@@ -353,31 +390,10 @@ class POMDPQuotientContainer(QuotientContainer):
         # print("")
         # print("choices: ", self.origin.nr_choices)
         # print("actions: ", [self.origin.get_nr_available_actions(s) for s in range(self.origin.nr_states)])
-        # print("nondet indices: ", self.origin.nondeterministic_choice_indices)
 
-        # note: actions in each state are sorted (accoring to labels appearing
-        # in the first state; therefore, we can refer to these actions using
-        # indices that are consistent throughout the state space
-        
         # print(self.origin.has_choice_origins())
         # print("has choice labeling: ", self.origin.has_choice_labeling())
         # l = self.origin.choice_labeling
         # print(type(l), dir(l))
         # for choice in range(self.origin.nr_choices):
         #     print(choice, l.get_labels_of_choice(choice))
-        
-        # print("\n>> transformation ...\n")
-
-        
-        # y = self.quotient_mdp
-        # print("states: ", y.nr_states)
-        # print("state map: ", self.mdp_to_pomdp_state_map)
-        # print("observations: ", y.nr_observations)
-        # print("state -> observation: ", self.model.observations)
-        # print("has observation valuation: ", self.model.has_observation_valuations())
-        # print("observation map: ", self.observation_map)
-        # print("memory map: ", self.memory_map)
-        # print("")
-        # print("choices: ", self.model.nr_choices)
-        # print("actions: ", [self.model.get_nr_available_actions(s) for s in range(self.model.nr_states)])
-

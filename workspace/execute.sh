@@ -123,6 +123,7 @@ function run() {
     coin=("coin" 0 16.7 16.7 1.0)
     maze=("maze/orig" 0 1 1 1.0)
     # maze=("maze/concise" 0 1 1 1.0)
+    
     maze=("pomdp/maze" 0 2.5 2.5 1.0)
     # maze=("pomdp/maze/concise" 0 1.0 1.0 1.0)
     grid=("pomdp/grid" 0 2.5 2.5 1.0)

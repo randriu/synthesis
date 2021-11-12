@@ -10,20 +10,20 @@ const double THRESHOLD;
 // y ____________
 //   x 0 1 2 3 4
 
-// wall detector
-formula wn = y=3;
-formula we = (x=4&y=3) | y<=2;
-formula ws = (x=1&y=3) | (x=3&y=3) | y=0;
-formula ww = (x=0&y=3) | y<=2;
+// can go in this direction
+formula n = y<3;
+formula e = y=3 & x<4;
+formula s = y>0 & (x=0 | x=2 | x=4);
+formula w = y=3 & x>0;
 
 // target cell
 formula goal = x=2&y=0;
 
 // corresponding observables
-observable "wn" = clk=0 & wn;
-observable "we" = clk=0 & we;
-observable "ws" = clk=0 & ws;
-observable "ww" = clk=0 & ww;
+observable "n" = clk=0 & n;
+observable "e" = clk=0 & e;
+observable "s" = clk=0 & s;
+observable "w" = clk=0 & w;
 observable "goal" = goal;
 
 
@@ -84,17 +84,17 @@ module maze
 		+ 1/13 :    (x'=4)&(y'=3);
 
 	// moving around the maze
-	[north] wn -> true;
-    [north] !wn -> (y'=y+1);
+    [north] n -> (y'=y+1);
+	[north] !n -> true;
     
-    [east] we -> true;
-    [east] !we -> (x'=x+1);
+    [east] e -> (x'=x+1);
+    [east] !e -> true;
 
-    [south] ws -> true;
-    [south] !ws -> (y'=y-1);
+    [south] s -> (y'=y-1);
+    [south] !s -> true;
 
-    [west] ww -> true;
-    [west] !ww -> (x'=x-1);
+    [west] w -> (x'=x-1);
+    [west] !w -> true;
 
 endmodule
 

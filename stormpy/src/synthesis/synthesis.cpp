@@ -2,9 +2,6 @@
 
 #include "storm-synthesis/synthesis/Counterexample.h"
 
-#include "storm-synthesis/pomdp/ExplicitPomdpMemoryUnfolder.h"
-#include "storm-synthesis/pomdp/PomdpManager.h"
-
 // Define python bindings
 void define_synthesis(py::module& m) {
 
@@ -72,29 +69,5 @@ void define_synthesis(py::module& m) {
             },
             "Read stats."
         );
-
-    py::class_<storm::synthesis::ExplicitPomdpMemoryUnfolder<double>>(m, "ExplicitPomdpMemoryUnfolder", "Explicit memory unfolder for POMDPs")
-        .def(py::init<storm::models::sparse::Pomdp<double> const&, storm::storage::PomdpMemory const&>(), "Constructor.", py::arg("pomdp"), py::arg("memory"))
-        .def("transform", &storm::synthesis::ExplicitPomdpMemoryUnfolder<double>::transform, "Unfold memory into POMDP.")
-        .def("state_to_state", &storm::synthesis::ExplicitPomdpMemoryUnfolder<double>::state_to_state, "TODO")
-        .def("state_to_memory", &storm::synthesis::ExplicitPomdpMemoryUnfolder<double>::state_to_memory, "TODO")
-        ;
-
-    py::class_<storm::synthesis::PomdpManager<double>>(m, "PomdpManager", "POMDP manager")
-        .def(py::init<storm::models::sparse::Pomdp<double> const&>(), "Constructor.", py::arg("pomdp"))
-        .def("construct_mdp", &storm::synthesis::PomdpManager<double>::constructMdp, "Unfold POMDP into MDP.")
-        .def("inject_memory", &storm::synthesis::PomdpManager<double>::injectMemory, "Inject 1 state into a selected observation.", py::arg("observation"))
-        ; 
 }
 
-// STANDARD, SIMPLE_LINEAR, SIMPLE_LINEAR_INVERSE, SIMPLE_LOG, FULL
-void define_transformations(py::module &m) {
-    /*py::class_<storm::transformer::ExplicitPomdpMemoryUnfolder<double>>(m, "ExplicitPomdpMemoryUnfolder", "Explicit memory unfolder for POMDPs")
-        .def(py::init<storm::models::sparse::Pomdp<double> const&, storm::storage::PomdpMemory const&>(), "Constructor.", py::arg("pomdp"), py::arg("memory"))
-        .def("transform", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::transform, "Unfold memory into POMDP.")
-        .def("state_to_state", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::state_to_state, "TODO")
-        .def("state_to_memory", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::state_to_memory, "TODO")
-        // .def("action_map", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::action_map, "TODO")
-        // .def("memory_map", &storm::transformer::ExplicitPomdpMemoryUnfolder<double>::memory_map, "TODO")
-        ;*/
-}

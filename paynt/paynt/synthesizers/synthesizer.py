@@ -8,7 +8,7 @@ from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
 from .quotient import JaniQuotientContainer, POMDPQuotientContainer
 
-from ..sketch.holes import DesignSpace
+from ..sketch.holes import HoleOptions,DesignSpace
 
 import logging
 logger = logging.getLogger(__name__)
@@ -124,12 +124,35 @@ class SynthesizerAR(Synthesizer):
         print("design space: ", self.sketch.design_space)
         print("design space size: ", self.sketch.design_space.size)
         if self.sketch.is_pomdp and satisfying_assignment is not None:
-            for obs in range(self.quotient_container.quotient_pomdp.nr_observations):
-                at_obs = self.quotient_container.action_labels_at_observation[obs]
-                for mem in range(self.quotient_container.memory_size):
+
+            pomdp = self.quotient_container.pomdp
+
+            # collect labels of actions available at each observation
+            action_labels_at_observation = [[] for obs in range(pomdp.nr_observations)]
+            for state in range(pomdp.nr_states):
+                obs = pomdp.observations[state]
+                if action_labels_at_observation[obs] != []:
+                    continue
+                actions = pomdp.get_nr_available_actions(state)
+                for offset in range(actions):
+                    choice = pomdp.get_choice_index(state,offset)
+                    labels = pomdp.choice_labeling.get_labels_of_choice(choice)
+                    action_labels_at_observation[obs].append(labels)
+            # print("labels of actions at observations: ", self.action_labels_at_observation)
+            
+            # satisfying_assignment_renamed = HoleOptions()
+            # for hole_index,options in satisfying_assignment.items():
+            #     hole_name = self.quotient_container.hole_names[hole_index]
+            #     satisfying_assignment_renamed[hole_name] = options
+            # satisfying_assignment = satisfying_assignment_renamed
+
+            for obs in range(self.quotient_container.pomdp.nr_observations):
+                at_obs = action_labels_at_observation[obs]
+                for mem in range(self.quotient_container.full_memory_size):
                     hole = self.quotient_container.holes_action[(obs,mem)]
                     options = satisfying_assignment[hole]
                     satisfying_assignment[hole] = [at_obs[index] for index in options]
+
         self.stat.finished(satisfying_assignment)
 
 
@@ -500,7 +523,6 @@ class SynthesizerHybrid(Synthesizer):
                 sat, result = family.analyze_member(formula_index)
                 logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
                 if not sat:
-                    print(formula_index, result)
                     violated_formulae_indices.append(formula_index)
                 formula = Family.formulae[formula_index]
                 if sat and formula.optimality:
@@ -527,7 +549,6 @@ class SynthesizerHybrid(Synthesizer):
                     f"CEGIS: found conflict involving {conflict_holes} (generalized {generalized_count} holes)."
                 )
                 conflicts.append(conflict_indices)
-                print(formula_index, flush=True)
                 # exit()
 
             exit()
