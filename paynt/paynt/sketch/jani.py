@@ -45,22 +45,25 @@ class JaniUnfolder():
 
     # Unfold holes in the jani program
     def unfold_jani(self, jani, design_space):
+        # ensure that jani.constants are in the same order as our holes
         open_constants = [c for c in jani.constants if not c.defined]
-        assert len(open_constants) == design_space.hole_count
-        expr_to_const = {c.expression_variable : c for c in open_constants}
+        expression_variables = [c.expression_variable for c in open_constants]
+        assert len(open_constants) == design_space.num_holes
+        for hole_index,hole in enumerate(design_space):
+            assert hole.name == open_constants[hole_index].name
 
         self.combination_coloring = CombinationColoring(design_space)
-        
+
         jani_program = stormpy.JaniModel(jani)
         new_automata = dict()
         for aut_index, automaton in enumerate(jani_program.automata):
-            if not self.automaton_has_holes(automaton, open_constants):
+            if not self.automaton_has_holes(automaton, set(expression_variables)):
                 continue
-            new_aut = self.construct_automaton(automaton, open_constants, expr_to_const, design_space)
+            new_aut = self.construct_automaton(automaton, design_space, expression_variables)
             new_automata[aut_index] = new_aut
         for aut_index, aut in new_automata.items():
             jani_program.replace_automaton(aut_index, aut)
-        [jani_program.remove_constant(c.name) for c in open_constants]
+        [jani_program.remove_constant(hole.name) for hole in design_space]
 
         jani_program.set_model_type(stormpy.JaniModelType.MDP)
         jani_program.finalize()
@@ -83,46 +86,45 @@ class JaniUnfolder():
         self.jani_unfolded = jani_program
         self.edge_to_color = edge_to_color
 
-    def automaton_has_holes(self, automaton, holes):
-        variables = {hole.expression_variable for hole in holes}
+    def automaton_has_holes(self, automaton, expression_variables):
         for edge_index, e in enumerate(automaton.edges):
-            if e.guard.contains_variable(variables):
+            if e.guard.contains_variable(expression_variables):
                 return True
             for dest in e.destinations:
-                if dest.probability.contains_variable(variables):
+                if dest.probability.contains_variable(expression_variables):
                     return True
                 for assignment in dest.assignments:
-                    if assignment.expression.contains_variable(variables):
+                    if assignment.expression.contains_variable(expression_variables):
                         return True
         return False
 
-    def construct_automaton(self, automaton, open_constants, expr_to_const, design_space):
+    def construct_automaton(self, automaton, design_space, expression_variables):
         new_aut = stormpy.storage.JaniAutomaton(automaton.name, automaton.location_variable)
         [new_aut.add_location(loc) for loc in automaton.locations]
         [new_aut.add_initial_location(idx) for idx in automaton.initial_location_indices]
         [new_aut.variables.add_variable(var) for var in automaton.variables]
         for edge in automaton.edges:
-            new_edges = self.construct_edges(edge, open_constants, expr_to_const, design_space)
+            new_edges = self.construct_edges(edge, design_space, expression_variables)
             for new_edge in new_edges:
                 new_aut.add_edge(new_edge)
         return new_aut
 
-    def construct_edges(self, edge, open_constants, expr_to_const, design_space):
-        
+    def construct_edges(self, edge, design_space, expression_variables):
+
         # relevant holes in guard
         variables = edge.template_edge.guard.get_variables()
-        relevant_guard = {c for ev,c in expr_to_const.items() if ev in variables}
+        relevant_guard = {hole_index for hole_index in design_space.hole_indices if expression_variables[hole_index] in variables}
 
         # relevant holes in probabilities
         variables = set().union(*[d.probability.get_variables() for d in edge.destinations])
-        relevant_probs = {c for ev,c in expr_to_const.items() if ev in variables}
+        relevant_probs = {hole_index for hole_index in design_space.hole_indices if expression_variables[hole_index] in variables}
 
         # relevant holes in updates
         variables = set()
         for dest in edge.template_edge.destinations:
             for assignment in dest.assignments:
                 variables |= assignment.expression.get_variables()
-        relevant_updates = {c for ev,c in expr_to_const.items() if ev in variables}
+        relevant_updates = {hole_index for hole_index in design_space.hole_indices if expression_variables[hole_index] in variables}
         
         # all relevant holes
         relevant_holes = relevant_guard | relevant_probs | relevant_updates
@@ -135,13 +137,14 @@ class JaniUnfolder():
 
         # unfold all combinations
         combinations = [
-            (range(len(design_space[c.name])) if c in relevant_holes else [None])
-            for c in open_constants
+            (design_space[hole_index].options if hole_index in relevant_holes else [None])
+            for hole_index in design_space.hole_indices
         ]
         for combination in itertools.product(*combinations):
             substitution = {
-                c.expression_variable: design_space[c.name][v]
-                for c,v in zip(open_constants, combination) if v is not None
+                expression_variables[hole_index] : design_space[hole_index].expressions[combination[hole_index]]
+                for hole_index in design_space.hole_indices
+                if combination[hole_index] is not None
             }
             new_edge = self.construct_edge(edge,substitution)
             new_edge.color = self.combination_coloring.get_or_make_color(combination)

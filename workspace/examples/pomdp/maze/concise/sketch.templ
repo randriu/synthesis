@@ -1,8 +1,5 @@
 pomdp
 
-const int CMAX;
-const double THRESHOLD;
-
 // 3 | x x x x x
 // 2 | x   x   x
 // 1 | x   x   x
@@ -11,64 +8,50 @@ const double THRESHOLD;
 //   x 0 1 2 3 4
 
 // can go in this direction
-formula n = y<3;
-formula e = y=3 & x<4;
-formula s = y>0 & (x=0 | x=2 | x=4);
-formula w = y=3 & x>0;
+formula u = y<3;
+formula r = y=3 & x<4;
+formula d = y>0 & (x=0 | x=2 | x=4);
+formula l = y=3 & x>0;
 
 // target cell
 formula goal = x=2&y=0;
 
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
 // corresponding observables
-observable "n" = clk=0 & n;
-observable "e" = clk=0 & e;
-observable "s" = clk=0 & s;
-observable "w" = clk=0 & w;
+observable "u" = clk=1 & u;
+observable "r" = clk=1 & r;
+observable "d" = clk=1 & d;
+observable "l" = clk=1 & l;
 observable "goal" = goal;
 
 
 // modules
 
 module clock
-    // -1 - init, 0 - steer, 1 - drive
-    clk : [-1..1] init -1;
+    // 0 - init, 1 - drive
+    clk : [0..1] init 0;
 
     // random placement
-    [place] clk=-1 -> (clk'=0);
+    [place] clk=0 -> (clk'=1);
     
-    // steering
-    [go_north] clk=0 -> (clk'=1);
-    [go_east]  clk=0 -> (clk'=1);
-    [go_south] clk=0 -> (clk'=1);
-    [go_west]  clk=0 -> (clk'=1);
-
-    // driving
-    [north] clk=1 -> (clk'=0);
-    [east]  clk=1 -> (clk'=0);
-    [south] clk=1 -> (clk'=0);
-    [west]  clk=1 -> (clk'=0);
-endmodule
-
-module steerer
-    v : [0..4] init 0;
-    [go_north] v=0 -> 0.8: (v'=1) + 0.08: (v'=2) + 0.08: (v'=4) + 0.04: (v'=3);
-    [go_east]  v=0 -> 0.8: (v'=2) + 0.08: (v'=3) + 0.08: (v'=1) + 0.04: (v'=4);
-    [go_south] v=0 -> 0.8: (v'=3) + 0.08: (v'=4) + 0.08: (v'=2) + 0.04: (v'=1);
-    [go_west]  v=0 -> 0.8: (v'=4) + 0.08: (v'=1) + 0.08: (v'=3) + 0.04: (v'=2);
-
-    [north] v=1 -> (v'=0);
-    [east]  v=2 -> (v'=0);
-    [south] v=3 -> (v'=0);
-    [west]  v=4 -> (v'=0);
+    // drive
+    [up] clk=1 -> true;
+    [right]  clk=1 -> true;
+    [down] clk=1 -> true;
+    [left]  clk=1 -> true;
 endmodule
 
 module maze
 
-	x : [-1..4] init -1;
-    y : [-1..3] init -1;
+	x : [0..4] init 0;
+    y : [0..3] init 0;
 	
 	// initialisation
-	[place] x=-1 ->
+	[place] true ->
           1/13 :    (x'=0)&(y'=0)
         + 1/13 :    (x'=0)&(y'=1)
 		+ 1/13 :    (x'=0)&(y'=2)
@@ -83,27 +66,21 @@ module maze
 		+ 1/13 :    (x'=4)&(y'=2)
 		+ 1/13 :    (x'=4)&(y'=3);
 
-	// moving around the maze
-    [north] n -> (y'=y+1);
-	[north] !n -> true;
+	// moving around the maze (all combinations)
     
-    [east] e -> (x'=x+1);
-    [east] !e -> true;
-
-    [south] s -> (y'=y-1);
-    [south] !s -> true;
-
-    [west] w -> (x'=x-1);
-    [west] !w -> true;
-
+    [up]        true -> 0.8: (y'=yu) + 0.08: (x'=xr) + 0.08: (x'=xl) + 0.04: (y'=yd);
+    [right]     true -> 0.8: (x'=xr) + 0.08: (y'=yu) + 0.08: (y'=yd) + 0.04: (x'=xl);
+    [down]      true -> 0.8: (y'=yd) + 0.08: (x'=xr) + 0.08: (x'=xl) + 0.04: (y'=yu);
+    [left]      true -> 0.8: (x'=xl) + 0.08: (y'=yu) + 0.08: (y'=yd) + 0.04: (x'=xr);
+	
 endmodule
 
 // rewards
 
 rewards "steps"
-	[north] true : 1;
-    [east] true : 1;
-    [south] true : 1;
-    [west] true : 1;
+	[up] true : 1;
+    [right] true : 1;
+    [down] true : 1;
+    [left] true : 1;
 endrewards
 

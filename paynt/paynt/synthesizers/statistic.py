@@ -99,10 +99,7 @@ class Statistic:
 
     def finished(self, assignment):
 
-        optimum = None
-        if self.optimality_property is not None:
-            optimum = self.optimality_property.optimum
-
+        
         self.timer.stop()
         self.feasible = False
         self.assignment = None
@@ -110,7 +107,10 @@ class Statistic:
             self.feasible = True
             # self.assignment = self.design_space.readable_assignment(assignment)
             self.assignment = str(assignment)
-        self.optimum = optimum
+        self.optimum = None
+        if self.optimality_property is not None:
+            self.optimum = self.optimality_property.optimum
+
 
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
         self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
@@ -126,7 +126,7 @@ class Statistic:
         formulae = "\n".join([f"formula {i + 1}: {str(f)}" for i,f in enumerate(self.properties)]) + "\n"
         formulae += f"optimality formula: {str(self.optimality_property)}\n" if self.optimality_property is not None else ""
 
-        design_space = f"number of holes: {self.design_space.hole_count}, family size: {self.design_space.size}"
+        design_space = f"number of holes: {self.design_space.num_holes}, family size: {self.design_space.size}"
         timing = f"method: {self.method_name}, synthesis time: {round(self.timer.time, 2)} s"
 
         mdp_stats = f"super MDP size: {self.super_mdp_size}, average MDP size: {round(self.avg_size_mdp)}, " \

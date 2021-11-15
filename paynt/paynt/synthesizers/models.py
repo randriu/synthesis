@@ -38,12 +38,16 @@ class MarkovChain:
         cls.environment = stormpy.Environment()
         env = cls.environment.solver_environment.minmax_solver_environment
         env.precision = stormpy.Rational(cls.precision)
-        # PI is the default method for DTMCs?
-        cls.set_solver_method(stormpy.MinMaxMethod.policy_iteration)
+        cls.set_solver_method(is_dtmc=True)
 
     @classmethod
-    def set_solver_method(cls, method):
-        cls.environment.solver_environment.minmax_solver_environment.method = method
+    def set_solver_method(cls, is_dtmc):
+        if is_dtmc:
+            cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
+        else:
+            cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+
+
     
     def __init__(self, sketch):
         self.sketch = sketch
@@ -134,10 +138,7 @@ class MDP(MarkovChain):
         :param alt if True, alternative direction will be checked
         :return bounds on satisfiability
         '''
-        if self.is_dtmc:
-            self.set_solver_method(stormpy.MinMaxMethod.policy_iteration)
-        else:
-            self.set_solver_method(stormpy.MinMaxMethod.value_iteration)
+        self.set_solver_method(self.is_dtmc)
         formula = prop.formula if not alt else prop.formula_alt
         bounds = stormpy.model_checking(
             self.model, formula, only_initial_states=False,
@@ -217,7 +218,10 @@ class MDP(MarkovChain):
             assignment,consistent = self.quotient_container.scheduler_consistent(self, bounds_primary.scheduler)
         if consistent:
             # LB is tight and LB < OPT
-            return bounds_primary, result_primary, HoleOptions(assignment), False
+            hole_options = self.design_space.copy()
+            for hole_index,hole in enumerate(hole_options):
+                hole.options = assignment[hole_index]
+            return bounds_primary, result_primary, hole_options, False
 
         # UB might improve the optimum
         bounds_secondary = self.analyze_property(prop, alt = True)

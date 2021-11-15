@@ -5,7 +5,7 @@ import os
 from . import version
 
 from .sketch.sketch import Sketch
-from .synthesizers.synthesizer import Synthesizer, SynthesizerAR
+from .synthesizers.synthesizer import Synthesizer, SynthesizerAR, SynthesizerPOMDP
 
 import logging
 # logger = logging.getLogger(__name__)
@@ -62,6 +62,11 @@ def paynt(
     properties_path = os.path.join(project, properties)
     sketch = Sketch(sketch_path, properties_path, constants)
     # TODO: differentiate between solvers
+
+    # if sketch.is_pomdp:
+    #     algorithm = SynthesizerPOMDP(sketch)
+    #     algorithm.run()
+    #     exit()
 
     # choose synthesis method
     if method == "onebyone":

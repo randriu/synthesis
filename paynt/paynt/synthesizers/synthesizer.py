@@ -8,6 +8,8 @@ from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
 from .quotient import JaniQuotientContainer, POMDPQuotientContainer
 
+from ..profiler import Profiler
+
 from ..sketch.holes import HoleOptions,DesignSpace
 
 import logging
@@ -15,15 +17,13 @@ logger = logging.getLogger(__name__)
 
 from stormpy.synthesis import dtmc_from_mdp
 
+
 class Synthesizer:
+
     def __init__(self, sketch):
         MarkovChain.initialize(sketch.properties, sketch.optimality_property)
 
         self.sketch = sketch
-        self.design_space = sketch.design_space
-        self.properties = sketch.properties
-        self.optimality_property = sketch.optimality_property
-
         self.stat = Statistic(sketch, self.method_name)
 
     @property
@@ -32,7 +32,7 @@ class Synthesizer:
     
     @property
     def has_optimality(self):
-        return self.optimality_property is not None
+        return self.sketch.optimality_property is not None
 
     def print_stats(self, short_summary = False):
         print(self.stat.get_summary(short_summary))
@@ -45,14 +45,14 @@ class Synthesizer:
             assignment = self.design_space.construct_assignment(hole_combination)
             dtmc = DTMC(self.sketch, assignment)
             self.stat.iteration_dtmc(dtmc.states)
-            constraints_sat = dtmc.check_properties(self.properties)
+            constraints_sat = dtmc.check_properties(self.sketch.properties)
             self.stat.pruned(1)
             if not constraints_sat:
                 continue
             if not self.has_optimality:
                 satisfying_assignment = assignment
                 break
-            _,improved = dtmc.check_optimality(self.optimality_property)
+            _,improved = dtmc.check_optimality(self.sketch.optimality_property)
             if improved:
                 satisfying_assignment = assignment
 
@@ -61,12 +61,16 @@ class Synthesizer:
 
 class SynthesizerAR(Synthesizer):
     
-    def __init__(self, sketch):
+    def __init__(self, sketch, quotient_container = None):
         super().__init__(sketch)
-        if sketch.is_pomdp:
-            self.quotient_container = POMDPQuotientContainer(sketch)
+        if quotient_container is not None:
+            self.quotient_container = quotient_container
         else:
-            self.quotient_container = JaniQuotientContainer(sketch)
+            if sketch.is_pomdp:
+                self.quotient_container = POMDPQuotientContainer(sketch)
+                self.quotient_container.unfoldFullMemory(memory_size = 2)
+            else:
+                self.quotient_container = JaniQuotientContainer(sketch)
         
         self.stat = Statistic(sketch, self.method_name)
         print("design space: ", self.sketch.design_space)
@@ -77,6 +81,7 @@ class SynthesizerAR(Synthesizer):
         return "AR"
 
     def run(self):
+
         self.stat.start()
         self.stat.super_mdp_size = self.quotient_container.quotient_mdp.nr_states
 
@@ -91,88 +96,102 @@ class SynthesizerAR(Synthesizer):
             feasible,undecided_properties,undecided_bounds = mdp.check_properties(family.properties)
             properties = undecided_properties
 
-            if feasible == False:
-                # all UNSAT
-                self.stat.pruned(family.size)
-                continue
-            
-            if feasible == None:
-                # undecided: split wrt first undecided result
-                assert len(undecided_bounds) > 0
-                subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, undecided_bounds[0], properties)
-                families.append(subfamily1)
-                families.append(subfamily2)
-                continue
-
-            # all SAT
-            # logger.debug("AR: family is SAT")
-            if not self.has_optimality:
-                # found feasible solution
-                logger.debug("AR: found feasible family")
+            if feasible == True and not self.has_optimality:
+                # logger.debug("AR: found feasible family")
                 satisfying_assignment = family.pick_any()
                 break
-            
-            # must check optimality
-            opt_bounds,optimum,improving_assignment,can_improve = mdp.check_optimality(self.optimality_property)
-            if optimum is not None:
-                self.optimality_property.update_optimum(optimum)
-                satisfying_assignment = improving_assignment
-            if can_improve:
-                subfamily1, subfamily2 = self.quotient_container.prepare_split(mdp, opt_bounds, properties)
-                families.append(subfamily1)
-                families.append(subfamily2)
-            else:
+
+            can_improve = feasible is None
+            if feasible == True and self.has_optimality:
+                # check optimality
+                opt_bounds,optimum,improving_assignment,can_improve = mdp.check_optimality(self.sketch.optimality_property)
+                if optimum is not None:
+                    self.sketch.optimality_property.update_optimum(optimum)
+                    satisfying_assignment = improving_assignment
+                if can_improve:
+                    undecided_bounds.append(opt_bounds)
+
+            if not can_improve:
                 self.stat.pruned(family.size)
+                continue
 
-        # FIXME POMDP hack: replace hole valuations with corresponding action labels & print a table
-        if self.sketch.is_pomdp and satisfying_assignment is not None:
+            # split family wrt first undecided result
+            subfamilies = self.quotient_container.prepare_split(mdp, undecided_bounds[0], properties)
+            for subfamily in subfamilies:
+                families.append(subfamily)
 
-            pomdp = self.quotient_container.pomdp
-
-            # collect labels of actions available at each observation
-            action_labels_at_observation = [[] for obs in range(pomdp.nr_observations)]
-            for state in range(pomdp.nr_states):
-                obs = pomdp.observations[state]
-                if action_labels_at_observation[obs] != []:
-                    continue
-                actions = pomdp.get_nr_available_actions(state)
-                for offset in range(actions):
-                    choice = pomdp.get_choice_index(state,offset)
-                    labels = pomdp.choice_labeling.get_labels_of_choice(choice)
-                    action_labels_at_observation[obs].append(labels)
-            # print("labels of actions at observations: ", self.action_labels_at_observation)
-            
-            # map action holes to their label
-            # action_hole_labels = {}
-            # for obs in range(pomdp.nr_observations):
-            #     for action_hole in self.quotient_container.pomdp_manager.action_holes[obs]:
-            #         action_hole_labels[action_hole] = action_labels_at_observation[obs]
-
-            # self.quotient_container
-            # satisfying_assignment_renamed = HoleOptions()
-            # for hole_index,options in satisfying_assignment.items():
-            #     hole_name = self.quotient_container.hole_names[hole_index]
-            #     if hole_index in action_hole_labels:
-            #         options = [action_hole_labels[hole_index][option] for option in options]
-            #     satisfying_assignment_renamed[hole_name] = options
-            # satisfying_assignment = satisfying_assignment_renamed
-
-            for obs in range(self.quotient_container.pomdp.nr_observations):
-                at_obs = action_labels_at_observation[obs]
-                for mem in range(self.quotient_container.full_memory_size):
-                    hole = self.quotient_container.holes_action[(obs,mem)]
-                    options = satisfying_assignment[hole]
-                    satisfying_assignment[hole] = [at_obs[index] for index in options]
 
         self.stat.finished(satisfying_assignment)
 
 
+class SynthesizerPOMDP():
 
+    def __init__(self, sketch):
+        assert sketch.is_pomdp
+        MarkovChain.initialize(sketch.properties, sketch.optimality_property)
+        Profiler.initialize()
 
+        self.sketch = sketch
+        self.quotient_container = POMDPQuotientContainer(sketch)
 
+        self.total_time = 0
+        self.total_iters = 0
+
+    def synthesize(self):
+        synthesizer = SynthesizerAR(self.sketch, self.quotient_container)
+        synthesizer.run()
+        synthesizer.print_stats(short_summary = True)
+        print("", flush=True)
+        self.total_time += synthesizer.stat.timer.read()
+        self.total_iters += synthesizer.stat.iterations_mdp
+
+    def run(self):
+
+        # analyze POMDP
+        assert len(self.sketch.properties) == 0
+        self.quotient_container.unfoldPartialMemory()
+
+        # initial run
+        self.synthesize()
+
+        self.quotient_container.pomdp_manager.inject_memory_all()
+        # self.quotient_container.pomdp_manager.inject_memory(3)
+        # self.quotient_container.pomdp_manager.inject_memory(0)
+        self.quotient_container.unfoldPartialMemory()
+        self.synthesize()
+        
+        # for i in range(3):
+        #     print("splitter frequency: ", self.quotient_container.splitter_frequency)
+        #     obs = self.quotient_container.suggest_injection()
+        #     print("suggesting split at observation ", obs)
+
+        #     self.quotient_container.pomdp_manager.inject_memory(obs)
+        #     self.quotient_container.unfoldPartialMemory()
+        #     self.synthesize()
+        #     print("current stats: {} sec, {} iters".format(round(self.total_time,2),self.total_iters))
+            
+
+        # Profiler.start("pomdp unfolding")
+        # self.quotient_container.pomdp_manager.inject_memory_all()
+        # self.quotient_container.unfoldPartialMemory()
+        # Profiler.stop()
+        # self.synthesizer = SynthesizerAR(sketch, self.quotient_container)
+        # self.synthesizer.run()
+        # self.synthesizer.print_stats(short_summary = True)
+
+        # Profiler.start("pomdp unfolding")
+        # self.quotient_container.pomdp_manager.inject_memory_all()
+        # self.quotient_container.unfoldPartialMemory()
+        # Profiler.stop()
+        # self.synthesizer = SynthesizerAR(sketch, self.quotient_container)
+        # self.synthesizer.run()
+        # self.synthesizer.print_stats(short_summary = True)
+
+        Profiler.print()
 
 
 class SynthesizerCEGIS(Synthesizer):
+
     @property
     def method_name(self):
         return "CEGIS"
@@ -223,30 +242,7 @@ class SynthesizerCEGIS(Synthesizer):
 
 
 
-class Family:
-
-    
-    def __init__(self, parent=None, design_space=None):
-        '''
-        Construct a family. Each family is either a superfamily represented by
-        a Family._quotient_mdp or a (proper) subfamily that is constructed on
-        demand via Family._quotient_container.consider_subset(). Subfamilies
-        inherit formulae of interest from their parents.
-        '''
-        self.design_space = Family.sketch.design_space.copy() if parent is None else design_space
-        self.mdp = Family._quotient_mdp if parent is None else None
-        self.choice_map = [i for i in range(Family._quotient_mdp.nr_choices)] if parent is None else None
-    
-        self.design_space.z3_encode()
-
-        # a family that has never been MDP-analyzed is not ready to be split
-        self.bounds = [None] * len(self.property_indices)  # assigned when analysis is initiated
-
-        self.suboptions = None
-        self.member_assignment = None
-
-
-class FamilyHybrid(Family):
+class FamilyHybrid():
     ''' Family adopted for CEGAR-CEGIS analysis. '''
 
     # TODO: more efficient state-hole mapping?

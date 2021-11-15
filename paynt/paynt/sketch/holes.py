@@ -8,62 +8,89 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class HoleOptions(OrderedDict):
-    ''' Mapping of hole names to hole options. '''
+class Hole:
+    '''
+    Options for each hole are simply indices of the corresponding actions.
+    Each hole can optionally contain a list of corresponding program expressions.
 
-    # TODO maybe make hole options as a list of indices?
+    '''
+    def __init__(self, name, options, option_labels, expressions = None):
+        self.options = options
+        self.name = name
+        self.option_labels = option_labels
+        self.expressions = expressions
+
+    @property
+    def size(self):
+        return len(self.options)
+
+    def __str__(self):
+        if self.size == 1:
+            return"{}={}".format(self.name,self.option_labels[0]) 
+        else:
+            return self.name + ": {" + ",".join(self.option_labels) + "}"
+
+    def copy(self):
+        return Hole(self.name, self.options.copy(), self.option_labels.copy())
+
+    def subhole(self, suboptions):
+        hole = Hole(self.name, [], [])
+        for index,option in enumerate(self.options):
+            if option in suboptions:
+                hole.options.append(option)
+                hole.option_labels.append(self.option_labels[index])
+        return hole
+
+    def pick_any(self):
+        return self.subhole([self.options[0]])
+
+
+
     
+
+class HoleOptions(list):
+    ''' List of holes. '''
+
     def __init__(self, *args):
         super().__init__(*args)
 
     @property
-    def holes(self):
-        return list(self.keys())
+    def num_holes(self):
+        return len(self)
 
     @property
-    def hole_count(self):
-        return len(self.holes)
+    def hole_indices(self):
+        return list(range(len(self)))
 
     @property
     def size(self):
-        return math.prod([len(v) for v in self.values()])
+        return math.prod([hole.size for hole in self])
 
-    def all_hole_combinations(self):
-        return itertools.product(*self.values())
+    def copy(self):
+        hole_options = HoleOptions()
+        for hole in self:
+            hole_options.append(hole.copy())
+        return hole_options
+
+    # def all_hole_combinations(self):
+        # return itertools.product(*self.values())
 
     def __str__(self):
-        hole_options = []
-        for hole,options in self.items():
-            if len(options) > 1:
-                options = "{" + ",".join([str(o) for o in options]) + "}"
-                hole_options.append("{}: {}".format(hole,options))
-            else:
-                hole_options.append("{}={}".format(hole,options[0]))
-        return ", ".join(hole_options)
+        return ", ".join([str(hole) for hole in self]) 
 
     def __repr__(self):
         return self.__str__()
 
+    def assume_suboptions(self, hole_index, suboptions):
+        result = self.copy()
+        result[hole_index] = self[hole_index].subhole(suboptions)
+        return result
+
     def pick_any(self):
         assignment = HoleOptions()
-        for hole in self.holes:
-            assignment[hole] = [self[hole][0]]
+        for hole in self:
+            assignment.append(hole.pick_any())
         return assignment
-
-    def index_map(self, subspace):
-        '''
-        Map options of a supplied subspace to indices of the corresponding
-        options in this design space.
-        '''
-        result = OrderedDict()
-        for hole,values in subspace.items():
-            result[hole] = []
-            for v in values:
-                for index, ref in enumerate(self[hole]):
-                    if ref == v:
-                        result[hole].append(index)
-        return result
-    
 
 class DesignSpace(HoleOptions):
     '''
@@ -78,14 +105,17 @@ class DesignSpace(HoleOptions):
     solver_var_to_hole = None
 
     # mapping of holes to their indices
-    hole_indices = None
+    # hole_indices = None
     # mapping of hole options to their indices for each hole
     hole_option_indices = None
 
     def __init__(self, hole_options, properties = None):
-        super().__init__(hole_options)   
+        super().__init__(hole_options)
         self.properties = properties
         self.encoding = None
+
+    def copy(self):
+        return DesignSpace(super().copy())
 
     def set_properties(self, properties):
         self.properties = properties
@@ -158,9 +188,9 @@ class CombinationColoring:
     Dictionary of colors associated with different hole combinations.
     Note: color 0 is reserved for general hole-free objects.
     '''
-    def __init__(self, hole_options):
+    def __init__(self, holes):
         # these are hole options of the initial design space
-        self.hole_options = hole_options
+        self.holes = holes
 
         self.coloring = {}
         self.reverse_coloring = {}
@@ -179,14 +209,13 @@ class CombinationColoring:
 
     def subcolors(self, subspace):
         ''' Collect colors that are valid within the provided design subspace. '''
-        indexed_subspace = self.hole_options.index_map(subspace)
         colors = set()
         for combination,color in self.coloring.items():
             contained = True
-            for hole, assignment in zip(indexed_subspace.keys(), combination):
-                if assignment is None:
+            for hole_index,hole in enumerate(subspace):
+                if combination[hole_index] is None:
                     continue
-                if assignment not in indexed_subspace[hole]:
+                if combination[hole_index] not in hole.options:
                     contained = False
                     break
             if contained:
@@ -197,21 +226,16 @@ class CombinationColoring:
     def get_hole_assignments(self, colors):
         ''' Collect all hole assignments associated with provided colors. '''
         hole_assignments = {}
-        for hole in self.hole_options.holes:
-            hole_assignments[hole] = set()
-        
+        hole_assignments = [set() for hole in self.holes]
+
         for color in colors:
             if color == 0:
                 continue
             combination = self.reverse_coloring[color]
-            for hole, assignment in zip(self.hole_options.holes, combination):
+            for hole_index,assignment in enumerate(combination):
                 if assignment is None:
                     continue
-                assignments = hole_assignments.get(hole)
-                assignments.add(assignment)
-                hole_assignments[hole] = assignments
+                hole_assignments[hole_index].add(assignment)
+        hole_assignments = [list(assignments) for assignments in hole_assignments]
 
-        hole_options = {}
-        for hole,assignments in hole_assignments.items():
-            hole_options[hole] = list(assignments)
-        return hole_options
+        return hole_assignments

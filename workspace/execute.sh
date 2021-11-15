@@ -124,12 +124,13 @@ function run() {
     maze=("maze/orig" 0 1 1 1.0)
     # maze=("maze/concise" 0 1 1 1.0)
     
-    # maze=("pomdp/maze" 0 2.5 2.5 1.0)
+    # maze=("pomdp/maze/orig" 0 2.5 2.5 1.0)
     maze=("pomdp/maze/concise" 0 1.0 1.0 1.0)
-    maze=("pomdp/maze/concise2" 0 1.0 1.0 1.0)
     grid=("pomdp/grid" 0 1.0 1.0 1.0)
+    avoid=("pomdp/grid/avoid" 0 1.0 1.0 1.0)
 
-    benchmark=("pomdp/grid/avoid" 0 1.0 1.0 1.0)
+    benchmark=("pomdp/refuel" 0 1.0 1.0 1.0)
+
 
     # running ##########
 
@@ -138,8 +139,9 @@ function run() {
     # model=coin
     model=maze
     # model=grid
+    # model=avoid
 
-    model=benchmark
+    # model=benchmark
 
     # evo dice
     # onebyone coin

@@ -1,6 +1,6 @@
 import stormpy
 from .property import Property, OptimalityProperty
-from .holes import HoleOptions, DesignSpace
+from .holes import Hole, HoleOptions, DesignSpace
 
 import os
 import re
@@ -19,20 +19,19 @@ class Sketch:
         self.properties = None
         self.optimality_property = None
         self.design_space = None
-        self.pomdp_memory_size = 2 # FIXME as a CLI argument
 
         self.prism = None
         self.jani = None
 
         logger.info(f"Loading sketch from {sketch_path} with constants {constant_str} ...")
         self.prism, hole_options = Sketch.load_sketch(sketch_path, constant_str)
-
+        
         logger.info(f"Loading properties from {properties_path} with constants {constant_str} ...")
         self.properties, self.optimality_property = Sketch.parse_properties(self.prism, properties_path, constant_str)
         
         self.design_space = DesignSpace(hole_options, self.properties)
 
-        logger.debug(f"Sketch has {self.design_space.hole_count} holes: {self.design_space.holes}")
+        logger.debug(f"Sketch has {self.design_space.num_holes} holes.")
         logger.debug(f"Hole options: {self.design_space}")
         logger.info(f"Design space: {self.design_space.size}")
 
@@ -97,28 +96,31 @@ class Sketch:
         prism = prism.define_constants(cls.constants_map(prism,constant_str))
 
         # parse hole definitions
-        hole_options = HoleOptions()
+        holes = []
         ep = stormpy.storage.ExpressionParser(prism.expression_manager)
         ep.set_identifier_mapping(dict())    
-        for hole, definition in hole_definitions.items():
+        for hole_name, definition in hole_definitions.items():
             options = definition.split(",")
-            hole_options[hole] = [ep.parse(o) for o in options]
+            expressions = [ep.parse(o) for o in options]
+            options = list(range(len(expressions)))
+            option_labels = [str(e) for e in expressions]
+            hole = Hole(hole_name, options, option_labels, expressions)
+            holes.append(hole)
 
         # collect undefined constants (must be the holes)
         program_constants = OrderedDict([(c.name, c) for c in prism.constants if not c.defined])
-        assert len(program_constants.keys()) == hole_options.hole_count, "some constants were unspecified"
+        assert len(program_constants.keys()) == len(holes), "some constants were unspecified"
 
         # convert single-valued holes to a defined constant
         constant_definitions = dict()
-        holes_to_remove = []
-        for hole,options in hole_options.items():
-            if len(options) == 1:
-                constant_definitions[program_constants[hole].expression_variable] = options[0]
-                holes_to_remove.append(hole)
-        
-        for hole in holes_to_remove:
-            del hole_options[hole]
+        hole_options = HoleOptions()
+        for hole_index,hole in enumerate(holes):
+            if hole.size == 1:
+                constant_definitions[program_constants[hole.name].expression_variable] = hole.expressions[0]
+            else:
+                hole_options.append(hole)
 
+        
         # define constants in the program
         prism = prism.define_constants(constant_definitions)
         prism = prism.substitute_constants()
