@@ -4,8 +4,8 @@ import time
 class Timer:
     def __init__(self):
         self.running = False
-        self.timer = None
-        self.time = 0
+        self.timer = None   # last timestamp
+        self.time = 0       # total time measured
 
     @staticmethod
     def timestamp():
@@ -27,12 +27,6 @@ class Timer:
         self.timer = None
         self.running = False
 
-    def toggle(self):
-        if self.running:
-            self.stop()
-        else:
-            self.start()
-
     def read(self):
         if not self.running:
             return self.time
@@ -42,33 +36,29 @@ class Timer:
 
 class Profiler:
 
-    labels = []
-    timer_total = None
-    timers = None
-
     @staticmethod
     def initialize():
+        Profiler.running = None
         Profiler.timers = {}
-        Profiler.started_last = None
         Profiler.timer_total = Timer()
         Profiler.timer_total.start()
 
     @staticmethod
     def stop():
-        if Profiler.started_last is None:
+        if Profiler.running is None:
             return
-        Profiler.started_last.stop()
-        Profiler.started_last = None
+        Profiler.running.stop()
+        Profiler.running = None
 
     @staticmethod
     def start(timer_name):
         Profiler.stop()
         Profiler.timers[timer_name] = Profiler.timers.get(timer_name, Timer())
         Profiler.timers[timer_name].start()
-        Profiler.started_last = Profiler.timers[timer_name]
+        Profiler.running = Profiler.timers[timer_name]
 
     @staticmethod
-    def print_base():
+    def print_all():
         time_total = Profiler.timer_total.read()
         covered = 0
         for timer_name, timer in Profiler.timers.items():
@@ -81,7 +71,6 @@ class Profiler:
     def print():
         Profiler.stop()
         Profiler.timer_total.stop()
-
-        Profiler.print_base()
+        Profiler.print_all()
 
 

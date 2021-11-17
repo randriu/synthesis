@@ -1,17 +1,5 @@
 import stormpy
 
-import math
-import itertools
-from collections import OrderedDict
-
-from .statistic import Statistic
-
-from ..sketch.property import Property
-from ..sketch.holes import *
-
-import logging
-logger = logging.getLogger(__name__)
-
 
 class MarkovChain:
 
@@ -24,6 +12,10 @@ class MarkovChain:
 
     @classmethod
     def initialize(cls, properties, optimality_property):
+        '''
+        Construct builder options wrt formulae of interest.
+        Setup model checking environment.
+        '''
 
         # builder options
         mc_formulae = [p.formula for p in properties]
@@ -46,14 +38,10 @@ class MarkovChain:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+
+    def __init__(self, model):
+        self.model = model
     
-    def __init__(self, sketch):
-        self.sketch = sketch
-
-    def build(self, program):
-        self.model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
-        assert self.model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-
     @property
     def states(self):
         return self.model.nr_states
@@ -70,6 +58,17 @@ class MarkovChain:
     def initial_state(self):
         return self.model.initial_states[0]
 
+    def model_check_formula(self, formula):
+        self.set_solver_method(self.is_dtmc)
+        result = stormpy.model_checking(
+            self.model, formula, only_initial_states=False,
+            extract_scheduler=(not self.is_dtmc), environment=self.environment
+        )
+        return result
+
+    def model_check_property(self, prop):
+        return self.model_check_formula(prop.formula)
+
     def at_initial_state(self, array):
         return array.at(self.initial_state)
 
@@ -84,38 +83,33 @@ class MarkovChain:
         MarkovChain.no_overlapping_guards(model)
         return model
 
+
 class DTMC(MarkovChain):
-
-    def __init__(self, sketch, model):
-        super().__init__(sketch)
-        self.model = model
-
-    def analyze_property(self, prop):
-        ''''
-        Model check dtmc against a property
-        :return value in the initial state
-        '''
-        result = stormpy.model_checking(
-            self.model, prop.formula, only_initial_states=False,
-            extract_scheduler=False, environment=self.environment
-        )
-        return self.at_initial_state(result)
 
     def check_property(self, prop):
         ''' Check whether this DTMC satisfies the property. '''
-        result = self.analyze_property(prop)
-        return prop.satisfies_threshold(result)
+        result = self.model_check_property(prop)
+        value = self.at_initial_state(result)
+        return prop.satisfies_threshold(value)
 
-    # check multiple properties, return False as soon as any one is violated
+    # check 
     def check_properties(self, properties):
+        '''
+        Check multiple properties.
+        :return False as soon as any one is violated, True otherwise
+        ''' 
         for p in properties:
             sat = self.check_property(p)
             if not sat:
                 return False
         return True
 
-    # check all properties, return satisfiability and a list of unsatisfiable properties
     def check_properties_all(self, properties):
+        '''
+        Check all properties.
+        :return (1) satisfiability (True/False)
+        :return (2) a list of unsatisfiable properties if (1) is False
+        '''
         unsat_properties = []
         for p in properties:
             sat = self.check_property(p)
@@ -127,16 +121,21 @@ class DTMC(MarkovChain):
     # (1) whether the property was satisfied
     # (2) whether the optimal value was improved
     def check_optimality(self, prop):
-        result = self.analyze_property(prop)
-        sat = prop.satisfies_threshold(result)
-        improves = prop.improves_optimum(result)
-        return sat,result,improves
+        '''
+        Model check optimality property.
+        :return (1) value of this DTMC
+        :return (2) whether (1) improves current optimum
+        '''
+        result = self.model_check_property(prop)
+        value = self.at_initial_state(result)
+        improves = prop.improves_optimum(value)
+        return value,improves
 
 
 class MDP(MarkovChain):
 
     def __init__(self, sketch, design_space, model, quotient_container, quotient_choice_map = None):
-        super().__init__(sketch)
+        super().__init__(model)
         self.design_space = design_space
         self.model = model
         self.quotient_container = quotient_container
@@ -149,15 +148,9 @@ class MDP(MarkovChain):
         '''
         Model check MDP against property.
         :param alt if True, alternative direction will be checked
-        :return model checking result containing bounds on satisfiability
+        :return model checking result
         '''
-        self.set_solver_method(self.is_dtmc)
-        formula = prop.formula if not alt else prop.formula_alt
-        result = stormpy.model_checking(
-            self.model, formula, only_initial_states=False,
-            extract_scheduler=(not self.is_dtmc), environment=self.environment
-        )
-        return result
+        return self.analyze_formula(prop.formula if not alt else prop.formula_alt)
 
     def check_property(self, prop):
         '''

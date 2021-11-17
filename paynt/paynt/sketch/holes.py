@@ -220,3 +220,5 @@ class CombinationColoring:
         hole_assignments = [list(assignments) for assignments in hole_assignments]
 
         return hole_assignments
+
+# TODO more general hole-option-action mapping

@@ -57,16 +57,16 @@ class QuotientContainer:
         submodel_construction = stormpy.construct_submodel(
             self.quotient_mdp, all_states, selected_actions, keep_unreachable_states, subsystem_options
         )
-        mdp = submodel_construction.model
+        model = submodel_construction.model
         choice_map = submodel_construction.new_to_old_action_mapping
-        assert len(choice_map) == mdp.nr_choices
+        assert len(choice_map) == model.nr_choices
         
         if design_space.size == 1:
-            assert mdp.nr_choices == mdp.nr_states
-            return DTMC(self.sketch, mdp) 
+            assert model.nr_choices == model.nr_states
+            return DTMC(model) 
 
         # success
-        return MDP(self.sketch, design_space, mdp, self, choice_map)
+        return MDP(design_space, model, self, choice_map)
 
     def scheduler_colors(self, mdp, scheduler):
         ''' Get all colors involved in the choices of this scheduler. '''

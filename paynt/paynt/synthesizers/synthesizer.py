@@ -147,7 +147,7 @@ class SynthesizerCEGIS(Synthesizer):
             # model check all properties
             sat,unsat_properties = dtmc.check_properties_all(self.sketch.properties)
             if self.has_optimality:
-                sat_opt,optimum,improves = dtmc.check_optimality(self.sketch.optimality_property)
+                optimum,improves = dtmc.check_optimality(self.sketch.optimality_property)
                 unsat_properties.append(self.sketch.optimality_property)
 
             # analyze model checking results

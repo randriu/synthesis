@@ -14,6 +14,9 @@ namespace storm {
             PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp);
             std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
 
+            // for each observation contains the number of allocated memory states (initially 1)
+            std::vector<uint64_t> observation_memory_size;
+            
             // inject 1 state to a selected observation
             void injectMemory(uint64_t observation);
             // set memory size to all observations
@@ -79,8 +82,6 @@ namespace storm {
             
             // original POMDP
             storm::models::sparse::Pomdp<ValueType> const& pomdp;
-            // for each observation contains the number of allocated memory states (initially 1)
-            std::vector<uint64_t> observation_memory_size;
             
             // number of states in an unfolded MDP
             uint64_t num_states;
