@@ -46,9 +46,6 @@ class MarkovChain:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-
-
-
     
     def __init__(self, sketch):
         self.sketch = sketch
@@ -76,13 +73,22 @@ class MarkovChain:
     def at_initial_state(self, array):
         return array.at(self.initial_state)
 
+    @staticmethod
+    def no_overlapping_guards(model):
+        assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+
+    @staticmethod
+    def build_from_program(sketch, assignment):
+        program = sketch.restrict(assignment)
+        model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
+        MarkovChain.no_overlapping_guards(model)
+        return model
 
 class DTMC(MarkovChain):
 
-    def __init__(self, sketch, assignment):
+    def __init__(self, sketch, model):
         super().__init__(sketch)
-        program = sketch.restrict(assignment)
-        self.build(program)
+        self.model = model
 
     def analyze_property(self, prop):
         ''''

@@ -10,7 +10,7 @@ from .quotient import JaniQuotientContainer, POMDPQuotientContainer
 
 from ..profiler import Timer,Profiler
 
-from ..sketch.holes import HoleOptions,DesignSpace
+from ..sketch.holes import Holes,DesignSpace
 
 import logging
 logger = logging.getLogger(__name__)
@@ -20,10 +20,19 @@ from stormpy.synthesis import dtmc_from_mdp
 
 class Synthesizer:
 
-    def __init__(self, sketch):
+    def __init__(self, sketch, quotient_container = None):
         MarkovChain.initialize(sketch.properties, sketch.optimality_property)
 
         self.sketch = sketch
+        if quotient_container is not None:
+            self.quotient_container = quotient_container
+        else:
+            if sketch.is_pomdp:
+                self.quotient_container = POMDPQuotientContainer(sketch)
+                self.quotient_container.unfoldFullMemory(memory_size = 1)
+            else:
+                self.quotient_container = JaniQuotientContainer(sketch)
+
         self.stat = Statistic(sketch, self.method_name)
         Profiler.initialize()
 
@@ -62,21 +71,6 @@ class Synthesizer:
 
 class SynthesizerAR(Synthesizer):
     
-    def __init__(self, sketch, quotient_container = None):
-        super().__init__(sketch)
-        if quotient_container is not None:
-            self.quotient_container = quotient_container
-        else:
-            if sketch.is_pomdp:
-                self.quotient_container = POMDPQuotientContainer(sketch)
-                self.quotient_container.unfoldFullMemory(memory_size = 1)
-            else:
-                self.quotient_container = JaniQuotientContainer(sketch)
-        
-        self.stat = Statistic(sketch, self.method_name)
-        # print("design space: ", self.sketch.design_space)
-        # print("design space size: ", self.sketch.design_space.size)
-
     @property
     def method_name(self):
         return "AR"
@@ -137,6 +131,7 @@ class SynthesizerCEGIS(Synthesizer):
         return "CEGIS"
 
     def run(self):
+        self.stat.start()
 
         satisfying_assignment = None
         self.sketch.design_space.z3_initialize()
@@ -144,10 +139,18 @@ class SynthesizerCEGIS(Synthesizer):
 
         assignment = self.sketch.design_space.pick_assignment()
         while assignment is not None:
-            logger.debug("analyzing assignment {}".format(assignment))
-            dtmc = DTMC(self.sketch, assignment)
+            # logger.debug("analyzing assignment {}".format(assignment))
+            # build DTMC
+            dtmc = self.quotient_container.build(assignment)
+            self.stat.iteration_dtmc(dtmc.states)
+
+            # model check all properties
             sat,unsat_properties = dtmc.check_properties_all(self.sketch.properties)
-            sat_opt,optimum,improves = dtmc.check_optimality(self.sketch.optimality_property)
+            if self.has_optimality:
+                sat_opt,optimum,improves = dtmc.check_optimality(self.sketch.optimality_property)
+                unsat_properties.append(self.sketch.optimality_property)
+
+            # analyze model checking results
             if sat:
                 if not self.has_optimality:
                     satisfying_assignment = assignment
@@ -156,21 +159,21 @@ class SynthesizerCEGIS(Synthesizer):
                     self.sketch.optimality_property.update_optimum(optimum)
                     satisfying_assignment = assignment
 
-            unsat_properties.append(self.sketch.optimality_property)
-
+            # construct a conflict to each unsatisfiable property
             conflicts = []
             for prop in unsat_properties:
                 conflict = [hole_index for hole_index,_ in enumerate(assignment)]
                 conflicts.append(conflict)
+
+            # use conflicts to exclude the generalizations of this assignment
             for conflict in conflicts:
                 self.sketch.design_space.exclude_assignment(assignment, conflict)
+                self.stat.pruned(1)
 
+            # construct next assignment
             assignment = self.sketch.design_space.pick_assignment()
 
         self.stat.finished(satisfying_assignment)
-
-
-
 
 
 

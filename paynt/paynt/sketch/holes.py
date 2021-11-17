@@ -2,19 +2,14 @@ import math
 import itertools
 import z3
 
-from collections import defaultdict, OrderedDict
-
-import logging
-logger = logging.getLogger(__name__)
-
-
 class Hole:
     '''
     Hole with a name, a list of options and corresponding option labels.
     Options for each hole are simply indices of the corresponding actions.
-    Each hole is identified by its position in HoleOptions, so this order must
-    be preserved in the refining process.
-
+    Each hole is identified by its position in Holes, therefore, this order must
+      be preserved in the refining process.
+    Option labels are not refined when assuming suboptions so that the correct
+      label can be accessed by the value of an option.
     '''
     def __init__(self, name, options, option_labels):
         self.name = name
@@ -26,30 +21,20 @@ class Hole:
         return len(self.options)
 
     def __str__(self):
+        labels = [self.option_labels[option] for option in self.options]
         if self.size == 1:
-            return"{}={}".format(self.name,self.option_labels[0]) 
+            return"{}={}".format(self.name,labels[0]) 
         else:
-            return self.name + ": {" + ",".join(self.option_labels) + "}"
+            return self.name + ": {" + ",".join(labels) + "}"
 
     def copy(self):
-        return Hole(self.name, self.options.copy(), self.option_labels.copy())
+        return Hole(self.name, self.options.copy(), self.option_labels)
 
-    def subhole(self, suboptions):
-        hole = Hole(self.name, [], [])
-        for index,option in enumerate(self.options):
-            if option in suboptions:
-                hole.options.append(option)
-                hole.option_labels.append(self.option_labels[index])
-        return hole
-
-    def pick_any(self):
-        return self.subhole([self.options[0]])
+    def assume_suboptions(self, suboptions):
+        return Hole(self.name, suboptions.copy(), self.option_labels)
 
 
-
-    
-
-class HoleOptions(list):
+class Holes(list):
     ''' List of holes. '''
 
     def __init__(self, *args):
@@ -65,48 +50,45 @@ class HoleOptions(list):
 
     @property
     def size(self):
+        ''' Family size. '''
         return math.prod([hole.size for hole in self])
 
     def __str__(self):
         return ", ".join([str(hole) for hole in self]) 
 
-    def __repr__(self):
-        return self.__str__()
-
     def copy(self):
-        hole_options = HoleOptions()
-        for hole in self:
-            hole_options.append(hole.copy())
-        return hole_options
+        return Holes([hole.copy() for hole in self])
 
-    # def all_hole_combinations(self):
-        # return itertools.product(*self.values())
-
-    def assume_suboptions(self, hole_index, suboptions):
+    def assume_hole_suboptions(self, hole_index, suboptions):
+        ''' Assume suboptions of a certain hole. '''
         result = self.copy()
-        result[hole_index] = self[hole_index].subhole(suboptions)
+        result[hole_index] = self[hole_index].assume_suboptions(suboptions)
         return result
 
+    def assume_suboptions(self, hole_suboptions):
+        ''' Assume suboptions for each hole. '''
+        return Holes([hole.assume_suboptions(hole_suboptions[hole_index]) for hole_index,hole in enumerate(self)])
+
     def pick_any(self):
-        assignment = HoleOptions()
-        for hole in self:
-            assignment.append(hole.pick_any())
-        return assignment
+        suboptions = [[hole.options[0]] for hole in self]
+        return self.assume_suboptions(suboptions)
 
-class DesignSpace(HoleOptions):
+
+class DesignSpace(Holes):
     '''
-    Hole options supplied with
+    List of holes supplied with
     - a list of constraints to investigate in this design space
-    - (optionally) z3 encoding
+    - (optionally) z3 encoding of this design space
+    :note z3 (re-)encoding construction must be invoked manually
     '''
 
-    # z3 solver
+    # z3 solver containing description of the complete design space
     solver = None
-    # solver variables that respect the hole order
+    # for each hole, a corresponding solver variable
     solver_vars = None
 
-    def __init__(self, hole_options, properties = None):
-        super().__init__(hole_options)
+    def __init__(self, holes, properties = None):
+        super().__init__(holes)
         self.properties = properties
         self.encoding = None
 
@@ -124,18 +106,19 @@ class DesignSpace(HoleOptions):
         DesignSpace.solver_vars = []
         for hole_index, hole in enumerate(self):
             var = z3.Int(hole_index)
+            DesignSpace.solver_vars.append(var)
             DesignSpace.solver.add(var >= 0)
             DesignSpace.solver.add(var < hole.size)
-            DesignSpace.solver_vars.append(var)
 
     def z3_encode(self):
         ''' Encode this design space. '''
-        hole_clauses = dict()
-        for hole_index,var in enumerate(DesignSpace.solver_vars):
-            hole_clauses[hole_index] = z3.Or(
-                [var == option for option in self[hole_index].options]
+        hole_clauses = []
+        for hole_index,hole in enumerate(self):
+            clauses = z3.Or(
+                [DesignSpace.solver_vars[hole_index] == option for option in hole.options]
             )
-        self.encoding = z3.And(list(hole_clauses.values()))
+            hole_clauses.append(clauses)
+        self.encoding = z3.And(hole_clauses)
 
     def pick_assignment(self):
         '''
@@ -150,27 +133,27 @@ class DesignSpace(HoleOptions):
 
         # construct the corresponding singleton
         sat_model = DesignSpace.solver.model()
-        assignment = HoleOptions()
-        for hole_index,var, in enumerate(DesignSpace.solver_vars):
-            hole = self[hole_index]
+        assignment = []
+        for hole_index,hole, in enumerate(self):
+            var = DesignSpace.solver_vars[hole_index]
             option = sat_model[var].as_long()
-            assignment.append(hole.subhole([option]))
-        return assignment
+            assignment.append([option])
+        return self.assume_suboptions(assignment)
 
     def exclude_assignment(self, assignment, conflict):
         '''
         Exclude assignment from the design space using provided conflict.
-        :param assignment hole option that yielded unsatisfiable DTMC
-        :param indices of relevant holes in the corresponding counterexample
+        :param assignment hole assignment that yielded unsatisfiable DTMC
+        :param conflict indices of relevant holes in the corresponding counterexample
         '''
-        counterexample_clauses = dict()
+        counterexample_clauses = []
         for hole_index,var in enumerate(DesignSpace.solver_vars):
             if hole_index in conflict:
-                counterexample_clauses[hole_index] = (var == assignment[hole_index].options[0])
+                counterexample_clauses.append((var == assignment[hole_index].options[0]))
             else:
                 all_options = [var == option for option in self[hole_index].options]
-                counterexample_clauses[hole_index] = z3.Or(all_options)
-        counterexample_encoding = z3.Not(z3.And(list(counterexample_clauses.values())))
+                counterexample_clauses.append(z3.Or(all_options))
+        counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
         DesignSpace.solver.add(counterexample_encoding)
 
 
@@ -180,9 +163,10 @@ class CombinationColoring:
     Note: color 0 is reserved for general hole-free objects.
     '''
     def __init__(self, holes):
-        # these are hole options of the initial design space
+        '''
+        :param holes of the initial design space
+        '''
         self.holes = holes
-
         self.coloring = {}
         self.reverse_coloring = {}
 

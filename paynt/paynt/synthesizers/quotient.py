@@ -11,11 +11,11 @@ from .statistic import Statistic
 
 from ..sketch.jani import JaniUnfolder
 from ..sketch.property import Property
-from ..sketch.holes import *
+from ..sketch.holes import Hole,Holes,DesignSpace,CombinationColoring
 
 from ..profiler import Profiler
 
-from .models import MarkovChain,MDP
+from .models import MarkovChain,MDP,DTMC
 
 import logging
 logger = logging.getLogger(__name__)
@@ -60,8 +60,10 @@ class QuotientContainer:
         mdp = submodel_construction.model
         choice_map = submodel_construction.new_to_old_action_mapping
         assert len(choice_map) == mdp.nr_choices
+        
         if design_space.size == 1:
             assert mdp.nr_choices == mdp.nr_states
+            return DTMC(self.sketch, mdp) 
 
         # success
         return MDP(self.sketch, design_space, mdp, self, choice_map)
@@ -141,8 +143,6 @@ class QuotientContainer:
             for hole_index in inconsistent_assignments
             }
         inconsistent_differences = [inconsistent_differences[hole_index] if hole_index in inconsistent_differences else 0 for hole_index in mdp.design_space.hole_indices]
-        # print(inconsistent_differences)
-        # exit()
 
 
         return selection, inconsistent_differences
@@ -228,7 +228,7 @@ class QuotientContainer:
         # construct corresponding design subspaces
         design_subspaces = []
         for suboption in suboptions:
-            design_subspace = mdp.design_space.assume_suboptions(splitter, suboption)
+            design_subspace = mdp.design_space.assume_hole_suboptions(splitter, suboption)
             design_subspaces.append(design_subspace)
         return design_subspaces
 
@@ -401,9 +401,9 @@ class POMDPQuotientContainer(QuotientContainer):
         print("", flush=True)
 
         # create holes
-        hole_options = HoleOptions()
+        holes = Holes()
         for hole_index in range(pm.num_holes):
-            hole_options.append(None)
+            holes.append(None)
 
         # create action holes
         for obs,hole_indices in enumerate(pm.action_holes):
@@ -414,7 +414,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 options = list(range(pm.hole_options[hole_index]))
                 option_labels = [str(labels) for labels in action_labels]
                 hole = Hole(name, options, option_labels)
-                hole_options[hole_index] = hole
+                holes[hole_index] = hole
 
         # create memory holes
         for obs,hole_indices in enumerate(pm.memory_holes):
@@ -424,15 +424,15 @@ class POMDPQuotientContainer(QuotientContainer):
                 options = list(range(pm.hole_options[hole_index]))
                 option_labels = [str(o) for o in options]
                 hole = Hole(name, options, option_labels)
-                hole_options[hole_index] = hole
+                holes[hole_index] = hole
 
         # create domains for each hole
-        self.design_space = DesignSpace(hole_options, self.sketch.properties)
+        self.design_space = DesignSpace(holes, self.sketch.properties)
         self.sketch.design_space = self.design_space
         # print("design space: ", self.design_space)
 
         # associate actions with hole combinations (colors)
-        self.combination_coloring = CombinationColoring(hole_options)
+        self.combination_coloring = CombinationColoring(holes)
         self.action_to_colors = []
         num_choices = mdp.nr_choices
         self.color_0_actions = stormpy.BitVector(num_choices, False)
@@ -478,7 +478,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.holes_action = []
         self.holes_memory = []
         hole_index = 0
-        hole_options = HoleOptions()
+        holes = Holes()
 
         for obs in range(self.pomdp.nr_observations):
             obs_label = self.observation_labels[obs]
@@ -495,24 +495,24 @@ class POMDPQuotientContainer(QuotientContainer):
                 options = list(range(obs_actions))
                 option_labels = [str(labels) for labels in action_labels]
                 hole = Hole(name,options,option_labels)
-                self.holes_action[obs].append(hole_options.num_holes)
-                hole_options.append(hole)
+                self.holes_action[obs].append(holes.num_holes)
+                holes.append(hole)
 
                 # create memory hole
                 name = "M" + string
                 options = list(range(memory_size))
                 option_labels = [str(o) for o in options]
                 hole = Hole(name,options,option_labels)
-                self.holes_memory[obs].append(hole_options.num_holes)
-                hole_options.append(hole)
+                self.holes_memory[obs].append(holes.num_holes)
+                holes.append(hole)
 
 
-        self.design_space = DesignSpace(hole_options, self.sketch.properties)
+        self.design_space = DesignSpace(holes, self.sketch.properties)
         self.sketch.design_space = self.design_space
         
         # associate actions with hole combinations (colors)
         # TODO determine reachable holes ?
-        self.combination_coloring = CombinationColoring(hole_options)
+        self.combination_coloring = CombinationColoring(holes)
         self.action_to_colors = []
         num_choices = self.quotient_mdp.nr_choices
         self.color_0_actions = stormpy.BitVector(num_choices, False)

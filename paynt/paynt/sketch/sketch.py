@@ -1,6 +1,6 @@
 import stormpy
 from .property import Property, OptimalityProperty
-from .holes import Hole, HoleOptions, DesignSpace
+from .holes import Hole, Holes, DesignSpace
 
 import os
 import re
@@ -24,12 +24,12 @@ class Sketch:
         self.jani = None
 
         logger.info(f"Loading sketch from {sketch_path} with constants {constant_str} ...")
-        self.prism, hole_options, self.hole_expressions = Sketch.load_sketch(sketch_path, constant_str)
-        
+        self.prism, holes, self.hole_expressions = Sketch.load_sketch(sketch_path, constant_str)
+
         logger.info(f"Loading properties from {properties_path} with constants {constant_str} ...")
         self.properties, self.optimality_property = Sketch.parse_properties(self.prism, properties_path, constant_str)
         
-        self.design_space = DesignSpace(hole_options, self.properties)
+        self.design_space = DesignSpace(holes, self.properties)
 
         logger.debug(f"Sketch has {self.design_space.num_holes} holes.")
         logger.debug(f"Hole options: {self.design_space}")
@@ -119,14 +119,15 @@ class Sketch:
 
         # convert single-valued holes to a defined constant
         constant_definitions = dict()
-        hole_options = HoleOptions()
+        holes_new = Holes()
         hole_expressions_new = []
         for hole_index,hole in enumerate(holes):
             if hole.size == 1:
                 constant_definitions[program_constants[hole.name].expression_variable] = hole_expressions[hole_index][0]
             else:
-                hole_options.append(hole)
+                holes_new.append(hole)
                 hole_expressions_new.append(hole_expressions[hole_index])
+        holes = holes_new
         hole_expressions = hole_expressions_new
 
         
@@ -135,7 +136,7 @@ class Sketch:
         prism = prism.substitute_constants()
 
         # success
-        return prism, hole_options, hole_expressions
+        return prism, holes, hole_expressions
 
  
     @classmethod
