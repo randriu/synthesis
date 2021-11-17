@@ -45,6 +45,7 @@ class JaniUnfolder():
         self.edge_to_color = None
         self.unfold_jani(jani, sketch.design_space)
 
+
     # Unfold holes in the jani program
     def unfold_jani(self, jani, design_space):
         # ensure that jani.constants are in the same order as our holes
@@ -70,7 +71,6 @@ class JaniUnfolder():
         jani_program.set_model_type(stormpy.JaniModelType.MDP)
         jani_program.finalize()
         jani_program.check_valid()
-        # print("colors: ", self.combination_coloring.colors)
 
         filename = "output.jani"
         logger.debug(f"Writing unfolded program to {filename}")
@@ -79,14 +79,22 @@ class JaniUnfolder():
         logger.debug("Done writing file.")
 
         # collect colors of each edge
+        edge_to_hole_options = {}
         edge_to_color = {}
         for aut_index, automaton in enumerate(jani_program.automata):
             for edge_index, edge in enumerate(automaton.edges):
                 global_index = jani_program.encode_automaton_and_edge_index(aut_index, edge_index)
                 edge_to_color[global_index] = edge.color
 
+                if edge.color == 0:
+                    continue
+                options = self.combination_coloring.reverse_coloring[edge.color]
+                options = {hole_index:option for hole_index,option in enumerate(options) if option is not None}
+                edge_to_hole_options[global_index] = options
+
         self.jani_unfolded = jani_program
         self.edge_to_color = edge_to_color
+        self.edge_to_hole_options = edge_to_hole_options
 
     def automaton_has_holes(self, automaton, expression_variables):
         for edge_index, e in enumerate(automaton.edges):

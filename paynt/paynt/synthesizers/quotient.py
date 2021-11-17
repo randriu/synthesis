@@ -29,9 +29,9 @@ class QuotientContainer:
         self.sketch = sketch
         
         self.quotient_mdp = None
-        self.combination_coloring = None
-        self.action_to_colors = None
-        self.color_0_actions = None
+
+        self.default_actions = None        
+        self.action_to_hole_options = None
 
     def build(self, design_space):
         if design_space == self.sketch.design_space:
@@ -39,13 +39,12 @@ class QuotientContainer:
             return MDP(self.quotient_mdp, design_space, self)
         
         # must restrict the quotient
-        # get actions having colors associated this design space
-        relevant_colors = self.combination_coloring.subcolors(design_space)
-        selected_actions = stormpy.BitVector(self.color_0_actions)
+        selected_actions = stormpy.BitVector(self.default_actions)
         for act_index in range(self.quotient_mdp.nr_choices):
             if selected_actions.get(act_index):
                 continue
-            if self.action_to_colors[act_index].issubset(relevant_colors):
+            hole_options = self.action_to_hole_options[act_index]
+            if design_space.includes(hole_options):
                 selected_actions.set(act_index)
         
         # construct the submodel
@@ -68,27 +67,21 @@ class QuotientContainer:
         # success
         return MDP(model, design_space, self, choice_map)
 
-    def scheduler_colors(self, mdp, scheduler):
-        ''' Get all colors involved in the choices of this scheduler. '''
+    def scheduler_selection(self, mdp, scheduler):
         assert scheduler.memoryless
         assert scheduler.deterministic
-        colors = set()
+        
+        selection = [set() for hole_index in mdp.design_space.hole_indices]
         for state in range(mdp.states):
             offset = scheduler.get_choice(state).get_deterministic_choice()
             choice = mdp.model.get_choice_index(state,offset)
-            # translate choice to the corresponding row in the super-MDP
             choice = mdp.quotient_choice_map[choice]
-            choice_colors = self.action_to_colors[choice]
-            colors.update(choice_colors)
-        return colors
 
-    def scheduler_selection(self, mdp, scheduler):
-        ''' Get hole assignments used in this scheduler. '''        
-        # collect colors of selected actions
-        colors = self.scheduler_colors(mdp, scheduler)
-        
-        # translate colors to hole assignments
-        selection = self.combination_coloring.get_hole_assignments(colors)
+            hole_option = self.action_to_hole_options[choice]
+            for hole_index,option in hole_option.items():
+                selection[hole_index].add(option)
+
+        selection = [list(options) for options in selection]
         return selection
 
     def scheduler_selection_difference(self, mdp, result):
@@ -99,12 +92,6 @@ class QuotientContainer:
         # get scheduler selection, filter inconsistent assignments
         selection = self.scheduler_selection(mdp, result.scheduler)        
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options)>1}
-
-        # associate inconsistent holes with colors of respective options
-        inconsistent_colors = {
-            hole_index:self.combination_coloring.subcolors_proper(hole_index,assignments)
-            for hole_index,assignments in inconsistent_assignments.items()
-        }
 
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
@@ -117,17 +104,27 @@ class QuotientContainer:
             hole_max = {hole_index: None for hole_index in inconsistent_assignments}
 
             for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                
                 value = choice_value[choice]
                 choice_global = mdp.quotient_choice_map[choice]
-                choice_colors = self.action_to_colors[choice_global]
-                for hole_index,colors in inconsistent_colors.items():
-                    if choice_colors & colors:
-                        current_min = hole_min[hole_index]
-                        if current_min is None or value < current_min:
-                            hole_min[hole_index] = value
-                        current_max = hole_max[hole_index]
-                        if current_max is None or value > current_min:
-                            hole_max[hole_index] = value
+                if self.default_actions.get(choice_global):
+                    continue
+                
+                # collect holes in which this action is inconsistent
+                choice_options = self.action_to_hole_options[choice_global]
+                inconsistent_holes = []
+                for hole_index,option in choice_options.items():
+                    inconsistent_options = inconsistent_assignments.get(hole_index,set())
+                    if option in inconsistent_options:
+                        inconsistent_holes.append(hole_index)
+
+                for hole_index in inconsistent_holes:
+                    current_min = hole_min[hole_index]
+                    if current_min is None or value < current_min:
+                        hole_min[hole_index] = value
+                    current_max = hole_max[hole_index]
+                    if current_max is None or value > current_min:
+                        hole_max[hole_index] = value
 
             for hole_index,min_value in hole_min.items():
                 if min_value is None:
@@ -143,7 +140,6 @@ class QuotientContainer:
             for hole_index in inconsistent_assignments
             }
         inconsistent_differences = [inconsistent_differences[hole_index] if hole_index in inconsistent_differences else 0 for hole_index in mdp.design_space.hole_indices]
-
 
         return selection, inconsistent_differences
 
@@ -233,33 +229,6 @@ class QuotientContainer:
         return design_subspaces
 
 
-    def test_family(self, family, optimality_property):
-        pass
-
-        # family["A([o=1],0)"] = [0]
-        # # family["A([o=1],1)"] = [0]
-        # print(family)
-
-        # mdp = self.build(family)
-        # result = mdp.analyze_property(optimality_property)
-        # at_init = mdp.at_initial_state(result)
-        # print(" MDP min: ", at_init)
-
-        # assignment,_ = self.scheduler_consistent(mdp,result.scheduler)
-        # assignment = HoleOptions(assignment)
-        # # print(assignment)
-
-        # mdp = self.build(assignment)
-        # result2 = mdp.analyze_property(optimality_property)
-        # at_init2 = mdp.at_initial_state(result2)
-
-        # print("DTMC min: ", at_init2)
-
-        # exit()
-
-
-
-
 
 class JaniQuotientContainer(QuotientContainer):
     
@@ -271,28 +240,41 @@ class JaniQuotientContainer(QuotientContainer):
         self.sketch.properties = unfolder.properties
         self.sketch.optimality_property = unfolder.optimality_property
         self.sketch.design_space.set_properties(self.sketch.properties)
-        self.combination_coloring = unfolder.combination_coloring
 
         # build quotient MDP       
+        edge_to_hole_options = unfolder.edge_to_hole_options
         self.quotient_mdp = stormpy.build_sparse_model_with_options(unfolder.jani_unfolded, MarkovChain.builder_options)
 
-        # associate each action of a quotient MDP with a set of colors
-        # remember color-0 actions
+        # associate each action of a quotient MDP with hole options
+        # remember default actions (actions taken in each hole assignment)
+        # TODO handle overlapping colors
         num_choices = self.quotient_mdp.nr_choices
-        self.action_to_colors = []
-        self.color_0_actions = stormpy.BitVector(num_choices, False)
-        for act_index in range(num_choices):
-            edges = self.quotient_mdp.choice_origins.get_edge_index_set(act_index)
-            colors = {unfolder.edge_to_color[edge] for edge in edges}
-            # if a choice has color 0 and some other, it is meaningless to store 0
-            if colors == {0}:
-                self.color_0_actions.set(act_index)
-            if len(colors) > 1 and 0 in colors:
-                colors.remove(0)
-            self.action_to_colors.append(colors)
+
+        self.default_actions = stormpy.BitVector(num_choices, False)
+        self.action_to_hole_options = []
+        tm = self.quotient_mdp.transition_matrix
+        for choice in range(num_choices):
+            edges = self.quotient_mdp.choice_origins.get_edge_index_set(choice)            
+            hole_options = {}
+            for edge in edges:
+                combination = edge_to_hole_options.get(edge, None)
+                if combination is None:
+                    continue
+                for hole_index,option in combination.items():
+                    options = hole_options.get(hole_index,set())
+                    options.add(option)
+                    hole_options[hole_index] = options
+
+            for hole_index,options in hole_options.items():
+                assert len(options) == 1
+            hole_options = {hole_index:list(options)[0] for hole_index,options in hole_options.items()}
+
+            self.action_to_hole_options.append(hole_options)
+            if len(hole_options) == 0:
+                self.default_actions.set(choice)
 
         self.splitter_frequency = [0] * self.sketch.design_space.num_holes
-        
+
 
     
 class POMDPQuotientContainer(QuotientContainer):
@@ -316,8 +298,8 @@ class POMDPQuotientContainer(QuotientContainer):
         self.design_space = None
 
         # coloring
-        self.combination_coloring = None
-        self.action_to_colors = None
+        self.action_to_hole_options = None
+        self.default_actions = None
 
         # construct quotient POMDP
         MarkovChain.builder_options.set_build_choice_labels(True)
@@ -433,9 +415,10 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # associate actions with hole combinations (colors)
         self.combination_coloring = CombinationColoring(holes)
-        self.action_to_colors = []
+        self.action_to_hole_options = []
         num_choices = mdp.nr_choices
-        self.color_0_actions = stormpy.BitVector(num_choices, False)
+
+        self.default_actions = stormpy.BitVector(num_choices, False)
         
         for row in range(num_choices):
             relevant_holes = {}
@@ -446,16 +429,11 @@ class POMDPQuotientContainer(QuotientContainer):
             if memory_hole != pm.num_holes:
                 relevant_holes[memory_hole] = pm.row_memory_option[row]
             if not relevant_holes:
-                self.color_0_actions.set(row)
-                self.action_to_colors.append({0})
+                self.action_to_hole_options.append({})
+                self.default_actions.set(row)
                 continue
 
-            combination = tuple(
-                relevant_holes[hole_index] if hole_index in relevant_holes else None
-                for hole_index in hole_options.hole_indices
-            )
-            color = self.combination_coloring.get_or_make_color(combination)
-            self.action_to_colors.append({color})
+            self.action_to_hole_options.append(relevant_holes)
 
         self.splitter_frequency = [0] * self.design_space.num_holes
 

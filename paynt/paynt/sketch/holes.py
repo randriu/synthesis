@@ -73,6 +73,12 @@ class Holes(list):
         suboptions = [[hole.options[0]] for hole in self]
         return self.assume_suboptions(suboptions)
 
+    def includes(self, hole_options):
+        for hole_index,option in hole_options.items():
+            if not option in self[hole_index].options:
+                return False
+        return True
+
 
 class DesignSpace(Holes):
     '''
@@ -220,5 +226,3 @@ class CombinationColoring:
         hole_assignments = [list(assignments) for assignments in hole_assignments]
 
         return hole_assignments
-
-# TODO more general hole-option-action mapping

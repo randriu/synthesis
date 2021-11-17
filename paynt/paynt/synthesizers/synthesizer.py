@@ -29,7 +29,8 @@ class Synthesizer:
         else:
             if sketch.is_pomdp:
                 self.quotient_container = POMDPQuotientContainer(sketch)
-                self.quotient_container.unfoldFullMemory(memory_size = 1)
+                # self.quotient_container.unfoldFullMemory(memory_size = 1)
+                self.quotient_container.unfoldPartialMemory()
             else:
                 self.quotient_container = JaniQuotientContainer(sketch)
 
@@ -246,7 +247,7 @@ class SynthesizerPOMDP():
         self.quotient_container.unfoldPartialMemory()
 
         mdp = self.quotient_container.build(self.sketch.design_space)
-        bounds = mdp.analyze_property(self.sketch.optimality_property)
+        bounds = mdp.model_check_property(self.sketch.optimality_property)
         selection = self.quotient_container.scheduler_selection(mdp, bounds.scheduler)
         print("scheduler selected: ", selection)
 
@@ -368,8 +369,8 @@ class SynthesizerPOMDP():
 
         
         # self.strategy_1()
-        # self.strategy_2()
-        self.strategy_3()
+        self.strategy_2()
+        # self.strategy_3()
         exit()
 
         

@@ -124,13 +124,14 @@ function run() {
     maze=("maze/orig" 0 1 1 1.0)
     # maze=("maze/concise" 0 1 1 1.0)
     
-    maze=("pomdp/maze/orig" 0 2.5 2.5 1.0)
+    # maze=("pomdp/maze/orig" 0 2.5 2.5 1.0)
     # maze=("pomdp/maze/concise" 0 1.0 1.0 1.0)
     grid=("pomdp/grid" 0 1.0 1.0 1.0)
     avoid=("pomdp/grid/avoid" 0 1.0 1.0 1.0)
     refuel=("pomdp/refuel" 0 1.0 1.0 1.0)
 
-    benchmark=("pomdp/refuel" 0 1.0 1.0 1.0)
+    # benchmark=("pomdp/refuel" 0 1.0 1.0 1.0)
+    benchmark=("badcolors" 0 1.0 1.0 1.0)
 
 
     # running ##########
@@ -141,7 +142,7 @@ function run() {
     model=maze
     # model=grid
     # model=avoid
-    # model=refuel
+    model=refuel
 
     # model=benchmark
 

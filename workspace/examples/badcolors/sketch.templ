@@ -1,0 +1,19 @@
+dtmc
+
+hole int X in {0,1};
+
+module A
+    a : [0..1] init 0;
+    [s] true -> (a'=X);
+endmodule
+
+module B
+    b : [0..1] init 0;
+    [s] true -> (b'=X);
+endmodule
+
+formula goal = a=1 & b =1;
+
+rewards "steps"
+    true : 1;
+endrewards
