@@ -146,8 +146,8 @@ function run() {
     # model=benchmark
 
     # onebyone $model
-    # cegar $model
-    cegis $model
+    cegar $model
+    # cegis $model
 }
 
 # --- execution ----------------------------------------------------------------

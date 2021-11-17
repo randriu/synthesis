@@ -32,6 +32,13 @@ class MarkovChain:
         env.precision = stormpy.Rational(cls.precision)
         cls.set_solver_method(is_dtmc=True)
 
+    @staticmethod
+    def build_from_program(sketch, assignment):
+        program = sketch.restrict(assignment)
+        model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
+        MarkovChain.no_overlapping_guards(model)
+        return model
+
     @classmethod
     def set_solver_method(cls, is_dtmc):
         if is_dtmc:
@@ -41,6 +48,7 @@ class MarkovChain:
 
     def __init__(self, model):
         self.model = model
+        assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
     
     @property
     def states(self):
@@ -71,17 +79,6 @@ class MarkovChain:
 
     def at_initial_state(self, array):
         return array.at(self.initial_state)
-
-    @staticmethod
-    def no_overlapping_guards(model):
-        assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-
-    @staticmethod
-    def build_from_program(sketch, assignment):
-        program = sketch.restrict(assignment)
-        model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
-        MarkovChain.no_overlapping_guards(model)
-        return model
 
 
 class DTMC(MarkovChain):
@@ -134,23 +131,22 @@ class DTMC(MarkovChain):
 
 class MDP(MarkovChain):
 
-    def __init__(self, sketch, design_space, model, quotient_container, quotient_choice_map = None):
+    def __init__(self, model, design_space, quotient_container, quotient_choice_map = None):
         super().__init__(model)
         self.design_space = design_space
-        self.model = model
         self.quotient_container = quotient_container
         self.quotient_choice_map = quotient_choice_map
         if quotient_choice_map is None:
             self.quotient_choice_map = [choice for choice in range(self.model.nr_choices)]
         self.design_subspaces = None
 
-    def analyze_property(self, prop, alt = False):
+    def model_check_property(self, prop, alt = False):
         '''
         Model check MDP against property.
         :param alt if True, alternative direction will be checked
         :return model checking result
         '''
-        return self.analyze_formula(prop.formula if not alt else prop.formula_alt)
+        return self.model_check_formula(prop.formula if not alt else prop.formula_alt)
 
     def check_property(self, prop):
         '''
@@ -160,7 +156,7 @@ class MDP(MarkovChain):
         '''
 
         # check primary direction
-        result_primary = self.analyze_property(prop)
+        result_primary = self.model_check_property(prop)
         value_primary = self.at_initial_state(result_primary)
         sat_primary = prop.satisfies_threshold(value_primary)
         if self.is_dtmc:
@@ -171,7 +167,7 @@ class MDP(MarkovChain):
             return False, (result_primary, None)
 
         # primary direction is not sufficient
-        result_secondary = self.analyze_property(prop, alt = True)
+        result_secondary = self.model_check_property(prop, alt = True)
         value_secondary = self.at_initial_state(result_secondary)
         sat_secondary = prop.satisfies_threshold(value_secondary)
         feasible = True if sat_secondary else None
@@ -205,7 +201,7 @@ class MDP(MarkovChain):
         '''
 
         # check primary direction
-        result_primary = self.analyze_property(prop)
+        result_primary = self.model_check_property(prop)
         value_primary = self.at_initial_state(result_primary)
         opt_primary = prop.improves_optimum(value_primary)
         sat_primary = prop.satisfies_threshold(value_primary)
@@ -229,7 +225,7 @@ class MDP(MarkovChain):
             return (result_primary,None), value_primary, hole_options, False
 
         # UB might improve the optimum
-        result_secondary = self.analyze_property(prop, alt = True)
+        result_secondary = self.model_check_property(prop, alt = True)
         value_secondary = self.at_initial_state(result_secondary)
         opt_secondary = prop.improves_optimum(value_secondary)
         sat_secondary = prop.satisfies_threshold(value_secondary)
@@ -252,9 +248,4 @@ class MDP(MarkovChain):
         else:
             # LB < T, LB < UB < OPT
             return (result_primary,result_secondary), value_secondary, assignment, True
-        
-
-
-
-
 

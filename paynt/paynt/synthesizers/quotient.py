@@ -36,7 +36,7 @@ class QuotientContainer:
     def build(self, design_space):
         if design_space == self.sketch.design_space:
             # quotient needed
-            return MDP(self.sketch, design_space, self.quotient_mdp, self)
+            return MDP(self.quotient_mdp, design_space, self)
         
         # must restrict the quotient
         # get actions having colors associated this design space
@@ -66,7 +66,7 @@ class QuotientContainer:
             return DTMC(model) 
 
         # success
-        return MDP(design_space, model, self, choice_map)
+        return MDP(model, design_space, self, choice_map)
 
     def scheduler_colors(self, mdp, scheduler):
         ''' Get all colors involved in the choices of this scheduler. '''
