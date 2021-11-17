@@ -16,8 +16,8 @@ namespace storm {
 
             // inject 1 state to a selected observation
             void injectMemory(uint64_t observation);
-            // inject 1 state to all observations
-            void injectMemoryAll();
+            // set memory size to all observations
+            void setMemorySize(uint64_t memory_size);
 
             // number of actions available at this observation
             std::vector<uint64_t> observation_actions;

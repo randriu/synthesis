@@ -3,6 +3,8 @@
 #include "storm-synthesis/pomdp/ExplicitPomdpMemoryUnfolder.h"
 #include "storm-synthesis/pomdp/PomdpManager.h"
 
+#include "storm/storage/SparseMatrix.h"
+
 // Define python bindings
 void define_pomdp(py::module& m) {
 
@@ -17,7 +19,7 @@ void define_pomdp(py::module& m) {
         .def(py::init<storm::models::sparse::Pomdp<double> const&>(), "Constructor.", py::arg("pomdp"))
         .def("construct_mdp", &storm::synthesis::PomdpManager<double>::constructMdp, "Unfold POMDP into MDP.")
         .def("inject_memory", &storm::synthesis::PomdpManager<double>::injectMemory, "Inject 1 state into a selected observation.", py::arg("observation"))
-        .def("inject_memory_all", &storm::synthesis::PomdpManager<double>::injectMemoryAll, "Inject 1 state into all observations.")
+        .def("set_memory_size", &storm::synthesis::PomdpManager<double>::setMemorySize, "Set memory size to all observations.", py::arg("memory_size"))
         .def_property_readonly("observation_actions", [](storm::synthesis::PomdpManager<double>& manager) {return manager.observation_actions;}, "TODO")
         .def_property_readonly("prototype_row_index", [](storm::synthesis::PomdpManager<double>& manager) {return manager.prototype_row_index;}, "TODO")
         .def_property_readonly("num_holes", [](storm::synthesis::PomdpManager<double>& manager) {return manager.num_holes;}, "TODO")
@@ -28,6 +30,12 @@ void define_pomdp(py::module& m) {
         .def_property_readonly("row_action_option", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_action_option;}, "TODO")
         .def_property_readonly("row_memory_hole", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_memory_hole;}, "TODO")
         .def_property_readonly("row_memory_option", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_memory_option;}, "TODO")
-        ; 
+        ;
+
+    m.def("multiply_with_vector", [] (storm::storage::SparseMatrix<double> matrix,std::vector<double> vector) {
+        std::vector<double> result(matrix.getRowCount());
+        matrix.multiplyWithVector(vector, result);
+        return result;
+    }, py::arg("matrix"), py::arg("vector"));
 }
 

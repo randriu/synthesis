@@ -50,6 +50,10 @@ class Statistic:
         self.status_period = 5
         self.status_time = 5
 
+    def family(self,family):
+        self.design_space = family
+        self.remaining = family.size
+
     def start(self):
         self.timer.start()
 
@@ -89,7 +93,8 @@ class Statistic:
         time_estimate = round(time_estimate,1)
         iters = self.iterations_mdp
         avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
-        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], [{avg_size_mdp} size]"
+        optimum = round(self.optimality_property.optimum,5) if (self.optimality_property is not None and self.optimality_property.optimum is not None) else "-"
+        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], opt={optimum}"
 
     def print_status(self):
         if self.timer.read() > self.status_time:

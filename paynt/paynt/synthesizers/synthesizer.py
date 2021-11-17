@@ -8,7 +8,7 @@ from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
 from .quotient import JaniQuotientContainer, POMDPQuotientContainer
 
-from ..profiler import Profiler
+from ..profiler import Timer,Profiler
 
 from ..sketch.holes import HoleOptions,DesignSpace
 
@@ -25,6 +25,7 @@ class Synthesizer:
 
         self.sketch = sketch
         self.stat = Statistic(sketch, self.method_name)
+        Profiler.initialize()
 
     @property
     def method_name(self):
@@ -68,32 +69,32 @@ class SynthesizerAR(Synthesizer):
         else:
             if sketch.is_pomdp:
                 self.quotient_container = POMDPQuotientContainer(sketch)
-                self.quotient_container.unfoldFullMemory(memory_size = 2)
+                self.quotient_container.unfoldFullMemory(memory_size = 1)
             else:
                 self.quotient_container = JaniQuotientContainer(sketch)
         
         self.stat = Statistic(sketch, self.method_name)
-        print("design space: ", self.sketch.design_space)
-        print("design space size: ", self.sketch.design_space.size)
+        # print("design space: ", self.sketch.design_space)
+        # print("design space size: ", self.sketch.design_space.size)
 
     @property
     def method_name(self):
         return "AR"
 
-    def run(self):
+    def synthesize(self, family):
 
+        self.stat.family(family)
         self.stat.start()
-        self.stat.super_mdp_size = self.quotient_container.quotient_mdp.nr_states
 
         # initiate AR loop
         satisfying_assignment = None
-        families = [self.sketch.design_space]
+        families = [family]
         while families:
             family = families.pop(-1)
             # logger.debug("analyzing family {}".format(family))
             mdp = self.quotient_container.build(family)
             self.stat.iteration_mdp(mdp.states)
-            feasible,undecided_properties,undecided_bounds = mdp.check_properties(family.properties)
+            feasible,undecided_properties,undecided_results = mdp.check_properties(family.properties)
             properties = undecided_properties
 
             if feasible == True and not self.has_optimality:
@@ -104,62 +105,273 @@ class SynthesizerAR(Synthesizer):
             can_improve = feasible is None
             if feasible == True and self.has_optimality:
                 # check optimality
-                opt_bounds,optimum,improving_assignment,can_improve = mdp.check_optimality(self.sketch.optimality_property)
+                results,optimum,improving_assignment,can_improve = mdp.check_optimality(self.sketch.optimality_property)
+
                 if optimum is not None:
                     self.sketch.optimality_property.update_optimum(optimum)
                     satisfying_assignment = improving_assignment
                 if can_improve:
-                    undecided_bounds.append(opt_bounds)
+                    undecided_results.append(results)
 
             if not can_improve:
                 self.stat.pruned(family.size)
                 continue
 
             # split family wrt first undecided result
-            subfamilies = self.quotient_container.prepare_split(mdp, undecided_bounds[0], properties)
+            subfamilies = self.quotient_container.prepare_split(mdp, undecided_results[-1], properties)
             for subfamily in subfamilies:
                 families.append(subfamily)
 
+        self.stat.finished(satisfying_assignment)
+
+        return satisfying_assignment
+
+    def run(self):
+        self.synthesize(self.sketch.design_space)
+
+
+class SynthesizerCEGIS(Synthesizer):
+
+    @property
+    def method_name(self):
+        return "CEGIS"
+
+    def run(self):
+
+        satisfying_assignment = None
+        self.sketch.design_space.z3_initialize()
+        self.sketch.design_space.z3_encode()
+
+        assignment = self.sketch.design_space.pick_assignment()
+        while assignment is not None:
+            logger.debug("analyzing assignment {}".format(assignment))
+            dtmc = DTMC(self.sketch, assignment)
+            sat,unsat_properties = dtmc.check_properties_all(self.sketch.properties)
+            sat_opt,optimum,improves = dtmc.check_optimality(self.sketch.optimality_property)
+            if sat:
+                if not self.has_optimality:
+                    satisfying_assignment = assignment
+                    break
+                if improves:
+                    self.sketch.optimality_property.update_optimum(optimum)
+                    satisfying_assignment = assignment
+
+            unsat_properties.append(self.sketch.optimality_property)
+
+            conflicts = []
+            for prop in unsat_properties:
+                conflict = [hole_index for hole_index,_ in enumerate(assignment)]
+                conflicts.append(conflict)
+            for conflict in conflicts:
+                self.sketch.design_space.exclude_assignment(assignment, conflict)
+
+            assignment = self.sketch.design_space.pick_assignment()
 
         self.stat.finished(satisfying_assignment)
+
+
+
+
+
 
 
 class SynthesizerPOMDP():
 
     def __init__(self, sketch):
         assert sketch.is_pomdp
+
         MarkovChain.initialize(sketch.properties, sketch.optimality_property)
         Profiler.initialize()
 
         self.sketch = sketch
         self.quotient_container = POMDPQuotientContainer(sketch)
 
-        self.total_time = 0
         self.total_iters = 0
 
-    def synthesize(self):
+    def synthesize(self, family = None):
+        Profiler.start("synthesis")
+        if family is None:
+            family = self.sketch.design_space
         synthesizer = SynthesizerAR(self.sketch, self.quotient_container)
-        synthesizer.run()
+        synthesizer.synthesize(family)
         synthesizer.print_stats(short_summary = True)
+        Profiler.stop()
+        print("current optimal solution: ", self.sketch.optimality_property.optimum)
         print("", flush=True)
-        self.total_time += synthesizer.stat.timer.read()
         self.total_iters += synthesizer.stat.iterations_mdp
 
-    def run(self):
+    def choose_consistent(self, full_space, restriction):
+        design_space = full_space.copy()
+        for obs,choices in restriction.items():
+            hole_index = self.quotient_container.pomdp_manager.action_holes[obs][0]
+            design_space = design_space.assume_suboptions(hole_index, choices)
+        # print("full design space", self.sketch.design_space)                
+        # print("restricted design space: ", design_space)
+        print("reduced design space from {} to {}".format(full_space.size, design_space.size))
+        return design_space
 
+    def choose_consistent_and_break_symmetry(self, full_space, observation_choices):
+        design_space = full_space.copy()
+        for obs,choices in observation_choices.items():
+            hole_indices = self.quotient_container.pomdp_manager.action_holes[obs]
+            if len(hole_indices) == 1:
+                if len(choices) == 1:
+                    # consistent observation
+                    hole_index = hole_indices[0]
+                    design_space = design_space.assume_suboptions(hole_index, choices)
+            else:
+                # have multiple holes for this observation
+                for index,hole_index in enumerate(hole_indices):
+                    options = full_space[hole_index].options.copy()
+                    options.remove(choices[index])
+                    design_space = design_space.assume_suboptions(hole_index, options)
+        # print("full design space", self.sketch.design_space)                
+        # print("restricted design space: ", design_space)
+        print("reduced design space from {} to {}".format(full_space.size, design_space.size))
+        return design_space
+
+    def strategy_1(self):
+        # self.sketch.optimality_property.optimum = 0.75
+        self.quotient_container.pomdp_manager.set_memory_size(1)
+        self.quotient_container.unfoldPartialMemory()
+        self.synthesize()
+        Profiler.print()
+
+    def strategy_2(self):
         # analyze POMDP
         assert len(self.sketch.properties) == 0
         self.quotient_container.unfoldPartialMemory()
 
-        # initial run
-        self.synthesize()
+        mdp = self.quotient_container.build(self.sketch.design_space)
+        bounds = mdp.analyze_property(self.sketch.optimality_property)
+        selection = self.quotient_container.scheduler_selection(mdp, bounds.scheduler)
+        print("scheduler selected: ", selection)
 
-        self.quotient_container.pomdp_manager.inject_memory_all()
-        # self.quotient_container.pomdp_manager.inject_memory(3)
-        # self.quotient_container.pomdp_manager.inject_memory(0)
-        self.quotient_container.unfoldPartialMemory()
-        self.synthesize()
+        # associate observations with respective choices
+        observation_choices = {}
+        pm = self.quotient_container.pomdp_manager
+        for obs in range(self.quotient_container.pomdp.nr_observations):
+            hole_indices = pm.action_holes[obs]
+            if len(hole_indices) == 0:
+                continue
+            hole_index = hole_indices[0]
+            assert len(selection[hole_index]) >= 1
+            observation_choices[obs] = selection[hole_index]
+        print("observation choices: ", observation_choices)
+
+        # map consistent observations to corresponding choices
+        consistent_restriction = {obs:choices for obs,choices in observation_choices.items() if len(choices) == 1}
+        print("consistent restriction" , consistent_restriction)
+
+        # synthesize optimal solution for k=1 (full, restricted)
+        # restrict options of consistent holes to a scheduler selection
+        design_space = self.choose_consistent(self.sketch.design_space, consistent_restriction)
+        self.synthesize(design_space)
+
+        # synthesize optimal solution for k=2 (partial, restricted)
+        # gradually inject memory to inconsistent observations
+        for obs in range(self.quotient_container.pomdp.nr_observations):
+            if pm.action_holes[obs] and obs not in consistent_restriction:
+                print("injecting memory to observation ", obs)
+                print("scheduler chose actions ", observation_choices[obs])
+                self.quotient_container.pomdp_manager.inject_memory(obs)
+                self.quotient_container.unfoldPartialMemory()
+                # design_space = self.choose_consistent(self.sketch.design_space, consistent_restriction)
+                design_space = self.choose_consistent_and_break_symmetry(self.sketch.design_space, observation_choices)
+                self.synthesize(design_space)
+
+        # synthesize optimal solution for k=2 (partial, unrestricted)
+        # print("synthesizing solution for k=2 (partial, unrestricted)")
+        # self.synthesize()
+
+        # total stats
+        print("total iters: ", self.total_iters)
+        Profiler.print()
+
+    def strategy_3(self):
         
+        assert len(self.sketch.properties) == 0
+        pomdp = self.quotient_container.pomdp
+        pm = self.quotient_container.pomdp_manager
+
+        obs_memory_size = [1] * pomdp.nr_observations
+        max_memory_size = 1
+
+        for i in range(10):
+            # analyze quotient MDP
+            self.quotient_container.unfoldPartialMemory()
+            mdp = self.quotient_container.build(self.sketch.design_space)
+            result = mdp.analyze_property(self.sketch.optimality_property)
+            selection = self.quotient_container.scheduler_selection(mdp, result.scheduler)
+            print("scheduler selected: ", selection)
+
+            # fix choices associated with consistent actions
+            design_space = self.sketch.design_space.copy()
+            for hole_index,hole in enumerate(self.sketch.design_space):
+                options = selection[hole_index]
+                if len(options) > 1:
+                    continue
+                # print("restricting hole {} to option {}".format(hole_index,options[0]))
+                # design_space[hole_index] = hole.subhole(options)
+
+            # synthesize
+            print("reduced design space from {} to {}".format(self.sketch.design_space.size, design_space.size))
+            self.synthesize(design_space)
+
+            # identify observations having inconsistent action or memory choices
+            obs_list = range(self.quotient_container.pomdp.nr_observations)
+            inconsistent_holes = [hole_index for hole_index,options in enumerate(selection) if len(options)>1]
+            inconsistent_obs = []
+            for obs in obs_list:
+                for hole_index in itertools.chain(pm.action_holes[obs],pm.memory_holes[obs]):
+                    if hole_index in inconsistent_holes:
+                        inconsistent_obs.append(obs)
+                        break
+            
+            # inject memory into observation having inconsistent action holes
+            can_add_memory = [obs for obs in obs_list if obs_memory_size[obs] < max_memory_size]
+            want_add_memory = [obs for obs in can_add_memory if obs in inconsistent_obs]
+
+            if not want_add_memory:
+                # all observation are at max memory
+                max_memory_size += 1
+                can_add_memory = [obs for obs in obs_list if obs_memory_size[obs] < max_memory_size]
+                want_add_memory = [obs for obs in can_add_memory if obs in inconsistent_obs]
+
+            assert want_add_memory
+            obs = want_add_memory[0]
+
+            print("injecting memory into observation ", obs)
+
+            pm.inject_memory(obs)
+            obs_memory_size[obs] += 1
+
+        exit()
+
+
+
+        # # associate observations with respective choices
+        # observation_choices = {}
+        
+        #     
+        #     if len(hole_indices) == 0:
+        #         continue
+        #     hole_index = hole_indices[0]
+        #     assert len(selection[hole_index]) >= 1
+        #     observation_choices[obs] = selection[hole_index]
+        # print("observation choices: ", observation_choices)
+
+    def run(self):
+
+        
+        # self.strategy_1()
+        # self.strategy_2()
+        self.strategy_3()
+        exit()
+
+        
+
+
         # for i in range(3):
         #     print("splitter frequency: ", self.quotient_container.splitter_frequency)
         #     obs = self.quotient_container.suggest_injection()
@@ -169,59 +381,7 @@ class SynthesizerPOMDP():
         #     self.quotient_container.unfoldPartialMemory()
         #     self.synthesize()
         #     print("current stats: {} sec, {} iters".format(round(self.total_time,2),self.total_iters))
-            
-
-        # Profiler.start("pomdp unfolding")
-        # self.quotient_container.pomdp_manager.inject_memory_all()
-        # self.quotient_container.unfoldPartialMemory()
-        # Profiler.stop()
-        # self.synthesizer = SynthesizerAR(sketch, self.quotient_container)
-        # self.synthesizer.run()
-        # self.synthesizer.print_stats(short_summary = True)
-
-        # Profiler.start("pomdp unfolding")
-        # self.quotient_container.pomdp_manager.inject_memory_all()
-        # self.quotient_container.unfoldPartialMemory()
-        # Profiler.stop()
-        # self.synthesizer = SynthesizerAR(sketch, self.quotient_container)
-        # self.synthesizer.run()
-        # self.synthesizer.print_stats(short_summary = True)
-
-        Profiler.print()
-
-
-class SynthesizerCEGIS(Synthesizer):
-
-    @property
-    def method_name(self):
-        return "CEGIS"
-    
-    def run(self):
-
-        satisfying_assignment = None
-        self.design_space.z3_initialize()
-        self.design_space.z3_encode()
-
-        assignment = self.design_space.pick_assignment()
-        while assignment is not None:
-            dtmc = DTMC(self.sketch, assignment)
-            unsat_properties = dtmc.check_properties_all(self.properties)
-            sat_opt,improved = dtmc.check_optimality(self.optimality_property)
-            # TODO
-            if sat:
-                if not self.has_optimality:
-                    satisfying_assignment = assignment
-                    break
-                if improved:
-                    satisfying_assignment = assignment
-
-            self.design_space.exclude_assignment(assignment, [index for index in range(len(self.design_space.holes))])
-            assignment = self.design_space.pick_assignment()
-
-        self.stat.finished(satisfying_assignment)
-
-
-
+        
 
 
 

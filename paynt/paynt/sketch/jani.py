@@ -13,6 +13,7 @@ class JaniUnfolder():
     ''' Unfolder of hole combinations into JANI program. '''
 
     def __init__(self, sketch):
+
         logger.debug("Constructing JANI program...")
         
         # pack properties
@@ -38,6 +39,7 @@ class JaniUnfolder():
         self.optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
 
         # unfold holes in the program
+        self.hole_expressions = sketch.hole_expressions
         self.jani_unfolded = None
         self.combination_coloring = None
         self.edge_to_color = None
@@ -142,7 +144,7 @@ class JaniUnfolder():
         ]
         for combination in itertools.product(*combinations):
             substitution = {
-                expression_variables[hole_index] : design_space[hole_index].expressions[combination[hole_index]]
+                expression_variables[hole_index] : self.hole_expressions[hole_index][combination[hole_index]]
                 for hole_index in design_space.hole_indices
                 if combination[hole_index] is not None
             }

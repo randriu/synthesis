@@ -24,7 +24,7 @@ class Sketch:
         self.jani = None
 
         logger.info(f"Loading sketch from {sketch_path} with constants {constant_str} ...")
-        self.prism, hole_options = Sketch.load_sketch(sketch_path, constant_str)
+        self.prism, hole_options, self.hole_expressions = Sketch.load_sketch(sketch_path, constant_str)
         
         logger.info(f"Loading properties from {properties_path} with constants {constant_str} ...")
         self.properties, self.optimality_property = Sketch.parse_properties(self.prism, properties_path, constant_str)
@@ -35,6 +35,9 @@ class Sketch:
         logger.debug(f"Hole options: {self.design_space}")
         logger.info(f"Design space: {self.design_space.size}")
 
+    @property
+    def is_pomdp(self):
+        return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
 
     @classmethod
     def constants_map(cls, prism, constant_str):
@@ -97,14 +100,17 @@ class Sketch:
 
         # parse hole definitions
         holes = []
+        hole_expressions = []
         ep = stormpy.storage.ExpressionParser(prism.expression_manager)
         ep.set_identifier_mapping(dict())    
         for hole_name, definition in hole_definitions.items():
             options = definition.split(",")
             expressions = [ep.parse(o) for o in options]
+            hole_expressions.append(expressions)
+
             options = list(range(len(expressions)))
             option_labels = [str(e) for e in expressions]
-            hole = Hole(hole_name, options, option_labels, expressions)
+            hole = Hole(hole_name, options, option_labels)
             holes.append(hole)
 
         # collect undefined constants (must be the holes)
@@ -114,11 +120,14 @@ class Sketch:
         # convert single-valued holes to a defined constant
         constant_definitions = dict()
         hole_options = HoleOptions()
+        hole_expressions_new = []
         for hole_index,hole in enumerate(holes):
             if hole.size == 1:
-                constant_definitions[program_constants[hole.name].expression_variable] = hole.expressions[0]
+                constant_definitions[program_constants[hole.name].expression_variable] = hole_expressions[hole_index][0]
             else:
                 hole_options.append(hole)
+                hole_expressions_new.append(hole_expressions[hole_index])
+        hole_expressions = hole_expressions_new
 
         
         # define constants in the program
@@ -126,7 +135,7 @@ class Sketch:
         prism = prism.substitute_constants()
 
         # success
-        return prism, hole_options
+        return prism, hole_options, hole_expressions
 
  
     @classmethod
@@ -183,13 +192,10 @@ class Sketch:
 
     def restrict(self, assignment):
         program_constants = OrderedDict([(c.name, c.expression_variable) for c in self.prism.constants if not c.defined])
-        substitution = {program_constants[hole]:assignment[hole][0] for hole in assignment.keys()}
+        substitution = {program_constants[hole.name]:self.hole_expressions[hole_index][hole.options[0]] for hole_index,hole in enumerate(assignment)}
         program = self.prism.define_constants(substitution)
         return program
 
-    @property
-    def is_pomdp(self):
-        return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
-
+    
 
     

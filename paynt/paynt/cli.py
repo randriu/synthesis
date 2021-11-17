@@ -5,7 +5,7 @@ import os
 from . import version
 
 from .sketch.sketch import Sketch
-from .synthesizers.synthesizer import Synthesizer, SynthesizerAR, SynthesizerPOMDP
+from .synthesizers.synthesizer import Synthesizer, SynthesizerAR, SynthesizerCEGIS, SynthesizerPOMDP
 
 import logging
 # logger = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ def paynt(
     if method == "onebyone":
         algorithm = Synthesizer(sketch)
     elif method == "cegis":
-        raise NotImplementedError
+        algorithm = SynthesizerCEGIS(sketch)
     elif method == "ar":
         algorithm = SynthesizerAR(sketch)
     elif method == "hybrid":
