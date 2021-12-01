@@ -120,11 +120,9 @@ class Statistic:
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
         self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
 
-    def get_summary(self,short_summary):
+    def get_summary(self):
         sep = "--------------------"
         summary = f"{sep}\n{self.get_long_summary()}"
-        if short_summary:
-            summary += f"\n{sep}\n{self.get_short_summary()}\n"
         return summary
 
     def get_long_summary(self):
@@ -151,19 +149,3 @@ class Statistic:
         summary = f"{formulae}\n{timing}\n{design_space}\n" \
                   f"{family_stats}\n{result}\n{assignment}"
         return summary
-
-    def get_short_summary(self):
-        # if self.optimum is None:
-        #     result = "F" if self.feasible else "U"
-        # else:
-        #     result = f"opt = {round(self.optimum, 6)}"
-        # if self.method == "CEGAR":
-        #     iters = self.iterations[0]
-        # elif self.method == "CEGIS" or self.method == "1-by-1":
-        #     iters = self.iterations[1]
-        # else:
-        #     iters = (self.iterations[0], self.iterations[1])
-        # thresholds = [round(float(f.threshold), 10) for f in self.formulae]
-
-        # return f"> T = {thresholds} - {self.method}: {result} ({iters} iters, {round(self.timer.time, 2)} sec)"
-        return ""

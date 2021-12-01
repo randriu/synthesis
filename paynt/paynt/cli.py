@@ -5,7 +5,8 @@ import os
 from . import version
 
 from .sketch.sketch import Sketch
-from .synthesizers.synthesizer import Synthesizer, SynthesizerAR, SynthesizerCEGIS, SynthesizerPOMDP
+from .synthesizers.synthesizer import Synthesizer, SynthesizerAR, SynthesizerCEGIS
+from .synthesizers.pomdp import SynthesizerPOMDP
 
 import logging
 # logger = logging.getLogger(__name__)
@@ -47,11 +48,12 @@ def setup_logger(log_path):
 @click.option('--sketch', help="the sketch", required=False, default="sketch.templ")
 @click.option('--properties', help="the properties", required=False, default="sketch.properties")
 @click.option("--constants", default="")
-@click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
+@click.option('--pomdp', help="Incremental synthesis of controllers for a POMDP", is_flag=True, default=False)
+# @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
 @click.argument("method", type=click.Choice(
     ['onebyone', 'cegis', 'ar', 'hybrid', 'evo'], case_sensitive=False))
 def paynt(
-        project, sketch, properties, constants, method, short_summary
+        project, sketch, properties, constants, pomdp, method
 ):
     print("This is Paynt version {}.".format(version()))
 
@@ -61,15 +63,11 @@ def paynt(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, properties)
     sketch = Sketch(sketch_path, properties_path, constants)
-    # TODO: differentiate between solvers
-
-    # if sketch.is_pomdp:
-    #     algorithm = SynthesizerPOMDP(sketch)
-    #     algorithm.run()
-    #     exit()
 
     # choose synthesis method
-    if method == "onebyone":
+    if sketch.is_pomdp and pomdp:
+        algorithm = SynthesizerPOMDP(sketch)
+    elif method == "onebyone":
         algorithm = Synthesizer(sketch)
     elif method == "cegis":
         algorithm = SynthesizerCEGIS(sketch)
@@ -77,12 +75,15 @@ def paynt(
         algorithm = SynthesizerAR(sketch)
     elif method == "hybrid":
         raise NotImplementedError
+    elif method == "evo":
+        raise NotImplementedError
     else:
         assert None
     
     # synthesize
+
     algorithm.run()
-    algorithm.print_stats(short_summary)
+    algorithm.print_stats()
 
 
 def main():

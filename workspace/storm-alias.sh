@@ -110,8 +110,8 @@ storm-build-debug() {
 stormpy-build() {
     cd $SYNTHESIS/stormpy
     source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
-    # python3 setup.py build_ext --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
+    # python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    python3 setup.py build_ext --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     deactivate
     cd ~-

@@ -33,10 +33,9 @@ class MarkovChain:
         cls.set_solver_method(is_dtmc=True)
 
     @staticmethod
-    def build_from_program(sketch, assignment):
-        program = sketch.restrict(assignment)
+    def build_from_prism(sketch, assignment):
+        program = sketch.restrict_prism(assignment)
         model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
-        MarkovChain.no_overlapping_guards(model)
         return model
 
     @classmethod
@@ -46,9 +45,15 @@ class MarkovChain:
         else:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, model, quotient_state_map = None, quotient_choice_map = None):
         assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+        self.model = model
+        self.quotient_choice_map = quotient_choice_map
+        if quotient_choice_map is None:
+            self.quotient_choice_map = [c for c in range(model.nr_choices)]
+        self.quotient_state_map = quotient_state_map
+        if quotient_state_map is None:
+            self.quotient_state_map = [s for s in range(model.nr_states)]
     
     @property
     def states(self):
@@ -83,13 +88,15 @@ class MarkovChain:
 
 class DTMC(MarkovChain):
 
+    def __init__(self, *args):
+        super().__init__(*args)
+
     def check_property(self, prop):
         ''' Check whether this DTMC satisfies the property. '''
         result = self.model_check_property(prop)
         value = self.at_initial_state(result)
         return prop.satisfies_threshold(value)
 
-    # check 
     def check_properties(self, properties):
         '''
         Check multiple properties.
@@ -114,9 +121,6 @@ class DTMC(MarkovChain):
                 unsat_properties.append(p)
         return len(unsat_properties) == 0, unsat_properties
 
-    # model check optimality property, return
-    # (1) whether the property was satisfied
-    # (2) whether the optimal value was improved
     def check_optimality(self, prop):
         '''
         Model check optimality property.
@@ -131,14 +135,10 @@ class DTMC(MarkovChain):
 
 class MDP(MarkovChain):
 
-    def __init__(self, model, design_space, quotient_container, quotient_choice_map = None):
-        super().__init__(model)
+    def __init__(self, model, design_space, quotient_container, quotient_state_map = None, quotient_choice_map = None):
+        super().__init__(model, quotient_state_map, quotient_choice_map)
         self.design_space = design_space
         self.quotient_container = quotient_container
-        self.quotient_choice_map = quotient_choice_map
-        if quotient_choice_map is None:
-            self.quotient_choice_map = [choice for choice in range(self.model.nr_choices)]
-        self.design_subspaces = None
 
     def model_check_property(self, prop, alt = False):
         '''
@@ -165,6 +165,8 @@ class MDP(MarkovChain):
         # no need to check secondary direction if primary direction yields UNSAT
         if not sat_primary:
             return False, (result_primary, None)
+
+        # if the primary direction is SAT and the corresponding scheduler is consistent ???
 
         # primary direction is not sufficient
         result_secondary = self.model_check_property(prop, alt = True)

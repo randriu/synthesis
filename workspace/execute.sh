@@ -10,6 +10,7 @@ fi
 timeout=100d
 verbose=false
 parallel=false
+pomdp=false
 
 # workspace settings
 paynt_exe="$SYNTHESIS/paynt/paynt.py"
@@ -31,26 +32,21 @@ function reset_log() {
 #     echo "$@" >> ${log_dir}/log.txt
 # }
 
-function choose_project() {
-    local arg=$1
-    local preset=(`eval echo '${'${arg}'[@]}'`)
-    project=${preset[0]}
-    cmax=${preset[1]}
-    t_min=${preset[2]}
-    t_max=${preset[3]}
-    t_step=${preset[4]}
-}
-
 function python_paynt() {
-    local method=$1
-    local paynt_call="python3 ${paynt_exe} --project ${projects_dir}/${project}/ $method --short-summary"
-    # local constants="--constants CMAX=${cmax},THRESHOLD=${threshold}"
-    echo \$ ${paynt_call} ${constants} ${optimality}
-    timeout ${timeout} ${paynt_call} ${constants} ${optimality}
+    local project=$1
+    local method=$2
+    local pomdp_flag=""
+    if [ ${pomdp} = "true" ]; then
+        pomdp_flag="--pomdp"
+    fi
+    local paynt_call="python3 ${paynt_exe} --project ${projects_dir}/${project}/ $method $pomdp_flag"
+    echo \$ ${paynt_call}
+    timeout ${timeout} ${paynt_call} ${constants}
 }
 
 function paynt() {
-    local method=$1
+    local project=$1
+    local method=$2
     local parallelity=""
     if [ ${parallel} = "true" ]; then
         parallelity="&"
@@ -59,105 +55,68 @@ function paynt() {
     if [ ${verbose} = "false" ]; then
         verbosity=${verbosity}' | grep "^> "'
     fi
-    command="python_paynt $method | ${verbosity} ${parallelity}"
+    command="python_paynt $project $method | ${verbosity} ${parallelity}"
     eval ${command}
 }
 
-function try_thresholds() {
-    local method=$1
-    local project=$2
-    choose_project $project
-    for threshold in `seq ${t_min} ${t_step} ${t_max}`; do
-        paynt $method
-    done
-    wait
-}
-
 function onebyone() {
-    try_thresholds onebyone $1
+    paynt $1 onebyone
 }
 function cegis() {
-    try_thresholds cegis $1
+    paynt $1 cegis
 }
-function cegar() {
-    try_thresholds ar $1
+function ar() {
+    paynt $1 ar
 }
 function hybrid() {
-    try_thresholds hybrid $1
-}
-function evo() {
-    try_thresholds evo $1
-}
-
-function try_models() {
-    local method=$1
-    echo "----- $method"
-    for model in "${models[@]}"; do
-        echo "--- $model"
-        choose_model $model
-        try_thresholds $method
-    done
+    paynt $1 hybrid
 }
 
 # --- sandbox ------------------------------------------------------------------
 
-function test_release() {
-    timeout=1m
-    parallel=true
-    # verbose=true
-
-    herman=("herman/release-test" 2 0.60 0.75 0.15)
-    cegar herman
-    echo "^ should be at 15 and 19 sec"
-}
-
-
 function run() {
     # timeout=5s
-    parallel=true
+    parallel=false
     verbose=true
-    
-    # dpm=("dpm/orig-bat100" 3 140 140 1.0)
-    pole=("pole/orig" 0 16.7 16.7 1.0)
-    dice=("dice/5" 0 16.7 16.7 1.0)
-    coin=("coin" 0 16.7 16.7 1.0)
-    maze=("maze/orig" 0 1 1 1.0)
-    # maze=("maze/concise" 0 1 1 1.0)
-    
-    # maze=("pomdp/maze/orig" 0 2.5 2.5 1.0)
-    # maze=("pomdp/maze/concise" 0 1.0 1.0 1.0)
-    grid=("pomdp/grid" 0 1.0 1.0 1.0)
-    avoid=("pomdp/grid/avoid" 0 1.0 1.0 1.0)
-    refuel=("pomdp/refuel" 0 1.0 1.0 1.0)
 
-    # benchmark=("pomdp/refuel" 0 1.0 1.0 1.0)
-    benchmark=("badcolors" 0 1.0 1.0 1.0)
+    coin="coin"
+    coin="coin/more"
 
+    maze="maze/orig"
+    # maze="maze/concise"
+
+    pomdp=true
+    maze="pomdp/maze/orig"
+    maze="pomdp/maze/concise"
+
+    grid="pomdp/grid/orig"
+    avoid="pomdp/grid/avoid"
+    refuel="pomdp/refuel"
+
+    benchmark="pomdp/refuel"
+    benchmark="badcolors"
 
     # running ##########
 
-    # model=pole
-    # model=dice
-    model=coin
-    model=maze
-    # model=grid
-    # model=avoid
-    model=refuel
+    # model=$pole
+    # model=$dice
+    # model=$coin
+    # model=$maze
+    # model=$grid
+    model=$avoid
+    # model=$refuel
 
     # model=benchmark
 
     # onebyone $model
-    cegar $model
+    ar $model
     # cegis $model
 }
 
 # --- execution ----------------------------------------------------------------
 
 reset_log
-
-# test_release
 run
-
 # exit
 
 # --- archive ------------------------------------------------------------------

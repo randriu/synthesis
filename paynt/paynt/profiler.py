@@ -38,7 +38,7 @@ class Profiler:
 
     @staticmethod
     def initialize():
-        Profiler.running = None
+        Profiler.running = None     # currently running timer
         Profiler.timers = {}
         Profiler.timer_total = Timer()
         Profiler.timer_total.start()

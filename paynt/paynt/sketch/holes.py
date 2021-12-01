@@ -30,8 +30,8 @@ class Hole:
     def copy(self):
         return Hole(self.name, self.options.copy(), self.option_labels)
 
-    def assume_suboptions(self, suboptions):
-        return Hole(self.name, suboptions.copy(), self.option_labels)
+    def assume_options(self, options):
+        self.options = options.copy()
 
 
 class Holes(list):
@@ -59,25 +59,38 @@ class Holes(list):
     def copy(self):
         return Holes([hole.copy() for hole in self])
 
-    def assume_hole_suboptions(self, hole_index, suboptions):
+    def assume_hole_options(self, hole_index, options):
         ''' Assume suboptions of a certain hole. '''
-        result = self.copy()
-        result[hole_index] = self[hole_index].assume_suboptions(suboptions)
-        return result
+        self[hole_index].assume_options(options)
 
-    def assume_suboptions(self, hole_suboptions):
+    def assume_options(self, hole_options):
         ''' Assume suboptions for each hole. '''
-        return Holes([hole.assume_suboptions(hole_suboptions[hole_index]) for hole_index,hole in enumerate(self)])
+        for hole_index,hole in enumerate(self):
+            hole.assume_options(hole_options[hole_index])
 
     def pick_any(self):
         suboptions = [[hole.options[0]] for hole in self]
-        return self.assume_suboptions(suboptions)
+        holes = self.copy()
+        holes.assume_options(suboptions)
+        return holes
 
     def includes(self, hole_options):
         for hole_index,option in hole_options.items():
             if not option in self[hole_index].options:
                 return False
         return True
+
+    def all_combinations(self):
+        return itertools.product(*[hole.options for hole in self])
+
+    def construct_assignment(self, combination):
+        combination = list(combination)
+        suboptions = [[option] for option in combination]
+        holes = self.copy()
+        holes.assume_options(suboptions)
+        return holes
+
+
 
 
 class DesignSpace(Holes):
@@ -139,12 +152,15 @@ class DesignSpace(Holes):
 
         # construct the corresponding singleton
         sat_model = DesignSpace.solver.model()
-        assignment = []
+        hole_options = []
         for hole_index,hole, in enumerate(self):
             var = DesignSpace.solver_vars[hole_index]
             option = sat_model[var].as_long()
-            assignment.append([option])
-        return self.assume_suboptions(assignment)
+            hole_options.append([option])
+
+        assignment = self.copy()
+        assignment.assume_options(hole_options)
+        return assignment
 
     def exclude_assignment(self, assignment, conflict):
         '''

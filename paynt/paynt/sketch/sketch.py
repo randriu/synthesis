@@ -5,7 +5,6 @@ from .holes import Hole, Holes, DesignSpace
 import os
 import re
 import uuid
-import itertools
 from collections import OrderedDict
 
 import logging
@@ -15,54 +14,57 @@ logger = logging.getLogger(__name__)
 class Sketch:
     
     def __init__(self, sketch_path, properties_path, constant_str):
-        self.constant_str = constant_str
+        self.prism = None
+
+        self.expression_parser = None
+        self.constant_map = None
+        self.hole_expressions = None
+
         self.properties = None
         self.optimality_property = None
         self.design_space = None
 
-        self.prism = None
-        self.jani = None
-
-        logger.info(f"Loading sketch from {sketch_path} with constants {constant_str} ...")
-        self.prism, holes, self.hole_expressions = Sketch.load_sketch(sketch_path, constant_str)
-
-        logger.info(f"Loading properties from {properties_path} with constants {constant_str} ...")
-        self.properties, self.optimality_property = Sketch.parse_properties(self.prism, properties_path, constant_str)
+        logger.info(f"Loading sketch from {sketch_path}...")
         
+        self.prism, hole_definitions = Sketch.load_sketch(sketch_path)
+        assert not self.is_mdp, "MDP sketches are not supported"
+
+        self.expression_parser = stormpy.storage.ExpressionParser(self.prism.expression_manager)
+        self.expression_parser.set_identifier_mapping(dict())
+
+        logger.info(f"Assuming constant definitions: '{constant_str}' ...")
+        constant_map = Sketch.map_constants(self.prism, self.expression_parser, constant_str)
+        self.prism = self.prism.define_constants(constant_map)
+        self.prism = self.prism.substitute_constants()
+
+        logger.info("Processing hole definitions ...")
+        self.prism, holes, self.hole_expressions = Sketch.parse_holes(self.prism, self.expression_parser, hole_definitions)
+        logger.info(f"Sketch has {holes.num_holes} holes")
+        logger.info(f"Listing hole domains: {holes}")
+        logger.info(f"Design space size: {holes.size}")
+
+        logger.info(f"Loading properties from {properties_path} ...")
+        self.properties, self.optimality_property = Sketch.parse_properties(self.prism, constant_map, properties_path)
+        logger.info(f"Found the following constraints: {self.properties}")
+        logger.info(f"Found the following optimality property: {self.optimality_property}")
         self.design_space = DesignSpace(holes, self.properties)
 
-        logger.debug(f"Sketch has {self.design_space.num_holes} holes.")
-        logger.debug(f"Hole options: {self.design_space}")
-        logger.info(f"Design space: {self.design_space.size}")
+    @property
+    def is_mdp(self):
+        return self.prism.model_type == stormpy.storage.PrismModelType.MDP
 
     @property
     def is_pomdp(self):
         return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
 
-    @classmethod
-    def constants_map(cls, prism, constant_str):
-        constant_str = constant_str.replace(" ", "")
-        if constant_str == "":
-            return dict()
-        constants_map = dict()
-        kvs = constant_str.split(",")
-        ep = stormpy.storage.ExpressionParser(prism.expression_manager)
-        ep.set_identifier_mapping(dict())
-
-        holes = {c.name:c for c in prism.constants}
-
-        for kv in kvs:
-            key_value = kv.split("=")
-            if len(key_value) != 2:
-                raise ValueError(f"Expected key=value pair, got '{kv}'.")
-
-            expr = ep.parse(key_value[1])
-            constants_map[holes[key_value[0]].expression_variable] = expr
-        return constants_map
-    
+    def restrict_prism(self, assignment):
+        assert assignment.size == 1
+        substitution = {prism.get_constant(hole.hame):self.hole_expressions[hole_index][hole.options[0]] for hole_index,hole in enumerate(assignment)}
+        program = self.prism.define_constants(substitution)
+        return program
 
     @classmethod
-    def load_sketch(cls, sketch_path, constant_str):
+    def load_sketch(cls, sketch_path):
         # read lines
         with open(sketch_path) as f:
             sketch_lines = f.readlines()
@@ -95,17 +97,39 @@ class Sketch:
         if parse_error:
             exit()
 
-        # substitute constants
-        prism = prism.define_constants(cls.constants_map(prism,constant_str))
+        return prism, hole_definitions
+
+    @classmethod
+    def map_constants(cls, prism, expression_parser, constant_str):
+        constant_str = constant_str.replace(" ", "")
+        if constant_str == "":
+            return dict()
+        constant_map = dict()
+        constant_definitions = constant_str.split(",")
+        
+        prism_constants = {c.name:c for c in prism.constants}
+
+        for constant_definition in constant_definitions:
+            key_value = constant_definition.split("=")
+            if len(key_value) != 2:
+                raise ValueError(f"Expected key=value pair, got '{constant_definition}'.")
+
+            expr = expression_parser.parse(key_value[1])
+            name = key_value[0]
+            constant = prism_constants[name].expression_variable
+            constant_map[constant] = expr
+        return constant_map
+
+
+    @classmethod
+    def parse_holes(cls, prism, expression_parser, hole_definitions):
 
         # parse hole definitions
-        holes = []
+        holes = Holes()
         hole_expressions = []
-        ep = stormpy.storage.ExpressionParser(prism.expression_manager)
-        ep.set_identifier_mapping(dict())    
-        for hole_name, definition in hole_definitions.items():
+        for hole_name,definition in hole_definitions.items():
             options = definition.split(",")
-            expressions = [ep.parse(o) for o in options]
+            expressions = [expression_parser.parse(o) for o in options]
             hole_expressions.append(expressions)
 
             options = list(range(len(expressions)))
@@ -113,25 +137,24 @@ class Sketch:
             hole = Hole(hole_name, options, option_labels)
             holes.append(hole)
 
-        # collect undefined constants (must be the holes)
-        program_constants = OrderedDict([(c.name, c) for c in prism.constants if not c.defined])
-        assert len(program_constants.keys()) == len(holes), "some constants were unspecified"
+        # check that all undefined constants are indeed the holes
+        undefined_constants = [c for c in prism.constants if not c.defined]
+        assert len(undefined_constants) == len(holes), "some constants were unspecified"
 
         # convert single-valued holes to a defined constant
-        constant_definitions = dict()
-        holes_new = Holes()
-        hole_expressions_new = []
+        constant_definitions = {}
+        nontrivial_holes = Holes()
+        nontrivial_hole_expressions = []
         for hole_index,hole in enumerate(holes):
             if hole.size == 1:
-                constant_definitions[program_constants[hole.name].expression_variable] = hole_expressions[hole_index][0]
+                constant_definitions[prism.get_constant(hole.name).expression_variable] = hole_expressions[hole_index][0]
             else:
-                holes_new.append(hole)
-                hole_expressions_new.append(hole_expressions[hole_index])
-        holes = holes_new
-        hole_expressions = hole_expressions_new
-
+                nontrivial_holes.append(hole)
+                nontrivial_hole_expressions.append(hole_expressions[hole_index])
+        holes = nontrivial_holes
+        hole_expressions = nontrivial_hole_expressions
         
-        # define constants in the program
+        # define these constants in the program
         prism = prism.define_constants(constant_definitions)
         prism = prism.substitute_constants()
 
@@ -140,7 +163,7 @@ class Sketch:
 
  
     @classmethod
-    def parse_properties(cls, prism, properites_path, constant_str):
+    def parse_properties(cls, prism, constant_map, properites_path):
         # read lines
         lines = []
         with open(properites_path) as file:
@@ -178,11 +201,10 @@ class Sketch:
                 optimality_property = prop
 
         # substitute constants in properties
-        constants_map = cls.constants_map(prism, constant_str)
         for p in properties:
-            p.raw_formula.substitute(constants_map)
+            p.raw_formula.substitute(constant_map)
         if optimality_property is not None:
-            optimality_property.raw_formula.substitute(constants_map)
+            optimality_property.raw_formula.substitute(constant_map)
 
         # wrap properties
         properties = [Property(p) for p in properties]
@@ -190,13 +212,6 @@ class Sketch:
             optimality_property = OptimalityProperty(optimality_property, optimality_epsilon)
 
         return properties, optimality_property
-
-    def restrict(self, assignment):
-        program_constants = OrderedDict([(c.name, c.expression_variable) for c in self.prism.constants if not c.defined])
-        substitution = {program_constants[hole.name]:self.hole_expressions[hole_index][hole.options[0]] for hole_index,hole in enumerate(assignment)}
-        program = self.prism.define_constants(substitution)
-        return program
-
     
 
     

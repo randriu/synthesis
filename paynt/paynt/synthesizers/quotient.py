@@ -33,12 +33,8 @@ class QuotientContainer:
         self.default_actions = None        
         self.action_to_hole_options = None
 
-    def build(self, design_space):
-        if design_space == self.sketch.design_space:
-            # quotient needed
-            return MDP(self.quotient_mdp, design_space, self)
-        
-        # must restrict the quotient
+    def select_actions(self, design_space):
+        ''' Select actions relevant in the provided design space. '''
         selected_actions = stormpy.BitVector(self.default_actions)
         for act_index in range(self.quotient_mdp.nr_choices):
             if selected_actions.get(act_index):
@@ -46,26 +42,42 @@ class QuotientContainer:
             hole_options = self.action_to_hole_options[act_index]
             if design_space.includes(hole_options):
                 selected_actions.set(act_index)
+        return selected_actions
+
+    def restrict_quotient(self,selected_actions):
+        '''
+        Restrict the quotient MDP to the selected actions.
+        :return (1) the restricted model
+        :return (2) sub- to full action mapping
+        '''
         
         # construct the submodel
         keep_unreachable_states = False
         subsystem_options = stormpy.SubsystemBuilderOptions()
+        subsystem_options.build_state_mapping = True
         subsystem_options.build_action_mapping = True
-        # subsystem_options.build_state_mapping = True #+
         all_states = stormpy.BitVector(self.quotient_mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
             self.quotient_mdp, all_states, selected_actions, keep_unreachable_states, subsystem_options
         )
         model = submodel_construction.model
+        state_map =  submodel_construction.new_to_old_state_mapping
         choice_map = submodel_construction.new_to_old_action_mapping
-        assert len(choice_map) == model.nr_choices
-        
-        if design_space.size == 1:
-            assert model.nr_choices == model.nr_states
-            return DTMC(model) 
+        return model,state_map,choice_map
 
-        # success
-        return MDP(model, design_space, self, choice_map)
+    def build(self, design_space = None):
+        if design_space is None or design_space == self.sketch.design_space:
+            design_space = self.sketch.design_space
+            return MDP(self.quotient_mdp, design_space, self)
+        selected_actions = self.select_actions(design_space)
+        model,state_map,choice_map = self.restrict_quotient(selected_actions)
+        return MDP(model, design_space, self, state_map, choice_map)
+
+    def build_dtmc(self, design_space):
+        assert design_space.size == 1
+        selected_actions = self.select_actions(design_space)
+        model,state_map,choice_map = self.restrict_quotient(selected_actions)
+        return DTMC(model,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):
         assert scheduler.memoryless
@@ -170,6 +182,7 @@ class QuotientContainer:
         return suboptions
 
     def suboptions_unique(self, mdp, splitter, used_options):
+        assert len(used_options) > 1
         suboptions = [[option] for option in used_options]
         index = 0
         for option in mdp.design_space[splitter].options:
@@ -191,40 +204,40 @@ class QuotientContainer:
         return most_inconsistent
 
     
-    def prepare_split(self, mdp, results, properties):
+    def split(self, mdp, results, properties):
         assert not mdp.is_dtmc
 
         result_primary,result_secondary = results
         scheduler = result_primary.scheduler
-
         Profiler.start("scheduler_selection")
-        # identify the most inconsistent holes
-        # hole_assignments = self.scheduler_selection(mdp, scheduler)
-        # inconsistent = self.most_inconsistent_holes(hole_assignments)
-        # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
-        # splitters = self.holes_with_max_score(hole_sizes)
+        hole_assignments = self.scheduler_selection(mdp, scheduler)
 
-        hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result_primary)
-        splitters = self.holes_with_max_score(inconsistent_differences)
+        inconsistent = self.most_inconsistent_holes(hole_assignments)
+        hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
+        splitters = self.holes_with_max_score(hole_sizes)
+
+        # hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result_primary)
+        # splitters = self.holes_with_max_score(inconsistent_differences)
 
         splitter = splitters[0]
         Profiler.start("synthesis")
         
-        # self.splitter_frequency[splitter] += 1
-        # if sum(self.splitter_frequency) % 100 == 0:
-        #     for obs in range(self.pomdp.nr_observations):
-        #         action_freq = [self.splitter_frequency[hole_index] for hole_index in self.pomdp_manager.action_holes[obs]]
-        #         memory_freq = [self.splitter_frequency[hole_index] for hole_index in self.pomdp_manager.memory_holes[obs]]
-        #         print("{}: {} & {}".format(obs,action_freq,memory_freq))
-        
+        self.splitter_frequency[splitter] += 1
+        inconsistency = frozenset(hole_assignments[splitter])
+        inconsistency_frequency = self.splitter_inconsistencies[splitter].get(inconsistency,0)
+        self.splitter_inconsistencies[splitter][inconsistency] = inconsistency_frequency + 1
+
         # split
-        # suboptions = self.suboptions_half(mdp, splitter)
-        suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
+        if len(hole_assignments[splitter]) == 1:
+            suboptions = self.suboptions_half(mdp, splitter)
+        else:
+            suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
 
         # construct corresponding design subspaces
         design_subspaces = []
         for suboption in suboptions:
-            design_subspace = mdp.design_space.assume_hole_suboptions(splitter, suboption)
+            design_subspace = mdp.design_space.copy()
+            design_subspace.assume_hole_options(splitter, suboption)
             design_subspaces.append(design_subspace)
         return design_subspaces
 
@@ -274,6 +287,7 @@ class JaniQuotientContainer(QuotientContainer):
                 self.default_actions.set(choice)
 
         self.splitter_frequency = [0] * self.sketch.design_space.num_holes
+        self.splitter_inconsistencies = [{} for hole_index in self.sketch.design_space.hole_indices]
 
 
     
@@ -355,17 +369,7 @@ class POMDPQuotientContainer(QuotientContainer):
         output += "]"
         return output
 
-    def suggest_injection(self):
-        max_splits_value = max(self.splitter_frequency)
-        hole_index = self.splitter_frequency.index(max_splits_value)
-        pm = self.pomdp_manager
-        for obs in range(self.pomdp.nr_observations):
-            if hole_index in pm.action_holes[obs] or hole_index in pm.memory_holes[obs]:
-                return obs
-        assert(False)
-
-
-    def unfoldPartialMemory(self):
+    def unfold_partial_memory(self):
 
         pomdp = self.pomdp
         pm = self.pomdp_manager
@@ -436,9 +440,10 @@ class POMDPQuotientContainer(QuotientContainer):
             self.action_to_hole_options.append(relevant_holes)
 
         self.splitter_frequency = [0] * self.design_space.num_holes
+        self.splitter_inconsistencies = [{} for hole_index in self.design_space.hole_indices]
 
 
-    def unfoldFullMemory(self, memory_size):
+    def unfold_full_memory(self, memory_size):
 
         # construct memory model and unfold it into quotient MDP
         memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, memory_size)
