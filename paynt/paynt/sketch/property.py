@@ -114,5 +114,31 @@ class OptimalityProperty(Property):
             self.threshold = optimum * (1 + self.epsilon)
 
 
-        
-        
+class Specification:
+    
+    def __init__(self, constraints, optimality):
+        self.constraints = constraints
+        self.optimality = optimality
+
+    @property
+    def has_optimality(self):
+        return self.optimality is not None
+
+    def all_indices(self):
+        return [i for i,_ in enumerate(self.constraints)]
+
+    def stormpy_properties(self):
+        properties = [c.property for c in self.constraints]
+        if self.has_optimality:
+            properties += [self.optimality.property]
+        return properties
+
+    def stormpy_formulae(self):
+        mc_formulae = [c.formula for c in self.constraints]
+        if self.has_optimality:
+            mc_formulae += [self.optimality.formula]
+        return mc_formulae
+
+
+
+

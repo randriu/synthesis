@@ -8,6 +8,8 @@ from ..profiler import Timer,Profiler
 
 from ..sketch.holes import Holes,DesignSpace
 
+from stormpy.synthesis import CounterexampleGenerator
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -15,14 +17,14 @@ logger = logging.getLogger(__name__)
 class Synthesizer:
 
     def __init__(self, sketch, quotient_container = None):
-        MarkovChain.initialize(sketch.properties, sketch.optimality_property)
+        MarkovChain.initialize(sketch.specification.stormpy_formulae())
         self.sketch = sketch
         if quotient_container is not None:
             self.quotient_container = quotient_container
         else:
             if sketch.is_pomdp:
                 self.quotient_container = POMDPQuotientContainer(sketch)
-                # self.quotient_container.pomdp_manager.set_memory_size(2)
+                self.quotient_container.pomdp_manager.set_memory_size(2)
                 self.quotient_container.unfold_partial_memory() # k = 1
             else:
                 self.quotient_container = JaniQuotientContainer(sketch)
@@ -34,10 +36,6 @@ class Synthesizer:
     def method_name(self):
         return "1-by-1"
     
-    @property
-    def has_optimality(self):
-        return self.sketch.optimality_property is not None
-
     def print_stats(self):
         print(self.stat.get_summary())
 
@@ -48,19 +46,20 @@ class Synthesizer:
 
         satisfying_assignment = None
         for hole_combination in family.all_combinations():
+            
             assignment = family.construct_assignment(hole_combination)
             dtmc = self.quotient_container.build_dtmc(assignment)
             self.stat.iteration_dtmc(dtmc.states)
-            constraints_sat = dtmc.check_properties(self.sketch.properties)
+            spec = dtmc.check_specification(self.sketch.specification, short_evaluation = True)
             self.stat.pruned(1)
-            if not constraints_sat:
+
+            if not spec.constraints_result.all_sat:
                 continue
-            if not self.has_optimality:
+            if not self.sketch.specification.has_optimality:
                 satisfying_assignment = assignment
                 break
-            optimum,improved = dtmc.check_optimality(self.sketch.optimality_property)
-            if improved:
-                self.sketch.optimality_property.update_optimum(optimum)
+            if spec.optimality_result.improves:
+                self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 satisfying_assignment = assignment
 
         self.stat.finished(satisfying_assignment)
@@ -90,33 +89,36 @@ class SynthesizerAR(Synthesizer):
             # logger.debug("analyzing family {}".format(family))
             mdp = self.quotient_container.build(family)
             self.stat.iteration_mdp(mdp.states)
-            feasible,undecided_properties,undecided_results = mdp.check_properties(family.properties)
-            properties = undecided_properties
-            
-            if feasible == True and not self.has_optimality:
-                logger.debug("AR: found feasible family")
-                satisfying_assignment = family.pick_any()
-                break
 
-            can_improve = feasible is None
+            spec = mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
 
-            if feasible == True and self.has_optimality:
-                # check optimality
-                results,optimum,improving_assignment,can_improve = mdp.check_optimality(self.sketch.optimality_property)
+            can_improve = spec.constraints_result.feasibility is None
 
-                if optimum is not None:
-                    self.sketch.optimality_property.update_optimum(optimum)
-                    satisfying_assignment = improving_assignment
-                if can_improve:
-                    undecided_results.append(results)
+            if spec.constraints_result.feasibility == True:
+                if not self.sketch.specification.has_optimality:
+                    logger.debug("AR: found feasible family")
+                    satisfying_assignment = family.pick_any()
+                    break
+                else:
+                    can_improve = spec.optimality_result.can_improve
+                    if spec.optimality_result.optimum is not None:
+                        self.sketch.specification.optimality.update_optimum(spec.optimality_result.optimum)
+                        satisfying_assignment = spec.optimality_result.improving_assignment
 
             if not can_improve:
                 self.stat.pruned(family.size)
                 continue
 
+            # filter undecided constraints
+            undecided_indices = [index for index in family.property_indices if spec.constraints_result.results[index].feasibility == None]
+            undecided_results = [spec.constraints_result.results[index] for index in undecided_indices]
+            if spec.optimality_result is not None and spec.optimality_result.can_improve:
+                undecided_results.append(spec.optimality_result)
+
             # split family wrt last undecided result
-            subfamilies = self.quotient_container.split(mdp, undecided_results[-1], properties)
+            subfamilies = self.quotient_container.split(mdp, undecided_results[-1].primary.result)
             for subfamily in subfamilies:
+                subfamily.property_indices = undecided_indices
                 families.append(subfamily)
 
         self.stat.finished(satisfying_assignment)
@@ -132,13 +134,31 @@ class SynthesizerCEGIS(Synthesizer):
     def method_name(self):
         return "CEGIS"
 
+    def property_indices(self):
+        all_properties = self.sketch.properties.copy()
+        if self.sketch.optimality_property is not None:
+            all_properties.append(self.sketch.optimality_property)
+        return {prop:all_properties.index(prop) for prop in all_properties}
+
+
     def synthesize(self, family):
         self.stat.start()
 
-        satisfying_assignment = None
+        # map mdp states to hole indices
+        quotient_relevant_holes = self.quotient_container.quotient_relevant_holes()
+
+        # initialize CE generator
+        formulae = self.sketch.specification.stormpy_formulae()
+        ce_generator = CounterexampleGenerator(
+            self.quotient_container.quotient_mdp, self.sketch.design_space.num_holes,
+            quotient_relevant_holes, formulae)
+
+        # encode family
         family.z3_initialize()
         family.z3_encode()
-
+        
+        # CEGIS loop
+        satisfying_assignment = None
         assignment = family.pick_assignment()
         while assignment is not None:
             # logger.debug("analyzing assignment {}".format(assignment))
@@ -147,31 +167,40 @@ class SynthesizerCEGIS(Synthesizer):
             self.stat.iteration_dtmc(dtmc.states)
 
             # model check all properties
-            sat,unsat_properties = dtmc.check_properties_all(self.sketch.properties)
-            if self.has_optimality:
-                optimum,improves = dtmc.check_optimality(self.sketch.optimality_property)
-                unsat_properties.append(self.sketch.optimality_property)
+            spec = dtmc.check_specification(self.sketch.specification, 
+                property_indices = family.property_indices, short_evaluation = False)
 
             # analyze model checking results
-            if sat:
-                if not self.has_optimality:
+            if spec.constraints_result.all_sat:
+                if not self.sketch.specification.has_optimality:
                     satisfying_assignment = assignment
                     break
-                if improves:
-                    self.sketch.optimality_property.update_optimum(optimum)
+                if spec.optimality_result.improves:
+                    self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                     satisfying_assignment = assignment
 
+
             # construct a conflict to each unsatisfiable property
+            ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+
+            unsat_indices = [index for index in family.property_indices if spec.constraints_result.results[index].sat == False]
+            unsat_thresholds = [self.sketch.specification.constraints[index].threshold for index in unsat_indices]
+            if self.sketch.specification.has_optimality and spec.optimality_result.sat == False:
+                unsat_indices.append(len(self.sketch.specification.constraints))
+                unsat_thresholds.append(self.sketch.specification.optimality.threshold)
+        
+            
             conflicts = []
-            for prop in unsat_properties:
-                # TODO construct actual counterexamples
-                conflict = [hole_index for hole_index,_ in enumerate(assignment)]
+            for index,prop_index in enumerate(unsat_indices):
+                threshold = unsat_thresholds[index]
+                conflict = ce_generator.construct_conflict(prop_index, threshold, use_bounds = False)
                 conflicts.append(conflict)
 
             # use conflicts to exclude the generalizations of this assignment
             for conflict in conflicts:
-                family.exclude_assignment(assignment, conflict)
-                self.stat.pruned(1) # TODO estimate pruned size
+                pruning_estimate = family.exclude_assignment(assignment, conflict)
+                self.stat.pruned(pruning_estimate)
+            # exit()
 
             # construct next assignment
             assignment = family.pick_assignment()

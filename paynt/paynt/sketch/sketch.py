@@ -1,5 +1,5 @@
 import stormpy
-from .property import Property, OptimalityProperty
+from .property import Property, OptimalityProperty, Specification
 from .holes import Hole, Holes, DesignSpace
 
 import os
@@ -20,8 +20,7 @@ class Sketch:
         self.constant_map = None
         self.hole_expressions = None
 
-        self.properties = None
-        self.optimality_property = None
+        self.specification = None
         self.design_space = None
 
         logger.info(f"Loading sketch from {sketch_path}...")
@@ -44,10 +43,11 @@ class Sketch:
         logger.info(f"Design space size: {holes.size}")
 
         logger.info(f"Loading properties from {properties_path} ...")
-        self.properties, self.optimality_property = Sketch.parse_properties(self.prism, constant_map, properties_path)
-        logger.info(f"Found the following constraints: {self.properties}")
-        logger.info(f"Found the following optimality property: {self.optimality_property}")
-        self.design_space = DesignSpace(holes, self.properties)
+        self.specification = Sketch.parse_specification(self.prism, constant_map, properties_path)
+        logger.info(f"Found the following constraints: {[str(p) for p in self.specification.constraints]}")
+        if self.specification.has_optimality:
+            logger.info(f"Found the following optimality property: {self.specification.optimality}")
+        self.design_space = DesignSpace(holes, self.specification.all_indices())
 
     @property
     def is_mdp(self):
@@ -163,7 +163,7 @@ class Sketch:
 
  
     @classmethod
-    def parse_properties(cls, prism, constant_map, properites_path):
+    def parse_specification(cls, prism, constant_map, properites_path):
         # read lines
         lines = []
         with open(properites_path) as file:
@@ -211,7 +211,8 @@ class Sketch:
         if optimality_property is not None:
             optimality_property = OptimalityProperty(optimality_property, optimality_epsilon)
 
-        return properties, optimality_property
+        specification = Specification(properties,optimality_property)
+        return specification
     
 
     

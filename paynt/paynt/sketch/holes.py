@@ -96,7 +96,7 @@ class Holes(list):
 class DesignSpace(Holes):
     '''
     List of holes supplied with
-    - a list of constraints to investigate in this design space
+    - a list of constraint indices to investigate in this design space
     - (optionally) z3 encoding of this design space
     :note z3 (re-)encoding construction must be invoked manually
     '''
@@ -106,18 +106,16 @@ class DesignSpace(Holes):
     # for each hole, a corresponding solver variable
     solver_vars = None
 
-    def __init__(self, holes, properties = None):
-        super().__init__(holes)
-        self.properties = properties
+    def __init__(self, holes, property_indices = None):
+        super().__init__(holes.copy())
+        self.property_indices = property_indices.copy()
         self.encoding = None
 
-    def set_properties(self, properties):
-        self.properties = properties
+    def set_prop_indices(self, property_indices):
+        self.property_indices = property_indices
 
     def copy(self):
-        design_space = DesignSpace(super().copy())
-        design_space.set_properties(self.properties.copy())
-        return design_space
+        return DesignSpace(super().copy(), self.property_indices)
 
     def z3_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
@@ -168,6 +166,7 @@ class DesignSpace(Holes):
         :param assignment hole assignment that yielded unsatisfiable DTMC
         :param conflict indices of relevant holes in the corresponding counterexample
         '''
+        pruning_estimate = 1
         counterexample_clauses = []
         for hole_index,var in enumerate(DesignSpace.solver_vars):
             if hole_index in conflict:
@@ -175,8 +174,10 @@ class DesignSpace(Holes):
             else:
                 all_options = [var == option for option in self[hole_index].options]
                 counterexample_clauses.append(z3.Or(all_options))
+                pruning_estimate *= len(all_options)
         counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
         DesignSpace.solver.add(counterexample_encoding)
+        return pruning_estimate
 
 
 class CombinationColoring:

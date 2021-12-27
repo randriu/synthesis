@@ -23,8 +23,7 @@ class Statistic:
     def __init__(self, sketch, method_name):
         self.design_space = sketch.design_space
         
-        self.properties = sketch.properties
-        self.optimality_property = sketch.optimality_property
+        self.specification = sketch.specification
 
         self.method_name = method_name
         
@@ -91,9 +90,9 @@ class Statistic:
         # percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.timer.read(),1)
         time_estimate = round(time_estimate,1)
-        iters = self.iterations_mdp
+        iters = self.iterations_mdp + self.iterations_dtmc
         avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
-        optimum = round(self.optimality_property.optimum,5) if (self.optimality_property is not None and self.optimality_property.optimum is not None) else "-"
+        optimum = round(self.specification.optimality.optimum,5) if (self.specification.has_optimality and self.specification.optimality.optimum is not None) else "-"
         return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], opt={optimum}"
 
     def print_status(self):
@@ -113,8 +112,8 @@ class Statistic:
             # self.assignment = self.design_space.readable_assignment(assignment)
             self.assignment = str(assignment)
         self.optimum = None
-        if self.optimality_property is not None:
-            self.optimum = self.optimality_property.optimum
+        if self.specification.has_optimality:
+            self.optimum = self.specification.optimality.optimum
 
 
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
@@ -126,8 +125,8 @@ class Statistic:
         return summary
 
     def get_long_summary(self):
-        formulae = "\n".join([f"formula {i + 1}: {str(f)}" for i,f in enumerate(self.properties)]) + "\n"
-        formulae += f"optimality formula: {str(self.optimality_property)}\n" if self.optimality_property is not None else ""
+        formulae = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(self.specification.constraints)]) + "\n"
+        formulae += f"optimality objective: {str(self.specification.optimality)}\n" if self.specification.has_optimality else ""
 
         design_space = f"number of holes: {self.design_space.num_holes}, family size: {self.design_space.size}"
         timing = f"method: {self.method_name}, synthesis time: {round(self.timer.time, 2)} s"

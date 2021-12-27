@@ -15,54 +15,34 @@
 namespace storm {
     namespace synthesis {
 
-        /*!
-         * Construct a DTMC by exploring a reachable state space of an MDP 
-         * through selected edges All reward models are automatically reduced
-         * to their state variants.
-         * @param mdp An MDP.
-         * @param selected_edge_indices Allowed edges in the resulting DTMC.
-         * @return A DTMC with a DTMC-MDP state mapping.
-         */
         template<typename ValueType = double, typename StateType = uint_fast64_t>
-        std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<StateType>> DtmcFromMdp(
-            storm::models::sparse::Mdp<ValueType> const& mdp,
-            storm::storage::FlatSet<uint_fast64_t> const& selected_edge_indices
-            );
-
-        template<typename ValueType = double, typename StateType = uint_fast64_t>
-        class Counterexample {
+        class CounterexampleGenerator {
         public:
 
             /*!
              * Preprocess the quotient MDP and its bound on the reachability
              * probability before constructing counterexamples from various
-             * sub-MDPs (DTMCs).
+             * deterministic sub-MDPs (DTMCs).
              * @param quotient_mdp The quotient MDP.
              * @param hole_count Total number of holes.
-             * @param mdp_holes A list of indices of significant holes for each
-             *   state of the quotient MDP.
-             * @param formula Operator formulae to check, can be both
+             * @param mdp_holes For each state of a quotient MDP, a set of
+             *   indices of significant holes.
+             * @param formulae Formulae to check, can be both
              *   probabilistic and reward-based.
-             * @param mdp_bound Lower (safety) or upper (liveness) bounds on
-             *   the formulae satisfiability for the quotient MDP.
              */
-            Counterexample(
+            CounterexampleGenerator(
                 storm::models::sparse::Mdp<ValueType> const& quotient_mdp,
                 uint_fast64_t hole_count,
                 std::vector<std::set<uint_fast64_t>> const& mdp_holes,
-                std::vector<std::shared_ptr<storm::logic::Formula const>> const& formulae,
-                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> const& mdp_bounds
+                std::vector<std::shared_ptr<storm::logic::Formula const>> const& formulae
                 );
 
             /*!
-             * Replace a formula threshold and the corresponding mdp bound for
-             * the formula with the given index.
-             * @note This function is used for updating the violation formula.
+             * Set MDP bounds before analyzing DTMCs in the subfamily.
+             * @param mdp_bounds for each formula, a primary result of the MDP model checking
              */
-            void replaceFormulaThreshold(
-                uint_fast64_t formula_index,
-                ValueType formula_threshold,
-                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bound
+            void setMdpBounds(
+                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds
             );
 
             /*!
@@ -72,11 +52,12 @@ namespace storm {
              * - if no non-blocking state remains, pick a blocking candidate with the least amount of unregistered holes
              * - register all holes in this blocking candidate, thus unblocking this state (and possibly many others)
              * - rinse and repeat
-             * @param dtmc A DTMC.
+             * @param dtmc A deterministic MDP (DTMC).
              * @param state_map DTMC-MDP state mapping.
+             
              */
             void prepareDtmc(
-                storm::models::sparse::Dtmc<ValueType> const& dtmc,
+                storm::models::sparse::Mdp<ValueType> const& dtmc,
                 std::vector<uint_fast64_t> const& state_map
                 );
             
@@ -87,16 +68,17 @@ namespace storm {
              * @param use_mdp_bounds If true, MDP bounds will be used for CE construction.
              * @return A list of holes relevant in the CE.
              */
-            std::vector<uint_fast64_t> constructCounterexample(
-                uint_fast64_t formula_index, bool use_mdp_bounds = true
+            std::vector<uint_fast64_t> constructConflict(
+                uint_fast64_t formula_index, ValueType formula_bound, bool use_mdp_bounds
                 );
-            
-            /*!
-             * @return A profiling vector.
-             */
-            std::vector<double> stats();
 
         protected:
+
+            /** Identify states of an MDP having some label. */
+            std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult> labelStates(
+                storm::models::sparse::Mdp<ValueType> const& mdp,
+                storm::logic::Formula const& label
+                );
 
             /**
              * Prepare data structures for sub-DTMC construction.
@@ -130,6 +112,7 @@ namespace storm {
              */
             bool expandAndCheck(
                 uint_fast64_t index,
+                ValueType formula_bound,
                 std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
                 std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling const& labeling_subdtmc,
@@ -143,42 +126,36 @@ namespace storm {
             uint_fast64_t hole_count;
             // Significant holes in MDP states
             std::vector<std::set<uint_fast64_t>> mdp_holes;
-            
-            // Target label for sub-dtmcs
-            const std::string target_label = "__target__";
 
-            // Total number of formulae
-            uint_fast64_t formulae_count;
             // Formula bounds: safety (<,<=) or liveness (>,>=)
             std::vector<bool> formula_safety;
             // Formula types: probability (false) or reward-based (true)
             std::vector<bool> formula_reward;
             // Reward model names for reward formulae
             std::vector<std::string> formula_reward_name;
-            // Modified operator formulae to apply to sub-dtmcs: P~?[F "__target__"]
+            
+            // Until label for sub-dtmcs
+            const std::string until_label = "__until__";
+            // Target label for sub-dtmcs
+            const std::string target_label = "__target__";
+            // Modified operator formulae to apply to sub-dtmcs: P~?["__until" U "__target__"] or P~?[F "__target__"]
             std::vector<std::shared_ptr<storm::logic::Formula>> formula_modified;
-            // Bounds from MDP model checking
-            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds;
+            // Flags for until states
+            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const>> mdp_untils;
             // Flags for target states
             std::vector<std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const>> mdp_targets;
+
+            // Bounds from MDP model checking
+            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds;
             
-            // Transition matrix of a DTMC under investigation
-            std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> dtmc;
+            // DTMC under investigation
+            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> dtmc;
             // DTMC to MDP state mapping
             std::vector<uint_fast64_t> state_map;
             // For each hole, a wave when it was registered (0 = unregistered).
             std::vector<uint_fast64_t> hole_wave;
             // // For each wave, a set of states that were expanded.
             std::vector<std::vector<StateType>> wave_states;
-             
-
-            // Profiling
-            storm::utility::Stopwatch total;
-
-            storm::utility::Stopwatch preparing_mdp;
-            storm::utility::Stopwatch preparing_dtmc;
-            storm::utility::Stopwatch preparing_subdtmc;
-            storm::utility::Stopwatch constructing_counterexample;
 
         };
 

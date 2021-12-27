@@ -1,6 +1,6 @@
 import stormpy
 
-from .property import Property, OptimalityProperty
+from .property import Property, OptimalityProperty, Specification
 from .holes import CombinationColoring
 
 import itertools
@@ -17,10 +17,8 @@ class JaniUnfolder():
         logger.debug("Constructing JANI program...")
         
         # pack properties
-        properties = [p.property for p in sketch.properties]
-        if sketch.optimality_property is not None:
-            properties += [sketch.optimality_property.property]
-
+        properties = sketch.specification.stormpy_properties()
+        
         # construct jani
         jani, new_properties = sketch.prism.to_jani(properties)
 
@@ -28,15 +26,16 @@ class JaniUnfolder():
         properties = new_properties
         opt = None
         eps = None
-        if sketch.optimality_property is not None:
+        if sketch.specification.has_optimality:
             properties = new_properties[:-1]
             opt = new_properties[-1]
-            eps = sketch.optimality_property.epsilon
+            eps = sketch.specification.optimality.epsilon
 
         # when translating PRISM to JANI, some properties may change their
         # atoms, so we need to re-wrap all properties
-        self.properties = [Property(p) for p in properties]
-        self.optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
+        properties = [Property(p) for p in properties]
+        optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
+        self.specification = Specification(properties,optimality_property)
 
         # unfold holes in the program
         self.hole_expressions = sketch.hole_expressions

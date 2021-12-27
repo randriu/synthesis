@@ -110,7 +110,15 @@ storm-build-debug() {
 stormpy-build() {
     cd $SYNTHESIS/stormpy
     source $SYNTHESIS_ENV/bin/activate
-    # python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    # python3 setup.py test
+    deactivate
+    cd ~-
+}
+
+stormpy-build-debug() {
+    cd $SYNTHESIS/stormpy
+    source $SYNTHESIS_ENV/bin/activate
     python3 setup.py build_ext --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     deactivate
@@ -134,24 +142,12 @@ synthesis-install() {
 
 ### development ################################################################
 
-# recompilation
-
-storm-rebuild() {
-    storm-config
-    storm-build
-}
-
-stormpy-rebuild() {
-    storm-rebuild
-    stormpy-build
-}
-
 # aliases
 
-alias sc='storm-config'
-alias sb='storm-build'
-alias pb='stormpy-build'
-alias sr='storm-rebuild'
+# alias sc='storm-config'
+# alias sb='storm-build'
+# alias pb='stormpy-build'
+# alias sr='storm-rebuild'
 
 
 ### executing paynt ##########################################################
@@ -214,6 +210,7 @@ bind '"\ek"':"\"storm-config-debug \C-m\""
 bind '"\eo"':"\"storm-build \C-m\""
 bind '"\el"':"\"storm-build-debug \C-m\""
 bind '"\ep"':"\"stormpy-build \C-m\""
+bind '"\e;"':"\"stormpy-build-debug \C-m\""
 
 bind '"\ed"':"\"db \C-m\""
 bind '"\e1"':"\"db 1 \C-m\""

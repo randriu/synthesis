@@ -1,5 +1,56 @@
 import stormpy
 
+from ..sketch.property import OptimalityProperty
+
+class PropertyResult:
+    def __init__(self, prop, result, value):
+        self.property = prop
+        self.result = result
+        self.value = value
+        self.sat = prop.satisfies_threshold(value)
+        self.improves = None if not isinstance(prop,OptimalityProperty) else prop.improves_optimum(value)
+
+class ConstraintsResult:
+    def __init__(self, results):
+        self.results = results
+        self.all_sat = True
+        for result in results:
+            if result is not None and result.sat == False:
+                self.all_sat = False
+                break
+
+class SpecificationResult:
+    def __init__(self, constraints_result, optimality_result):
+        self.constraints_result = constraints_result
+        self.optimality_result = optimality_result
+
+class MdpPropertyResult:
+    def __init__(self, prop, primary, secondary, feasibility):
+        self.property = prop
+        self.primary = primary
+        self.secondary = secondary
+        self.feasibility = feasibility
+
+class MdpOptimalityResult(MdpPropertyResult):
+    def __init__(self, prop, primary, secondary, optimum, improving_assignment, can_improve):
+        super().__init__(prop, primary, secondary, None)
+        self.optimum = optimum
+        self.improving_assignment = improving_assignment
+        self.can_improve = can_improve
+
+class MdpConstraintsResult:
+    def __init__(self, results):
+        self.results = results
+
+        self.feasibility = True
+        for result in results:
+            if result is None:
+                continue
+            if result.feasibility == False:
+                self.feasibility = False
+                break
+            if result.feasibility == None:
+                self.feasibility = None
 
 class MarkovChain:
 
@@ -11,17 +62,13 @@ class MarkovChain:
     environment = None
 
     @classmethod
-    def initialize(cls, properties, optimality_property):
+    def initialize(cls, formulae):
         '''
         Construct builder options wrt formulae of interest.
         Setup model checking environment.
         '''
-
         # builder options
-        mc_formulae = [p.formula for p in properties]
-        if optimality_property is not None:
-            mc_formulae.append(optimality_property.formula)
-        cls.builder_options = stormpy.BuilderOptions(mc_formulae)
+        cls.builder_options = stormpy.BuilderOptions(formulae)
         cls.builder_options.set_build_with_choice_origins(True)
         cls.builder_options.set_build_state_valuations(True)
         cls.builder_options.set_add_overlapping_guards_label()
@@ -77,13 +124,13 @@ class MarkovChain:
             self.model, formula, only_initial_states=False,
             extract_scheduler=(not self.is_dtmc), environment=self.environment
         )
-        return result
+        value = result.at(self.initial_state)
+        return result, value
 
-    def model_check_property(self, prop):
-        return self.model_check_formula(prop.formula)
-
-    def at_initial_state(self, array):
-        return array.at(self.initial_state)
+    def model_check_property(self, prop, alt = False):
+        formula = prop.formula if not alt else prop.formula_alt
+        result,value = self.model_check_formula(formula)
+        return PropertyResult(prop, result, value)
 
 
 class DTMC(MarkovChain):
@@ -91,46 +138,37 @@ class DTMC(MarkovChain):
     def __init__(self, *args):
         super().__init__(*args)
 
-    def check_property(self, prop):
-        ''' Check whether this DTMC satisfies the property. '''
-        result = self.model_check_property(prop)
-        value = self.at_initial_state(result)
-        return prop.satisfies_threshold(value)
+    def check_constraints(self, properties, property_indices = None, short_evaluation = False):
+        '''
+        Check constraints.
+        :param properties a list of all constraints
+        :param property_indices a selection of property indices to investigate
+        :param short_evaluation if set to True, then evaluation terminates as
+          soon as a constraint is not satisfied
+        '''
 
-    def check_properties(self, properties):
-        '''
-        Check multiple properties.
-        :return False as soon as any one is violated, True otherwise
-        ''' 
-        for p in properties:
-            sat = self.check_property(p)
-            if not sat:
-                return False
-        return True
+        # implicitly, check all constraints
+        if property_indices is None:
+            property_indices = [index for index,_ in enumerate(properties)]
+        
+        # check selected properties
+        results = [None for prop in properties]
+        for index in property_indices:
+            prop = properties[index]
+            result = self.model_check_property(prop)
+            results[index] = result
+            if short_evaluation and not result.sat:
+                break
 
-    def check_properties_all(self, properties):
-        '''
-        Check all properties.
-        :return (1) satisfiability (True/False)
-        :return (2) a list of unsatisfiable properties if (1) is False
-        '''
-        unsat_properties = []
-        for p in properties:
-            sat = self.check_property(p)
-            if not sat:
-                unsat_properties.append(p)
-        return len(unsat_properties) == 0, unsat_properties
+        return ConstraintsResult(results)
 
-    def check_optimality(self, prop):
-        '''
-        Model check optimality property.
-        :return (1) value of this DTMC
-        :return (2) whether (1) improves current optimum
-        '''
-        result = self.model_check_property(prop)
-        value = self.at_initial_state(result)
-        improves = prop.improves_optimum(value)
-        return value,improves
+    def check_specification(self, specification, property_indices = None, short_evaluation = False):
+        constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
+        optimality_result = None
+        if not (short_evaluation and not constraints_result.sat) and specification.has_optimality:
+            optimality_result = self.model_check_property(specification.optimality)
+        return SpecificationResult(constraints_result, optimality_result)
+
 
 
 class MDP(MarkovChain):
@@ -140,77 +178,46 @@ class MDP(MarkovChain):
         self.design_space = design_space
         self.quotient_container = quotient_container
 
-    def model_check_property(self, prop, alt = False):
-        '''
-        Model check MDP against property.
-        :param alt if True, alternative direction will be checked
-        :return model checking result
-        '''
-        return self.model_check_formula(prop.formula if not alt else prop.formula_alt)
-
     def check_property(self, prop):
-        '''
-        Model check the underlying quotient MDP against a given formula. Return:
-        (1) feasibility: SAT = True, UNSAT = False, undecided = None
-        (2) (primary, secondary) model checking result
-        '''
-
         # check primary direction
-        result_primary = self.model_check_property(prop)
-        value_primary = self.at_initial_state(result_primary)
-        sat_primary = prop.satisfies_threshold(value_primary)
-        if self.is_dtmc:
-            return sat_primary, (result_primary, None)
-
+        primary = self.model_check_property(prop, alt = False)
+        
         # no need to check secondary direction if primary direction yields UNSAT
-        if not sat_primary:
-            return False, (result_primary, None)
+        if not primary.sat:
+            return MdpPropertyResult(prop, primary, None, False)
 
-        # if the primary direction is SAT and the corresponding scheduler is consistent ???
-
+        # no need to check secondary direction if the primary direction is SAT
+        # and the corresponding scheduler is consistent
+        # TODO
+        if self.is_dtmc:
+            return MdpPropertyResult(prop, primary, None, primary.sat)
+        
         # primary direction is not sufficient
-        result_secondary = self.model_check_property(prop, alt = True)
-        value_secondary = self.at_initial_state(result_secondary)
-        sat_secondary = prop.satisfies_threshold(value_secondary)
-        feasible = True if sat_secondary else None
-        return feasible, (result_primary, result_secondary)
+        secondary = self.model_check_property(prop, alt = True)
+        feasibility = True if secondary.sat else None
+        return MdpPropertyResult(prop, primary, secondary, feasibility)
 
-    def check_properties(self, properties):
-        ''' check all properties, return
-        (1) satisfiability (True/False/None)
-        (2) list of undecided properties
-        (3) for each undecided property, a list (of pairs) of model checking results
-        '''
-        undecided_properties = []
-        undecided_results = []
-        for prop in properties:
-            feasible,results = self.check_property(prop)
-            if feasible == False:
-                return False, None, None
-            if feasible == None:
-                undecided_properties.append(prop)
-                undecided_results.append(results)
-        feasibility = True if undecided_properties == [] else None
-        return feasibility, undecided_properties, undecided_results
+    def check_constraints(self, properties, property_indices = None, short_evaluation = False):
+        if property_indices is None:
+            property_indices = [index for index,_ in enumerate(properties)]
+
+        results = [None for prop in properties]
+        for index in property_indices:
+            prop = properties[index]
+            result = self.check_property(prop)
+            results[index] = result
+            if short_evaluation and result.feasibility == False:
+                break
+
+        return MdpConstraintsResult(results)
 
     def check_optimality(self, prop):
-        ''' model check optimality property, return
-        (1) (a pair of) model checking results
-        (2) new optimal value (or None)
-        (3) improving assignment corresponding to (2) (or None)
-        (4) whether the optimal value (wrt eps) can still be improved by
-            refining the design space
-        '''
-
         # check primary direction
-        result_primary = self.model_check_property(prop)
-        value_primary = self.at_initial_state(result_primary)
-        opt_primary = prop.improves_optimum(value_primary)
-        sat_primary = prop.satisfies_threshold(value_primary)
-
-        if not opt_primary:
+        primary = self.model_check_property(prop, alt = False)
+        
+        if not primary.improves:
             # OPT <= LB
-            return (result_primary,None), None, None, False
+            return MdpOptimalityResult(prop, primary, None, None, None, False)
 
         # LB < OPT
         # check if LB is tight
@@ -218,36 +225,40 @@ class MDP(MarkovChain):
             assignment = [hole.options for hole in self.design_space]
             consistent = True
         else:
-            assignment,consistent = self.quotient_container.scheduler_consistent(self, result_primary)
+            assignment,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
         if consistent:
             # LB is tight and LB < OPT
             hole_options = self.design_space.copy()
             for hole_index,hole in enumerate(hole_options):
                 hole.options = assignment[hole_index]
-            return (result_primary,None), value_primary, hole_options, False
+            return MdpOptimalityResult(prop, primary, None, primary.value, hole_options, False)
 
         # UB might improve the optimum
-        result_secondary = self.model_check_property(prop, alt = True)
-        value_secondary = self.at_initial_state(result_secondary)
-        opt_secondary = prop.improves_optimum(value_secondary)
-        sat_secondary = prop.satisfies_threshold(value_secondary)
-
-        if not opt_secondary:
+        secondary = self.model_check_property(prop, alt = True)
+        
+        if not secondary.improves:
             # LB < OPT < UB
-            if not sat_primary:
+            if not primary.sat:
                 # T < LB < OPT < UB
-                return (result_primary,result_secondary), None, None, False
+                return MdpOptimalityResult(prop, primary, secondary, None, None, False)
             else:
                 # LB < T < OPT < UB
-                return (result_primary,result_secondary), None, None, True
+                return MdpOptimalityResult(prop, primary, secondary, None, None, True)
 
         # LB < UB < OPT
         # this family definitely improves the optimum
         assignment = self.design_space.pick_any()
-        if not sat_primary:
+        if not primary.sat:
             # T < LB < UB < OPT
-            return (result_primary,result_secondary), value_secondary, assignment, False
+            return MdpOptimalityResult(prop, primary, secondary, secondary.value, assignment, False)
         else:
             # LB < T, LB < UB < OPT
-            return (result_primary,result_secondary), value_secondary, assignment, True
+            return MdpOptimalityResult(prop, primary, secondary, secondary.value, assignment, True)
 
+
+    def check_specification(self, specification, property_indices = None, short_evaluation = False):
+        constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
+        optimality_result = None
+        if not (short_evaluation and constraints_result.feasibility == False) and specification.has_optimality:
+            optimality_result = self.check_optimality(specification.optimality)
+        return SpecificationResult(constraints_result, optimality_result)

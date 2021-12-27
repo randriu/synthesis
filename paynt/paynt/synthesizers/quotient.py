@@ -23,13 +23,10 @@ logger = logging.getLogger(__name__)
 
 class QuotientContainer:
 
-    sketch = None
-
     def __init__(self, sketch):
         self.sketch = sketch
         
         self.quotient_mdp = None
-
         self.default_actions = None        
         self.action_to_hole_options = None
 
@@ -204,11 +201,10 @@ class QuotientContainer:
         return most_inconsistent
 
     
-    def split(self, mdp, results, properties):
+    def split(self, mdp, result):
         assert not mdp.is_dtmc
 
-        result_primary,result_secondary = results
-        scheduler = result_primary.scheduler
+        scheduler = result.scheduler
         Profiler.start("scheduler_selection")
         hole_assignments = self.scheduler_selection(mdp, scheduler)
 
@@ -241,6 +237,16 @@ class QuotientContainer:
             design_subspaces.append(design_subspace)
         return design_subspaces
 
+    def quotient_relevant_holes(self):
+        tm = self.quotient_mdp.transition_matrix
+        state_to_holes = []
+        for state in range(self.quotient_mdp.nr_states):
+            relevant_holes = set()
+            for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                relevant_holes.update(set(self.action_to_hole_options[action].keys()))
+            state_to_holes.append(relevant_holes)
+        return state_to_holes
+
 
 
 class JaniQuotientContainer(QuotientContainer):
@@ -250,9 +256,7 @@ class JaniQuotientContainer(QuotientContainer):
 
         # unfold jani program
         unfolder = JaniUnfolder(self.sketch)
-        self.sketch.properties = unfolder.properties
-        self.sketch.optimality_property = unfolder.optimality_property
-        self.sketch.design_space.set_properties(self.sketch.properties)
+        self.sketch.specification = unfolder.specification
 
         # build quotient MDP       
         edge_to_hole_options = unfolder.edge_to_hole_options
@@ -413,7 +417,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 holes[hole_index] = hole
 
         # create domains for each hole
-        self.design_space = DesignSpace(holes, self.sketch.properties)
+        self.design_space = DesignSpace(holes, self.sketch.specification.all_indices())
         self.sketch.design_space = self.design_space
         # print("design space: ", self.design_space)
 
@@ -490,7 +494,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 holes.append(hole)
 
 
-        self.design_space = DesignSpace(holes, self.sketch.properties)
+        self.design_space = DesignSpace(holes, self.sketch.specification.all_indices())
         self.sketch.design_space = self.design_space
         
         # associate actions with hole combinations (colors)

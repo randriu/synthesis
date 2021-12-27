@@ -80,12 +80,14 @@ function run() {
     verbose=true
 
     coin="coin"
-    coin="coin/more"
+    # coin="coin/more"
 
-    maze="maze/orig"
+    dice="dice/5"
+
+    # maze="maze/orig"
     # maze="maze/concise"
 
-    pomdp=true
+    # pomdp=true
     maze="pomdp/maze/orig"
     maze="pomdp/maze/concise"
 
@@ -93,20 +95,19 @@ function run() {
     avoid="pomdp/grid/avoid"
     refuel="pomdp/refuel"
 
-    benchmark="pomdp/refuel"
-    benchmark="badcolors"
+    benchmark="pomdp/nrp"
 
     # running ##########
 
-    # model=$pole
+    model=$coin
     # model=$dice
-    # model=$coin
-    # model=$maze
+    model=$maze
     # model=$grid
     model=$avoid
-    # model=$refuel
+    model=$refuel
+    model=$refuel
 
-    # model=benchmark
+    model=$benchmark
 
     # onebyone $model
     ar $model
