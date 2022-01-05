@@ -254,7 +254,6 @@ namespace storm {
         void CounterexampleGenerator<ValueType,StateType>::prepareSubdtmc (
             uint_fast64_t formula_index,
             bool use_mdp_bounds,
-            std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
             std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling & labeling_subdtmc,
             std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
@@ -266,21 +265,11 @@ namespace storm {
 
             // Get DTMC info
             StateType dtmc_states = dtmc->getNumberOfStates();
-            storm::storage::SparseMatrix<ValueType> const& transition_matrix = dtmc->getTransitionMatrix();
             
             // Introduce expanded state space
             uint_fast64_t sink_state_false = dtmc_states;
             uint_fast64_t sink_state_true = dtmc_states+1;
 
-            // Construct a copy of the original matrix
-            for(StateType state = 0; state < dtmc_states; state++) {
-                std::vector<std::pair<StateType,ValueType>> r;
-                for(auto entry: transition_matrix.getRow(state)) {
-                    r.emplace_back(entry.getColumn(), entry.getValue());
-                }
-                matrix_dtmc.push_back(r);
-            }
-            
             // Label target states of a DTMC
             std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const> mdp_target = this->mdp_targets[formula_index];
             std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const> mdp_until = this->mdp_untils[formula_index];
@@ -344,7 +333,6 @@ namespace storm {
         bool CounterexampleGenerator<ValueType,StateType>::expandAndCheck (
             uint_fast64_t index,
             ValueType formula_bound,
-            std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
             std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling const& labeling_subdtmc,
             std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc,
@@ -353,14 +341,18 @@ namespace storm {
             
             // Get DTMC info
             uint_fast64_t dtmc_states = this->dtmc->getNumberOfStates();
-            
+            storm::storage::SparseMatrix<ValueType> const& transition_matrix = this->dtmc->getTransitionMatrix();
             StateType initial_state = *(this->dtmc->getInitialStates().begin());
             
             // Expand states from the new wave: 
             // - expand transition probabilities
             for(StateType state : to_expand) {
-                matrix_subdtmc[state] = std::move(matrix_dtmc[state]);
+                matrix_subdtmc[state].clear();
+                for(auto entry: transition_matrix.getRow(state)) {
+                    matrix_subdtmc[state].emplace_back(entry.getColumn(), entry.getValue());
+                }
             }
+
             if(this->formula_reward[index]) {
                 // - expand state rewards
                 storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[index]);
@@ -406,13 +398,11 @@ namespace storm {
             StateType dtmc_states = this->dtmc->getNumberOfStates();
             
             // Prepare to construct sub-DTMCs
-            std::vector<std::vector<std::pair<StateType,ValueType>>> matrix_dtmc;
             std::vector<std::vector<std::pair<StateType,ValueType>>> matrix_subdtmc;
             storm::models::sparse::StateLabeling labeling_subdtmc(dtmc_states+2);
             std::unordered_map<std::string, storm::models::sparse::StandardRewardModel<ValueType>> reward_models_subdtmc;
             this->prepareSubdtmc(
-                formula_index, use_mdp_bounds, matrix_dtmc,
-                matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
+                formula_index, use_mdp_bounds, matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
             );
 
             // Explore subDTMCs wave by wave
@@ -420,7 +410,7 @@ namespace storm {
             uint_fast64_t wave = 0;
             while(true) {
                 bool satisfied = this->expandAndCheck(
-                    formula_index, formula_bound, matrix_dtmc, matrix_subdtmc, labeling_subdtmc,
+                    formula_index, formula_bound, matrix_subdtmc, labeling_subdtmc,
                     reward_models_subdtmc, this->wave_states[wave]
                 );
                 if(!satisfied) {

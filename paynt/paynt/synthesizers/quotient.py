@@ -419,7 +419,10 @@ class POMDPQuotientContainer(QuotientContainer):
         # create domains for each hole
         self.design_space = DesignSpace(holes, self.sketch.specification.all_indices())
         self.sketch.design_space = self.design_space
-        # print("design space: ", self.design_space)
+        print("# of observations:" , pomdp.nr_observations)
+        print("# of holes: ", pm.num_holes)
+        print("design space size: ", self.design_space.size)
+        print("", flush=True)
 
         # associate actions with hole combinations (colors)
         self.combination_coloring = CombinationColoring(holes)

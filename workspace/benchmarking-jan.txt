@@ -1,0 +1,297 @@
+
+--------------------------------------------------------------------------------
+crypt [3]
+
+-- k=1
+
+# of observations: 130
+# of holes:  56
+design space size:  3833759992447475122176
+
+ar: ETA: 2833615910.9 s [80696 iters], opt=0.5
+cegis: ETA: 335894.4 s [3515 iters], opt=0.5
+
+--------------------------------------------------------------------------------
+drone [4 1]
+
+-- k=1
+
+# of observations: 384
+# of holes:  165
+design space size:  2187250724783011924372502227117621365353169430893212436425770606409952999199375923223513177023053824
+
+--------------------------------------------------------------------------------
+avoid
+
+optimality objective: Pmax=? [!("bad") U "goal"]
+
+-- k=1
+# of observations: 4
+# of holes:  1
+design space size:  4
+
+optimal: 0.214286
+
+method: AR, synthesis time: 0.0 s
+super MDP size: 0, average MDP size: 17, iterations: 4
+
+method: CEGIS, synthesis time: 0.01 s
+average DTMC size: 17, DTMC checks: 0, iterations: 5
+
+-- k=2
+
+# of observations: 4
+# of holes:  10
+design space size:  4096
+
+optimal: 0.857143
+
+
+method: AR, synthesis time: 0.01 s
+super MDP size: 0, average MDP size: 33, iterations: 27
+
+
+method: CEGIS, synthesis time: 0.78 s
+average DTMC size: 28, DTMC checks: 0, iterations: 399
+
+-- k=3
+
+# of observations: 4
+# of holes:  15
+design space size:  34012224
+number of holes: 15, family size: 34012224
+
+optimal: 0.928571
+
+method: AR, synthesis time: 0.28 s
+super MDP size: 0, average MDP size: 49, iterations: 524
+
+cegis: ETA: 71.6 s [9015 iters], opt=0.92857
+
+--------------------------------------------------------------------------------
+maze-concise
+
+optimality objective: R[exp]{"steps"}min=? [F ((x = 2) & (y = 0))]
+
+-- k=1
+
+# of observations: 8
+# of holes:  6
+design space size:  4096
+number of holes: 6, family size: 4096
+
+optimal: 71.905288
+
+method: AR, synthesis time: 0.28 s
+super MDP size: 0, average MDP size: 15, iterations: 17
+
+cegis: SEGFAULT
+
+-- k=2
+
+# of observations: 8
+# of holes:  28
+design space size:  1099511627776
+number of holes: 28, family size: 1099511627776
+
+optimal: 13.87332
+
+method: AR, synthesis time: 8.43 s
+super MDP size: 0, average MDP size: 29, iterations: 153
+
+cegis: SEGFAULT
+
+
+-- k=3
+
+# of observations: 8
+# of holes:  42
+design space size:  19408409961765342806016
+
+ar: ETA: 3267.2 s [503 iters], opt=31.95674
+
+
+--------------------------------------------------------------------------------
+network: how to set K & T ?
+
+--------------------------------------------------------------------------------
+nrp
+
+optimality objective: Pmax=? [F "unfair"]
+
+-- k=1
+
+# of observations: 31
+# of holes:  6
+design space size:  64
+
+optimal: 0.166667
+
+method: AR, synthesis time: 0.01 s
+super MDP size: 0, average MDP size: 46, iterations: 27
+
+method: CEGIS, synthesis time: 0.02 s
+average DTMC size: 37, DTMC checks: 0, iterations: 8
+
+-- k=2
+
+# of observations: 31
+# of holes:  74
+design space size:  18889465931478580854784
+
+ar: ETA: 221.2 s [80905 iters], opt=0.16667
+cegis: ETA: 82.8 s [3177 iters], opt=0.16667
+
+--------------------------------------------------------------------------------
+refuel [6]
+
+optimality objective: Pmax=? ["notbad" U "goal"]
+
+-- k=1
+
+# of observations: 50
+# of holes:  26
+design space size:  1410554953728
+
+optimal: 0.350026
+
+method: AR, synthesis time: 7.07 s
+super MDP size: 0, average MDP size: 171, iterations: 7931
+
+cegis: ETA: 87.9 s [6282 iters], opt=0.26767
+
+-- k=2
+
+# of observations: 50
+# of holes:  152
+design space size:  2522200383259155377694530751330983269335622954971561984
+
+ar: ETA: 1777558.7 s [20254 iters], opt=0.00332
+cegis: ETA: 9712.6 s [1436 iters], opt=0.09204
+
+--------------------------------------------------------------------------------
+
+samplerocks
+
+-- k=1
+# of observations: 277
+# of holes:  226
+design space size:  4228871736815801385829438148917777093674713447756258020171883782707609600000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+ar: ETA: 55000383.7 s [11460 iters], opt=28.0
+cegis: BAD_ALLOC
+
+--------------------------------------------------------------------------------
+
+obstacle [5]
+
+optimality objective: Pmax=? [F "goal"]
+
+
+-- k=1
+
+# of observations: 4
+# of holes:  2
+design space size:  16
+
+optimal: 0.55
+
+method: AR, synthesis time: 0.0 s
+super MDP size: 0, average MDP size: 23, iterations: 4
+
+method: CEGIS, synthesis time: 0.02 s
+average DTMC size: 10, DTMC checks: 0, iterations: 18
+
+-- k=2
+
+# of observations: 4
+# of holes:  12
+design space size:  65536
+
+optimal: 1.0
+
+method: AR, synthesis time: 0.01 s
+super MDP size: 0, average MDP size: 40, iterations: 21
+
+method: CEGIS, synthesis time: 0.75 s
+average DTMC size: 20, DTMC checks: 0, iterations: 327
+
+
+-- k=3
+
+# of observations: 4
+# of holes:  18
+design space size:  2176782336
+
+optimal: 1.0
+
+method: AR, synthesis time: 0.03 s
+super MDP size: 0, average MDP size: 61, iterations: 31
+
+method: CEGIS, synthesis time: 1.47 s
+average DTMC size: 26, DTMC checks: 0, iterations: 387
+
+
+--------------------------------------------------------------------------------
+
+intercept [5 2]
+
+optimality objective: Pmax=? ["notbad" U "goal"]
+
+
+-- k=1
+
+# of observations: 905
+# of holes:  404
+design space size:  1707011694817242694164442058424641996069058130512872489061441999811593532881313810309486643423117898430190057111918909554147533223454557460573019149396692491800360340355587726966548041193424390330615044130786970107312831497593974090537952608256
+
+optimal: 1.0
+
+method: AR, synthesis time: 0.29 s
+super MDP size: 0, average MDP size: 1192, iterations: 47
+
+
+cegis: ETA: 55061674.2 s [404 iters], opt=0.08446
+
+
+-- k=2
+
+# of observations: 905
+# of holes:  2618
+design space size:  213189172957257929911609185895507569418164209095758119985684105884942557923071601816612746038301357098450398262163833202256396811238586343764135863216698628061051148686356484324940813595038607611592495420063367224657848585513961878111985603136678588705782717002849418414636788672632317719957778830996960801598346857680532636158540042289069635402006350249459524422157190148094989005705711666844403736355806993037019613117715414084366060056174289393422930356955499309260903919925194939320215681069354277995774921949021257848415495922531131460556836194068789553466451526421555060525322987018173294044872386352417054572156038589475921642372841051398157536620858106940053408474778683481195870731328431392877274018010121806955920951397894263144008446707435027949862521607325555919315089738119523717837912872826823403041054997253046574862508800231362824155381397472668076526980422007757920923234238983363606199382970252971162142888838448132810282576044144970857002349005320582163860088615011706624756136202599008171129543702152631879204864
+
+method: AR, synthesis time: 2.84 s
+super MDP size: 0, average MDP size: 2382, iterations: 97
+
+cegis: ETA: 51031913.2 s [57 iters], opt=0.08439
+
+--------------------------------------------------------------------------------
+
+evade [5 2]
+
+optimality objective: Pmax=? ["notbad" U "goal"]
+
+-- k=1
+
+# of observations: 981
+# of holes:  461
+design space size:  16794690268917721879477413972375567823926055498407571640386375377425738752719770241755684023359882794026564951006691027519298986185396347825548096649855456651705982595815814737646443244195830638751081412128845625487358990760105134152220274269100694401592313506075224782070013038464025012519442725533735938370227813720703125
+
+optimal: 1.0
+
+method: AR, synthesis time: 1.37 s
+super MDP size: 0, average MDP size: 1918, iterations: 99
+
+cegis: ETA: 55048200.2 s [274 iters], opt=0.0
+
+
+-- k=2
+
+# of observations: 981
+# of holes:  2884
+design space size:  117813617286336735328947744983549524942387739291963003550715137987531686415893111198651827698013002806801277832312516350875264462890216077716912492143885762152213966634919844430677422637872640242124772443478429380665770431179956474002743696124036538147373390682250476414531827098242066877536899124182531530565877760000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+method: AR, synthesis time: 38.67 s
+super MDP size: 0, average MDP size: 3816, iterations: 677
+
+cegis: ETA: 40335153.4 s [49 iters], opt=0.0

@@ -1,0 +1,83 @@
+pomdp
+
+observables
+started, r1taken, r1lastobs , r2taken, r2lastobs, r3taken, r3lastobs
+endobservables
+
+const int N;
+const int xMx = N-1;
+const int yMx = N-1;
+const int xMIN = 0;
+const int yMIN = 0;
+const double slippery = 0.0;
+// Rock positions
+const r1x = floor(xMx/2);
+const r1y = floor(yMx/2);
+const r2x = 1;
+const r2y = floor(yMx/2);
+const r3x = 1;
+const r3y = yMx;
+// How likely is a rock a good rock
+const double goodrock = 0.5;
+// We are done when we reach max x location
+formula finish = started & x = xMx;
+formula good = ((!r1qual & !r2qual & !r3qual) | (r1taken | r2taken | r3taken));
+observable "atend" = done;
+// Distance between r1 and the robot
+formula r1dist = max(r1x-x,x-r1x) + max(r1y-y,y-r1y);
+// max distance
+formula maxdist = xMx-xMIN+yMx-yMIN;
+// Distance between r1 and the robot
+formula r2dist = max(r2x-x,x-r2x) + max(r2y-y,y-r2y);
+formula r3dist = max(r3x-x,x-r3x) + max(r3y-y,y-r3y);
+formula bad = (r1taken & !r1qual) | (r2taken & !r2qual) | (r3taken & !r3qual);
+label "seebad" = bad;
+formula done = bad | finish;
+
+formula normdistr1 = 1+(r1dist/maxdist);
+formula normdistr2 = 1+(r2dist/maxdist);
+formula normdistr3 = 1+(r3dist/maxdist);
+
+module master
+    started : bool init false;
+
+    [placement] !started -> (started'=true);
+    [north] started & !done -> true;
+    [south] started  & !done -> true;
+    [east] started  & !done-> true;
+    [west] started & !done -> true;
+    [finished] done -> true;
+endmodule
+
+module rock1
+    r1qual : bool init false;
+    r1taken : bool init false;
+    r1lastobs : bool init false;
+    [placement] true -> goodrock : (r1qual'=true) + (1-goodrock) : (r1qual'=false);
+
+    [r1sample] started & !done -> 1:(r1taken'=(x = r1x & y = r1y & !r1taken));
+    [r1sense] started & !r1taken & !done -> (1/normdistr1): (r1lastobs'=r1qual) +  (1-(1/normdistr1)): (r1lastobs'=!r1qual);
+    [north] true -> (r1lastobs'=false);
+    [south] true -> (r1lastobs'=false);
+    [east] true -> (r1lastobs'=false);
+    [west] true -> (r1lastobs'=false);
+endmodule
+
+module rock2 = rock1[r1sample=r2sample, r1sense=r2sense, r1x = r2x, r1y = r2y, r1qual=r2qual,r1taken=r2taken,r1lastobs=r2lastobs,normdistr1=normdistr2] endmodule
+module rock3 = rock1[r1sample=r3sample, r1sense=r3sense, r1x = r3x, r1y = r3y, r1qual=r3qual,r1taken=r3taken,r1lastobs=r3lastobs,normdistr1=normdistr3] endmodule
+
+module robot
+    x : [xMIN..xMx] init 0;
+    y : [yMIN..yMx] init 0;
+
+    [west] true -> (1-slippery): (x'=max(x-1,xMIN)) + slippery: (x'=max(x-2,xMIN));
+    [east] true -> (1-slippery): (x'=min(x+1,xMx)) + slippery: (x'=min(x+2,xMx));
+    [south]  true -> (1-slippery): (y'=min(y+1,yMx)) + slippery: (y'=min(y+2,yMx));
+    [north]  true -> (1-slippery): (y'=max(y-1,yMIN)) + slippery: (y'=max(y-2,yMIN));
+
+endmodule
+
+
+label "goal" = done;
+label "rockposition" = (!r1taken & r1x = x & r1y = y) | (!r2taken & r2x = x & r2y = y) | (!r3taken & r3x = x & r3y = y);
+label "notbad" = !bad;

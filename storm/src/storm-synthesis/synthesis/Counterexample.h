@@ -94,7 +94,6 @@ namespace storm {
             void prepareSubdtmc(
                 uint_fast64_t index,
                 bool use_mdp_bounds,
-                std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
                 std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling & labeling_subdtmc,
                 std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
@@ -113,7 +112,6 @@ namespace storm {
             bool expandAndCheck(
                 uint_fast64_t index,
                 ValueType formula_bound,
-                std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_dtmc,
                 std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling const& labeling_subdtmc,
                 std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc,
@@ -154,7 +152,7 @@ namespace storm {
             std::vector<uint_fast64_t> state_map;
             // For each hole, a wave when it was registered (0 = unregistered).
             std::vector<uint_fast64_t> hole_wave;
-            // // For each wave, a set of states that were expanded.
+            // For each wave, a set of states that were expanded.
             std::vector<std::vector<StateType>> wave_states;
 
         };

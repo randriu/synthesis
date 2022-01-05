@@ -75,43 +75,60 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    # timeout=5s
+    timeout=1m
     parallel=false
     verbose=true
 
+    # pomdp=true
+
     coin="coin"
     # coin="coin/more"
-
     dice="dice/5"
 
-    # maze="maze/orig"
-    # maze="maze/concise"
+    m="pomdp/obstacle"
 
-    # pomdp=true
-    maze="pomdp/maze/orig"
+    drone="pomdp/drone"
+    crypt="pomdp/crypt"
     maze="pomdp/maze/concise"
+    network="pomdp/network"
+    nrp="pomdp/nrp"
+    samplerocks="pomdp/samplerocks"
 
-    grid="pomdp/grid/orig"
     avoid="pomdp/grid/avoid"
-    refuel="pomdp/refuel"
-
-    benchmark="pomdp/nrp"
+    avoids="pomdp/grid/avoid-slippery"
+    refuel="pomdp/grid/refuel"
+    obstacle="pomdp/grid/obstacle"
+    intercept="pomdp/grid/intercept"
+    evade="pomdp/grid/evade"
 
     # running ##########
 
-    model=$coin
+    # model=$coin
     # model=$dice
-    model=$maze
-    # model=$grid
-    model=$avoid
-    model=$refuel
-    model=$refuel
 
-    model=$benchmark
+    model=$drone
+    model=$crypt
+    model=$maze
+    model=$network
+    model=$nrp
+    model=$samplerocks
+
+    # todo rocks
+
+    model=$avoid
+    model=$avoids
+    model=$refuel
+    model=$obstacle
+    model=$intercept
+    model=$evade
+    
+
+    
+    # model=$m
 
     # onebyone $model
     ar $model
-    # cegis $model
+    cegis $model
 }
 
 # --- execution ----------------------------------------------------------------

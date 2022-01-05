@@ -25,7 +25,7 @@ class Synthesizer:
             if sketch.is_pomdp:
                 self.quotient_container = POMDPQuotientContainer(sketch)
                 self.quotient_container.pomdp_manager.set_memory_size(2)
-                self.quotient_container.unfold_partial_memory() # k = 1
+                self.quotient_container.unfold_partial_memory()
             else:
                 self.quotient_container = JaniQuotientContainer(sketch)
 
