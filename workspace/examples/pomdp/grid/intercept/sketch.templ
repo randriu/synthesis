@@ -77,6 +77,9 @@ module agent
                 + 1/8 : (ax'=max(ax-1,axMIN)) & (ay'=min(ay+1,ayMAX)) +  1/8: (ax'=min(ax+1,axMAX)) & (ay'=min(ay+1,ayMAX));
 endmodule
 
+rewards "steps"
+    true: 1;
+endrewards
 
 label "goal" = done;
 label "notbad" =  !left;

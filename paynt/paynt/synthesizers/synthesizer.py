@@ -16,28 +16,31 @@ logger = logging.getLogger(__name__)
 
 class Synthesizer:
 
-    def __init__(self, sketch, quotient_container = None):
-        MarkovChain.initialize(sketch.specification.stormpy_formulae())
+    def __init__(self, sketch, quotient = None):
         self.sketch = sketch
-        if quotient_container is not None:
-            self.quotient_container = quotient_container
-        else:
-            if sketch.is_pomdp:
-                self.quotient_container = POMDPQuotientContainer(sketch)
-                self.quotient_container.pomdp_manager.set_memory_size(2)
-                self.quotient_container.unfold_partial_memory()
-            else:
-                self.quotient_container = JaniQuotientContainer(sketch)
-
         self.stat = Statistic(sketch, self.method_name)
         Profiler.initialize()
 
     @property
     def method_name(self):
-        return "1-by-1"
+        """ to be overridden """
+        pass
     
     def print_stats(self):
         print(self.stat.get_summary())
+
+    def synthesize(self, family):
+        """ to be overridden """
+        pass
+
+    def run(self):
+        return self.synthesize(self.sketch.design_space)
+        
+class Synthesizer1By1(Synthesizer):
+    
+    @property
+    def method_name(self):
+        return "1-by-1"
 
     def synthesize(self, family):
 
@@ -48,7 +51,7 @@ class Synthesizer:
         for hole_combination in family.all_combinations():
             
             assignment = family.construct_assignment(hole_combination)
-            dtmc = self.quotient_container.build_dtmc(assignment)
+            dtmc = self.sketch.quotient.build_dtmc(assignment)
             self.stat.iteration_dtmc(dtmc.states)
             spec = dtmc.check_specification(self.sketch.specification, short_evaluation = True)
             self.stat.pruned(1)
@@ -65,10 +68,6 @@ class Synthesizer:
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
 
-    def run(self):
-        return self.synthesize(self.sketch.design_space)
-        
-
 
 class SynthesizerAR(Synthesizer):
     
@@ -76,56 +75,87 @@ class SynthesizerAR(Synthesizer):
     def method_name(self):
         return "AR"
 
+    def analyze_family_ar(self, family):
+        """
+        :return (1) family feasibility (True/False/None)
+        :return (2) new satisfying assignment (or None)
+        """
+        # logger.debug("analyzing family {}".format(family))
+        family.mdp = self.sketch.quotient.build(family)
+        # print("family size: {}, mdp size: {}".format(family.size, family.mdp.states))
+        self.stat.iteration_mdp(family.mdp.states)
+
+        res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+        family.analysis_result = res
+        satisfying_assignment = None
+
+        prim = res.optimality_result.primary.value
+        seco = res.optimality_result.secondary.value if res.optimality_result.secondary is not None else "na"
+        # print("{} - {}".format(seco,prim))
+        # print("{} - {}".format(prim,seco))
+        # exit()
+
+        can_improve = res.constraints_result.feasibility is None
+        if res.constraints_result.feasibility == True:
+            if not self.sketch.specification.has_optimality:
+                satisfying_assignment = family.pick_any()
+                return True, satisfying_assignment
+            else:
+                can_improve = res.optimality_result.can_improve
+                if res.optimality_result.optimum is not None:
+                    self.sketch.specification.optimality.update_optimum(res.optimality_result.optimum)
+                    satisfying_assignment = res.optimality_result.improving_assignment
+
+        if not can_improve:
+            self.stat.pruned(family.size)
+            return False, satisfying_assignment
+
+        feasibility = None if can_improve else False
+        return feasibility, satisfying_assignment
+
+    def split_family(self, family):
+        # filter undecided constraints
+        res = family.analysis_result
+        undecided_constraints = [index for index in family.property_indices if res.constraints_result.results[index].feasibility == None]
+
+        # split family wrt last undecided result
+        if res.optimality_result is not None:
+            split_result = res.optimality_result.primary.result
+            split_result_sec = res.optimality_result.secondary.result
+        else:
+            split_result = res.constraints_result.results[undecided_constraints[-1]].primary.result
+            split_result_sec = res.constraints_result.results[undecided_constraints[-1]].secondary.result
+        subfamilies = self.sketch.quotient.split(family.mdp, split_result)
+        # subfamilies = self.sketch.quotient.split_milan(family.mdp, split_result, split_result_sec)
+        for subfamily in subfamilies:
+            subfamily.property_indices = undecided_constraints
+        return subfamilies
+
     def synthesize(self, family):
 
         self.stat.family(family)
         self.stat.start()
 
-        # initiate AR loop
         satisfying_assignment = None
         families = [family]
         while families:
             family = families.pop(-1)
-            # logger.debug("analyzing family {}".format(family))
-            mdp = self.quotient_container.build(family)
-            self.stat.iteration_mdp(mdp.states)
 
-            spec = mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
-
-            can_improve = spec.constraints_result.feasibility is None
-
-            if spec.constraints_result.feasibility == True:
-                if not self.sketch.specification.has_optimality:
-                    logger.debug("AR: found feasible family")
-                    satisfying_assignment = family.pick_any()
-                    break
-                else:
-                    can_improve = spec.optimality_result.can_improve
-                    if spec.optimality_result.optimum is not None:
-                        self.sketch.specification.optimality.update_optimum(spec.optimality_result.optimum)
-                        satisfying_assignment = spec.optimality_result.improving_assignment
-
-            if not can_improve:
-                self.stat.pruned(family.size)
+            feasibility,assignment = self.analyze_family_ar(family)
+            if assignment is not None:
+                satisfying_assignment = assignment
+            if feasibility == True:
+                break
+            if feasibility == False:
                 continue
 
-            # filter undecided constraints
-            undecided_indices = [index for index in family.property_indices if spec.constraints_result.results[index].feasibility == None]
-            undecided_results = [spec.constraints_result.results[index] for index in undecided_indices]
-            if spec.optimality_result is not None and spec.optimality_result.can_improve:
-                undecided_results.append(spec.optimality_result)
+            # undecided
+            subfamilies = self.split_family(family)            
+            families = families + subfamilies
 
-            # split family wrt last undecided result
-            subfamilies = self.quotient_container.split(mdp, undecided_results[-1].primary.result)
-            for subfamily in subfamilies:
-                subfamily.property_indices = undecided_indices
-                families.append(subfamily)
 
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
-
-    def run(self):
-        return self.synthesize(self.sketch.design_space)
 
 
 class SynthesizerCEGIS(Synthesizer):
@@ -134,23 +164,69 @@ class SynthesizerCEGIS(Synthesizer):
     def method_name(self):
         return "CEGIS"
 
-    def property_indices(self):
-        all_properties = self.sketch.properties.copy()
-        if self.sketch.optimality_property is not None:
-            all_properties.append(self.sketch.optimality_property)
-        return {prop:all_properties.index(prop) for prop in all_properties}
+    def analyze_family_assignment_cegis(self, family, assignment, ce_generator):
+        """
+        :return (1) overall satisfiability (True/False)
+        :return (2) whether this is an improving assignment
+        """
+        
+        # logger.debug("analyzing assignment {}".format(assignment))
+        
+        # build DTMC
+        dtmc = self.sketch.quotient.build_dtmc(assignment)
+        self.stat.iteration_dtmc(dtmc.states)
 
+        # model check all properties
+        spec = dtmc.check_specification(self.sketch.specification, 
+            property_indices = family.property_indices, short_evaluation = False)
+
+        improving = False
+
+        # analyze model checking results
+        if spec.constraints_result.all_sat:
+            if not self.sketch.specification.has_optimality:
+                return True, True
+            if spec.optimality_result is not None and spec.optimality_result.improves:
+                self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
+                improving = True
+
+        # collect all unsatisfiable properties
+        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+
+        # construct conflict wrt each unsatisfiable property
+        conflicts = []
+        for index in family.property_indices:
+            if spec.constraints_result.results[index].sat:
+                continue
+            threshold = self.sketch.specification.constraints[index].threshold
+            bounds = None if family.analysis_result is None else family.analysis_result.constraints_result.results[index].primary
+            conflict = ce_generator.construct_conflict(index, threshold, bounds)
+            conflicts.append(conflict)
+
+        if self.sketch.specification.has_optimality and spec.optimality_result.sat == False:
+            index = len(self.sketch.specification.constraints)
+            threshold = self.sketch.specification.optimality.threshold
+            bounds = None if family.analysis_result is None else family.analysis_result.optimality_result.primary.result
+            conflict = ce_generator.construct_conflict(index, threshold, bounds)
+            conflicts.append(conflict)
+            
+        # use conflicts to exclude the generalizations of this assignment
+        pruned_estimate = 0
+        for conflict in conflicts:
+            pruned_estimate += family.exclude_assignment(assignment, conflict)
+
+        return False, improving, pruned_estimate
 
     def synthesize(self, family):
         self.stat.start()
 
         # map mdp states to hole indices
-        quotient_relevant_holes = self.quotient_container.quotient_relevant_holes()
+        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
 
         # initialize CE generator
         formulae = self.sketch.specification.stormpy_formulae()
         ce_generator = CounterexampleGenerator(
-            self.quotient_container.quotient_mdp, self.sketch.design_space.num_holes,
+            self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
 
         # encode family
@@ -160,510 +236,166 @@ class SynthesizerCEGIS(Synthesizer):
         # CEGIS loop
         satisfying_assignment = None
         assignment = family.pick_assignment()
+
         while assignment is not None:
-            # logger.debug("analyzing assignment {}".format(assignment))
-            # build DTMC
-            dtmc = self.quotient_container.build_dtmc(assignment)
-            self.stat.iteration_dtmc(dtmc.states)
-
-            # model check all properties
-            spec = dtmc.check_specification(self.sketch.specification, 
-                property_indices = family.property_indices, short_evaluation = False)
-
-            # analyze model checking results
-            if spec.constraints_result.all_sat:
-                if not self.sketch.specification.has_optimality:
-                    satisfying_assignment = assignment
-                    break
-                if spec.optimality_result.improves:
-                    self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
-                    satisfying_assignment = assignment
-
-
-            # construct a conflict to each unsatisfiable property
-            ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
-
-            unsat_indices = [index for index in family.property_indices if spec.constraints_result.results[index].sat == False]
-            unsat_thresholds = [self.sketch.specification.constraints[index].threshold for index in unsat_indices]
-            if self.sketch.specification.has_optimality and spec.optimality_result.sat == False:
-                unsat_indices.append(len(self.sketch.specification.constraints))
-                unsat_thresholds.append(self.sketch.specification.optimality.threshold)
-        
             
-            conflicts = []
-            for index,prop_index in enumerate(unsat_indices):
-                threshold = unsat_thresholds[index]
-                conflict = ce_generator.construct_conflict(prop_index, threshold, use_bounds = False)
-                conflicts.append(conflict)
-
-            # use conflicts to exclude the generalizations of this assignment
-            for conflict in conflicts:
-                pruning_estimate = family.exclude_assignment(assignment, conflict)
-                self.stat.pruned(pruning_estimate)
-            # exit()
-
+            sat, improving, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
+            if improving:
+                satisfying_assignment = assignment
+            if sat:
+                break
+            
             # construct next assignment
             assignment = family.pick_assignment()
 
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
 
-    def run(self):
-        self.synthesize(self.sketch.design_space)
-
-
-
-
-
-
-
-
-
-
-
-
-# LEGACY
-
-
-class FamilyHybrid():
-    ''' Family adopted for CEGAR-CEGIS analysis. '''
-
-    # TODO: more efficient state-hole mapping?
-
-    _choice_to_hole_indices = {}
-
-    def __init__(self, *args):
-        super().__init__(*args)
-
-        self._state_to_hole_indices = None  # evaluated on demand
-
-        # dtmc corresponding to the constructed assignment
-        self.dtmc = None
-        self.dtmc_state_map = None
-
-    def initialize(*args):
-        Family.initialize(*args)
-
-        # map edges of a quotient container to hole indices
-        jani = Family._quotient_container.jani_program
-        _edge_to_hole_indices = dict()
-        for aut_index, aut in enumerate(jani.automata):
-            for edge_index, edge in enumerate(aut.edges):
-                if edge.color == 0:
-                    continue
-                index = jani.encode_automaton_and_edge_index(aut_index, edge_index)
-                assignment = Family._quotient_container.edge_coloring.get_hole_assignment(edge.color)
-                hole_indices = [index for index, value in enumerate(assignment) if value is not None]
-                _edge_to_hole_indices[index] = hole_indices
-
-        # map actions of a quotient MDP to hole indices
-        FamilyHybrid._choice_to_hole_indices = []
-        choice_origins = Family._quotient_mdp.choice_origins
-        matrix = Family._quotient_mdp.transition_matrix
-        for state in range(Family._quotient_mdp.nr_states):
-            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
-                choice_hole_indices = set()
-                for index in choice_origins.get_edge_index_set(choice_index):
-                    hole_indices = _edge_to_hole_indices.get(index, set())
-                    choice_hole_indices.update(hole_indices)
-                FamilyHybrid._choice_to_hole_indices.append(choice_hole_indices)
-
-    def split(self):
-        assert self.split_ready
-        return FamilyHybrid(self, self.suboptions[0]), FamilyHybrid(self, self.suboptions[1])
-
-    @property
-    def state_to_hole_indices(self):
-        '''
-        Identify holes relevant to the states of the MDP and store only significant ones.
-        '''
-        # if someone (i.e., CEGIS) asks for state indices, the model should already be analyzed
-        assert self.constructed and self.analyzed
-
-        # lazy evaluation
-        if self._state_to_hole_indices is not None:
-            return self._state_to_hole_indices
-
-        
-        # logger.debug("Constructing state-holes mapping via edge-holes mapping.")
-
-        self._state_to_hole_indices = []
-        matrix = self.mdp.transition_matrix
-        for state in range(self.mdp.nr_states):
-            state_hole_indices = set()
-            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
-                state_hole_indices.update(FamilyHybrid._choice_to_hole_indices[self.choice_map[choice_index]])
-            state_hole_indices = set(
-                [index for index in state_hole_indices if len(self.design_space[Family.sketch.design_space.holes[index]]) > 1]
-            )
-            self._state_to_hole_indices.append(state_hole_indices)
-
-        return self._state_to_hole_indices
-
-    @property
-    def state_to_hole_indices_choices(self):
-        '''
-        Identify holes relevant to the states of the MDP and store only significant ones.
-        '''
-        # if someone (i.e., CEGIS) asks for state indices, the model should already be analyzed
-        assert self.constructed and self.analyzed
-
-        # lazy evaluation
-        if self._state_to_hole_indices is not None:
-            return self._state_to_hole_indices
-
-        Profiler.start("is - MDP holes (choices)")
-        logger.debug("Constructing state-holes mapping via choice-holes mapping.")
-
-        self._state_to_hole_indices = []
-        matrix = self.mdp.transition_matrix
-        for state in range(self.mdp.nr_states):
-            state_hole_indices = set()
-            for choice_index in range(matrix.get_row_group_start(state), matrix.get_row_group_end(state)):
-                quotient_choice_index = self.choice_map[choice_index]
-                choice_hole_indices = FamilyHybrid._choice_to_hole_indices[quotient_choice_index]
-                state_hole_indices.update(choice_hole_indices)
-            state_hole_indices = set(
-                [index for index in state_hole_indices if len(self.options[Family.hole_list[index]]) > 1])
-            self._state_to_hole_indices.append(state_hole_indices)
-        Profiler.stop()
-        return self._state_to_hole_indices
-
-    def pick_member(self):
-        # pick hole assignment
-
-        self.pick_assignment()
-        if self.member_assignment is not None:
-
-            # collect edges relevant for this assignment
-            indexed_assignment = Family.sketch.design_space.index_map(self.member_assignment)
-            subcolors = Family._quotient_container.edge_coloring.subcolors(indexed_assignment)
-            collected_edge_indices = stormpy.FlatSet(
-                Family._quotient_container.color_to_edge_indices.get(0, stormpy.FlatSet())
-            )
-            for c in subcolors:
-                collected_edge_indices.insert_set(Family._quotient_container.color_to_edge_indices.get(c))
-
-            # construct the DTMC by exploring the quotient MDP for this subfamily
-            self.dtmc, self.dtmc_state_map = stormpy.synthesis.dtmc_from_mdp(self.mdp, collected_edge_indices)
-            logger.debug(f"Constructed DTMC of size {self.dtmc.nr_states}.")
-
-            # assert absence of deadlocks or overlapping guards
-            # assert self.dtmc.labeling.get_states("deadlock").number_of_set_bits() == 0
-            assert self.dtmc.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-            assert len(self.dtmc.initial_states) == 1  # to avoid ambiguity
-
-        # success
-        return self.member_assignment
-
-    def exclude_member(self, conflicts):
-        '''
-        Exclude the subfamily induced by the selected assignment and a set of conflicts.
-        '''
-        assert self.member_assignment is not None
-
-        for conflict in conflicts:
-            counterexample_clauses = dict()
-            for var, hole in Family._solver_meta_vars.items():
-                if Family._hole_indices[hole] in conflict:
-                    option_index = Family._hole_option_indices[hole][self.member_assignment[hole][0]]
-                    counterexample_clauses[hole] = (var == option_index)
-                else:
-                    all_options = [var == Family._hole_option_indices[hole][option] for option in self.options[hole]]
-                    counterexample_clauses[hole] = z3.Or(all_options)
-            counterexample_encoding = z3.Not(z3.And(list(counterexample_clauses.values())))
-            Family._solver.add(counterexample_encoding)
-        self.member_assignment = None
-
-    def analyze_member(self, formula_index):
-        assert self.dtmc is not None
-        result = stormpy.model_checking(self.dtmc, Family.formulae[formula_index].formula)
-        value = result.at(self.dtmc.initial_states[0])
-        satisfied = Family.formulae[formula_index].satisfied(value)
-        return satisfied, value
-
-    def print_member(self):
-        print("> DTMC info:")
-        dtmc = self.dtmc
-        tm = dtmc.transition_matrix
-        for state in range(dtmc.nr_states):
-            row = tm.get_row(state)
-            print("> ", str(row))
-
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 
 # ----- Adaptivity ----- #
-# idea: switch between cegar/cegis, allocate more time to the more efficient method
+# idea: switch between ar/cegis, allocate more time to the more efficient method
 
 class StageControl:
-    # switching
-    def __init__(self):
-        self.stage_timer = Timer()
-        # cegar/cegis stats
-        self.stage_time_cegar, self.stage_pruned_cegar, self.stage_time_cegis, self.stage_pruned_cegis = 0, 0, 0, 0
-        # multiplier to derive time allocated for cegis; =1 is fair, <1 favours cegar, >1 favours cegis
-        self.cegis_allocated_time_factor = 1.0
-        # start with AR
-        self.stage_cegar = True
-        self.cegis_allocated_time = 0
 
-    def start(self, request_stage_cegar):
-        self.stage_cegar = request_stage_cegar
-        self.stage_timer.reset()
-        self.stage_timer.start()
+    # strategy
+    strategy_equal = False
 
-    def step(self, models_pruned):
-        '''Performs a stage step, returns True if the method switch took place'''
+    def __init__(self, members_total):
 
-        # record pruned models
-        self.stage_pruned_cegar += models_pruned / self.models_total if self.stage_cegar else 0
-        self.stage_pruned_cegis += models_pruned / self.models_total if not self.stage_cegar else 0
+        # pruning stats
+        self.members_total = members_total
+        self.pruned_ar = 0
+        self.pruned_cegis = 0
 
-        # in cegis mode, allow cegis another stage step if some time remains
-        if not self.stage_cegar and self.stage_timer.read() < self.cegis_allocated_time:
+        # timings
+        self.timer_ar = Timer()
+        self.timer_cegis = Timer()
+        
+        # multiplier to derive time allocated for cegis
+        # time_ar * factor = time_cegis
+        # =1 is fair, >1 favours cegis, <1 favours ar
+        self.cegis_efficiency = 1
+
+
+    @property
+    def ar_running(self):
+        return self.timer_ar.running
+
+    def start_ar(self):
+        # print(self.pruned_ar, self.pruned_cegis)
+        # print(self.timer_ar.read(), self.timer_cegis.read())
+        self.timer_cegis.stop()
+        self.timer_ar.start()
+
+    def start_cegis(self):
+        self.timer_ar.stop()
+        self.timer_cegis.start()
+
+    def prune_ar(self, pruned):
+        self.pruned_ar += pruned / self.members_total
+
+    def prune_cegis(self, pruned):
+        self.pruned_cegis += pruned / self.members_total
+
+    def cegis_step(self):
+        """
+        :return True if cegis time is over
+        """
+        if self.timer_cegis.read() < self.timer_ar.read() * self.cegis_efficiency:
             return False
 
-        # stage is finished: record time
-        self.stage_timer.stop()
-        current_time = self.stage_timer.read()
-        if self.stage_cegar:
-            # cegar stage over: allocate time for cegis and switch
-            self.stage_time_cegar += current_time
-            self.cegis_allocated_time = current_time * self.cegis_allocated_time_factor
-            self.stage_start(request_stage_cegar=False)
+        # calculate average success rate, adjust cegis time allocation factor
+        self.timer_cegis.stop()
+
+        if StageControl.strategy_equal:
             return True
 
-        # cegis stage over
-        self.stage_time_cegis += current_time
-
-        # calculate average success rate, adjust cegis time allocation factor
-        success_rate_cegar = self.stage_pruned_cegar / self.stage_time_cegar
-        success_rate_cegis = self.stage_pruned_cegis / self.stage_time_cegis
-        if self.stage_pruned_cegar == 0 or self.stage_pruned_cegis == 0:
-            cegar_dominance = 1
+        if self.pruned_ar == 0 and self.pruned_cegis == 0:
+            self.cegis_efficiency = 1
+        elif self.pruned_ar == 0 and self.pruned_cegis > 0:
+            self.cegis_efficiency = 2
+        elif self.pruned_ar > 0 and self.pruned_cegis == 0:
+            self.cegis_efficiency = 0.5
         else:
-            cegar_dominance = success_rate_cegar / success_rate_cegis
-        cegis_dominance = 1 / cegar_dominance
-        self.cegis_allocated_time_factor = cegis_dominance
-
-        # switch back to cegar
-        self.start(request_stage_cegar=True)
+            success_rate_cegis = self.pruned_cegis / self.timer_cegis.read()
+            success_rate_ar = self.pruned_ar / self.timer_ar.read()
+            self.cegis_efficiency = success_rate_cegis / success_rate_ar
         return True
 
 
-
-class SynthesizerHybrid(Synthesizer):
-    
-    def __init__(self, sketch):
-        super().__init__(sketch)
-
-        sketch.construct_jani()
-        sketch.design_space.z3_initialize()
-        
-        self.stage_control = StageControl()
-
-        # ar family stack
-        self.families = []
-
+class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
     @property
     def method_name(self):
         return "hybrid"
 
+    def synthesize(self, family):
+        self.stat.family(family)
+        self.stat.start()
 
-    def analyze_family_cegis(self, family):
-        return None
-        '''
-        Analyse a family against selected formulae using precomputed MDP data
-        to construct generalized counterexamples.
-        '''
+        self.stage_control = StageControl(family.size)
 
-        # TODO preprocess only formulae of interest
+        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
+        formulae = self.sketch.specification.stormpy_formulae()
+        ce_generator = CounterexampleGenerator(
+            self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
+            quotient_relevant_holes, formulae)
 
-        logger.debug(f"CEGIS: analyzing family {family.design_space} of size {family.design_space.size}.")
-
-        assert family.constructed
-        assert family.analyzed
-
-        # list of relevant holes (open constants) in this subfamily
-        relevant_holes = [hole for hole in family.design_space.holes if len(family.hole_options[hole]) > 1]
-
-        # prepare counterexample generator
-        logger.debug("CEGIS: preprocessing quotient MDP")
-        raw_formulae = [f.property.raw_formula for f in Family.formulae]
-        counterexample_generator = stormpy.synthesis.SynthesisCounterexample(
-            family.mdp, len(Family.sketch.design_space.holes), family.state_to_hole_indices, raw_formulae, family.bounds
-        )
+        # encode family
+        family.z3_initialize()
         
-
-        # process family members
-        assignment = family.pick_member()
-
-        while assignment is not None:
-            logger.debug(f"CEGIS: picked family member: {assignment}.")
-
-            # collect indices of violated formulae
-            violated_formulae_indices = []
-            for formula_index in family.formulae_indices:
-                # logger.debug(f"CEGIS: model checking DTMC against formula with index {formula_index}.")
-                sat, result = family.analyze_member(formula_index)
-                logger.debug(f"Formula {formula_index} is {'SAT' if sat else 'UNSAT'}")
-                if not sat:
-                    violated_formulae_indices.append(formula_index)
-                formula = Family.formulae[formula_index]
-                if sat and formula.optimality:
-                    formula.improve_threshold(result)
-                    counterexample_generator.replace_formula_threshold(
-                        formula_index, formula.threshold, family.bounds[formula_index]
-                    )
-            # exit()
-            if not violated_formulae_indices:
-                return True
-
-
-            # some formulae were UNSAT: construct counterexamples
-            counterexample_generator.prepare_dtmc(family.dtmc, family.dtmc_state_map)
-            
-            conflicts = []
-            for formula_index in violated_formulae_indices:
-                # logger.debug(f"CEGIS: constructing CE for formula with index {formula_index}.")
-                conflict_indices = counterexample_generator.construct_conflict(formula_index)
-                # conflict = counterexample_generator.construct(formula_index, self.use_nontrivial_bounds)
-                conflict_holes = [Family.hole_list[index] for index in conflict_indices]
-                generalized_count = len(Family.hole_list) - len(conflict_holes)
-                logger.debug(
-                    f"CEGIS: found conflict involving {conflict_holes} (generalized {generalized_count} holes)."
-                )
-                conflicts.append(conflict_indices)
-                # exit()
-
-            exit()
-            family.exclude_member(conflicts)
-
-            # pick next member
-            Profiler.start("is - pick DTMC")
-            assignment = family.pick_member()
-            Profiler.stop()
-
-            # record stage
-            if self.stage_control.step(0):
-                # switch requested
-                Profiler.add_ce_stats(counterexample_generator.stats)
-                return None
-
-        # full family pruned
-        logger.debug("CEGIS: no more family members.")
-        Profiler.add_ce_stats(counterexample_generator.stats)
-        return False
-
-    def run(self):
-        
-        # initialize family description
-        logger.debug("Constructing quotient MDP of the superfamily.")
-        self.models_total = self.sketch.design_space.size
-
-        # FamilyHybrid.initialize(self.sketch)
-
-        qmdp = MDP(self.sketch)
-        # exit()
-
-        # get the first family to analyze
-        
-        family = FamilyHybrid()
-        family.construct()
+        # AR loop
         satisfying_assignment = None
+        families = [family]
+        while families:
+            # MDP analysis
+            self.stage_control.start_ar()
+            
+            # family = families.pop(-1) # DFS
+            family = families.pop(0) # BFS
 
-        # CEGAR the superfamily
-        self.stage_control.stage_start(request_stage_cegar=True)
-        feasible, optimal_value = family.analyze()
-        exit()
+            feasibility,improving_assignment = self.analyze_family_ar(family)
+            if improving_assignment is not None:
+                satisfying_assignment = improving_assignment
+            if feasibility == True:
+                break
+            if feasibility == False:
+                self.stage_control.prune_ar(family.size)
+                continue
 
-        self.stage_step(0)
-
-
-        # initiate CEGAR-CEGIS loop (first phase: CEGIS) 
-        self.families = [family]
-        logger.debug("Initiating CEGAR--CEGIS loop")
-        while self.families:
-            logger.debug(f"Current number of families: {len(self.families)}")
-
-            # pick a family
-            family = self.families.pop(-1)
-            if not self.stage_cegar:
-                # CEGIS
-                feasible = self.analyze_family_cegis(family)
-                exit()
-                if feasible and isinstance(feasible, bool):
-                    logger.debug("CEGIS: some is SAT.")
-                    satisfying_assignment = family.member_assignment
+            # undecided: initiate CEGIS
+            self.stage_control.start_cegis()
+            family.z3_encode()
+            assignment = family.pick_assignment()
+            sat = False
+            while assignment is not None:
+                
+                sat, improving_assignment, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
+                if improving_assignment is not None:
+                    satisfying_assignment = improving_assignment
+                if sat:
                     break
-                elif not feasible and isinstance(feasible, bool):
-                    logger.debug("CEGIS: all UNSAT.")
-                    self.stage_step(family.size)
-                    continue
-                else:  # feasible is None:
-                    # stage interrupted: leave the family to cegar
-                    # note: phase was switched implicitly
-                    logger.debug("CEGIS: stage interrupted.")
-                    self.families.append(family)
-                    continue
-            else:  # CEGAR
-                assert family.split_ready
+                # member is UNSAT
+                if self.stage_control.cegis_step():
+                    break
+                
+                # cegis still has time: check next assignment
+                assignment = family.pick_assignment()
 
-                # family has already been analysed: discard the parent and refine
-                logger.debug("Splitting the family.")
-                subfamily_left, subfamily_right = family.split()
-                subfamilies = [subfamily_left, subfamily_right]
-                logger.debug(
-                    f"Constructed two subfamilies of size {subfamily_left.size} and {subfamily_right.size}."
-                )
+            if sat:
+                break
+            if assignment is None:
+                # family is UNSAT
+                self.stage_control.prune_cegis(family.size)
+                self.stat.pruned(family.size)
+                continue
+        
+            # CEGIS could not process the family: split
+            self.stat.hybrid(self.stage_control.cegis_efficiency)
+            subfamilies = self.split_family(family)
+            families = families + subfamilies
+        
 
-                # analyze both subfamilies
-                models_pruned = 0
-                for subfamily in subfamilies:
-                    self.iterations_cegar += 1
-                    logger.debug(f"CEGAR: iteration {self.iterations_cegar}.")
-                    subfamily.construct()
-                    Profiler.start("ar - MDP model checking")
-                    feasible, optimal_value = subfamily.analyze()
-                    Profiler.stop()
-                    if feasible and isinstance(feasible, bool):
-                        logger.debug("CEGAR: all SAT.")
-                        satisfying_assignment = subfamily.member_assignment
-                        if optimal_value is not None:
-                            self._check_optimal_property(
-                                subfamily, satisfying_assignment, cex_generator=None, optimal_value=optimal_value
-                            )
-                        elif satisfying_assignment is not None and self._optimality_setting is None:
-                            break
-                    elif not feasible and isinstance(feasible, bool):
-                        logger.debug("CEGAR: all UNSAT.")
-                        models_pruned += subfamily.size
-                        continue
-                    else:  # feasible is None:
-                        logger.debug("CEGAR: undecided.")
-                        self.families.append(subfamily)
-                        continue
-                self.stage_step(models_pruned)
-
-        if PRINT_PROFILING:
-            Profiler.print()
-
-        if self.input_has_optimality_property() and self._optimal_value is not None:
-            assert not self.families
-            logger.info(f"Found optimal assignment: {self._optimal_value}")
-            return self._optimal_assignment, self._optimal_value
-        elif satisfying_assignment is not None:
-            logger.info(f"Found satisfying assignment: {readable_assignment(satisfying_assignment)}")
-            return satisfying_assignment, None
-        else:
-            logger.info("No more options.")
-            return None, None
-
-
-
+        self.stat.finished(satisfying_assignment)
+        return satisfying_assignment
 

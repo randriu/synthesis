@@ -108,13 +108,6 @@ namespace storm {
         }
 
         template <typename ValueType, typename StateType>
-        void CounterexampleGenerator<ValueType,StateType>::setMdpBounds(
-                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds
-            ) {
-            this->mdp_bounds = mdp_bounds;
-        }
-
-        template <typename ValueType, typename StateType>
         void CounterexampleGenerator<ValueType,StateType>::prepareDtmc(
             storm::models::sparse::Mdp<ValueType> const& dtmc,
             std::vector<uint_fast64_t> const& state_map
@@ -253,7 +246,7 @@ namespace storm {
         template <typename ValueType, typename StateType>
         void CounterexampleGenerator<ValueType,StateType>::prepareSubdtmc (
             uint_fast64_t formula_index,
-            bool use_mdp_bounds,
+            std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
             std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling & labeling_subdtmc,
             std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
@@ -294,7 +287,7 @@ namespace storm {
                 for(StateType state = 0; state < dtmc_states; state++) {
                     StateType mdp_state = this->state_map[state];
                     std::vector<std::pair<StateType,ValueType>> r;
-                    double probability = use_mdp_bounds ? (*(this->mdp_bounds[formula_index]))[mdp_state] : default_bound;
+                    double probability = mdp_bounds != NULL ? (*mdp_bounds)[mdp_state] : default_bound;
                     r.emplace_back(sink_state_false, 1-probability);
                     r.emplace_back(sink_state_true, probability);
                     matrix_subdtmc.push_back(r);
@@ -310,7 +303,7 @@ namespace storm {
                 double default_reward = 0;
                 for(StateType state = 0; state < dtmc_states; state++) {
                     StateType mdp_state = this->state_map[state];
-                    double reward = use_mdp_bounds ? (*(this->mdp_bounds[formula_index]))[mdp_state] : default_reward;
+                    double reward = mdp_bounds != NULL ? (*mdp_bounds)[mdp_state] : default_reward;
                     state_rewards_subdtmc[state] = reward;
 
                     std::vector<std::pair<StateType,ValueType>> r;
@@ -391,7 +384,9 @@ namespace storm {
 
         template <typename ValueType, typename StateType>
         std::vector<uint_fast64_t> CounterexampleGenerator<ValueType,StateType>::constructConflict (
-            uint_fast64_t formula_index, ValueType formula_bound, bool use_mdp_bounds
+            uint_fast64_t formula_index,
+            ValueType formula_bound,
+            std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds
             ) {
             
             // Get DTMC info
@@ -402,7 +397,7 @@ namespace storm {
             storm::models::sparse::StateLabeling labeling_subdtmc(dtmc_states+2);
             std::unordered_map<std::string, storm::models::sparse::StandardRewardModel<ValueType>> reward_models_subdtmc;
             this->prepareSubdtmc(
-                formula_index, use_mdp_bounds, matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
+                formula_index, mdp_bounds, matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
             );
 
             // Explore subDTMCs wave by wave

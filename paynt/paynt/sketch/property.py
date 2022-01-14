@@ -92,6 +92,9 @@ class OptimalityProperty(Property):
         self.optimum = None
         self.epsilon = epsilon
 
+    def __str__(self):
+        return f"{self.formula_str} [{self.epsilon}]"
+
     def satisfies_threshold(self, result):
         if not self.result_valid(result):
             return False

@@ -1,6 +1,9 @@
 import stormpy
+
 from .property import Property, OptimalityProperty, Specification
 from .holes import Hole, Holes, DesignSpace
+from ..synthesizers.models import MarkovChain
+from ..synthesizers.quotient import JaniQuotientContainer, POMDPQuotientContainer
 
 import os
 import re
@@ -24,44 +27,88 @@ class Sketch:
         self.design_space = None
 
         logger.info(f"Loading sketch from {sketch_path}...")
-        
-        self.prism, hole_definitions = Sketch.load_sketch(sketch_path)
-        assert not self.is_mdp, "MDP sketches are not supported"
 
-        self.expression_parser = stormpy.storage.ExpressionParser(self.prism.expression_manager)
-        self.expression_parser.set_identifier_mapping(dict())
+        self.explicit_model = Sketch.read_explicit_mdp(sketch_path)
+        if self.is_implicit:
+            # template as a prism program
+            self.prism, hole_definitions = Sketch.load_sketch(sketch_path)
 
-        logger.info(f"Assuming constant definitions: '{constant_str}' ...")
-        constant_map = Sketch.map_constants(self.prism, self.expression_parser, constant_str)
-        self.prism = self.prism.define_constants(constant_map)
-        self.prism = self.prism.substitute_constants()
+            self.expression_parser = stormpy.storage.ExpressionParser(self.prism.expression_manager)
+            self.expression_parser.set_identifier_mapping(dict())
 
-        logger.info("Processing hole definitions ...")
-        self.prism, holes, self.hole_expressions = Sketch.parse_holes(self.prism, self.expression_parser, hole_definitions)
-        logger.info(f"Sketch has {holes.num_holes} holes")
-        logger.info(f"Listing hole domains: {holes}")
-        logger.info(f"Design space size: {holes.size}")
+            logger.info(f"Assuming constant definitions: '{constant_str}' ...")
+            constant_map = Sketch.map_constants(self.prism, self.expression_parser, constant_str)
+            self.prism = self.prism.define_constants(constant_map)
+            self.prism = self.prism.substitute_constants()
+
+            logger.info("Processing hole definitions ...")
+            self.prism, holes, self.hole_expressions = Sketch.parse_holes(self.prism, self.expression_parser, hole_definitions)
+            logger.info(f"Sketch has {holes.num_holes} holes")
+            logger.info(f"Listing hole domains: {holes}")
+            logger.info(f"Design space size: {holes.size}")
+        else:
+            # pomdp in explicit form
+            logger.info(f"Loaded model from explicit format.")
+            assert self.is_pomdp
+            self.prism = None
+            self.expression_parser = None
+            self.hole_expressions = None
+            constant_map = None
+            holes = None
 
         logger.info(f"Loading properties from {properties_path} ...")
         self.specification = Sketch.parse_specification(self.prism, constant_map, properties_path)
         logger.info(f"Found the following constraints: {[str(p) for p in self.specification.constraints]}")
         if self.specification.has_optimality:
             logger.info(f"Found the following optimality property: {self.specification.optimality}")
-        self.design_space = DesignSpace(holes, self.specification.all_indices())
+
+        if self.is_implicit:
+            self.design_space = DesignSpace(holes)
+            self.design_space.property_indices = self.specification.all_indices()
+
+        MarkovChain.initialize(self.specification.stormpy_formulae())
+        if not self.is_pomdp:
+            self.quotient = JaniQuotientContainer(self)
+        else:
+            self.quotient = POMDPQuotientContainer(self)
+            self.quotient.pomdp_manager.set_memory_size(2)
+            self.quotient.unfold_partial_memory()
+
+    @property
+    def is_implicit(self):
+        return self.explicit_model is None
 
     @property
     def is_mdp(self):
-        return self.prism.model_type == stormpy.storage.PrismModelType.MDP
+        if self.is_implicit:
+            return self.prism.model_type == stormpy.storage.PrismModelType.MDP
+        else:
+            return self.explicit_model.is_nondeterministic_model and not self.explicit_model.is_partially_observable
 
     @property
     def is_pomdp(self):
-        return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
+        if self.is_implicit:
+            return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
+        else:
+            return self.explicit_model.is_nondeterministic_model and self.explicit_model.is_partially_observable
 
     def restrict_prism(self, assignment):
         assert assignment.size == 1
         substitution = {prism.get_constant(hole.hame):self.hole_expressions[hole_index][hole.options[0]] for hole_index,hole in enumerate(assignment)}
         program = self.prism.define_constants(substitution)
         return program
+
+    @classmethod
+    def read_explicit_mdp(cls, path):
+        model = None
+        try:
+            builder_options = stormpy.core.DirectEncodingParserOptions()
+            builder_options.build_choice_labels = True
+            model = stormpy.core._build_sparse_model_from_drn(path, builder_options)
+        except:
+            return None
+        return model
+
 
     @classmethod
     def load_sketch(cls, sketch_path):
@@ -189,7 +236,12 @@ class Sketch:
         # parse all properties
         properties = []
         optimality_property = None
-        for prop in stormpy.parse_properties_for_prism_program(lines_properties, prism):
+
+        if prism is not None:
+            props = stormpy.parse_properties_for_prism_program(lines_properties, prism)
+        else:
+            props = stormpy.parse_properties_without_context(lines_properties)
+        for prop in props:
             rf = prop.raw_formula
             assert rf.has_bound != rf.has_optimality_type, "optimizing formula contains a bound or a comparison formula does not"
             if rf.has_bound:
@@ -200,11 +252,12 @@ class Sketch:
                 assert optimality_property is None, "two optimality formulae specified"
                 optimality_property = prop
 
-        # substitute constants in properties
-        for p in properties:
-            p.raw_formula.substitute(constant_map)
-        if optimality_property is not None:
-            optimality_property.raw_formula.substitute(constant_map)
+        if constant_map is not None:
+            # substitute constants in properties
+            for p in properties:
+                p.raw_formula.substitute(constant_map)
+            if optimality_property is not None:
+                optimality_property.raw_formula.substitute(constant_map)
 
         # wrap properties
         properties = [Property(p) for p in properties]

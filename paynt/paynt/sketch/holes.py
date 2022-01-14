@@ -106,16 +106,19 @@ class DesignSpace(Holes):
     # for each hole, a corresponding solver variable
     solver_vars = None
 
-    def __init__(self, holes, property_indices = None):
+    def __init__(self, holes):
         super().__init__(holes.copy())
-        self.property_indices = property_indices.copy()
+        self.property_indices = None
+
+        self.mdp = None
+        self.analysis_result = None
+        
         self.encoding = None
-
-    def set_prop_indices(self, property_indices):
-        self.property_indices = property_indices
-
+    
     def copy(self):
-        return DesignSpace(super().copy(), self.property_indices)
+        ds = DesignSpace(super().copy())
+        ds.property_indices = self.property_indices.copy()
+        return ds
 
     def z3_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
@@ -178,6 +181,9 @@ class DesignSpace(Holes):
         counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
         DesignSpace.solver.add(counterexample_encoding)
         return pruning_estimate
+
+
+
 
 
 class CombinationColoring:

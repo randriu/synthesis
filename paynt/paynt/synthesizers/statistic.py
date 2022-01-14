@@ -41,7 +41,8 @@ class Statistic:
 
         self.feasible = None
         self.assignment = None
-        self.optimum = None
+
+        self.stage_factor = None
 
         self.timer = Timer()
         self.remaining = self.design_space.size
@@ -84,16 +85,21 @@ class Statistic:
         time_estimate = safe_division(self.timer.read(), fraction_rejected)
         return fraction_rejected, time_estimate
 
+    def hybrid(self, stage_factor):
+        self.stage_factor = stage_factor
+
     def status(self):
         fraction_rejected, time_estimate = self.estimate()
-        percentage_rejected = int(fraction_rejected * 10000) / 100.0
+        percentage_rejected = int(fraction_rejected * 1000000) / 10000.0
         # percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.timer.read(),1)
         time_estimate = round(time_estimate,1)
-        iters = self.iterations_mdp + self.iterations_dtmc
+        iters = self.iterations_mdp # + self.iterations_dtmc
         avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
         optimum = round(self.specification.optimality.optimum,5) if (self.specification.has_optimality and self.specification.optimality.optimum is not None) else "-"
-        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], opt={optimum}"
+        threshold = round(self.specification.optimality.threshold,5)
+        factor = self.stage_factor
+        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], opt={optimum}, t={threshold}, f={factor}"
 
     def print_status(self):
         if self.timer.read() > self.status_time:

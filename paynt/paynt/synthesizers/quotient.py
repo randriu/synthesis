@@ -5,6 +5,7 @@ import stormpy.pomdp
 import math
 import re
 import itertools
+import random
 from collections import OrderedDict
 
 from .statistic import Statistic
@@ -188,7 +189,6 @@ class QuotientContainer:
             suboptions[index].append(option)
             index = (index + 1) % len(suboptions)
         return suboptions
-        # return self.suboptions_half(mdp, splitter)
 
     def holes_with_max_score(self, hole_score):
         max_score = max(hole_score)
@@ -201,22 +201,113 @@ class QuotientContainer:
         return most_inconsistent
 
     
+    def split_milan(self, mdp, primary, secondary):
+        assert not mdp.is_dtmc
+
+        scheduler = primary.scheduler
+        hole_assignments = self.scheduler_selection(mdp, scheduler)
+
+
+        # print("\n FAMILY")
+        # for hole_index in mdp.design_space.hole_indices:
+        #     print("{} : {}".format(hole_index,mdp.design_space[hole_index].options))
+        
+        # print("\n PRIMARY SCHEDULER")
+        # prim_selection = self.scheduler_selection(mdp,primary.scheduler)
+        # for hole_index,selection in enumerate(prim_selection):
+        #     print(hole_index,selection)
+
+        # print("\n\n\n SECONDARY SCHEDULER")
+        # seco_selection = self.scheduler_selection(mdp,secondary.scheduler)
+        # for hole_index,selection in enumerate(seco_selection):
+        #     print(hole_index,selection)
+
+        nontrivial_holes = [hole_index for hole_index,hole in enumerate(mdp.design_space) if mdp.design_space[hole_index].size > 1]
+        # # print(nontrivial_holes)
+        # sum_diffs = dict()
+        # for hole_index in nontrivial_holes:
+        #     sum_diffs[hole_index] = (0,0)
+
+
+        # state_to_relevant_holes = self.quotient_relevant_holes()
+
+        # for state in range(mdp.states):
+            
+        #     diff = abs(primary.at(state)-secondary.at(state))
+
+        #     relevant_holes = state_to_relevant_holes[mdp.quotient_state_map[state]]
+        #     # print("state {}: {}".format(state, relevant_holes))
+        #     for hole_index in relevant_holes:
+        #         if hole_index not in nontrivial_holes:
+        #             continue
+        #         sum_diff,count = sum_diffs[hole_index]
+        #         sum_diff += diff
+        #         count += 1
+        #         sum_diffs[hole_index] = (sum_diff,count)
+        #         # if curr_diff is None or diff > curr_diff:
+        #         #     max_diffs[hole_index] = diff
+
+        # avg_diffs = dict()
+        # for hole_index in sum_diffs.keys():
+        #     sum_diff,count = sum_diffs[hole_index]
+        #     avg_diffs[hole_index] = sum_diff / count if count != 0 else None
+        
+        # # print(sum_diffs)
+        # avg_diffs_str = ["{}:{}".format(k,v if v is not None else "-") for k,v in avg_diffs.items()]
+        # # print(avg_diffs)
+        # print(", ".join(avg_diffs_str))
+
+        # diffs = [diff for diff in sum_diffs.values() if diff is not None]
+        # max_diff = max(diffs)
+        # max_keys = [hole_index for hole_index in sum_diffs.keys() if sum_diffs[hole_index] == max_diff]
+
+        # splitters = max_keys
+        # splitter = list(splitters)[0]
+
+        splitters = nontrivial_holes
+        splitter = random.choice(splitters)
+        
+        # print("splitter: ", splitter)
+
+        # Profiler.start("synthesis")
+        # print("splitter: {} with domain size {}".format(splitter,len(hole_assignments[splitter])))
+        # exit()
+        
+        self.splitter_frequency[splitter] += 1
+        inconsistency = frozenset(hole_assignments[splitter])
+        inconsistency_frequency = self.splitter_inconsistencies[splitter].get(inconsistency,0)
+        self.splitter_inconsistencies[splitter][inconsistency] = inconsistency_frequency + 1
+
+        # split
+        suboptions = self.suboptions_half(mdp, splitter)
+        
+        # construct corresponding design subspaces
+        design_subspaces = []
+        for suboption in suboptions:
+            design_subspace = mdp.design_space.copy()
+            design_subspace.assume_hole_options(splitter, suboption)
+            design_subspaces.append(design_subspace)
+        return design_subspaces
+
+
     def split(self, mdp, result):
         assert not mdp.is_dtmc
 
         scheduler = result.scheduler
         Profiler.start("scheduler_selection")
         hole_assignments = self.scheduler_selection(mdp, scheduler)
+        # print(hole_assignments)
 
         inconsistent = self.most_inconsistent_holes(hole_assignments)
         hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
         splitters = self.holes_with_max_score(hole_sizes)
 
         # hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result_primary)
-        # splitters = self.holes_with_max_score(inconsistent_differences)
+        # splitters = self.holes_with_max_score(inconsistent_differences)        
 
         splitter = splitters[0]
         Profiler.start("synthesis")
+        # print("splitter: {} with domain size {}".format(splitter,len(hole_assignments[splitter])))
         
         self.splitter_frequency[splitter] += 1
         inconsistency = frozenset(hole_assignments[splitter])
@@ -228,6 +319,7 @@ class QuotientContainer:
             suboptions = self.suboptions_half(mdp, splitter)
         else:
             suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
+            # print("suboptions: ", suboptions)
 
         # construct corresponding design subspaces
         design_subspaces = []
@@ -320,17 +412,24 @@ class POMDPQuotientContainer(QuotientContainer):
         self.default_actions = None
 
         # construct quotient POMDP
-        MarkovChain.builder_options.set_build_choice_labels(True)
-        self.pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
-        assert self.pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+        if self.sketch.is_implicit:
+            MarkovChain.builder_options.set_build_choice_labels(True)
+            self.pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
+            assert self.pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+        else:
+            self.pomdp = self.sketch.explicit_model
         self.pomdp = stormpy.pomdp.make_canonic(self.pomdp)
+
         # ^ this also asserts that states with the same observation have the same number of available actions
         print("observations: ", self.pomdp.observations)
-
+        
         # extract observation labels
-        ov = self.pomdp.observation_valuations
-        self.observation_labels = [ov.get_string(obs) for obs in range(self.pomdp.nr_observations)]
-        self.observation_labels = [self.process_label(label) for label in self.observation_labels]
+        if self.pomdp.has_observation_valuations():
+            ov = self.pomdp.observation_valuations
+            self.observation_labels = [ov.get_string(obs) for obs in range(self.pomdp.nr_observations)]
+            self.observation_labels = [self.process_label(label) for label in self.observation_labels]
+        else:
+            self.observation_labels = list(range(self.pomdp.nr_observations))
         print("observation labels: ", self.observation_labels)
 
         # compute actions available at each observation
@@ -417,7 +516,8 @@ class POMDPQuotientContainer(QuotientContainer):
                 holes[hole_index] = hole
 
         # create domains for each hole
-        self.design_space = DesignSpace(holes, self.sketch.specification.all_indices())
+        self.design_space = DesignSpace(holes)
+        self.design_space.property_indices = self.sketch.specification.all_indices()
         self.sketch.design_space = self.design_space
         print("# of observations:" , pomdp.nr_observations)
         print("# of holes: ", pm.num_holes)

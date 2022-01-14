@@ -75,7 +75,7 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    timeout=1m
+    timeout=400s
     parallel=false
     verbose=true
 
@@ -101,34 +101,38 @@ function run() {
     intercept="pomdp/grid/intercept"
     evade="pomdp/grid/evade"
 
+    leo_refuel="pomdp/leo/refuel"
+
     # running ##########
 
     # model=$coin
     # model=$dice
 
-    model=$drone
-    model=$crypt
-    model=$maze
-    model=$network
+    # model=$drone
+    # model=$crypt
+    # model=$maze
+    # model=$network
     model=$nrp
-    model=$samplerocks
+    # model=$samplerocks
 
+    # model=$avoid
+    # model=$avoids
+    # model=$refuel
+    # model=$obstacle
+    # model=$intercept
+    # model=$evade
     # todo rocks
 
-    model=$avoid
-    model=$avoids
-    model=$refuel
-    model=$obstacle
-    model=$intercept
-    model=$evade
-    
+    ### leonore ###
 
-    
+    # model=$leo_refuel
+
     # model=$m
 
     # onebyone $model
-    ar $model
-    cegis $model
+    # ar $model
+    # cegis $model
+    hybrid $model
 }
 
 # --- execution ----------------------------------------------------------------

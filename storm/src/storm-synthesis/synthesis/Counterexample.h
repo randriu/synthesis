@@ -38,14 +38,6 @@ namespace storm {
                 );
 
             /*!
-             * Set MDP bounds before analyzing DTMCs in the subfamily.
-             * @param mdp_bounds for each formula, a primary result of the MDP model checking
-             */
-            void setMdpBounds(
-                std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds
-            );
-
-            /*!
              * Preprocess the DTMC by establishing the state expansion order (waves):
              * - explore the reachable state space wave by wave
              * - during each wave, expand only 'non-blocking' states (states with registered holes)
@@ -65,11 +57,14 @@ namespace storm {
              * Construct a counterexample to a prepared DTMC and a formula with
              * the given index.
              * @param formula_index Formula index.
-             * @param use_mdp_bounds If true, MDP bounds will be used for CE construction.
+             * @param formula_bound Formula threshold for CE construction.
+             * @param mdp_bounds MDP model checking result in the primary direction (NULL if not used).
              * @return A list of holes relevant in the CE.
              */
             std::vector<uint_fast64_t> constructConflict(
-                uint_fast64_t formula_index, ValueType formula_bound, bool use_mdp_bounds
+                uint_fast64_t formula_index,
+                ValueType formula_bound,
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds
                 );
 
         protected:
@@ -82,8 +77,8 @@ namespace storm {
 
             /**
              * Prepare data structures for sub-DTMC construction.
-             * @param index Formula index
-             * @param use_mdp_bounds If false, trivial bounds are used.
+             * @param formula_index Formula index.
+             * @param mdp_bounds MDP model checking result in the primary direction.
              * @param matrix_dtmc (output) Copy of the transition matrix of the DTMC.
              * @param matrix_subdtmc (output) Matrix of shortcuts.
              * @param labeling_subdtdmc (output) Labeling marking target states.
@@ -92,8 +87,8 @@ namespace storm {
              *   for the initial sub-DTMC.
              */
             void prepareSubdtmc(
-                uint_fast64_t index,
-                bool use_mdp_bounds,
+                uint_fast64_t formula_index,
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
                 std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling & labeling_subdtmc,
                 std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
@@ -143,9 +138,6 @@ namespace storm {
             // Flags for target states
             std::vector<std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const>> mdp_targets;
 
-            // Bounds from MDP model checking
-            std::vector<std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const>> mdp_bounds;
-            
             // DTMC under investigation
             std::shared_ptr<storm::models::sparse::Mdp<ValueType>> dtmc;
             // DTMC to MDP state mapping

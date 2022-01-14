@@ -93,7 +93,8 @@ class MarkovChain:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
     def __init__(self, model, quotient_state_map = None, quotient_choice_map = None):
-        assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+        if model.labeling.contains_label("overlap_guards"):
+            assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.model = model
         self.quotient_choice_map = quotient_choice_map
         if quotient_choice_map is None:
@@ -122,7 +123,8 @@ class MarkovChain:
         self.set_solver_method(self.is_dtmc)
         result = stormpy.model_checking(
             self.model, formula, only_initial_states=False,
-            extract_scheduler=(not self.is_dtmc), environment=self.environment
+            # extract_scheduler=(not self.is_dtmc), environment=self.environment # TODO
+            extract_scheduler=True, environment=self.environment
         )
         value = result.at(self.initial_state)
         return result, value

@@ -20,12 +20,6 @@ void define_synthesis(py::module& m) {
             py::arg("quotient_mdp"), py::arg("hole_count"), py::arg("mdp_holes"), py::arg("formulae")
             )
         .def(
-            "set_mdp_bounds",
-            &storm::synthesis::CounterexampleGenerator<>::setMdpBounds,
-            "Set MDP bounds before analyzing DTMCs in the subfamily.",
-            py::arg("mdp_bounds")
-            )
-        .def(
             "prepare_dtmc",
             &storm::synthesis::CounterexampleGenerator<>::prepareDtmc,
             "Prepare a DTMC for CE construction.",
@@ -35,7 +29,7 @@ void define_synthesis(py::module& m) {
             "construct_conflict",
             &storm::synthesis::CounterexampleGenerator<>::constructConflict,
             "Construct a conflict to a prepared DTMC wrt a single formula.",
-            py::arg("formula_index"), py::arg("formula_bound"), py::arg("use_bounds")
+            py::arg("formula_index"), py::arg("formula_bound"), py::arg("mdp_bounds")
         );
         /*.def_property_readonly(
             "stats",

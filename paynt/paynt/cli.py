@@ -5,7 +5,7 @@ import os
 from . import version
 
 from .sketch.sketch import Sketch
-from .synthesizers.synthesizer import Synthesizer, SynthesizerAR, SynthesizerCEGIS
+from .synthesizers.synthesizer import *
 from .synthesizers.pomdp import SynthesizerPOMDP
 
 import logging
@@ -66,24 +66,22 @@ def paynt(
 
     # choose synthesis method
     if sketch.is_pomdp and pomdp:
-        algorithm = SynthesizerPOMDP(sketch)
+        synthesizer = SynthesizerPOMDP(sketch)
     elif method == "onebyone":
-        algorithm = Synthesizer(sketch)
+        synthesizer = Synthesizer1By1(sketch)
     elif method == "cegis":
-        algorithm = SynthesizerCEGIS(sketch)
+        synthesizer = SynthesizerCEGIS(sketch)
     elif method == "ar":
-        algorithm = SynthesizerAR(sketch)
+        synthesizer = SynthesizerAR(sketch)
     elif method == "hybrid":
-        raise NotImplementedError
+        synthesizer = SynthesizerHybrid(sketch)
     elif method == "evo":
         raise NotImplementedError
     else:
         assert None
-    
-    # synthesize
 
-    algorithm.run()
-    algorithm.print_stats()
+    synthesizer.run()
+    synthesizer.print_stats()
 
 
 def main():
