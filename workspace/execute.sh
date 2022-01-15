@@ -75,7 +75,7 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    timeout=400s
+    timeout=5m
     parallel=false
     verbose=true
 
@@ -103,6 +103,10 @@ function run() {
 
     leo_refuel="pomdp/leo/refuel"
 
+    cav_dpm="cav/dpm"
+    cav_pole="cav/pole"
+    herman="herman/5"
+
     # running ##########
 
     # model=$coin
@@ -126,6 +130,11 @@ function run() {
     ### leonore ###
 
     # model=$leo_refuel
+
+    ## cav ##
+    model=$cav_dpm
+    # model=$cav_pole # error
+    model=$herman
 
     # model=$m
 

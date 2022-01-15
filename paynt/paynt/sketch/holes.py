@@ -112,9 +112,35 @@ class DesignSpace(Holes):
 
         self.mdp = None
         self.analysis_result = None
+
+        self.analysis_hints = None
         
         self.encoding = None
-    
+
+    def set_analysis_hints(self, property_indices, analysis_hints):
+        self.property_indices = property_indices
+        self.analysis_hints = analysis_hints
+
+    def translate_analysis_hint(self, hint):
+        if hint is None:
+            return None
+        translated_hint = [0] * self.mdp.states
+        for state in range(self.mdp.states):
+            translated_hint[state] = hint[self.mdp.quotient_state_map[state]]
+        return translated_hint
+
+    def translate_analysis_hints(self):
+        if self.analysis_hints is None:
+            return None
+
+        analysis_hints = dict()
+        for prop,hints in self.analysis_hints.items():
+            hint_prim,hint_seco = hints
+            hint_prim = self.translate_analysis_hint(hint_prim)
+            hint_seco = self.translate_analysis_hint(hint_seco)
+            analysis_hints[prop] = (hint_prim,hint_seco)
+        self.mdp.analysis_hints = analysis_hints
+
     def copy(self):
         ds = DesignSpace(super().copy())
         ds.property_indices = self.property_indices.copy()

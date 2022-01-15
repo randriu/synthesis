@@ -1,3 +1,19 @@
+hybrid
+model                 parameters      family size     avg. MC size    hybrid (hard)   hybrid (easy)                   
+    dpm               -               -               -               SF              SF    
+    maze              22              9437184         98              SF              0.54            
+    herman            -               -               -               5579384.0*      5536665.0*      
+    pole              -               -               -               SF              SF               
+    grid              8               65536           1217            164.03          88.64      
+
+AR
+model                 parameters      family size     avg. MC size    hybrid (hard)   hybrid (easy)                   
+    dpm               -               -               -               5279008.0*      5013976.0*      
+    maze              22              9437184         -               26.33           4.65            
+    herman            -               -               -               7136925.0*      6985430.0*      
+    pole              17              1327104         -               6.58            1.68            
+    grid              8               65536           -               752.0*          553.67  
+
 
 --------------------------------------------------------------------------------
 crypt [3]
@@ -145,17 +161,19 @@ average DTMC size: 37, DTMC checks: 0, iterations: 8
 # of holes:  74
 design space size: 18889465931478580854784
 
-TO = 1min
-ar: ETA: 221.2 s [80905 iters], opt=0.16667
-cegis: ETA: 82.8 s [3177 iters], opt=0.16667
+optimality objective: Pmax=? [F "unfair"] [0.01]
+optimal: 0.166667
 
-TO = 5min
-ar: Processed 43.41% members, elapsed 300.0 s, ETA: 691.0 s [447056 iters], opt=0.16667
-cegis:  Processed 69.26% members, elapsed 300.0 s, ETA: 433.2 s [10574 iters], opt=0.16667
+no hints
+method: AR, synthesis time: 846.73 s
+super MDP size: 0, average MDP size: 85, iterations: 1096291
 
-eps = 0.2
-ar: Processed 43.41% members, elapsed 295.0 s, ETA: 679.5 s [447131 iters], opt=0.16667
-cegis: Processed 69.26% members, elapsed 295.0 s, ETA: 425.9 s [10505 iters], opt=0.16667
+with hints
+method: AR, synthesis time: 911.93 s
+super MDP size: 0, average MDP size: 85, iterations: 1096291
+
+
+
 
 --------------------------------------------------------------------------------
 refuel [6]

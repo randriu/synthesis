@@ -53,16 +53,16 @@ class Synthesizer1By1(Synthesizer):
             assignment = family.construct_assignment(hole_combination)
             dtmc = self.sketch.quotient.build_dtmc(assignment)
             self.stat.iteration_dtmc(dtmc.states)
-            spec = dtmc.check_specification(self.sketch.specification, short_evaluation = True)
+            result = dtmc.check_specification(self.sketch.specification, short_evaluation = True)
             self.stat.pruned(1)
 
-            if not spec.constraints_result.all_sat:
+            if not result.constraints_result.all_sat:
                 continue
             if not self.sketch.specification.has_optimality:
                 satisfying_assignment = assignment
                 break
-            if spec.optimality_result.improves:
-                self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
+            if result.optimality_result.improves:
+                self.sketch.specification.optimality.update_optimum(result.optimality_result.value)
                 satisfying_assignment = assignment
 
         self.stat.finished(satisfying_assignment)
@@ -82,15 +82,17 @@ class SynthesizerAR(Synthesizer):
         """
         # logger.debug("analyzing family {}".format(family))
         family.mdp = self.sketch.quotient.build(family)
+        family.translate_analysis_hints()
         # print("family size: {}, mdp size: {}".format(family.size, family.mdp.states))
         self.stat.iteration_mdp(family.mdp.states)
+
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
         satisfying_assignment = None
 
-        prim = res.optimality_result.primary.value
-        seco = res.optimality_result.secondary.value if res.optimality_result.secondary is not None else "na"
+        # prim = res.optimality_result.primary.value
+        # seco = res.optimality_result.secondary.value if res.optimality_result.secondary is not None else "na"
         # print("{} - {}".format(seco,prim))
         # print("{} - {}".format(prim,seco))
         # exit()
@@ -113,22 +115,50 @@ class SynthesizerAR(Synthesizer):
         feasibility = None if can_improve else False
         return feasibility, satisfying_assignment
 
+    
+    def generalize_hint(self, family, hint):
+        state_range = max(family.mdp.quotient_state_map)
+        default_value = 0
+        hint_global = [default_value for state in range(state_range+1)]
+        for state in range(family.mdp.states):
+            hint_global[family.mdp.quotient_state_map[state]] = hint.at(state)
+        return hint_global
+
+    def generalize_hints(self, family, result):
+        prop = result.property
+        hint_prim = self.generalize_hint(family, result.primary.result)
+        hint_seco = self.generalize_hint(family, result.secondary.result) if result.secondary is not None else None
+        return prop, (hint_prim, hint_seco)
+
+    def collect_analysis_hints(self, family):
+        res = family.analysis_result
+        analysis_hints = dict()
+        for index in res.constraints_result.undecided:
+            prop, hints = self.generalize_hints(family, res.constraints_result.results[index])
+            analysis_hints[prop] = hints
+        if res.optimality_result is not None:
+            prop, hints = self.generalize_hints(family, res.optimality_result)
+            analysis_hints[prop] = hints
+        return analysis_hints
+
     def split_family(self, family):
         # filter undecided constraints
         res = family.analysis_result
-        undecided_constraints = [index for index in family.property_indices if res.constraints_result.results[index].feasibility == None]
+        undecided = res.constraints_result.undecided
+        analysis_hints = self.collect_analysis_hints(family)
 
         # split family wrt last undecided result
         if res.optimality_result is not None:
             split_result = res.optimality_result.primary.result
-            split_result_sec = res.optimality_result.secondary.result
+            # split_result_sec = res.optimality_result.secondary.result
         else:
-            split_result = res.constraints_result.results[undecided_constraints[-1]].primary.result
-            split_result_sec = res.constraints_result.results[undecided_constraints[-1]].secondary.result
+            split_result = res.constraints_result.results[undecided[-1]].primary.result
+            # split_result_sec = res.constraints_result.results[undecided[-1]].secondary.result
         subfamilies = self.sketch.quotient.split(family.mdp, split_result)
         # subfamilies = self.sketch.quotient.split_milan(family.mdp, split_result, split_result_sec)
+        
         for subfamily in subfamilies:
-            subfamily.property_indices = undecided_constraints
+            subfamily.set_analysis_hints(undecided, analysis_hints)
         return subfamilies
 
     def synthesize(self, family):
@@ -199,7 +229,7 @@ class SynthesizerCEGIS(Synthesizer):
             if spec.constraints_result.results[index].sat:
                 continue
             threshold = self.sketch.specification.constraints[index].threshold
-            bounds = None if family.analysis_result is None else family.analysis_result.constraints_result.results[index].primary
+            bounds = None if family.analysis_result is None else family.analysis_result.constraints_result.results[index].primary.result
             conflict = ce_generator.construct_conflict(index, threshold, bounds)
             conflicts.append(conflict)
 
@@ -258,7 +288,7 @@ class SynthesizerCEGIS(Synthesizer):
 class StageControl:
 
     # strategy
-    strategy_equal = False
+    strategy_equal = True
 
     def __init__(self, members_total):
 

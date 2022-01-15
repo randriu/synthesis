@@ -4,6 +4,8 @@
 // the procotol is synchronous with no nondeterminism (a DTMC)
 dtmc
 
+const int CMAX = 0;
+
 const int STATIONS = 5;
 const int MAXMEM = 1;
 
@@ -41,10 +43,10 @@ const double p27 = p26+P_STEP;
 const double p28 = p27+P_STEP;
 const double p29 = p28+P_STEP;
 
-hole int M0LFAIR in {0,1,2,3,4};
-hole int M0HFAIR in {0,1,2,3,4};
-hole int M1LFAIR in {0,1,2,3,4};
-hole int M1HFAIR in {0,1,2,3,4};
+hole int M0LFAIR in {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+hole int M0HFAIR in {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+hole int M1LFAIR in {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+hole int M1HFAIR in {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
 hole int MxxA in {0,1};
 hole int MxxB in {0,1};
 hole int MxxC in {0,1};

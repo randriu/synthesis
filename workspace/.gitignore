@@ -1,4 +1,2 @@
 log/
-
-*.jani
-*.log
+benchmarking/logs/

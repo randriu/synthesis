@@ -16,7 +16,10 @@ export STORM_DIR=$SYNTHESIS/storm
 export STORM_BLD=$STORM_DIR/build
 export STORM_BLD_DEBUG=$STORM_DIR/build_debug
 
-export DYNASTY_DIR=$SYNTHESIS/paynt
+export STORMPY_BLD=$SYNTHESIS/stormpy/build
+export STORMPY_BLD_DEBUG=$SYNTHESIS/stormpy/build_debug
+
+export PAYNT_DIR=$SYNTHESIS/paynt
 
 ### prerequisites ##############################################################
 
@@ -110,7 +113,7 @@ storm-build-debug() {
 stormpy-build() {
     cd $SYNTHESIS/stormpy
     source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    python3 setup.py build_ext --build-temp $STORMPY_BLD --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     deactivate
     cd ~-
@@ -119,14 +122,14 @@ stormpy-build() {
 stormpy-build-debug() {
     cd $SYNTHESIS/stormpy
     source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
+    python3 setup.py build_ext --build-temp $STORMPY_BLD --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     deactivate
     cd ~-
 }
 
 paynt-install() {
-    cd $DYNASTY_DIR
+    cd $PAYNT_DIR
     source $SYNTHESIS_ENV/bin/activate
     python3 setup.py install
     # python3 setup.py test
@@ -232,7 +235,7 @@ storm() {
 }
 
 storm-jani() {
-    storm "--jani $DYNASTY_DIR/output_0.jani --prop $DYNASTY_DIR/workspace/examples/cav/maze/orig/compute.properties"
+    storm "--jani $PAYNT_DIR/output_0.jani --prop $PAYNT_DIR/workspace/examples/cav/maze/orig/compute.properties"
 }
 
 storm-eval() {

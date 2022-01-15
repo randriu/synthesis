@@ -1,5 +1,5 @@
 import stormpy
-
+# import stormpy.synthes
 from ..sketch.property import OptimalityProperty
 
 class PropertyResult:
@@ -51,7 +51,10 @@ class MdpConstraintsResult:
                 break
             if result.feasibility == None:
                 self.feasibility = None
+        self.undecided = [index for index,result in enumerate(results) if result is not None and result.feasibility is None]
 
+from ..profiler import Timer
+    
 class MarkovChain:
 
     # options for the construction of chains
@@ -90,6 +93,7 @@ class MarkovChain:
         if is_dtmc:
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         else:
+            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
 
     def __init__(self, model, quotient_state_map = None, quotient_choice_map = None):
@@ -102,6 +106,8 @@ class MarkovChain:
         self.quotient_state_map = quotient_state_map
         if quotient_state_map is None:
             self.quotient_state_map = [s for s in range(model.nr_states)]
+
+        self.analysis_hints = None
     
     @property
     def states(self):
@@ -120,18 +126,36 @@ class MarkovChain:
         return self.model.initial_states[0]
 
     def model_check_formula(self, formula):
-        self.set_solver_method(self.is_dtmc)
         result = stormpy.model_checking(
             self.model, formula, only_initial_states=False,
-            # extract_scheduler=(not self.is_dtmc), environment=self.environment # TODO
-            extract_scheduler=True, environment=self.environment
+            # extract_scheduler=(not self.is_dtmc), # TODO
+            extract_scheduler=True,
+            environment=self.environment
         )
-        value = result.at(self.initial_state)
-        return result, value
+        return result
+
+    def model_check_formula_hint(self, formula, hint):
+        task = stormpy.core.CheckTask(formula, only_initial_states=False)
+        task.set_produce_schedulers(produce_schedulers=True)
+        result = stormpy.synthesis.model_check_with_hint(self.model, task, self.environment, hint)
+        return result
 
     def model_check_property(self, prop, alt = False):
+        self.set_solver_method(self.is_dtmc)
+        
+        # check hint
+        hint = None
+        if self.analysis_hints is not None:
+            hint_prim,hint_seco = self.analysis_hints[prop]
+            hint = hint_prim if not alt else hint_seco
+
         formula = prop.formula if not alt else prop.formula_alt
-        result,value = self.model_check_formula(formula)
+        if hint is None:
+            result = self.model_check_formula(formula)
+        else:
+            result = self.model_check_formula(formula)
+            # result = self.model_check_formula_hint(formula,hint)
+        value = result.at(self.initial_state)
         return PropertyResult(prop, result, value)
 
 
@@ -167,7 +191,7 @@ class DTMC(MarkovChain):
     def check_specification(self, specification, property_indices = None, short_evaluation = False):
         constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
         optimality_result = None
-        if not (short_evaluation and not constraints_result.sat) and specification.has_optimality:
+        if not (short_evaluation and not constraints_result.all_sat) and specification.has_optimality:
             optimality_result = self.model_check_property(specification.optimality)
         return SpecificationResult(constraints_result, optimality_result)
 
@@ -179,6 +203,7 @@ class MDP(MarkovChain):
         super().__init__(model, quotient_state_map, quotient_choice_map)
         self.design_space = design_space
         self.quotient_container = quotient_container
+        self.analysis_hints = None
 
     def check_property(self, prop):
         # check primary direction
