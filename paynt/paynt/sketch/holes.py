@@ -155,7 +155,9 @@ class DesignSpace(Holes):
             DesignSpace.solver_vars.append(var)
             DesignSpace.solver.add(var >= 0)
             DesignSpace.solver.add(var < hole.size)
-
+            # FIXME
+        solver_result = DesignSpace.solver.check()
+        
     def z3_encode(self):
         ''' Encode this design space. '''
         hole_clauses = []

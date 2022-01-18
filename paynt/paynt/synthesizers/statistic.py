@@ -111,13 +111,11 @@ class Statistic:
 
     def finished(self, assignment):
 
-        
         self.timer.stop()
         self.feasible = False
         self.assignment = None
         if assignment is not None:
             self.feasible = True
-            # self.assignment = self.design_space.readable_assignment(assignment)
             self.assignment = str(assignment)
         self.optimum = None
         if self.specification.has_optimality:
@@ -152,6 +150,7 @@ class Statistic:
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimum is None else f"optimal: {round(self.optimum, 6)}"
         assignment = f"hole assignment: {str(self.assignment)}\n" if self.assignment else ""
+        # assignment = ""
 
         summary = f"{formulae}\n{timing}\n{design_space}\n" \
                   f"{family_stats}\n{result}\n{assignment}"

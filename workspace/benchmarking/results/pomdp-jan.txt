@@ -1,3 +1,122 @@
+maze
+
+optimality objective: R[exp]{"steps"}min=? [F ((x = 2) & (y = 0))] [0.0]
+
+-- k=1
+
+method: AR, synthesis time: 0.35 s
+number of holes: 6, family size: 4096
+super MDP size: 0, average MDP size: 15, iterations: 29
+
+optimal: 71.905288
+
+-- k=2
+
+method: AR, synthesis time: 12.41 s
+number of holes: 28, family size: 1099511627776
+super MDP size: 0, average MDP size: 29, iterations: 373
+
+optimal: 7.249333
+
+
+-- k=2 (hints)
+
+method: AR, synthesis time: 0.35 s
+number of holes: 28, family size: 1099511627776
+super MDP size: 0, average MDP size: 29, iterations: 375
+
+method: hybrid, synthesis time: 11.58 s
+number of holes: 28, family size: 1099511627776
+super MDP size: 0, average MDP size: 29, iterations: 2087
+average DTMC size: 28, DTMC checks: 0, iterations: 1069
+
+optimal: 7.249335
+
+-- k=3 (hints)
+
+method: AR, synthesis time: 74.7 s
+number of holes: 42, family size: 19408409961765342806016
+super MDP size: 0, average MDP size: 43, iterations: 78690
+
+optimal: 7.093666
+
+note: hints help a lot, new splitting strategy is probably* much better => AR is much betther than hybrid
+* based on CAV vs now
+
+
+# memory exploration
+
+
+method: AR, synthesis time: 33.0 s
+number of holes: 42, family size: 19408409961765342806016
+super MDP size: 0, average MDP size: 43, iterations: 39107
+
+optimal: 7.093666
+
+total iters:  39312
+> scheduler_selection : 6.0%
+> synthesis : 93.0%
+> covered 99.0% of 33.0 sec
+
+
+strategy_2: k=3 74 -> 33, k=4: TO, no progress after 6%
+
+
+
+
+##### maze2 #####
+
+-- k=1
+
+optimality objective: R[exp]min=? [F "goal"] [0]
+
+method: AR, synthesis time: 0.0 s
+number of holes: 6, family size: 4096
+super MDP size: 0, average MDP size: 15, iterations: 3
+
+feasible: no
+
+-- k=2
+
+method: AR, synthesis time: 0.03 s
+number of holes: 28, family size: 1099511627776
+super MDP size: 0, average MDP size: 29, iterations: 63
+
+optimal: 5.692308
+
+-- k=3
+
+optimality objective: R[exp]min=? [F "goal"] [0]
+
+method: AR, synthesis time: 5.47 s
+number of holes: 42, family size: 19408409961765342806016
+super MDP size: 0, average MDP size: 43, iterations: 7787
+
+optimal: 5.692308
+
+
+
+##### maze-sl (sl=0.5) #####
+
+-- k=1
+
+optimality objective: R[exp]min=? [F "goal"] [0]
+
+method: AR, synthesis time: 0.0 s
+number of holes: 6, family size: 4096
+super MDP size: 0, average MDP size: 15, iterations: 3
+
+feasible: no
+
+-- k=2
+
+--------------------------------------------------------------------------------
+
+
+
+
+
+
 hybrid
 model                 parameters      family size     avg. MC size    hybrid (hard)   hybrid (easy)                   
     dpm               -               -               -               SF              SF    
@@ -164,6 +283,14 @@ design space size: 18889465931478580854784
 optimality objective: Pmax=? [F "unfair"] [0.01]
 optimal: 0.166667
 
+BFS
+ar: 40%
+
+
+DFS:
+hybrid: 70
+
+DFS
 no hints
 method: AR, synthesis time: 846.73 s
 super MDP size: 0, average MDP size: 85, iterations: 1096291
@@ -186,12 +313,10 @@ optimality objective: Pmax=? ["notbad" U "goal"]
 # of holes:  26
 design space size:  1410554953728
 
-optimal: 0.350026
+method: AR, synthesis time: 0.03 s
+super MDP size: 0, average MDP size: 190, iterations: 32
 
-method: AR, synthesis time: 7.07 s
-super MDP size: 0, average MDP size: 171, iterations: 7931
-
-cegis: ETA: 87.9 s [6282 iters], opt=0.26767
+optimal: 0.981088
 
 -- k=2
 
@@ -199,8 +324,11 @@ cegis: ETA: 87.9 s [6282 iters], opt=0.26767
 # of holes:  152
 design space size:  2522200383259155377694530751330983269335622954971561984
 
-ar: ETA: 1777558.7 s [20254 iters], opt=0.00332
-cegis: ETA: 9712.6 s [1436 iters], opt=0.09204
+optimal: 0.981093
+
+method: AR, synthesis time: 0.78 s
+super MDP size: 0, average MDP size: 379, iterations: 251
+
 
 --------------------------------------------------------------------------------
 
@@ -280,11 +408,11 @@ design space size:  170701169481724269416444205842464199606905813051287248906144
 
 optimal: 8.41317
 
-ar:
+method: AR, synthesis time: 0.39 s
+super MDP size: 0, average MDP size: 1251, iterations: 58
 
 hybrid:
 method: hybrid, synthesis time: 2.78 s
-number of holes: 452, family size: 135243399970730303066198984938628251268824915465247109664757941510828519054521564025450817507240240101036645118273824941793880975232687497536137978486512531688546991103745301547195268525165168909574203624502064231461895242944399805142629606084361337981321876709820927574016
 super MDP size: 0, average MDP size: 1251, iterations: 37
 average DTMC size: 167, DTMC checks: 0, iterations: 17
 
@@ -293,6 +421,11 @@ average DTMC size: 167, DTMC checks: 0, iterations: 17
 # of observations: 905
 # of holes:  2618
 design space size:  213189172957257929911609185895507569418164209095758119985684105884942557923071601816612746038301357098450398262163833202256396811238586343764135863216698628061051148686356484324940813595038607611592495420063367224657848585513961878111985603136678588705782717002849418414636788672632317719957778830996960801598346857680532636158540042289069635402006350249459524422157190148094989005705711666844403736355806993037019613117715414084366060056174289393422930356955499309260903919925194939320215681069354277995774921949021257848415495922531131460556836194068789553466451526421555060525322987018173294044872386352417054572156038589475921642372841051398157536620858106940053408474778683481195870731328431392877274018010121806955920951397894263144008446707435027949862521607325555919315089738119523717837912872826823403041054997253046574862508800231362824155381397472668076526980422007757920923234238983363606199382970252971162142888838448132810282576044144970857002349005320582163860088615011706624756136202599008171129543702152631879204864
+
+optimal: 8.41317
+
+method: AR, synthesis time: 9.82 s
+super MDP size: 0, average MDP size: 2501, iterations: 351
 
 
 --------------------------------------------------------------------------------
@@ -325,3 +458,13 @@ method: AR, synthesis time: 38.67 s
 super MDP size: 0, average MDP size: 3816, iterations: 677
 
 cegis: ETA: 40335153.4 s [49 iters], opt=0.0
+
+-- k=2
+optimality objective: R[exp]{"steps"}min=? [F "goal"] [0.0]
+
+method: AR, synthesis time: 0.02 s
+number of holes: 2922, family size: 42860344287450692837937001962400072422456192468221344297750015534814042044997444899727935152627834325103786916702125873007485811427692561743938310298794299215738271099296923941684298420249484567511816728612185899934327765069595070236662175784308251658284785910746168670641719326610497547348822672277504000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+super MDP size: 0, average MDP size: 3922, iterations: 1
+
+optimal: 17.0
+

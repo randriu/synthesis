@@ -68,6 +68,9 @@ module agent
                 + 1/16 : (ax'=max(ax-1,aXMIN)) & (ay'=min(ay+1,aYMAX)) +  1/16: (ax'=min(ax+1,aXMAX)) & (ay'=min(ay+1,aYMAX));
 endmodule
 
+rewards "steps"
+    true : 1;
+endrewards
 
 label "goal" = done;
 label "traps" = crash;

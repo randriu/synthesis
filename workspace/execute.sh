@@ -75,11 +75,11 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    timeout=5m
+    timeout=1000s
     parallel=false
     verbose=true
 
-    # pomdp=true
+    pomdp=true
 
     coin="coin"
     # coin="coin/more"
@@ -89,10 +89,12 @@ function run() {
 
     drone="pomdp/drone"
     crypt="pomdp/crypt"
-    maze="pomdp/maze/concise"
     network="pomdp/network"
     nrp="pomdp/nrp"
     samplerocks="pomdp/samplerocks"
+
+    maze="pomdp/maze/concise"
+    # maze="pomdp/maze/2"
 
     avoid="pomdp/grid/avoid"
     avoids="pomdp/grid/avoid-slippery"
@@ -101,7 +103,9 @@ function run() {
     intercept="pomdp/grid/intercept"
     evade="pomdp/grid/evade"
 
-    leo_refuel="pomdp/leo/refuel"
+    leo_refuel="pomdp/leonore/refuel"
+    leo_avoid="pomdp/leonore/avoid"
+    leo_sketch="pomdp/leonore/sketch"
 
     cav_dpm="cav/dpm"
     cav_pole="cav/pole"
@@ -113,15 +117,15 @@ function run() {
     # model=$dice
 
     # model=$drone
-    # model=$crypt
+    model=$crypt
     # model=$maze
     # model=$network
-    model=$nrp
+    # model=$nrp
     # model=$samplerocks
 
     # model=$avoid
     # model=$avoids
-    # model=$refuel
+    model=$refuel
     # model=$obstacle
     # model=$intercept
     # model=$evade
@@ -130,18 +134,20 @@ function run() {
     ### leonore ###
 
     # model=$leo_refuel
+    # model=$leo_avoid
+    # model=$leo_sketch
 
     ## cav ##
-    model=$cav_dpm
+    # model=$cav_dpm
     # model=$cav_pole # error
-    model=$herman
+    # model=$herman
 
     # model=$m
 
     # onebyone $model
-    # ar $model
+    ar $model
     # cegis $model
-    hybrid $model
+    # hybrid $model
 }
 
 # --- execution ----------------------------------------------------------------

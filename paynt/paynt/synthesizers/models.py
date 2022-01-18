@@ -10,6 +10,9 @@ class PropertyResult:
         self.sat = prop.satisfies_threshold(value)
         self.improves = None if not isinstance(prop,OptimalityProperty) else prop.improves_optimum(value)
 
+    def __str__(self):
+        return str(self.value)
+
 class ConstraintsResult:
     def __init__(self, results):
         self.results = results
@@ -19,10 +22,16 @@ class ConstraintsResult:
                 self.all_sat = False
                 break
 
+    def __str__(self):
+        return ",".join([str(result) for result in self.results])
+
 class SpecificationResult:
     def __init__(self, constraints_result, optimality_result):
         self.constraints_result = constraints_result
         self.optimality_result = optimality_result
+
+    def __str__(self):
+        return str(self.constraints_result) + " : " + str(self.optimality_result)
 
 class MdpPropertyResult:
     def __init__(self, prop, primary, secondary, feasibility):
@@ -30,6 +39,14 @@ class MdpPropertyResult:
         self.primary = primary
         self.secondary = secondary
         self.feasibility = feasibility
+
+    def __str__(self):
+        prim = str(self.primary)
+        seco = str(self.secondary)
+        if self.property.minimizing:
+            return "{} - {}".format(prim,seco)
+        else:
+            return "{} - {}".format(seco,prim)
 
 class MdpOptimalityResult(MdpPropertyResult):
     def __init__(self, prop, primary, secondary, optimum, improving_assignment, can_improve):
@@ -53,8 +70,10 @@ class MdpConstraintsResult:
                 self.feasibility = None
         self.undecided = [index for index,result in enumerate(results) if result is not None and result.feasibility is None]
 
-from ..profiler import Timer
-    
+    def __str__(self):
+        return ",".join([str(result) for result in self.results])
+
+
 class MarkovChain:
 
     # options for the construction of chains
@@ -132,6 +151,7 @@ class MarkovChain:
             extract_scheduler=True,
             environment=self.environment
         )
+        assert result is not None
         return result
 
     def model_check_formula_hint(self, formula, hint):
@@ -153,8 +173,8 @@ class MarkovChain:
         if hint is None:
             result = self.model_check_formula(formula)
         else:
-            result = self.model_check_formula(formula)
-            # result = self.model_check_formula_hint(formula,hint)
+            # result = self.model_check_formula(formula)
+            result = self.model_check_formula_hint(formula,hint)
         value = result.at(self.initial_state)
         return PropertyResult(prop, result, value)
 

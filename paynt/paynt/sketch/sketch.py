@@ -71,7 +71,7 @@ class Sketch:
             self.quotient = JaniQuotientContainer(self)
         else:
             self.quotient = POMDPQuotientContainer(self)
-            self.quotient.pomdp_manager.set_memory_size(2)
+            self.quotient.pomdp_manager.set_memory_size(1)
             self.quotient.unfold_partial_memory()
 
     @property

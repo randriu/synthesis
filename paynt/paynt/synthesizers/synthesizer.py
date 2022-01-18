@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class Synthesizer:
 
-    def __init__(self, sketch, quotient = None):
+    def __init__(self, sketch):
         self.sketch = sketch
         self.stat = Statistic(sketch, self.method_name)
         Profiler.initialize()
@@ -95,7 +95,6 @@ class SynthesizerAR(Synthesizer):
         # seco = res.optimality_result.secondary.value if res.optimality_result.secondary is not None else "na"
         # print("{} - {}".format(seco,prim))
         # print("{} - {}".format(prim,seco))
-        # exit()
 
         can_improve = res.constraints_result.feasibility is None
         if res.constraints_result.feasibility == True:
@@ -107,7 +106,7 @@ class SynthesizerAR(Synthesizer):
                 if res.optimality_result.optimum is not None:
                     self.sketch.specification.optimality.update_optimum(res.optimality_result.optimum)
                     satisfying_assignment = res.optimality_result.improving_assignment
-
+        
         if not can_improve:
             self.stat.pruned(family.size)
             return False, satisfying_assignment
@@ -399,6 +398,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             assignment = family.pick_assignment()
             sat = False
             while assignment is not None:
+                assert False
                 
                 sat, improving_assignment, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
                 if improving_assignment is not None:
