@@ -71,23 +71,23 @@ class QuotientContainer:
         model,state_map,choice_map = self.restrict_quotient(selected_actions)
         return MDP(model, design_space, self, state_map, choice_map)
 
-    def build_dtmc(self, design_space):
+    def build_chain(self, design_space):
         assert design_space.size == 1
         selected_actions = self.select_actions(design_space)
         model,state_map,choice_map = self.restrict_quotient(selected_actions)
         return DTMC(model,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):
-        assert scheduler.memoryless
-        assert scheduler.deterministic
+        assert scheduler.memoryless and scheduler.deterministic
         
         selection = [set() for hole_index in mdp.design_space.hole_indices]
+
         for state in range(mdp.states):
             offset = scheduler.get_choice(state).get_deterministic_choice()
             choice = mdp.model.get_choice_index(state,offset)
-            choice = mdp.quotient_choice_map[choice]
+            action = mdp.quotient_choice_map[choice]
 
-            hole_option = self.action_to_hole_options[choice]
+            hole_option = self.action_to_hole_options[action]
             for hole_index,option in hole_option.items():
                 selection[hole_index].add(option)
 
@@ -153,14 +153,13 @@ class QuotientContainer:
 
         return selection, inconsistent_differences
 
-    def scheduler_consistent(self, mdp, result):
+    def scheduler_consistent(self, mdp, scheduler):
         '''
         Get hole assignment induced by this scheduler and fill undefined
         holes by some option from the design space of this mdp.
         :return hole assignment
         :return whether the scheduler is consistent
         '''
-        scheduler = result.scheduler
         selection = self.scheduler_selection(mdp, scheduler)
         consistent = True
         for hole_index in mdp.design_space.hole_indices:
@@ -200,96 +199,6 @@ class QuotientContainer:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    
-    def split_milan(self, mdp, primary, secondary):
-        assert not mdp.is_dtmc
-
-        scheduler = primary.scheduler
-        hole_assignments = self.scheduler_selection(mdp, scheduler)
-
-
-        # print("\n FAMILY")
-        # for hole_index in mdp.design_space.hole_indices:
-        #     print("{} : {}".format(hole_index,mdp.design_space[hole_index].options))
-        
-        # print("\n PRIMARY SCHEDULER")
-        # prim_selection = self.scheduler_selection(mdp,primary.scheduler)
-        # for hole_index,selection in enumerate(prim_selection):
-        #     print(hole_index,selection)
-
-        # print("\n\n\n SECONDARY SCHEDULER")
-        # seco_selection = self.scheduler_selection(mdp,secondary.scheduler)
-        # for hole_index,selection in enumerate(seco_selection):
-        #     print(hole_index,selection)
-
-        nontrivial_holes = [hole_index for hole_index,hole in enumerate(mdp.design_space) if mdp.design_space[hole_index].size > 1]
-        # # print(nontrivial_holes)
-        # sum_diffs = dict()
-        # for hole_index in nontrivial_holes:
-        #     sum_diffs[hole_index] = (0,0)
-
-
-        # state_to_relevant_holes = self.quotient_relevant_holes()
-
-        # for state in range(mdp.states):
-            
-        #     diff = abs(primary.at(state)-secondary.at(state))
-
-        #     relevant_holes = state_to_relevant_holes[mdp.quotient_state_map[state]]
-        #     # print("state {}: {}".format(state, relevant_holes))
-        #     for hole_index in relevant_holes:
-        #         if hole_index not in nontrivial_holes:
-        #             continue
-        #         sum_diff,count = sum_diffs[hole_index]
-        #         sum_diff += diff
-        #         count += 1
-        #         sum_diffs[hole_index] = (sum_diff,count)
-        #         # if curr_diff is None or diff > curr_diff:
-        #         #     max_diffs[hole_index] = diff
-
-        # avg_diffs = dict()
-        # for hole_index in sum_diffs.keys():
-        #     sum_diff,count = sum_diffs[hole_index]
-        #     avg_diffs[hole_index] = sum_diff / count if count != 0 else None
-        
-        # # print(sum_diffs)
-        # avg_diffs_str = ["{}:{}".format(k,v if v is not None else "-") for k,v in avg_diffs.items()]
-        # # print(avg_diffs)
-        # print(", ".join(avg_diffs_str))
-
-        # diffs = [diff for diff in sum_diffs.values() if diff is not None]
-        # max_diff = max(diffs)
-        # max_keys = [hole_index for hole_index in sum_diffs.keys() if sum_diffs[hole_index] == max_diff]
-
-        # splitters = max_keys
-        # splitter = list(splitters)[0]
-
-        splitters = nontrivial_holes
-        splitter = random.choice(splitters)
-        
-        # print("splitter: ", splitter)
-
-        # Profiler.start("synthesis")
-        # print("splitter: {} with domain size {}".format(splitter,len(hole_assignments[splitter])))
-        # exit()
-        
-        self.splitter_frequency[splitter] += 1
-        inconsistency = frozenset(hole_assignments[splitter])
-        inconsistency_frequency = self.splitter_inconsistencies[splitter].get(inconsistency,0)
-        self.splitter_inconsistencies[splitter][inconsistency] = inconsistency_frequency + 1
-
-        # split
-        suboptions = self.suboptions_half(mdp, splitter)
-        
-        # construct corresponding design subspaces
-        design_subspaces = []
-        for suboption in suboptions:
-            design_subspace = mdp.design_space.copy()
-            design_subspace.assume_hole_options(splitter, suboption)
-            design_subspaces.append(design_subspace)
-        return design_subspaces
-
-
     def split(self, mdp, result):
         assert not mdp.is_dtmc
 
@@ -302,17 +211,11 @@ class QuotientContainer:
         hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
         splitters = self.holes_with_max_score(hole_sizes)
 
-        # hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result_primary)
+        # hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result)
         # splitters = self.holes_with_max_score(inconsistent_differences)        
 
         splitter = splitters[0]
         Profiler.start("synthesis")
-        # print("splitter: {} with domain size {}".format(splitter,len(hole_assignments[splitter])))
-        
-        self.splitter_frequency[splitter] += 1
-        inconsistency = frozenset(hole_assignments[splitter])
-        inconsistency_frequency = self.splitter_inconsistencies[splitter].get(inconsistency,0)
-        self.splitter_inconsistencies[splitter][inconsistency] = inconsistency_frequency + 1
 
         # split
         if len(hole_assignments[splitter]) == 1:
@@ -341,7 +244,7 @@ class QuotientContainer:
 
 
 
-class JaniQuotientContainer(QuotientContainer):
+class DTMCQuotientContainer(QuotientContainer):
     
     def __init__(self, *args):
         super().__init__(*args)
@@ -382,11 +285,21 @@ class JaniQuotientContainer(QuotientContainer):
             if len(hole_options) == 0:
                 self.default_actions.set(choice)
 
-        self.splitter_frequency = [0] * self.sketch.design_space.num_holes
-        self.splitter_inconsistencies = [{} for hole_index in self.sketch.design_space.hole_indices]
+
+class CTMCQuotientContainer(QuotientContainer):
+    def __init__(self, *args):
+        super().__init__(*args)
 
 
-    
+class MDPQuotientContainer(QuotientContainer):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def build_chain(self, assignment):
+        model = self.sketch.restrict_prism(assignment)
+        return MDP(model, assignment, self)
+
+
 class POMDPQuotientContainer(QuotientContainer):
 
     def __init__(self, *args):
@@ -412,7 +325,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.default_actions = None
 
         # construct quotient POMDP
-        if self.sketch.is_implicit:
+        if not self.sketch.is_explicit:
             MarkovChain.builder_options.set_build_choice_labels(True)
             self.pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
             assert self.pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
@@ -421,7 +334,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.pomdp = stormpy.pomdp.make_canonic(self.pomdp)
 
         # ^ this also asserts that states with the same observation have the same number of available actions
-        print("observations: ", self.pomdp.observations)
+        # print("observations: ", self.pomdp.observations)
         
         # extract observation labels
         if self.pomdp.has_observation_valuations():
@@ -430,7 +343,7 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_labels = [self.process_label(label) for label in self.observation_labels]
         else:
             self.observation_labels = list(range(self.pomdp.nr_observations))
-        print("observation labels: ", self.observation_labels)
+        # print("observation labels: ", self.observation_labels)
 
         # compute actions available at each observation
         self.actions_at_observation = [0] * self.pomdp.nr_observations
@@ -439,7 +352,7 @@ class POMDPQuotientContainer(QuotientContainer):
             if self.actions_at_observation[obs] != 0:
                 continue
             self.actions_at_observation[obs] = self.pomdp.get_nr_available_actions(state)
-        print("actions at observations: ", self.actions_at_observation)
+        # print("actions at observations: ", self.actions_at_observation)
 
         # collect labels of actions available at each observation
         self.action_labels_at_observation = [[] for obs in range(self.pomdp.nr_observations)]
@@ -484,9 +397,9 @@ class POMDPQuotientContainer(QuotientContainer):
 
         print("# of observations:" , pomdp.nr_observations)
         print("# of holes: ", pm.num_holes)
-        print("action holes: ", pm.action_holes)
-        print("memory holes: ", pm.memory_holes)
-        print("hole options: ", pm.hole_options)
+        # print("action holes: ", pm.action_holes)
+        # print("memory holes: ", pm.memory_holes)
+        # print("hole options: ", pm.hole_options)
         print("", flush=True)
 
         # create holes
@@ -517,7 +430,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # create domains for each hole
         self.design_space = DesignSpace(holes)
-        self.design_space.property_indices = self.sketch.specification.all_indices()
+        self.design_space.property_indices = self.sketch.specification.all_constraint_indices()
         self.sketch.design_space = self.design_space
         print("# of observations:" , pomdp.nr_observations)
         print("# of holes: ", pm.num_holes)
@@ -525,7 +438,6 @@ class POMDPQuotientContainer(QuotientContainer):
         print("", flush=True)
 
         # associate actions with hole combinations (colors)
-        self.combination_coloring = CombinationColoring(holes)
         self.action_to_hole_options = []
         num_choices = mdp.nr_choices
 
@@ -545,9 +457,6 @@ class POMDPQuotientContainer(QuotientContainer):
                 continue
 
             self.action_to_hole_options.append(relevant_holes)
-
-        self.splitter_frequency = [0] * self.design_space.num_holes
-        self.splitter_inconsistencies = [{} for hole_index in self.design_space.hole_indices]
 
 
     def unfold_full_memory(self, memory_size):
@@ -623,25 +532,3 @@ class POMDPQuotientContainer(QuotientContainer):
                 self.action_to_colors.append({color})
             # print("hole options in state {} : {}x{}".format(state, len(hole_options[hole_action]), len(hole_options[hole_memory])))
             # print("actions in state {} : {}".format(state, self.model.get_nr_available_actions(state)))
-
-        self.splitter_frequency = [0] * self.design_space.num_holes
-
-        # print(self.combination_coloring)
-        # print(self.action_colors)
-        
-        # print("has observation valuation: ", x.has_observation_valuations())
-        # ov = x.observation_valuations
-        # print(type(ov), dir(ov))
-        # for state in range(x.nr_observations):
-        #     print(ov.get_string(state))
-
-        # print("")
-        # print("choices: ", self.origin.nr_choices)
-        # print("actions: ", [self.origin.get_nr_available_actions(s) for s in range(self.origin.nr_states)])
-
-        # print(self.origin.has_choice_origins())
-        # print("has choice labeling: ", self.origin.has_choice_labeling())
-        # l = self.origin.choice_labeling
-        # print(type(l), dir(l))
-        # for choice in range(self.origin.nr_choices):
-        #     print(choice, l.get_labels_of_choice(choice))

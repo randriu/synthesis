@@ -74,14 +74,14 @@ cd $PAYNT_DIR
 # method=ar
 method=hybrid
 
-echo "-- evaluating hybrid method (hard problem)"
-for benchmark in "${benchmarks[@]}"; do
-    paynt hybrid_hard "${benchmark}" "hard" "${method}" "${timeout}"
-done
+# echo "-- evaluating hybrid method (hard problem)"
+# for benchmark in "${benchmarks[@]}"; do
+#     paynt hybrid_hard "${benchmark}" "hard" "${method}" "${timeout}"
+# done
 
-echo "-- evaluating hybrid method (easy problem)"
+echo "-- evaluating "
 for benchmark in "${benchmarks[@]}"; do
-    paynt hybrid_easy "${benchmark}" "easy" "${method}" "${timeout}"
+    paynt jan "${benchmark}" "sketch" "${method}" "${timeout}"
 done
 
 # wait for the remaining experiments to finish

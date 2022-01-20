@@ -75,11 +75,11 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    timeout=1000s
+    timeout=120s
     parallel=false
     verbose=true
 
-    pomdp=true
+    # pomdp=true
 
     coin="coin"
     # coin="coin/more"
@@ -88,8 +88,9 @@ function run() {
     m="pomdp/obstacle"
 
     drone="pomdp/drone"
-    crypt="pomdp/crypt"
-    network="pomdp/network"
+    crypt="pomdp/crypt/4"
+    network="pomdp/network/simple-2"
+    network="pomdp/network/priorities-2"
     nrp="pomdp/nrp"
     samplerocks="pomdp/samplerocks"
 
@@ -97,19 +98,14 @@ function run() {
     # maze="pomdp/maze/2"
 
     avoid="pomdp/grid/avoid"
-    avoids="pomdp/grid/avoid-slippery"
+    grid_simple="pomdp/grid/simple"
+    grid_simple_mo="pomdp/grid/simple-mo"
+
     refuel="pomdp/grid/refuel"
     obstacle="pomdp/grid/obstacle"
     intercept="pomdp/grid/intercept"
     evade="pomdp/grid/evade"
 
-    leo_refuel="pomdp/leonore/refuel"
-    leo_avoid="pomdp/leonore/avoid"
-    leo_sketch="pomdp/leonore/sketch"
-
-    cav_dpm="cav/dpm"
-    cav_pole="cav/pole"
-    herman="herman/5"
 
     # running ##########
 
@@ -117,30 +113,35 @@ function run() {
     # model=$dice
 
     # model=$drone
-    model=$crypt
-    # model=$maze
+    # model=$crypt
+    model=$maze
     # model=$network
     # model=$nrp
     # model=$samplerocks
 
     # model=$avoid
-    # model=$avoids
-    model=$refuel
+    # model=$grid_simple
+    # model=$grid_simple_mo
+    # model=$refuel
     # model=$obstacle
     # model=$intercept
     # model=$evade
-    # todo rocks
-
+    
     ### leonore ###
 
-    # model=$leo_refuel
-    # model=$leo_avoid
-    # model=$leo_sketch
+    # model="pomdp/leonore/refuel"
+    # model="pomdp/leonore/avoid"
+    # model="pomdp/leonore/sketch"
+    # model="pomdp/leonore/cheese"
 
     ## cav ##
-    # model=$cav_dpm
-    # model=$cav_pole # error
-    # model=$herman
+    # model="cav/dpm"
+    model="cav/pole"
+    # model="herman/5"
+
+    # model="mdp"
+
+    ## indef
 
     # model=$m
 

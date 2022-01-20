@@ -1,77 +1,6 @@
 import stormpy
 # import stormpy.synthes
-from ..sketch.property import OptimalityProperty
-
-class PropertyResult:
-    def __init__(self, prop, result, value):
-        self.property = prop
-        self.result = result
-        self.value = value
-        self.sat = prop.satisfies_threshold(value)
-        self.improves = None if not isinstance(prop,OptimalityProperty) else prop.improves_optimum(value)
-
-    def __str__(self):
-        return str(self.value)
-
-class ConstraintsResult:
-    def __init__(self, results):
-        self.results = results
-        self.all_sat = True
-        for result in results:
-            if result is not None and result.sat == False:
-                self.all_sat = False
-                break
-
-    def __str__(self):
-        return ",".join([str(result) for result in self.results])
-
-class SpecificationResult:
-    def __init__(self, constraints_result, optimality_result):
-        self.constraints_result = constraints_result
-        self.optimality_result = optimality_result
-
-    def __str__(self):
-        return str(self.constraints_result) + " : " + str(self.optimality_result)
-
-class MdpPropertyResult:
-    def __init__(self, prop, primary, secondary, feasibility):
-        self.property = prop
-        self.primary = primary
-        self.secondary = secondary
-        self.feasibility = feasibility
-
-    def __str__(self):
-        prim = str(self.primary)
-        seco = str(self.secondary)
-        if self.property.minimizing:
-            return "{} - {}".format(prim,seco)
-        else:
-            return "{} - {}".format(seco,prim)
-
-class MdpOptimalityResult(MdpPropertyResult):
-    def __init__(self, prop, primary, secondary, optimum, improving_assignment, can_improve):
-        super().__init__(prop, primary, secondary, None)
-        self.optimum = optimum
-        self.improving_assignment = improving_assignment
-        self.can_improve = can_improve
-
-class MdpConstraintsResult:
-    def __init__(self, results):
-        self.results = results
-
-        self.feasibility = True
-        for result in results:
-            if result is None:
-                continue
-            if result.feasibility == False:
-                self.feasibility = False
-                break
-            if result.feasibility == None:
-                self.feasibility = None
-        self.undecided = [index for index,result in enumerate(results) if result is not None and result.feasibility is None]
-
-    def __str__(self):
-        return ",".join([str(result) for result in self.results])
+from ..sketch.property import *
 
 
 class MarkovChain:
@@ -82,13 +11,11 @@ class MarkovChain:
     precision = 1e-5
     # model checking environment (method & precision)
     environment = None
+    # whether hints will be used for model checking
+    use_hints = False
 
     @classmethod
     def initialize(cls, formulae):
-        '''
-        Construct builder options wrt formulae of interest.
-        Setup model checking environment.
-        '''
         # builder options
         cls.builder_options = stormpy.BuilderOptions(formulae)
         cls.builder_options.set_build_with_choice_origins(True)
@@ -99,13 +26,7 @@ class MarkovChain:
         cls.environment = stormpy.Environment()
         env = cls.environment.solver_environment.minmax_solver_environment
         env.precision = stormpy.Rational(cls.precision)
-        cls.set_solver_method(is_dtmc=True)
-
-    @staticmethod
-    def build_from_prism(sketch, assignment):
-        program = sketch.restrict_prism(assignment)
-        model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
-        return model
+        cls.set_solver_method(is_dtmc=False)
 
     @classmethod
     def set_solver_method(cls, is_dtmc):
@@ -114,14 +35,19 @@ class MarkovChain:
         else:
             # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
             cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
+            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
+            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     def __init__(self, model, quotient_state_map = None, quotient_choice_map = None):
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.model = model
+        
         self.quotient_choice_map = quotient_choice_map
         if quotient_choice_map is None:
             self.quotient_choice_map = [c for c in range(model.nr_choices)]
+        
         self.quotient_state_map = quotient_state_map
         if quotient_state_map is None:
             self.quotient_state_map = [s for s in range(model.nr_states)]
@@ -147,8 +73,8 @@ class MarkovChain:
     def model_check_formula(self, formula):
         result = stormpy.model_checking(
             self.model, formula, only_initial_states=False,
-            # extract_scheduler=(not self.is_dtmc), # TODO
-            extract_scheduler=True,
+            extract_scheduler=(not self.is_dtmc), # error here?
+            # extract_scheduler=True,
             environment=self.environment
         )
         assert result is not None
@@ -163,9 +89,9 @@ class MarkovChain:
     def model_check_property(self, prop, alt = False):
         self.set_solver_method(self.is_dtmc)
         
-        # check hint
+        # get hint
         hint = None
-        if self.analysis_hints is not None:
+        if self.analysis_hints is not None and MarkovChain.use_hints:
             hint_prim,hint_seco = self.analysis_hints[prop]
             hint = hint_prim if not alt else hint_seco
 
@@ -173,8 +99,7 @@ class MarkovChain:
         if hint is None:
             result = self.model_check_formula(formula)
         else:
-            # result = self.model_check_formula(formula)
-            result = self.model_check_formula_hint(formula,hint)
+            result = self.model_check_formula_hint(formula, hint)
         value = result.at(self.initial_state)
         return PropertyResult(prop, result, value)
 
@@ -261,8 +186,10 @@ class MDP(MarkovChain):
     def check_optimality(self, prop):
         # check primary direction
         primary = self.model_check_property(prop, alt = False)
+
+        # def __init__(self, prop, primary, secondary, optimum, improving_assignment, can_improve):
         
-        if not primary.improves:
+        if not primary.improves_optimum:
             # OPT <= LB
             return MdpOptimalityResult(prop, primary, None, None, None, False)
 
@@ -272,7 +199,7 @@ class MDP(MarkovChain):
             assignment = [hole.options for hole in self.design_space]
             consistent = True
         else:
-            assignment,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
+            assignment,consistent = self.quotient_container.scheduler_consistent(self, primary.result.scheduler)
         if consistent:
             # LB is tight and LB < OPT
             hole_options = self.design_space.copy()
@@ -283,7 +210,7 @@ class MDP(MarkovChain):
         # UB might improve the optimum
         secondary = self.model_check_property(prop, alt = True)
         
-        if not secondary.improves:
+        if not secondary.improves_optimum:
             # LB < OPT < UB
             if not primary.sat:
                 # T < LB < OPT < UB

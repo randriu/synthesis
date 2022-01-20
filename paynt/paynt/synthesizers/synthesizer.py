@@ -1,14 +1,10 @@
 import stormpy
 
-from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
-from .quotient import JaniQuotientContainer, POMDPQuotientContainer
-
-from ..profiler import Timer,Profiler
-
 from ..sketch.holes import Holes,DesignSpace
 
-from stormpy.synthesis import CounterexampleGenerator
+from .statistic import Statistic
+from ..profiler import Timer,Profiler
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,6 +31,7 @@ class Synthesizer:
 
     def run(self):
         return self.synthesize(self.sketch.design_space)
+
         
 class Synthesizer1By1(Synthesizer):
     
@@ -51,9 +48,9 @@ class Synthesizer1By1(Synthesizer):
         for hole_combination in family.all_combinations():
             
             assignment = family.construct_assignment(hole_combination)
-            dtmc = self.sketch.quotient.build_dtmc(assignment)
-            self.stat.iteration_dtmc(dtmc.states)
-            result = dtmc.check_specification(self.sketch.specification, short_evaluation = True)
+            chain = self.sketch.quotient.build_chain(assignment)
+            self.stat.iteration_dtmc(chain.states)
+            result = chain.check_specification(self.sketch.specification, short_evaluation = True)
             self.stat.pruned(1)
 
             if not result.constraints_result.all_sat:
@@ -61,7 +58,7 @@ class Synthesizer1By1(Synthesizer):
             if not self.sketch.specification.has_optimality:
                 satisfying_assignment = assignment
                 break
-            if result.optimality_result.improves:
+            if result.optimality_result.improves_optimum:
                 self.sketch.specification.optimality.update_optimum(result.optimality_result.value)
                 satisfying_assignment = assignment
 
@@ -91,11 +88,6 @@ class SynthesizerAR(Synthesizer):
         family.analysis_result = res
         satisfying_assignment = None
 
-        # prim = res.optimality_result.primary.value
-        # seco = res.optimality_result.secondary.value if res.optimality_result.secondary is not None else "na"
-        # print("{} - {}".format(seco,prim))
-        # print("{} - {}".format(prim,seco))
-
         can_improve = res.constraints_result.feasibility is None
         if res.constraints_result.feasibility == True:
             if not self.sketch.specification.has_optimality:
@@ -116,9 +108,7 @@ class SynthesizerAR(Synthesizer):
 
     
     def generalize_hint(self, family, hint):
-        state_range = max(family.mdp.quotient_state_map)
-        default_value = 0
-        hint_global = [default_value for state in range(state_range+1)]
+        hint_global = dict()
         for state in range(family.mdp.states):
             hint_global[family.mdp.quotient_state_map[state]] = hint.at(state)
         return hint_global
@@ -132,7 +122,7 @@ class SynthesizerAR(Synthesizer):
     def collect_analysis_hints(self, family):
         res = family.analysis_result
         analysis_hints = dict()
-        for index in res.constraints_result.undecided:
+        for index in res.constraints_result.undecided_constraints:
             prop, hints = self.generalize_hints(family, res.constraints_result.results[index])
             analysis_hints[prop] = hints
         if res.optimality_result is not None:
@@ -143,7 +133,7 @@ class SynthesizerAR(Synthesizer):
     def split_family(self, family):
         # filter undecided constraints
         res = family.analysis_result
-        undecided = res.constraints_result.undecided
+        undecided = res.constraints_result.undecided_constraints
         analysis_hints = self.collect_analysis_hints(family)
 
         # split family wrt last undecided result
@@ -202,7 +192,7 @@ class SynthesizerCEGIS(Synthesizer):
         # logger.debug("analyzing assignment {}".format(assignment))
         
         # build DTMC
-        dtmc = self.sketch.quotient.build_dtmc(assignment)
+        dtmc = self.sketch.quotient.build_chain(assignment)
         self.stat.iteration_dtmc(dtmc.states)
 
         # model check all properties
@@ -215,7 +205,7 @@ class SynthesizerCEGIS(Synthesizer):
         if spec.constraints_result.all_sat:
             if not self.sketch.specification.has_optimality:
                 return True, True
-            if spec.optimality_result is not None and spec.optimality_result.improves:
+            if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 improving = True
 
@@ -254,7 +244,7 @@ class SynthesizerCEGIS(Synthesizer):
 
         # initialize CE generator
         formulae = self.sketch.specification.stormpy_formulae()
-        ce_generator = CounterexampleGenerator(
+        ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
 

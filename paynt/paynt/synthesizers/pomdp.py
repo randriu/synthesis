@@ -72,8 +72,11 @@ class SynthesizerPOMDP():
         return design_space
 
     def strategy_2(self):
+
+        print("strategy started", flush=True)
+
         # analyze POMDP
-        assert len(self.sketch.specification.constraints) == 0
+        # assert len(self.sketch.specification.constraints) == 0
         self.sketch.quotient.pomdp_manager.set_memory_size(1)
         self.sketch.quotient.unfold_partial_memory()
 
@@ -113,9 +116,9 @@ class SynthesizerPOMDP():
                 # design_space = self.choose_consistent_and_break_symmetry(self.sketch.design_space, observation_choices) # FIXME
                 self.synthesize(design_space)
         
-        exit()
-        print("synthesizing solution for k=3 (full, unrestricted)")
-        self.sketch.quotient.pomdp_manager.set_memory_size(3)
+        # exit()
+        print("synthesizing solution for k=* (full, unrestricted)")
+        self.sketch.quotient.pomdp_manager.set_memory_size(self.sketch.POMDP_MEM_SIZE)
         self.sketch.quotient.unfold_partial_memory()
         self.synthesize()
 
@@ -404,10 +407,11 @@ class SynthesizerPOMDP():
         Profiler.print()
 
     def run(self):
+
         # self.strategy()
-        # self.strategy_2()
+        self.strategy_2()
         # self.strategy_3()
-        self.strategy_5()
+        # self.strategy_5()
 
 
 

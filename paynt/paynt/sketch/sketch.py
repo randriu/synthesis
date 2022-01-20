@@ -3,111 +3,119 @@ import stormpy
 from .property import Property, OptimalityProperty, Specification
 from .holes import Hole, Holes, DesignSpace
 from ..synthesizers.models import MarkovChain
-from ..synthesizers.quotient import JaniQuotientContainer, POMDPQuotientContainer
+from ..synthesizers.quotient import *
 
 import os
 import re
 import uuid
-from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
 
-
 class Sketch:
-    
-    def __init__(self, sketch_path, properties_path, constant_str):
-        self.prism = None
 
-        self.expression_parser = None
-        self.constant_map = None
+    # implicit size for full memory exploration (make as a CL argument?)
+    POMDP_MEM_SIZE = 2
+
+    def __init__(self, sketch_path, properties_path, constant_str):
+
+        self.explicit_model = None
+        self.prism = None
         self.hole_expressions = None
 
-        self.specification = None
         self.design_space = None
+        self.specification = None
+        self.quotient = None
+
+        constant_map = None
+        expression_parser = None
 
         logger.info(f"Loading sketch from {sketch_path}...")
-
-        self.explicit_model = Sketch.read_explicit_mdp(sketch_path)
-        if self.is_implicit:
-            # template as a prism program
+        logger.info(f"Attempting to parse model in explicit format ...")
+        self.explicit_model = Sketch.read_explicit_model(sketch_path)
+        if self.is_explicit:
+            logger.info(f"Successfully parsed model in explicit format.")
+        else:
+            logger.info(f"Assuming a sketch in a PRISM format ...")
             self.prism, hole_definitions = Sketch.load_sketch(sketch_path)
 
-            self.expression_parser = stormpy.storage.ExpressionParser(self.prism.expression_manager)
-            self.expression_parser.set_identifier_mapping(dict())
+            expression_parser = stormpy.storage.ExpressionParser(self.prism.expression_manager)
+            expression_parser.set_identifier_mapping(dict())
 
-            logger.info(f"Assuming constant definitions: '{constant_str}' ...")
-            constant_map = Sketch.map_constants(self.prism, self.expression_parser, constant_str)
-            self.prism = self.prism.define_constants(constant_map)
-            self.prism = self.prism.substitute_constants()
+            if constant_str != '':
+                logger.info(f"Assuming constant definitions: '{constant_str}' ...")
+                constant_map = Sketch.map_constants(self.prism, expression_parser, constant_str)
+                self.prism = self.prism.define_constants(constant_map)
+                self.prism = self.prism.substitute_constants()
 
-            logger.info("Processing hole definitions ...")
-            self.prism, holes, self.hole_expressions = Sketch.parse_holes(self.prism, self.expression_parser, hole_definitions)
-            logger.info(f"Sketch has {holes.num_holes} holes")
-            logger.info(f"Listing hole domains: {holes}")
-            logger.info(f"Design space size: {holes.size}")
-        else:
-            # pomdp in explicit form
-            logger.info(f"Loaded model from explicit format.")
-            assert self.is_pomdp
-            self.prism = None
-            self.expression_parser = None
-            self.hole_expressions = None
-            constant_map = None
-            holes = None
+            if len(hole_definitions) == 0:
+                logger.info("Sketch does not contain any hole definitions.")
+                self.design_space = DesignSpace()
+            else:
+                logger.info("Processing hole definitions ...")
+                self.prism, self.hole_expressions, self.design_space = Sketch.parse_holes(self.prism, expression_parser, hole_definitions)
+                
+                logger.info(f"Sketch has {self.design_space.num_holes} holes")
+                # logger.info(f"Listing hole domains: {holes}"
+                logger.info(f"Design space size: {self.design_space.size}")
 
         logger.info(f"Loading properties from {properties_path} ...")
         self.specification = Sketch.parse_specification(self.prism, constant_map, properties_path)
-        logger.info(f"Found the following constraints: {[str(p) for p in self.specification.constraints]}")
-        if self.specification.has_optimality:
-            logger.info(f"Found the following optimality property: {self.specification.optimality}")
-
-        if self.is_implicit:
-            self.design_space = DesignSpace(holes)
-            self.design_space.property_indices = self.specification.all_indices()
-
+        logger.info(f"Found the following specification: {self.specification}")
+        self.design_space.property_indices = self.specification.all_constraint_indices()
         MarkovChain.initialize(self.specification.stormpy_formulae())
-        if not self.is_pomdp:
-            self.quotient = JaniQuotientContainer(self)
-        else:
+        
+        logger.info(f"Initializing the quotient ...")
+
+        if self.is_dtmc:
+            self.quotient = DTMCQuotientContainer(self)
+        elif self.is_ctmc:
+            self.quotient = CTMCQuotientContainer(self)
+        elif self.is_mdp:
+            self.quotient = MDPQuotientContainer(self)
+        elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
-            self.quotient.pomdp_manager.set_memory_size(1)
+            self.quotient.pomdp_manager.set_memory_size(Sketch.POMDP_MEM_SIZE)
             self.quotient.unfold_partial_memory()
+        else:
+            raise TypeError("sketch type is not supported")
+
+        logger.info(f"Sketch parsing complete.")
+
 
     @property
-    def is_implicit(self):
-        return self.explicit_model is None
+    def is_explicit(self):
+        return self.explicit_model is not None
 
+    @property
+    def is_dtmc(self):
+        return not self.is_explicit and self.prism.model_type == stormpy.storage.PrismModelType.DTMC
+    
+    @property
+    def is_ctmc(self):
+        return not self.is_explicit and self.prism.model_type == stormpy.storage.PrismModelType.CTMC
+    
     @property
     def is_mdp(self):
-        if self.is_implicit:
-            return self.prism.model_type == stormpy.storage.PrismModelType.MDP
-        else:
-            return self.explicit_model.is_nondeterministic_model and not self.explicit_model.is_partially_observable
+        return not self.is_explicit and self.prism.model_type == stormpy.storage.PrismModelType.MDP
 
     @property
     def is_pomdp(self):
-        if self.is_implicit:
-            return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
-        else:
+        if self.is_explicit:
             return self.explicit_model.is_nondeterministic_model and self.explicit_model.is_partially_observable
-
-    def restrict_prism(self, assignment):
-        assert assignment.size == 1
-        substitution = {prism.get_constant(hole.hame):self.hole_expressions[hole_index][hole.options[0]] for hole_index,hole in enumerate(assignment)}
-        program = self.prism.define_constants(substitution)
-        return program
+        else:
+            return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
 
     @classmethod
-    def read_explicit_mdp(cls, path):
-        model = None
+    def read_explicit_model(cls, path):
+        explicit_model = None
         try:
             builder_options = stormpy.core.DirectEncodingParserOptions()
             builder_options.build_choice_labels = True
-            model = stormpy.core._build_sparse_model_from_drn(path, builder_options)
+            explicit_model = stormpy.core._build_sparse_model_from_drn(path, builder_options)
         except:
-            return None
-        return model
+            pass
+        return explicit_model
 
 
     @classmethod
@@ -116,44 +124,45 @@ class Sketch:
         with open(sketch_path) as f:
             sketch_lines = f.readlines()
 
-        # strip hole definitions
+        # replace hole definitions with constants
         hole_re = re.compile(r'^hole\s+(.*?)\s+(.*?)\s+in\s+\{(.*?)\};$')
         sketch_output = []
-        hole_definitions = OrderedDict()
+        hole_definitions = {}
         for line in sketch_lines:
             match = hole_re.search(line)
             if match is not None:
+                hole_type = match.group(1)
                 hole_name = match.group(2)
-                hole_definitions[hole_name] = match.group(3).replace(" ", "")
-                line = f"const {match.group(1)} {hole_name};"
+                hole_options = match.group(3).replace(" ", "")
+                hole_definitions[hole_name] = hole_options
+                line = f"const {hole_type} {hole_name};"
             sketch_output.append(line)
 
-        # store stripped sketch to a temporary file
+        # store modified sketch to a temporary file
         tmp_path = sketch_path + str(uuid.uuid4())
         with open(tmp_path, 'w') as f:
             for line in sketch_output:
                 print(line, end="", file=f)
 
         # try to parse temporary sketch and then delete it
-        parse_error = False
         try:
             prism = stormpy.parse_prism_program(tmp_path)
+            os.remove(tmp_path)
         except:
-            parse_error = True
-        os.remove(tmp_path)
-        if parse_error:
+            os.remove(tmp_path)
             exit()
 
         return prism, hole_definitions
 
+ 
     @classmethod
     def map_constants(cls, prism, expression_parser, constant_str):
         constant_str = constant_str.replace(" ", "")
         if constant_str == "":
             return dict()
+        
         constant_map = dict()
         constant_definitions = constant_str.split(",")
-        
         prism_constants = {c.name:c for c in prism.constants}
 
         for constant_definition in constant_definitions:
@@ -189,24 +198,25 @@ class Sketch:
         assert len(undefined_constants) == len(holes), "some constants were unspecified"
 
         # convert single-valued holes to a defined constant
-        constant_definitions = {}
+        trivial_holes_definitions = {}
         nontrivial_holes = Holes()
         nontrivial_hole_expressions = []
         for hole_index,hole in enumerate(holes):
             if hole.size == 1:
-                constant_definitions[prism.get_constant(hole.name).expression_variable] = hole_expressions[hole_index][0]
+                trivial_holes_definitions[prism.get_constant(hole.name).expression_variable] = hole_expressions[hole_index][0]
             else:
                 nontrivial_holes.append(hole)
                 nontrivial_hole_expressions.append(hole_expressions[hole_index])
         holes = nontrivial_holes
         hole_expressions = nontrivial_hole_expressions
-        
-        # define these constants in the program
-        prism = prism.define_constants(constant_definitions)
-        prism = prism.substitute_constants()
 
-        # success
-        return prism, holes, hole_expressions
+        # substitute trivial holes
+        prism = prism.define_constants(trivial_holes_definitions)
+        prism = prism.substitute_constants()
+    
+        design_space = DesignSpace(holes)
+
+        return prism, hole_expressions, design_space
 
  
     @classmethod
@@ -268,4 +278,16 @@ class Sketch:
         return specification
     
 
+    def restrict_prism(self, assignment):
+        assert assignment.size == 1
+        substitution = {}
+        for hole_index,hole in enumerate(assignment):
+            ev = self.prism.get_constant(hole.name).expression_variable
+            expr = self.hole_expressions[hole_index][hole.options[0]]
+            substitution[ev] = expr
+        program = self.prism.define_constants(substitution)
+        model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
+        return model
+
+    
     

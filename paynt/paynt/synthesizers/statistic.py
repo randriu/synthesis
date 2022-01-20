@@ -101,7 +101,7 @@ class Statistic:
         if self.specification.has_optimality and self.specification.optimality.optimum is not None:
             optimum = round(self.specification.optimality.optimum,5)
             threshold = round(self.specification.optimality.threshold,5)
-        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], *={optimum}, t={threshold}"
+        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], *={optimum}"
 
     def print_status(self):
         if self.timer.read() > self.status_time:

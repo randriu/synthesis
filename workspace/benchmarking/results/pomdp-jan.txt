@@ -62,54 +62,6 @@ total iters:  39312
 strategy_2: k=3 74 -> 33, k=4: TO, no progress after 6%
 
 
-
-
-##### maze2 #####
-
--- k=1
-
-optimality objective: R[exp]min=? [F "goal"] [0]
-
-method: AR, synthesis time: 0.0 s
-number of holes: 6, family size: 4096
-super MDP size: 0, average MDP size: 15, iterations: 3
-
-feasible: no
-
--- k=2
-
-method: AR, synthesis time: 0.03 s
-number of holes: 28, family size: 1099511627776
-super MDP size: 0, average MDP size: 29, iterations: 63
-
-optimal: 5.692308
-
--- k=3
-
-optimality objective: R[exp]min=? [F "goal"] [0]
-
-method: AR, synthesis time: 5.47 s
-number of holes: 42, family size: 19408409961765342806016
-super MDP size: 0, average MDP size: 43, iterations: 7787
-
-optimal: 5.692308
-
-
-
-##### maze-sl (sl=0.5) #####
-
--- k=1
-
-optimality objective: R[exp]min=? [F "goal"] [0]
-
-method: AR, synthesis time: 0.0 s
-number of holes: 6, family size: 4096
-super MDP size: 0, average MDP size: 15, iterations: 3
-
-feasible: no
-
--- k=2
-
 --------------------------------------------------------------------------------
 
 
@@ -145,15 +97,6 @@ design space size:  3833759992447475122176
 
 ar: ETA: 2833615910.9 s [80696 iters], opt=0.5
 cegis: ETA: 335894.4 s [3515 iters], opt=0.5
-
---------------------------------------------------------------------------------
-drone [4 1]
-
--- k=1
-
-# of observations: 384
-# of holes:  165
-design space size:  2187250724783011924372502227117621365353169430893212436425770606409952999199375923223513177023053824
 
 --------------------------------------------------------------------------------
 avoid
@@ -253,9 +196,6 @@ ar: ETA: 3267.2 s [503 iters], opt=31.95674
 
 
 --------------------------------------------------------------------------------
-network: how to set K & T ?
-
---------------------------------------------------------------------------------
 nrp
 
 optimality objective: Pmax=? [F "unfair"]
@@ -298,49 +238,6 @@ super MDP size: 0, average MDP size: 85, iterations: 1096291
 with hints
 method: AR, synthesis time: 911.93 s
 super MDP size: 0, average MDP size: 85, iterations: 1096291
-
-
-
-
---------------------------------------------------------------------------------
-refuel [6]
-
-optimality objective: Pmax=? ["notbad" U "goal"]
-
--- k=1
-
-# of observations: 50
-# of holes:  26
-design space size:  1410554953728
-
-method: AR, synthesis time: 0.03 s
-super MDP size: 0, average MDP size: 190, iterations: 32
-
-optimal: 0.981088
-
--- k=2
-
-# of observations: 50
-# of holes:  152
-design space size:  2522200383259155377694530751330983269335622954971561984
-
-optimal: 0.981093
-
-method: AR, synthesis time: 0.78 s
-super MDP size: 0, average MDP size: 379, iterations: 251
-
-
---------------------------------------------------------------------------------
-
-samplerocks
-
--- k=1
-# of observations: 277
-# of holes:  226
-design space size:  4228871736815801385829438148917777093674713447756258020171883782707609600000000000000000000000000000000000000000000000000000000000000000000000000000000
-
-ar: ETA: 55000383.7 s [11460 iters], opt=28.0
-cegis: BAD_ALLOC
 
 --------------------------------------------------------------------------------
 

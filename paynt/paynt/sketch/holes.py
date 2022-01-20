@@ -5,7 +5,7 @@ import z3
 class Hole:
     '''
     Hole with a name, a list of options and corresponding option labels.
-    Options for each hole are simply indices of the corresponding actions.
+    Options for each hole are simply indices of the corresponding hole assignment.
     Each hole is identified by its position in Holes, therefore, this order must
       be preserved in the refining process.
     Option labels are not refined when assuming suboptions so that the correct
@@ -31,7 +31,7 @@ class Hole:
         return Hole(self.name, self.options.copy(), self.option_labels)
 
     def assume_options(self, options):
-        self.options = options.copy()
+        self.options = options
 
 
 class Holes(list):
@@ -74,8 +74,11 @@ class Holes(list):
         holes.assume_options(suboptions)
         return holes
 
-    def includes(self, hole_options):
-        for hole_index,option in hole_options.items():
+    def includes(self, hole_assignment):
+        '''
+        :return True if hole_assignment is included in self
+        '''
+        for hole_index,option in hole_assignment.items():
             if not option in self[hole_index].options:
                 return False
         return True
@@ -106,20 +109,20 @@ class DesignSpace(Holes):
     # for each hole, a corresponding solver variable
     solver_vars = None
 
-    def __init__(self, holes):
+    def __init__(self, holes = []):
         super().__init__(holes.copy())
         self.property_indices = None
 
         self.mdp = None
         self.analysis_result = None
-
         self.analysis_hints = None
         
         self.encoding = None
 
     def set_analysis_hints(self, property_indices, analysis_hints):
         self.property_indices = property_indices
-        self.analysis_hints = analysis_hints
+        # TODO proper analysis hints usage
+        # self.analysis_hints = analysis_hints
 
     def translate_analysis_hint(self, hint):
         if hint is None:
@@ -138,7 +141,9 @@ class DesignSpace(Holes):
             hint_prim,hint_seco = hints
             hint_prim = self.translate_analysis_hint(hint_prim)
             hint_seco = self.translate_analysis_hint(hint_seco)
-            analysis_hints[prop] = (hint_prim,hint_seco)
+            analysis_hints[prop] = (hint_prim,hint_seco) # no swap?
+            # use primary hint for the secondary direction and vice versa
+            # analysis_hints[prop] = (hint_seco,hint_prim) # swap?
         self.mdp.analysis_hints = analysis_hints
 
     def copy(self):
@@ -146,19 +151,7 @@ class DesignSpace(Holes):
         ds.property_indices = self.property_indices.copy()
         return ds
 
-    def z3_initialize(self):
-        ''' Use this design space as a baseline for future refinements. '''
-        DesignSpace.solver = z3.Solver()
-        DesignSpace.solver_vars = []
-        for hole_index, hole in enumerate(self):
-            var = z3.Int(hole_index)
-            DesignSpace.solver_vars.append(var)
-            DesignSpace.solver.add(var >= 0)
-            DesignSpace.solver.add(var < hole.size)
-            # FIXME
-        solver_result = DesignSpace.solver.check()
-        
-    def z3_encode(self):
+    def encode(self):
         ''' Encode this design space. '''
         hole_clauses = []
         for hole_index,hole in enumerate(self):
@@ -166,7 +159,19 @@ class DesignSpace(Holes):
                 [DesignSpace.solver_vars[hole_index] == option for option in hole.options]
             )
             hole_clauses.append(clauses)
-        self.encoding = z3.And(hole_clauses)
+        encoding = z3.And(hole_clauses)
+        return encoding
+
+    def z3_initialize(self):
+        ''' Use this design space as a baseline for future refinements. '''
+        DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
+        
+        DesignSpace.solver = z3.Solver()
+        DesignSpace.solver.add(self.encode())
+        
+    def z3_encode(self):
+        self.encoding = self.encode()
+        
 
     def pick_assignment(self):
         '''
@@ -196,6 +201,7 @@ class DesignSpace(Holes):
         Exclude assignment from the design space using provided conflict.
         :param assignment hole assignment that yielded unsatisfiable DTMC
         :param conflict indices of relevant holes in the corresponding counterexample
+        :return estimate of pruned assignments
         '''
         pruning_estimate = 1
         counterexample_clauses = []
@@ -209,9 +215,6 @@ class DesignSpace(Holes):
         counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
         DesignSpace.solver.add(counterexample_encoding)
         return pruning_estimate
-
-
-
 
 
 class CombinationColoring:

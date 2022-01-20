@@ -48,7 +48,7 @@ def setup_logger(log_path):
 @click.option('--sketch', help="the sketch", required=False, default="sketch.templ")
 @click.option('--properties', help="the properties", required=False, default="sketch.properties")
 @click.option("--constants", default="")
-@click.option('--pomdp', help="Incremental synthesis of controllers for a POMDP", is_flag=True, default=False)
+@click.option('--pomdp', help="enable incremental synthesis of controllers for a POMDP", is_flag=True, default=False)
 # @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
 @click.argument("method", type=click.Choice(
     ['onebyone', 'cegis', 'ar', 'hybrid', 'evo'], case_sensitive=False))
@@ -63,6 +63,7 @@ def paynt(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, properties)
     sketch = Sketch(sketch_path, properties_path, constants)
+    # exit()
 
     # choose synthesis method
     if sketch.is_pomdp and pomdp:
