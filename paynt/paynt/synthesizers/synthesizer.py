@@ -30,7 +30,13 @@ class Synthesizer:
         pass
 
     def run(self):
-        return self.synthesize(self.sketch.design_space)
+        assignment = self.synthesize(self.sketch.design_space)
+        # double-check assignment
+        if assignment is not None:
+            dtmc = self.sketch.quotient.build_chain(assignment)
+            spec_result = dtmc.check_specification(self.sketch.specification)
+            print(spec_result)
+        return assignment
 
         
 class Synthesizer1By1(Synthesizer):
@@ -187,6 +193,7 @@ class SynthesizerCEGIS(Synthesizer):
         """
         :return (1) overall satisfiability (True/False)
         :return (2) whether this is an improving assignment
+        :return (3) pruning estimate
         """
         
         # logger.debug("analyzing assignment {}".format(assignment))
@@ -204,7 +211,7 @@ class SynthesizerCEGIS(Synthesizer):
         # analyze model checking results
         if spec.constraints_result.all_sat:
             if not self.sketch.specification.has_optimality:
-                return True, True
+                return True, True, None
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 improving = True
@@ -222,10 +229,11 @@ class SynthesizerCEGIS(Synthesizer):
             conflict = ce_generator.construct_conflict(index, threshold, bounds)
             conflicts.append(conflict)
 
-        if self.sketch.specification.has_optimality and spec.optimality_result.sat == False:
+        if self.sketch.specification.has_optimality:
             index = len(self.sketch.specification.constraints)
             threshold = self.sketch.specification.optimality.threshold
             bounds = None if family.analysis_result is None else family.analysis_result.optimality_result.primary.result
+            assert bounds is not None
             conflict = ce_generator.construct_conflict(index, threshold, bounds)
             conflicts.append(conflict)
             
@@ -237,6 +245,14 @@ class SynthesizerCEGIS(Synthesizer):
         return False, improving, pruned_estimate
 
     def synthesize(self, family):
+
+        # assert that no reward formula is maximizing
+        for c in self.sketch.specification.constraints:
+            assert not (c.reward and not c.minimizing)
+        if self.sketch.specification.has_optimality:
+            c = self.sketch.specification.optimality
+            assert not (c.reward and not c.minimizing)
+
         self.stat.start()
 
         # map mdp states to hole indices
@@ -349,6 +365,21 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         return "hybrid"
 
     def synthesize(self, family):
+
+
+        assignment = family.copy()
+
+        interesting = "M11=4, M12=2, M14=2, M15=3, M21=4, M22=4, M23=2, M24=2, M25=3, M32=4, M33=4, M34=3, M42=4, M43=1, M44=1, M51=4, M55=1"
+        print(interesting)
+        interesting_split = interesting.replace(" ", "").split(",")
+        for hole_index,hole_option in enumerate(interesting_split):
+            hole_option = hole_option.split("=")
+            option_index = family[hole_index].option_labels.index(hole_option[1])
+            assignment.assume_hole_options(hole_index, [option_index])
+        print(assignment)
+        exit()
+        # interesting_assignment = [2,]
+
         self.stat.family(family)
         self.stat.start()
 
@@ -356,7 +387,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
         formulae = self.sketch.specification.stormpy_formulae()
-        ce_generator = CounterexampleGenerator(
+        ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
 
@@ -388,11 +419,10 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             assignment = family.pick_assignment()
             sat = False
             while assignment is not None:
-                assert False
                 
-                sat, improving_assignment, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
-                if improving_assignment is not None:
-                    satisfying_assignment = improving_assignment
+                sat, improving, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
+                if improving:
+                    satisfying_assignment = assignment
                 if sat:
                     break
                 # member is UNSAT

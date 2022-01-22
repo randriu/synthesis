@@ -294,10 +294,8 @@ namespace storm {
                 }
             } else {
                 // Reward formula: one reward model
-                assert(this->formula_safety[formula_index]);
+                assert(mdp_bounds != NULL);
                 assert(dtmc->hasRewardModel(this->formula_reward_name[formula_index]));
-                storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[formula_index]);
-                assert(reward_model_dtmc.hasOnlyStateRewards());
 
                 std::vector<ValueType> state_rewards_subdtmc(dtmc_states+2);
                 double default_reward = 0;
@@ -349,9 +347,16 @@ namespace storm {
             if(this->formula_reward[index]) {
                 // - expand state rewards
                 storm::models::sparse::StandardRewardModel<ValueType> const& reward_model_dtmc = dtmc->getRewardModel(this->formula_reward_name[index]);
+                assert(reward_model_dtmc.hasStateRewards() or reward_model_dtmc.hasStateActionRewards());
                 storm::models::sparse::StandardRewardModel<ValueType> & reward_model_subdtmc = (reward_models_subdtmc.find(this->formula_reward_name[index]))->second;
                 for(StateType state : to_expand) {
-                    reward_model_subdtmc.setStateReward(state, reward_model_dtmc.getStateReward(state));
+                    ValueType reward;
+                    if(reward_model_dtmc.hasStateRewards()) {
+                        reward = reward_model_dtmc.getStateReward(state);
+                    } else {
+                        reward = reward_model_dtmc.getStateActionReward(state);
+                    }
+                    reward_model_subdtmc.setStateReward(state, reward);
                 }
             }
 
