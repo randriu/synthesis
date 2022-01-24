@@ -210,6 +210,7 @@ namespace storm {
                 for(uint_fast64_t hole: dtmc_holes[blocking_candidate]) {
                     if(this->hole_wave[hole] == 0) {
                         hole_wave[hole] = current_wave;
+                        // std::cout << "[storm] hole " << hole << " expanded in wave " << current_wave << std::endl;
                     }
                 }
 
@@ -247,14 +248,11 @@ namespace storm {
         void CounterexampleGenerator<ValueType,StateType>::prepareSubdtmc (
             uint_fast64_t formula_index,
             std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
+            std::vector<StateType> const& mdp_quotient_state_map,
             std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
             storm::models::sparse::StateLabeling & labeling_subdtmc,
             std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc
             ) {
-
-            // Typedefs for matrices
-            // typedef std::vector<std::pair<StateType,ValueType>> row;
-            // typedef std::vector<row> matrix;
 
             // Get DTMC info
             StateType dtmc_states = dtmc->getNumberOfStates();
@@ -280,6 +278,20 @@ namespace storm {
             // Associate true sink with the target label
             labeling_subdtmc.addLabelToState(this->target_label, sink_state_true);
 
+            // Map MDP bounds onto the state space of a quotient MDP
+            bool have_bounds = mdp_bounds != NULL;
+            std::vector<ValueType> quotient_mdp_bounds;
+            if(have_bounds) {
+                auto const& mdp_values = mdp_bounds->getValueVector();
+                quotient_mdp_bounds.resize(this->quotient_mdp.getNumberOfStates());
+                uint_fast64_t mdp_states = mdp_values.size();
+                for(StateType state = 0; state < mdp_states; state++) {
+                    quotient_mdp_bounds[mdp_quotient_state_map[state]] = mdp_values[state];
+                }
+            }
+
+            
+
             // Construct transition matrix (as well as the reward model) for the subdtmc
             if(!this->formula_reward[formula_index]) {
                 // Probability formula: no reward models
@@ -287,7 +299,7 @@ namespace storm {
                 for(StateType state = 0; state < dtmc_states; state++) {
                     StateType mdp_state = this->state_map[state];
                     std::vector<std::pair<StateType,ValueType>> r;
-                    double probability = mdp_bounds != NULL ? (*mdp_bounds)[mdp_state] : default_bound;
+                    double probability = have_bounds ? quotient_mdp_bounds[mdp_state] : default_bound;
                     r.emplace_back(sink_state_false, 1-probability);
                     r.emplace_back(sink_state_true, probability);
                     matrix_subdtmc.push_back(r);
@@ -301,7 +313,7 @@ namespace storm {
                 double default_reward = 0;
                 for(StateType state = 0; state < dtmc_states; state++) {
                     StateType mdp_state = this->state_map[state];
-                    double reward = mdp_bounds != NULL ? (*mdp_bounds)[mdp_state] : default_reward;
+                    double reward = have_bounds ? quotient_mdp_bounds[mdp_state] : default_reward;
                     state_rewards_subdtmc[state] = reward;
 
                     std::vector<std::pair<StateType,ValueType>> r;
@@ -337,12 +349,19 @@ namespace storm {
             
             // Expand states from the new wave: 
             // - expand transition probabilities
+            // std::cout << "expanded " << to_expand.size() << " states in this wave " << std::endl;
             for(StateType state : to_expand) {
+                // std::cout << "holes in state " << state << " : ";
+                /*for(auto hole: this->mdp_holes[this->state_map[state]]) {
+                    std::cout << hole << ",";
+                }*/
+                // std::cout << std::endl;
                 matrix_subdtmc[state].clear();
                 for(auto entry: transition_matrix.getRow(state)) {
                     matrix_subdtmc[state].emplace_back(entry.getColumn(), entry.getValue());
                 }
             }
+            // std::cout << std::endl;
 
             if(this->formula_reward[index]) {
                 // - expand state rewards
@@ -371,6 +390,7 @@ namespace storm {
             assert(sub_matrix.isProbabilistic());
             storm::storage::sparse::ModelComponents<ValueType> components(sub_matrix, labeling_subdtmc, reward_models_subdtmc);
             std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
+            // std::cout << "[storm] sub-dtmc has " << subdtmc->getNumberOfStates() << " states" << std::endl;
             
             // Model check
             bool onlyInitialStatesRelevant = false;
@@ -383,6 +403,7 @@ namespace storm {
             } else {
                 satisfied = result[initial_state] > formula_bound;
             }
+            // std::cout << "[storm] mc result: " << result[initial_state] << " vs " << formula_bound << std::endl;
 
             return satisfied;
         }
@@ -391,7 +412,8 @@ namespace storm {
         std::vector<uint_fast64_t> CounterexampleGenerator<ValueType,StateType>::constructConflict (
             uint_fast64_t formula_index,
             ValueType formula_bound,
-            std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds
+            std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
+            std::vector<StateType> const& mdp_quotient_state_map
             ) {
             
             // Get DTMC info
@@ -402,17 +424,24 @@ namespace storm {
             storm::models::sparse::StateLabeling labeling_subdtmc(dtmc_states+2);
             std::unordered_map<std::string, storm::models::sparse::StandardRewardModel<ValueType>> reward_models_subdtmc;
             this->prepareSubdtmc(
-                formula_index, mdp_bounds, matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
+                formula_index, mdp_bounds, mdp_quotient_state_map, matrix_subdtmc, labeling_subdtmc, reward_models_subdtmc
             );
 
             // Explore subDTMCs wave by wave
             uint_fast64_t wave_last = this->wave_states.size()-1;
             uint_fast64_t wave = 0;
+
+            /*std::cout << "[storm] hole-wave: ";
+            for(uint_fast64_t hole = 0; hole < this->hole_count; hole++) {
+                std::cout << this->hole_wave[hole] << ",";
+            }
+            std::cout << std::endl;*/
             while(true) {
                 bool satisfied = this->expandAndCheck(
                     formula_index, formula_bound, matrix_subdtmc, labeling_subdtmc,
                     reward_models_subdtmc, this->wave_states[wave]
                 );
+                // std::cout << "[storm] wave " << wave << "/" << wave_last << " : " << satisfied << std::endl;
                 if(!satisfied) {
                     break;
                 }

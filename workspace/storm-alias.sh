@@ -66,21 +66,6 @@ storm-dependencies() {
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
 
-### storm patch (obsolete) #####################################################
-
-paynt-patch-create() {
-    local storm_src=$SYNTHESIS/storm/src
-    local patch_storm_src=$SYNTHESIS/patch/storm/src
-
-    rsync -av $storm_src/CMakeLists.txt $patch_storm_src/CMakeLists.txt
-    rsync -av $storm_src/storm-synthesis $patch_storm_src/
-    rsync -av $storm_src/storm-cli-utilities/CMakeLists.txt $patch_storm_src/storm-cli-utilities/CMakeLists.txt
-}
-
-paynt-patch() {
-    rsync -av $SYNTHESIS/patch/ $SYNTHESIS/
-}
-
 ### storm and stormpy ##########################################################
 
 storm-config() {
@@ -189,6 +174,7 @@ alias dtime='ps -aux | grep "python3 .*/paynt.py"'
 alias dshow='pgrep -af "^python3 .*/paynt.py .*"'
 alias dcount='pgrep -afc "^python3 .*/paynt.py .*"'
 alias dkill='dpid | xargs kill'
+alias k='dkill'
 alias dclear='rm $DYNASTY_LOG/*'
 
 dlog() {

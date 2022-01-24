@@ -81,52 +81,31 @@ function run() {
 
     # pomdp=true
 
-    coin="coin"
-    # coin="coin/more"
-    dice="dice/5"
-
-    m="pomdp/obstacle"
-
-    drone="pomdp/drone"
-    crypt="pomdp/crypt/4"
-    network="pomdp/network/simple-2"
-    network="pomdp/network/priorities-2"
-    nrp="pomdp/nrp"
-    samplerocks="pomdp/samplerocks"
-
-    maze="pomdp/maze/concise"
-    # maze="pomdp/maze/2"
-
-    avoid="pomdp/grid/avoid"
-    grid_simple="pomdp/grid/simple"
-    grid_simple_mo="pomdp/grid/simple-mo"
-
-    refuel="pomdp/grid/refuel"
-    obstacle="pomdp/grid/obstacle"
-    intercept="pomdp/grid/intercept"
-    evade="pomdp/grid/evade"
-
-
     # running ##########
 
-    # model=$coin
-    # model=$dice
+    # model="coin"
+    # model="coin/more"
+    # model="dice/5"
 
-    # model=$drone
-    # model=$crypt
-    model=$maze
-    # model=$network
-    # model=$nrp
-    # model=$samplerocks
-
-    # model=$avoid
-    # model=$grid_simple
-    # model=$grid_simple_mo
-    # model=$refuel
-    # model=$obstacle
-    # model=$intercept
-    # model=$evade
+    # model="pomdp/maze/concise"
+    # model="pomdp/maze/2"
     
+    # model="pomdp/drone"
+    # model="pomdp/crypt/4"
+    # model="pomdp/network/simple-2"
+    # model="pomdp/network/priorities-2"
+    # model="pomdp/nrp"
+    # model="pomdp/samplerocks"
+
+    # model="pomdp/grid/avoid"
+    # model="pomdp/grid/simple"
+    # model="pomdp/grid/simple-mo"
+
+    model="pomdp/grid/refuel"
+    # model="pomdp/grid/obstacle"
+    # model="pomdp/grid/intercept"
+    # model="pomdp/grid/evade"
+
     ### leonore ###
 
     # model="pomdp/leonore/refuel"
@@ -135,8 +114,9 @@ function run() {
     # model="pomdp/leonore/cheese"
 
     ## cav ##
+    # model="cav/grid"
     # model="cav/dpm"
-    model="cav/pole"
+    # model="cav/pole"
     # model="herman/5"
 
     # model="mdp"
@@ -146,9 +126,9 @@ function run() {
     # model=$m
 
     # onebyone $model
-    ar $model
+    # ar $model
     # cegis $model
-    # hybrid $model
+    hybrid $model
 }
 
 # --- execution ----------------------------------------------------------------

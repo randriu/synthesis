@@ -50,7 +50,7 @@ void define_synthesis(py::module& m) {
             "construct_conflict",
             &storm::synthesis::CounterexampleGenerator<>::constructConflict,
             "Construct a conflict to a prepared DTMC wrt a single formula.",
-            py::arg("formula_index"), py::arg("formula_bound"), py::arg("mdp_bounds")
+            py::arg("formula_index"), py::arg("formula_bound"), py::arg("mdp_bounds"), py::arg("mdp_quotient_state_map")
         );
         /*.def_property_readonly(
             "stats",

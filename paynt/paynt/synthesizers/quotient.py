@@ -203,7 +203,6 @@ class QuotientContainer:
         assert not mdp.is_dtmc
 
         scheduler = result.scheduler
-        Profiler.start("scheduler_selection")
         hole_assignments = self.scheduler_selection(mdp, scheduler)
         # print(hole_assignments)
 
@@ -215,8 +214,7 @@ class QuotientContainer:
         # splitters = self.holes_with_max_score(inconsistent_differences)        
 
         splitter = splitters[0]
-        Profiler.start("synthesis")
-
+        
         # split
         if len(hole_assignments[splitter]) == 1:
             suboptions = self.suboptions_half(mdp, splitter)
@@ -255,7 +253,9 @@ class DTMCQuotientContainer(QuotientContainer):
 
         # build quotient MDP       
         edge_to_hole_options = unfolder.edge_to_hole_options
+        logger.debug("Constructing quotient MDP ... ")
         self.quotient_mdp = stormpy.build_sparse_model_with_options(unfolder.jani_unfolded, MarkovChain.builder_options)
+        logger.debug(f"Constructed quotient MDP with {self.quotient_mdp.nr_states} states")
 
         # associate each action of a quotient MDP with hole options
         # remember default actions (actions taken in each hole assignment)

@@ -15,7 +15,6 @@ class Synthesizer:
     def __init__(self, sketch):
         self.sketch = sketch
         self.stat = Statistic(sketch, self.method_name)
-        Profiler.initialize()
 
     @property
     def method_name(self):
@@ -35,7 +34,9 @@ class Synthesizer:
         if assignment is not None:
             dtmc = self.sketch.quotient.build_chain(assignment)
             spec_result = dtmc.check_specification(self.sketch.specification)
-            print(spec_result)
+            print("double-checking: ", spec_result)
+
+        Profiler.print_all()
         return assignment
 
         
@@ -83,6 +84,7 @@ class SynthesizerAR(Synthesizer):
         :return (1) family feasibility (True/False/None)
         :return (2) new satisfying assignment (or None)
         """
+        Profiler.start("MDP analysis")
         # logger.debug("analyzing family {}".format(family))
         family.mdp = self.sketch.quotient.build(family)
         family.translate_analysis_hints()
@@ -98,6 +100,7 @@ class SynthesizerAR(Synthesizer):
         if res.constraints_result.feasibility == True:
             if not self.sketch.specification.has_optimality:
                 satisfying_assignment = family.pick_any()
+                Profiler.resume()
                 return True, satisfying_assignment
             else:
                 can_improve = res.optimality_result.can_improve
@@ -107,9 +110,11 @@ class SynthesizerAR(Synthesizer):
         
         if not can_improve:
             self.stat.pruned(family.size)
+            Profiler.resume()
             return False, satisfying_assignment
 
         feasibility = None if can_improve else False
+        Profiler.resume()
         return feasibility, satisfying_assignment
 
     
@@ -137,6 +142,7 @@ class SynthesizerAR(Synthesizer):
         return analysis_hints
 
     def split_family(self, family):
+        Profiler.start("family splitting")
         # filter undecided constraints
         res = family.analysis_result
         undecided = res.constraints_result.undecided_constraints
@@ -154,6 +160,7 @@ class SynthesizerAR(Synthesizer):
         
         for subfamily in subfamilies:
             subfamily.set_analysis_hints(undecided, analysis_hints)
+        Profiler.resume()
         return subfamilies
 
     def synthesize(self, family):
@@ -164,7 +171,8 @@ class SynthesizerAR(Synthesizer):
         satisfying_assignment = None
         families = [family]
         while families:
-            family = families.pop(-1)
+            family = families.pop(-1) # DFS
+            # family = families.pop(0) # BFS
 
             feasibility,assignment = self.analyze_family_ar(family)
             if assignment is not None:
@@ -197,61 +205,82 @@ class SynthesizerCEGIS(Synthesizer):
         """
         
         # logger.debug("analyzing assignment {}".format(assignment))
+        Profiler.start("CEGIS analysis")
         
         # build DTMC
+        Profiler.start("CEGIS: dtmc construction")
         dtmc = self.sketch.quotient.build_chain(assignment)
         self.stat.iteration_dtmc(dtmc.states)
+        Profiler.resume()
 
         # model check all properties
+        Profiler.start("CEGIS: dtmc model checking")
         spec = dtmc.check_specification(self.sketch.specification, 
             property_indices = family.property_indices, short_evaluation = False)
+        Profiler.resume()
 
         improving = False
 
         # analyze model checking results
         if spec.constraints_result.all_sat:
             if not self.sketch.specification.has_optimality:
+                Profiler.resume()
                 return True, True, None
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 improving = True
 
-        # collect all unsatisfiable properties
-        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
-
         # construct conflict wrt each unsatisfiable property
+        Profiler.start("CEGIS: CE preparing")
+        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+        Profiler.resume()
         conflicts = []
         for index in family.property_indices:
             if spec.constraints_result.results[index].sat:
                 continue
             threshold = self.sketch.specification.constraints[index].threshold
             bounds = None if family.analysis_result is None else family.analysis_result.constraints_result.results[index].primary.result
-            conflict = ce_generator.construct_conflict(index, threshold, bounds)
+            Profiler.start("CEGIS: conflicts")
+            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
+            Profiler.resume()
             conflicts.append(conflict)
 
         if self.sketch.specification.has_optimality:
             index = len(self.sketch.specification.constraints)
             threshold = self.sketch.specification.optimality.threshold
             bounds = None if family.analysis_result is None else family.analysis_result.optimality_result.primary.result
-            assert bounds is not None
-            conflict = ce_generator.construct_conflict(index, threshold, bounds)
+            # POLE DEBUGGING
+            # print(family.analysis_result.optimality_result)
+            # print("bounds", max(bounds.get_values()))
+            # print("re-computing bounds ..")
+            # result = family.mdp.check_specification(self.sketch.specification)
+            # bounds = result.optimality_result.primary.result
+            # print(result.optimality_result)
+            # print("bounds", max(bounds.get_values()))
+            Profiler.start("CEGIS: conflicts")
+            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
+            Profiler.resume()
             conflicts.append(conflict)
             
         # use conflicts to exclude the generalizations of this assignment
         pruned_estimate = 0
+        Profiler.start("CEGIS: exclusion")
         for conflict in conflicts:
             pruned_estimate += family.exclude_assignment(assignment, conflict)
+        Profiler.resume()
 
+        Profiler.resume()
         return False, improving, pruned_estimate
 
     def synthesize(self, family):
 
         # assert that no reward formula is maximizing
+        msg = "Cannot use CEGIS for maximizing reward formulae -- consider using AR or hybrid methods."
         for c in self.sketch.specification.constraints:
-            assert not (c.reward and not c.minimizing)
+            assert not (c.reward and not c.minimizing), msg
         if self.sketch.specification.has_optimality:
             c = self.sketch.specification.optimality
-            assert not (c.reward and not c.minimizing)
+            assert not (c.reward and not c.minimizing), msg
 
         self.stat.start()
 
@@ -266,7 +295,7 @@ class SynthesizerCEGIS(Synthesizer):
 
         # encode family
         family.z3_initialize()
-        family.z3_encode()
+        family.encode()
         
         # CEGIS loop
         satisfying_assignment = None
@@ -309,7 +338,7 @@ class StageControl:
         # multiplier to derive time allocated for cegis
         # time_ar * factor = time_cegis
         # =1 is fair, >1 favours cegis, <1 favours ar
-        self.cegis_efficiency = 1
+        self.cegis_efficiency = 10
 
 
     @property
@@ -336,6 +365,7 @@ class StageControl:
         """
         :return True if cegis time is over
         """
+        # return False # FIXME
         if self.timer_cegis.read() < self.timer_ar.read() * self.cegis_efficiency:
             return False
 
@@ -357,7 +387,6 @@ class StageControl:
             self.cegis_efficiency = success_rate_cegis / success_rate_ar
         return True
 
-
 class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
     @property
@@ -366,30 +395,39 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
     def synthesize(self, family):
 
+        # POLE DEBUGGING
+        # interesting = "M11=4, M12=2, M14=2, M15=3, M21=4, M22=4, M23=2, M24=2, M25=3, M32=4, M33=4, M34=3, M42=4, M43=1, M44=1, M51=4, M55=1"
+        # print(interesting)
+        # interesting_split = interesting.replace(" ", "").split(",")
+        # interesting_split = [hole_option.split("=") for hole_option in interesting_split]
+        # interesting_split = {hole_option[0]:hole_option[1] for hole_option in interesting_split}
+        # print(interesting_split)
+        
+        # self.interesting_assignment = {}
+        # for hole_index,hole in enumerate(family):
+        #     option = interesting_split[hole.name]
+        #     option_index = hole.option_labels.index(option)
+        #     self.interesting_assignment[hole_index] = option_index
+        # print(self.interesting_assignment)
+        # assert family.includes(self.interesting_assignment)
 
-        assignment = family.copy()
-
-        interesting = "M11=4, M12=2, M14=2, M15=3, M21=4, M22=4, M23=2, M24=2, M25=3, M32=4, M33=4, M34=3, M42=4, M43=1, M44=1, M51=4, M55=1"
-        print(interesting)
-        interesting_split = interesting.replace(" ", "").split(",")
-        for hole_index,hole_option in enumerate(interesting_split):
-            hole_option = hole_option.split("=")
-            option_index = family[hole_index].option_labels.index(hole_option[1])
-            assignment.assume_hole_options(hole_index, [option_index])
-        print(assignment)
-        exit()
-        # interesting_assignment = [2,]
+        # print("running hybrid ... \n")
+        # exit()
 
         self.stat.family(family)
         self.stat.start()
 
         self.stage_control = StageControl(family.size)
 
+        Profiler.start("MDP preprocessing")
         quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
         formulae = self.sketch.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
+        Profiler.stop()
+
+        Profiler.start("synthesis loop")
 
         # encode family
         family.z3_initialize()
@@ -401,8 +439,8 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             # MDP analysis
             self.stage_control.start_ar()
             
-            # family = families.pop(-1) # DFS
-            family = families.pop(0) # BFS
+            family = families.pop(-1) # DFS
+            # family = families.pop(0) # BFS
 
             feasibility,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
@@ -415,8 +453,10 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
             # undecided: initiate CEGIS
             self.stage_control.start_cegis()
-            family.z3_encode()
+            family.encode()
+            Profiler.start("pick_assignment")
             assignment = family.pick_assignment()
+            Profiler.resume()
             sat = False
             while assignment is not None:
                 
@@ -430,12 +470,18 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                     break
                 
                 # cegis still has time: check next assignment
+                Profiler.start("pick_assignment")
                 assignment = family.pick_assignment()
+                Profiler.resume()
 
             if sat:
                 break
             if assignment is None:
+                # POLE DEBUGGING
                 # family is UNSAT
+                # if family.includes(self.interesting_assignment):
+                #     print("CEGIS rejected interesting assignment")
+                #     # exit()
                 self.stage_control.prune_cegis(family.size)
                 self.stat.pruned(family.size)
                 continue
@@ -447,5 +493,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         
 
         self.stat.finished(satisfying_assignment)
+        Profiler.stop()
         return satisfying_assignment
 

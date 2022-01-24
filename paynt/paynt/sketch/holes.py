@@ -2,6 +2,8 @@ import math
 import itertools
 import z3
 
+from ..profiler import Profiler
+
 class Hole:
     '''
     Hole with a name, a list of options and corresponding option labels.
@@ -76,7 +78,7 @@ class Holes(list):
 
     def includes(self, hole_assignment):
         '''
-        :return True if hole_assignment is included in self
+        :return True if this family contains hole_assignment
         '''
         for hole_index,option in hole_assignment.items():
             if not option in self[hole_index].options:
@@ -117,6 +119,7 @@ class DesignSpace(Holes):
         self.analysis_result = None
         self.analysis_hints = None
         
+        self.hole_clauses = None
         self.encoding = None
 
     def set_analysis_hints(self, property_indices, analysis_hints):
@@ -153,24 +156,29 @@ class DesignSpace(Holes):
 
     def encode(self):
         ''' Encode this design space. '''
-        hole_clauses = []
+        Profiler.start("holes.py::encode")
+        self.hole_clauses = []
         for hole_index,hole in enumerate(self):
+            hole_var = DesignSpace.solver_vars[hole_index]
             clauses = z3.Or(
-                [DesignSpace.solver_vars[hole_index] == option for option in hole.options]
+                [hole_var == option for option in hole.options]
             )
-            hole_clauses.append(clauses)
-        encoding = z3.And(hole_clauses)
-        return encoding
+            self.hole_clauses.append(clauses)
+        self.encoding = z3.And(self.hole_clauses)
+        Profiler.resume()
 
     def z3_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
         DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
         
         DesignSpace.solver = z3.Solver()
-        DesignSpace.solver.add(self.encode())
+        self.encode()
+        DesignSpace.solver.add(self.encoding)
         
     def z3_encode(self):
-        self.encoding = self.encode()
+        if self.encoding is not None:
+            return
+        self.encode()
         
 
     def pick_assignment(self):
@@ -179,21 +187,29 @@ class DesignSpace(Holes):
         :return None if no instance remains
         '''
         # get satisfiable assignment within this design space
+        Profiler.start("p_a: z3 check")
         solver_result = DesignSpace.solver.check(self.encoding)
+        Profiler.resume()
         if solver_result != z3.sat:
             # no further instances
             return None
 
         # construct the corresponding singleton
+        Profiler.start("p_a: z3 model")
         sat_model = DesignSpace.solver.model()
+        Profiler.start("p_a: loop")
         hole_options = []
         for hole_index,hole, in enumerate(self):
             var = DesignSpace.solver_vars[hole_index]
             option = sat_model[var].as_long()
             hole_options.append([option])
+        Profiler.resume()
 
+
+        Profiler.start("p_a: assignment construction")
         assignment = self.copy()
         assignment.assume_options(hole_options)
+        Profiler.resume()
         return assignment
 
     def exclude_assignment(self, assignment, conflict):
@@ -207,13 +223,20 @@ class DesignSpace(Holes):
         counterexample_clauses = []
         for hole_index,var in enumerate(DesignSpace.solver_vars):
             if hole_index in conflict:
+                Profiler.start("ea: in conflict")
                 counterexample_clauses.append((var == assignment[hole_index].options[0]))
+                Profiler.resume()
             else:
-                all_options = [var == option for option in self[hole_index].options]
-                counterexample_clauses.append(z3.Or(all_options))
-                pruning_estimate *= len(all_options)
+                Profiler.start("ea: not in conflict")
+                counterexample_clauses.append(self.hole_clauses[hole_index])
+                Profiler.resume()
+                pruning_estimate *= self[hole_index].size
+        Profiler.start("ea: not")
         counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
+        Profiler.resume()
+        Profiler.start("ea: add")
         DesignSpace.solver.add(counterexample_encoding)
+        Profiler.resume()
         return pruning_estimate
 
 

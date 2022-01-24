@@ -59,12 +59,14 @@ namespace storm {
              * @param formula_index Formula index.
              * @param formula_bound Formula threshold for CE construction.
              * @param mdp_bounds MDP model checking result in the primary direction (NULL if not used).
+             * @param mdp_quotient_state_mdp A mapping of MDP states to the states of a quotient MDP.
              * @return A list of holes relevant in the CE.
              */
             std::vector<uint_fast64_t> constructConflict(
                 uint_fast64_t formula_index,
                 ValueType formula_bound,
-                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds
+                std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
+                std::vector<StateType> const& mdp_quotient_state_map
                 );
 
         protected:
@@ -89,6 +91,7 @@ namespace storm {
             void prepareSubdtmc(
                 uint_fast64_t formula_index,
                 std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
+                std::vector<StateType> const& mdp_quotient_state_map,
                 std::vector<std::vector<std::pair<StateType,ValueType>>> & matrix_subdtmc,
                 storm::models::sparse::StateLabeling & labeling_subdtmc,
                 std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> & reward_models_subdtmc

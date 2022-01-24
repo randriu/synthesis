@@ -228,6 +228,3 @@ class MdpOptimalityResult(MdpPropertyResult):
         self.improving_assignment = improving_assignment
         self.can_improve = can_improve
 
-    def __str__(self):
-        return ",".join([str(result) for result in self.results])
-
