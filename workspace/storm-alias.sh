@@ -33,6 +33,7 @@ prerequisites-prepare() {
 }
 
 python-environment() {
+    pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
     source $SYNTHESIS_ENV/bin/activate
     pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
@@ -62,7 +63,7 @@ storm-dependencies() {
     sudo apt update
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
     sudo apt -y install texlive-latex-extra
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip virtualenv
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
 

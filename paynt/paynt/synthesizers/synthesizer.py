@@ -29,6 +29,7 @@ class Synthesizer:
         pass
 
     def run(self):
+        logger.info("Synthesis initiated.")
         assignment = self.synthesize(self.sketch.design_space)
         # double-check assignment
         if assignment is not None:
@@ -404,7 +405,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         # encode family
         family.z3_initialize()
-        
+
         # AR loop
         satisfying_assignment = None
         families = [family]

@@ -37,6 +37,11 @@ class Hole:
     def assume_options(self, options):
         self.options = options
 
+    @property
+    def is_unrefined(self):
+        # return False
+        return len(self.options) == len(self.option_labels)
+
 
 class Holes(list):
     ''' List of holes. '''
@@ -258,7 +263,8 @@ class DesignSpace(Holes):
                 option = assignment[hole_index].options[0]
                 counterexample_clauses.append(DesignSpace.solver_clauses[hole_index][option])
             else:
-                counterexample_clauses.append(self.hole_clauses[hole_index])
+                if not self[hole_index].is_unrefined:
+                    counterexample_clauses.append(self.hole_clauses[hole_index])
                 pruning_estimate *= self[hole_index].size
 
         if DesignSpace.use_storm:

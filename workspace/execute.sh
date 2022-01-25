@@ -88,7 +88,7 @@ function run() {
     # model="dice/5"
 
     model="pomdp/maze/concise"
-    # model="pomdp/maze/2"
+    model="pomdp/maze/2"
     
     # model="pomdp/drone"
     # model="pomdp/crypt/4"
@@ -116,7 +116,7 @@ function run() {
     ## cav ##
     # model="cav/grid"
     # model="cav/dpm"
-    model="cav/pole"
+    # model="cav/pole"
     # model="herman/5"
 
     # model="mdp"
