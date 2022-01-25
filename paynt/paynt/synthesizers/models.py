@@ -69,7 +69,7 @@ class MarkovChain:
     def model_check_formula(self, formula):
         result = stormpy.model_checking(
             self.model, formula, only_initial_states=False,
-            extract_scheduler=(not self.is_dtmc), # error here?
+            extract_scheduler=(not self.is_dtmc),
             # extract_scheduler=True,
             environment=self.environment
         )
@@ -190,7 +190,7 @@ class MDP(MarkovChain):
         # LB < OPT
         # check if LB is tight
         if self.is_dtmc:
-            assignment = [hole.options for hole in self.design_space]
+            assignment = [[hole.options[0]] for hole in self.design_space]
             consistent = True
         else:
             assignment,consistent = self.quotient_container.scheduler_consistent(self, primary.result.scheduler)

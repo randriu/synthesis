@@ -1,12 +1,92 @@
 grid-avoid [4, sl=0]
 
--- k=3
+optimality objective: Pmax=? [!("bad") U "goal"] [eps = 0]
+
+note: hybrid > ar
+
+-- k=4
+
+number of holes: 20, family size: 1099511627776, super quotient: 68 states / 944 actions
+
+method: AR, synthesis time: 8.35 s
+AR stats: iterations: 10113, avg MDP size: 65
+
+method: hybrid, synthesis time: 3.44 s
+AR stats: iterations: 352, avg MDP size: 65
+CEGIS stats: iterations: 1753, avg DTMC size: 32
+
+optimal: 0.928571
+
+--------------------------------------------------------------------------------
+grid-avoid [4, sl=0.1]
 
 optimality objective: Pmax=? [!("bad") U "goal"] [eps = 0]
 
-method: hybrid, synthesis time: 0.88 s
-number of holes: 15, family size: 34012224, super quotient: 51 states / 531 actions
-AR stats: iterations: 149, avg MDP size: 49
-CEGIS stats: iterations: 603, avg DTMC size: 31
+-- k=3
 
-optimal: 0.928571
+number of holes: 15, family size: 34012224, super quotient: 51 states / 531 actions
+
+method: AR, synthesis time: 0.4 s
+AR stats: iterations: 652, avg MDP size: 49
+
+method: hybrid, synthesis time: 3.45 s
+AR stats: iterations: 569, avg MDP size: 49
+CEGIS stats: iterations: 2059, avg DTMC size: 38
+
+-- k=4
+
+note: AR failure (undefined scheduler choice)
+
+--------------------------------------------------------------------------------
+
+grid-simple [sl=0.3]
+
+optimality objective: R[exp]{"steps"}min=? [F "goal"] [eps = 0]
+
+note:
+    for k=2, we obtain the best policy within 0s, outperforfing belief-based approach
+    hybrid is slower since MDPs/DMTCs are small, but the design space is large
+
+-- k=2
+
+number of holes: 8, family size: 1024, super quotient: 34 states / 248 actions
+
+method: hybrid, synthesis time: 0.06 s
+AR stats: iterations: 15, avg MDP size: 33
+CEGIS stats: iterations: 53, avg DTMC size: 30
+
+-- k=4
+
+number of holes: 16, family size: 4294967296, super quotient: 68 states / 992 actions
+
+method: AR, synthesis time: 6.01 s
+AR stats: iterations: 5462, avg MDP size: 65
+
+method: hybrid, synthesis time: 54.42 s
+AR stats: iterations: 4648, avg MDP size: 65
+CEGIS stats: iterations: 13212, avg DTMC size: 42
+
+--------------------------------------------------------------------------------
+
+refuel [6]
+
+optimality objective: Pmax=? ["notbad" U "goal"] [eps = 0]
+
+-- k=1
+
+number of holes: 26, family size: 1410554953728, super quotient: 208 states / 565 actions
+optimal: 0.350026
+
+method: AR, synthesis time: 7.85 s
+AR stats: iterations: 8013, avg MDP size: 171
+
+method: hybrid, synthesis time: 12.99 s
+AR stats: iterations: 1261, avg MDP size: 189
+CEGIS stats: iterations: 5592, avg DTMC size: 38
+
+
+--------------------------------------------------------------------------------
+
+maze2 [0.1]
+
+note: dtmc model checking convergence?

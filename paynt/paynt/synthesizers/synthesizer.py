@@ -107,6 +107,7 @@ class SynthesizerAR(Synthesizer):
                 if res.optimality_result.optimum is not None:
                     # double-check the assignment and update optimum
                     satisfying_assignment = res.optimality_result.improving_assignment
+                    assert satisfying_assignment.size == 1
                     dtmc = self.sketch.quotient.build_chain(satisfying_assignment)
                     opt_result = dtmc.model_check_property(self.sketch.specification.optimality)
                     self.sketch.specification.optimality.update_optimum(opt_result.value)

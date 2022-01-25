@@ -304,6 +304,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
     def __init__(self, *args):
         super().__init__(*args)
+
         
         # quotient POMDP stuff
         self.pomdp = None
@@ -443,14 +444,19 @@ class POMDPQuotientContainer(QuotientContainer):
 
         self.default_actions = stormpy.BitVector(num_choices, False)
         
+        row_action_hole = list(pm.row_action_hole)
+        row_memory_hole = list(pm.row_memory_hole)
+        row_action_option = list(pm.row_action_option)
+        row_memory_option = list(pm.row_memory_option)
+        num_holes = pm.num_holes
         for row in range(num_choices):
             relevant_holes = {}
-            action_hole = pm.row_action_hole[row]
-            if action_hole != pm.num_holes:
-                relevant_holes[action_hole] = pm.row_action_option[row]
-            memory_hole = pm.row_memory_hole[row]
-            if memory_hole != pm.num_holes:
-                relevant_holes[memory_hole] = pm.row_memory_option[row]
+            action_hole = row_action_hole[row]
+            if action_hole != num_holes:
+                relevant_holes[action_hole] = row_action_option[row]
+            memory_hole = row_memory_hole[row]
+            if memory_hole != num_holes:
+                relevant_holes[memory_hole] = row_memory_option[row]
             if not relevant_holes:
                 self.action_to_hole_options.append({})
                 self.default_actions.set(row)

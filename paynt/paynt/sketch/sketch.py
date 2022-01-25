@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Sketch:
 
     # implicit size for full memory exploration (make as a CL argument?)
-    POMDP_MEM_SIZE = 3
+    POMDP_MEM_SIZE = 2
 
     def __init__(self, sketch_path, properties_path, constant_str):
 
@@ -79,7 +79,9 @@ class Sketch:
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
             self.quotient.pomdp_manager.set_memory_size(Sketch.POMDP_MEM_SIZE)
+            Profiler.start("POMDP unfolding")
             self.quotient.unfold_partial_memory()
+            Profiler.stop()
         else:
             raise TypeError("sketch type is not supported")
 
