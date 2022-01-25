@@ -87,7 +87,7 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    # model="pomdp/maze/concise"
+    model="pomdp/maze/concise"
     # model="pomdp/maze/2"
     
     # model="pomdp/drone"
@@ -101,7 +101,7 @@ function run() {
     # model="pomdp/grid/simple"
     # model="pomdp/grid/simple-mo"
 
-    model="pomdp/grid/refuel"
+    # model="pomdp/grid/refuel"
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"
@@ -116,7 +116,7 @@ function run() {
     ## cav ##
     # model="cav/grid"
     # model="cav/dpm"
-    # model="cav/pole"
+    model="cav/pole"
     # model="herman/5"
 
     # model="mdp"

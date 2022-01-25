@@ -19,6 +19,11 @@
 #include "storm/api/verification.h"
 #include "storm/logic/Bound.h"
 #include "storm/modelchecker/CheckTask.h"
+#include "storm/modelchecker/hints/ExplicitModelCheckerHint.h"
+
+#include "storm/environment/Environment.h"
+#include "storm/environment/solver/SolverEnvironment.h"
+
 
 namespace storm {
     namespace synthesis {
@@ -391,19 +396,37 @@ namespace storm {
             storm::storage::sparse::ModelComponents<ValueType> components(sub_matrix, labeling_subdtmc, reward_models_subdtmc);
             std::shared_ptr<storm::models::sparse::Model<ValueType>> subdtmc = storm::utility::builder::buildModelFromComponents(storm::models::ModelType::Dtmc, std::move(components));
             // std::cout << "[storm] sub-dtmc has " << subdtmc->getNumberOfStates() << " states" << std::endl;
+
             
-            // Model check
+            // Construct MC task
             bool onlyInitialStatesRelevant = false;
             storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> task(*(this->formula_modified[index]), onlyInitialStatesRelevant);
-            std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(subdtmc, task);
-            storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& result = result_ptr->asExplicitQuantitativeCheckResult<ValueType>();
+            if(this->hint_result != NULL) {
+                // Add hints from previous wave
+                storm::modelchecker::ExplicitModelCheckerHint<ValueType> hint;
+                hint.setComputeOnlyMaybeStates(false);
+                hint.setResultHint(boost::make_optional(this->hint_result->asExplicitQuantitativeCheckResult<ValueType>().getValueVector()));
+                task.setHint(std::make_shared<storm::modelchecker::ExplicitModelCheckerHint<ValueType>>(hint));
+            }
+            storm::Environment env;
+            // storm::SolverEnvironment & solver = env.solver();
+            // std::cout << solver.getLinearEquationSolverType() << std::endl;
+            // std::cout << solver.getPrecisionOfLinearEquationSolver() << std::endl;
+
+
+            // Model check
+            // std::unique_ptr<storm::modelchecker::CheckResult> result_ptr = storm::api::verifyWithSparseEngine<ValueType>(subdtmc, task);
+            // storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& result = result_ptr->asExplicitQuantitativeCheckResult<ValueType>();
+            this->timer_model_check.start();
+            this->hint_result = storm::api::verifyWithSparseEngine<ValueType>(env, subdtmc, task);
+            this->timer_model_check.stop();
+            storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& result = this->hint_result->asExplicitQuantitativeCheckResult<ValueType>();
             bool satisfied;
             if(this->formula_safety[index]) {
                 satisfied = result[initial_state] < formula_bound;
             } else {
                 satisfied = result[initial_state] > formula_bound;
             }
-            // std::cout << "[storm] mc result: " << result[initial_state] << " vs " << formula_bound << std::endl;
 
             return satisfied;
         }
@@ -415,6 +438,10 @@ namespace storm {
             std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds,
             std::vector<StateType> const& mdp_quotient_state_map
             ) {
+            this->timer_conflict.start();
+
+            // Clear hint result
+            this->hint_result = NULL;
             
             // Get DTMC info
             StateType dtmc_states = this->dtmc->getNumberOfStates();
@@ -459,9 +486,19 @@ namespace storm {
                     critical_holes.push_back(hole);
                 }
             }
+            this->timer_conflict.stop();
 
             return critical_holes;
         }
+
+        template <typename ValueType, typename StateType>
+        void CounterexampleGenerator<ValueType,StateType>::printProfiling() {
+            std::cout << "[s] conflict: " << this->timer_conflict << std::endl;
+            std::cout << "[s]     model checking: " << this->timer_model_check << std::endl;
+        }
+        
+
+
 
          // Explicitly instantiate functions and classes.
         template class CounterexampleGenerator<double, uint_fast64_t>;

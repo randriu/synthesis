@@ -69,6 +69,8 @@ namespace storm {
                 std::vector<StateType> const& mdp_quotient_state_map
                 );
 
+            void printProfiling();
+
         protected:
 
             /** Identify states of an MDP having some label. */
@@ -149,6 +151,13 @@ namespace storm {
             std::vector<uint_fast64_t> hole_wave;
             // For each wave, a set of states that were expanded.
             std::vector<std::vector<StateType>> wave_states;
+
+            // Hint for future model checking.
+            std::unique_ptr<storm::modelchecker::CheckResult> hint_result;
+
+            // Profiling
+            storm::utility::Stopwatch timer_conflict;
+            storm::utility::Stopwatch timer_model_check;
 
         };
 

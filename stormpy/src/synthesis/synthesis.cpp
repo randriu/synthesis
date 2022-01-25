@@ -51,7 +51,13 @@ void define_synthesis(py::module& m) {
             &storm::synthesis::CounterexampleGenerator<>::constructConflict,
             "Construct a conflict to a prepared DTMC wrt a single formula.",
             py::arg("formula_index"), py::arg("formula_bound"), py::arg("mdp_bounds"), py::arg("mdp_quotient_state_map")
-        );
+            )
+        .def(
+            "print_profiling",
+            &storm::synthesis::CounterexampleGenerator<>::printProfiling,
+            "Print profiling stats."
+            )
+        
         /*.def_property_readonly(
             "stats",
             [](storm::synthesis::CounterexampleGenerator<> & counterexample) {
@@ -59,6 +65,7 @@ void define_synthesis(py::module& m) {
             },
             "Read stats."
         );*/
+        ;
 
     m.def("model_check_with_hint", &modelCheckWithHint<double>, "Perform model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment"), py::arg("hint_values"));
     

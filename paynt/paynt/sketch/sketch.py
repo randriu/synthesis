@@ -21,8 +21,7 @@ class Sketch:
     def __init__(self, sketch_path, properties_path, constant_str):
 
         Profiler.initialize()
-        Profiler.start("sketch parsing")
-
+        
         self.explicit_model = None
         self.prism = None
         self.hole_expressions = None
@@ -70,7 +69,6 @@ class Sketch:
         MarkovChain.initialize(self.specification.stormpy_formulae())
         
         logger.info(f"Initializing the quotient ...")
-        Profiler.start("quotient construction")
 
         if self.is_dtmc:
             self.quotient = DTMCQuotientContainer(self)
@@ -86,7 +84,6 @@ class Sketch:
             raise TypeError("sketch type is not supported")
 
         logger.info(f"Sketch parsing complete.")
-        Profiler.stop()
 
 
     @property

@@ -24,20 +24,16 @@ class MarkovChain:
     
         # model checking environment
         cls.environment = stormpy.Environment()
-        env = cls.environment.solver_environment.minmax_solver_environment
-        env.precision = stormpy.Rational(cls.precision)
-        cls.set_solver_method(is_dtmc=False)
+        
+        se = cls.environment.solver_environment
 
-    @classmethod
-    def set_solver_method(cls, is_dtmc):
-        if is_dtmc:
-            cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        else:
-            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-            cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
-            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
-            # cls.environment.solver_environment.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
+        se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
+        se.minmax_solver_environment.precision = stormpy.Rational(cls.precision)
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     def __init__(self, model, quotient_state_map = None, quotient_choice_map = None):
         if model.labeling.contains_label("overlap_guards"):
@@ -87,8 +83,6 @@ class MarkovChain:
         return result
 
     def model_check_property(self, prop, alt = False):
-        self.set_solver_method(self.is_dtmc)
-        
         # get hint
         hint = None
         if self.analysis_hints is not None and MarkovChain.use_hints:

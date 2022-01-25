@@ -2,6 +2,8 @@ import math
 import itertools
 import z3
 
+import stormpy.synthesis
+
 from ..profiler import Profiler
 
 class Hole:
@@ -110,6 +112,15 @@ class DesignSpace(Holes):
     solver = None
     # for each hole, a corresponding solver variable
     solver_vars = None
+    # for each hole, a list of equalities [h==opt1,h==opt2,...]
+    solver_clauses = None
+
+    # TODO
+    # use_storm = False
+    use_storm = True
+
+    # TODO
+    solver_implicit_clauses = None
 
     def __init__(self, holes = []):
         super().__init__(holes.copy())
@@ -154,32 +165,43 @@ class DesignSpace(Holes):
         ds.property_indices = self.property_indices.copy()
         return ds
 
-    def encode(self):
-        ''' Encode this design space. '''
-        Profiler.start("holes.py::encode")
-        self.hole_clauses = []
-        for hole_index,hole in enumerate(self):
-            hole_var = DesignSpace.solver_vars[hole_index]
-            clauses = z3.Or(
-                [hole_var == option for option in hole.options]
-            )
-            self.hole_clauses.append(clauses)
-        self.encoding = z3.And(self.hole_clauses)
-        Profiler.resume()
-
     def z3_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
-        DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
+
+        DesignSpace.solver_clauses = []
+        if DesignSpace.use_storm:
+            expression_manager = stormpy.storage.ExpressionManager()
+            DesignSpace.solver_vars = [expression_manager.create_integer_variable(str(hole_index)) for hole_index in self.hole_indices]
+            for hole_index,hole in enumerate(self):
+                var = DesignSpace.solver_vars[hole_index].get_expression()
+                clauses = [stormpy.storage.Expression.Eq(var,expression_manager.create_integer(option)) for option in hole.options]
+                DesignSpace.solver_clauses.append(clauses)
+            DesignSpace.solver = stormpy.utility.Z3SmtSolver(expression_manager)
+
+        else:
+            DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
+            for hole_index,hole in enumerate(self):
+                var = DesignSpace.solver_vars[hole_index]
+                clauses = [var == option for option in hole.options]
+                DesignSpace.solver_clauses.append(clauses)
+            DesignSpace.solver = z3.Solver()
         
-        DesignSpace.solver = z3.Solver()
-        self.encode()
-        DesignSpace.solver.add(self.encoding)
         
-    def z3_encode(self):
-        if self.encoding is not None:
-            return
-        self.encode()
-        
+    def encode(self):
+        ''' Encode this design space. '''
+        self.hole_clauses = []
+        for hole_index,hole in enumerate(self):
+            all_clauses = DesignSpace.solver_clauses[hole_index]
+            clauses = [all_clauses[option] for option in hole.options]
+            if DesignSpace.use_storm:
+                or_clause = stormpy.storage.Expression.Disjunction(clauses)
+            else:
+                or_clause = z3.Or(clauses)
+            self.hole_clauses.append(or_clause)
+        if DesignSpace.use_storm:
+            self.encoding = stormpy.storage.Expression.Conjunction(self.hole_clauses)
+        else:
+            self.encoding = z3.And(self.hole_clauses)
 
     def pick_assignment(self):
         '''
@@ -187,26 +209,36 @@ class DesignSpace(Holes):
         :return None if no instance remains
         '''
         # get satisfiable assignment within this design space
-        Profiler.start("p_a: z3 check")
-        solver_result = DesignSpace.solver.check(self.encoding)
-        Profiler.resume()
-        if solver_result != z3.sat:
-            # no further instances
-            return None
-
-        # construct the corresponding singleton
-        Profiler.start("p_a: z3 model")
-        sat_model = DesignSpace.solver.model()
-        Profiler.start("p_a: loop")
-        hole_options = []
-        for hole_index,hole, in enumerate(self):
-            var = DesignSpace.solver_vars[hole_index]
-            option = sat_model[var].as_long()
-            hole_options.append([option])
-        Profiler.resume()
-
-
-        Profiler.start("p_a: assignment construction")
+        if DesignSpace.use_storm:
+            Profiler.start("    z3 check")
+            solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
+            Profiler.resume()
+            if solver_result == stormpy.utility.SmtCheckResult.Unsat:
+                return None
+            Profiler.start("    z3 model")
+            solver_model = DesignSpace.solver.model
+            hole_options = []
+            for hole_index,hole, in enumerate(self):
+                var = DesignSpace.solver_vars[hole_index]
+                option = solver_model.get_integer_value(var)
+                hole_options.append([option])
+            Profiler.resume()
+        else:
+            Profiler.start("    z3 check")
+            solver_result = DesignSpace.solver.check(self.encoding)
+            Profiler.resume()
+            if solver_result == z3.unsat:
+                return None
+            Profiler.start("    z3 model")
+            sat_model = DesignSpace.solver.model()
+            hole_options = []
+            for hole_index,hole, in enumerate(self):
+                var = DesignSpace.solver_vars[hole_index]
+                option = sat_model[var].as_long()
+                hole_options.append([option])
+            Profiler.resume()
+        
+        Profiler.start("    assignment construction")
         assignment = self.copy()
         assignment.assume_options(hole_options)
         Profiler.resume()
@@ -223,20 +255,18 @@ class DesignSpace(Holes):
         counterexample_clauses = []
         for hole_index,var in enumerate(DesignSpace.solver_vars):
             if hole_index in conflict:
-                Profiler.start("ea: in conflict")
-                counterexample_clauses.append((var == assignment[hole_index].options[0]))
-                Profiler.resume()
+                option = assignment[hole_index].options[0]
+                counterexample_clauses.append(DesignSpace.solver_clauses[hole_index][option])
             else:
-                Profiler.start("ea: not in conflict")
                 counterexample_clauses.append(self.hole_clauses[hole_index])
-                Profiler.resume()
                 pruning_estimate *= self[hole_index].size
-        Profiler.start("ea: not")
-        counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
-        Profiler.resume()
-        Profiler.start("ea: add")
+
+        if DesignSpace.use_storm:
+            conflict_encoding = stormpy.storage.Expression.Conjunction(counterexample_clauses)
+            counterexample_encoding = stormpy.storage.Expression.Not(conflict_encoding)
+        else:
+            counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
         DesignSpace.solver.add(counterexample_encoding)
-        Profiler.resume()
         return pruning_estimate
 
 
