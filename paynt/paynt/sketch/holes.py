@@ -190,10 +190,14 @@ class DesignSpace(Holes):
                 clauses = [var == option for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
             DesignSpace.solver = z3.Solver()
-        
+
+    @property
+    def encoded(self):
+        return self.encoding is not None
         
     def encode(self):
         ''' Encode this design space. '''
+        Profiler.start("encode")
         self.hole_clauses = []
         for hole_index,hole in enumerate(self):
             all_clauses = DesignSpace.solver_clauses[hole_index]
@@ -207,6 +211,7 @@ class DesignSpace(Holes):
             self.encoding = stormpy.storage.Expression.Conjunction(self.hole_clauses)
         else:
             self.encoding = z3.And(self.hole_clauses)
+        Profiler.resume()
 
     def pick_assignment(self):
         '''
@@ -214,11 +219,16 @@ class DesignSpace(Holes):
         :return None if no instance remains
         '''
         # get satisfiable assignment within this design space
+        if not self.encoded:
+            self.encode()
+        
+        Profiler.start("pick_assignment")
         if DesignSpace.use_storm:
             Profiler.start("    z3 check")
             solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
             Profiler.resume()
             if solver_result == stormpy.utility.SmtCheckResult.Unsat:
+                Profiler.resume()
                 return None
             Profiler.start("    z3 model")
             solver_model = DesignSpace.solver.model
@@ -233,6 +243,7 @@ class DesignSpace(Holes):
             solver_result = DesignSpace.solver.check(self.encoding)
             Profiler.resume()
             if solver_result == z3.unsat:
+                Profiler.resume()
                 return None
             Profiler.start("    z3 model")
             sat_model = DesignSpace.solver.model()
@@ -246,6 +257,8 @@ class DesignSpace(Holes):
         Profiler.start("    assignment construction")
         assignment = self.copy()
         assignment.assume_options(hole_options)
+        Profiler.resume()
+
         Profiler.resume()
         return assignment
 

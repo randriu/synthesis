@@ -49,7 +49,6 @@ class Synthesizer1By1(Synthesizer):
 
     def synthesize(self, family):
 
-        self.stat.family(family)
         self.stat.start()
 
         satisfying_assignment = None
@@ -106,8 +105,11 @@ class SynthesizerAR(Synthesizer):
             else:
                 can_improve = res.optimality_result.can_improve
                 if res.optimality_result.optimum is not None:
-                    self.sketch.specification.optimality.update_optimum(res.optimality_result.optimum)
+                    # double-check the assignment and update optimum
                     satisfying_assignment = res.optimality_result.improving_assignment
+                    dtmc = self.sketch.quotient.build_chain(satisfying_assignment)
+                    opt_result = dtmc.model_check_property(self.sketch.specification.optimality)
+                    self.sketch.specification.optimality.update_optimum(opt_result.value)
         
         if not can_improve:
             self.stat.pruned(family.size)
@@ -164,7 +166,6 @@ class SynthesizerAR(Synthesizer):
 
     def synthesize(self, family):
 
-        self.stat.family(family)
         self.stat.start()
 
         satisfying_assignment = None
@@ -265,6 +266,8 @@ class SynthesizerCEGIS(Synthesizer):
 
     def synthesize(self, family):
 
+        self.stat.start()
+
         # assert that no reward formula is maximizing
         msg = "Cannot use CEGIS for maximizing reward formulae -- consider using AR or hybrid methods."
         for c in self.sketch.specification.constraints:
@@ -272,8 +275,6 @@ class SynthesizerCEGIS(Synthesizer):
         if self.sketch.specification.has_optimality:
             c = self.sketch.specification.optimality
             assert not (c.reward and not c.minimizing), msg
-
-        self.stat.start()
 
         # map mdp states to hole indices
         quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
@@ -286,12 +287,10 @@ class SynthesizerCEGIS(Synthesizer):
 
         # encode family
         family.z3_initialize()
-        family.encode()
         
         # CEGIS loop
         satisfying_assignment = None
         assignment = family.pick_assignment()
-
         while assignment is not None:
             
             sat, improving, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
@@ -390,7 +389,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
     def synthesize(self, family):
 
-        self.stat.family(family)
         self.stat.start()
 
         self.stage_control = StageControl(family.size)
@@ -400,7 +398,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
-
+        
         Profiler.start("synthesis loop")
 
         # encode family
@@ -427,12 +425,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
             # undecided: initiate CEGIS
             self.stage_control.start_cegis()
-            Profiler.start("encode")
-            family.encode()
-            Profiler.resume()
-            Profiler.start("pick_assignment")
             assignment = family.pick_assignment()
-            Profiler.resume()
             sat = False
             while assignment is not None:
                 
@@ -446,9 +439,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                     break
                 
                 # cegis still has time: check next assignment
-                Profiler.start("pick_assignment")
                 assignment = family.pick_assignment()
-                Profiler.resume()
 
             if sat:
                 break
@@ -458,7 +449,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 continue
         
             # CEGIS could not process the family: split
-            self.stat.hybrid(self.stage_control.cegis_efficiency)
             subfamilies = self.split_family(family)
             families = families + subfamilies
 

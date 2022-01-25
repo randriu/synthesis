@@ -21,9 +21,12 @@ class Statistic:
     """General computation stats."""
 
     def __init__(self, sketch, method_name):
-        self.design_space = sketch.design_space
         
+        self.design_space = sketch.design_space
         self.specification = sketch.specification
+
+        self.super_quotient_states = sketch.quotient.quotient_mdp.nr_states
+        self.super_quotient_actions = sketch.quotient.quotient_mdp.nr_choices
 
         self.method_name = method_name
         
@@ -49,10 +52,6 @@ class Statistic:
 
         self.status_period = 5
         self.status_time = 5
-
-    def family(self,family):
-        self.design_space = family
-        self.remaining = family.size
 
     def start(self):
         self.timer.start()
@@ -131,27 +130,25 @@ class Statistic:
         return summary
 
     def get_long_summary(self):
-        formulae = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(self.specification.constraints)]) + "\n"
-        formulae += f"optimality objective: {str(self.specification.optimality)}\n" if self.specification.has_optimality else ""
+        specification = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(self.specification.constraints)]) + "\n"
+        specification += f"optimality objective: {str(self.specification.optimality)}\n" if self.specification.has_optimality else ""
 
-        design_space = f"number of holes: {self.design_space.num_holes}, family size: {self.design_space.size}"
+        design_space = f"number of holes: {self.design_space.num_holes}, family size: {self.design_space.size}, super quotient: {self.super_quotient_states} states / {self.super_quotient_actions} actions"
         timing = f"method: {self.method_name}, synthesis time: {round(self.timer.time, 2)} s"
 
-        mdp_stats = f"super MDP size: {self.super_mdp_size}, average MDP size: {round(self.avg_size_mdp)}, " \
-                    f"iterations: {self.iterations_mdp}"
-        dtmc_stats = f"average DTMC size: {round(self.avg_size_dtmc)}, " \
-                     f"DTMC checks: {self.checks_dtmc}, iterations: {self.iterations_dtmc}"
         family_stats = ""
+        ar_stats = f"AR stats: iterations: {self.iterations_mdp}, avg MDP size: {round(self.avg_size_mdp)}" 
+        cegis_stats = f"CEGIS stats: iterations: {self.iterations_dtmc}, avg DTMC size: {round(self.avg_size_dtmc)}"
         if self.iterations_mdp > 0:
-            family_stats += f"{mdp_stats}\n"
+            family_stats += f"{ar_stats}\n"
         if self.iterations_dtmc > 0:
-            family_stats += f"{dtmc_stats}\n"
+            family_stats += f"{cegis_stats}\n"
 
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimum is None else f"optimal: {round(self.optimum, 6)}"
-        assignment = f"hole assignment: {str(self.assignment)}\n" if self.assignment else ""
-        # assignment = ""
+        # assignment = f"hole assignment: {str(self.assignment)}\n" if self.assignment else ""
+        assignment = ""
 
-        summary = f"{formulae}\n{timing}\n{design_space}\n" \
+        summary = f"{specification}\n{timing}\n{design_space}\n" \
                   f"{family_stats}\n{result}\n{assignment}"
         return summary

@@ -87,8 +87,8 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    model="pomdp/maze/concise"
-    model="pomdp/maze/2"
+    # model="pomdp/maze/concise"
+    # model="pomdp/maze/2"
     
     # model="pomdp/drone"
     # model="pomdp/crypt/4"
@@ -97,7 +97,7 @@ function run() {
     # model="pomdp/nrp"
     # model="pomdp/samplerocks"
 
-    # model="pomdp/grid/avoid"
+    model="pomdp/grid/avoid"
     # model="pomdp/grid/simple"
     # model="pomdp/grid/simple-mo"
 
@@ -126,9 +126,9 @@ function run() {
     # model=$m
 
     # onebyone $model
-    # ar $model
+    ar $model
     # cegis $model
-    hybrid $model
+    # hybrid $model
 }
 
 # --- execution ----------------------------------------------------------------

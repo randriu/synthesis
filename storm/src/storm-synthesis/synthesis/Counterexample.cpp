@@ -4,7 +4,9 @@
 
 #include <queue>
 #include <deque>
+
 #include "storm/storage/BitVector.h"
+#include "storm/exceptions/UnexpectedException.h"
 
 #include "storm/storage/sparse/JaniChoiceOrigins.h"
 #include "storm/storage/sparse/StateValuations.h"
@@ -23,6 +25,7 @@
 
 #include "storm/environment/Environment.h"
 #include "storm/environment/solver/SolverEnvironment.h"
+
 
 
 namespace storm {
@@ -70,6 +73,7 @@ namespace storm {
                 if(!is_reward) {
                     this->formula_reward_name.push_back("");
                 } else {
+                    STORM_LOG_THROW(formula->asRewardOperatorFormula().hasRewardModelName(), storm::exceptions::InvalidArgumentException, "Name of the reward model must be specified.");
                     this->formula_reward_name.push_back(formula->asRewardOperatorFormula().getRewardModelName());
                 }
 

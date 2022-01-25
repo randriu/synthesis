@@ -1,0 +1,12 @@
+grid-avoid [4, sl=0]
+
+-- k=3
+
+optimality objective: Pmax=? [!("bad") U "goal"] [eps = 0]
+
+method: hybrid, synthesis time: 0.88 s
+number of holes: 15, family size: 34012224, super quotient: 51 states / 531 actions
+AR stats: iterations: 149, avg MDP size: 49
+CEGIS stats: iterations: 603, avg DTMC size: 31
+
+optimal: 0.928571

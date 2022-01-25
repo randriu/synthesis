@@ -30,7 +30,7 @@ endobservables
 // o=5 - east and west walls (s5, s6, s7, s8, s9 and s10)
 // o=6 - east, west and south walls (s11 and s12)
 // o=7 - the target (s13)
-const double sl = 0.1;
+const double sl;
 module maze
 
 	s : [-1..13];
@@ -124,7 +124,7 @@ module maze
 endmodule
 
 // reward structure (number of steps to reach the target)
-rewards "steps"
+rewards
 
 	[east] true : 1;
 	[west] true : 1;
