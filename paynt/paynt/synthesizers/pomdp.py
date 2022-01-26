@@ -409,8 +409,8 @@ class SynthesizerPOMDP():
     def run(self):
 
         # self.strategy()
-        self.strategy_2()
-        # self.strategy_3()
+        # self.strategy_2()
+        self.strategy_3()
         # self.strategy_5()
 
 

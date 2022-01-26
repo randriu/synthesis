@@ -206,12 +206,12 @@ class QuotientContainer:
         hole_assignments = self.scheduler_selection(mdp, scheduler)
         # print(hole_assignments)
 
-        inconsistent = self.most_inconsistent_holes(hole_assignments)
-        hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
-        splitters = self.holes_with_max_score(hole_sizes)
+        # inconsistent = self.most_inconsistent_holes(hole_assignments)
+        # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
+        # splitters = self.holes_with_max_score(hole_sizes)
 
-        # hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result)
-        # splitters = self.holes_with_max_score(inconsistent_differences)        
+        hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result)
+        splitters = self.holes_with_max_score(inconsistent_differences)        
 
         splitter = splitters[0]
         
