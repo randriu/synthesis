@@ -78,6 +78,7 @@ class QuotientContainer:
         return DTMC(model,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):
+        Profiler.start("quotient::scheduler_selection")
         assert scheduler.memoryless and scheduler.deterministic
         
         selection = [set() for hole_index in mdp.design_space.hole_indices]
@@ -85,22 +86,21 @@ class QuotientContainer:
         for state in range(mdp.states):
             offset = scheduler.get_choice(state).get_deterministic_choice()
             choice = mdp.model.get_choice_index(state,offset)
-            action = mdp.quotient_choice_map[choice]
-
-            hole_option = self.action_to_hole_options[action]
+            global_choice = mdp.quotient_choice_map[choice]
+            hole_option = self.action_to_hole_options[global_choice]
             for hole_index,option in hole_option.items():
                 selection[hole_index].add(option)
 
         selection = [list(options) for options in selection]
+        Profiler.resume()
         return selection
 
-    def scheduler_selection_difference(self, mdp, result):
+    def scheduler_selection_difference(self, mdp, result, selection):
         # for each choice, compute a scalar product of choice probabilities and destination results
         tm = mdp.model.transition_matrix
         choice_value = stormpy.synthesis.multiply_with_vector(tm,result.get_values())
         
-        # get scheduler selection, filter inconsistent assignments
-        selection = self.scheduler_selection(mdp, result.scheduler)        
+        # get scheduler selection, filter inconsistent assignments        
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options)>1}
 
         # for each hole, compute its difference sum and a number of affected states
@@ -170,15 +170,15 @@ class QuotientContainer:
                 selection[hole_index] = [mdp.design_space[hole_index].options[0]]
         return selection,consistent
 
-    
-
     def suboptions_half(self, mdp, splitter):
+        ''' Split options of a splitter into to halves. '''
         options = mdp.design_space[splitter].options
         half = len(options) // 2
         suboptions = [options[:half], options[half:]]
         return suboptions
 
     def suboptions_unique(self, mdp, splitter, used_options):
+        ''' Distribute used options of a splitter into different suboptions. '''
         assert len(used_options) > 1
         suboptions = [[option] for option in used_options]
         index = 0
@@ -188,6 +188,17 @@ class QuotientContainer:
             suboptions[index].append(option)
             index = (index + 1) % len(suboptions)
         return suboptions
+
+    def suboptions_enumerate(self, mdp, splitter, used_options):
+        assert len(used_options) > 1
+        suboptions = [[option] for option in used_options]
+        other_options = [option for option in mdp.design_space[splitter].options if option not in used_options]
+        if not other_options:
+            return suboptions
+        return suboptions # [1],[4]
+        # return [other_options] # [2,3]
+        # return suboptions + [other_options] # [1],[4],[2,3]
+        # return [other_options] + suboptions # [2,3],[1],[4]
 
     def holes_with_max_score(self, hole_score):
         max_score = max(hole_score)
@@ -199,35 +210,43 @@ class QuotientContainer:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    def split(self, mdp, result):
+    def split(self, mdp):
         assert not mdp.is_dtmc
+        Profiler.start("quotient::split")
 
-        scheduler = result.scheduler
-        hole_assignments = self.scheduler_selection(mdp, scheduler)
-        # print(hole_assignments)
-
+        # split family wrt last undecided result
+        assert mdp.schedulers is not None
+        result,hole_assignments = mdp.schedulers[next(reversed(mdp.schedulers))]
+        
         # inconsistent = self.most_inconsistent_holes(hole_assignments)
         # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
         # splitters = self.holes_with_max_score(hole_sizes)
 
-        hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result)
+        Profiler.start("    difference")
+        hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result, hole_assignments)
+        Profiler.resume()
         splitters = self.holes_with_max_score(inconsistent_differences)        
 
         splitter = splitters[0]
         
         # split
-        if len(hole_assignments[splitter]) == 1:
-            suboptions = self.suboptions_half(mdp, splitter)
-        else:
-            suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
-            # print("suboptions: ", suboptions)
+        # if len(hole_assignments[splitter]) == 1:
+        #     suboptions = self.suboptions_half(mdp, splitter)
+        # else:
+        assert len(hole_assignments[splitter]) > 1
+        # suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
+        suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
 
         # construct corresponding design subspaces
+        Profiler.start("    design subspaces")
         design_subspaces = []
         for suboption in suboptions:
             design_subspace = mdp.design_space.copy()
             design_subspace.assume_hole_options(splitter, suboption)
             design_subspaces.append(design_subspace)
+        Profiler.resume()
+
+        Profiler.resume()
         return design_subspaces
 
     def quotient_relevant_holes(self):

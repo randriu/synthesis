@@ -194,13 +194,10 @@ class DesignSpace(Holes):
             
             DesignSpace.solver = pycvc5.Solver()
             DesignSpace.solver.setOption("produce-models", "true")
-            
             # DesignSpace.solver.setLogic("ALL")
             # DesignSpace.solver.setLogic("QF_ALL")
-
             # DesignSpace.solver.setLogic("QF_DT")
             DesignSpace.solver.setLogic("QF_UFDT")
-
             intSort = DesignSpace.solver.getIntegerSort()
             DesignSpace.solver_vars = [DesignSpace.solver.mkConst(intSort, hole.name) for hole in self]
             for hole_index,hole in enumerate(self):

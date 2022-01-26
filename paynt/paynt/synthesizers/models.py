@@ -1,4 +1,6 @@
 import stormpy
+
+from collections import OrderedDict
 # import stormpy.synthes
 from ..sketch.property import *
 
@@ -142,6 +144,7 @@ class MDP(MarkovChain):
         super().__init__(model, quotient_state_map, quotient_choice_map)
         self.design_space = design_space
         self.quotient_container = quotient_container
+        self.schedulers = OrderedDict()
         self.analysis_hints = None
 
     def check_property(self, prop):
@@ -193,7 +196,9 @@ class MDP(MarkovChain):
             assignment = [[hole.options[0]] for hole in self.design_space]
             consistent = True
         else:
-            assignment,consistent = self.quotient_container.scheduler_consistent(self, primary.result.scheduler)
+            result = primary.result
+            assignment,consistent = self.quotient_container.scheduler_consistent(self, result.scheduler)
+            self.schedulers[prop] = (result,assignment)
         if consistent:
             # LB is tight and LB < OPT
             hole_options = self.design_space.copy()

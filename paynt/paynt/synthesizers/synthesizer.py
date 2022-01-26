@@ -149,15 +149,7 @@ class SynthesizerAR(Synthesizer):
         undecided = res.constraints_result.undecided_constraints
         analysis_hints = self.collect_analysis_hints(family)
 
-        # split family wrt last undecided result
-        if res.optimality_result is not None:
-            split_result = res.optimality_result.primary.result
-            # split_result_sec = res.optimality_result.secondary.result
-        else:
-            split_result = res.constraints_result.results[undecided[-1]].primary.result
-            # split_result_sec = res.constraints_result.results[undecided[-1]].secondary.result
-        subfamilies = self.sketch.quotient.split(family.mdp, split_result)
-        # subfamilies = self.sketch.quotient.split_milan(family.mdp, split_result, split_result_sec)
+        subfamilies = self.sketch.quotient.split(family.mdp)
         
         for subfamily in subfamilies:
             subfamily.set_analysis_hints(undecided, analysis_hints)
