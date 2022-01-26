@@ -87,8 +87,8 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    # model="pomdp/maze/concise"
-    model="pomdp/maze/2"
+    model="pomdp/maze/concise"
+    # model="pomdp/maze/2"
     
     # model="pomdp/drone"
     # model="pomdp/crypt/4"
@@ -101,7 +101,7 @@ function run() {
     # model="pomdp/grid/simple"
     # model="pomdp/grid/simple-mo"
 
-    model="pomdp/grid/refuel"
+    # model="pomdp/grid/refuel"
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"
@@ -120,7 +120,6 @@ function run() {
     # model="herman/5"
 
     # model="mdp"
-    model="ctmc"
 
     # ar $model
     hybrid $model

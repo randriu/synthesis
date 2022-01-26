@@ -9,7 +9,6 @@ from ..profiler import Timer,Profiler
 import logging
 logger = logging.getLogger(__name__)
 
-
 class Synthesizer:
 
     def __init__(self, sketch):

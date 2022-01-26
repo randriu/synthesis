@@ -1,6 +1,8 @@
 import math
 import itertools
 import z3
+import pycvc5
+
 
 import stormpy.synthesis
 
@@ -120,12 +122,10 @@ class DesignSpace(Holes):
     # for each hole, a list of equalities [h==opt1,h==opt2,...]
     solver_clauses = None
 
-    # TODO
-    # use_storm = False
-    use_storm = True
-
-    # TODO
-    solver_implicit_clauses = None
+    # SMT solver
+    use_python_z3 = False
+    use_storm_z3 = True
+    use_cvc = False
 
     def __init__(self, holes = []):
         super().__init__(holes.copy())
@@ -174,7 +174,14 @@ class DesignSpace(Holes):
         ''' Use this design space as a baseline for future refinements. '''
 
         DesignSpace.solver_clauses = []
-        if DesignSpace.use_storm:
+        if DesignSpace.use_python_z3:
+            DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
+            for hole_index,hole in enumerate(self):
+                var = DesignSpace.solver_vars[hole_index]
+                clauses = [var == option for option in hole.options]
+                DesignSpace.solver_clauses.append(clauses)
+            DesignSpace.solver = z3.Solver()
+        elif DesignSpace.use_storm_z3:
             expression_manager = stormpy.storage.ExpressionManager()
             DesignSpace.solver_vars = [expression_manager.create_integer_variable(str(hole_index)) for hole_index in self.hole_indices]
             for hole_index,hole in enumerate(self):
@@ -182,14 +189,20 @@ class DesignSpace(Holes):
                 clauses = [stormpy.storage.Expression.Eq(var,expression_manager.create_integer(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
             DesignSpace.solver = stormpy.utility.Z3SmtSolver(expression_manager)
+        elif DesignSpace.use_cvc:
+            solver = pycvc5.Solver()
+            solver.setOption("produce-models", "true")
+            solver.setOption("produce-unsat-cores", "true")
+            solver.setLogic("ALL")
+            intSort = solver.getIntegerSort()
+            a = solver.mkConst(intSort, "a");
+            b = solver.mkConst(intSort, "b");
+            print(dir(pycvc5.Op(solver)))
 
+            exit()
         else:
-            DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
-            for hole_index,hole in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
-                clauses = [var == option for option in hole.options]
-                DesignSpace.solver_clauses.append(clauses)
-            DesignSpace.solver = z3.Solver()
+            pass
+            
 
     @property
     def encoded(self):
@@ -202,12 +215,16 @@ class DesignSpace(Holes):
         for hole_index,hole in enumerate(self):
             all_clauses = DesignSpace.solver_clauses[hole_index]
             clauses = [all_clauses[option] for option in hole.options]
-            if DesignSpace.use_storm:
-                or_clause = stormpy.storage.Expression.Disjunction(clauses)
-            else:
+            if DesignSpace.use_python_z3:
                 or_clause = z3.Or(clauses)
+            elif DesignSpace.use_storm_z3:
+                or_clause = stormpy.storage.Expression.Disjunction(clauses)
+            elif DesignSpace.use_cvc:
+                pass
+            else:
+                pass
             self.hole_clauses.append(or_clause)
-        if DesignSpace.use_storm:
+        if DesignSpace.use_storm_z3:
             self.encoding = stormpy.storage.Expression.Conjunction(self.hole_clauses)
         else:
             self.encoding = z3.And(self.hole_clauses)
@@ -223,22 +240,7 @@ class DesignSpace(Holes):
             self.encode()
         
         Profiler.start("pick_assignment")
-        if DesignSpace.use_storm:
-            Profiler.start("    z3 check")
-            solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
-            Profiler.resume()
-            if solver_result == stormpy.utility.SmtCheckResult.Unsat:
-                Profiler.resume()
-                return None
-            Profiler.start("    z3 model")
-            solver_model = DesignSpace.solver.model
-            hole_options = []
-            for hole_index,hole, in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
-                option = solver_model.get_integer_value(var)
-                hole_options.append([option])
-            Profiler.resume()
-        else:
+        if DesignSpace.use_python_z3:
             Profiler.start("    z3 check")
             solver_result = DesignSpace.solver.check(self.encoding)
             Profiler.resume()
@@ -253,6 +255,25 @@ class DesignSpace(Holes):
                 option = sat_model[var].as_long()
                 hole_options.append([option])
             Profiler.resume()
+        elif DesignSpace.use_storm_z3:
+            Profiler.start("    z3 check")
+            solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
+            Profiler.resume()
+            if solver_result == stormpy.utility.SmtCheckResult.Unsat:
+                Profiler.resume()
+                return None
+            Profiler.start("    z3 model")
+            solver_model = DesignSpace.solver.model
+            hole_options = []
+            for hole_index,hole, in enumerate(self):
+                var = DesignSpace.solver_vars[hole_index]
+                option = solver_model.get_integer_value(var)
+                hole_options.append([option])
+            Profiler.resume()
+        elif DesignSpace.use_cvc:
+            assert False
+        else:
+            pass            
         
         Profiler.start("    assignment construction")
         assignment = self.copy()
@@ -280,11 +301,15 @@ class DesignSpace(Holes):
                     counterexample_clauses.append(self.hole_clauses[hole_index])
                 pruning_estimate *= self[hole_index].size
 
-        if DesignSpace.use_storm:
+        if DesignSpace.use_python_z3:
+            counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
+        elif DesignSpace.use_storm_z3:
             conflict_encoding = stormpy.storage.Expression.Conjunction(counterexample_clauses)
             counterexample_encoding = stormpy.storage.Expression.Not(conflict_encoding)
+        elif DesignSpace.use_cvc:
+            assert False
         else:
-            counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
+            pass
         DesignSpace.solver.add(counterexample_encoding)
         return pruning_estimate
 

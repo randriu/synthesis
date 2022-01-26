@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Sketch:
 
     # implicit size for full memory exploration (make as a CL argument?)
-    POMDP_MEM_SIZE = 2
+    POMDP_MEM_SIZE = 1
 
     def __init__(self, sketch_path, properties_path, constant_str):
 
