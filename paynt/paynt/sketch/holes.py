@@ -142,6 +142,11 @@ class DesignSpace(Holes):
         self.hole_clauses = None
         self.encoding = None
 
+    def copy(self):
+        ds = DesignSpace(super().copy())
+        ds.property_indices = self.property_indices.copy()
+        return ds
+
     def set_analysis_hints(self, property_indices, analysis_hints):
         self.property_indices = property_indices
         self.analysis_hints = analysis_hints
@@ -168,12 +173,7 @@ class DesignSpace(Holes):
             # analysis_hints[prop] = (hint_seco,hint_prim) # swap?
         self.mdp.analysis_hints = analysis_hints
 
-    def copy(self):
-        ds = DesignSpace(super().copy())
-        ds.property_indices = self.property_indices.copy()
-        return ds
-
-    def z3_initialize(self):
+    def sat_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
 
         if "pycvc5" in sys.modules:
@@ -184,7 +184,7 @@ class DesignSpace(Holes):
 
         DesignSpace.solver_clauses = []
         if DesignSpace.use_python_z3:
-            logger.debug("Using Python z3 for SAT solving.")
+            logger.debug("Using Python Z3 for SAT solving.")
             DesignSpace.solver = z3.Solver()
             DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
             for hole_index,hole in enumerate(self):
@@ -192,7 +192,7 @@ class DesignSpace(Holes):
                 clauses = [var == option for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         elif DesignSpace.use_storm_z3:
-            logger.debug("Using Storm z3 for SAT solving.")
+            logger.debug("Using Storm Z3 for SAT solving.")
             expression_manager = stormpy.storage.ExpressionManager()
             DesignSpace.solver = stormpy.utility.Z3SmtSolver(expression_manager)
             DesignSpace.solver_vars = [expression_manager.create_integer_variable(str(hole_index)) for hole_index in self.hole_indices]
@@ -210,13 +210,13 @@ class DesignSpace(Holes):
             # DesignSpace.solver.setLogic("QF_UFDT")
             # DesignSpace.solver.setLogic("QF_UFLIA")
             intSort = DesignSpace.solver.getIntegerSort()
-            DesignSpace.solver_vars = [DesignSpace.solver.mkConst(intSort, hole.name) for hole in self]
+            DesignSpace.solver_vars = [DesignSpace.solver.mkConst(intSort, str(hole_index)) for hole_index in self.hole_indices]
             for hole_index,hole in enumerate(self):
                 var = DesignSpace.solver_vars[hole_index]
                 clauses = [DesignSpace.solver.mkTerm(pycvc5.Kind.Equal, var, DesignSpace.solver.mkInteger(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         else:
-            raise RuntimeError("forgot to specify SAT solver :(")
+            raise RuntimeError("Need to enable at least one SAT solver.")
     
     @property
     def encoded(self):
@@ -229,6 +229,9 @@ class DesignSpace(Holes):
         for hole_index,hole in enumerate(self):
             all_clauses = DesignSpace.solver_clauses[hole_index]
             clauses = [all_clauses[option] for option in hole.options]
+            # if len(clauses) == 1:
+            #     or_clause = clauses[0]
+            # else:
             if DesignSpace.use_python_z3:
                 or_clause = z3.Or(clauses)
             elif DesignSpace.use_storm_z3:
@@ -301,6 +304,7 @@ class DesignSpace(Holes):
             for hole_index,hole, in enumerate(self):
                 var = DesignSpace.solver_vars[hole_index]
                 option = DesignSpace.solver.getValue(var).getIntegerValue()
+                Profiler.resume()
                 hole_options.append([option])
             Profiler.resume()
         else:

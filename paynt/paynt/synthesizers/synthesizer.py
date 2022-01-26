@@ -279,7 +279,7 @@ class SynthesizerCEGIS(Synthesizer):
             quotient_relevant_holes, formulae)
 
         # encode family
-        family.z3_initialize()
+        family.sat_initialize()
         
         # CEGIS loop
         satisfying_assignment = None
@@ -395,7 +395,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         Profiler.start("synthesis loop")
 
         # encode family
-        family.z3_initialize()
+        family.sat_initialize()
 
         # AR loop
         satisfying_assignment = None
