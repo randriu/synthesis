@@ -20,7 +20,7 @@ def safe_division(dividend, divisor):
 class Statistic:
     """General computation stats."""
 
-    def __init__(self, synthesizer):
+    def __init__(self, sketch, synthesizer):
         
         self.synthesizer = synthesizer
 

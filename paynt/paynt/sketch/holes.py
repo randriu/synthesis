@@ -1,13 +1,16 @@
 import math
 import itertools
 
+import sys
+import pycvc5   # comment this import if you don't have CVC5 installed
 import z3
-import pycvc5
-
 
 import stormpy.synthesis
 
 from ..profiler import Profiler
+
+import logging
+logger = logging.getLogger(__name__)
 
 class Hole:
     '''
@@ -126,7 +129,7 @@ class DesignSpace(Holes):
     # SMT solver
     use_python_z3 = False
     use_storm_z3 = False
-    use_cvc = True
+    use_cvc = False
 
     def __init__(self, holes = []):
         super().__init__(holes.copy())
@@ -173,8 +176,15 @@ class DesignSpace(Holes):
     def z3_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
 
+        if "pycvc5" in sys.modules:
+            DesignSpace.use_cvc = True
+        else:
+            DesignSpace.use_python_z3 = False
+            DesignSpace.use_storm_z3 = True
+
         DesignSpace.solver_clauses = []
         if DesignSpace.use_python_z3:
+            logger.debug("Using Python z3 for SAT solving.")
             DesignSpace.solver = z3.Solver()
             DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
             for hole_index,hole in enumerate(self):
@@ -182,6 +192,7 @@ class DesignSpace(Holes):
                 clauses = [var == option for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         elif DesignSpace.use_storm_z3:
+            logger.debug("Using Storm z3 for SAT solving.")
             expression_manager = stormpy.storage.ExpressionManager()
             DesignSpace.solver = stormpy.utility.Z3SmtSolver(expression_manager)
             DesignSpace.solver_vars = [expression_manager.create_integer_variable(str(hole_index)) for hole_index in self.hole_indices]
@@ -190,13 +201,14 @@ class DesignSpace(Holes):
                 clauses = [stormpy.storage.Expression.Eq(var,expression_manager.create_integer(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         elif DesignSpace.use_cvc:
-            
+            logger.debug("Using CVC5 for SAT solving.")
             DesignSpace.solver = pycvc5.Solver()
             DesignSpace.solver.setOption("produce-models", "true")
             # DesignSpace.solver.setLogic("ALL")
             # DesignSpace.solver.setLogic("QF_ALL")
-            # DesignSpace.solver.setLogic("QF_DT")
-            DesignSpace.solver.setLogic("QF_UFDT")
+            DesignSpace.solver.setLogic("QF_DT")
+            # DesignSpace.solver.setLogic("QF_UFDT")
+            # DesignSpace.solver.setLogic("QF_UFLIA")
             intSort = DesignSpace.solver.getIntegerSort()
             DesignSpace.solver_vars = [DesignSpace.solver.mkConst(intSort, hole.name) for hole in self]
             for hole_index,hole in enumerate(self):
@@ -204,7 +216,7 @@ class DesignSpace(Holes):
                 clauses = [DesignSpace.solver.mkTerm(pycvc5.Kind.Equal, var, DesignSpace.solver.mkInteger(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         else:
-            pass
+            raise RuntimeError("forgot to specify SAT solver :(")
     
     @property
     def encoded(self):
@@ -248,13 +260,13 @@ class DesignSpace(Holes):
         
         Profiler.start("pick_assignment")
         if DesignSpace.use_python_z3:
-            Profiler.start("    z3 check")
+            Profiler.start("    SAT check")
             solver_result = DesignSpace.solver.check(self.encoding)
             Profiler.resume()
             if solver_result == z3.unsat:
                 Profiler.resume()
                 return None
-            Profiler.start("    z3 model")
+            Profiler.start("    SAT model")
             sat_model = DesignSpace.solver.model()
             hole_options = []
             for hole_index,hole, in enumerate(self):
@@ -263,13 +275,13 @@ class DesignSpace(Holes):
                 hole_options.append([option])
             Profiler.resume()
         elif DesignSpace.use_storm_z3:
-            Profiler.start("    z3 check")
+            Profiler.start("    SAT check")
             solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
             Profiler.resume()
             if solver_result == stormpy.utility.SmtCheckResult.Unsat:
                 Profiler.resume()
                 return None
-            Profiler.start("    z3 model")
+            Profiler.start("    SAT model")
             solver_model = DesignSpace.solver.model
             hole_options = []
             for hole_index,hole, in enumerate(self):
@@ -278,12 +290,13 @@ class DesignSpace(Holes):
                 hole_options.append([option])
             Profiler.resume()
         elif DesignSpace.use_cvc:
-            Profiler.start("    z3 check")
+            Profiler.start("    SAT check")
             solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
+            Profiler.resume()
             if solver_result.isUnsat():
                 Profiler.resume()
                 return None
-            Profiler.start("    z3 model")
+            Profiler.start("    SAT model")
             hole_options = []
             for hole_index,hole, in enumerate(self):
                 var = DesignSpace.solver_vars[hole_index]

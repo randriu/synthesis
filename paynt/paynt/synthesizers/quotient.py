@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 
 class QuotientContainer:
 
+    # holes with avg choice value difference below this threshold will be considered consistent
+    inconsistency_threshold = 1e-8
+
     def __init__(self, sketch):
         self.sketch = sketch
         
@@ -79,33 +82,42 @@ class QuotientContainer:
         return DTMC(model,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):
+        ''' Get hole options involved in the scheduler selection. '''
         Profiler.start("quotient::scheduler_selection")
+
         assert scheduler.memoryless and scheduler.deterministic
-
+        
         selection = [set() for hole_index in mdp.design_space.hole_indices]
-
         choice_selection = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         for choice in choice_selection:
             global_choice = mdp.quotient_choice_map[choice]
-            hole_option = self.action_to_hole_options[global_choice]
-            for hole_index,option in hole_option.items():
+            choice_options = self.action_to_hole_options[global_choice]
+            for hole_index,option in choice_options.items():
                 selection[hole_index].add(option)
-
         selection = [list(options) for options in selection]
+
         Profiler.resume()
         return selection
 
-    def scheduler_selection_difference(self, mdp, result, selection):
-        # for each choice, compute a scalar product of choice probabilities and destination results
-        tm = mdp.model.transition_matrix
-        choice_value = stormpy.synthesis.multiply_with_vector(tm,result.get_values())
-        
-        # get scheduler selection, filter inconsistent assignments        
-        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options)>1}
+    def scheduler_selection_quantitative(self, mdp, result):
+        '''
+        Get hole options involved in the scheduler selection.
+        Use numeric values to filter spurious inconsistencies.
+        '''
+        Profiler.start("quotient::scheduler_selection_quantitative")
 
+
+        # get qualitative scheduler selection, filter inconsistent assignments        
+        selection = self.scheduler_selection(mdp, result.scheduler)
+        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options)>1}
+        if not inconsistent_assignments:
+            return selection,None
+        
+        choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix,result.get_values())
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
+        tm = mdp.model.transition_matrix
 
         for state in range(mdp.states):
 
@@ -114,10 +126,6 @@ class QuotientContainer:
             hole_max = {hole_index: None for hole_index in inconsistent_assignments}
 
             for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                
-                value = choice_value[choice]
-                if value == math.inf:
-                    continue
                 
                 choice_global = mdp.quotient_choice_map[choice]
                 if self.default_actions.get(choice_global):
@@ -131,6 +139,7 @@ class QuotientContainer:
                     if option in inconsistent_options:
                         inconsistent_holes.append(hole_index)
 
+                value = choice_values[choice]
                 for hole_index in inconsistent_holes:
                     current_min = hole_min[hole_index]
                     if current_min is None or value < current_min:
@@ -139,11 +148,15 @@ class QuotientContainer:
                     if current_max is None or value > current_max:
                         hole_max[hole_index] = value
 
+            # compute the difference
             for hole_index,min_value in hole_min.items():
                 if min_value is None:
                     continue
                 max_value = hole_max[hole_index]
                 difference = max_value - min_value
+                if difference == math.nan:
+                    assert max_value == min_value and min_value == math.inf
+                    difference = 0
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
 
@@ -152,18 +165,25 @@ class QuotientContainer:
             hole_index: (hole_difference_sum[hole_index] / hole_states_affected[hole_index])
             for hole_index in inconsistent_assignments
             }
-        inconsistent_differences = [inconsistent_differences[hole_index] if hole_index in inconsistent_differences else 0 for hole_index in mdp.design_space.hole_indices]
 
-        return selection, inconsistent_differences
+        # filter differences below epsilon
+        for hole_index in inconsistent_assignments:
+            if inconsistent_differences[hole_index] < QuotientContainer.inconsistency_threshold:
+                selection[hole_index] = [selection[hole_index][0]]
 
-    def scheduler_consistent(self, mdp, scheduler):
+        Profiler.resume()
+        return selection,inconsistent_differences
+        
+
+    def scheduler_consistent(self, mdp, result):
         '''
         Get hole assignment induced by this scheduler and fill undefined
         holes by some option from the design space of this mdp.
         :return hole assignment
         :return whether the scheduler is consistent
         '''
-        selection = self.scheduler_selection(mdp, scheduler)
+        # selection = self.scheduler_selection(mdp, result.scheduler)
+        selection,scores = self.scheduler_selection_quantitative(mdp, result)
         consistent = True
         for hole_index in mdp.design_space.hole_indices:
             options = selection[hole_index]
@@ -171,7 +191,8 @@ class QuotientContainer:
                 consistent = False
             if options == []:
                 selection[hole_index] = [mdp.design_space[hole_index].options[0]]
-        return selection,consistent
+
+        return selection,scores,consistent
 
     def suboptions_half(self, mdp, splitter):
         ''' Split options of a splitter into to halves. '''
@@ -200,11 +221,11 @@ class QuotientContainer:
             return suboptions
 
         # complete variants
-        # return [other_options] + suboptions # DFS solves other last
+        return [other_options] + suboptions # DFS solves other last
         # return suboptions + [other_options] # DFS solver other first
 
         # incomplete variants
-        return suboptions       # drop other
+        # return suboptions       # drop other
         # return [other_options]  # drop significant
 
     def holes_with_max_score(self, hole_score):
@@ -222,17 +243,17 @@ class QuotientContainer:
         Profiler.start("quotient::split")
 
         # split family wrt last undecided result
-        assert mdp.schedulers is not None
-        result,hole_assignments = mdp.schedulers[next(reversed(mdp.schedulers))]
+        assert mdp.scheduler_results is not None
+        result,hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
+        scores = [scores[hole_index] if hole_index in scores else 0 for hole_index in mdp.design_space.hole_indices]
         
         # inconsistent = self.most_inconsistent_holes(hole_assignments)
         # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
         # splitters = self.holes_with_max_score(hole_sizes)
 
         Profiler.start("    difference")
-        hole_assignments,inconsistent_differences = self.scheduler_selection_difference(mdp, result, hole_assignments)
         Profiler.resume()
-        splitters = self.holes_with_max_score(inconsistent_differences)        
+        splitters = self.holes_with_max_score(scores)        
 
         splitter = splitters[0]
         

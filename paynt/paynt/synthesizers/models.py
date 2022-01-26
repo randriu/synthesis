@@ -142,7 +142,8 @@ class MDP(MarkovChain):
         super().__init__(model, quotient_state_map, quotient_choice_map)
         self.design_space = design_space
         self.quotient_container = quotient_container
-        self.schedulers = OrderedDict()
+        
+        self.scheduler_results = OrderedDict()
         self.analysis_hints = None
 
     def check_property(self, prop):
@@ -195,8 +196,8 @@ class MDP(MarkovChain):
             consistent = True
         else:
             result = primary.result
-            assignment,consistent = self.quotient_container.scheduler_consistent(self, result.scheduler)
-            self.schedulers[prop] = (result,assignment)
+            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, result)
+            self.scheduler_results[prop] = (result,assignment,scores)
         if consistent:
             # LB is tight and LB < OPT
             hole_options = self.design_space.copy()
