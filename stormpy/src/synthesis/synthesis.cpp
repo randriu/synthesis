@@ -26,6 +26,22 @@ void define_synthesis(py::module& m) {
             py::arg("dtmc"), py::arg("quotient_state_map")
             )
         .def(
+            "invoke_cegis_parallel_execution",
+            &storm::synthesis::CounterexampleGenerator<>::invoke_cegis_parallel_execution,
+            "Invoke Cegis Parallel Execution",
+            py::arg("hole_name_l2"), py::arg("option_labels_l3"), py::arg("options_l3"),
+            py::arg("quotient_mdp"), py::arg("default_actions"), py::arg("action_to_hole_options"),
+            // 2.point parameters
+            py::arg("family_property_indices"), py::arg("specification_constraints"),
+            py::arg("specification_has_optimality"), py::arg("formulea"),
+            // 3.point parameters
+            py::arg("sketch_spec_optimality_minimizing"), py::arg("current_optimum"),
+            py::arg("current_threshold"), py::arg("sketch_spec_optimality_epsilon"),
+            py::arg("sketch_spec_optimality_reward"),
+            // 4.point parameters
+            py::arg("ce_generator")
+        )
+        .def(
             "construct_conflict",
             &storm::synthesis::CounterexampleGenerator<>::constructConflict,
             "Construct a conflict to a prepared DTMC wrt a single formula.",

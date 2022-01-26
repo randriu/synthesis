@@ -1,5 +1,7 @@
 import math
 import itertools
+import typing
+
 import z3
 
 class Hole:
@@ -90,7 +92,8 @@ class Holes(list):
         holes.assume_options(suboptions)
         return holes
 
-
+    def get_holes(self):
+        return list(self)
 
 
 class DesignSpace(Holes):
@@ -182,8 +185,46 @@ class DesignSpace(Holes):
         DesignSpace.solver.add(counterexample_encoding)
         return pruning_estimate
 
+    def pick_assignment_and_exclude_naive_conflict(self):
+        # 1. pick assigment and ensure that if assignment is None we terminate
+        assignment = self.pick_assignment()
 
+        # we don't have any more members in family
+        if assignment is None:
+            return None
 
+        # 2. generate naive conflict
+        naive_conflict = []
+        for hole_index in range(assignment.num_holes):
+            # here I get evaluation of each hole
+            naive_conflict.append(assignment[hole_index].options[0])
+
+        # 3. exclude naive conflict
+        self.exclude_assignment(assignment, naive_conflict)
+
+        return assignment
+
+    def get_pure_assignment(self):
+        if self is None:
+            return None
+
+        pure_assigment = {}
+
+        for hole in self.get_holes():
+            pure_assigment[hole.name] = int(hole.option_labels[hole.options[0]])
+
+        return pure_assigment
+
+    def get_pure_assignment_options(self):
+        if self is None:
+            return None
+
+        pure_assigment_options = []
+
+        for hole in self.get_holes():
+            pure_assigment_options.append(hole.options)
+
+        return pure_assigment_options
 
 
 class CombinationColoring:

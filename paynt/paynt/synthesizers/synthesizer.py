@@ -25,7 +25,7 @@ class Synthesizer:
     def method_name(self):
         """ to be overridden """
         pass
-    
+
     def print_stats(self):
         print(self.stat.get_summary())
 
@@ -35,9 +35,9 @@ class Synthesizer:
 
     def run(self):
         return self.synthesize(self.sketch.design_space)
-        
+
 class Synthesizer1By1(Synthesizer):
-    
+
     @property
     def method_name(self):
         return "1-by-1"
@@ -49,7 +49,7 @@ class Synthesizer1By1(Synthesizer):
 
         satisfying_assignment = None
         for hole_combination in family.all_combinations():
-            
+
             assignment = family.construct_assignment(hole_combination)
             dtmc = self.sketch.quotient.build_dtmc(assignment)
             self.stat.iteration_dtmc(dtmc.states)
@@ -70,7 +70,7 @@ class Synthesizer1By1(Synthesizer):
 
 
 class SynthesizerAR(Synthesizer):
-    
+
     @property
     def method_name(self):
         return "AR"
@@ -150,7 +150,7 @@ class SynthesizerAR(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.split_family(family)            
+            subfamilies = self.split_family(family)
             families = families + subfamilies
 
 
@@ -169,19 +169,32 @@ class SynthesizerCEGIS(Synthesizer):
         :return (1) overall satisfiability (True/False)
         :return (2) whether this is an improving assignment
         """
-        
+
         # logger.debug("analyzing assignment {}".format(assignment))
-        
+
+        # TODO: 1.Build DTMC
+        #   = commentary:
+        #       This should be done in c++ I think but I am not sure that
+        #       I can re-implemented everything in c++ WDYT @Roman?
         # build DTMC
         dtmc = self.sketch.quotient.build_dtmc(assignment)
+
         self.stat.iteration_dtmc(dtmc.states)
 
+        # TODO: 2.Model check all properties
+        #  = commentary:
+        #       When I am looking at that implementation I can re-implemented everything inside c++ also
+        #       check_constraints method as so on...I think this one is okay :)
         # model check all properties
-        spec = dtmc.check_specification(self.sketch.specification, 
+        spec = dtmc.check_specification(self.sketch.specification,
             property_indices = family.property_indices, short_evaluation = False)
 
         improving = False
 
+        # TODO: 3. analyze model check results
+        #  = commentary:
+        #       Do I need representation of `self.sketch.specification` in C++? My idea is to store somehow
+        #       optimal value and master (python), should then update value...
         # analyze model checking results
         if spec.constraints_result.all_sat:
             if not self.sketch.specification.has_optimality:
@@ -190,9 +203,18 @@ class SynthesizerCEGIS(Synthesizer):
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 improving = True
 
+        # TODO: 4. prepare DTMC
+        #   = commentary:
+        #       This one is easy...we can use prepare_dtmc() method from storm (easy)
         # collect all unsatisfiable properties
         ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
 
+        # TODO: 5. generation of conflicts
+        #   = commentary:
+        #       family.property_indices                                 - as method parameter
+        #       self.sketch.specification.constraints[index].threshold  - also threshold as parameter
+        #       What about family.analysis_result and this family.analysis_result.constraints_result.results[index].primary?
+        #
         # construct conflict wrt each unsatisfiable property
         conflicts = []
         for index in family.property_indices:
@@ -203,18 +225,29 @@ class SynthesizerCEGIS(Synthesizer):
             conflict = ce_generator.construct_conflict(index, threshold, bounds)
             conflicts.append(conflict)
 
+        # TODO: What is this code?? I see duplicity from the previous one...
         if self.sketch.specification.has_optimality and spec.optimality_result.sat == False:
             index = len(self.sketch.specification.constraints)
             threshold = self.sketch.specification.optimality.threshold
             bounds = None if family.analysis_result is None else family.analysis_result.optimality_result.primary.result
             conflict = ce_generator.construct_conflict(index, threshold, bounds)
             conflicts.append(conflict)
-            
+
+        # TODO: 5. Use of all conflicts to exclude the generalizations of assigment...
+        #   = commentary:
+        #       This one has to make master (python).
         # use conflicts to exclude the generalizations of this assignment
         pruned_estimate = 0
         for conflict in conflicts:
             pruned_estimate += family.exclude_assignment(assignment, conflict)
 
+        # TODO: 6. Map return values of C++ method
+        #   = commentary:
+        #       For this is little bit tricky, but we can eliminate `pruned_estimate`
+        #       (because master will take care) and we need create structure or
+        #       Object,  which will consist of
+        #        f.e. -> Object(boolean, boolean, Conflicts)
+        #
         return False, improving, pruned_estimate
 
     def synthesize(self, family):
@@ -232,21 +265,92 @@ class SynthesizerCEGIS(Synthesizer):
         # encode family
         family.z3_initialize()
         family.z3_encode()
-        
+
         # CEGIS loop
         satisfying_assignment = None
-        assignment = family.pick_assignment()
 
-        while assignment is not None:
-            
-            sat, improving, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
-            if improving:
-                satisfying_assignment = assignment
-            if sat:
-                break
-            
-            # construct next assignment
-            assignment = family.pick_assignment()
+        pure_assignments = ['init']
+        terminate = False
+
+        # (assignment, assignment, assignment, assignment, None) <- termination point
+        while pure_assignments[-1] is not None or terminate:
+            pure_assignments = []
+            # pure_assignments_options = []
+
+            # 1. generation phase of specific number of assignments
+            hole_name_list_list = []
+            options_labels_list_list_list = []
+            options_list_list_list = []
+
+            for i in range(1):
+                assigment = family.pick_assignment_and_exclude_naive_conflict()
+
+                pure_assignments.append(assigment)  # for python
+
+                hole_name_list = []
+                options_labels_list_list = []
+                options_list_list = []
+
+                # Additional check TypeError: 'NoneType' object is not iterable
+                if assigment is not None:
+                    for hole in assigment:
+                        hole_name_list.append(hole.name)
+                        options_labels_list_list.append(hole.option_labels)
+                        options_list_list.append(hole.options)
+
+                hole_name_list_list.append(hole_name_list)
+                options_labels_list_list_list.append(options_labels_list_list)
+                options_list_list_list.append(options_list_list)
+
+                # pure_assignments.append(assigment.get_pure_assignment()) # .get_pure_assignment() for c++
+
+                # pure_assignments_options.append(assigment.get_pure_assignment_options())
+                # for c++ code we have to use
+                # pure_assignments.append(family.pick_assignment_and_exclude_naive_conflict().get_pure_assignment())
+
+            # TODO: 2. analyze phase (this should be invoked in c++)
+            if self.sketch.specification.optimality.optimum is None:
+                current_optimality_value = 0.0
+            else:
+                current_optimality_value = self.sketch.specification.optimality.optimum
+            # ce_generator.invoke_cegis_parallel_execution(
+            #     hole_name_list_list,
+            #     options_labels_list_list_list,
+            #     options_list_list_list,
+            #     self.sketch.quotient.quotient_mdp,
+            #     self.sketch.quotient.default_actions,
+            #     self.sketch.quotient.action_to_hole_options,
+            #     # 2.point
+            #     family.property_indices,
+            #     self.sketch.specification.constraints,
+            #     self.sketch.specification.has_optimality,
+            #     # send one formula(i.e., "Pmax=? [F ("goal" & (c < 40))]")
+            #     formulae[0],
+            #     # 3. point
+            #     self.sketch.specification.optimality.minimizing,
+            #     current_optimality_value,
+            #     self.sketch.specification.optimality.threshold,
+            #     self.sketch.specification.optimality.epsilon,
+            #     self.sketch.specification.optimality.reward,
+            #     ce_generator
+            # )
+
+            for i in range(1):
+                # (assignment, assignment, assignment, assignment, None) <- termination point
+                if pure_assignments[i] is None:
+                    break
+                sat, improving, _ = self.analyze_family_assignment_cegis(family, pure_assignments[i], ce_generator)
+                if improving:
+                    satisfying_assignment = pure_assignments[i]
+                if sat:
+                    terminate = True
+                    break
+
+            # TODO: 3. Use of all conflicts to exclude the generalizations of assigment (value from slaves - c++)
+            # for conflict in conflicts:
+            #     pruned_estimate += family.exclude_assignment(pure_assignments, conflict)
+            # break
+
 
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
@@ -270,7 +374,7 @@ class StageControl:
         # timings
         self.timer_ar = Timer()
         self.timer_cegis = Timer()
-        
+
         # multiplier to derive time allocated for cegis
         # time_ar * factor = time_cegis
         # =1 is fair, >1 favours cegis, <1 favours ar
@@ -343,14 +447,14 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         # encode family
         family.z3_initialize()
-        
+
         # AR loop
         satisfying_assignment = None
         families = [family]
         while families:
             # MDP analysis
             self.stage_control.start_ar()
-            
+
             # family = families.pop(-1) # DFS
             family = families.pop(0) # BFS
 
@@ -369,7 +473,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             assignment = family.pick_assignment()
             sat = False
             while assignment is not None:
-                
+
                 sat, improving_assignment, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
                 if improving_assignment is not None:
                     satisfying_assignment = improving_assignment
@@ -378,7 +482,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 # member is UNSAT
                 if self.stage_control.cegis_step():
                     break
-                
+
                 # cegis still has time: check next assignment
                 assignment = family.pick_assignment()
 
@@ -389,12 +493,12 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 self.stage_control.prune_cegis(family.size)
                 self.stat.pruned(family.size)
                 continue
-        
+
             # CEGIS could not process the family: split
             self.stat.hybrid(self.stage_control.cegis_efficiency)
             subfamilies = self.split_family(family)
             families = families + subfamilies
-        
+
 
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment

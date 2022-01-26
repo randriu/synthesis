@@ -167,7 +167,7 @@ class DTMC(MarkovChain):
     def check_specification(self, specification, property_indices = None, short_evaluation = False):
         constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
         optimality_result = None
-        if not (short_evaluation and not constraints_result.sat) and specification.has_optimality:
+        if not (short_evaluation and not constraints_result.all_sat) and specification.has_optimality:
             optimality_result = self.model_check_property(specification.optimality)
         return SpecificationResult(constraints_result, optimality_result)
 

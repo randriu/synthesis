@@ -59,7 +59,7 @@ class QuotientContainer:
             self.quotient_mdp, all_states, selected_actions, keep_unreachable_states, subsystem_options
         )
         model = submodel_construction.model
-        state_map =  submodel_construction.new_to_old_state_mapping
+        state_map = submodel_construction.new_to_old_state_mapping
         choice_map = submodel_construction.new_to_old_action_mapping
         return model,state_map,choice_map
 

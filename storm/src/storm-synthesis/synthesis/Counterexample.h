@@ -3,6 +3,8 @@
 #ifndef STORM_SYNTHESIS_COUNTEREXAMPLE_H
 #define STORM_SYNTHESIS_COUNTEREXAMPLE_H
 
+#include "storm-synthesis/synthesis/Hole.h"
+
 #include "storm/storage/jani/Model.h"
 #include "storm/logic/Formula.h"
 #include "storm/models/sparse/Mdp.h"
@@ -11,6 +13,11 @@
 
 #include "storm/models/sparse/Dtmc.h"
 #include "storm/utility/Stopwatch.h"
+
+// this is for CEGIS parallel
+#include "storm/transformer/SubsystemBuilder.h"
+#include "storm/api/transformation.h"
+#include "storm-parsers/parser/FormulaParser.h"
 
 namespace storm {
     namespace synthesis {
@@ -66,6 +73,38 @@ namespace storm {
                 ValueType formula_bound,
                 std::shared_ptr<storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const> mdp_bounds
                 );
+
+            std::vector<bool> invoke_cegis_parallel_execution(
+                std::vector<std::vector<std::string>> hole_name_l2,
+                std::vector<std::vector<std::vector<std::string>>> option_labels_l3,
+                std::vector<std::vector<std::vector<int>>> options_l3,
+                storm::models::sparse::Mdp<ValueType> quotient_mdp,
+                storm::storage::BitVector default_actions,
+                std::vector<std::unordered_map<int, int>> action_to_hole_options,
+                // 2.point parameters...
+                std::vector<int> family_property_indices,    // there is no need for each assignment has different family_property_indices (all assignments are in one family...)
+                std::vector<int> specification_constraints,
+                bool specification_has_optimality,
+                std::shared_ptr<storm::logic::Formula const> const& formulae,
+                // 3.point parameters
+                bool sketch_spec_optimality_minimizing,
+                double current_optimum,
+                float current_threshold,
+                float sketch_spec_optimality_epsilon,
+                bool sketch_spec_optimality_reward,
+                // 4.point parameters
+                storm::synthesis::CounterexampleGenerator<>& ce_generator
+            );
+
+            bool includesFce(
+                std::unordered_map<int, int> hole_options,
+                std::vector<std::vector<int>> options_l2
+            );
+
+            bool improves_optimum(bool reward, ValueType result, int iteration,
+                bool sketch_spec_optimality_minimizing, ValueType current_optimum);
+
+            bool result_valid(bool reward, ValueType result);
 
         protected:
 
