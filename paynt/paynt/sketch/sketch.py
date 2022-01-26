@@ -21,6 +21,7 @@ class Sketch:
     def __init__(self, sketch_path, properties_path, constant_str):
 
         Profiler.initialize()
+        Profiler.start("sketch")
         
         self.explicit_model = None
         self.prism = None
@@ -79,13 +80,12 @@ class Sketch:
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
             self.quotient.pomdp_manager.set_memory_size(Sketch.POMDP_MEM_SIZE)
-            Profiler.start("POMDP unfolding")
             self.quotient.unfold_partial_memory()
-            Profiler.stop()
         else:
             raise TypeError("sketch type is not supported")
 
         logger.info(f"Sketch parsing complete.")
+        Profiler.stop()
 
 
     @property

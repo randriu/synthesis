@@ -23,7 +23,7 @@ class Synthesizer:
     
     def print_stats(self):
         print(self.stat.get_summary())
-        Profiler.print_all()
+        Profiler.print()
 
     def synthesize(self, family):
         """ to be overridden """
@@ -31,12 +31,14 @@ class Synthesizer:
 
     def run(self):
         logger.info("Synthesis initiated.")
+        Profiler.start("synthesis")
         assignment = self.synthesize(self.sketch.design_space)
         # double-check assignment
         if assignment is not None:
             dtmc = self.sketch.quotient.build_chain(assignment)
             spec_result = dtmc.check_specification(self.sketch.specification)
             print("double-checking: ", spec_result)
+        Profiler.stop()
         return assignment
 
     def explore(self, family):
@@ -76,6 +78,9 @@ class Synthesizer1By1(Synthesizer):
 
 
 class SynthesizerAR(Synthesizer):
+
+    # family exploration order: True = DFS, False = BFS
+    exploration_order_dfs = True
     
     @property
     def method_name(self):
@@ -92,7 +97,6 @@ class SynthesizerAR(Synthesizer):
         family.translate_analysis_hints()
         # print("family size: {}, mdp size: {}".format(family.size, family.mdp.states))
         self.stat.iteration_mdp(family.mdp.states)
-
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
@@ -164,10 +168,12 @@ class SynthesizerAR(Synthesizer):
 
         satisfying_assignment = None
         families = [family]
-        Profiler.start("synthesis loop")
         while families:
-            family = families.pop(-1) # DFS
-            # family = families.pop(0) # BFS
+            
+            if SynthesizerAR.exploration_order_dfs:
+                family = families.pop(-1)
+            else:
+                family = families.pop(0)
 
             feasibility,assignment = self.analyze_family_ar(family)
             if assignment is not None:
@@ -181,7 +187,6 @@ class SynthesizerAR(Synthesizer):
             subfamilies = self.split_family(family)            
             families = families + subfamilies
 
-        Profiler.stop()
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
 
@@ -205,8 +210,8 @@ class SynthesizerCEGIS(Synthesizer):
         # build DTMC
         Profiler.start("    dtmc construction")
         dtmc = self.sketch.quotient.build_chain(assignment)
-        self.stat.iteration_dtmc(dtmc.states)
         Profiler.resume()
+        self.stat.iteration_dtmc(dtmc.states)
 
         # model check all properties
         Profiler.start("    dtmc model checking")
@@ -383,7 +388,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
     def synthesize(self, family):
 
         self.stat.start()
-
         self.stage_control = StageControl(family.size)
 
         quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes
@@ -391,8 +395,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
-        
-        Profiler.start("synthesis loop")
 
         # encode family
         family.sat_initialize()
@@ -401,12 +403,20 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         satisfying_assignment = None
         families = [family]
         while families:
+            
             # MDP analysis
             self.stage_control.start_ar()
             
-            family = families.pop(-1) # DFS
-            # family = families.pop(0) # BFS
+            # choose family
+            if SynthesizerAR.exploration_order_dfs:
+                family = families.pop(-1)
+            else:
+                family = families.pop(0)
 
+            # set SMT solver level
+            family.sat_level()
+
+            # analyze the family
             feasibility,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
@@ -416,7 +426,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 self.stage_control.prune_ar(family.size)
                 continue
 
-            # undecided: initiate CEGIS
+            # undecided: initiate CEGIS analysis
             self.stage_control.start_cegis()
             assignment = family.pick_assignment()
             sat = False
@@ -440,6 +450,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 self.explore(family)
                 self.stage_control.prune_cegis(family.size)
                 continue
+
         
             # CEGIS could not process the family: split
             subfamilies = self.split_family(family)
@@ -448,6 +459,5 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         ce_generator.print_profiling()
 
         self.stat.finished(satisfying_assignment)
-        Profiler.stop()
         return satisfying_assignment
 

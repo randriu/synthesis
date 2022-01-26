@@ -49,8 +49,8 @@ class Statistic:
 
         self.timer = Timer()
 
-        self.status_period = 5
-        self.status_time = 5
+        self.status_period = 1
+        self.status_time = self.status_period
 
     def start(self):
         self.timer.start()
@@ -91,7 +91,13 @@ class Statistic:
         if self.specification.has_optimality and self.specification.optimality.optimum is not None:
             optimum = round(self.specification.optimality.optimum,5)
             threshold = round(self.specification.optimality.threshold,5)
-        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], *={optimum}"
+        sat_size = "-"
+        ds = self.synthesizer.sketch.design_space
+        if ds.use_cvc:
+            sat_size = len(ds.solver.getAssertions())
+        elif ds.use_python_z3:
+            sat_size = len(ds.solver.assertions())
+        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], *={optimum}, SAT={sat_size}"
 
     def print_status(self):
         if self.timer.read() > self.status_time:

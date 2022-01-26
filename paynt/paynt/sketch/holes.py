@@ -130,6 +130,7 @@ class DesignSpace(Holes):
     use_python_z3 = False
     use_storm_z3 = False
     use_cvc = False
+    solver_depth = 0
 
     def __init__(self, holes = []):
         super().__init__(holes.copy())
@@ -141,6 +142,8 @@ class DesignSpace(Holes):
         
         self.hole_clauses = None
         self.encoding = None
+
+        self.refinement_depth = 0
 
     def copy(self):
         ds = DesignSpace(super().copy())
@@ -176,15 +179,16 @@ class DesignSpace(Holes):
     def sat_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
 
+
         if "pycvc5" in sys.modules:
             DesignSpace.use_cvc = True
         else:
-            DesignSpace.use_python_z3 = False
-            DesignSpace.use_storm_z3 = True
+            DesignSpace.use_python_z3 = True
+            DesignSpace.use_storm_z3 = False
 
         DesignSpace.solver_clauses = []
         if DesignSpace.use_python_z3:
-            logger.debug("Using Python Z3 for SAT solving.")
+            logger.debug("Using Python Z3 for SMT solving.")
             DesignSpace.solver = z3.Solver()
             DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
             for hole_index,hole in enumerate(self):
@@ -192,7 +196,7 @@ class DesignSpace(Holes):
                 clauses = [var == option for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         elif DesignSpace.use_storm_z3:
-            logger.debug("Using Storm Z3 for SAT solving.")
+            logger.debug("Using Storm Z3 for SMT solving.")
             expression_manager = stormpy.storage.ExpressionManager()
             DesignSpace.solver = stormpy.utility.Z3SmtSolver(expression_manager)
             DesignSpace.solver_vars = [expression_manager.create_integer_variable(str(hole_index)) for hole_index in self.hole_indices]
@@ -201,9 +205,10 @@ class DesignSpace(Holes):
                 clauses = [stormpy.storage.Expression.Eq(var,expression_manager.create_integer(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         elif DesignSpace.use_cvc:
-            logger.debug("Using CVC5 for SAT solving.")
+            logger.debug("Using CVC5 for SMT solving.")
             DesignSpace.solver = pycvc5.Solver()
             DesignSpace.solver.setOption("produce-models", "true")
+            DesignSpace.solver.setOption("produce-assertions", "true")
             # DesignSpace.solver.setLogic("ALL")
             # DesignSpace.solver.setLogic("QF_ALL")
             DesignSpace.solver.setLogic("QF_DT")
@@ -216,7 +221,7 @@ class DesignSpace(Holes):
                 clauses = [DesignSpace.solver.mkTerm(pycvc5.Kind.Equal, var, DesignSpace.solver.mkInteger(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         else:
-            raise RuntimeError("Need to enable at least one SAT solver.")
+            raise RuntimeError("Need to enable at least one SMT solver.")
     
     @property
     def encoded(self):
@@ -263,48 +268,44 @@ class DesignSpace(Holes):
         
         Profiler.start("pick_assignment")
         if DesignSpace.use_python_z3:
-            Profiler.start("    SAT check")
+            Profiler.start("    SMT check")
             solver_result = DesignSpace.solver.check(self.encoding)
             Profiler.resume()
             if solver_result == z3.unsat:
                 Profiler.resume()
                 return None
-            Profiler.start("    SAT model")
+            Profiler.start("    SMT model")
             sat_model = DesignSpace.solver.model()
             hole_options = []
-            for hole_index,hole, in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
+            for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = sat_model[var].as_long()
                 hole_options.append([option])
             Profiler.resume()
         elif DesignSpace.use_storm_z3:
-            Profiler.start("    SAT check")
+            Profiler.start("    SMT check")
             solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
             Profiler.resume()
             if solver_result == stormpy.utility.SmtCheckResult.Unsat:
                 Profiler.resume()
                 return None
-            Profiler.start("    SAT model")
+            Profiler.start("    SMT model")
             solver_model = DesignSpace.solver.model
             hole_options = []
-            for hole_index,hole, in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
+            for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = solver_model.get_integer_value(var)
                 hole_options.append([option])
             Profiler.resume()
         elif DesignSpace.use_cvc:
-            Profiler.start("    SAT check")
+            Profiler.start("    SMT check")
             solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
             Profiler.resume()
             if solver_result.isUnsat():
                 Profiler.resume()
                 return None
-            Profiler.start("    SAT model")
+            Profiler.start("    SMT model")
             hole_options = []
-            for hole_index,hole, in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
+            for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = DesignSpace.solver.getValue(var).getIntegerValue()
-                Profiler.resume()
                 hole_options.append([option])
             Profiler.resume()
         else:
@@ -350,6 +351,28 @@ class DesignSpace(Holes):
             pass
 
         return pruning_estimate
+
+    def sat_level(self):
+        ''' Reset solver depth level to correspond to refinement level. '''
+
+        if self.refinement_depth == 0:
+            # fresh family, nothing to do
+            return
+
+        # reset to the scope of the parent (refinement_depth - 1)
+        while DesignSpace.solver_depth >= self.refinement_depth:
+            if DesignSpace.use_storm_z3:
+                DesignSpace.solver.pop(1)
+            else:
+                DesignSpace.solver.pop()
+            DesignSpace.solver_depth -= 1
+
+        # create new scope
+        DesignSpace.solver.push()
+        DesignSpace.solver_depth += 1
+                
+
+
 
 
 class CombinationColoring:

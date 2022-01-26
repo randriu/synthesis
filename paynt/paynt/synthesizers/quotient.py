@@ -50,7 +50,8 @@ class QuotientContainer:
         '''
         Restrict the quotient MDP to the selected actions.
         :return (1) the restricted model
-        :return (2) sub- to full action mapping
+        :return (2) sub- to full state mapping
+        :return (3) sub- to full action mapping
         '''
         
         # construct the submodel
@@ -251,8 +252,6 @@ class QuotientContainer:
         # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
         # splitters = self.holes_with_max_score(hole_sizes)
 
-        Profiler.start("    difference")
-        Profiler.resume()
         splitters = self.holes_with_max_score(scores)        
 
         splitter = splitters[0]
@@ -271,6 +270,7 @@ class QuotientContainer:
         for suboption in suboptions:
             design_subspace = mdp.design_space.copy()
             design_subspace.assume_hole_options(splitter, suboption)
+            design_subspace.refinement_depth = mdp.design_space.refinement_depth + 1
             design_subspaces.append(design_subspace)
         Profiler.resume()
 
