@@ -30,6 +30,7 @@ class QuotientContainer:
         self.quotient_mdp = None
         self.default_actions = None        
         self.action_to_hole_options = None
+        self._quotient_relevant_holes = None
 
     def select_actions(self, design_space):
         ''' Select actions relevant in the provided design space. '''
@@ -80,12 +81,11 @@ class QuotientContainer:
     def scheduler_selection(self, mdp, scheduler):
         Profiler.start("quotient::scheduler_selection")
         assert scheduler.memoryless and scheduler.deterministic
-        
+
         selection = [set() for hole_index in mdp.design_space.hole_indices]
 
-        for state in range(mdp.states):
-            offset = scheduler.get_choice(state).get_deterministic_choice()
-            choice = mdp.model.get_choice_index(state,offset)
+        choice_selection = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        for choice in choice_selection:
             global_choice = mdp.quotient_choice_map[choice]
             hole_option = self.action_to_hole_options[global_choice]
             for hole_index,option in hole_option.items():
@@ -109,13 +109,16 @@ class QuotientContainer:
 
         for state in range(mdp.states):
 
-            # for this state, compute for each inconsistent hole the difference in choice value between respective options
+            # for this state, compute for each inconsistent hole the difference in choice values between respective options
             hole_min = {hole_index: None for hole_index in inconsistent_assignments}
             hole_max = {hole_index: None for hole_index in inconsistent_assignments}
 
             for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
                 
                 value = choice_value[choice]
+                if value == math.inf:
+                    continue
+                
                 choice_global = mdp.quotient_choice_map[choice]
                 if self.default_actions.get(choice_global):
                     continue
@@ -133,7 +136,7 @@ class QuotientContainer:
                     if current_min is None or value < current_min:
                         hole_min[hole_index] = value
                     current_max = hole_max[hole_index]
-                    if current_max is None or value > current_min:
+                    if current_max is None or value > current_max:
                         hole_max[hole_index] = value
 
             for hole_index,min_value in hole_min.items():
@@ -195,10 +198,14 @@ class QuotientContainer:
         other_options = [option for option in mdp.design_space[splitter].options if option not in used_options]
         if not other_options:
             return suboptions
-        return suboptions # [1],[4]
-        # return [other_options] # [2,3]
-        # return suboptions + [other_options] # [1],[4],[2,3]
-        # return [other_options] + suboptions # [2,3],[1],[4]
+
+        # complete variants
+        # return [other_options] + suboptions # DFS solves other last
+        # return suboptions + [other_options] # DFS solver other first
+
+        # incomplete variants
+        return suboptions       # drop other
+        # return [other_options]  # drop significant
 
     def holes_with_max_score(self, hole_score):
         max_score = max(hole_score)
@@ -238,7 +245,7 @@ class QuotientContainer:
         suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
 
         # construct corresponding design subspaces
-        Profiler.start("    design subspaces")
+        Profiler.start("    create subspaces")
         design_subspaces = []
         for suboption in suboptions:
             design_subspace = mdp.design_space.copy()
@@ -249,15 +256,19 @@ class QuotientContainer:
         Profiler.resume()
         return design_subspaces
 
+    @property
     def quotient_relevant_holes(self):
+        if self._quotient_relevant_holes is not None:
+            return self._quotient_relevant_holes
+
         tm = self.quotient_mdp.transition_matrix
-        state_to_holes = []
+        self._quotient_relevant_holes = []
         for state in range(self.quotient_mdp.nr_states):
             relevant_holes = set()
             for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
                 relevant_holes.update(set(self.action_to_hole_options[action].keys()))
-            state_to_holes.append(relevant_holes)
-        return state_to_holes
+            self._quotient_relevant_holes.append(relevant_holes)
+        return self._quotient_relevant_holes
 
 
 
@@ -324,25 +335,19 @@ class POMDPQuotientContainer(QuotientContainer):
     def __init__(self, *args):
         super().__init__(*args)
 
-        
-        # quotient POMDP stuff
+        # default quotient attributes
+        self.quotient_mdp = None
+        self.default_actions = None        
+        self.action_to_hole_options = None
+        self._quotient_relevant_holes = None
+
+        # POMDP attributes
         self.pomdp = None
+        self.observation_labels = None
         self.actions_at_observation = None
 
-        # (unfolded) quotient MDP stuff
-        self.quotient_mdp = None
-        self.mdp_to_pomdp_state_map = None
-        self.mdp_to_pomdp_observations = None
-        self.mdp_to_pomdp_memory = None
-
-        # state space associated with the quotient MDP
-        self.holes_action = None
-        self.holes_memory = None
-        self.design_space = None
-
-        # coloring
-        self.action_to_hole_options = None
-        self.default_actions = None
+        # (unfolded) quotient MDP attributes
+        self.pomdp_manager = None
 
         # construct quotient POMDP
         if not self.sketch.is_explicit:
@@ -359,14 +364,14 @@ class POMDPQuotientContainer(QuotientContainer):
         # extract observation labels
         if self.pomdp.has_observation_valuations():
             ov = self.pomdp.observation_valuations
-            self.observation_labels = [ov.get_string(obs) for obs in range(self.pomdp.nr_observations)]
+            self.observation_labels = [ov.get_string(obs) for obs in range(self.observations)]
             self.observation_labels = [self.process_label(label) for label in self.observation_labels]
         else:
-            self.observation_labels = list(range(self.pomdp.nr_observations))
+            self.observation_labels = list(range(self.observations))
         # print("observation labels: ", self.observation_labels)
 
         # compute actions available at each observation
-        self.actions_at_observation = [0] * self.pomdp.nr_observations
+        self.actions_at_observation = [0] * self.observations
         for state in range(self.pomdp.nr_states):
             obs = self.pomdp.observations[state]
             if self.actions_at_observation[obs] != 0:
@@ -375,7 +380,7 @@ class POMDPQuotientContainer(QuotientContainer):
         # print("actions at observations: ", self.actions_at_observation)
 
         # collect labels of actions available at each observation
-        self.action_labels_at_observation = [[] for obs in range(self.pomdp.nr_observations)]
+        self.action_labels_at_observation = [[] for obs in range(self.observations)]
         for state in range(self.pomdp.nr_states):
             obs = self.pomdp.observations[state]
             if self.action_labels_at_observation[obs] != []:
@@ -387,7 +392,13 @@ class POMDPQuotientContainer(QuotientContainer):
                 self.action_labels_at_observation[obs].append(labels)
         # print("labels of actions at observations: ", self.action_labels_at_observation)
 
+        # create POMDP manager
         self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
+
+    
+    @property
+    def observations(self):
+        return self.pomdp.nr_observations
 
     def process_label(self,label):
         label = re.sub(r"\s+", "", label)
@@ -412,16 +423,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
         self.quotient_mdp = pm.construct_mdp()
         mdp = self.quotient_mdp
-        # print("MDP states: ", mdp.nr_states)
-        # print("MDP rows: ", mdp.nr_choices)
-
-        print("# of observations:" , pomdp.nr_observations)
-        print("# of holes: ", pm.num_holes)
-        # print("action holes: ", pm.action_holes)
-        # print("memory holes: ", pm.memory_holes)
-        # print("hole options: ", pm.hole_options)
-        print("", flush=True)
-
+        
         # create holes
         holes = Holes()
         for hole_index in range(pm.num_holes):
@@ -449,12 +451,16 @@ class POMDPQuotientContainer(QuotientContainer):
                 holes[hole_index] = hole
 
         # create domains for each hole
-        self.design_space = DesignSpace(holes)
-        self.design_space.property_indices = self.sketch.specification.all_constraint_indices()
-        self.sketch.design_space = self.design_space
+        self.sketch.design_space = DesignSpace(holes)
+        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
+        
+        # printo info about this unfolding
         print("# of observations:" , pomdp.nr_observations)
         print("# of holes: ", pm.num_holes)
-        print("design space size: ", self.design_space.size)
+        # print("action holes: ", pm.action_holes)
+        # print("memory holes: ", pm.memory_holes)
+        # print("hole options: ", pm.hole_options)
+        print("design space size: ", self.sketch.design_space.size)
         print("", flush=True)
 
         # associate actions with hole combinations (colors)
@@ -483,77 +489,3 @@ class POMDPQuotientContainer(QuotientContainer):
 
             self.action_to_hole_options.append(relevant_holes)
 
-
-    def unfold_full_memory(self, memory_size):
-
-        # construct memory model and unfold it into quotient MDP
-        memory = stormpy.pomdp.PomdpMemoryBuilder().build(stormpy.pomdp.PomdpMemoryPattern.full, memory_size)
-        # pomdp.model = stormpy.pomdp.unfold_memory(pomdp.model, memory, add_memory_labels=True, keep_state_valuations=True)
-        unfolder = stormpy.synthesis.ExplicitPomdpMemoryUnfolder(self.pomdp,memory)
-        self.quotient_mdp = unfolder.transform()
-        self.mdp_to_pomdp_state_map = unfolder.state_to_state()
-        self.mdp_to_pomdp_memory = unfolder.state_to_memory()
-        self.mdp_to_pomdp_observations = [
-            self.pomdp.observations[self.mdp_to_pomdp_state_map[s]]
-            for s in range(self.quotient_mdp.nr_states)
-        ]
-
-        # create holes for each observation-memory pair
-        self.holes_action = []
-        self.holes_memory = []
-        hole_index = 0
-        holes = Holes()
-
-        for obs in range(self.pomdp.nr_observations):
-            obs_label = self.observation_labels[obs]
-            obs_actions = self.actions_at_observation[obs]
-            action_labels = self.action_labels_at_observation[obs]
-
-            self.holes_action.append([])
-            self.holes_memory.append([])
-            for mem in range(memory_size):
-                string = "({},{})".format(obs_label,mem)
-
-                # create action hole
-                name = "A" + string
-                options = list(range(obs_actions))
-                option_labels = [str(labels) for labels in action_labels]
-                hole = Hole(name,options,option_labels)
-                self.holes_action[obs].append(holes.num_holes)
-                holes.append(hole)
-
-                # create memory hole
-                name = "M" + string
-                options = list(range(memory_size))
-                option_labels = [str(o) for o in options]
-                hole = Hole(name,options,option_labels)
-                self.holes_memory[obs].append(holes.num_holes)
-                holes.append(hole)
-
-
-        self.design_space = DesignSpace(holes, self.sketch.specification.all_indices())
-        self.sketch.design_space = self.design_space
-        
-        # associate actions with hole combinations (colors)
-        # TODO determine reachable holes ?
-        self.combination_coloring = CombinationColoring(holes)
-        self.action_to_colors = []
-        num_choices = self.quotient_mdp.nr_choices
-        self.color_0_actions = stormpy.BitVector(num_choices, False)
-        
-        for state in range(self.quotient_mdp.nr_states):
-            obs = self.mdp_to_pomdp_observations[state]
-            mem = self.mdp_to_pomdp_memory[state]
-            
-            action_hole_index = self.holes_action[obs][mem]
-            memory_hole_index = self.holes_memory[obs][mem]
-            relevant_hole_indices = [action_hole_index, memory_hole_index]
-            combinations = [
-                hole.options if hole_index in relevant_hole_indices else [None]
-                for hole_index,hole in enumerate(self.design_space)
-            ]
-            for combination in itertools.product(*combinations):            
-                color = self.combination_coloring.get_or_make_color(combination)
-                self.action_to_colors.append({color})
-            # print("hole options in state {} : {}x{}".format(state, len(hole_options[hole_action]), len(hole_options[hole_memory])))
-            # print("actions in state {} : {}".format(state, self.model.get_nr_available_actions(state)))

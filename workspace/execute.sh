@@ -79,7 +79,7 @@ function run() {
     parallel=false
     verbose=true
 
-    # pomdp=true
+    pomdp=true
 
     # running ##########
 
@@ -98,10 +98,10 @@ function run() {
     # model="pomdp/samplerocks"
 
     # model="pomdp/grid/avoid"
-    # model="pomdp/grid/simple"
+    model="pomdp/grid/simple"
     # model="pomdp/grid/simple-mo"
 
-    model="pomdp/grid/refuel"
+    # model="pomdp/grid/refuel"
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"

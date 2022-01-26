@@ -20,15 +20,15 @@ def safe_division(dividend, divisor):
 class Statistic:
     """General computation stats."""
 
-    def __init__(self, sketch, method_name):
+    def __init__(self, synthesizer):
         
+        self.synthesizer = synthesizer
+
         self.design_space = sketch.design_space
         self.specification = sketch.specification
 
         self.super_quotient_states = sketch.quotient.quotient_mdp.nr_states
         self.super_quotient_actions = sketch.quotient.quotient_mdp.nr_choices
-
-        self.method_name = method_name
         
         self.iterations_dtmc = 0
         self.acc_size_dtmc = 0
@@ -48,7 +48,6 @@ class Statistic:
         self.stage_factor = None
 
         self.timer = Timer()
-        self.remaining = self.design_space.size
 
         self.status_period = 5
         self.status_time = 5
@@ -75,20 +74,12 @@ class Statistic:
     def check_mdp(self):
         self.checks_mdp += 1
 
-    def pruned(self, pruned):
-        self.remaining -= pruned
-
-    def estimate(self):
-        fraction_remaining = self.remaining / self.design_space.size
-        fraction_rejected = 1 - fraction_remaining
-        time_estimate = safe_division(self.timer.read(), fraction_rejected)
-        return fraction_rejected, time_estimate
-
     def hybrid(self, stage_factor):
         self.stage_factor = stage_factor
 
     def status(self):
-        fraction_rejected, time_estimate = self.estimate()
+        fraction_rejected = self.synthesizer.explored / self.design_space.size
+        time_estimate = safe_division(self.timer.read(), fraction_rejected)
         percentage_rejected = int(fraction_rejected * 1000000) / 10000.0
         # percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.timer.read(),1)
@@ -120,7 +111,6 @@ class Statistic:
         if self.specification.has_optimality:
             self.optimum = self.specification.optimality.optimum
 
-
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
         self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
 
@@ -133,8 +123,11 @@ class Statistic:
         specification = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(self.specification.constraints)]) + "\n"
         specification += f"optimality objective: {str(self.specification.optimality)}\n" if self.specification.has_optimality else ""
 
+        fraction_explored = int((self.synthesizer.explored / self.design_space.size) * 100)
+        explored = f"explored: {fraction_explored} %"
+
         design_space = f"number of holes: {self.design_space.num_holes}, family size: {self.design_space.size}, super quotient: {self.super_quotient_states} states / {self.super_quotient_actions} actions"
-        timing = f"method: {self.method_name}, synthesis time: {round(self.timer.time, 2)} s"
+        timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.timer.time, 2)} s"
 
         family_stats = ""
         ar_stats = f"AR stats: iterations: {self.iterations_mdp}, avg MDP size: {round(self.avg_size_mdp)}" 
@@ -149,6 +142,6 @@ class Statistic:
         # assignment = f"hole assignment: {str(self.assignment)}\n" if self.assignment else ""
         assignment = ""
 
-        summary = f"{specification}\n{timing}\n{design_space}\n" \
+        summary = f"{specification}\n{timing}\n{design_space}\n{explored}\n" \
                   f"{family_stats}\n{result}\n{assignment}"
         return summary

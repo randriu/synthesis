@@ -141,8 +141,7 @@ class DesignSpace(Holes):
 
     def set_analysis_hints(self, property_indices, analysis_hints):
         self.property_indices = property_indices
-        # TODO proper analysis hints usage
-        # self.analysis_hints = analysis_hints
+        self.analysis_hints = analysis_hints
 
     def translate_analysis_hint(self, hint):
         if hint is None:

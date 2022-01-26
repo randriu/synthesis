@@ -13,8 +13,6 @@ class MarkovChain:
     precision = 1e-5
     # model checking environment (method & precision)
     environment = None
-    # whether hints will be used for model checking
-    use_hints = False
 
     @classmethod
     def initialize(cls, formulae):
@@ -87,7 +85,7 @@ class MarkovChain:
     def model_check_property(self, prop, alt = False):
         # get hint
         hint = None
-        if self.analysis_hints is not None and MarkovChain.use_hints:
+        if self.analysis_hints is not None:
             hint_prim,hint_seco = self.analysis_hints[prop]
             hint = hint_prim if not alt else hint_seco
 

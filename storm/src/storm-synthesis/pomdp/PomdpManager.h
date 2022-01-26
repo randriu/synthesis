@@ -12,30 +12,47 @@ namespace storm {
         public:
             
             PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp);
-            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
 
+            /** Memory manipulation . */
+
+            // unfold memory model into the POMDP
+            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
             // for each observation contains the number of allocated memory states (initially 1)
             std::vector<uint64_t> observation_memory_size;
             
-            // inject 1 state to a selected observation
+            // inject 1 state into a selected observation
             void injectMemory(uint64_t observation);
             // set memory size to all observations
             void setMemorySize(uint64_t memory_size);
 
             // number of actions available at this observation
             std::vector<uint64_t> observation_actions;
-            // for each row contains its index in its row group
+            // for each row of a POMDP contains its index in its row group
             std::vector<uint64_t> prototype_row_index;
             
-            // design space associated with this POMDP
+            /** Design space associated with this POMDP. */
+
+            // total number of holes
             uint64_t num_holes;
+            // for each observation, a list of action holes
             std::vector<std::vector<uint64_t>> action_holes;
+            // for each observation, a list of memory holes
             std::vector<std::vector<uint64_t>> memory_holes;
+            // for each hole, its size
             std::vector<uint64_t> hole_options;
 
+            /** Unfolded MDP stuff. */
+
+            // for each state, its prototype state (reverse of prototype_duplicates)
+            std::vector<uint64_t> state_prototype;
+
+            // for each row, the corresponding action hole
             std::vector<uint64_t> row_action_hole;
+            // for each row, the corresponding option of the action hole
             std::vector<uint64_t> row_action_option;
+            // for each row, the corresponding memory hole
             std::vector<uint64_t> row_memory_hole;
+            // for each row, the corresponding option of the memory hole
             std::vector<uint64_t> row_memory_option;
 
             // MDP obtained after last injection (initially contains MDP-ized POMDP)
@@ -87,8 +104,6 @@ namespace storm {
             uint64_t num_states;
             // for each prototype state contains a list of its duplicates (including itself)
             std::vector<std::vector<uint64_t>> prototype_duplicates;
-            // for each state contains its prototype state (reverse of prototype_duplicates)
-            std::vector<uint64_t> state_prototype;
             // for each state contains its memory index
             std::vector<uint64_t> state_memory;
 

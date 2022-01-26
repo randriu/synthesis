@@ -14,7 +14,6 @@ from collections import defaultdict
 import logging
 logger = logging.getLogger(__name__)
 
-# TODO make SynthesizerPOMDP a subclass of Synthesizer?
 
 class SynthesizerPOMDP():
 
@@ -28,14 +27,12 @@ class SynthesizerPOMDP():
         pass
 
     def synthesize(self, family = None):
-        Profiler.start("synthesis")
         if family is None:
             family = self.sketch.design_space
         synthesizer = SynthesizerAR(self.sketch)
         # synthesizer = SynthesizerHybrid(self.sketch)
         assignment = synthesizer.synthesize(family)
         synthesizer.print_stats()
-        Profiler.stop()
         self.total_iters += synthesizer.stat.iterations_mdp
         return assignment
 
@@ -305,98 +302,130 @@ class SynthesizerPOMDP():
 
         Profiler.print()
 
-    def strategy_4(self):
-        
-        assert len(self.sketch.properties) == 0     # FIXME
+    
+    def strategy_5(self):
 
-        # start with k = 1
+        # assuming no constraints
+        assert not self.sketch.specification.constraints
+
+        # start with k=1
         self.sketch.quotient.pomdp_manager.set_memory_size(1)
-        for i in range(1):
 
-            # construct quotient
+        old_assignment = None
+
+        for iteration in range(5):
+            print("\n------------------------------------------------------------\n")
+            # construct the quotient
             self.sketch.quotient.unfold_partial_memory()
 
-            # compute scheduler for the quotient
+            # solve quotient MDP
             mdp = self.sketch.quotient.build()
-            mdp_result = mdp.model_check_property(self.sketch.optimality_property)
-            scheduler_selection = self.sketch.quotient.scheduler_selection(mdp, mdp_result.scheduler)
-            inconsistent_selection = {hole_index:options for hole_index,options in enumerate(scheduler_selection) if len(options) > 1}
+            mdp_matrix = mdp.model.transition_matrix
+            spec = mdp.check_specification(self.sketch.specification)
+            state_to_hole = self.sketch.quotient.quotient_relevant_holes
 
-            # synthesize optimum
-            optimal_assignment = self.synthesize()
-            assert optimal_assignment is not None # FIXME
+            # ? assuming that primary direction was not enough ?
+            assert spec.optimality_result.secondary is not None
+            
+            # store scheduler selection
+            result = spec.optimality_result.primary.result
+            mdp_scheduler = result.scheduler
+            mdp_choices = mdp_scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
 
-            # get numerical values associated with optimum
-            dtmc = self.sketch.quotient.build_dtmc(optimal_assignment)
-            print(dtmc.quotient_choice_map)
-            dtmc_result = dtmc.model_check_property(self.sketch.optimality_property).get_values()
+            # compute quantitative values associated with this scheduler
+            mdp_state_values = result.get_values()
+            mdp_choice_values = stormpy.synthesis.multiply_with_vector(mdp_matrix,mdp_state_values)
 
-            # map to MDP
-            # dtmc_result = [dtmc.quo]
+            # mdp_selection = self.sketch.quotient.scheduler_selection(mdp, mdp_scheduler)
 
-            print(dtmc_result)
-            exit()
+            # synthesize optimal assignment for k=1
+            synthesized_assignment = self.synthesize()
+            if synthesized_assignment is None:
+                # no new solution
+                if old_assignment is None:
+                    # sketch is unfeasible
+                    current_mem_size = self.sketch.quotient.pomdp_manager.observation_memory_size[0]
+                    self.sketch.quotient.pomdp_manager.set_memory_size(current_mem_size+1)
+                    continue
+                # translate previous assignment in terms of the new design space
+                logger.info("no new solution: adapting previous one ...")
+                hole_selection = [None] * self.sketch.design_space.num_holes
+                for obs in range(self.sketch.quotient.observations):
+                    
+                    # action holes
+                    old_holes = old_action_holes[obs]
+                    for index,hole in enumerate(self.sketch.quotient.pomdp_manager.action_holes[obs]):
+                        if not old_holes:
+                            hole_selection[hole] = [0]
+                            continue
+                        if index >= len(old_holes):
+                            index = 0
+                        old_hole = old_holes[index]
+                        hole_selection[hole] = [old_assignment[old_hole].options[0]]
+                    
+                    # memory holes
+                    old_holes = old_memory_holes[obs]
+                    for index,hole in enumerate(self.sketch.quotient.pomdp_manager.memory_holes[obs]):
+                        if not old_holes:
+                            hole_selection[hole] = [0]
+                            continue
+                        if index >= len(old_holes):
+                            index = 0
+                        old_hole = old_holes[index]
+                        hole_selection[hole] = [old_assignment[old_hole].options[0]]
+                        
+                synthesized_assignment = self.sketch.design_space.copy()
+                synthesized_assignment.assume_options(hole_selection)
+            
+            # compute choices induced by this assignment
+            synthesized_choices = self.sketch.quotient.select_actions(synthesized_assignment)
+            
+            # compare both choices state-wise
+            state_improvement = [0] * mdp.states
+            nci = mdp.model.nondeterministic_choice_indices
+            for state in range(mdp.states):
+                mdp_choice = None
+                syn_choice = None
+                for choice in range(nci[state],nci[state+1]):
+                    if mdp_choices.get(choice):
+                        assert mdp_choice is None
+                        mdp_choice = choice
+                    if synthesized_choices.get(choice):
+                        assert syn_choice is None
+                        syn_choice = choice
+                assert mdp_choice is not None and syn_choice is not None
+                if mdp_choice == syn_choice:
+                    continue
+                mdp_value = mdp_choice_values[mdp_choice]
+                syn_value = mdp_choice_values[syn_choice]
+                # assert mdp_value >= syn_value
+                improvement = abs(mdp_value - syn_value)
+                state_improvement[state] = improvement
 
-        Profiler.print()
+            # for each observation, compute average (potential) improvement across all of its states
+            obs_sum = [0] * self.sketch.quotient.observations
+            obs_cnt = [0] * self.sketch.quotient.observations
+            for state in range(mdp.states):
+                pomdp_state = self.sketch.quotient.pomdp_manager.state_prototype[state]
+                obs = self.sketch.quotient.pomdp.observations[pomdp_state]
+                obs_sum[obs] += state_improvement[state]
+                obs_cnt[obs] += 1
+            obs_avg = [obs_sum[obs] / obs_cnt[obs] for obs in range(self.sketch.quotient.observations)]
+            selected_observation = obs_avg.index(max(obs_avg))
+            print("observation labels: ", self.sketch.quotient.observation_labels)
+            print("avg improvement: ", obs_avg)
+            print("")
+            print("selected observation: ", selected_observation)
 
-    def strategy_5(self):
-        self.sketch.quotient.pomdp_manager.set_memory_size(1)
-        self.sketch.quotient.unfold_partial_memory()
+            self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
 
-        mdp = self.sketch.quotient.build()
-        spec = mdp.check_specification(self.sketch.specification)
-        state_to_hole = self.sketch.quotient.quotient_relevant_holes()
-        state_to_hole = {state:list(holes)[0] for state,holes in enumerate(state_to_hole) if len(holes) > 0}
-        hole_to_states = defaultdict(set)
-        for state,hole in state_to_hole.items():
-            hole_to_states[hole].add(state)
-        print(state_to_hole)
-        print(hole_to_states)
-        exit()
+            # store current design space for later
+            old_assignment = synthesized_assignment
+            old_action_holes = self.sketch.quotient.pomdp_manager.action_holes.copy()
+            old_memory_holes = self.sketch.quotient.pomdp_manager.memory_holes.copy()
 
-        print(spec)
-        assert spec.optimality_result is not None and spec.optimality_result.secondary is not None
-        values_min = spec.optimality_result.secondary.result.get_values()
-        values_max = spec.optimality_result.primary.result.get_values()
         
-        tm = mdp.model.transition_matrix
-        choice_values_min = stormpy.synthesis.multiply_with_vector(tm,values_min)
-        choice_values_max = stormpy.synthesis.multiply_with_vector(tm,values_max)
-        print(choice_values_min)
-        print(choice_values_max)
-        # exit()
-
-        for state in range(mdp.states):
-            # pstate = self.sketch.quotient.mdp_to_pomdp_state_map[state]
-            obs = self.sketch.quotient.pomdp.observations[state]
-            print("{} [{}], {}={}".format(state,obs, state_to_hole[state], len(state_to_hole[state])))
-
-            # action_hole = self.sketch.quotient.holes_action[obs][0]
-            # print(action_hole)
-            values_min = choice_values_min[tm.get_row_group_start(state):tm.get_row_group_end(state)]
-            print(values_min)
-            # for choice in :
-                # hole_options = self.sketch.quotient.action_to_hole_options[choice]
-                # print(choice_value[choice], hole_options)
-            # print(values)
-
-
         exit()
-        # for hole_index,hole in enumerate(self.sketch.design_space):
-
-
-        # exit()
-
-
-        #     print("--", hole)
-        #     for option in hole.options:
-        #         ds = self.sketch.design_space.copy()
-        #         ds[hole_index].assume_options([option])
-        #         # print(ds)
-                
-        #         print(spec)
-        #         # selection = self.mdp_scheduler(self.sketch.specification.optimality, ds)
-
         
 
 
@@ -409,9 +438,9 @@ class SynthesizerPOMDP():
     def run(self):
 
         # self.strategy()
-        self.strategy_2()
+        # self.strategy_2()
         # self.strategy_3()
-        # self.strategy_5()
+        self.strategy_5()
 
 
 

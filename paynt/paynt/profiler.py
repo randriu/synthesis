@@ -122,9 +122,9 @@ class Profiler:
     @staticmethod
     def resume():
         Profiler.stop()
-        assert len(Profiler.paused) > 0
-        Profiler.running = Profiler.paused.pop(-1)
-        Profiler.running.start()
+        if Profiler.paused:
+            Profiler.running = Profiler.paused.pop(-1)
+            Profiler.running.start()
     
     @staticmethod
     def start(timer_name = "-"):

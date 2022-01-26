@@ -13,7 +13,8 @@ class Synthesizer:
 
     def __init__(self, sketch):
         self.sketch = sketch
-        self.stat = Statistic(sketch, self.method_name)
+        self.stat = Statistic(sketch, self)
+        self.explored = 0
 
     @property
     def method_name(self):
@@ -22,6 +23,7 @@ class Synthesizer:
     
     def print_stats(self):
         print(self.stat.get_summary())
+        Profiler.print_all()
 
     def synthesize(self, family):
         """ to be overridden """
@@ -35,9 +37,10 @@ class Synthesizer:
             dtmc = self.sketch.quotient.build_chain(assignment)
             spec_result = dtmc.check_specification(self.sketch.specification)
             print("double-checking: ", spec_result)
-
-        Profiler.print_all()
         return assignment
+
+    def explore(self, family):
+        self.explored += family.size
 
         
 class Synthesizer1By1(Synthesizer):
@@ -57,7 +60,7 @@ class Synthesizer1By1(Synthesizer):
             chain = self.sketch.quotient.build_chain(assignment)
             self.stat.iteration_dtmc(chain.states)
             result = chain.check_specification(self.sketch.specification, short_evaluation = True)
-            self.stat.pruned(1)
+            self.explore(assignment)
 
             if not result.constraints_result.all_sat:
                 continue
@@ -112,7 +115,7 @@ class SynthesizerAR(Synthesizer):
                     self.sketch.specification.optimality.update_optimum(opt_result.value)
         
         if not can_improve:
-            self.stat.pruned(family.size)
+            self.explore(family)
             return False, satisfying_assignment
 
         feasibility = None if can_improve else False
@@ -132,6 +135,7 @@ class SynthesizerAR(Synthesizer):
         return prop, (hint_prim, hint_seco)
 
     def collect_analysis_hints(self, family):
+        return None # hints are disabled
         res = family.analysis_result
         analysis_hints = dict()
         for index in res.constraints_result.undecided_constraints:
@@ -143,17 +147,15 @@ class SynthesizerAR(Synthesizer):
         return analysis_hints
 
     def split_family(self, family):
-        Profiler.start("family splitting")
-        # filter undecided constraints
+        # filter undecided constraints, collect analysis hints
         res = family.analysis_result
         undecided = res.constraints_result.undecided_constraints
         analysis_hints = self.collect_analysis_hints(family)
 
+        # split
         subfamilies = self.sketch.quotient.split(family.mdp)
-        
         for subfamily in subfamilies:
             subfamily.set_analysis_hints(undecided, analysis_hints)
-        Profiler.resume()
         return subfamilies
 
     def synthesize(self, family):
@@ -178,7 +180,6 @@ class SynthesizerAR(Synthesizer):
             # undecided
             subfamilies = self.split_family(family)            
             families = families + subfamilies
-
 
         Profiler.stop()
         self.stat.finished(satisfying_assignment)
@@ -269,7 +270,7 @@ class SynthesizerCEGIS(Synthesizer):
             assert not (c.reward and not c.minimizing), msg
 
         # map mdp states to hole indices
-        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
+        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes
 
         # initialize CE generator
         formulae = self.sketch.specification.stormpy_formulae()
@@ -385,7 +386,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         self.stage_control = StageControl(family.size)
 
-        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes()
+        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes
         formulae = self.sketch.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
@@ -436,8 +437,8 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             if sat:
                 break
             if assignment is None:
+                self.explore(family)
                 self.stage_control.prune_cegis(family.size)
-                self.stat.pruned(family.size)
                 continue
         
             # CEGIS could not process the family: split
