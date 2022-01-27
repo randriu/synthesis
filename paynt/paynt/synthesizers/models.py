@@ -59,9 +59,6 @@ class MarkovChain:
                 self.hole_to_states[hole].add(state)
         self.hole_redundant = [len(self.hole_to_states[hole]) == 0 for hole in design_space.hole_indices]
         self.hole_simple = [len(self.hole_to_states[hole]) == 1 for hole in design_space.hole_indices]
-        # print(self.hole_to_states)
-        # print(self.hole_redundant)
-        # print(self.hole_simple)
 
         self.analysis_hints = None
     
@@ -165,11 +162,17 @@ class MDP(MarkovChain):
         if not primary.sat:
             return MdpPropertyResult(prop, primary, None, False)
 
-        # no need to check secondary direction if the primary direction is SAT
-        # and the corresponding scheduler is consistent
-        # TODO
-        if self.is_dtmc:
-            return MdpPropertyResult(prop, primary, None, primary.sat)
+        # primary direction is SAT
+        # check if the primary scheduler is consistent
+        consistent = True
+        if not self.is_dtmc:
+            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
+            if not consistent:
+                self.scheduler_results[prop] = (result,assignment,scores)
+        
+        # primary scheduler is sufficient
+        if consistent:
+            return MdpPropertyResult(prop, primary, None, True)
         
         # primary direction is not sufficient
         secondary = self.model_check_property(prop, alt = True)
@@ -206,9 +209,9 @@ class MDP(MarkovChain):
             assignment = [[hole.options[0]] for hole in self.design_space]
             consistent = True
         else:
-            result = primary.result
-            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, result)
-            self.scheduler_results[prop] = (result,assignment,scores)
+            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
+            if not consistent:
+                self.scheduler_results[prop] = (primary.result,assignment,scores)
         if consistent:
             # LB is tight and LB < OPT
             hole_options = self.design_space.copy()

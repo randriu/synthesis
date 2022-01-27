@@ -44,6 +44,9 @@ prerequisites-prepare() {
     cd -
 }
 
+alias enva='source $SYNTHESIS_ENV/bin/activate'
+alias envd='deactivate'
+
 python-environment() {
     pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
@@ -122,29 +125,33 @@ storm-build-debug() {
 
 stormpy-build() {
     cd $SYNTHESIS/stormpy
-    source $SYNTHESIS_ENV/bin/activate
+    enva
     python3 setup.py build_ext --build-temp $STORMPY_BLD --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
     # python3 setup.py test
-    deactivate
+    envd
     cd ~-
 }
 
 stormpy-build-debug() {
     cd $SYNTHESIS/stormpy
-    source $SYNTHESIS_ENV/bin/activate
+    enva
     python3 setup.py build_ext --build-temp $STORMPY_BLD --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
-    deactivate
+    envd
     cd ~-
 }
 
 paynt-install() {
     cd $PAYNT_DIR
-    source $SYNTHESIS_ENV/bin/activate
+    enva
     python3 setup.py install
     # python3 setup.py test
-    deactivate
+    envd
     cd ~-
+}
+
+paynt-check() {
+    cd $PAYNT_DIR
 }
 
 synthesis-install() {
@@ -179,6 +186,9 @@ synthesis-install() {
     stormpy-build
     # install paynt
     paynt-install
+
+    # check
+    paynt workspace/examples/coin
 }
 
 ### development ################################################################
@@ -196,10 +206,14 @@ synthesis-install() {
 export WORKSPACE=$SYNTHESIS/workspace
 export DYNASTY_LOG=$WORKSPACE/log
 
-alias enva='source $SYNTHESIS_ENV/bin/activate'
-alias envd='deactivate'
-
 function paynt() {
+    local project=$1
+    enva
+    python3 $PAYNT_DIR/paynt.py --project ${project} ar
+    envd
+}
+
+function paynt-execute() {
     local core=0
     if [ -n "$1" ]; then
         core=$1
@@ -210,16 +224,16 @@ function paynt() {
     mkdir -p $DYNASTY_LOG
     cd $DYNASTY_LOG
     cp $exp_sh $run_sh
-    source $SYNTHESIS_ENV/bin/activate
+    enva
     bash $run_sh $core
-    deactivate
+    envd
     cd ~-
 }
 function d() {
-    paynt $1
+    paynt-execute $1
 }
 function db() {
-    paynt $1 & disown
+    paynt-execute $1 & disown
 }
 
 alias dpid='pgrep -f "^python3 .*/paynt.py .*"'

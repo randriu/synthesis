@@ -107,11 +107,10 @@ class QuotientContainer:
         '''
         Profiler.start("quotient::scheduler_selection_quantitative")
 
-
         # get qualitative scheduler selection, filter inconsistent assignments        
         selection = self.scheduler_selection(mdp, result.scheduler)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
-        if not inconsistent_assignments:
+        if len(inconsistent_assignments) == 0:
             return selection,None
         
         choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix,result.get_values())
@@ -262,6 +261,7 @@ class QuotientContainer:
         # split family wrt last undecided result
         assert mdp.scheduler_results is not None
         result,hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
+        assert scores is not None
         scores = [scores[hole_index] if hole_index in scores else 0 for hole_index in mdp.design_space.hole_indices]
         
         # inconsistent = self.most_inconsistent_holes(hole_assignments)

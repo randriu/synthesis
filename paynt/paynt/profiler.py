@@ -84,6 +84,7 @@ class Profiler:
     def print_all():
         time_total = Profiler.timer_total.read()
         covered = 0
+        print("profiling report:")
         for timer_name, timer in Profiler.timers.items():
             t = timer.read()
             covered += t
