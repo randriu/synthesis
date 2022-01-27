@@ -110,7 +110,7 @@ class QuotientContainer:
 
         # get qualitative scheduler selection, filter inconsistent assignments        
         selection = self.scheduler_selection(mdp, result.scheduler)
-        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options)>1}
+        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
         if not inconsistent_assignments:
             return selection,None
         

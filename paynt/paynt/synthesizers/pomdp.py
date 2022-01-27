@@ -313,7 +313,7 @@ class SynthesizerPOMDP():
 
         old_assignment = None
 
-        for iteration in range(5):
+        for iteration in range(2):
             print("\n------------------------------------------------------------\n")
             # construct the quotient
             self.sketch.quotient.unfold_partial_memory()
@@ -394,12 +394,21 @@ class SynthesizerPOMDP():
                         assert syn_choice is None
                         syn_choice = choice
                 assert mdp_choice is not None and syn_choice is not None
+                pomdp_state = self.sketch.quotient.pomdp_manager.state_prototype[state]
+                obs = self.sketch.quotient.pomdp.observations[pomdp_state]
+                
+                if obs == 0:
+                    print(f"state {state} [{self.sketch.quotient.pomdp.state_valuations.get_string(pomdp_state)}] (obs={obs}): {syn_choice} -> {mdp_choice}", flush=True)
+                    pm = self.sketch.quotient.pomdp_manager
+                    print(pm.row_action_hole[syn_choice],pm.row_action_option[syn_choice]," -> ", end="")
+                    print(pm.row_action_hole[mdp_choice],pm.row_action_option[mdp_choice],flush=True)
                 if mdp_choice == syn_choice:
                     continue
                 mdp_value = mdp_choice_values[mdp_choice]
                 syn_value = mdp_choice_values[syn_choice]
-                # assert mdp_value >= syn_value
                 improvement = abs(mdp_value - syn_value)
+                if obs == 0:
+                    print(f"improvement in state {state} (obs = {obs}): {syn_value} -> {mdp_value}  = {improvement}", flush=True)
                 state_improvement[state] = improvement
 
             # for each observation, compute average (potential) improvement across all of its states

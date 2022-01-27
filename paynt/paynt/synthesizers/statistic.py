@@ -49,7 +49,7 @@ class Statistic:
 
         self.timer = Timer()
 
-        self.status_period = 1
+        self.status_period = 5
         self.status_time = self.status_period
 
     def start(self):
