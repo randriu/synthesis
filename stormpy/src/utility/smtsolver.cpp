@@ -27,12 +27,12 @@ void define_smt(py::module& m) {
             .def("reset", &SmtSolver::reset, "reset")
             .def("add", [](SmtSolver& solver, storm::expressions::Expression const& expr) {solver.add(expr);}, "addconstraint")
             .def("check", &SmtSolver::check, "check")
-            .def_property_readonly("model", &SmtSolver::getModel, "get the model")
-            .def("check_with_assumptions", [](SmtSolver& solver, std::set<storm::expressions::Expression> const& assumptions) {return solver.checkWithAssumptions(assumptions);}, "check", py::arg("assumptions")) //+
-            ;
+            .def_property_readonly("model", &SmtSolver::getModel, "get the model");
 
     py::class_<Z3SmtSolver> z3solver(m, "Z3SmtSolver", "z3 API for storm smtsolver wrapper", smtsolver);
     z3solver.def(pybind11::init<storm::expressions::ExpressionManager&>());
 
-    py::class_<storm::utility::solver::SmtSolverFactory, std::shared_ptr<storm::utility::solver::SmtSolverFactory>> (m, "SmtSolverFactory", "Factory for creating SMT Solvers");
+    py::class_<storm::utility::solver::SmtSolverFactory, std::shared_ptr<storm::utility::solver::SmtSolverFactory>> smtfactory(m, "SmtSolverFactory", "Factory for creating SMT Solvers");
+    py::class_<storm::utility::solver::Z3SmtSolverFactory, std::shared_ptr<storm::utility::solver::Z3SmtSolverFactory>> z3factory(m, "Z3SmtSolverFactory", "Factory for creating z3 based SMT solvers", smtfactory);
+    z3factory.def(py::init<>());
 }

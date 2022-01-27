@@ -201,7 +201,6 @@ namespace storm {
                                 actionval = *pomdp.getChoiceLabeling().getLabelsOfChoice(rowIndexFrom).begin();
                             }
                         }
-
                         STORM_LOG_THROW(false, storm::exceptions::AmbiguousModelException, "Observation " << observation << " sometimes provides multiple actions, but in state " <<  state << stateval << " provides only one action " << actionval << ".");
                     }
                     oneActionObservations.set(observation);
@@ -274,10 +273,10 @@ namespace storm {
 
                         std::cout << "Observation " << observation << ": ";
                         detail::actionIdentifiersToStream(std::cout, observationActionIdentifiers[observation], labelStorage);
-                        std::cout << " according to state " << actionIdentifierDefinition[observation] << "." <<  std::endl;
+                        std::cout << " according to state " << actionIdentifierDefinition[observation] << ".\n";
                         std::cout << "Observation " << observation << ": ";
                         detail::actionIdentifiersToStream(std::cout, actionIdentifiers, labelStorage);
-                        std::cout << " according to state " << state << "." <<  std::endl;
+                        std::cout << " according to state " << state << ".\n";
 
                         STORM_LOG_THROW(false, storm::exceptions::AmbiguousModelException, "Actions identifiers do not align between states \n\t" <<  getStateInformation(state) << "\nand\n\t" << getStateInformation(actionIdentifierDefinition[observation]) << "\nboth having observation " << observation  << ". See output above for more information.");
                     }

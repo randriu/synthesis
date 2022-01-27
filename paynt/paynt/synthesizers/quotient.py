@@ -71,16 +71,16 @@ class QuotientContainer:
     def build(self, design_space = None):
         if design_space is None or design_space == self.sketch.design_space:
             design_space = self.sketch.design_space
-            return MDP(self.quotient_mdp, design_space, self)
+            return MDP(self.quotient_mdp, self, None, None, design_space)
         selected_actions = self.select_actions(design_space)
         model,state_map,choice_map = self.restrict_quotient(selected_actions)
-        return MDP(model, design_space, self, state_map, choice_map)
+        return MDP(model, self, state_map, choice_map, design_space)
 
     def build_chain(self, design_space):
         assert design_space.size == 1
         selected_actions = self.select_actions(design_space)
         model,state_map,choice_map = self.restrict_quotient(selected_actions)
-        return DTMC(model,state_map,choice_map)
+        return DTMC(model,self,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):
         ''' Get hole options involved in the scheduler selection. '''
@@ -243,6 +243,18 @@ class QuotientContainer:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
+    def reduce_simple_holes(self, mdp, hole_assignments):
+        '''
+        For each simple hole in the MDP, fix its options to the single option
+        provided by the scheduler.
+        '''
+        design_space = mdp.design_space
+        for hole_index in design_space.hole_indices:
+            if mdp.hole_simple[hole_index]:
+                assert len(hole_assignments[hole_index]) == 1
+                design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+
+
     def split(self, mdp):
         assert not mdp.is_dtmc
         Profiler.start("quotient::split")
@@ -257,7 +269,6 @@ class QuotientContainer:
         # splitters = self.holes_with_max_score(hole_sizes)
 
         splitters = self.holes_with_max_score(scores)        
-
         splitter = splitters[0]
         
         # split
@@ -267,6 +278,8 @@ class QuotientContainer:
         assert len(hole_assignments[splitter]) > 1
         # suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
         suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
+
+        # self.reduce_simple_holes(mdp, hole_assignments)
 
         # construct corresponding design subspaces
         Profiler.start("    create subspaces")
@@ -352,7 +365,7 @@ class MDPQuotientContainer(QuotientContainer):
 
     def build_chain(self, assignment):
         model = self.sketch.restrict_prism(assignment)
-        return MDP(model, assignment, self)
+        return MDP(model, self, None, None, assignment)
 
 
 class POMDPQuotientContainer(QuotientContainer):
@@ -442,11 +455,18 @@ class POMDPQuotientContainer(QuotientContainer):
         return output
 
     def unfold_partial_memory(self):
+        
+        # reset attributes
+        self.quotient_mdp = None
+        self.default_actions = None        
+        self.action_to_hole_options = None
+        self._quotient_relevant_holes = None
+        
+        self.quotient_mdp = self.pomdp_manager.construct_mdp()
 
-        pomdp = self.pomdp
+        # shortcuts
         pm = self.pomdp_manager
-
-        self.quotient_mdp = pm.construct_mdp()
+        pomdp = self.pomdp
         mdp = self.quotient_mdp
         
         # create holes

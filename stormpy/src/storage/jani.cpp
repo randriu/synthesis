@@ -1,6 +1,6 @@
 #include "jani.h"
 #include <storm/storage/jani/Model.h>
-#include <storm/storage/jani/JSONExporter.h>
+#include <storm/storage/jani/visitor/JSONExporter.h>
 #include <storm/storage/expressions/ExpressionManager.h>
 #include <storm/logic/RewardAccumulationEliminationVisitor.h>
 #include <storm/storage/jani/traverser/InformationCollector.h>
@@ -135,8 +135,6 @@ void define_jani(py::module& m) {
             return py::make_iterator(v.begin(), v.end());
         }, py::keep_alive<0, 1>())
         .def("add_variable", [](VariableSet& vs, Variable& v) -> void { vs.addVariable(v); })
-        .def("add_bounded_integer_variable", [](VariableSet& vs, BoundedIntegerVariable& v) -> auto& { return vs.addVariable(v); }, py::return_value_policy::reference_internal, "variable"_a)
-        .def("add_real_variable", [](VariableSet& vs, RealVariable& v) -> auto& { return vs.addVariable(v); }, py::return_value_policy::reference_internal, "variable"_a)
         .def("empty", &VariableSet::empty, "is there a variable in the set?")
         .def("get_variable_by_name", [](VariableSet& v, std::string const& name) -> auto& { return v.getVariable(name);})
         .def("get_variable_by_expr_variable", [](VariableSet& v, storm::expressions::Variable const& var) -> auto& { return v.getVariable(var);})
@@ -146,25 +144,7 @@ void define_jani(py::module& m) {
     py::class_<Variable, std::shared_ptr<Variable>> variable(m, "JaniVariable", "A Variable in JANI");
     variable.def_property_readonly("name", &Variable::getName, "name of constant")
             .def_property_readonly("expression_variable", &Variable::getExpressionVariable, "expression variable for this variable")
-            .def_property_readonly("init_expression", &Variable::getInitExpression)
-            .def_property_readonly("is_real_variable", &Variable::isRealVariable)
-            .def_property_readonly("is_bounded_integer_variable", &Variable::isBoundedIntegerVariable);
-
-    py::class_<BoundedIntegerVariable, std::shared_ptr<BoundedIntegerVariable>> bivariable(m, "JaniBoundedIntegerVariable", "A Bounded Integer", variable);
-    bivariable.def(py::init<std::string, storm::expressions::Variable, storm::expressions::Expression, storm::expressions::Expression, storm::expressions::Expression>(),
-                "name"_a, "expression_variable"_a, "init_value"_a, "lower_bound"_a, "upper_bound"_a)
-            .def(py::init<std::string, storm::expressions::Variable, storm::expressions::Expression, storm::expressions::Expression>(),
-                 "name"_a, "expression_variable"_a, "lower_bound"_a, "upper_bound"_a)
-            .def_property_readonly("lower_bound", &BoundedIntegerVariable::getLowerBound)
-            .def_property_readonly("upper_bound", &BoundedIntegerVariable::getUpperBound)
-    ;
-
-    py::class_<RealVariable, std::shared_ptr<RealVariable>> realvariable(m, "JaniRealVariable", "A Real Variable", variable);
-    realvariable.def(py::init<std::string, storm::expressions::Variable, storm::expressions::Expression, bool>(),
-                "name"_a, "expression_variable"_a, "init_value"_a, "transient"_a)
-                .def(py::init<std::string, storm::expressions::Variable>(),
-                "name"_a, "expression_variable"_a)
-    ;
+            .def_property_readonly("init_expression", &Variable::getInitExpression);
 
     py::class_<Constant, std::shared_ptr<Constant>> constant(m, "JaniConstant", "A Constant in JANI");
     constant.def(py::init<std::string, storm::expressions::Variable>())
@@ -199,7 +179,7 @@ void define_jani_transformers(py::module& m) {
     py::class_<JaniLocationExpander>(m, "JaniLocationExpander", "A transformer for Jani expanding variables into locations")
             .def(py::init<Model const&>(), py::arg("model"))
             .def("transform", &JaniLocationExpander::transform, py::arg("automaton_name"), py::arg("variable_name"))
-            .def("get_result", &JaniLocationExpander::getResult);
+        ;
 
     py::class_<JaniScopeChanger>(m, "JaniScopeChanger", "A transformer for Jani changing variables from local to global and vice versa")
             .def(py::init<>())

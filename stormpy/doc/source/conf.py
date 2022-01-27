@@ -62,7 +62,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'stormpy'
-copyright = '2016-2020 Moves RWTH Aachen'
+copyright = '2016-2021 Moves RWTH Aachen'
 author = 'Sebastian Junges, Matthias Volk'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -101,9 +101,9 @@ add_module_names = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'bootstrap'
+html_theme = 'fixedbootstrap'
 
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme_path = ["themes"] + sphinx_bootstrap_theme.get_html_theme_path()
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -125,7 +125,7 @@ html_theme_options = {
     # Note the "1" or "True" value above as the third argument to indicate
     # an arbitrary url.
     'navbar_links': [
-        ("Storm", "http://stormchecker.org", True),
+        ("Storm", "https://www.stormchecker.org", True),
         ("Github", "https://github.com/moves-rwth/stormpy", True)
     ],
 
@@ -173,6 +173,8 @@ html_theme_options = {
     # Values: "3" (default) or "2" (in quotes)
     'bootstrap_version': "3",
 }
+
+html_sidebars = {'**': ['localtoc.html']}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -26,7 +26,7 @@ endmodule
 
 module die2 = die1 [ s1=s2, s2=s1, d1=d2, p1=p2 ] endmodule
 
-rewards "coin_flips"
+rewards "coinflips"
 	[] s1<7 | s2<7 : 1;
 endrewards
 

@@ -129,3 +129,37 @@ class TestTransformation:
         assert len(ma_formulas_elim) == 1
         result = stormpy.model_checking(ma_elim, ma_formulas_elim[0])
         assert math.isclose(result.at(initial_state), 1)
+
+class TestECElimination:
+    def test_elimination_on_two_dice(self):
+        program = stormpy.parse_prism_program(get_example_path("mdp", "two_dice.nm"))
+        formulas = stormpy.parse_properties_for_prism_program("P=? [ F \"two\" ]", program)
+        model = stormpy.build_model(program, formulas)
+        subsystem = stormpy.BitVector(model.nr_states, True)
+        possible_ec_rows = stormpy.BitVector(model.nr_choices, True)
+        add_sink_rows = subsystem
+        ec_elimination_result = stormpy.eliminate_ECs(model.transition_matrix, subsystem, possible_ec_rows, add_sink_rows, True)
+        assert ec_elimination_result.matrix.nr_rows == 218
+        assert ec_elimination_result.matrix.nr_columns == model.nr_states
+        assert ec_elimination_result.old_to_new_state_mapping[23] == 23
+        assert ec_elimination_result.new_to_old_row_mapping[200] == 245
+        assert ec_elimination_result.sink_rows.number_of_set_bits() == 36
+
+class TestSubsystemCreation:
+    def test_for_ctmc(self):
+        program = stormpy.parse_prism_program(get_example_path("ctmc", "polling2.sm"), True)
+        formulas = stormpy.parse_properties_for_prism_program("P=? [ F<=3 \"target\" ]", program)
+        model = stormpy.build_model(program, formulas)
+        assert model.nr_states == 12
+        selected_outgoing_transitions = stormpy.BitVector(model.nr_states, True)
+        selected_outgoing_transitions.set(3, False)
+        selected_outgoing_transitions.set(6, False)
+        options = stormpy.SubsystemBuilderOptions()
+        options.fix_deadlocks = True
+        submodel_result = stormpy.construct_submodel(model, stormpy.BitVector(model.nr_states, True), selected_outgoing_transitions, False, options)
+        submodel = submodel_result.model
+        abort_label = submodel_result.deadlock_label
+        assert submodel.nr_states == 8
+        assert abort_label == "deadl"
+        assert "deadl" in submodel.labeling.get_labels()
+

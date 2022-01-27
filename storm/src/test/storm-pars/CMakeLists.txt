@@ -9,10 +9,10 @@ register_source_groups_from_filestructure("${ALL_FILES}" test)
 # Note that the tests also need the source files, except for the main file
 include_directories(${GTEST_INCLUDE_DIR})
 
-foreach (testsuite analysis modelchecker utility)
+foreach (testsuite analysis modelchecker utility derivative)
 
 	  file(GLOB_RECURSE TEST_${testsuite}_FILES ${STORM_TESTS_BASE_PATH}/${testsuite}/*.h ${STORM_TESTS_BASE_PATH}/${testsuite}/*.cpp)
-      add_executable (test-pars-${testsuite} ${TEST_${testsuite}_FILES} ${STORM_TESTS_BASE_PATH}/storm-test.cpp)
+      add_executable (test-pars-${testsuite} ${TEST_${testsuite}_FILES} ${STORM_TESTS_BASE_PATH}/storm-test.cpp analysis/MonotonicityCheckerTest.cpp)
 	  target_link_libraries(test-pars-${testsuite} storm-pars storm-parsers)
 	  target_link_libraries(test-pars-${testsuite} ${STORM_TEST_LINK_LIBRARIES})
 

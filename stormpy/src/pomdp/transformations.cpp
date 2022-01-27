@@ -45,6 +45,7 @@ void define_transformations_nt(py::module &m) {
             .value("simple_log", storm::transformer::PomdpFscApplicationMode::SIMPLE_LOG)
             .value("full", storm::transformer::PomdpFscApplicationMode::FULL)
             ;
+
 }
 
 template<typename ValueType>

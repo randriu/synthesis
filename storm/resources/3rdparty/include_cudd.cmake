@@ -36,9 +36,9 @@ endif()
 
 set(CUDD_CXX_COMPILER "${CMAKE_CXX_COMPILER}")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-	if (CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 12.0.0.12000032)
+	if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 12.0.0.12000032)
 		if (CMAKE_HOST_SYSTEM_VERSION VERSION_GREATER_EQUAL 20.1.0)
-			message(WARNING "There is a known issue when compiling CUDD on *this* version of macOS using *this* version of AppleClang. A workaround that appears to solve the issue is to set the c++ compiler for CUDD to 'c++'. If you are compiling Storm with the default compiler of your system (which should almost always be the case), this is not a problem and you can safely ignore this warning. Please contact the Storm developers if you keep having issues.")
+			message(WARNING "There are some known issues compiling CUDD on some setups. We implemented a workaround that mostly works, but if you still have problems compiling CUDD, especially if you do not use the default compiler of your system, please contact the Storm developers.")
 			# The issue is known to occur using the Command Line Tools for XCode 12.2. Apparently, it is fixed in the beta for XCode 12.3. 
 			set(CUDD_CXX_COMPILER "c++")
 		endif()
@@ -54,7 +54,7 @@ ExternalProject_Add(
         PATCH_COMMAND ${AUTORECONF}
         CONFIGURE_COMMAND ${STORM_3RDPARTY_SOURCE_DIR}/cudd-3.0.0/configure --enable-shared --enable-obj --with-pic=yes --prefix=${STORM_3RDPARTY_BINARY_DIR}/cudd-3.0.0 --libdir=${CUDD_LIB_DIR} CC=${CMAKE_C_COMPILER} CXX=${CUDD_CXX_COMPILER} ${CUDD_INCLUDE_FLAGS}
         BUILD_COMMAND make ${STORM_CUDD_FLAGS}
-        INSTALL_COMMAND make install
+        INSTALL_COMMAND make install -j${STORM_RESOURCES_BUILD_JOBCOUNT}
         BUILD_IN_SOURCE 0
         LOG_CONFIGURE ON
         LOG_BUILD ON

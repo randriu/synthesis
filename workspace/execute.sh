@@ -79,7 +79,7 @@ function run() {
     parallel=false
     verbose=true
 
-    pomdp=true
+    # pomdp=true
 
     # running ##########
 
@@ -87,7 +87,7 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    model="pomdp/maze/concise"
+    # model="pomdp/maze/concise"
     # model="pomdp/maze/2"
     
     # model="pomdp/drone"
@@ -102,7 +102,7 @@ function run() {
     # model="pomdp/grid/simple-mo"
 
     # model="pomdp/grid/refuel"
-    # model="pomdp/grid/obstacle"
+    model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"
 
@@ -121,8 +121,8 @@ function run() {
 
     # model="mdp"
 
-    # ar $model
-    hybrid $model
+    ar $model
+    # hybrid $model
 }
 
 # --- execution ----------------------------------------------------------------

@@ -1,3 +1,4 @@
+
 Changelog
 ==============
 
@@ -8,18 +9,45 @@ The releases of major and minor versions contain an overview of changes since th
 Version 1.6.x
 -------------
 
+## Version 1.6.4 (2022/01)
+- Added support for model checking LTL properties in the sparse (and dd-to-sparse) engine. Requires building with Spot or an external LTL to deterministic automaton converter (using option `--ltl2datool`).
+- Added cmake options `STORM_USE_SPOT_SYSTEM` and `STORM_USE_SPOT_SHIPPED` to facilitate building Storm with [Spot](https://spot.lrde.epita.fr/).
+- Improved parsing of formulas in PRISM-style syntax.
+- Added export of schedulers that use memory (in particular optimizing schedulers for LTL properties)
+- Added support for PRISM models that use unbounded integer variables.
+- Added support for nested arrays in JANI.
+- Added `--location-elimination` that can be applied to Jani DTMC models to reduce the size of the resulting Markov models, see [here](https://arxiv.org/abs/2011.00983).
+- Added an export of check results to json. Use `--exportresult` in the command line interface.
+- Added `--exportbuilt` option that exports the built model in various formats. Deprecates `--io:exportexplicit`, `--io:exportdd` and `--io:exportdot`
+- Added export of built model in .json. which can be used to debug and explore the model.
+- Added computation of steady state probabilities for DTMC/CTMC in the sparse engine. Use `--steadystate` in the command line interface.
+- Added computation of the expected number of times each state in a DTMC/CTMC is visited (sparse engine). Use `--expvisittimes` in the command line interface.
+- Implemented parsing and model building of Stochastic multiplayer games (SMGs) in the PRISM language. No model checking implemented (yet).
+- API: Simulation of prism-models 
+- API: Model-builder takes a callback function to prevent extension of particular actions, prism-to-explicit mapping can be exported
+- API: Export of dice-formatted expressions
+- Prism-language/explicit builder: Allow action names in commands writing to global variables if these (clearly) do not conflict with assignments of synchronizing commads.
+- Prism-language: n-ary predicates are supported (e.g., ExactlyOneOf)
+- Added support for continuous integration with Github Actions.
+- `storm-pars`: Exploit monotonicity for computing extremal values and parameter space partitioning.
+- `storm-dft`: Support for analysis of static fault trees via BDDs (Flag `--bdd`). In particular, efficient computation of multiple time bounds was added and support for several importance measures (Argument `--importance`).
+- `storm-dft`: Computation of minimal cut sets for static fault trees (Flag `--mcs`).
+- `storm-dft`: Improved modularisation for DFT by exploiting SFT analysis via BDDs.
+- `storm-dft`: Fixed don't care propagation for shared SPAREs which resulted in wrong results.
+- Developer: Added support for automatic code formatting and corresponding CI workflow.
+
 ## Version 1.6.3 (2020/11)
 - Added support for multi-objective model checking of long-run average objectives including mixtures with other kinds of objectives.
-- Added support for generating optimal schedulers for globally formulae
-- Simulator supports exact arithmetic
-- Added switch `--no-simplify` to disable simplification of PRISM programs (which sometimes costs a bit of time on extremely large inputs)
-- Fixed issues with JANI inputs concerning 
+- Added support for generating optimal schedulers for globally formulae.
+- Simulator supports exact arithmetic.
+- Added switch `--no-simplify` to disable simplification of PRISM programs (which sometimes costs a bit of time on extremely large inputs).
+- Fixed issues with JANI inputs concerning .
     - transient variable expressions in properties,
     - constants in properties, and
     - integer variables with either only an upper or only a lower bound.
-- `storm-pomdp`: States can be labelled with values for observable predicates
-- `storm-pomdp`: (Only API) Track state estimates
-- `storm-pomdp`: (Only API) Reduce computation of state estimates to computation on unrolled MDP
+- `storm-pomdp`: States can be labelled with values for observable predicates.
+- `storm-pomdp`: (Only API) Track state estimates.
+- `storm-pomdp`: (Only API) Reduce computation of state estimates to computation on unrolled MDP.
 
 ## Version 1.6.2 (2020/09)
 - Prism program simplification improved.

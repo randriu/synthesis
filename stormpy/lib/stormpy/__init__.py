@@ -241,19 +241,20 @@ def perform_sparse_bisimulation(model, properties, bisimulation_type):
         return core._perform_bisimulation(model, formulae, bisimulation_type)
 
 
-def perform_symbolic_bisimulation(model, properties):
+def perform_symbolic_bisimulation(model, properties, quotient_format=stormpy.QuotientFormat.DD):
     """
     Perform bisimulation on model in symbolic representation.
     :param model: Model.
     :param properties: Properties to preserve during bisimulation.
+    :param quotient_format: Return format of quotient.
     :return: Model after bisimulation.
     """
     formulae = [(prop.raw_formula if isinstance(prop, Property) else prop) for prop in properties]
     bisimulation_type = BisimulationType.STRONG
     if model.supports_parameters:
-        return core._perform_symbolic_parametric_bisimulation(model, formulae, bisimulation_type)
+        return core._perform_symbolic_parametric_bisimulation(model, formulae, bisimulation_type, quotient_format)
     else:
-        return core._perform_symbolic_bisimulation(model, formulae, bisimulation_type)
+        return core._perform_symbolic_bisimulation(model, formulae, bisimulation_type, quotient_format)
 
 
 def model_checking(model, property, only_initial_states=False, extract_scheduler=False, force_fully_observable=False, environment=Environment()):
@@ -479,6 +480,14 @@ def topological_sort(model, forward=True, initial=[]):
         raise StormError("Unknown kind of model.")
 
 
+def get_reachable_states(model, initial_states, constraint_states, target_states, maximal_steps = None, choice_filter = None ):
+    if model.supports_parameters:
+        return core._get_reachable_states_rf(model, initial_states, constraint_states, target_states, maximal_steps, choice_filter)
+    if model.is_exact:
+        return core._get_reachable_states_exact(model, initial_states, constraint_states, target_states, maximal_steps, choice_filter)
+    return core._get_reachable_states_double(model, initial_states, constraint_states, target_states, maximal_steps, choice_filter)
+
+
 def construct_submodel(model, states, actions, keep_unreachable_states=True, options=SubsystemBuilderOptions()):
     """
 
@@ -486,12 +495,37 @@ def construct_submodel(model, states, actions, keep_unreachable_states=True, opt
     :param states: Which states should be preserved
     :param actions: Which actions should be preserved
     :param keep_unreachable_states: If False, run a reachability analysis.
+    :param options: An options object of type SubsystemBuilderOptions
     :return: A model with fewer states/actions
     """
-    if isinstance(model, storage._SparseModel):
-        return core._construct_subsystem_double(model, states, actions, keep_unreachable_states, options)
-    else:
-        raise NotImplementedError()
+    if model.supports_parameters:
+        return core._construct_subsystem_RatFunc(model, states, actions, keep_unreachable_states, options)
+    if model.is_exact:
+        return core._construct_subsystem_Exact(model, states, actions, keep_unreachable_states, options)
+    return core._construct_subsystem_Double(model, states, actions, keep_unreachable_states, options)
+
+
+def eliminate_ECs(matrix, subsystem, possible_ecs, add_sink_row_states, add_self_loop_at_sink_states = False):
+    """
+    For each such EC (that is not contained in another EC), we add a new state and redirect all incoming and outgoing
+             transitions of the EC to (and from) this state.
+
+    :param matrix:
+    :param subsystem: BitVector with states many entries. Only states in the given subsystem are kept. Transitions leading to a state outside of the subsystem will be
+             removed (but the corresponding row is kept, possibly yielding empty rows).
+             The ECs are then identified on the subsystem.
+    :param possible_ecs: BitVector with rows many entries. Only ECs for which possible_ecs is true for all choices are considered.
+             Furthermore, the rows that contain a transition leading outside of the subsystem are not considered for an EC.
+    :param add_sink_row_states: BitVector with states many entries. If add_sink_row_states is true for at least one state of an eliminated EC, a row is added to the new state (representing the choice to stay at the EC forever).
+    :param add_self_loop_at_sink_states: if true, such rows get a selfloop (with value 1). Otherwise, the row remains empty.
+    :return: A container with various information.
+    """
+    assert matrix.nr_columns == subsystem.size(), "subsystem vector should have an entry for every state."
+    assert matrix.nr_rows == possible_ecs.size(), "possible_ecs vector should have an entry for every row."
+    assert matrix.nr_columns == add_sink_row_states.size(), "add_sink_row_states vector should have an entry for every state."
+
+    return core._eliminate_end_components_double(matrix, subsystem, possible_ecs, add_sink_row_states, add_self_loop_at_sink_states)
+
 
 
 def parse_properties(properties, context=None, filters=None):

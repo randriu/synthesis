@@ -98,7 +98,7 @@ namespace storm {
                     builder.addDepElement("Failure_Trigger", failedBEs, storm::utility::one<ValueType>());
                 }
 
-                builder.setTopLevel(dft.getTopLevelGate()->name());
+                builder.setTopLevel(dft.getTopLevelElement()->name());
 
                 STORM_LOG_DEBUG("Transformation UniqueFailedBe complete");
                 return std::make_shared<storm::storage::DFT<ValueType>>(builder.build());
@@ -150,7 +150,7 @@ namespace storm {
                         }
                         case storm::storage::DFTElementType::POR: {
                             auto por = std::static_pointer_cast<storm::storage::DFTPor<ValueType> const>(element);
-                            builder.addPandElement(por->name(), getChildrenVector(por), por->isInclusive());
+                            builder.addPorElement(por->name(), getChildrenVector(por), por->isInclusive());
                             break;
                         }
                         case storm::storage::DFTElementType::SPARE:
@@ -223,7 +223,7 @@ namespace storm {
 
                 }
 
-                builder.setTopLevel(dft.getTopLevelGate()->name());
+                builder.setTopLevel(dft.getTopLevelElement()->name());
 
                 STORM_LOG_DEBUG("Transformation BinaryFDEPs complete");
                 return std::make_shared<storm::storage::DFT<ValueType>>(builder.build());

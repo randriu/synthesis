@@ -21,13 +21,13 @@ class TestPLA:
         checker = stormpy.pars.create_region_checker(env, model, formulas[0].raw_formula)
         parameters = model.collect_probability_parameters()
         assert len(parameters) == 2
-        region = stormpy.pars.ParameterRegion.create_from_string("0.7<=pL<=0.9,0.75<=pK<=0.95", parameters)
+        region = stormpy.pars.ParameterRegion.create_from_string("0.7<=pL<=0.9,0.75<=pK<=0.95", parameters, splitting_threshold=None)
         result = checker.check_region(env, region)
         assert result == stormpy.pars.RegionResult.ALLSAT
-        region = stormpy.pars.ParameterRegion.create_from_string("0.4<=pL<=0.65,0.75<=pK<=0.95", parameters)
+        region = stormpy.pars.ParameterRegion.create_from_string("0.4<=pL<=0.65,0.75<=pK<=0.95", parameters, splitting_threshold=None)
         result = checker.check_region(env, region, stormpy.pars.RegionResultHypothesis.UNKNOWN, stormpy.pars.RegionResult.UNKNOWN, True)
         assert result == stormpy.pars.RegionResult.EXISTSBOTH
-        region = stormpy.pars.ParameterRegion.create_from_string("0.1<=pL<=0.73,0.2<=pK<=0.715", parameters)
+        region = stormpy.pars.ParameterRegion.create_from_string("0.1<=pL<=0.73,0.2<=pK<=0.715", parameters, splitting_threshold=None)
         result = checker.check_region(env, region)
         assert result == stormpy.pars.RegionResult.ALLVIOLATED
 
@@ -129,20 +129,3 @@ class TestPLA:
         result_vec = checker.get_bound_all_states(env, region, True)
         assert len(result_vec.get_values()) == model.nr_states
         assert math.isclose(result_vec.at(model.initial_states[0]), 0.836963056082918, rel_tol=1e-6)
-
-    def test_dynasty(self):
-        program = stormpy.parse_prism_program("/home/simon/School/DP/synthesis/workspace/simon/die/sketch.templ")
-        prop = "P>=1/6 [F s=7 & d=1]"
-        formulas = stormpy.parse_properties_for_prism_program(prop, program)
-        model = stormpy.build_parametric_model(program, formulas)
-        assert model.has_parameters
-        env = stormpy.Environment()
-        checker = stormpy.pars.MdpParameterLiftingModelChecker()
-        checker.specify(env, model, formulas[0].raw_formula, True)
-        parameters = model.collect_probability_parameters()
-        assert len(parameters) == 1
-        region = stormpy.pars.ParameterRegion.create_from_string("0.1<=p0<=0.62", parameters)
-        minr = checker.get_bound(env, region, False)
-        maxr = checker.get_bound(env, region, True)
-        result = checker.check_region(env, region)
-        assert True

@@ -3,7 +3,7 @@
 lib/**/_config.py
 .eggs/
 *.egg-info/
-build*/
+build/
 dist/
 .idea/
 __pycache__/

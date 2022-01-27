@@ -35,10 +35,11 @@ class MarkovChain:
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
-    def __init__(self, model, quotient_state_map = None, quotient_choice_map = None):
+    def __init__(self, model, quotient_container, quotient_state_map = None, quotient_choice_map = None):
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.model = model
+        self.quotient_container = quotient_container
         
         self.quotient_choice_map = quotient_choice_map
         if quotient_choice_map is None:
@@ -47,6 +48,20 @@ class MarkovChain:
         self.quotient_state_map = quotient_state_map
         if quotient_state_map is None:
             self.quotient_state_map = [s for s in range(model.nr_states)]
+
+        # map states to relevant holes
+        tm = self.model.transition_matrix
+        self.state_to_holes = [quotient_container.quotient_relevant_holes[self.quotient_state_map[state]] for state in range(self.states)]
+        design_space = self.quotient_container.sketch.design_space
+        self.hole_to_states = [set() for hole in design_space]
+        for state in range(self.states):
+            for hole in self.state_to_holes[state]:
+                self.hole_to_states[hole].add(state)
+        self.hole_redundant = [len(self.hole_to_states[hole]) == 0 for hole in design_space.hole_indices]
+        self.hole_simple = [len(self.hole_to_states[hole]) == 1 for hole in design_space.hole_indices]
+        # print(self.hole_to_states)
+        # print(self.hole_redundant)
+        # print(self.hole_simple)
 
         self.analysis_hints = None
     
@@ -100,9 +115,6 @@ class MarkovChain:
 
 class DTMC(MarkovChain):
 
-    def __init__(self, *args):
-        super().__init__(*args)
-
     def check_constraints(self, properties, property_indices = None, short_evaluation = False):
         '''
         Check constraints.
@@ -138,10 +150,9 @@ class DTMC(MarkovChain):
 
 class MDP(MarkovChain):
 
-    def __init__(self, model, design_space, quotient_container, quotient_state_map = None, quotient_choice_map = None):
-        super().__init__(model, quotient_state_map, quotient_choice_map)
+    def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map, design_space):
+        super().__init__(model, quotient_container, quotient_state_map, quotient_choice_map)
         self.design_space = design_space
-        self.quotient_container = quotient_container
         
         self.scheduler_results = OrderedDict()
         self.analysis_hints = None

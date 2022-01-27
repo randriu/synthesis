@@ -44,8 +44,11 @@ class Hole:
         self.options = options
 
     @property
+    def is_trivial(self):
+        return len(self.options) == 1
+
+    @property
     def is_unrefined(self):
-        # return False
         return len(self.options) == len(self.option_labels)
 
 

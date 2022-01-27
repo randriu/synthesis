@@ -9,10 +9,10 @@ Before installing stormpy, make sure
 
 - Python 3 is available on your system.
 - `pycarl <https://moves-rwth.github.io/pycarl>`_ is available.
-- `Storm <http://www.stormchecker.org/>`_ is available on your system.
+- `Storm <https://www.stormchecker.org/>`_ is available on your system.
 
 To avoid issues, we suggest that both pycarl and Storm use the same version of `carl <https://smtrat.github.io/carl>`_.
-The simplest way of ensuring this is to first install carl as explained in the `Storm installation guide <http://www.stormchecker.org/documentation/installation/manual-configuration.html#carl>`_.
+The simplest way of ensuring this is to first install carl as explained in the `Storm installation guide <https://www.stormchecker.org/documentation/obtain-storm/dependencies.html#carl>`_.
 You can then install Storm and pycarl independently.
 
 .. _compatibility_stormpy_storm:
@@ -24,7 +24,7 @@ It is therefore important to use compatible versions of stormpy and Storm.
 You have two choices for stormpy depending on the version of Storm you are using:
 
 1. **Release version**:
-   You use the latest `release of Storm <https://github.com/moves-rwth/storm/releases>`_ or the ``stable`` branch or you installed Storm via `Homebrew <https://www.stormchecker.org/documentation/obtain-storm/homebrew.html>`_.
+   You use the latest `release of Storm <https://github.com/moves-rwth/storm/releases>`_ or the ``stable`` branch.
    In these cases, you need to use the latest `release of stormpy <https://github.com/moves-rwth/stormpy/releases>`_.
    For example, Storm 1.6.0 is compatible with stormpy 1.6.0.
 
@@ -34,6 +34,8 @@ You have two choices for stormpy depending on the version of Storm you are using
    Note that due to ongoing development in Storm, after some commits, the stormpy ``master`` might not work with the Storm ``master`` anymore.
    We will fix such issues as fast as possible.
 
+.. warning::
+    Unfortunately, Stormpy currently does not work in conjunction with a homebrew installation of Storm.
 
 Installation Steps
 ====================
@@ -44,7 +46,7 @@ Virtual Environments
 Virtual environments create isolated environments for your projects.
 This helps to keep your system clean, work with different versions of packages and different version of python.
 While it is not required, we recommend the use of such virtual environments. To get you started, we recommend
-`this guide <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or
+`this guide <https://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or
 `this primer <https://realpython.com/blog/python/python-virtual-environments-a-primer>`_.
 
 In short you can create a virtual environment ``env`` with::
@@ -74,11 +76,11 @@ or for the latest release use (remember to use the correct version)::
 **Build** stormpy in develop mode using your favourite python distribution way of installing: e.g.::
 
 	$ python3 setup.py develop
-	
+
 or::
 
 	$ pip install -ve .
-	
+
 
 Optional build arguments
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -118,7 +120,7 @@ Testing stormpy installation
 
 After building, you can run the test files by either::
 
-	$ python setup.py test
+	$ python3 setup.py test
 
 or by invoking pytest directly with::
 
@@ -127,3 +129,20 @@ or by invoking pytest directly with::
 
 If the tests pass, you can now use stormpy.
 To get started, continue with our :doc:`getting_started`, consult the test files in ``tests/`` or the :doc:`api` (work in progress).
+
+Building stormpy documentation
+------------------------------
+
+To build this documentation, you need additional python dependencies as well as `pandoc <https://pandoc.org/>`_.
+You can install the required python dependencies automatically with::
+
+	$ python setup.py develop easy_install stormpy[doc,numpy]
+
+or manually with::
+
+	$ pip install sphinx sphinx_bootstrap_theme nbsphinx ipykernel numpy
+
+Then build the documentation::
+
+	$ cd doc
+	$ make html

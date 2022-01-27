@@ -23,6 +23,16 @@ export PAYNT_DIR=$SYNTHESIS/paynt
 
 ### prerequisites ##############################################################
 
+prerequisites-download() {
+    cd $DOWNLOADS
+    wget https://github.com/ths-rwth/carl/archive/refs/heads/master14.zip -O carl.zip
+    wget https://github.com/moves-rwth/pycarl/archive/refs/tags/2.0.5.zip -O pycarl.zip
+    wget https://github.com/cvc5/cvc5/archive/refs/tags/cvc5-0.0.6.zip -O cvc5.zip
+    # wget https://github.com/moves-rwth/storm/archive/refs/tags/1.6.4.zip -O storm.zip
+    # wget https://github.com/moves-rwth/stormpy/archive/refs/tags/1.6.4.zip -O stormpy.zip
+    cd -
+}
+
 prerequisites-prepare() {
     cd $PREREQUISITES
     unzip $DOWNLOADS/carl.zip
@@ -53,7 +63,7 @@ prerequisites-build() {
     #pycarl
     cd $PREREQUISITES/pycarl
     source $SYNTHESIS_ENV/bin/activate
-    python3 setup.py build_ext --jobs $COMPILE_JOBS --disable-parser develop
+    python3 setup.py build_ext --jobs $COMPILE_JOBS develop
     #[TEST] python3 setup.py test
     deactivate
     cd $SYNTHESIS
@@ -128,6 +138,8 @@ synthesis-install() {
     bash install.sh
     cd ~-
 }
+
+### upgrading storm ############################################################
 
 ### development ################################################################
 
