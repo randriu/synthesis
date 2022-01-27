@@ -80,6 +80,7 @@ class QuotientContainer:
         assert design_space.size == 1
         selected_actions = self.select_actions(design_space)
         model,state_map,choice_map = self.restrict_quotient(selected_actions)
+        # TODO convert to DTMC ?
         return DTMC(model,self,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):

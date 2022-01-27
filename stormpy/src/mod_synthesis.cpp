@@ -12,4 +12,5 @@ PYBIND11_MODULE(synthesis, m) {
 
     define_synthesis(m);
     define_pomdp(m);
+    define_helpers(m);
 }

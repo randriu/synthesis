@@ -2,8 +2,6 @@
 
 #include "storm-synthesis/pomdp/PomdpManager.h"
 
-#include "storm/storage/SparseMatrix.h"
-
 // Define python bindings
 void define_pomdp(py::module& m) {
 
@@ -25,11 +23,5 @@ void define_pomdp(py::module& m) {
         .def_property_readonly("row_memory_hole", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_memory_hole;}, "TODO")
         .def_property_readonly("row_memory_option", [](storm::synthesis::PomdpManager<double>& manager) {return manager.row_memory_option;}, "TODO")
         ;
-
-    m.def("multiply_with_vector", [] (storm::storage::SparseMatrix<double> matrix,std::vector<double> vector) {
-        std::vector<double> result(matrix.getRowCount());
-        matrix.multiplyWithVector(vector, result);
-        return result;
-    }, py::arg("matrix"), py::arg("vector"));
 }
 

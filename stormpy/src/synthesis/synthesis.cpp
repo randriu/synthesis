@@ -2,27 +2,6 @@
 
 #include "storm-synthesis/synthesis/Counterexample.h"
 
-#include "storm/modelchecker/CheckTask.h"
-#include "storm/environment/Environment.h"
-#include "storm/api/verification.h"
-#include "storm/modelchecker/hints/ExplicitModelCheckerHint.h"
-
-
-
-template<typename ValueType>
-std::shared_ptr<storm::modelchecker::CheckResult> modelCheckWithHint(
-    std::shared_ptr<storm::models::sparse::Model<ValueType>> model,
-    storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> & task,
-    storm::Environment const& env,
-    std::vector<ValueType> hint_values
-) {
-    storm::modelchecker::ExplicitModelCheckerHint<ValueType> hint;
-    hint.setComputeOnlyMaybeStates(false);
-    hint.setResultHint(boost::make_optional(hint_values));
-    task.setHint(std::make_shared<storm::modelchecker::ExplicitModelCheckerHint<ValueType>>(hint));
-    return storm::api::verifyWithSparseEngine<ValueType>(env, model, task);
-}
-
 // Define python bindings
 void define_synthesis(py::module& m) {
 
@@ -66,8 +45,6 @@ void define_synthesis(py::module& m) {
             "Read stats."
         );*/
         ;
-
-    m.def("model_check_with_hint", &modelCheckWithHint<double>, "Perform model checking using the sparse engine", py::arg("model"), py::arg("task"), py::arg("environment"), py::arg("hint_values"));
     
 }
 
