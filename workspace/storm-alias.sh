@@ -34,39 +34,53 @@ prerequisites-download() {
 }
 
 prerequisites-prepare() {
-    cd $PREREQUISITES
+    cd $PREREQUISITES    
     unzip $DOWNLOADS/carl.zip
     mv carl-master14 carl
     unzip $DOWNLOADS/pycarl.zip
-    mv pycarl-master pycarl
-    cd $SYNTHESIS
+    mv pycarl-2.0.5 pycarl
+    unzip $DOWNLOADS/cvc5.zip
+    mv cvc5-cvc5-0.0.6 cvc5
+    cd -
 }
 
 python-environment() {
     pip3 install virtualenv
     virtualenv -p python3 $SYNTHESIS_ENV
-    source $SYNTHESIS_ENV/bin/activate
+    enva
     pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
-    deactivate
+    pip3 install Cython scikit-build
+    envd
 }
 
-prerequisites-build() {
-    # carl
-    cd $PREREQUISITES
-    mkdir -p carl/build
-    cd carl/build
+prerequisites-build-carl() {
+    mkdir -p $PREREQUISITES/carl/build
+    cd $PREREQUISITES/carl/build
     cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
     make lib_carl --jobs $COMPILE_JOBS
     #[TEST] make test
-    cd $SYNTHESIS
+    cd -
+}
 
-    #pycarl
+prerequisites-build-pycarl() {
     cd $PREREQUISITES/pycarl
-    source $SYNTHESIS_ENV/bin/activate
+    enva
     python3 setup.py build_ext --jobs $COMPILE_JOBS develop
     #[TEST] python3 setup.py test
-    deactivate
-    cd $SYNTHESIS
+    envd
+    cd -
+}
+
+prerequisites-build-cvc5() {
+    # configuration
+    cd $PREREQUISITES/cvc5
+    enva
+    ./configure.sh --prefix="." --auto-download --python-bindings
+    cd build
+    make --jobs $COMPILE_JOBS
+    make install
+    envd
+    cd -
 }
 
 storm-dependencies() {
@@ -134,12 +148,38 @@ paynt-install() {
 }
 
 synthesis-install() {
-    cd $SYNTHESIS
-    bash install.sh
-    cd ~-
-}
 
-### upgrading storm ############################################################
+    # clone repository
+    git clone https://github.com/randriu/synthesis.git
+    # git clone git@github.com:randriu/synthesis.git
+    cd synthesis
+    
+    # load aliases
+    source workspace/storm-alias.sh
+    
+    # install dependencies
+    storm-dependencies
+    # setup python environment
+    python-environment
+
+    # unzip prerequisites
+    prerequisites-prepare
+    # build carl
+    prerequisites-build-carl
+    # build pycarl
+    prerequisites-build-pycarl
+    # build cvc5 (optional)
+    prerequisites-build-cvc5
+
+    # configure storm
+    storm-config
+    # build storm
+    storm-build
+    # build stomrpy
+    stormpy-build
+    # install paynt
+    paynt-install
+}
 
 ### development ################################################################
 
@@ -250,21 +290,7 @@ export MAZE2=$SYNTHESIS/workspace/examples/maze/orig
 dice() {
     storm-eval "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
 }
-dpm() {
-    storm-eval "--prism $DPM/sketch.templ" $DPM/compute.properties "CMAX=10,THRESHOLD=0,T2=5,$1"
-}
 
-walk() {
-    storm-eval "-pc --prism $WALK/sketch.templ" $WALK/compute.properties "CMAX=10,THRESHOLD=0"
-}
-
-walk2() {
-    storm-eval "-pc --prism $WALK/sketch2.templ" $WALK/compute.properties "CMAX=10,THRESHOLD=0"
-}
-
-maze2() {
-    storm-eval "-pc --prism $MAZE2/sketch.prism" $MAZE2/sketch.properties "CMAX=10,THRESHOLD=0"
-}
 
 # useful flags
 # ./storm-pomdp --prism $SYNTHESIS/workspace/examples/pomdp/maze/concise/sketch.templ --constants CMAX=2,THRESHOLD=1.0 --prop $SYNTHESIS/workspace/examples/pomdp/maze/concise/sketch.properties -ec --io:exportexplicit test.drn
