@@ -136,8 +136,8 @@ class Statistic:
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.timer.time, 2)} s"
 
         family_stats = ""
-        ar_stats = f"AR stats: iterations: {self.iterations_mdp}, avg MDP size: {round(self.avg_size_mdp)}" 
-        cegis_stats = f"CEGIS stats: iterations: {self.iterations_dtmc}, avg DTMC size: {round(self.avg_size_dtmc)}"
+        ar_stats = f"AR stats: avg MDP size: {round(self.avg_size_mdp)}, iterations: {self.iterations_mdp}" 
+        cegis_stats = f"CEGIS stats: avg DTMC size: {round(self.avg_size_dtmc)}, iterations: {self.iterations_dtmc}"
         if self.iterations_mdp > 0:
             family_stats += f"{ar_stats}\n"
         if self.iterations_dtmc > 0:

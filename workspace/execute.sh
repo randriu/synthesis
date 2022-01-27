@@ -102,7 +102,7 @@ function run() {
     # model="pomdp/grid/simple-mo"
 
     model="pomdp/grid/refuel"
-    # model="pomdp/grid/obstacle"
+    model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"
 

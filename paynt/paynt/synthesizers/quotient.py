@@ -155,7 +155,7 @@ class QuotientContainer:
                     continue
                 max_value = hole_max[hole_index]
                 difference = max_value - min_value
-                if difference == math.nan:
+                if math.isnan(difference):
                     assert max_value == min_value and min_value == math.inf
                     difference = 0
                 hole_difference_sum[hole_index] += difference
@@ -171,6 +171,10 @@ class QuotientContainer:
         for hole_index in inconsistent_assignments:
             if inconsistent_differences[hole_index] < QuotientContainer.inconsistency_threshold:
                 selection[hole_index] = [selection[hole_index][0]]
+
+        # sanity check
+        for difference in inconsistent_differences.values():
+            assert not math.isnan(difference)
 
         Profiler.resume()
         return selection,inconsistent_differences

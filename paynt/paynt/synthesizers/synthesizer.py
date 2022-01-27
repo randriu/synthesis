@@ -413,8 +413,9 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             else:
                 family = families.pop(0)
 
-            # set SMT solver level
-            family.sat_level()
+            # reset SMT solver level
+            if SynthesizerAR.exploration_order_dfs:
+                family.sat_level()
 
             # analyze the family
             feasibility,improving_assignment = self.analyze_family_ar(family)
