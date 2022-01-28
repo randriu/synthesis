@@ -32,14 +32,15 @@ class Synthesizer:
     def run(self):
         logger.info("Synthesis initiated.")
         Profiler.start("synthesis")
-        assignment = self.synthesize(self.sketch.design_space)
+        self.sketch.quotient.discarded = 0
+        opt_assignment = self.synthesize(self.sketch.design_space)
         # double-check assignment
-        if assignment is not None:
-            dtmc = self.sketch.quotient.build_chain(assignment)
+        if opt_assignment is not None:
+            dtmc = self.sketch.quotient.build_chain(opt_assignment)
             spec_result = dtmc.check_specification(self.sketch.specification)
             print("double-checking: ", spec_result)
         Profiler.stop()
-        return assignment
+        return opt_assignment
 
     def explore(self, family):
         self.explored += family.size

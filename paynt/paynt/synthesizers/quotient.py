@@ -35,6 +35,8 @@ class QuotientContainer:
         self.action_to_hole_options = None
         self._quotient_relevant_holes = None
 
+        self.discarded = None
+
     def select_actions(self, design_space):
         ''' Select actions relevant in the provided design space. '''
         Profiler.start("quotient::select_actions")
@@ -232,18 +234,9 @@ class QuotientContainer:
 
     def suboptions_enumerate(self, mdp, splitter, used_options):
         assert len(used_options) > 1
-        suboptions = [[option] for option in used_options]
-        other_options = [option for option in mdp.design_space[splitter].options if option not in used_options]
-        if not other_options:
-            return suboptions
-
-        # complete variants
-        # return [other_options] + suboptions # DFS solves other last
-        # return suboptions + [other_options] # DFS solver other first
-
-        # incomplete variants
-        return suboptions       # drop other
-        # return [other_options]  # drop significant
+        core_suboptions = [[option] for option in used_options]
+        other_suboptions = [option for option in mdp.design_space[splitter].options if option not in used_options]
+        return core_suboptions, other_suboptions
 
     def holes_with_max_score(self, hole_score):
         max_score = max(hole_score)
@@ -255,16 +248,29 @@ class QuotientContainer:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    def reduce_simple_holes(self, mdp, hole_assignments):
-        '''
-        For each simple hole in the MDP, fix its options to the single option
-        provided by the scheduler.
-        '''
-        design_space = mdp.design_space
-        for hole_index in design_space.hole_indices:
+    def discard(self, mdp, hole_assignments, core_suboptions, other_suboptions):
+
+        # default result
+        reduced_design_space = mdp.design_space.copy()
+        if len(other_suboptions) == 0:
+            suboptions = core_suboptions
+        else:
+            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
+
+        # reduce simple holes
+        ds_before = reduced_design_space.size
+        for hole_index in reduced_design_space.hole_indices:
             if mdp.hole_simple[hole_index]:
                 assert len(hole_assignments[hole_index]) == 1
-                design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+                reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+        ds_after = reduced_design_space.size
+        self.discarded += ds_before - ds_after
+
+        # discard other suboptions
+        suboptions = core_suboptions
+        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
+
+        return reduced_design_space, suboptions
 
 
     def split(self, mdp):
@@ -283,22 +289,16 @@ class QuotientContainer:
 
         splitters = self.holes_with_max_score(scores)        
         splitter = splitters[0]
-        
-        # split
-        # if len(hole_assignments[splitter]) == 1:
-        #     suboptions = self.suboptions_half(mdp, splitter)
-        # else:
         assert len(hole_assignments[splitter]) > 1
-        # suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
-        suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
+        core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
 
-        self.reduce_simple_holes(mdp, hole_assignments)
+        new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions)
 
         # construct corresponding design subspaces
         Profiler.start("    create subspaces")
         design_subspaces = []
         for suboption in suboptions:
-            design_subspace = mdp.design_space.copy()
+            design_subspace = new_design_space.copy()
             design_subspace.assume_hole_options(splitter, suboption)
             design_subspace.refinement_depth = mdp.design_space.refinement_depth + 1
             design_subspaces.append(design_subspace)

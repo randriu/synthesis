@@ -1,5 +1,4 @@
 import stormpy
-
 from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
 from .quotient import POMDPQuotientContainer
@@ -9,6 +8,7 @@ from ..profiler import Timer,Profiler
 
 from ..sketch.holes import Holes,DesignSpace
 
+import math
 from collections import defaultdict
 
 import logging
@@ -27,6 +27,7 @@ class SynthesizerPOMDP():
         pass
 
     def synthesize(self, family = None):
+        self.sketch.quotient.discarded = 0
         if family is None:
             family = self.sketch.design_space
         synthesizer = SynthesizerAR(self.sketch)
@@ -305,7 +306,7 @@ class SynthesizerPOMDP():
     
     def strategy_5(self):
 
-        # assuming no constraints
+        # assuming only optimality
         assert not self.sketch.specification.constraints
 
         # start with k=1
@@ -313,7 +314,7 @@ class SynthesizerPOMDP():
 
         old_assignment = None
 
-        for iteration in range(2):
+        for iteration in range(5):
             print("\n------------------------------------------------------------\n")
             # construct the quotient
             self.sketch.quotient.unfold_partial_memory()
@@ -322,7 +323,6 @@ class SynthesizerPOMDP():
             mdp = self.sketch.quotient.build()
             mdp_matrix = mdp.model.transition_matrix
             spec = mdp.check_specification(self.sketch.specification)
-            state_to_hole = self.sketch.quotient.quotient_relevant_holes
 
             # ? assuming that primary direction was not enough ?
             assert spec.optimality_result.secondary is not None
@@ -337,6 +337,27 @@ class SynthesizerPOMDP():
             mdp_choice_values = stormpy.synthesis.multiply_with_vector(mdp_matrix,mdp_state_values)
 
             # mdp_selection = self.sketch.quotient.scheduler_selection(mdp, mdp_scheduler)
+
+            # extract DTMC induced by this optimizing scheduler
+            sub_mdp,state_map,_ = self.sketch.quotient.restrict_quotient(mdp_choices)
+            tm = sub_mdp.transition_matrix
+            tm.make_row_grouping_trivial()
+            components = stormpy.storage.SparseModelComponents(tm, sub_mdp.labeling, sub_mdp.reward_models)
+            dtmc = stormpy.storage.SparseDtmc(components)
+
+            # compute expected number of visits
+            dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc).get_values()
+            # print(dtmc_visits)
+
+            # map vector above onto the state space of the quotient MDP
+            mdp_visits = [0] * mdp.states
+            for state in range(dtmc.nr_states):
+                mdp_visits[state_map[state]] = dtmc_visits[state]
+
+            # reduce infinity-visits to 0
+            # for state in range(mdp.states):
+            #     if mdp_visits[state] == math.inf:
+            #         mdp_visits[state] = 0
 
             # synthesize optimal assignment for k=1
             synthesized_assignment = self.synthesize()
@@ -379,7 +400,7 @@ class SynthesizerPOMDP():
             
             # compute choices induced by this assignment
             synthesized_choices = self.sketch.quotient.select_actions(synthesized_assignment)
-            
+
             # compare both choices state-wise
             state_improvement = [0] * mdp.states
             nci = mdp.model.nondeterministic_choice_indices
@@ -397,19 +418,23 @@ class SynthesizerPOMDP():
                 pomdp_state = self.sketch.quotient.pomdp_manager.state_prototype[state]
                 obs = self.sketch.quotient.pomdp.observations[pomdp_state]
                 
-                if obs == 0:
-                    print(f"state {state} [{self.sketch.quotient.pomdp.state_valuations.get_string(pomdp_state)}] (obs={obs}): {syn_choice} -> {mdp_choice}", flush=True)
-                    pm = self.sketch.quotient.pomdp_manager
-                    print(pm.row_action_hole[syn_choice],pm.row_action_option[syn_choice]," -> ", end="")
-                    print(pm.row_action_hole[mdp_choice],pm.row_action_option[mdp_choice],flush=True)
+                # if obs == 0:
+                #     print(f"state {state} [{self.sketch.quotient.pomdp.state_valuations.get_string(pomdp_state)}] (obs={obs}): {syn_choice} -> {mdp_choice}", flush=True)
+                    # pm = self.sketch.quotient.pomdp_manager
+                    # print(pm.row_action_hole[syn_choice],pm.row_action_option[syn_choice]," -> ", end="")
+                    # print(pm.row_action_hole[mdp_choice],pm.row_action_option[mdp_choice],flush=True)
                 if mdp_choice == syn_choice:
                     continue
                 mdp_value = mdp_choice_values[mdp_choice]
                 syn_value = mdp_choice_values[syn_choice]
                 improvement = abs(mdp_value - syn_value)
-                if obs == 0:
-                    print(f"improvement in state {state} (obs = {obs}): {syn_value} -> {mdp_value}  = {improvement}", flush=True)
-                state_improvement[state] = improvement
+                # if obs == 0:
+                    # print(f"improvement in state {state} (obs = {obs}) [~> {mdp_visits[state]}]: {syn_value} -> {mdp_value}  = {improvement}", flush=True)
+
+                # weight state improvement with the expected number of visits
+                state_improvement[state] = mdp_visits[state] * improvement
+                if math.isnan(state_improvement[state]):
+                    state_improvement[state] = 0
 
             # for each observation, compute average (potential) improvement across all of its states
             obs_sum = [0] * self.sketch.quotient.observations
@@ -421,9 +446,10 @@ class SynthesizerPOMDP():
                 obs_cnt[obs] += 1
             obs_avg = [obs_sum[obs] / obs_cnt[obs] for obs in range(self.sketch.quotient.observations)]
             selected_observation = obs_avg.index(max(obs_avg))
-            print("observation labels: ", self.sketch.quotient.observation_labels)
-            print("avg improvement: ", obs_avg)
-            print("")
+            obs_score = {obs:score for obs,score in enumerate(obs_avg) if score > 0}
+            # print("observation labels: ", self.sketch.quotient.observation_labels)
+            print("weighted improvement: ", obs_score)
+            # print("")
             print("selected observation: ", selected_observation)
 
             self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)

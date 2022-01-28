@@ -49,7 +49,7 @@ class Statistic:
 
         self.timer = Timer()
 
-        self.status_period = 5
+        self.status_period = 1
         self.status_time = self.status_period
 
     def start(self):
@@ -78,7 +78,7 @@ class Statistic:
         self.stage_factor = stage_factor
 
     def status(self):
-        fraction_rejected = self.synthesizer.explored / self.design_space.size
+        fraction_rejected = (self.synthesizer.explored + self.synthesizer.sketch.quotient.discarded) / self.design_space.size
         time_estimate = safe_division(self.timer.read(), fraction_rejected)
         percentage_rejected = int(fraction_rejected * 1000000) / 10000.0
         # percentage_rejected = fraction_rejected * 100
