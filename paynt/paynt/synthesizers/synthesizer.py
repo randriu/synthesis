@@ -274,7 +274,9 @@ class SynthesizerCEGIS(Synthesizer):
             c = self.sketch.specification.optimality
             assert not (c.reward and not c.minimizing), msg
 
+
         # map mdp states to hole indices
+        family.mdp = self.sketch.quotient.build(family)
         quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes
 
         # initialize CE generator

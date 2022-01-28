@@ -118,7 +118,7 @@ namespace storm {
 
         template <typename ValueType, typename StateType>
         void CounterexampleGenerator<ValueType,StateType>::prepareDtmc(
-            storm::models::sparse::Mdp<ValueType> const& dtmc,
+            storm::models::sparse::Dtmc<ValueType> const& dtmc,
             std::vector<uint_fast64_t> const& state_map
             ) {
             
@@ -127,7 +127,7 @@ namespace storm {
             this->wave_states.clear();
 
             // Get DTMC info
-            this->dtmc = std::make_shared<storm::models::sparse::Mdp<ValueType>>(dtmc);
+            this->dtmc = std::make_shared<storm::models::sparse::Dtmc<ValueType>>(dtmc);
             this->state_map = state_map;
             uint_fast64_t dtmc_states = this->dtmc->getNumberOfStates();
             StateType initial_state = *(this->dtmc->getInitialStates().begin());

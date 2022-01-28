@@ -49,7 +49,7 @@ namespace storm {
              
              */
             void prepareDtmc(
-                storm::models::sparse::Mdp<ValueType> const& dtmc,
+                storm::models::sparse::Dtmc<ValueType> const& dtmc,
                 std::vector<uint_fast64_t> const& state_map
                 );
             
@@ -147,7 +147,7 @@ namespace storm {
             std::vector<std::shared_ptr<storm::modelchecker::ExplicitQualitativeCheckResult const>> mdp_targets;
 
             // DTMC under investigation
-            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> dtmc;
+            std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> dtmc;
             // DTMC to MDP state mapping
             std::vector<uint_fast64_t> state_map;
             // For each hole, a wave when it was registered (0 = unregistered).

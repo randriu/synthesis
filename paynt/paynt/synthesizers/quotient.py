@@ -37,6 +37,7 @@ class QuotientContainer:
 
     def select_actions(self, design_space):
         ''' Select actions relevant in the provided design space. '''
+        Profiler.start("quotient::select_actions")
         selected_actions = stormpy.BitVector(self.default_actions)
         for act_index in range(self.quotient_mdp.nr_choices):
             if selected_actions.get(act_index):
@@ -44,9 +45,10 @@ class QuotientContainer:
             hole_options = self.action_to_hole_options[act_index]
             if design_space.includes(hole_options):
                 selected_actions.set(act_index)
+        Profiler.resume()
         return selected_actions
 
-    def restrict_quotient(self,selected_actions):
+    def restrict_quotient(self, selected_actions):
         '''
         Restrict the quotient MDP to the selected actions.
         :return (1) the restricted model
@@ -55,6 +57,7 @@ class QuotientContainer:
         '''
         
         # construct the submodel
+        Profiler.start("quotient::restrict_quotient")
         keep_unreachable_states = False
         subsystem_options = stormpy.SubsystemBuilderOptions()
         subsystem_options.build_state_mapping = True
@@ -66,6 +69,7 @@ class QuotientContainer:
         model = submodel_construction.model
         state_map =  submodel_construction.new_to_old_state_mapping
         choice_map = submodel_construction.new_to_old_action_mapping
+        Profiler.resume()
         return model,state_map,choice_map
 
     def build(self, design_space = None):
@@ -78,10 +82,18 @@ class QuotientContainer:
 
     def build_chain(self, design_space):
         assert design_space.size == 1
+
+        # restrict quotient
         selected_actions = self.select_actions(design_space)
-        model,state_map,choice_map = self.restrict_quotient(selected_actions)
-        # TODO convert to DTMC ?
-        return DTMC(model,self,state_map,choice_map)
+        sub_mdp,state_map,choice_map = self.restrict_quotient(selected_actions)
+        
+        # convert restricted MDP to DTMC
+        tm = sub_mdp.transition_matrix
+        tm.make_row_grouping_trivial()
+        components = stormpy.storage.SparseModelComponents(tm, sub_mdp.labeling, sub_mdp.reward_models)
+        dtmc = stormpy.storage.SparseDtmc(components)
+
+        return DTMC(dtmc,self,state_map,choice_map)
 
     def scheduler_selection(self, mdp, scheduler):
         ''' Get hole options involved in the scheduler selection. '''
@@ -226,11 +238,11 @@ class QuotientContainer:
             return suboptions
 
         # complete variants
-        return [other_options] + suboptions # DFS solves other last
+        # return [other_options] + suboptions # DFS solves other last
         # return suboptions + [other_options] # DFS solver other first
 
         # incomplete variants
-        # return suboptions       # drop other
+        return suboptions       # drop other
         # return [other_options]  # drop significant
 
     def holes_with_max_score(self, hole_score):
@@ -280,7 +292,7 @@ class QuotientContainer:
         # suboptions = self.suboptions_unique(mdp, splitter, hole_assignments[splitter])
         suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
 
-        # self.reduce_simple_holes(mdp, hole_assignments)
+        self.reduce_simple_holes(mdp, hole_assignments)
 
         # construct corresponding design subspaces
         Profiler.start("    create subspaces")

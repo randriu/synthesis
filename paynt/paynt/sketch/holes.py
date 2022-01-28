@@ -237,17 +237,17 @@ class DesignSpace(Holes):
         for hole_index,hole in enumerate(self):
             all_clauses = DesignSpace.solver_clauses[hole_index]
             clauses = [all_clauses[option] for option in hole.options]
-            # if len(clauses) == 1:
-            #     or_clause = clauses[0]
-            # else:
-            if DesignSpace.use_python_z3:
-                or_clause = z3.Or(clauses)
-            elif DesignSpace.use_storm_z3:
-                or_clause = stormpy.storage.Expression.Disjunction(clauses)
-            elif DesignSpace.use_cvc:
-                or_clause = DesignSpace.solver.mkTerm(pycvc5.Kind.Or, clauses)
+            if len(clauses) == 1:
+                or_clause = clauses[0]
             else:
-                pass
+                if DesignSpace.use_python_z3:
+                    or_clause = z3.Or(clauses)
+                elif DesignSpace.use_storm_z3:
+                    or_clause = stormpy.storage.Expression.Disjunction(clauses)
+                elif DesignSpace.use_cvc:
+                    or_clause = DesignSpace.solver.mkTerm(pycvc5.Kind.Or, clauses)
+                else:
+                    pass
             self.hole_clauses.append(or_clause)
         if DesignSpace.use_python_z3:
             self.encoding = z3.And(self.hole_clauses)
@@ -339,6 +339,7 @@ class DesignSpace(Holes):
                 if not self[hole_index].is_unrefined:
                     counterexample_clauses.append(self.hole_clauses[hole_index])
                 pruning_estimate *= self[hole_index].size
+        assert len(counterexample_clauses) > 0  # not sure about this
 
         if DesignSpace.use_python_z3:
             counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
@@ -348,7 +349,10 @@ class DesignSpace(Holes):
             counterexample_encoding = stormpy.storage.Expression.Not(conflict_encoding)
             DesignSpace.solver.add(counterexample_encoding)
         elif DesignSpace.use_cvc:
-            counterexample_encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, counterexample_clauses).notTerm()
+            if len(counterexample_clauses) == 1:
+                counterexample_encoding = counterexample_clauses[0].notTerm()
+            else:
+                counterexample_encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, counterexample_clauses).notTerm()
             DesignSpace.solver.assertFormula(counterexample_encoding)
         else:
             pass

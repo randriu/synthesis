@@ -121,8 +121,9 @@ function run() {
 
     # model="mdp"
 
-    ar $model
-    # hybrid $model
+    # ar $model
+    hybrid $model
+    # cegis $model
 }
 
 # --- execution ----------------------------------------------------------------
