@@ -110,6 +110,7 @@ class OptimalityProperty(Property):
         return self.op(result, self.optimum)
 
     def update_optimum(self, optimum):
+        # assert self.improves_optimum(optimum)
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)

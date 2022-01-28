@@ -75,7 +75,7 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    timeout=6s
+    timeout=800s
     parallel=false
     verbose=true
 
@@ -87,18 +87,9 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    model="pomdp/maze/concise"
-    # model="pomdp/maze/2"
-    
-    # model="pomdp/drone"
-    # model="pomdp/crypt/4"
-    # model="pomdp/network/simple-2"
-    # model="pomdp/network/priorities-2"
-    # model="pomdp/nrp"
-    # model="pomdp/samplerocks"
+    # model="pomdp/maze/concise"
 
     # model="pomdp/grid/avoid"
-    # model="pomdp/grid/simple"
     # model="pomdp/grid/simple-mo"
 
     # model="pomdp/grid/refuel"
@@ -107,20 +98,20 @@ function run() {
     # model="pomdp/grid/evade"
 
     ### verification of indefinite-horizon POMDPs ###
-    model="pomdp/voihp/drone-4-1"
-    model="pomdp/voihp/grid-avoid-4-0.1"
-    model="pomdp/voihp/grid-4-0.1"
-    model="pomdp/voihp/grid-4-0.3"
-    model="pomdp/voihp/maze2-0.1"
-    model="pomdp/voihp/refuel-06"
-    model="pomdp/voihp/rocks-12"
+    # model="pomdp/voihp/drone-4-1"
+    # model="pomdp/voihp/grid-avoid-4-0.1"
+    # model="pomdp/voihp/grid-4-0.1"
+    # model="pomdp/voihp/grid-4-0.3"
+    # model="pomdp/voihp/maze2-0.1"
+    # model="pomdp/voihp/refuel-06"
+    # model="pomdp/voihp/rocks-12"
 
-    model="pomdp/voihp/crypt-4"
-    model="pomdp/voihp/grid-avoid-4-0"
-    model="pomdp/voihp/maze2-0"
-    model="pomdp/voihp/network-prio-2-8-20"
-    model="pomdp/voihp/network-2-8-20"
-    model="pomdp/voihp/nrp-8"
+    # model="pomdp/voihp/crypt-4"
+    # model="pomdp/voihp/grid-avoid-4-0"
+    # model="pomdp/voihp/maze2-0"
+    # model="pomdp/voihp/network-prio-2-8-20"
+    # model="pomdp/voihp/network-2-8-20"
+    # model="pomdp/voihp/nrp-8"
 
 
     ### leonore ###

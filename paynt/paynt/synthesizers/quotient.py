@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class QuotientContainer:
 
     # holes with avg choice value difference below this threshold will be considered consistent
-    inconsistency_threshold = 1e-8
+    inconsistency_threshold = 0
 
     def __init__(self, sketch):
         self.sketch = sketch
@@ -170,7 +170,7 @@ class QuotientContainer:
                 max_value = hole_max[hole_index]
                 difference = max_value - min_value
                 if math.isnan(difference):
-                    assert max_value == min_value and min_value == math.inf
+                    assert max_value == min_value and min_value == math.inf and False
                     difference = 0
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
@@ -183,8 +183,10 @@ class QuotientContainer:
 
         # filter differences below epsilon
         for hole_index in inconsistent_assignments:
-            if inconsistent_differences[hole_index] < QuotientContainer.inconsistency_threshold:
-                selection[hole_index] = [selection[hole_index][0]]
+            if inconsistent_differences[hole_index] <= QuotientContainer.inconsistency_threshold:
+                pass
+                # TODO investigate nrp-8, why can't we fix these pseudo-consistent holes?
+                # selection[hole_index] = [selection[hole_index][0]]
 
         # sanity check
         for difference in inconsistent_differences.values():
@@ -239,8 +241,8 @@ class QuotientContainer:
         return core_suboptions, other_suboptions
 
     def holes_with_max_score(self, hole_score):
-        max_score = max(hole_score)
-        with_max_score = [hole_index for hole_index in range(len(hole_score)) if hole_score[hole_index] == max_score]
+        max_score = max(hole_score.values())
+        with_max_score = [hole_index for hole_index in hole_score if hole_score[hole_index] == max_score]
         return with_max_score
 
     def most_inconsistent_holes(self, scheduler_assignment):
@@ -258,16 +260,16 @@ class QuotientContainer:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
         # reduce simple holes
-        ds_before = reduced_design_space.size
-        for hole_index in reduced_design_space.hole_indices:
-            if mdp.hole_simple[hole_index]:
-                assert len(hole_assignments[hole_index]) == 1
-                reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
-        ds_after = reduced_design_space.size
-        self.discarded += ds_before - ds_after
+        # ds_before = reduced_design_space.size
+        # for hole_index in reduced_design_space.hole_indices:
+        #     if mdp.hole_simple[hole_index]:
+        #         assert len(hole_assignments[hole_index]) == 1
+        #         reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+        # ds_after = reduced_design_space.size
+        # self.discarded += ds_before - ds_after
 
         # discard other suboptions
-        suboptions = core_suboptions
+        # suboptions = core_suboptions
         # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
@@ -281,13 +283,14 @@ class QuotientContainer:
         assert mdp.scheduler_results is not None
         result,hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
         assert scores is not None
-        scores = [scores[hole_index] if hole_index in scores else 0 for hole_index in mdp.design_space.hole_indices]
+        
+        # scores = [scores[hole_index] if hole_index in scores else 0 for hole_index in mdp.design_space.hole_indices]
         
         # inconsistent = self.most_inconsistent_holes(hole_assignments)
         # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
         # splitters = self.holes_with_max_score(hole_sizes)
 
-        splitters = self.holes_with_max_score(scores)        
+        splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
         assert len(hole_assignments[splitter]) > 1
         core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])

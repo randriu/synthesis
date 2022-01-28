@@ -69,6 +69,19 @@ class SynthesizerPOMDP():
         print("reduced design space from {} to {}".format(full_space.size, design_space.size))
         return design_space
 
+    def break_symmetry(self, design_space):
+        restriced_space = design_space.copy()
+        for obs in range(self.sketch.quotient.observations):
+            hole_indices = self.sketch.quotient.pomdp_manager.action_holes[obs]    
+            if len(hole_indices) == 1:
+                continue
+            for index,hole_index in enumerate(hole_indices):
+                options = design_space[hole_index].options.copy()
+                options.remove(index)
+                restriced_space[hole_index].assume_options(options)
+        print("reduced design space from {} to {}".format(design_space.size, restriced_space.size))
+        return restriced_space
+
     def strategy_2(self):
 
         print("strategy started", flush=True)
@@ -314,7 +327,7 @@ class SynthesizerPOMDP():
 
         old_assignment = None
 
-        for iteration in range(5):
+        for iteration in range(100):
             print("\n------------------------------------------------------------\n")
             # construct the quotient
             self.sketch.quotient.unfold_partial_memory()
@@ -359,8 +372,11 @@ class SynthesizerPOMDP():
             #     if mdp_visits[state] == math.inf:
             #         mdp_visits[state] = 0
 
-            # synthesize optimal assignment for k=1
-            synthesized_assignment = self.synthesize()
+            # break symmetry
+            reduced_space = self.break_symmetry(self.sketch.design_space)
+
+            # synthesize optimal assignment
+            synthesized_assignment = self.synthesize(reduced_space)
             if synthesized_assignment is None:
                 # no new solution
                 if old_assignment is None:

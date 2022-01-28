@@ -228,6 +228,8 @@ class SynthesizerCEGIS(Synthesizer):
                 Profiler.resume()
                 return True, True, None
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
+                print(spec.optimality_result.improves_optimum)
+                print("CEGIS: ", self.sketch.specification.optimality.optimum, " -> ", spec.optimality_result.value)
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 improving = True
 

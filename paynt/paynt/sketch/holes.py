@@ -182,7 +182,7 @@ class DesignSpace(Holes):
     def sat_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
 
-
+        DesignSpace.solver_depth = 0
         if "pycvc5" in sys.modules:
             DesignSpace.use_cvc = True
         else:
@@ -249,15 +249,19 @@ class DesignSpace(Holes):
                 else:
                     pass
             self.hole_clauses.append(or_clause)
-        if DesignSpace.use_python_z3:
-            self.encoding = z3.And(self.hole_clauses)
-        elif DesignSpace.use_storm_z3:
-            self.encoding = stormpy.storage.Expression.Conjunction(self.hole_clauses)
-        elif DesignSpace.use_cvc:
-            self.encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, self.hole_clauses)
+
+        if len(self.hole_clauses) == 1:
+            self.encoding = self.hole_clauses[0]
         else:
-            pass
-            
+            if DesignSpace.use_python_z3:
+                self.encoding = z3.And(self.hole_clauses)
+            elif DesignSpace.use_storm_z3:
+                self.encoding = stormpy.storage.Expression.Conjunction(self.hole_clauses)
+            elif DesignSpace.use_cvc:
+                self.encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, self.hole_clauses)
+            else:
+                pass
+
         Profiler.resume()
 
     def pick_assignment(self):

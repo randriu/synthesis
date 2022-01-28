@@ -29,11 +29,11 @@ class MarkovChain:
 
         se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
         se.minmax_solver_environment.precision = stormpy.Rational(cls.precision)
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     def __init__(self, model, quotient_container, quotient_state_map = None, quotient_choice_map = None):
         if model.labeling.contains_label("overlap_guards"):
@@ -139,7 +139,7 @@ class DTMC(MarkovChain):
     def check_specification(self, specification, property_indices = None, short_evaluation = False):
         constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
         optimality_result = None
-        if not (short_evaluation and not constraints_result.all_sat) and specification.has_optimality:
+        if specification.has_optimality and not (short_evaluation and not constraints_result.all_sat):
             optimality_result = self.model_check_property(specification.optimality)
         return SpecificationResult(constraints_result, optimality_result)
 
@@ -210,14 +210,16 @@ class MDP(MarkovChain):
             consistent = True
         else:
             assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
+            # hash scheduler analysis results
             if not consistent:
                 self.scheduler_results[prop] = (primary.result,assignment,scores)
+        
         if consistent:
             # LB is tight and LB < OPT
-            hole_options = self.design_space.copy()
-            for hole_index,hole in enumerate(hole_options):
+            improving_assignment = self.design_space.copy()
+            for hole_index,hole in enumerate(improving_assignment):
                 hole.options = assignment[hole_index]
-            return MdpOptimalityResult(prop, primary, None, primary.value, hole_options, False)
+            return MdpOptimalityResult(prop, primary, None, primary.value, improving_assignment, False)
 
         # UB might improve the optimum
         secondary = self.model_check_property(prop, alt = True)
@@ -245,6 +247,6 @@ class MDP(MarkovChain):
     def check_specification(self, specification, property_indices = None, short_evaluation = False):
         constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
         optimality_result = None
-        if not (short_evaluation and constraints_result.feasibility == False) and specification.has_optimality:
+        if specification.has_optimality and not (short_evaluation and constraints_result.feasibility == False):
             optimality_result = self.check_optimality(specification.optimality)
         return SpecificationResult(constraints_result, optimality_result)
