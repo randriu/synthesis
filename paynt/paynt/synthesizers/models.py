@@ -1,16 +1,14 @@
 import stormpy
 
-from collections import OrderedDict
-# import stormpy.synthes
 from ..sketch.property import *
+from ..profiler import Profiler
 
+from collections import OrderedDict
 
 class MarkovChain:
 
     # options for the construction of chains
     builder_options = None
-    # model checking precision
-    precision = 1e-5
     # model checking environment (method & precision)
     environment = None
 
@@ -28,10 +26,11 @@ class MarkovChain:
         se = cls.environment.solver_environment
 
         se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
-        se.minmax_solver_environment.precision = stormpy.Rational(cls.precision)
+        se.minmax_solver_environment.precision = stormpy.Rational(Property.mc_precision)
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
@@ -95,18 +94,22 @@ class MarkovChain:
         return result
 
     def model_check_property(self, prop, alt = False):
+        Profiler.start(f"   MC {alt}")
         # get hint
         hint = None
         if self.analysis_hints is not None:
-            hint_prim,hint_seco = self.analysis_hints[prop]
-            hint = hint_prim if not alt else hint_seco
+            # hint_prim,hint_seco = self.analysis_hints[prop]
+            # hint = hint_prim if not alt else hint_seco
+            hint = self.analysis_hints[prop]
 
         formula = prop.formula if not alt else prop.formula_alt
         if hint is None:
             result = self.model_check_formula(formula)
         else:
+            assert False
             result = self.model_check_formula_hint(formula, hint)
         value = result.at(self.initial_state)
+        Profiler.resume()
         return PropertyResult(prop, result, value)
 
 
@@ -166,7 +169,7 @@ class MDP(MarkovChain):
         # check if the primary scheduler is consistent
         consistent = True
         if not self.is_dtmc:
-            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
+            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
             if not consistent:
                 self.scheduler_results[prop] = (result,assignment,scores)
         
@@ -209,7 +212,7 @@ class MDP(MarkovChain):
             assignment = [[hole.options[0]] for hole in self.design_space]
             consistent = True
         else:
-            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, primary.result)
+            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
             # hash scheduler analysis results
             if not consistent:
                 self.scheduler_results[prop] = (primary.result,assignment,scores)

@@ -76,8 +76,7 @@ class QuotientContainer:
 
     def build(self, design_space = None):
         if design_space is None or design_space == self.sketch.design_space:
-            design_space = self.sketch.design_space
-            return MDP(self.quotient_mdp, self, None, None, design_space)
+            return MDP(self.quotient_mdp, self, None, None, self.sketch.design_space)
         selected_actions = self.select_actions(design_space)
         model,state_map,choice_map = self.restrict_quotient(selected_actions)
         return MDP(model, self, state_map, choice_map, design_space)
@@ -115,7 +114,7 @@ class QuotientContainer:
         Profiler.resume()
         return selection
 
-    def scheduler_selection_quantitative(self, mdp, result):
+    def scheduler_selection_quantitative(self, mdp, prop, result):
         '''
         Get hole options involved in the scheduler selection.
         Use numeric values to filter spurious inconsistencies.
@@ -134,6 +133,17 @@ class QuotientContainer:
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
         tm = mdp.model.transition_matrix
 
+        if prop.reward:
+            # if the associated reward model has state-action rewards, then these must be added to choice values
+            reward_name = prop.formula.reward_name
+            rm = mdp.model.reward_models.get(reward_name)
+            assert not rm.has_transition_rewards and (rm.has_state_rewards != rm.has_state_action_rewards)
+            if rm.has_state_action_rewards:
+                choice_rewards = list(rm.state_action_rewards)
+                assert mdp.choices == len(choice_rewards)
+                for choice in range(mdp.choices):
+                    choice_values[choice] += choice_rewards[choice]
+
         for state in range(mdp.states):
 
             # for this state, compute for each inconsistent hole the difference in choice values between respective options
@@ -145,9 +155,9 @@ class QuotientContainer:
                 choice_global = mdp.quotient_choice_map[choice]
                 if self.default_actions.get(choice_global):
                     continue
+                choice_options = self.action_to_hole_options[choice_global]
                 
                 # collect holes in which this action is inconsistent
-                choice_options = self.action_to_hole_options[choice_global]
                 inconsistent_holes = []
                 for hole_index,option in choice_options.items():
                     inconsistent_options = inconsistent_assignments.get(hole_index,set())
@@ -184,9 +194,7 @@ class QuotientContainer:
         # filter differences below epsilon
         for hole_index in inconsistent_assignments:
             if inconsistent_differences[hole_index] <= QuotientContainer.inconsistency_threshold:
-                pass
-                # TODO investigate nrp-8, why can't we fix these pseudo-consistent holes?
-                # selection[hole_index] = [selection[hole_index][0]]
+                selection[hole_index] = [selection[hole_index][0]]
 
         # sanity check
         for difference in inconsistent_differences.values():
@@ -196,7 +204,7 @@ class QuotientContainer:
         return selection,inconsistent_differences
         
 
-    def scheduler_consistent(self, mdp, result):
+    def scheduler_consistent(self, mdp, prop, result):
         '''
         Get hole assignment induced by this scheduler and fill undefined
         holes by some option from the design space of this mdp.
@@ -204,7 +212,7 @@ class QuotientContainer:
         :return whether the scheduler is consistent
         '''
         # selection = self.scheduler_selection(mdp, result.scheduler)
-        selection,scores = self.scheduler_selection_quantitative(mdp, result)
+        selection,scores = self.scheduler_selection_quantitative(mdp, prop, result)
         consistent = True
         for hole_index in mdp.design_space.hole_indices:
             options = selection[hole_index]
@@ -296,7 +304,7 @@ class QuotientContainer:
         core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
 
         new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions)
-
+        
         # construct corresponding design subspaces
         Profiler.start("    create subspaces")
         design_subspaces = []

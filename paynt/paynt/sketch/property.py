@@ -4,6 +4,10 @@ import math
 import operator
 
 class Property:
+
+    # model checking precision
+    mc_precision = 1e-5
+    
     ''' Wrapper over a stormpy property. '''
     def __init__(self, prop):
         self.property = prop
@@ -33,8 +37,8 @@ class Property:
         self.formula_alt = Property.alt_formula(self.formula)
         self.formula_str = rf
         
-    @classmethod
-    def alt_formula(cls, formula):
+    @staticmethod
+    def alt_formula(formula):
         ''' Construct alternative quantitative formula to use in AR. '''
         formula_alt = formula.clone()
         optimality_type = formula.optimality_type
@@ -53,15 +57,22 @@ class Property:
     def reward(self):
         return self.formula.is_reward_operator
 
-    def meets_threshold(self, result):
-        return self.op(result, self.threshold)
+    @staticmethod
+    def above_precision(a, b):
+        return abs(a-b) > Property.mc_precision
 
-    def result_valid(self, result):
-        return not self.reward or result != math.inf
+    def meets_op(self, a, b):
+        return Property.above_precision(a,b) and self.op(a,b)
 
-    def satisfies_threshold(self, result):
+    def meets_threshold(self, value):
+        return self.meets_op(value, self.threshold)
+
+    def result_valid(self, value):
+        return not self.reward or value != math.inf
+
+    def satisfies_threshold(self, value):
         ''' check if DTMC model checking result satisfies the property '''
-        return self.result_valid(result) and self.meets_threshold(result)
+        return self.result_valid(value) and self.meets_threshold(value)
 
 
 class OptimalityProperty(Property):
@@ -95,22 +106,17 @@ class OptimalityProperty(Property):
     def __str__(self):
         return f"{self.formula_str} [eps = {self.epsilon}]"
 
-    def satisfies_threshold(self, result):
-        if not self.result_valid(result):
-            return False
-        if self.threshold is None:
-            return True
-        return self.meets_threshold(result)
+    def meets_op(self, a, b):
+        return b is None or super().meets_op(a,b)
 
-    def improves_optimum(self, result):
-        if not self.result_valid(result):
-            return False
-        if self.optimum is None:
-            return True
-        return self.op(result, self.optimum)
+    def satisfies_threshold(self, value):
+        return self.result_valid(value) and self.meets_op(value, self.threshold)
+
+    def improves_optimum(self, value):
+        return self.result_valid(value) and self.meets_op(value, self.optimum)
 
     def update_optimum(self, optimum):
-        # assert self.improves_optimum(optimum)
+        assert self.improves_optimum(optimum)
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)

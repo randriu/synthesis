@@ -129,11 +129,15 @@ class DesignSpace(Holes):
     # for each hole, a list of equalities [h==opt1,h==opt2,...]
     solver_clauses = None
 
-    # SMT solver
+    # SMT solver choice
     use_python_z3 = False
-    use_storm_z3 = False
+    use_storm_z3 = False # deprecated in stormpy-1.6.4 ?
     use_cvc = False
+    # current depth of push/pop solving
     solver_depth = 0
+
+    # whether hints will be stored for subsequent MDP model checking
+    store_hints = False
 
     def __init__(self, holes = []):
         super().__init__(holes.copy())
@@ -166,7 +170,7 @@ class DesignSpace(Holes):
         return translated_hint
 
     def translate_analysis_hints(self):
-        if self.analysis_hints is None:
+        if not DesignSpace.store_hints or self.analysis_hints is None:
             return None
 
         analysis_hints = dict()
@@ -174,9 +178,16 @@ class DesignSpace(Holes):
             hint_prim,hint_seco = hints
             hint_prim = self.translate_analysis_hint(hint_prim)
             hint_seco = self.translate_analysis_hint(hint_seco)
-            analysis_hints[prop] = (hint_prim,hint_seco) # no swap?
+            
+            # store both
+            # analysis_hints[prop] = (hint_prim,hint_seco) # no swap?
             # use primary hint for the secondary direction and vice versa
             # analysis_hints[prop] = (hint_seco,hint_prim) # swap?
+            
+            # store only lower bound
+            lb = hint_prim if prop.minimizing else hint_seco
+            analysis_hints[prop] = lb
+
         self.mdp.analysis_hints = analysis_hints
 
     def sat_initialize(self):

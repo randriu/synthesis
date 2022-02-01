@@ -77,7 +77,8 @@ class Synthesizer1By1(Synthesizer):
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
 
-
+import ast
+    
 class SynthesizerAR(Synthesizer):
 
     # family exploration order: True = DFS, False = BFS
@@ -94,9 +95,9 @@ class SynthesizerAR(Synthesizer):
         """
         Profiler.start("MDP analysis")
         # logger.debug("analyzing family {}".format(family))
+        
         family.mdp = self.sketch.quotient.build(family)
         family.translate_analysis_hints()
-        # print("family size: {}, mdp size: {}".format(family.size, family.mdp.states))
         self.stat.iteration_mdp(family.mdp.states)
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
@@ -140,7 +141,6 @@ class SynthesizerAR(Synthesizer):
         return prop, (hint_prim, hint_seco)
 
     def collect_analysis_hints(self, family):
-        return None # hints are disabled
         res = family.analysis_result
         analysis_hints = dict()
         for index in res.constraints_result.undecided_constraints:
@@ -162,7 +162,7 @@ class SynthesizerAR(Synthesizer):
         for subfamily in subfamilies:
             subfamily.set_analysis_hints(undecided, analysis_hints)
         return subfamilies
-
+    
     def synthesize(self, family):
 
         self.stat.start()
@@ -185,7 +185,7 @@ class SynthesizerAR(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.split_family(family)            
+            subfamilies = self.split_family(family)
             families = families + subfamilies
 
         self.stat.finished(satisfying_assignment)
@@ -228,8 +228,6 @@ class SynthesizerCEGIS(Synthesizer):
                 Profiler.resume()
                 return True, True, None
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
-                print(spec.optimality_result.improves_optimum)
-                print("CEGIS: ", self.sketch.specification.optimality.optimum, " -> ", spec.optimality_result.value)
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
                 improving = True
 
@@ -340,8 +338,6 @@ class StageControl:
         return self.timer_ar.running
 
     def start_ar(self):
-        # print(self.pruned_ar, self.pruned_cegis)
-        # print(self.timer_ar.read(), self.timer_cegis.read())
         self.timer_cegis.stop()
         self.timer_ar.start()
 

@@ -89,13 +89,11 @@ function run() {
 
     # model="pomdp/maze/concise"
 
-    # model="pomdp/grid/avoid"
-    # model="pomdp/grid/simple-mo"
 
-    # model="pomdp/grid/refuel"
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"
+    # model="pomdp/grid/simple-mo"
 
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp/drone-4-1"
@@ -110,7 +108,7 @@ function run() {
     # model="pomdp/voihp/grid-avoid-4-0"
     # model="pomdp/voihp/maze2-0"
     # model="pomdp/voihp/network-prio-2-8-20"
-    # model="pomdp/voihp/network-2-8-20"
+    model="pomdp/voihp/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
 
 
