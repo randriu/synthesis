@@ -88,6 +88,9 @@ class MarkovChain:
         return result
 
     def model_check_formula_hint(self, formula, hint):
+        print(dir(stormpy.synthesis))
+        stormpy.synthesis._set_loglevel_off()
+        exit()
         task = stormpy.core.CheckTask(formula, only_initial_states=False)
         task.set_produce_schedulers(produce_schedulers=True)
         result = stormpy.synthesis.model_check_with_hint(self.model, task, self.environment, hint)
@@ -98,15 +101,14 @@ class MarkovChain:
         # get hint
         hint = None
         if self.analysis_hints is not None:
-            # hint_prim,hint_seco = self.analysis_hints[prop]
-            # hint = hint_prim if not alt else hint_seco
-            hint = self.analysis_hints[prop]
+            hint_prim,hint_seco = self.analysis_hints[prop]
+            hint = hint_prim if not alt else hint_seco
+            # hint = self.analysis_hints[prop]
 
         formula = prop.formula if not alt else prop.formula_alt
         if hint is None:
             result = self.model_check_formula(formula)
         else:
-            assert False
             result = self.model_check_formula_hint(formula, hint)
         value = result.at(self.initial_state)
         Profiler.resume()
@@ -200,51 +202,52 @@ class MDP(MarkovChain):
         # check primary direction
         primary = self.model_check_property(prop, alt = False)
 
-        # def __init__(self, prop, primary, secondary, optimum, improving_assignment, can_improve):
+        # def __init__(self, prop, primary, secondary, improving_assignment, can_improve):
         
         if not primary.improves_optimum:
             # OPT <= LB
-            return MdpOptimalityResult(prop, primary, None, None, None, False)
+            return MdpOptimalityResult(prop, primary, None, None, False)
 
         # LB < OPT
         # check if LB is tight
+
         if self.is_dtmc:
-            assignment = [[hole.options[0]] for hole in self.design_space]
+            assignment = self.design_space.pick_any()
             consistent = True
         else:
-            assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
-            # hash scheduler analysis results
-            if not consistent:
-                self.scheduler_results[prop] = (primary.result,assignment,scores)
+            selection,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
+            assignment = self.design_space.copy()
+            assignment.assume_options(selection)
         
         if consistent:
             # LB is tight and LB < OPT
-            improving_assignment = self.design_space.copy()
-            for hole_index,hole in enumerate(improving_assignment):
-                hole.options = assignment[hole_index]
-            return MdpOptimalityResult(prop, primary, None, primary.value, improving_assignment, False)
+            improving_assignment = self.quotient_container.double_check_assignment(assignment, prop)
+            return MdpOptimalityResult(prop, primary, None, improving_assignment, False)
 
         # UB might improve the optimum
         secondary = self.model_check_property(prop, alt = True)
-        
+
         if not secondary.improves_optimum:
             # LB < OPT < UB
             if not primary.sat:
                 # T < LB < OPT < UB
-                return MdpOptimalityResult(prop, primary, secondary, None, None, False)
+                return MdpOptimalityResult(prop, primary, secondary, None, False)
             else:
                 # LB < T < OPT < UB
-                return MdpOptimalityResult(prop, primary, secondary, None, None, True)
+                self.scheduler_results[prop] = (selection,scores)
+                return MdpOptimalityResult(prop, primary, secondary, None, True)
 
         # LB < UB < OPT
         # this family definitely improves the optimum
         assignment = self.design_space.pick_any()
+        improving_assignment = self.quotient_container.double_check_assignment(assignment, prop)
         if not primary.sat:
             # T < LB < UB < OPT
-            return MdpOptimalityResult(prop, primary, secondary, secondary.value, assignment, False)
+            return MdpOptimalityResult(prop, primary, secondary, improving_assignment, False)
         else:
             # LB < T, LB < UB < OPT
-            return MdpOptimalityResult(prop, primary, secondary, secondary.value, assignment, True)
+            self.scheduler_results[prop] = (selection,scores)
+            return MdpOptimalityResult(prop, primary, secondary, improving_assignment, True)
 
 
     def check_specification(self, specification, property_indices = None, short_evaluation = False):

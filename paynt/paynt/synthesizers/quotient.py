@@ -180,7 +180,7 @@ class QuotientContainer:
                 max_value = hole_max[hole_index]
                 difference = max_value - min_value
                 if math.isnan(difference):
-                    assert max_value == min_value and min_value == math.inf and False
+                    assert max_value == min_value and min_value == math.inf
                     difference = 0
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
@@ -289,7 +289,7 @@ class QuotientContainer:
 
         # split family wrt last undecided result
         assert mdp.scheduler_results is not None
-        result,hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
+        hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
         assert scores is not None
         
         # scores = [scores[hole_index] if hole_index in scores else 0 for hole_index in mdp.design_space.hole_indices]
@@ -331,6 +331,20 @@ class QuotientContainer:
                 relevant_holes.update(set(self.action_to_hole_options[action].keys()))
             self._quotient_relevant_holes.append(relevant_holes)
         return self._quotient_relevant_holes
+
+    def double_check_assignment(self, assignment, opt_prop):
+        '''
+        Double-check whether this assignment truly improves optimum.
+        :return singleton family if the assignment truly improves optimum
+        '''
+        assert assignment.size == 1
+        dtmc = self.build_chain(assignment)
+        opt_result = dtmc.model_check_property(opt_prop)
+        if opt_prop.improves_optimum(opt_result.value):
+            opt_prop.update_optimum(opt_result.value)
+            return assignment
+        else:
+            return None
 
 
 

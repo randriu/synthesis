@@ -34,11 +34,6 @@ class Synthesizer:
         Profiler.start("synthesis")
         self.sketch.quotient.discarded = 0
         opt_assignment = self.synthesize(self.sketch.design_space)
-        # double-check assignment
-        if opt_assignment is not None:
-            dtmc = self.sketch.quotient.build_chain(opt_assignment)
-            spec_result = dtmc.check_specification(self.sketch.specification)
-            print("double-checking: ", spec_result)
         Profiler.stop()
         return opt_assignment
 
@@ -93,7 +88,6 @@ class SynthesizerAR(Synthesizer):
         :return (1) family feasibility (True/False/None)
         :return (2) new satisfying assignment (or None)
         """
-        Profiler.start("MDP analysis")
         # logger.debug("analyzing family {}".format(family))
         
         family.mdp = self.sketch.quotient.build(family)
@@ -102,9 +96,9 @@ class SynthesizerAR(Synthesizer):
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
-        satisfying_assignment = None
         Profiler.resume()
 
+        satisfying_assignment = None
         can_improve = res.constraints_result.feasibility is None
         if res.constraints_result.feasibility == True:
             if not self.sketch.specification.has_optimality:
@@ -112,13 +106,8 @@ class SynthesizerAR(Synthesizer):
                 return True, satisfying_assignment
             else:
                 can_improve = res.optimality_result.can_improve
-                if res.optimality_result.optimum is not None:
-                    # double-check the assignment and update optimum
+                if res.optimality_result.improving_assignment is not None:
                     satisfying_assignment = res.optimality_result.improving_assignment
-                    assert satisfying_assignment.size == 1
-                    dtmc = self.sketch.quotient.build_chain(satisfying_assignment)
-                    opt_result = dtmc.model_check_property(self.sketch.specification.optimality)
-                    self.sketch.specification.optimality.update_optimum(opt_result.value)
         
         if not can_improve:
             self.explore(family)
@@ -338,6 +327,8 @@ class StageControl:
         return self.timer_ar.running
 
     def start_ar(self):
+        # print(self.pruned_ar, self.pruned_cegis)
+        # print(self.timer_ar.read(), self.timer_cegis.read())
         self.timer_cegis.stop()
         self.timer_ar.start()
 

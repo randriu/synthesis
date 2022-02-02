@@ -137,7 +137,7 @@ class DesignSpace(Holes):
     solver_depth = 0
 
     # whether hints will be stored for subsequent MDP model checking
-    store_hints = False
+    store_hints = True
 
     def __init__(self, holes = []):
         super().__init__(holes.copy())
@@ -185,8 +185,12 @@ class DesignSpace(Holes):
             # analysis_hints[prop] = (hint_seco,hint_prim) # swap?
             
             # store only lower bound
-            lb = hint_prim if prop.minimizing else hint_seco
-            analysis_hints[prop] = lb
+            # lb = hint_prim if prop.minimizing else hint_seco
+            # analysis_hints[prop] = lb
+
+            # store both only if probability
+            if not prop.reward:
+                analysis_hints[prop] = (hint_prim,hint_seco)
 
         self.mdp.analysis_hints = analysis_hints
 

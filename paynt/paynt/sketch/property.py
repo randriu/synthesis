@@ -229,9 +229,8 @@ class MdpConstraintsResult:
                 self.feasibility = None
 
 class MdpOptimalityResult(MdpPropertyResult):
-    def __init__(self, prop, primary, secondary, optimum, improving_assignment, can_improve):
+    def __init__(self, prop, primary, secondary, improving_assignment, can_improve):
         super().__init__(prop, primary, secondary, None)
-        self.optimum = optimum
         self.improving_assignment = improving_assignment
         self.can_improve = can_improve
 
