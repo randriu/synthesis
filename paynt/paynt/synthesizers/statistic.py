@@ -1,4 +1,4 @@
-from ..profiler import Timer
+from ..profiler import Timer,Profiler
 
 import logging
 logger = logging.getLogger(__name__)
@@ -101,6 +101,7 @@ class Statistic:
 
     def print_status(self):
         if self.timer.read() > self.status_time:
+            # Profiler.print_all()
             logger.info(self.status())
             self.status_time += self.status_period
 

@@ -88,9 +88,7 @@ class MarkovChain:
         return result
 
     def model_check_formula_hint(self, formula, hint):
-        print(dir(stormpy.synthesis))
-        stormpy.synthesis._set_loglevel_off()
-        exit()
+        stormpy.synthesis.set_loglevel_off()
         task = stormpy.core.CheckTask(formula, only_initial_states=False)
         task.set_produce_schedulers(produce_schedulers=True)
         result = stormpy.synthesis.model_check_with_hint(self.model, task, self.environment, hint)

@@ -7,7 +7,6 @@ import z3
 
 import stormpy.synthesis
 
-from ..profiler import Profiler
 
 import logging
 logger = logging.getLogger(__name__)
@@ -112,6 +111,13 @@ class Holes(list):
         return holes
 
 
+class ParentInfo():
+    def __init__(self):
+        self.refinement_depth = None
+        self.selected_actions = None
+        self.analysis_hints = None
+        self.property_indices = None
+        self.splitter = None
 
 
 class DesignSpace(Holes):
@@ -139,60 +145,26 @@ class DesignSpace(Holes):
     # whether hints will be stored for subsequent MDP model checking
     store_hints = True
 
-    def __init__(self, holes = []):
+    def __init__(self, holes = [], parent_info = None):
         super().__init__(holes.copy())
-        self.property_indices = None
 
         self.mdp = None
-        self.analysis_result = None
-        self.analysis_hints = None
-        
         self.hole_clauses = None
         self.encoding = None
 
+        self.selected_actions = None
         self.refinement_depth = 0
+        self.property_indices = None
+
+        self.splitter = None
+        self.parent_info = parent_info
+        if parent_info is not None:
+            self.refinement_depth = parent_info.refinement_depth + 1
+            self.property_indices = parent_info.property_indices.copy()
 
     def copy(self):
         ds = DesignSpace(super().copy())
-        ds.property_indices = self.property_indices.copy()
         return ds
-
-    def set_analysis_hints(self, property_indices, analysis_hints):
-        self.property_indices = property_indices
-        self.analysis_hints = analysis_hints
-
-    def translate_analysis_hint(self, hint):
-        if hint is None:
-            return None
-        translated_hint = [0] * self.mdp.states
-        for state in range(self.mdp.states):
-            translated_hint[state] = hint[self.mdp.quotient_state_map[state]]
-        return translated_hint
-
-    def translate_analysis_hints(self):
-        if not DesignSpace.store_hints or self.analysis_hints is None:
-            return None
-
-        analysis_hints = dict()
-        for prop,hints in self.analysis_hints.items():
-            hint_prim,hint_seco = hints
-            hint_prim = self.translate_analysis_hint(hint_prim)
-            hint_seco = self.translate_analysis_hint(hint_seco)
-            
-            # store both
-            # analysis_hints[prop] = (hint_prim,hint_seco) # no swap?
-            # use primary hint for the secondary direction and vice versa
-            # analysis_hints[prop] = (hint_seco,hint_prim) # swap?
-            
-            # store only lower bound
-            # lb = hint_prim if prop.minimizing else hint_seco
-            # analysis_hints[prop] = lb
-
-            # store both only if probability
-            if not prop.reward:
-                analysis_hints[prop] = (hint_prim,hint_seco)
-
-        self.mdp.analysis_hints = analysis_hints
 
     def sat_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
@@ -247,7 +219,6 @@ class DesignSpace(Holes):
         
     def encode(self):
         ''' Encode this design space. '''
-        Profiler.start("encode")
         self.hole_clauses = []
         for hole_index,hole in enumerate(self):
             all_clauses = DesignSpace.solver_clauses[hole_index]
@@ -277,8 +248,6 @@ class DesignSpace(Holes):
             else:
                 pass
 
-        Profiler.resume()
-
     def pick_assignment(self):
         '''
         Pick any (feasible) hole assignment.
@@ -288,57 +257,38 @@ class DesignSpace(Holes):
         if not self.encoded:
             self.encode()
         
-        Profiler.start("pick_assignment")
         if DesignSpace.use_python_z3:
-            Profiler.start("    SMT check")
             solver_result = DesignSpace.solver.check(self.encoding)
-            Profiler.resume()
             if solver_result == z3.unsat:
-                Profiler.resume()
                 return None
-            Profiler.start("    SMT model")
             sat_model = DesignSpace.solver.model()
             hole_options = []
             for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = sat_model[var].as_long()
                 hole_options.append([option])
-            Profiler.resume()
         elif DesignSpace.use_storm_z3:
-            Profiler.start("    SMT check")
             solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
-            Profiler.resume()
             if solver_result == stormpy.utility.SmtCheckResult.Unsat:
-                Profiler.resume()
                 return None
-            Profiler.start("    SMT model")
             solver_model = DesignSpace.solver.model
             hole_options = []
             for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = solver_model.get_integer_value(var)
                 hole_options.append([option])
-            Profiler.resume()
         elif DesignSpace.use_cvc:
-            Profiler.start("    SMT check")
             solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
-            Profiler.resume()
             if solver_result.isUnsat():
-                Profiler.resume()
                 return None
-            Profiler.start("    SMT model")
             hole_options = []
             for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = DesignSpace.solver.getValue(var).getIntegerValue()
                 hole_options.append([option])
-            Profiler.resume()
         else:
             pass            
         
-        Profiler.start("    assignment construction")
         assignment = self.copy()
         assignment.assume_options(hole_options)
-        Profiler.resume()
 
-        Profiler.resume()
         return assignment
 
     def exclude_assignment(self, assignment, conflict):
@@ -396,6 +346,70 @@ class DesignSpace(Holes):
         # create new scope
         DesignSpace.solver.push()
         DesignSpace.solver_depth += 1
+
+    def generalize_hint(self, hint):
+        hint_global = dict()
+        for state in range(self.mdp.states):
+            hint_global[self.mdp.quotient_state_map[state]] = hint.at(state)
+        return hint_global
+
+    def generalize_hints(self, result):
+        prop = result.property
+        hint_prim = self.generalize_hint(result.primary.result)
+        hint_seco = self.generalize_hint(result.secondary.result) if result.secondary is not None else None
+        return prop, (hint_prim, hint_seco)
+
+    def collect_analysis_hints(self):
+        res = self.analysis_result
+        analysis_hints = dict()
+        for index in res.constraints_result.undecided_constraints:
+            prop, hints = self.generalize_hints(res.constraints_result.results[index])
+            analysis_hints[prop] = hints
+        if res.optimality_result is not None:
+            prop, hints = self.generalize_hints(res.optimality_result)
+            analysis_hints[prop] = hints
+        return analysis_hints
+
+    def translate_analysis_hint(self, hint):
+        if hint is None:
+            return None
+        translated_hint = [0] * self.mdp.states
+        for state in range(self.mdp.states):
+            translated_hint[state] = hint[self.mdp.quotient_state_map[state]]
+        return translated_hint
+
+    def translate_analysis_hints(self):
+        if not DesignSpace.store_hints or self.parent_info is None:
+            return None
+
+        analysis_hints = dict()
+        for prop,hints in self.parent_info.analysis_hints.items():
+            hint_prim,hint_seco = hints
+            hint_prim = self.translate_analysis_hint(hint_prim)
+            hint_seco = self.translate_analysis_hint(hint_seco)
+            
+            # store both
+            analysis_hints[prop] = (hint_prim,hint_seco)
+            
+            # store only lower bound
+            # lb = hint_prim if prop.minimizing else hint_seco
+            # analysis_hints[prop] = lb
+
+            # store both only if probability
+            # if not prop.reward:
+                # analysis_hints[prop] = (hint_prim,hint_seco)
+
+        return analysis_hints
+
+    def collect_parent_info(self):
+        pi = ParentInfo()
+        pi.selected_actions = self.selected_actions
+        pi.refinement_depth = self.refinement_depth
+        pi.analysis_hints = self.collect_analysis_hints()
+        pi.property_indices = self.property_indices
+        pi.splitter = self.splitter
+        return pi
+
                 
 
 

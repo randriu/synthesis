@@ -34,7 +34,7 @@ std::shared_ptr<storm::modelchecker::CheckResult> getExpectedNumberOfVisits(stor
 // Define python bindings
 void define_helpers(py::module& m) {
 
-    m.def("_set_loglevel_off", []() { storm::utility::setLogLevel(l3pp::LogLevel::OFF); }, "set loglevel for storm to off");
+    m.def("set_loglevel_off", []() { storm::utility::setLogLevel(l3pp::LogLevel::OFF); }, "set loglevel for storm to off");
 
     m.def("multiply_with_vector", [] (storm::storage::SparseMatrix<double> matrix,std::vector<double> vector) {
         std::vector<double> result(matrix.getRowCount());

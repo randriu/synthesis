@@ -90,13 +90,11 @@ class SynthesizerAR(Synthesizer):
         """
         # logger.debug("analyzing family {}".format(family))
         
-        family.mdp = self.sketch.quotient.build(family)
-        family.translate_analysis_hints()
+        self.sketch.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
-        Profiler.resume()
 
         satisfying_assignment = None
         can_improve = res.constraints_result.feasibility is None
@@ -115,42 +113,6 @@ class SynthesizerAR(Synthesizer):
 
         feasibility = None if can_improve else False
         return feasibility, satisfying_assignment
-
-    
-    def generalize_hint(self, family, hint):
-        hint_global = dict()
-        for state in range(family.mdp.states):
-            hint_global[family.mdp.quotient_state_map[state]] = hint.at(state)
-        return hint_global
-
-    def generalize_hints(self, family, result):
-        prop = result.property
-        hint_prim = self.generalize_hint(family, result.primary.result)
-        hint_seco = self.generalize_hint(family, result.secondary.result) if result.secondary is not None else None
-        return prop, (hint_prim, hint_seco)
-
-    def collect_analysis_hints(self, family):
-        res = family.analysis_result
-        analysis_hints = dict()
-        for index in res.constraints_result.undecided_constraints:
-            prop, hints = self.generalize_hints(family, res.constraints_result.results[index])
-            analysis_hints[prop] = hints
-        if res.optimality_result is not None:
-            prop, hints = self.generalize_hints(family, res.optimality_result)
-            analysis_hints[prop] = hints
-        return analysis_hints
-
-    def split_family(self, family):
-        # filter undecided constraints, collect analysis hints
-        res = family.analysis_result
-        undecided = res.constraints_result.undecided_constraints
-        analysis_hints = self.collect_analysis_hints(family)
-
-        # split
-        subfamilies = self.sketch.quotient.split(family.mdp)
-        for subfamily in subfamilies:
-            subfamily.set_analysis_hints(undecided, analysis_hints)
-        return subfamilies
     
     def synthesize(self, family):
 
@@ -174,7 +136,7 @@ class SynthesizerAR(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.split_family(family)
+            subfamilies = self.sketch.quotient.split(family)
             families = families + subfamilies
 
         self.stat.finished(satisfying_assignment)
@@ -446,7 +408,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         
             # CEGIS could not process the family: split
-            subfamilies = self.split_family(family)
+            subfamilies = self.sketch.quotient.split(family)
             families = families + subfamilies
 
         ce_generator.print_profiling()

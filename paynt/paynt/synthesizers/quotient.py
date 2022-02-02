@@ -31,24 +31,39 @@ class QuotientContainer:
         self.sketch = sketch
         
         self.quotient_mdp = None
-        self.default_actions = None        
+        self.default_actions = None
         self.action_to_hole_options = None
         self._quotient_relevant_holes = None
 
         self.discarded = None
 
-    def select_actions(self, design_space):
-        ''' Select actions relevant in the provided design space. '''
+    def select_actions(self, family):
+        ''' Select non-default actions relevant in the provided design space. '''
         Profiler.start("quotient::select_actions")
-        selected_actions = stormpy.BitVector(self.default_actions)
-        for act_index in range(self.quotient_mdp.nr_choices):
-            if selected_actions.get(act_index):
-                continue
-            hole_options = self.action_to_hole_options[act_index]
-            if design_space.includes(hole_options):
-                selected_actions.set(act_index)
+
+        if family.parent_info is None:
+            # select from scratch
+            selected_actions = []
+            for action in range(self.quotient_mdp.nr_choices):
+                if self.default_actions[action]:
+                    continue
+                hole_options = self.action_to_hole_options[action]
+                if family.includes(hole_options):
+                    selected_actions.append(action)
+        else:
+
+            # filter each action in the parent wrt newly restricted design space
+            parent_actions = family.parent_info.selected_actions
+            selected_actions = []
+            for action in parent_actions:
+                hole_options = self.action_to_hole_options[action]
+                if family.includes(hole_options):
+                # if family.parent_info.splitter not in hole_options or family.includes(hole_options):
+                    selected_actions.append(action)
+
         Profiler.resume()
         return selected_actions
+
 
     def restrict_quotient(self, selected_actions):
         '''
@@ -74,19 +89,28 @@ class QuotientContainer:
         Profiler.resume()
         return model,state_map,choice_map
 
-    def build(self, design_space = None):
-        if design_space is None or design_space == self.sketch.design_space:
-            return MDP(self.quotient_mdp, self, None, None, self.sketch.design_space)
-        selected_actions = self.select_actions(design_space)
-        model,state_map,choice_map = self.restrict_quotient(selected_actions)
-        return MDP(model, self, state_map, choice_map, design_space)
+    def add_default_actions(self, selected_actions):
+        selected_actions_bv = stormpy.BitVector(self.default_actions)
+        for action in selected_actions:
+            selected_actions_bv.set(action)
+        return selected_actions_bv
 
-    def build_chain(self, design_space):
-        assert design_space.size == 1
+    def build(self, family):
+        selected_actions = self.select_actions(family)
+        selected_actions_bv = self.add_default_actions(selected_actions)
+        model,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
+
+        family.selected_actions = selected_actions
+        family.mdp = MDP(model, self, state_map, choice_map, family)
+        family.mdp.analysis_hints = family.translate_analysis_hints()
+
+    def build_chain(self, family):
+        assert family.size == 1
 
         # restrict quotient
-        selected_actions = self.select_actions(design_space)
-        sub_mdp,state_map,choice_map = self.restrict_quotient(selected_actions)
+        selected_actions = self.select_actions(family)
+        selected_actions_bv = self.add_default_actions(selected_actions)
+        sub_mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
         
         # convert restricted MDP to DTMC
         tm = sub_mdp.transition_matrix
@@ -283,21 +307,17 @@ class QuotientContainer:
         return reduced_design_space, suboptions
 
 
-    def split(self, mdp):
-        assert not mdp.is_dtmc
+    def split(self, family):
         Profiler.start("quotient::split")
+
+        mdp = family.mdp
+        assert not mdp.is_dtmc
 
         # split family wrt last undecided result
         assert mdp.scheduler_results is not None
         hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
         assert scores is not None
         
-        # scores = [scores[hole_index] if hole_index in scores else 0 for hole_index in mdp.design_space.hole_indices]
-        
-        # inconsistent = self.most_inconsistent_holes(hole_assignments)
-        # hole_sizes = [mdp.design_space[hole_index].size if hole_index in inconsistent else 0 for hole_index in mdp.design_space.hole_indices]
-        # splitters = self.holes_with_max_score(hole_sizes)
-
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
         assert len(hole_assignments[splitter]) > 1
@@ -308,10 +328,12 @@ class QuotientContainer:
         # construct corresponding design subspaces
         Profiler.start("    create subspaces")
         design_subspaces = []
+        
+        family.splitter = splitter
+        parent_info = family.collect_parent_info()
         for suboption in suboptions:
-            design_subspace = new_design_space.copy()
+            design_subspace = DesignSpace(new_design_space, parent_info)
             design_subspace.assume_hole_options(splitter, suboption)
-            design_subspace.refinement_depth = mdp.design_space.refinement_depth + 1
             design_subspaces.append(design_subspace)
         Profiler.resume()
 
