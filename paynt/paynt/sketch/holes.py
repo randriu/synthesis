@@ -7,6 +7,8 @@ import z3
 
 import stormpy.synthesis
 
+from ..profiler import Profiler
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -370,35 +372,24 @@ class DesignSpace(Holes):
             analysis_hints[prop] = hints
         return analysis_hints
 
-    def translate_analysis_hint(self, hint):
-        if hint is None:
-            return None
-        translated_hint = [0] * self.mdp.states
-        for state in range(self.mdp.states):
-            translated_hint[state] = hint[self.mdp.quotient_state_map[state]]
-        return translated_hint
-
     def translate_analysis_hints(self):
         if not DesignSpace.store_hints or self.parent_info is None:
             return None
 
+        Profiler.start("holes::translate_analysis_hints")
         analysis_hints = dict()
         for prop,hints in self.parent_info.analysis_hints.items():
             hint_prim,hint_seco = hints
-            hint_prim = self.translate_analysis_hint(hint_prim)
-            hint_seco = self.translate_analysis_hint(hint_seco)
-            
-            # store both
-            analysis_hints[prop] = (hint_prim,hint_seco)
-            
-            # store only lower bound
-            # lb = hint_prim if prop.minimizing else hint_seco
-            # analysis_hints[prop] = lb
 
-            # store both only if probability
-            # if not prop.reward:
-                # analysis_hints[prop] = (hint_prim,hint_seco)
+            translated_hint_prim = [0] * self.mdp.states
+            translated_hint_seco = [0] * self.mdp.states
+            for state in range(self.mdp.states):
+                global_state = self.mdp.quotient_state_map[state]
+                translated_hint_prim[state] = hint_prim[global_state]
+                translated_hint_seco[state] = hint_seco[global_state]
+            analysis_hints[prop] = (translated_hint_prim,translated_hint_seco)
 
+        Profiler.resume()
         return analysis_hints
 
     def collect_parent_info(self):
@@ -408,6 +399,7 @@ class DesignSpace(Holes):
         pi.analysis_hints = self.collect_analysis_hints()
         pi.property_indices = self.property_indices
         pi.splitter = self.splitter
+        pi.mdp = self.mdp
         return pi
 
                 

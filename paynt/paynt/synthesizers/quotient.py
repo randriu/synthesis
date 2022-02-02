@@ -32,10 +32,15 @@ class QuotientContainer:
         
         self.quotient_mdp = None
         self.default_actions = None
+        self.default_actions_explicit = None
         self.action_to_hole_options = None
         self._quotient_relevant_holes = None
 
         self.discarded = None
+
+        self.subsystem_builder_options = stormpy.SubsystemBuilderOptions()
+        self.subsystem_builder_options.build_state_mapping = True
+        self.subsystem_builder_options.build_action_mapping = True
 
     def select_actions(self, family):
         ''' Select non-default actions relevant in the provided design space. '''
@@ -57,60 +62,59 @@ class QuotientContainer:
             selected_actions = []
             for action in parent_actions:
                 hole_options = self.action_to_hole_options[action]
-                if family.includes(hole_options):
-                # if family.parent_info.splitter not in hole_options or family.includes(hole_options):
+                # if family.includes(hole_options):
+                if family.parent_info.splitter not in hole_options or family.includes(hole_options):
                     selected_actions.append(action)
 
         Profiler.resume()
         return selected_actions
 
 
-    def restrict_quotient(self, selected_actions):
+    def restrict_quotient(self, family):
         '''
         Restrict the quotient MDP to the selected actions.
         :return (1) the restricted model
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
         '''
+        selected_actions = self.select_actions(family)
         
+        # add to default actions
+        selected_actions_bv = stormpy.BitVector(self.default_actions)
+        for action in selected_actions:
+            selected_actions_bv.set(action)
+
         # construct the submodel
         Profiler.start("quotient::restrict_quotient")
+        
         keep_unreachable_states = False
-        subsystem_options = stormpy.SubsystemBuilderOptions()
-        subsystem_options.build_state_mapping = True
-        subsystem_options.build_action_mapping = True
         all_states = stormpy.BitVector(self.quotient_mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
-            self.quotient_mdp, all_states, selected_actions, keep_unreachable_states, subsystem_options
+            self.quotient_mdp, all_states, selected_actions_bv, keep_unreachable_states, self.subsystem_builder_options
         )
+
         model = submodel_construction.model
         state_map =  submodel_construction.new_to_old_state_mapping
         choice_map = submodel_construction.new_to_old_action_mapping
         Profiler.resume()
-        return model,state_map,choice_map
+        return selected_actions,model,state_map,choice_map
 
-    def add_default_actions(self, selected_actions):
-        selected_actions_bv = stormpy.BitVector(self.default_actions)
-        for action in selected_actions:
-            selected_actions_bv.set(action)
-        return selected_actions_bv
-
+    
     def build(self, family):
-        selected_actions = self.select_actions(family)
-        selected_actions_bv = self.add_default_actions(selected_actions)
-        model,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
 
+        Profiler.start("quotient::build")
+        
+        selected_actions,model,state_map,choice_map = self.restrict_quotient(family)
         family.selected_actions = selected_actions
         family.mdp = MDP(model, self, state_map, choice_map, family)
         family.mdp.analysis_hints = family.translate_analysis_hints()
+        Profiler.resume()
 
     def build_chain(self, family):
         assert family.size == 1
 
         # restrict quotient
-        selected_actions = self.select_actions(family)
-        selected_actions_bv = self.add_default_actions(selected_actions)
-        sub_mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
+        _,sub_mdp,state_map,choice_map = self.restrict_quotient(family)
         
         # convert restricted MDP to DTMC
         tm = sub_mdp.transition_matrix
@@ -122,8 +126,6 @@ class QuotientContainer:
 
     def scheduler_selection(self, mdp, scheduler):
         ''' Get hole options involved in the scheduler selection. '''
-        Profiler.start("quotient::scheduler_selection")
-
         assert scheduler.memoryless and scheduler.deterministic
         
         selection = [set() for hole_index in mdp.design_space.hole_indices]
@@ -135,7 +137,6 @@ class QuotientContainer:
                 selection[hole_index].add(option)
         selection = [list(options) for options in selection]
 
-        Profiler.resume()
         return selection
 
     def scheduler_selection_quantitative(self, mdp, prop, result):
@@ -146,17 +147,24 @@ class QuotientContainer:
         Profiler.start("quotient::scheduler_selection_quantitative")
 
         # get qualitative scheduler selection, filter inconsistent assignments        
+        Profiler.start("    scheduler_selection")
         selection = self.scheduler_selection(mdp, result.scheduler)
+        Profiler.resume()
+
+        Profiler.start("    other")
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
+        Profiler.resume()
         if len(inconsistent_assignments) == 0:
+            Profiler.resume()
             return selection,None
-        
+
+        Profiler.start("    other")
         choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix,result.get_values())
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
         tm = mdp.model.transition_matrix
-
+        
         if prop.reward:
             # if the associated reward model has state-action rewards, then these must be added to choice values
             reward_name = prop.formula.reward_name
@@ -167,7 +175,9 @@ class QuotientContainer:
                 assert mdp.choices == len(choice_rewards)
                 for choice in range(mdp.choices):
                     choice_values[choice] += choice_rewards[choice]
+        Profiler.resume()
 
+        Profiler.start("    states")
         for state in range(mdp.states):
 
             # for this state, compute for each inconsistent hole the difference in choice values between respective options
@@ -208,8 +218,10 @@ class QuotientContainer:
                     difference = 0
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
+        Profiler.resume()
 
         # aggregate
+        Profiler.start("    other")
         inconsistent_differences = {
             hole_index: (hole_difference_sum[hole_index] / hole_states_affected[hole_index])
             for hole_index in inconsistent_assignments
@@ -221,8 +233,7 @@ class QuotientContainer:
                 selection[hole_index] = [selection[hole_index][0]]
 
         # sanity check
-        for difference in inconsistent_differences.values():
-            assert not math.isnan(difference)
+        Profiler.resume()
 
         Profiler.resume()
         return selection,inconsistent_differences
@@ -326,10 +337,10 @@ class QuotientContainer:
         new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions)
         
         # construct corresponding design subspaces
-        Profiler.start("    create subspaces")
         design_subspaces = []
         
         family.splitter = splitter
+        Profiler.start("    collect_parent_info")
         parent_info = family.collect_parent_info()
         for suboption in suboptions:
             design_subspace = DesignSpace(new_design_space, parent_info)
@@ -412,6 +423,7 @@ class DTMCQuotientContainer(QuotientContainer):
             self.action_to_hole_options.append(hole_options)
             if len(hole_options) == 0:
                 self.default_actions.set(choice)
+        self.default_actions_explicit = [self.default_actions.get(choice) for choice in range(self.quotient_mdp.nr_choices)]
 
 
 class CTMCQuotientContainer(QuotientContainer):
@@ -593,4 +605,5 @@ class POMDPQuotientContainer(QuotientContainer):
                 continue
 
             self.action_to_hole_options.append(relevant_holes)
+        self.default_actions_explicit = [self.default_actions.get(choice) for choice in range(self.quotient_mdp.nr_choices)]
 

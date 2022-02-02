@@ -34,32 +34,26 @@ class MarkovChain:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
-    def __init__(self, model, quotient_container, quotient_state_map = None, quotient_choice_map = None):
+    def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
+        Profiler.start("models::MarkovChain::__init__")
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.model = model
         self.quotient_container = quotient_container
-        
         self.quotient_choice_map = quotient_choice_map
-        if quotient_choice_map is None:
-            self.quotient_choice_map = [c for c in range(model.nr_choices)]
-        
         self.quotient_state_map = quotient_state_map
-        if quotient_state_map is None:
-            self.quotient_state_map = [s for s in range(model.nr_states)]
 
-        # map states to relevant holes
+        # identify simple holes
         tm = self.model.transition_matrix
-        self.state_to_holes = [quotient_container.quotient_relevant_holes[self.quotient_state_map[state]] for state in range(self.states)]
         design_space = self.quotient_container.sketch.design_space
-        self.hole_to_states = [set() for hole in design_space]
+        hole_to_states = [0 for hole in design_space]
         for state in range(self.states):
-            for hole in self.state_to_holes[state]:
-                self.hole_to_states[hole].add(state)
-        self.hole_redundant = [len(self.hole_to_states[hole]) == 0 for hole in design_space.hole_indices]
-        self.hole_simple = [len(self.hole_to_states[hole]) == 1 for hole in design_space.hole_indices]
+            for hole in quotient_container.quotient_relevant_holes[self.quotient_state_map[state]]:
+                hole_to_states[hole] += 1
+        self.hole_simple = [hole_to_states[hole] == 1 for hole in design_space.hole_indices]
 
         self.analysis_hints = None
+        Profiler.resume()
     
     @property
     def states(self):
@@ -152,8 +146,8 @@ class MDP(MarkovChain):
 
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map, design_space):
         super().__init__(model, quotient_container, quotient_state_map, quotient_choice_map)
+
         self.design_space = design_space
-        
         self.scheduler_results = OrderedDict()
         self.analysis_hints = None
 
@@ -171,7 +165,7 @@ class MDP(MarkovChain):
         if not self.is_dtmc:
             assignment,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
             if not consistent:
-                self.scheduler_results[prop] = (result,assignment,scores)
+                self.scheduler_results[prop] = (assignment,scores)
         
         # primary scheduler is sufficient
         if consistent:
@@ -209,15 +203,19 @@ class MDP(MarkovChain):
         # LB < OPT
         # check if LB is tight
 
+        selection = None
         if self.is_dtmc:
-            assignment = self.design_space.pick_any()
             consistent = True
         else:
             selection,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
-            assignment = self.design_space.copy()
-            assignment.assume_options(selection)
         
         if consistent:
+            if selection is None:
+                assignment = self.design_space.pick_any()
+            else:
+                assignment = self.design_space.copy()
+                assignment.assume_options(selection)
+
             # LB is tight and LB < OPT
             improving_assignment = self.quotient_container.double_check_assignment(assignment, prop)
             return MdpOptimalityResult(prop, primary, None, improving_assignment, False)

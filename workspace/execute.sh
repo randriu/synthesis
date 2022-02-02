@@ -96,7 +96,7 @@ function run() {
 
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp/drone-4-1"
-    model="pomdp/voihp/grid-avoid-4-0.1"
+    # model="pomdp/voihp/grid-avoid-4-0.1"
     # model="pomdp/voihp/grid-4-0.1"
     # model="pomdp/voihp/grid-4-0.3"
     # model="pomdp/voihp/maze2-0.1"

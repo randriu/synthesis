@@ -89,12 +89,14 @@ class SynthesizerAR(Synthesizer):
         :return (2) new satisfying assignment (or None)
         """
         # logger.debug("analyzing family {}".format(family))
+        Profiler.start("synthesizer::analyze_family_ar")
         
         self.sketch.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
+        Profiler.resume()
 
         satisfying_assignment = None
         can_improve = res.constraints_result.feasibility is None
