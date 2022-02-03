@@ -49,7 +49,7 @@ class Statistic:
 
         self.timer = Timer()
 
-        self.status_period = 1
+        self.status_period = 5
         self.status_time = self.status_period
 
     def start(self):
@@ -101,7 +101,7 @@ class Statistic:
 
     def print_status(self):
         if self.timer.read() > self.status_time:
-            # Profiler.print_all()
+            Profiler.print_all()
             logger.info(self.status())
             self.status_time += self.status_period
 

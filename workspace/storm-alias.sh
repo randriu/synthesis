@@ -204,12 +204,12 @@ synthesis-install() {
 ### executing paynt ##########################################################
 
 export WORKSPACE=$SYNTHESIS/workspace
-export DYNASTY_LOG=$WORKSPACE/log
+export PAYNT_LOG=$WORKSPACE/log
 
 function paynt() {
-    local project=$1
+    local args=$@
     enva
-    python3 $PAYNT_DIR/paynt.py --project ${project} ar
+    python3 $PAYNT_DIR/paynt.py ${args}
     envd
 }
 
@@ -219,10 +219,10 @@ function paynt-execute() {
         core=$1
     fi
     local exp_sh=$WORKSPACE/execute.sh
-    local run_sh=$DYNASTY_LOG/run_${core}.sh
+    local run_sh=$PAYNT_LOG/run_${core}.sh
 
-    mkdir -p $DYNASTY_LOG
-    cd $DYNASTY_LOG
+    mkdir -p $PAYNT_LOG
+    cd $PAYNT_LOG
     cp $exp_sh $run_sh
     enva
     bash $run_sh $core
@@ -242,13 +242,10 @@ alias dshow='pgrep -af "^python3 .*/paynt.py .*"'
 alias dcount='pgrep -afc "^python3 .*/paynt.py .*"'
 alias dkill='dpid | xargs kill'
 alias k='dkill'
-alias dclear='rm $DYNASTY_LOG/*'
+alias dclear='rm $PAYNT_LOG/*'
 
 dlog() {
-    cat $DYNASTY_LOG/log_$1.txt
-}
-dgrep() {
-    cat $DYNASTY_LOG/log_grep_$1.txt
+    cat $PAYNT_LOG/log_$1.txt
 }
 
 dhead() {
@@ -294,12 +291,6 @@ storm-jani() {
 storm-eval() {
     storm "$1 --prop $2 --constants $3"
 }
-
-export DPM=$SYNTHESIS/workspace/examples/cav/dpm-main
-export DICE=$SYNTHESIS/workspace/examples/cav/dice
-export MAZE=$SYNTHESIS/workspace/examples/cav/maze
-export WALK=$SYNTHESIS/workspace/examples/random-walk
-export MAZE2=$SYNTHESIS/workspace/examples/maze/orig
 
 dice() {
     storm-eval "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"

@@ -35,7 +35,7 @@ class MarkovChain:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
-        Profiler.start("models::MarkovChain::__init__")
+        Profiler.start("models::MarkovChain")
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.model = model
@@ -89,7 +89,7 @@ class MarkovChain:
         return result
 
     def model_check_property(self, prop, alt = False):
-        Profiler.start(f"   MC {alt}")
+        Profiler.start(f"  MC {alt}")
         # get hint
         hint = None
         if self.analysis_hints is not None:

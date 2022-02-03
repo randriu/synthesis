@@ -44,18 +44,22 @@ def setup_logger(log_path):
 #     logger.info("Stored stats at {}".format(path))
 
 @click.command()
-@click.option('--project', help="root", required=True)
-@click.option('--sketch', help="the sketch", required=False, default="sketch.templ")
-@click.option('--properties', help="the properties", required=False, default="sketch.properties")
-@click.option("--constants", default="")
-@click.option('--pomdp', help="enable incremental synthesis of controllers for a POMDP", is_flag=True, default=False)
+@click.option('--project', required=True, help="root", )
+@click.option('--sketch', default="sketch.templ", help="the sketch")
+@click.option('--properties', default="sketch.properties", help="path to properties file")
+@click.option("--constants", default="", help="constant assignment string", )
+@click.option('--export-jani', is_flag=True, default=False, help="set to export JANI model to 'output.jani'")
+@click.option('--pomdp', is_flag=True, default=False, help="enable incremental synthesis of controllers for a POMDP")
+@click.option('--pomdp-memory-size', default=1, help="implicit memory size for POMDP FCSs")
 # @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
-@click.argument("method", type=click.Choice(
-    ['onebyone', 'cegis', 'ar', 'hybrid', 'evo'], case_sensitive=False))
+@click.argument("method", type=click.Choice(['onebyone', 'cegis', 'ar', 'hybrid', 'evo'], case_sensitive=False))
 def paynt(
-        project, sketch, properties, constants, pomdp, method
+        project, sketch, properties, constants, export_jani, pomdp, pomdp_memory_size, method
 ):
     print("This is Paynt version {}.".format(version()))
+
+    Sketch.POMDP_MEM_SIZE = pomdp_memory_size
+    Sketch.EXPORT_JANI = export_jani
 
     # parse sketch
     if not os.path.isdir(project):

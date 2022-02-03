@@ -47,7 +47,7 @@ class QuotientContainer:
         Profiler.start("quotient::select_actions")
 
         if family.parent_info is None:
-            # select from scratch
+            # select from the super-quotient
             selected_actions = []
             for action in range(self.quotient_mdp.nr_choices):
                 if self.default_actions[action]:
@@ -56,7 +56,6 @@ class QuotientContainer:
                 if family.includes(hole_options):
                     selected_actions.append(action)
         else:
-
             # filter each action in the parent wrt newly restricted design space
             parent_actions = family.parent_info.selected_actions
             selected_actions = []
@@ -77,6 +76,8 @@ class QuotientContainer:
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
         '''
+        Profiler.start("quotient::restrict_quotient")
+        
         selected_actions = self.select_actions(family)
         
         # add to default actions
@@ -85,7 +86,6 @@ class QuotientContainer:
             selected_actions_bv.set(action)
 
         # construct the submodel
-        Profiler.start("quotient::restrict_quotient")
         
         keep_unreachable_states = False
         all_states = stormpy.BitVector(self.quotient_mdp.nr_states, True)
@@ -94,16 +94,15 @@ class QuotientContainer:
         )
 
         model = submodel_construction.model
-        state_map =  submodel_construction.new_to_old_state_mapping
+        state_map = submodel_construction.new_to_old_state_mapping
         choice_map = submodel_construction.new_to_old_action_mapping
         Profiler.resume()
         return selected_actions,model,state_map,choice_map
 
     
     def build(self, family):
-
+        ''' Construct the quotient MDP for the family. '''
         Profiler.start("quotient::build")
-        
         selected_actions,model,state_map,choice_map = self.restrict_quotient(family)
         family.selected_actions = selected_actions
         family.mdp = MDP(model, self, state_map, choice_map, family)
@@ -128,6 +127,7 @@ class QuotientContainer:
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
         
+        Profiler.start("quotient::scheduler_selection")
         selection = [set() for hole_index in mdp.design_space.hole_indices]
         choice_selection = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         for choice in choice_selection:
@@ -136,6 +136,7 @@ class QuotientContainer:
             for hole_index,option in choice_options.items():
                 selection[hole_index].add(option)
         selection = [list(options) for options in selection]
+        Profiler.resume()
 
         return selection
 
@@ -147,18 +148,13 @@ class QuotientContainer:
         Profiler.start("quotient::scheduler_selection_quantitative")
 
         # get qualitative scheduler selection, filter inconsistent assignments        
-        Profiler.start("    scheduler_selection")
         selection = self.scheduler_selection(mdp, result.scheduler)
-        Profiler.resume()
 
-        Profiler.start("    other")
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
-        Profiler.resume()
         if len(inconsistent_assignments) == 0:
             Profiler.resume()
             return selection,None
 
-        Profiler.start("    other")
         choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix,result.get_values())
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
@@ -175,9 +171,8 @@ class QuotientContainer:
                 assert mdp.choices == len(choice_rewards)
                 for choice in range(mdp.choices):
                     choice_values[choice] += choice_rewards[choice]
-        Profiler.resume()
 
-        Profiler.start("    states")
+        Profiler.start("    states loop")
         for state in range(mdp.states):
 
             # for this state, compute for each inconsistent hole the difference in choice values between respective options
@@ -221,7 +216,6 @@ class QuotientContainer:
         Profiler.resume()
 
         # aggregate
-        Profiler.start("    other")
         inconsistent_differences = {
             hole_index: (hole_difference_sum[hole_index] / hole_states_affected[hole_index])
             for hole_index in inconsistent_assignments
@@ -233,7 +227,6 @@ class QuotientContainer:
                 selection[hole_index] = [selection[hole_index][0]]
 
         # sanity check
-        Profiler.resume()
 
         Profiler.resume()
         return selection,inconsistent_differences

@@ -8,55 +8,44 @@ fi
 
 # default parameters
 timeout=100d
-verbose=false
 parallel=false
-pomdp=false
+pomdp_mem_size=1
+pomdp_strategy=false
 
 # workspace settings
 paynt_exe="$SYNTHESIS/paynt/paynt.py"
 projects_dir="$SYNTHESIS/workspace/examples"
 log_dir="$SYNTHESIS/workspace/log"
 log_file="${log_dir}/log_${core}.txt"
-log_grep_file="${log_dir}/log_grep_${core}.txt"
 
 # ------------------------------------------------------------------------------
 # functions
 
 function reset_log() {
     > ${log_file}
-    > ${log_grep_file}
-}
-
-# function log() {
-#     echo "$@"
-#     echo "$@" >> ${log_dir}/log.txt
-# }
-
-function python_paynt() {
-    local project=$1
-    local method=$2
-    local pomdp_flag=""
-    if [ ${pomdp} = "true" ]; then
-        pomdp_flag="--pomdp"
-    fi
-    local paynt_call="python3 ${paynt_exe} --project ${projects_dir}/${project}/ $method $pomdp_flag"
-    echo \$ ${paynt_call}
-    timeout ${timeout} ${paynt_call} ${constants}
 }
 
 function paynt() {
-    local project=$1
+    # argument settings
+    local project="--project ${projects_dir}/$1/"
     local method=$2
+
+    # global settings
     local parallelity=""
     if [ ${parallel} = "true" ]; then
         parallelity="&"
     fi
-    local verbosity='tee >(cat >>${log_file}) >(grep "^> " | cat >>${log_grep_file})'
-    if [ ${verbose} = "false" ]; then
-        verbosity=${verbosity}' | grep "^> "'
+
+    local pomdp_flag=""
+    if [ ${pomdp_strategy} = "true" ]; then
+        pomdp_flag="--pomdp"
     fi
-    command="python_paynt $project $method | ${verbosity} ${parallelity}"
-    eval ${command}
+    local pomdp_memory_set="--pomdp-memory-size=$pomdp_mem_size"
+
+    local paynt_call="python3 ${paynt_exe} $project $method ${pomdp_flag} ${pomdp_memory_set}"
+    echo \$ ${paynt_call}
+
+    eval timeout ${timeout} ${paynt_call} ${parallelity}
 }
 
 function onebyone() {
@@ -75,13 +64,15 @@ function hybrid() {
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
-    timeout=800s
-    parallel=false
-    verbose=true
 
-    # pomdp=true
+    timeout=10s
 
-    # running ##########
+    parallel=true
+
+    pomdp_mem_size=4
+    # pomdp_strategy=true
+
+    ### running ###
 
     # model="coin"
     # model="coin/more"
@@ -110,19 +101,8 @@ function run() {
     # model="pomdp/voihp/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
 
+    
 
-    ### leonore ###
-
-    # model="pomdp/leonore/refuel"
-    # model="pomdp/leonore/avoid"
-    # model="pomdp/leonore/sketch"
-    # model="pomdp/leonore/cheese"
-
-    ## cav ##
-    # model="cav/grid"
-    # model="cav/dpm"
-    # model="cav/pole"
-    # model="herman/5"
 
     ar $model
     # hybrid $model
@@ -133,7 +113,19 @@ function run() {
 
 reset_log
 run
-# exit
 
 # --- archive ------------------------------------------------------------------
 
+### leonore ###
+
+    # model="pomdp/leonore/refuel"
+    # model="pomdp/leonore/avoid"
+    # model="pomdp/leonore/sketch"
+    # model="pomdp/leonore/cheese"
+
+    
+    ### cav ###
+    # model="cav/grid"
+    # model="cav/dpm"
+    # model="cav/pole"
+    # model="herman/5"

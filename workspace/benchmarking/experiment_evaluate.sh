@@ -1,6 +1,6 @@
 #!/bin/bash
 
-timeout=10s
+timeout=5s
 if [ -n "$1" ]; then
     timeout=$1
 fi
@@ -9,12 +9,6 @@ threads=$(nproc)
 if [ -n "$2" ]; then
     threads=$2
 fi
-
-# experiment counters
-experiment_current=0
-experiment_total=15
-
-# read aliases 
 
 ## helper functions ############################################################
 
@@ -33,63 +27,61 @@ function experiments_wait() {
 function paynt() {
     experiments_wait ${threads}
 
+    # create folder for this experiment
     local experiment_set=$1
-
+    mkdir -p logs/${experiment_set}
+    
     local benchmark=$2
-    local project="--project ${WORKSPACE}/benchmarking/cav21-benchmark/${benchmark}"
+    local logfile="logs/${experiment_set}/${benchmark}.txt"
 
-    local property=$3
-    property="--properties ${property}.properties"
-    
-    local method=$4
-    
-    local timeout=$5
-    local logfile="${WORKSPACE}/benchmarking/logs/${experiment_set}/${benchmark}_${method}.txt"
+    # collect other arguments
+    local project="--project ${benchmarks_dir}/${benchmark}"
+    local method=$3
+    local pomdp="--pomdp-memory-size=${pomdp_mem_size}"
+    local timeout=$4
     
     ((experiment_current+=1))
-    echo "experiment ${experiment_current}/${experiment_total}: ${benchmark}, method: ${method}"
-    timeout ${timeout} python paynt.py ${project} ${property} ${method} > ${logfile} || echo "TO" >> ${logfile} &
+    echo "experiment ${experiment_current}/${experiments_total}: ${benchmark}, method: ${method}"
+    # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} || echo "TO" >> ${logfile} &
+    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} &
 }
 
 ## experiment section ##########################################################
 
-benchmarks=( dpm maze herman pole grid )
 
-# create folders for log files
-mkdir -p logs logs/onebyone logs/hybrid_hard logs/hybrid_easy
+# benchmark setup
+experiment_current=0
+
+# benchmarks=( dpm maze herman pole grid )
+# experiments_total=5
+
+benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/voihp"
+experiments_total=`ls $benchmarks_dir/ | wc -l`
+
+# create folder for log files
+mkdir -p logs
 
 # activate environment
 source $SYNTHESIS_ENV/bin/activate
 
-# navigate to paynt
-cd $PAYNT_DIR
-
 ## experiments
 
-# echo "-- evaluating 1-by-1 enumeration"
-# for benchmark in "${benchmarks[@]}"; do
-#     paynt onebyone "${benchmark}" "hard" "onebyone" "${timeout}"
-# done
-
-# method=ar
-method=hybrid
-
-# echo "-- evaluating hybrid method (hard problem)"
-# for benchmark in "${benchmarks[@]}"; do
-#     paynt hybrid_hard "${benchmark}" "hard" "${method}" "${timeout}"
-# done
+method=ar
+pomdp_mem_size=1
 
 echo "-- evaluating "
-for benchmark in "${benchmarks[@]}"; do
-    paynt jan "${benchmark}" "sketch" "${method}" "${timeout}"
+# for benchmark in "${benchmarks[@]}"; do
+for k in {1..4}; do
+    echo "-- k=$k"
+    pomdp_mem_size=$k
+    experiment_name="ar-k=${k}"
+    for benchmark in `ls $benchmarks_dir`; do
+        paynt "${experiment_name}" "${benchmark}" ${method} ${timeout}
+    done
 done
-
 # wait for the remaining experiments to finish
 wait
 echo "-- all experiments finished"
-
-# navigate back to root folder
-cd -
 
 # deactivate environment
 deactivate

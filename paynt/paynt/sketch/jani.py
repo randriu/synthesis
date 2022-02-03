@@ -42,11 +42,11 @@ class JaniUnfolder():
         self.jani_unfolded = None
         self.combination_coloring = None
         self.edge_to_color = None
-        self.unfold_jani(jani, sketch.design_space)
+        self.unfold_jani(jani, sketch.design_space, sketch.EXPORT_JANI)
 
 
     # Unfold holes in the jani program
-    def unfold_jani(self, jani, design_space):
+    def unfold_jani(self, jani, design_space, export_jani):
         # ensure that jani.constants are in the same order as our holes
         open_constants = [c for c in jani.constants if not c.defined]
         expression_variables = [c.expression_variable for c in open_constants]
@@ -71,11 +71,13 @@ class JaniUnfolder():
         jani_program.finalize()
         jani_program.check_valid()
 
-        filename = "output.jani"
-        logger.debug(f"Writing unfolded program to {filename}")
-        with open(filename, "w") as f:
-            f.write(str(jani_program))
-        logger.debug("Done writing file.")
+        if export_jani:
+            filename = "output.jani"
+            logger.debug(f"Writing unfolded program to {filename}")
+            with open(filename, "w") as f:
+                f.write(str(jani_program))
+            logger.debug("Done writing file.")
+            exit()
 
         # collect colors of each edge
         edge_to_hole_options = {}
