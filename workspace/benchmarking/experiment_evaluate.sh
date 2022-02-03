@@ -50,7 +50,6 @@ function paynt() {
 
 
 # benchmark setup
-experiment_current=0
 
 # benchmarks=( dpm maze herman pole grid )
 # experiments_total=5
@@ -72,6 +71,7 @@ pomdp_mem_size=1
 echo "-- evaluating "
 # for benchmark in "${benchmarks[@]}"; do
 for k in {1..4}; do
+    experiment_current=0
     echo "-- k=$k"
     pomdp_mem_size=$k
     experiment_name="ar-k=${k}"
