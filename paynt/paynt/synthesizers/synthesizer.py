@@ -33,6 +33,7 @@ class Synthesizer:
         logger.info("Synthesis initiated.")
         Profiler.start("synthesis")
         self.sketch.quotient.discarded = 0
+        # self.sketch.specification.optimality.update_optimum(19)
         opt_assignment = self.synthesize(self.sketch.design_space)
         Profiler.stop()
         return opt_assignment
@@ -231,7 +232,8 @@ class SynthesizerCEGIS(Synthesizer):
 
         # map mdp states to hole indices
         family.mdp = self.sketch.quotient.build(family)
-        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes
+        self.sketch.quotient.compute_state_to_holes()
+        quotient_relevant_holes = self.sketch.quotient.state_to_holes
 
         # initialize CE generator
         formulae = self.sketch.specification.stormpy_formulae()
@@ -346,7 +348,8 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         self.stat.start()
         self.stage_control = StageControl(family.size)
 
-        quotient_relevant_holes = self.sketch.quotient.quotient_relevant_holes
+        self.sketch.quotient.compute_state_to_holes()
+        quotient_relevant_holes = self.sketch.quotient.state_to_holes
         formulae = self.sketch.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,

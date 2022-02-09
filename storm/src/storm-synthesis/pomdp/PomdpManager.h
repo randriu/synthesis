@@ -13,10 +13,11 @@ namespace storm {
             
             PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp);
 
+            // number of actions available at this observation
+            std::vector<uint64_t> observation_actions;
+            
             /** Memory manipulation . */
 
-            // unfold memory model into the POMDP
-            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
             // for each observation contains the number of allocated memory states (initially 1)
             std::vector<uint64_t> observation_memory_size;
             
@@ -25,10 +26,8 @@ namespace storm {
             // set memory size to all observations
             void setMemorySize(uint64_t memory_size);
 
-            // number of actions available at this observation
-            std::vector<uint64_t> observation_actions;
-            // for each row of a POMDP contains its index in its row group
-            std::vector<uint64_t> prototype_row_index;
+            // unfold memory model into the POMDP
+            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
             
             /** Design space associated with this POMDP. */
 
@@ -43,8 +42,13 @@ namespace storm {
 
             /** Unfolded MDP stuff. */
 
-            // for each state, its prototype state (reverse of prototype_duplicates)
+            // MDP obtained after last injection (initially contains MDP-ized POMDP)
+            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;
+
+            // for each state contains its prototype state (reverse of prototype_duplicates)
             std::vector<uint64_t> state_prototype;
+            // for each state contains its memory index
+            std::vector<uint64_t> state_memory;
 
             // for each row, the corresponding action hole
             std::vector<uint64_t> row_action_hole;
@@ -55,8 +59,10 @@ namespace storm {
             // for each row, the corresponding option of the memory hole
             std::vector<uint64_t> row_memory_option;
 
-            // MDP obtained after last injection (initially contains MDP-ized POMDP)
-            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;            
+            // for each observation contains the maximum memory size of a destination
+            // across all rows of a prototype state having this observation
+            std::vector<uint64_t> max_successor_memory_size;
+            
 
         private:
             
@@ -99,17 +105,13 @@ namespace storm {
             
             // original POMDP
             storm::models::sparse::Pomdp<ValueType> const& pomdp;
+            // for each row of a POMDP contains its index in its row group
+            std::vector<uint64_t> prototype_row_index;
             
             // number of states in an unfolded MDP
             uint64_t num_states;
             // for each prototype state contains a list of its duplicates (including itself)
             std::vector<std::vector<uint64_t>> prototype_duplicates;
-            // for each state contains its memory index
-            std::vector<uint64_t> state_memory;
-
-            // for each observation contains the maximum memory size of a destination
-            // across all rows of a prototype state having this observation
-            std::vector<uint64_t> max_successor_memory_size;    
 
             // number of rows in an unfolded MDP
             uint64_t num_rows;

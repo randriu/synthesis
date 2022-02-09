@@ -46,5 +46,12 @@ void define_helpers(py::module& m) {
     
     m.def("compute_expected_number_of_visits", &getExpectedNumberOfVisits<double>, py::arg("env"), py::arg("model"));
 
+    m.def("construct_selection", [] ( storm::storage::BitVector default_actions, std::vector<uint_fast64_t> selected_actions) {
+        auto bv = storm::storage::BitVector(default_actions);
+        for(auto action: selected_actions)
+            bv.set(action);
+        return bv;
+    }, py::arg("default_actions"), py::arg("selected_actions"));
+
 }
 

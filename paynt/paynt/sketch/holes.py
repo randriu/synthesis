@@ -39,7 +39,8 @@ class Hole:
             return self.name + ": {" + ",".join(labels) + "}"
 
     def copy(self):
-        return Hole(self.name, self.options.copy(), self.option_labels)
+        # note that the copy is shallow
+        return Hole(self.name, self.options, self.option_labels)
 
     def assume_options(self, options):
         self.options = options
@@ -112,10 +113,20 @@ class Holes(list):
         holes.assume_options(suboptions)
         return holes
 
+    def subholes(self, hole_index, options):
+        ''' Construct a semi-shallow copy of self with one modified hole. '''
+        subhole = self[hole_index].copy()
+        subhole.assume_options(options)
+        
+        shallow_copy = Holes([hole for hole in self])
+        shallow_copy[hole_index] = subhole
+        return shallow_copy
+
 
 class ParentInfo():
     def __init__(self):
         self.refinement_depth = None
+        self.hole_selected_actions = None
         self.selected_actions = None
         self.analysis_hints = None
         self.property_indices = None
@@ -146,14 +157,16 @@ class DesignSpace(Holes):
 
     # whether hints will be stored for subsequent MDP model checking
     store_hints = True
+    # store_hints = False
 
     def __init__(self, holes = [], parent_info = None):
-        super().__init__(holes.copy())
+        super().__init__(holes)
 
         self.mdp = None
         self.hole_clauses = None
         self.encoding = None
 
+        self.hole_selected_actions = None
         self.selected_actions = None
         self.refinement_depth = 0
         self.property_indices = None
@@ -162,11 +175,10 @@ class DesignSpace(Holes):
         self.parent_info = parent_info
         if parent_info is not None:
             self.refinement_depth = parent_info.refinement_depth + 1
-            self.property_indices = parent_info.property_indices.copy()
+            self.property_indices = parent_info.property_indices
 
     def copy(self):
-        ds = DesignSpace(super().copy())
-        return ds
+        return DesignSpace(super().copy())
 
     def sat_initialize(self):
         ''' Use this design space as a baseline for future refinements. '''
@@ -351,8 +363,9 @@ class DesignSpace(Holes):
 
     def generalize_hint(self, hint):
         hint_global = dict()
+        hint = list(hint.get_values())
         for state in range(self.mdp.states):
-            hint_global[self.mdp.quotient_state_map[state]] = hint.at(state)
+            hint_global[self.mdp.quotient_state_map[state]] = hint[state]
         return hint_global
 
     def generalize_hints(self, result):
@@ -362,6 +375,7 @@ class DesignSpace(Holes):
         return prop, (hint_prim, hint_seco)
 
     def collect_analysis_hints(self):
+        Profiler.start("holes::collect_analysis_hints")
         res = self.analysis_result
         analysis_hints = dict()
         for index in res.constraints_result.undecided_constraints:
@@ -370,6 +384,7 @@ class DesignSpace(Holes):
         if res.optimality_result is not None:
             prop, hints = self.generalize_hints(res.optimality_result)
             analysis_hints[prop] = hints
+        Profiler.resume()
         return analysis_hints
 
     def translate_analysis_hints(self):
@@ -394,6 +409,7 @@ class DesignSpace(Holes):
 
     def collect_parent_info(self):
         pi = ParentInfo()
+        pi.hole_selected_actions = self.hole_selected_actions
         pi.selected_actions = self.selected_actions
         pi.refinement_depth = self.refinement_depth
         pi.analysis_hints = self.collect_analysis_hints()

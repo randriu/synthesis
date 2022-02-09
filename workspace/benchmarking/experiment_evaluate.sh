@@ -74,7 +74,7 @@ for k in {1..4}; do
     experiment_current=0
     echo "-- k=$k"
     pomdp_mem_size=$k
-    experiment_name="ar-k=${k}"
+    experiment_name="ar-k=${k}-cold"
     for benchmark in `ls $benchmarks_dir`; do
         paynt "${experiment_name}" "${benchmark}" ${method} ${timeout}
     done

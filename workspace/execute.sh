@@ -65,11 +65,11 @@ function hybrid() {
 
 function run() {
 
-    timeout=10s
+    timeout=30s
 
-    parallel=true
+    # parallel=true
 
-    pomdp_mem_size=4
+    pomdp_mem_size=2
     # pomdp_strategy=true
 
     ### running ###
@@ -78,7 +78,7 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    model="pomdp/maze/concise"
+    # model="pomdp/maze/concise"
 
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
@@ -91,7 +91,7 @@ function run() {
     # model="pomdp/voihp/grid-4-0.1"
     # model="pomdp/voihp/grid-4-0.3"
     # model="pomdp/voihp/maze2-0.1"
-    # model="pomdp/voihp/refuel-06"
+    model="pomdp/voihp/refuel-06"
     # model="pomdp/voihp/rocks-12"
 
     # model="pomdp/voihp/crypt-4"
@@ -100,9 +100,6 @@ function run() {
     # model="pomdp/voihp/network-prio-2-8-20"
     # model="pomdp/voihp/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
-
-    
-
 
     ar $model
     # hybrid $model

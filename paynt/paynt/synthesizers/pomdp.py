@@ -333,7 +333,8 @@ class SynthesizerPOMDP():
             self.sketch.quotient.unfold_partial_memory()
 
             # solve quotient MDP
-            mdp = self.sketch.quotient.build()
+            self.sketch.quotient.build(self.sketch.design_space)
+            mdp = self.sketch.design_space.mdp
             mdp_matrix = mdp.model.transition_matrix
             spec = mdp.check_specification(self.sketch.specification)
 
@@ -352,7 +353,7 @@ class SynthesizerPOMDP():
             # mdp_selection = self.sketch.quotient.scheduler_selection(mdp, mdp_scheduler)
 
             # extract DTMC induced by this optimizing scheduler
-            sub_mdp,state_map,_ = self.sketch.quotient.restrict_quotient(mdp_choices)
+            _,sub_mdp,state_map,_ = self.sketch.quotient.restrict_quotient(None, mdp_choices)
             tm = sub_mdp.transition_matrix
             tm.make_row_grouping_trivial()
             components = stormpy.storage.SparseModelComponents(tm, sub_mdp.labeling, sub_mdp.reward_models)

@@ -1,0 +1,938 @@
+--- k=1 ---
+
+-- crypt-4
+
+2022-02-03 15:09:06,276 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.1 s, ETA: 7.905895027306121e+72 s [42812 iters], *=0.33333, SAT=-
+
+> quotient::select_actions : 10.0%
+> models::MarkovChain : 4.5%
+>   MC False : 5.2%
+> quotient::scheduler_selection : 3.7%
+>     states loop : 15.0%
+> quotient::split : 10.8%
+>     collect_parent_info : 21.7%
+> holes::translate_analysis_hints : 2.6%
+> covered 99.0% of 295.3 sec
+
+-- drone-4-1
+
+2022-02-03 15:09:06,001 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0002% members, elapsed 295.0 s, ETA: 135215004.9 s [14489 iters], *=0.86298, SAT=-
+
+> quotient::restrict_quotient : 8.3%
+> quotient::select_actions : 2.3%
+> models::MarkovChain : 3.1%
+>   MC False : 63.3%
+>     states loop : 8.7%
+>     collect_parent_info : 5.9%
+> holes::translate_analysis_hints : 2.2%
+> covered 100.0% of 295.1 sec
+
+-- grid-4-0.1
+
+0
+
+-- grid-4-0.3
+
+0
+
+-- grid-avoid-4-0.1
+
+0
+
+-- grid-avoid-4-0
+
+0
+
+-- maze2-0.1
+
+0
+
+-- maze2-0
+
+0
+
+-- network-2-8-20
+
+2022-02-03 15:09:06,887 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 1.1270032007103288e+92 s [3690 iters], *=3.89477, SAT=-
+
+> quotient::restrict_quotient : 4.5%
+> models::MarkovChain : 2.2%
+>   MC False : 4.8%
+> quotient::scheduler_selection : 2.7%
+>     states loop : 69.6%
+>   MC True : 2.0%
+>     collect_parent_info : 7.2%
+
+-- network-prio-2-8-20
+
+2022-02-03 15:09:01,380 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 269.3 s, ETA: 269267696.8 s [27 iters], *=79.2, SAT=-
+
+> sketch : 7.4%
+>     states loop : 89.6%
+
+-- nrp-8
+
+synthesis time: 0.03 s
+optimal: 0.125
+
+-- refuel-06
+
+synthesis time: 3.73 s
+optimal: 0.350026
+
+> synthesizer::analyze_family_ar : 3.0%
+> quotient::restrict_quotient : 17.1%
+> quotient::select_actions : 6.1%
+> models::MarkovChain : 6.3%
+>   MC False : 16.9%
+> quotient::scheduler_selection : 4.9%
+>     states loop : 18.5%
+>   MC True : 2.7%
+>     collect_parent_info : 11.1%
+
+-- rocks-12
+
+2022-02-03 15:09:07,896 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.1 s, ETA: 9.843864147685604e+71 s [2582 iters], *=42.0, SAT=-
+
+> quotient::restrict_quotient : 11.7%
+> quotient::select_actions : 6.5%
+>   MC False : 4.1%
+>     states loop : 54.2%
+> quotient::split : 3.4%
+>     collect_parent_info : 14.6%
+
+
+
+
+
+--- k=2 ---
+
+-- crypt-4
+
+
+profiling report:
+> sketch : 0.1%
+> synthesis : 0.8%
+> synthesizer::analyze_family_ar : 1.0%
+> quotient::build : 0.1%
+> quotient::restrict_quotient : 13.6%
+> quotient::select_actions : 7.1%
+> models::MarkovChain : 2.2%
+>   MC False : 1.9%
+> quotient::scheduler_selection_quantitative : 0.7%
+> quotient::scheduler_selection : 6.5%
+>     states loop : 25.1%
+>   MC True : 1.0%
+> quotient::split : 11.5%
+>     collect_parent_info : 27.2%
+> holes::translate_analysis_hints : 0.9%
+> covered 100.0% of 295.3 sec
+2022-02-03 15:09:05,513 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 4.910268326951243e+186 s [6451 iters], *=0.33333, SAT=-
+
+
+-- drone-4-1
+
+profiling report:
+> sketch : 0.0%
+> synthesis : 0.3%
+> synthesizer::analyze_family_ar : 0.4%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 8.8%
+> quotient::select_actions : 2.8%
+> models::MarkovChain : 2.2%
+>   MC False : 48.9%
+> quotient::scheduler_selection_quantitative : 0.6%
+> quotient::scheduler_selection : 3.3%
+>     states loop : 13.4%
+>   MC True : 1.3%
+> quotient::split : 5.0%
+>     collect_parent_info : 11.7%
+> holes::translate_analysis_hints : 1.2%
+> covered 100.0% of 295.1 sec
+2022-02-03 15:09:06,590 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 5.6900543301127665e+25 s [3810 iters], *=0.59692, SAT=-
+
+
+-- grid-4-0.1
+
+
+method: AR, synthesis time: 0.03 s
+number of holes: 8, family size: 1024, super quotient: 34 states / 248 actions
+explored: 100 %
+AR stats: avg MDP size: 33, iterations: 31
+
+optimal: 4.701739
+
+profiling report:
+> sketch : 55.3%
+> synthesis : 0.7%
+> synthesizer::analyze_family_ar : 2.8%
+> quotient::build : 0.9%
+> quotient::restrict_quotient : 6.3%
+> quotient::select_actions : 5.1%
+> models::MarkovChain : 2.8%
+>   MC False : 6.7%
+> quotient::scheduler_selection_quantitative : 1.7%
+> quotient::scheduler_selection : 2.0%
+>     states loop : 6.3%
+>   MC True : 1.6%
+> quotient::split : 0.9%
+>     collect_parent_info : 2.4%
+> holes::translate_analysis_hints : 0.9%
+> covered 96.0% of 0.1 sec
+
+
+-- grid-4-0.3
+
+
+method: AR, synthesis time: 0.03 s
+number of holes: 8, family size: 1024, super quotient: 34 states / 248 actions
+explored: 100 %
+AR stats: avg MDP size: 33, iterations: 31
+
+optimal: 6.314724
+
+profiling report:
+> sketch : 54.4%
+> synthesis : 0.7%
+> synthesizer::analyze_family_ar : 3.3%
+> quotient::build : 1.0%
+> quotient::restrict_quotient : 6.1%
+> quotient::select_actions : 4.9%
+> models::MarkovChain : 2.7%
+>   MC False : 6.7%
+> quotient::scheduler_selection_quantitative : 1.8%
+> quotient::scheduler_selection : 2.3%
+>     states loop : 6.5%
+>   MC True : 1.6%
+> quotient::split : 1.0%
+>     collect_parent_info : 2.4%
+> holes::translate_analysis_hints : 0.9%
+> covered 96.0% of 0.1 sec
+
+
+-- grid-avoid-4-0.1
+
+
+method: AR, synthesis time: 0.04 s
+number of holes: 10, family size: 4096, super quotient: 34 states / 236 actions
+explored: 100 %
+AR stats: avg MDP size: 33, iterations: 52
+
+optimal: 0.851776
+
+profiling report:
+> sketch : 45.0%
+> synthesis : 0.8%
+> synthesizer::analyze_family_ar : 3.6%
+> quotient::build : 1.2%
+> quotient::restrict_quotient : 7.6%
+> quotient::select_actions : 6.2%
+> models::MarkovChain : 3.5%
+>   MC False : 7.4%
+> quotient::scheduler_selection_quantitative : 1.1%
+> quotient::scheduler_selection : 2.3%
+>     states loop : 7.3%
+>   MC True : 1.9%
+> quotient::split : 1.0%
+>     collect_parent_info : 5.5%
+> holes::translate_analysis_hints : 1.2%
+> covered 96.0% of 0.1 sec
+
+
+-- grid-avoid-4-0
+
+method: AR, synthesis time: 0.03 s
+number of holes: 10, family size: 4096, super quotient: 34 states / 236 actions
+explored: 100 %
+AR stats: avg MDP size: 33, iterations: 44
+
+optimal: 0.857143
+
+profiling report:
+> sketch : 49.5%
+> synthesis : 0.7%
+> synthesizer::analyze_family_ar : 3.3%
+> quotient::build : 1.1%
+> quotient::restrict_quotient : 7.0%
+> quotient::select_actions : 6.2%
+> models::MarkovChain : 3.3%
+>   MC False : 5.9%
+> quotient::scheduler_selection_quantitative : 1.0%
+> quotient::scheduler_selection : 2.1%
+>     states loop : 6.6%
+>   MC True : 1.5%
+> quotient::split : 1.2%
+>     collect_parent_info : 5.5%
+> holes::translate_analysis_hints : 1.1%
+> covered 96.0% of 0.1 sec
+
+
+-- maze2-0.1
+
+method: AR, synthesis time: 0.08 s
+number of holes: 28, family size: 1099511627776, super quotient: 30 states / 216 actions
+explored: 100 %
+AR stats: avg MDP size: 29, iterations: 86
+
+optimal: 6.324786
+
+profiling report:
+> sketch : 30.4%
+> synthesis : 1.1%
+> synthesizer::analyze_family_ar : 3.8%
+> quotient::build : 1.3%
+> quotient::restrict_quotient : 10.9%
+> quotient::select_actions : 5.0%
+> models::MarkovChain : 3.4%
+>   MC False : 10.8%
+> quotient::scheduler_selection_quantitative : 2.5%
+> quotient::scheduler_selection : 3.3%
+>     states loop : 10.3%
+>   MC True : 2.0%
+> quotient::split : 3.6%
+>     collect_parent_info : 5.9%
+> holes::translate_analysis_hints : 1.1%
+> covered 95.0% of 0.1 sec
+
+
+-- maze2-0
+
+
+method: AR, synthesis time: 0.04 s
+number of holes: 28, family size: 1099511627776, super quotient: 30 states / 216 actions
+explored: 100 %
+AR stats: avg MDP size: 29, iterations: 47
+
+optimal: 5.692308
+
+profiling report:
+> sketch : 47.1%
+> synthesis : 1.0%
+> synthesizer::analyze_family_ar : 3.0%
+> quotient::build : 1.0%
+> quotient::restrict_quotient : 8.4%
+> quotient::select_actions : 3.9%
+> models::MarkovChain : 2.8%
+>   MC False : 7.5%
+> quotient::scheduler_selection_quantitative : 1.7%
+> quotient::scheduler_selection : 2.3%
+>     states loop : 6.8%
+>   MC True : 1.7%
+> quotient::split : 1.8%
+>     collect_parent_info : 6.2%
+> holes::translate_analysis_hints : 0.9%
+> covered 96.0% of 0.1 sec
+
+
+-- network-2-8-20
+
+profiling report:
+> sketch : 0.4%
+> synthesis : 0.0%
+> synthesizer::analyze_family_ar : 0.5%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 1.2%
+> quotient::select_actions : 1.0%
+> models::MarkovChain : 0.3%
+>   MC False : 0.9%
+> quotient::scheduler_selection_quantitative : 0.4%
+> quotient::scheduler_selection : 0.7%
+>     states loop : 89.1%
+>   MC True : 0.7%
+> quotient::split : 0.9%
+>     collect_parent_info : 3.9%
+> holes::translate_analysis_hints : 0.2%
+> covered 100.0% of 297.8 sec
+2022-02-03 15:09:14,480 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 296.6 s, ETA: 296638117.7 s [137 iters], *=22.75, SAT=-
+
+
+-- network-prio-2-8-20
+
+profiling report:
+> sketch : 8.5%
+> synthesis : 0.0%
+> synthesizer::analyze_family_ar : 0.2%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 0.4%
+> quotient::select_actions : 0.3%
+> models::MarkovChain : 0.1%
+>   MC False : 0.2%
+> quotient::scheduler_selection_quantitative : 0.1%
+> quotient::scheduler_selection : 0.1%
+>     states loop : 88.7%
+>   MC True : 0.2%
+> quotient::split : 0.2%
+>     collect_parent_info : 0.8%
+> holes::translate_analysis_hints : 0.0%
+> covered 100.0% of 295.9 sec
+2022-02-03 15:14:06,385 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 270.6 s, ETA: 270600973.8 s [7 iters], *=7.2, SAT=-
+
+
+-- nrp-8
+
+> sketch : 0.0%
+> synthesis : 1.3%
+> synthesizer::analyze_family_ar : 3.4%
+> quotient::build : 0.9%
+> quotient::restrict_quotient : 13.7%
+> quotient::select_actions : 5.7%
+> models::MarkovChain : 5.4%
+>   MC False : 6.9%
+> quotient::scheduler_selection_quantitative : 1.9%
+> quotient::scheduler_selection : 6.1%
+>     states loop : 18.4%
+>   MC True : 3.0%
+> quotient::split : 5.4%
+>     collect_parent_info : 22.6%
+> holes::translate_analysis_hints : 2.3%
+> covered 97.0% of 295.1 sec
+2022-02-03 15:14:06,796 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.1359% members, elapsed 295.0 s, ETA: 216985.1 s [121166 iters], *=0.125, SAT=-
+
+
+-- refuel-06
+
+> sketch : 0.0%
+> synthesis : 1.2%
+> synthesizer::analyze_family_ar : 2.1%
+> quotient::build : 0.6%
+> quotient::restrict_quotient : 19.2%
+> quotient::select_actions : 8.0%
+> models::MarkovChain : 5.0%
+>   MC False : 9.5%
+> quotient::scheduler_selection_quantitative : 1.2%
+> quotient::scheduler_selection : 4.0%
+>     states loop : 15.9%
+>   MC True : 2.1%
+> quotient::split : 7.1%
+>     collect_parent_info : 20.1%
+> holes::translate_analysis_hints : 2.2%
+> covered 98.0% of 295.1 sec
+2022-02-03 15:14:05,679 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0007% members, elapsed 295.0 s, ETA: 38646979.6 s [74904 iters], *=0.02335, SAT=-
+
+
+-- rocks-12
+
+> sketch : 1.1%
+> synthesis : 0.0%
+> synthesizer::analyze_family_ar : 0.1%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 1.2%
+> quotient::select_actions : 0.5%
+> models::MarkovChain : 0.2%
+>   MC False : 1.3%
+> quotient::scheduler_selection_quantitative : 0.4%
+> quotient::scheduler_selection : 0.4%
+>     states loop : 91.9%
+>   MC True : 0.1%
+> quotient::split : 0.8%
+>     collect_parent_info : 2.0%
+> holes::translate_analysis_hints : 0.1%
+> covered 100.0% of 292.0 sec
+2022-02-03 15:14:02,383 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 288.8 s, ETA: 288790608.2 s [34 iters], *=-, SAT=-
+
+
+
+
+
+
+
+
+
+--- k=3 ---
+
+-- crypt-4
+
+> sketch : 0.1%
+> synthesis : 0.3%
+> synthesizer::analyze_family_ar : 0.4%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 8.9%
+> quotient::select_actions : 3.9%
+> models::MarkovChain : 1.2%
+>   MC False : 1.5%
+> quotient::scheduler_selection_quantitative : 0.6%
+> quotient::scheduler_selection : 3.8%
+>     states loop : 54.8%
+>   MC True : 0.8%
+> quotient::split : 4.9%
+>     collect_parent_info : 18.1%
+> holes::translate_analysis_hints : 0.6%
+> covered 100.0% of 295.4 sec
+2022-02-03 15:14:05,895 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 8.619780231245026e+301 s [1466 iters], *=0.33333, SAT=-
+
+
+-- drone-4-1
+
+> sketch : 0.1%
+> synthesis : 0.3%
+> synthesizer::analyze_family_ar : 0.2%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 10.2%
+> quotient::select_actions : 3.3%
+> models::MarkovChain : 1.8%
+>   MC False : 55.6%
+> quotient::scheduler_selection_quantitative : 0.4%
+> quotient::scheduler_selection : 2.3%
+>     states loop : 10.5%
+>   MC True : 0.9%
+> quotient::split : 2.4%
+>     collect_parent_info : 10.9%
+> holes::translate_analysis_hints : 0.9%
+> covered 100.0% of 295.2 sec
+2022-02-03 15:14:05,890 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 2.3258415550314006e+40 s [2010 iters], *=0.58753, SAT=-
+
+
+-- grid-4-0.1
+
+method: AR, synthesis time: 0.52 s
+number of holes: 12, family size: 1259712, super quotient: 51 states / 558 actions
+explored: 100 %
+AR stats: avg MDP size: 49, iterations: 524
+
+optimal: 4.701739
+
+profiling report:
+> sketch : 6.8%
+> synthesis : 1.2%
+> synthesizer::analyze_family_ar : 4.7%
+> quotient::build : 1.9%
+> quotient::restrict_quotient : 14.4%
+> quotient::select_actions : 8.6%
+> models::MarkovChain : 5.8%
+>   MC False : 14.2%
+> quotient::scheduler_selection_quantitative : 3.0%
+> quotient::scheduler_selection : 4.1%
+>     states loop : 13.9%
+>   MC True : 3.2%
+> quotient::split : 2.7%
+>     collect_parent_info : 7.3%
+> holes::translate_analysis_hints : 2.3%
+> covered 94.0% of 0.6 sec
+
+
+-- grid-4-0.3
+
+method: AR, synthesis time: 0.52 s
+number of holes: 12, family size: 1259712, super quotient: 51 states / 558 actions
+explored: 100 %
+AR stats: avg MDP size: 49, iterations: 512
+
+optimal: 6.314724
+
+profiling report:
+> sketch : 6.6%
+> synthesis : 1.2%
+> synthesizer::analyze_family_ar : 4.9%
+> quotient::build : 1.8%
+> quotient::restrict_quotient : 14.2%
+> quotient::select_actions : 8.7%
+> models::MarkovChain : 5.7%
+>   MC False : 14.6%
+> quotient::scheduler_selection_quantitative : 3.1%
+> quotient::scheduler_selection : 4.4%
+>     states loop : 13.8%
+>   MC True : 3.2%
+> quotient::split : 2.5%
+>     collect_parent_info : 7.1%
+> holes::translate_analysis_hints : 2.2%
+> covered 94.0% of 0.6 sec
+
+
+-- grid-avoid-4-0.1
+
+method: AR, synthesis time: 0.52 s
+number of holes: 12, family size: 1259712, super quotient: 51 states / 558 actions
+explored: 100 %
+AR stats: avg MDP size: 49, iterations: 512
+
+optimal: 6.314724
+
+profiling report:
+> sketch : 6.6%
+> synthesis : 1.2%
+> synthesizer::analyze_family_ar : 4.9%
+> quotient::build : 1.8%
+> quotient::restrict_quotient : 14.2%
+> quotient::select_actions : 8.7%
+> models::MarkovChain : 5.7%
+>   MC False : 14.6%
+> quotient::scheduler_selection_quantitative : 3.1%
+> quotient::scheduler_selection : 4.4%
+>     states loop : 13.8%
+>   MC True : 3.2%
+> quotient::split : 2.5%
+>     collect_parent_info : 7.1%
+> holes::translate_analysis_hints : 2.2%
+> covered 94.0% of 0.6 sec
+
+
+-- grid-avoid-4-0
+
+method: AR, synthesis time: 0.6 s
+number of holes: 15, family size: 34012224, super quotient: 51 states / 531 actions
+explored: 100 %
+AR stats: avg MDP size: 49, iterations: 642
+
+optimal: 0.928571
+
+profiling report:
+> sketch : 5.9%
+> synthesis : 1.4%
+> synthesizer::analyze_family_ar : 5.2%
+> quotient::build : 1.9%
+> quotient::restrict_quotient : 15.5%
+> quotient::select_actions : 10.0%
+> models::MarkovChain : 6.1%
+>   MC False : 11.7%
+> quotient::scheduler_selection_quantitative : 1.7%
+> quotient::scheduler_selection : 4.0%
+>     states loop : 13.2%
+>   MC True : 2.4%
+> quotient::split : 2.7%
+>     collect_parent_info : 9.7%
+> holes::translate_analysis_hints : 2.4%
+> covered 94.0% of 0.6 sec
+
+
+-- maze2-0.1
+
+method: AR, synthesis time: 37.29 s
+number of holes: 42, family size: 19408409961765342806016, super quotient: 45 states / 486 actions
+explored: 100 %
+AR stats: avg MDP size: 43, iterations: 26467
+
+optimal: 6.324786
+
+profiling report:
+> sketch : 0.1%
+> synthesis : 1.5%
+> synthesizer::analyze_family_ar : 4.0%
+> quotient::build : 1.4%
+> quotient::restrict_quotient : 18.0%
+> quotient::select_actions : 6.8%
+> models::MarkovChain : 4.3%
+>   MC False : 18.4%
+> quotient::scheduler_selection_quantitative : 2.9%
+> quotient::scheduler_selection : 3.4%
+>     states loop : 13.7%
+>   MC True : 2.4%
+> quotient::split : 4.7%
+>     collect_parent_info : 12.4%
+> holes::translate_analysis_hints : 1.6%
+> covered 96.0% of 37.3 sec
+
+
+-- maze2-0
+
+method: AR, synthesis time: 4.45 s
+number of holes: 42, family size: 19408409961765342806016, super quotient: 45 states / 486 actions
+explored: 100 %
+AR stats: avg MDP size: 43, iterations: 3241
+
+optimal: 5.692308
+
+profiling report:
+> sketch : 0.9%
+> synthesis : 1.5%
+> synthesizer::analyze_family_ar : 4.1%
+> quotient::build : 1.5%
+> quotient::restrict_quotient : 18.7%
+> quotient::select_actions : 7.3%
+> models::MarkovChain : 4.5%
+>   MC False : 14.6%
+> quotient::scheduler_selection_quantitative : 3.0%
+> quotient::scheduler_selection : 3.4%
+>     states loop : 13.9%
+>   MC True : 2.7%
+> quotient::split : 4.5%
+>     collect_parent_info : 13.1%
+> holes::translate_analysis_hints : 1.6%
+> covered 95.0% of 4.5 sec
+
+
+-- network-2-8-20
+
+> sketch : 0.5%
+> synthesis : 0.0%
+> synthesizer::analyze_family_ar : 0.5%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 1.2%
+> quotient::select_actions : 0.9%
+> models::MarkovChain : 0.2%
+>   MC False : 0.8%
+> quotient::scheduler_selection_quantitative : 0.4%
+> quotient::scheduler_selection : 0.8%
+>     states loop : 90.9%
+>   MC True : 0.6%
+> quotient::split : 0.6%
+>     collect_parent_info : 2.5%
+> holes::translate_analysis_hints : 0.1%
+> covered 100.0% of 297.1 sec
+2022-02-03 15:14:17,047 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.6 s, ETA: 295610663.7 s [60 iters], *=30.5, SAT=-
+
+
+-- network-prio-2-8-20
+
+> sketch : 11.8%
+> synthesis : 0.0%
+> synthesizer::analyze_family_ar : 0.1%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 0.4%
+> quotient::select_actions : 0.4%
+> models::MarkovChain : 0.2%
+>   MC False : 0.2%
+> quotient::scheduler_selection_quantitative : 0.1%
+> quotient::scheduler_selection : 0.1%
+>     states loop : 85.8%
+>   MC True : 0.2%
+> quotient::split : 0.2%
+>     collect_parent_info : 0.5%
+> holes::translate_analysis_hints : 0.0%
+> covered 100.0% of 239.3 sec
+2022-02-03 15:13:53,733 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 211.1 s, ETA: 211139743.6 s [3 iters], *=0.0, SAT=-
+
+
+-- nrp-8
+
+> sketch : 0.0%
+> synthesis : 1.3%
+> synthesizer::analyze_family_ar : 2.3%
+> quotient::build : 0.6%
+> quotient::restrict_quotient : 20.5%
+> quotient::select_actions : 8.9%
+> models::MarkovChain : 5.2%
+>   MC False : 6.3%
+> quotient::scheduler_selection_quantitative : 1.2%
+> quotient::scheduler_selection : 4.1%
+>     states loop : 16.4%
+>   MC True : 2.0%
+> quotient::split : 7.0%
+>     collect_parent_info : 19.9%
+> holes::translate_analysis_hints : 2.4%
+> covered 98.0% of 295.0 sec
+2022-02-03 15:19:05,655 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0005% members, elapsed 295.0 s, ETA: 49996125.6 s [82068 iters], *=0.125, SAT=-
+
+
+-- refuel-06
+
+> sketch : 0.0%
+> synthesis : 1.0%
+> synthesizer::analyze_family_ar : 1.4%
+> quotient::build : 0.4%
+> quotient::restrict_quotient : 22.8%
+> quotient::select_actions : 10.0%
+> models::MarkovChain : 4.2%
+>   MC False : 10.2%
+> quotient::scheduler_selection_quantitative : 0.9%
+> quotient::scheduler_selection : 3.2%
+>     states loop : 15.8%
+>   MC True : 1.7%
+> quotient::split : 5.2%
+>     collect_parent_info : 20.0%
+> holes::translate_analysis_hints : 2.0%
+> covered 99.0% of 295.1 sec
+2022-02-03 15:19:06,248 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 44543827748.7 s [41385 iters], *=0.02335, SAT=-
+
+
+-- rocks-12
+
+profiling report:
+> sketch : 1.3%
+> synthesis : 0.0%
+> synthesizer::analyze_family_ar : 0.1%
+> quotient::build : 0.0%
+> quotient::restrict_quotient : 1.2%
+> quotient::select_actions : 0.5%
+> models::MarkovChain : 0.2%
+>   MC False : 1.2%
+> quotient::scheduler_selection_quantitative : 0.4%
+> quotient::scheduler_selection : 0.3%
+>     states loop : 92.6%
+>   MC True : 0.1%
+> quotient::split : 0.7%
+>     collect_parent_info : 1.2%
+> holes::translate_analysis_hints : 0.0%
+> covered 100.0% of 298.3 sec
+2022-02-03 15:19:08,566 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 294.4 s, ETA: 294373135.0 s [16 iters], *=-, SAT=-
+
+
+
+
+
+
+
+
+
+--- k=4 ---
+
+-- crypt-4
+
+elapsed 295.3 s [398 iters], *=0.33333
+
+> quotient::select_actions : 2.5%
+> quotient::scheduler_selection : 2.3%
+>     states loop : 67.3%
+>     collect_parent_info : 15.1%
+
+-- drone-4-1
+
+elapsed 295.0 s, ETA: 1.0994662503450528e+53 s [1201 iters], *=0.58753, SAT=-
+
+> quotient::restrict_quotient : 10.6%
+> quotient::select_actions : 3.5%
+>   MC False : 55.2%
+> quotient::scheduler_selection : 2.3%
+>     states loop : 12.1%
+>     collect_parent_info : 10.1%
+
+-- grid-4-0.1
+
+synthesis time: 13.86 s
+optimal: 4.701739
+
+> synthesizer::analyze_family_ar : 4.6%
+> quotient::restrict_quotient : 15.9%
+> quotient::select_actions : 8.8%
+> models::MarkovChain : 5.9%
+>   MC False : 15.2%
+> quotient::scheduler_selection_quantitative : 3.1%
+> quotient::scheduler_selection : 4.8%
+>     states loop : 15.2%
+>   MC True : 3.4%
+> quotient::split : 3.0%
+>     collect_parent_info : 9.2%
+
+-- grid-4-0.3
+
+synthesis time: 13.84 s
+optimal: 6.314724
+
+> synthesizer::analyze_family_ar : 4.6%
+> quotient::restrict_quotient : 15.7%
+> quotient::select_actions : 8.9%
+> models::MarkovChain : 5.9%
+>   MC False : 15.6%
+> quotient::scheduler_selection_quantitative : 3.1%
+> quotient::scheduler_selection : 4.8%
+>     states loop : 14.9%
+>   MC True : 3.5%
+> quotient::split : 3.1%
+>     collect_parent_info : 9.2%
+> holes::translate_analysis_hints : 2.4%
+
+-- grid-avoid-4-0.1
+
+synthesis time: 32.13 s
+optimal: 0.926768
+
+> synthesizer::analyze_family_ar : 4.9%
+> quotient::build : 1.8%
+> quotient::restrict_quotient : 16.2%
+> quotient::select_actions : 8.8%
+> models::MarkovChain : 6.2%
+>   MC False : 16.2%
+> quotient::scheduler_selection : 4.3%
+>     states loop : 13.2%
+>   MC True : 3.5%
+> quotient::split : 3.0%
+>     collect_parent_info : 10.6%
+> holes::translate_analysis_hints : 2.5%
+
+-- grid-avoid-4-0
+
+synthesis time: 12.75 s
+optimal: 0.928571
+
+> synthesizer::analyze_family_ar : 4.7%
+> quotient::restrict_quotient : 17.9%
+> quotient::select_actions : 10.5%
+> models::MarkovChain : 6.3%
+>   MC False : 12.1%
+> quotient::scheduler_selection : 4.1%
+>     states loop : 15.3%
+>   MC True : 2.4%
+> quotient::split : 2.6%
+>     collect_parent_info : 11.2%
+> holes::translate_analysis_hints : 2.6%
+
+-- maze2-0.1
+
+2022-02-03 15:19:49,951 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.4174% members, elapsed 295.0 s, ETA: 70667.7 s [171417 iters], *=6.32479, SAT=-
+
+> synthesizer::analyze_family_ar : 3.5%
+> quotient::restrict_quotient : 18.8%
+> quotient::select_actions : 6.8%
+> models::MarkovChain : 4.0%
+>   MC False : 19.4%
+> quotient::scheduler_selection_quantitative : 2.8%
+> quotient::scheduler_selection : 3.0%
+>     states loop : 14.1%
+>   MC True : 2.4%
+> quotient::split : 3.9%
+>     collect_parent_info : 13.9%
+
+
+
+-- maze2-0
+
+2022-02-03 15:19:34,397 MainThread - paynt.synthesizers.statistic - INFO - > Processed 29.6999% members, elapsed 295.0 s, ETA: 993.3 s [152333 iters], *=5.69231, SAT=-
+
+> synthesizer::analyze_family_ar : 3.4%
+> quotient::restrict_quotient : 20.5%
+> quotient::select_actions : 8.1%
+> models::MarkovChain : 3.8%
+>   MC False : 14.0%
+> quotient::scheduler_selection_quantitative : 3.1%
+> quotient::scheduler_selection : 3.1%
+>     states loop : 16.7%
+>   MC True : 2.6%
+> quotient::split : 3.8%
+>     collect_parent_info : 13.7%
+
+-- network-2-8-20
+
+2022-02-03 15:20:01,540 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 293.2 s, ETA: 293239957.6 s [37 iters], *=36.0, SAT=-
+
+>     states loop : 92.1%
+>     collect_parent_info : 2.0%
+
+-- network-prio-2-8-20
+
+2022-02-03 15:22:51,382 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 190.1 s, ETA: 190088401.9 s [3 iters], *=0.0, SAT=-
+
+> sketch : 14.2%
+>     states loop : 82.7%
+
+-- nrp-8
+
+2022-02-03 15:24:06,293 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 77462615329.8 s [95767 iters], *=0.125, SAT=-
+
+> quotient::restrict_quotient : 22.9%
+> quotient::select_actions : 9.8%
+> models::MarkovChain : 4.6%
+>   MC False : 6.1%
+> quotient::scheduler_selection : 3.5%
+>     states loop : 16.3%
+> quotient::split : 7.2%
+>     collect_parent_info : 19.6%
+> holes::translate_analysis_hints : 2.1%
+
+-- refuel-06
+
+2022-02-03 15:24:06,262 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 295.0 s, ETA: 81089110760183.5 s [42521 iters], *=0.02335, SAT=-
+
+> quotient::restrict_quotient : 22.5%
+> quotient::select_actions : 9.8%
+> models::MarkovChain : 3.1%
+>   MC False : 10.7%
+> quotient::scheduler_selection : 2.5%
+>     states loop : 16.4%
+> quotient::split : 9.6%
+>     collect_parent_info : 18.8%
+
+-- rocks-12
+
+2022-02-03 15:24:01,260 MainThread - paynt.synthesizers.statistic - INFO - > Processed 0.0% members, elapsed 285.9 s, ETA: 285949922.0 s [16 iters], *=-, SAT=-
+
+>     states loop : 91.8%
+
