@@ -1,14 +1,17 @@
 import math
 import itertools
 
-import sys
-import pycvc5   # comment this import if you don't have CVC5 installed
 import z3
+import sys
 
-import stormpy.synthesis
+# import pycvc5 if installed
+import importlib
+if importlib.util.find_spec('pycvc5') is not None:
+    import pycvc5
 
 from ..profiler import Profiler
 
+import stormpy.synthesis
 
 import logging
 logger = logging.getLogger(__name__)
@@ -16,9 +19,11 @@ logger = logging.getLogger(__name__)
 class Hole:
     '''
     Hole with a name, a list of options and corresponding option labels.
-    Options for each hole are simply indices of the corresponding hole assignment.
-    Each hole is identified by its position in Holes, therefore, this order must
-      be preserved in the refining process.
+    Options for each hole are simply indices of the corresponding hole
+      assignment, therefore, their order does not matter.
+      # TODO maybe store options as bitmaps?
+    Each hole is identified by its position hole_index in Holes, therefore,
+      this order must be preserved in the refining process.
     Option labels are not refined when assuming suboptions so that the correct
       label can be accessed by the value of an option.
     '''
@@ -31,6 +36,14 @@ class Hole:
     def size(self):
         return len(self.options)
 
+    @property
+    def is_trivial(self):
+        return self.size == 1
+
+    @property
+    def is_unrefined(self):
+        return self.size == len(self.option_labels)
+
     def __str__(self):
         labels = [self.option_labels[option] for option in self.options]
         if self.size == 1:
@@ -38,20 +51,14 @@ class Hole:
         else:
             return self.name + ": {" + ",".join(labels) + "}"
 
-    def copy(self):
-        # note that the copy is shallow
-        return Hole(self.name, self.options, self.option_labels)
-
     def assume_options(self, options):
         self.options = options
 
-    @property
-    def is_trivial(self):
-        return len(self.options) == 1
+    def copy(self):
+        # note that the copy is shallow since after assuming some options
+        # the corresponding list is replaced
+        return Hole(self.name, self.options, self.option_labels)
 
-    @property
-    def is_unrefined(self):
-        return len(self.options) == len(self.option_labels)
 
 
 class Holes(list):
@@ -77,6 +84,7 @@ class Holes(list):
         return ", ".join([str(hole) for hole in self]) 
 
     def copy(self):
+        ''' Create a shallow copy of this list of holes. '''
         return Holes([hole.copy() for hole in self])
 
     def assume_hole_options(self, hole_index, options):
@@ -104,9 +112,13 @@ class Holes(list):
         return True
 
     def all_combinations(self):
+        '''
+        :return iteratable Cartesian product of hole options
+        '''
         return itertools.product(*[hole.options for hole in self])
 
     def construct_assignment(self, combination):
+        ''' Convert hole option combination to a hole assignment. '''
         combination = list(combination)
         suboptions = [[option] for option in combination]
         holes = self.copy()
@@ -114,24 +126,44 @@ class Holes(list):
         return holes
 
     def subholes(self, hole_index, options):
-        ''' Construct a semi-shallow copy of self with one modified hole. '''
+        '''
+        Construct a semi-shallow copy of self with only one modified hole
+          @hole_index having selected @options
+        :note this is a performance/memory optimization associated with creating
+          subfamilies wrt one splitter having restricted options
+        '''
         subhole = self[hole_index].copy()
         subhole.assume_options(options)
         
-        shallow_copy = Holes([hole for hole in self])
+        shallow_copy = Holes(self)
         shallow_copy[hole_index] = subhole
         return shallow_copy
 
 
 class ParentInfo():
+    '''
+    Container for stuff to be remembered when splitting an undecided family
+    into subfamilies. Generally used to speed-up work with the subfamilies.
+    :note it is better to store these things in a separate container instead
+      of having a reference to the parent family (that will never be considered
+      again) for the purposes of memory efficiency.
+    '''
     def __init__(self):
-        self.refinement_depth = None
-        self.hole_selected_actions = None
-        self.selected_actions = None
-        self.analysis_hints = None
+        # list of constraint indices still undecided in this family
         self.property_indices = None
-        self.splitter = None
+        # for each undecided property contains analysis results
+        self.analysis_hints = None
 
+        # how many refinements were needed to create this family
+        self.refinement_depth = None
+
+        # explicit list of all non-default actions in the MDP
+        self.selected_actions = None
+        # for each hole and for each option explicit list of all non-default actions in the MDP
+        self.hole_selected_actions = None
+        # index of a hole used to split the family
+        self.splitter = None
+        
 
 class DesignSpace(Holes):
     '''
@@ -143,21 +175,19 @@ class DesignSpace(Holes):
 
     # z3 solver containing description of the complete design space
     solver = None
-    # for each hole, a corresponding solver variable
+    # for each hole contains a corresponding solver variable
     solver_vars = None
-    # for each hole, a list of equalities [h==opt1,h==opt2,...]
+    # for each hole contains a list of equalities [h==opt1,h==opt2,...]
     solver_clauses = None
 
     # SMT solver choice
     use_python_z3 = False
-    use_storm_z3 = False # deprecated in stormpy-1.6.4 ?
     use_cvc = False
     # current depth of push/pop solving
     solver_depth = 0
 
     # whether hints will be stored for subsequent MDP model checking
     store_hints = True
-    # store_hints = False
 
     def __init__(self, holes = [], parent_info = None):
         super().__init__(holes)
@@ -188,7 +218,6 @@ class DesignSpace(Holes):
             DesignSpace.use_cvc = True
         else:
             DesignSpace.use_python_z3 = True
-            DesignSpace.use_storm_z3 = False
 
         DesignSpace.solver_clauses = []
         if DesignSpace.use_python_z3:
@@ -198,15 +227,6 @@ class DesignSpace(Holes):
             for hole_index,hole in enumerate(self):
                 var = DesignSpace.solver_vars[hole_index]
                 clauses = [var == option for option in hole.options]
-                DesignSpace.solver_clauses.append(clauses)
-        elif DesignSpace.use_storm_z3:
-            logger.debug("Using Storm Z3 for SMT solving.")
-            expression_manager = stormpy.storage.ExpressionManager()
-            DesignSpace.solver = stormpy.utility.Z3SmtSolver(expression_manager)
-            DesignSpace.solver_vars = [expression_manager.create_integer_variable(str(hole_index)) for hole_index in self.hole_indices]
-            for hole_index,hole in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index].get_expression()
-                clauses = [stormpy.storage.Expression.Eq(var,expression_manager.create_integer(option)) for option in hole.options]
                 DesignSpace.solver_clauses.append(clauses)
         elif DesignSpace.use_cvc:
             logger.debug("Using CVC5 for SMT solving.")
@@ -242,8 +262,6 @@ class DesignSpace(Holes):
             else:
                 if DesignSpace.use_python_z3:
                     or_clause = z3.Or(clauses)
-                elif DesignSpace.use_storm_z3:
-                    or_clause = stormpy.storage.Expression.Disjunction(clauses)
                 elif DesignSpace.use_cvc:
                     or_clause = DesignSpace.solver.mkTerm(pycvc5.Kind.Or, clauses)
                 else:
@@ -255,8 +273,6 @@ class DesignSpace(Holes):
         else:
             if DesignSpace.use_python_z3:
                 self.encoding = z3.And(self.hole_clauses)
-            elif DesignSpace.use_storm_z3:
-                self.encoding = stormpy.storage.Expression.Conjunction(self.hole_clauses)
             elif DesignSpace.use_cvc:
                 self.encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, self.hole_clauses)
             else:
@@ -279,15 +295,6 @@ class DesignSpace(Holes):
             hole_options = []
             for hole_index,var in enumerate(DesignSpace.solver_vars):
                 option = sat_model[var].as_long()
-                hole_options.append([option])
-        elif DesignSpace.use_storm_z3:
-            solver_result = DesignSpace.solver.check_with_assumptions(set([self.encoding]))
-            if solver_result == stormpy.utility.SmtCheckResult.Unsat:
-                return None
-            solver_model = DesignSpace.solver.model
-            hole_options = []
-            for hole_index,var in enumerate(DesignSpace.solver_vars):
-                option = solver_model.get_integer_value(var)
                 hole_options.append([option])
         elif DesignSpace.use_cvc:
             solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
@@ -327,10 +334,6 @@ class DesignSpace(Holes):
         if DesignSpace.use_python_z3:
             counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
             DesignSpace.solver.add(counterexample_encoding)
-        elif DesignSpace.use_storm_z3:
-            conflict_encoding = stormpy.storage.Expression.Conjunction(counterexample_clauses)
-            counterexample_encoding = stormpy.storage.Expression.Not(conflict_encoding)
-            DesignSpace.solver.add(counterexample_encoding)
         elif DesignSpace.use_cvc:
             if len(counterexample_clauses) == 1:
                 counterexample_encoding = counterexample_clauses[0].notTerm()
@@ -351,10 +354,7 @@ class DesignSpace(Holes):
 
         # reset to the scope of the parent (refinement_depth - 1)
         while DesignSpace.solver_depth >= self.refinement_depth:
-            if DesignSpace.use_storm_z3:
-                DesignSpace.solver.pop(1)
-            else:
-                DesignSpace.solver.pop()
+            DesignSpace.solver.pop()
             DesignSpace.solver_depth -= 1
 
         # create new scope
@@ -387,6 +387,14 @@ class DesignSpace(Holes):
         Profiler.resume()
         return analysis_hints
 
+    def translate_analysis_hint(self, hint):
+        if hint is None:
+            return None
+        translated_hint = [0] * self.mdp.states
+        for state in range(self.mdp.states):
+            global_state = self.mdp.quotient_state_map[state]
+            translated_hint[state] = hint[global_state]
+
     def translate_analysis_hints(self):
         if not DesignSpace.store_hints or self.parent_info is None:
             return None
@@ -395,13 +403,8 @@ class DesignSpace(Holes):
         analysis_hints = dict()
         for prop,hints in self.parent_info.analysis_hints.items():
             hint_prim,hint_seco = hints
-
-            translated_hint_prim = [0] * self.mdp.states
-            translated_hint_seco = [0] * self.mdp.states
-            for state in range(self.mdp.states):
-                global_state = self.mdp.quotient_state_map[state]
-                translated_hint_prim[state] = hint_prim[global_state]
-                translated_hint_seco[state] = hint_seco[global_state]
+            translated_hint_prim = self.translate_analysis_hint(hint_prim)
+            translated_hint_seco = self.translate_analysis_hint(hint_seco)
             analysis_hints[prop] = (translated_hint_prim,translated_hint_seco)
 
         Profiler.resume()

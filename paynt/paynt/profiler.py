@@ -36,6 +36,8 @@ class Timer:
 
 class Profiler:
 
+    percentage_filter = 5
+
     @staticmethod
     def initialize():
         Profiler.timers = {}        # dictionary of all timers
@@ -88,7 +90,9 @@ class Profiler:
         for timer_name, timer in Profiler.timers.items():
             t = timer.read()
             covered += t
-            print(f'> {timer_name} : {round(t / time_total * 100, 1)}%')
+            percentage = round(t / time_total * 100, 1)
+            if percentage > Profiler.percentage_filter:
+                print(f'> {timer_name} : {percentage}%')
         print(f"> covered {round(covered / time_total * 100, 0)}% of {round(time_total, 1)} sec")
 
     @staticmethod

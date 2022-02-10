@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 # 2) symmetry breaking
 # 3) stopping criteria
 # 4) experiment headlines (where > ATVA, where > NFA [grid-av MO], hard benchmark with good results, )
+# 5) remove consistent holes from conflicts
+# 6) choose assignemnts
 
 
 class Synthesizer:
@@ -41,7 +43,7 @@ class Synthesizer:
         logger.info("Synthesis initiated.")
         Profiler.start("synthesis")
         self.sketch.quotient.discarded = 0
-        self.sketch.specification.optimality.update_optimum(0.96)
+        # self.sketch.specification.optimality.update_optimum(0.96)
         opt_assignment = self.synthesize(self.sketch.design_space)
         Profiler.stop()
         return opt_assignment
@@ -369,6 +371,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         # AR loop
         satisfying_assignment = None
         families = [family]
+
         while families:
             
             # MDP analysis
@@ -383,6 +386,8 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             # reset SMT solver level
             if SynthesizerAR.exploration_order_dfs:
                 family.sat_level()
+
+            # print(family.has_unsat())
 
             # analyze the family
             feasibility,improving_assignment = self.analyze_family_ar(family)

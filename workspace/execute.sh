@@ -65,11 +65,11 @@ function hybrid() {
 
 function run() {
 
-    timeout=300s
+    # timeout=3s
 
     # parallel=true
 
-    pomdp_mem_size=2
+    pomdp_mem_size=3
     # pomdp_strategy=true
 
     ### running ###
@@ -78,7 +78,7 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    # model="pomdp/maze/concise"
+    model="pomdp/maze/concise"
 
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
@@ -86,7 +86,7 @@ function run() {
     # model="pomdp/grid/simple-mo"
 
     ### verification of indefinite-horizon POMDPs ###
-    model="pomdp/voihp/drone-4-1"
+    # model="pomdp/voihp/drone-4-1"
     # model="pomdp/voihp/grid-avoid-4-0.1"
     # model="pomdp/voihp/grid-4-0.1"
     # model="pomdp/voihp/grid-4-0.3"

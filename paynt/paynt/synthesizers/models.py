@@ -89,7 +89,8 @@ class MarkovChain:
         return result
 
     def model_check_property(self, prop, alt = False):
-        Profiler.start(f"  MC {alt}")
+        direction = "prim" if not alt else "seco"
+        Profiler.start(f"  MC {direction}")
         # get hint
         hint = None
         if self.analysis_hints is not None:
@@ -144,6 +145,9 @@ class DTMC(MarkovChain):
 
 class MDP(MarkovChain):
 
+    # whether the secondary direction will be explored if primary is not enough
+    compute_secondary_direction = False
+
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map, design_space):
         super().__init__(model, quotient_container, quotient_state_map, quotient_choice_map)
 
@@ -172,6 +176,9 @@ class MDP(MarkovChain):
             return MdpPropertyResult(prop, primary, None, True)
         
         # primary direction is not sufficient
+        if not MDP.compute_secondary_direction:
+            return MdpPropertyResult(prop, primary, None, None)
+
         secondary = self.model_check_property(prop, alt = True)
         feasibility = True if secondary.sat else None
         return MdpPropertyResult(prop, primary, secondary, feasibility)
@@ -219,6 +226,10 @@ class MDP(MarkovChain):
             # LB is tight and LB < OPT
             improving_assignment = self.quotient_container.double_check_assignment(assignment, prop)
             return MdpOptimalityResult(prop, primary, None, improving_assignment, False)
+
+        if not MDP.compute_secondary_direction:
+            self.scheduler_results[prop] = (selection,scores)
+            return MdpOptimalityResult(prop, primary, None, None, True)
 
         # UB might improve the optimum
         secondary = self.model_check_property(prop, alt = True)
