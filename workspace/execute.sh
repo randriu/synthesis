@@ -65,7 +65,7 @@ function hybrid() {
 
 function run() {
 
-    timeout=30s
+    timeout=300s
 
     # parallel=true
 
@@ -86,12 +86,12 @@ function run() {
     # model="pomdp/grid/simple-mo"
 
     ### verification of indefinite-horizon POMDPs ###
-    # model="pomdp/voihp/drone-4-1"
+    model="pomdp/voihp/drone-4-1"
     # model="pomdp/voihp/grid-avoid-4-0.1"
     # model="pomdp/voihp/grid-4-0.1"
     # model="pomdp/voihp/grid-4-0.3"
     # model="pomdp/voihp/maze2-0.1"
-    model="pomdp/voihp/refuel-06"
+    # model="pomdp/voihp/refuel-06"
     # model="pomdp/voihp/rocks-12"
 
     # model="pomdp/voihp/crypt-4"

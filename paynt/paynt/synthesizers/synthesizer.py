@@ -9,6 +9,14 @@ from ..profiler import Timer,Profiler
 import logging
 logger = logging.getLogger(__name__)
 
+
+# TODO
+# 1) memory injection
+# 2) symmetry breaking
+# 3) stopping criteria
+# 4) experiment headlines (where > ATVA, where > NFA [grid-av MO], hard benchmark with good results, )
+
+
 class Synthesizer:
 
     def __init__(self, sketch):
@@ -33,7 +41,7 @@ class Synthesizer:
         logger.info("Synthesis initiated.")
         Profiler.start("synthesis")
         self.sketch.quotient.discarded = 0
-        # self.sketch.specification.optimality.update_optimum(19)
+        self.sketch.specification.optimality.update_optimum(0.96)
         opt_assignment = self.synthesize(self.sketch.design_space)
         Profiler.stop()
         return opt_assignment

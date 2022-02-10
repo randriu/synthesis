@@ -70,11 +70,11 @@ pomdp_mem_size=1
 
 echo "-- evaluating "
 # for benchmark in "${benchmarks[@]}"; do
-for k in {1..4}; do
+for k in {1..1}; do
     experiment_current=0
     echo "-- k=$k"
     pomdp_mem_size=$k
-    experiment_name="ar-k=${k}-cold"
+    experiment_name="ar-k=${k}-warm-pruning"
     for benchmark in `ls $benchmarks_dir`; do
         paynt "${experiment_name}" "${benchmark}" ${method} ${timeout}
     done
