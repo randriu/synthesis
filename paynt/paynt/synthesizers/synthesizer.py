@@ -1,7 +1,4 @@
-import stormpy
-
-from .models import MarkovChain, DTMC, MDP
-from ..sketch.holes import Holes,DesignSpace
+import stormpy.synthesis
 
 from .statistic import Statistic
 from ..profiler import Timer,Profiler
@@ -11,12 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 # TODO
-# 1) memory injection
-# 2) symmetry breaking
-# 3) stopping criteria
-# 4) experiment headlines (where > ATVA, where > NFA [grid-av MO], hard benchmark with good results, )
-# 5) remove consistent holes from conflicts
-# 6) choose assignemnts
+# X 1) memory injection
+# X 2) symmetry breaking
+#   3) stopping criteria
+#   4) experiment headlines (where > ATVA, where > NFA [grid-av MO], hard benchmark with good results, )
+# X 5) remove consistent holes from conflicts
+# X 6) use primary scheduler from AR to select assignments for CEGIS
+#   7) use MDP scheduler for memory injection ?
+#   8) CEGIS time allocation
+#   -) use belief-based
+
 
 
 class Synthesizer:
@@ -28,19 +29,17 @@ class Synthesizer:
 
     @property
     def method_name(self):
-        """ to be overridden """
+        ''' to be overridden '''
         pass
     
     def print_stats(self):
-        print(self.stat.get_summary())
-        Profiler.print()
+        self.stat.print()
 
     def synthesize(self, family):
-        """ to be overridden """
+        ''' to be overridden '''
         pass
 
     def run(self):
-        logger.info("Synthesis initiated.")
         Profiler.start("synthesis")
         self.sketch.quotient.discarded = 0
         # self.sketch.specification.optimality.update_optimum(0.96)
@@ -60,6 +59,7 @@ class Synthesizer1By1(Synthesizer):
 
     def synthesize(self, family):
 
+        logger.info("Synthesis initiated.")
         self.stat.start()
 
         satisfying_assignment = None
@@ -83,8 +83,7 @@ class Synthesizer1By1(Synthesizer):
         self.stat.finished(satisfying_assignment)
         return satisfying_assignment
 
-import ast
-    
+
 class SynthesizerAR(Synthesizer):
 
     # family exploration order: True = DFS, False = BFS
@@ -129,11 +128,15 @@ class SynthesizerAR(Synthesizer):
     
     def synthesize(self, family):
 
+        logger.info("Synthesis initiated.")
         self.stat.start()
 
         satisfying_assignment = None
         families = [family]
         while families:
+            
+            # if self.stat.iterations_mdp == 10:
+            #     exit()
             
             if SynthesizerAR.exploration_order_dfs:
                 family = families.pop(-1)
@@ -150,6 +153,9 @@ class SynthesizerAR(Synthesizer):
 
             # undecided
             subfamilies = self.sketch.quotient.split(family)
+
+            # print(family.splitter, family.analysis_result.optimality_result.primary_scores)
+
             families = families + subfamilies
 
         self.stat.finished(satisfying_assignment)
@@ -158,9 +164,30 @@ class SynthesizerAR(Synthesizer):
 
 class SynthesizerCEGIS(Synthesizer):
 
+    # generalize_consistent_holes = False
+    generalize_consistent_holes = True
+
+    # explore_scheduler_assignments_first = False
+    explore_scheduler_assignments_first = True
+
     @property
     def method_name(self):
         return "CEGIS"
+
+    def generalize_conflict(self, assignment, conflict, scheduler_selection):
+
+        if not SynthesizerCEGIS.generalize_consistent_holes:
+            return conflict
+
+        # filter holes set to consistent assignment
+        conflict_filtered = []
+        for hole in conflict:
+            scheduler_options = scheduler_selection[hole]
+            if len(scheduler_options) == 1 and assignment[hole].options[0] == scheduler_options[0]:
+                continue
+            conflict_filtered.append(hole)
+
+        return conflict_filtered
 
     def analyze_family_assignment_cegis(self, family, assignment, ce_generator):
         """
@@ -196,27 +223,42 @@ class SynthesizerCEGIS(Synthesizer):
                 improving = True
 
         # construct conflict wrt each unsatisfiable property
-        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
-        conflicts = []
+        # pack all unsatisfiable properties as well as their MDP results (if exists)
+        conflict_requests = []
         for index in family.property_indices:
             if spec.constraints_result.results[index].sat:
                 continue
-            threshold = self.sketch.specification.constraints[index].threshold
-            bounds = None if family.analysis_result is None else family.analysis_result.constraints_result.results[index].primary.result
-            Profiler.start("    generating conflicts")
-            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
-            Profiler.resume()
-            conflicts.append(conflict)
-
+            prop = self.sketch.specification.constraints[index]
+            property_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
+            conflict_requests.append( (index,prop,property_result) )
         if self.sketch.specification.has_optimality:
             index = len(self.sketch.specification.constraints)
-            threshold = self.sketch.specification.optimality.threshold
-            bounds = None if family.analysis_result is None else family.analysis_result.optimality_result.primary.result
+            prop = self.sketch.specification.optimality
+            property_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
+            conflict_requests.append( (index,prop,property_result) )
+
+        # prepare DTMC for CE generation
+        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+
+        # construct conflict to each unsatisfiable property
+        conflicts = []
+        for request in conflict_requests:
+            index,prop,property_result = request
+
+            threshold = prop.threshold
+
+            bounds = None
+            scheduler_selection = None
+            if property_result is not None:
+                bounds = property_result.primary.result
+                scheduler_selection = property_result.primary_selection
+
             Profiler.start("    generating conflicts")
             conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
+            conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
             Profiler.resume()
             conflicts.append(conflict)
-            
+                    
         # use conflicts to exclude the generalizations of this assignment
         pruned_estimate = 0
         Profiler.start("    excluding assignment")
@@ -229,6 +271,7 @@ class SynthesizerCEGIS(Synthesizer):
 
     def synthesize(self, family):
 
+        logger.info("Synthesis initiated.")
         self.stat.start()
 
         # assert that no reward formula is maximizing
@@ -251,8 +294,8 @@ class SynthesizerCEGIS(Synthesizer):
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
 
-        # encode family
-        family.sat_initialize()
+        # use sketch design space as a SAT baseline
+        self.sketch.design_space.sat_initialize()
         
         # CEGIS loop
         satisfying_assignment = None
@@ -295,7 +338,7 @@ class StageControl:
         # multiplier to derive time allocated for cegis
         # time_ar * factor = time_cegis
         # =1 is fair, >1 favours cegis, <1 favours ar
-        self.cegis_efficiency = 10
+        self.cegis_efficiency = 1
 
 
     @property
@@ -335,17 +378,20 @@ class StageControl:
         if StageControl.strategy_equal:
             return True
 
+        factor = 1
+
         if self.pruned_ar == 0 and self.pruned_cegis == 0:
-            self.cegis_efficiency = 1
+            self.cegis_efficiency = 1 / factor
         elif self.pruned_ar == 0 and self.pruned_cegis > 0:
-            self.cegis_efficiency = 2
+            self.cegis_efficiency = 2 / factor
         elif self.pruned_ar > 0 and self.pruned_cegis == 0:
-            self.cegis_efficiency = 0.5
+            self.cegis_efficiency = 0.5 / factor
         else:
             success_rate_cegis = self.pruned_cegis / self.timer_cegis.read()
             success_rate_ar = self.pruned_ar / self.timer_ar.read()
-            self.cegis_efficiency = success_rate_cegis / success_rate_ar
+            self.cegis_efficiency = success_rate_cegis / success_rate_ar / factor
         return True
+
 
 class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
@@ -355,18 +401,18 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
     def synthesize(self, family):
 
+        logger.info("Synthesis initiated.")
         self.stat.start()
         self.stage_control = StageControl(family.size)
 
-        self.sketch.quotient.compute_state_to_holes()
         quotient_relevant_holes = self.sketch.quotient.state_to_holes
         formulae = self.sketch.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
             quotient_relevant_holes, formulae)
 
-        # encode family
-        family.sat_initialize()
+        # use sketch design space as a SAT baseline
+        self.sketch.design_space.sat_initialize()
 
         # AR loop
         satisfying_assignment = None
@@ -387,8 +433,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             if SynthesizerAR.exploration_order_dfs:
                 family.sat_level()
 
-            # print(family.has_unsat())
-
             # analyze the family
             feasibility,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
@@ -401,25 +445,40 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
             # undecided: initiate CEGIS analysis
             self.stage_control.start_cegis()
-            assignment = family.pick_assignment()
+
+            # construct priority subfamily
+            priority_subfamily = None
+            if SynthesizerCEGIS.explore_scheduler_assignments_first:
+                # construct family that corresponds to primary scheduler
+                scheduler_selection = family.analysis_result.optimality_result.primary_selection
+                priority_subfamily = family.copy()
+                priority_subfamily.assume_options(scheduler_selection)
+
+            # explore family assignments
             sat = False
-            while assignment is not None:
+            while True:
+
+                # pick assignment
+                assignment = family.pick_assignment_priority(priority_subfamily)
+                if assignment is None:
+                    break
                 
+                # analyze this assignment
                 sat, improving, _ = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
                 if improving:
                     satisfying_assignment = assignment
                 if sat:
                     break
-                # member is UNSAT
-                if self.stage_control.cegis_step():
-                    break
                 
-                # cegis still has time: check next assignment
-                assignment = family.pick_assignment()
+                # assignment is UNSAT
+                if self.stage_control.cegis_step():
+                    # CEGIS timeout
+                    break
 
             if sat:
                 break
-            if assignment is None:
+            
+            if not family.has_assignments:
                 self.explore(family)
                 self.stage_control.prune_cegis(family.size)
                 continue

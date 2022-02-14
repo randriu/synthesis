@@ -5,14 +5,11 @@ import stormpy.pomdp
 import math
 import re
 import itertools
-import random
-from collections import OrderedDict
 
 from .statistic import Statistic
 
 from ..sketch.jani import JaniUnfolder
-from ..sketch.property import Property
-from ..sketch.holes import Hole,Holes,DesignSpace,CombinationColoring
+from ..sketch.holes import Hole,Holes,DesignSpace
 
 from ..profiler import Profiler
 
@@ -26,6 +23,8 @@ class QuotientContainer:
 
     # holes with avg choice value difference below this threshold will be considered consistent
     inconsistency_threshold = 0
+    # whether choice values will be weighted by expected number of visits
+    compute_expected_visits = True
 
     def __init__(self, sketch):
 
@@ -91,61 +90,72 @@ class QuotientContainer:
                 if family.parent_info.splitter not in hole_options or family.includes(hole_options):
                     selected_actions.append(action)
 
-
+        # construct bitvector of selected actions
+        selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
+        
         Profiler.resume()
-        return None,selected_actions
+        return None,selected_actions,selected_actions_bv
 
-
-    def restrict_quotient(self, family):
+    def restrict_mdp(self, mdp, selected_actions_bv):
         '''
         Restrict the quotient MDP to the selected actions.
+        :param selected_actions_bv a bitvector of selected actions
         :return (1) the restricted model
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
         '''
-
-        # select actions compatible with the family
-        hole_selected_actions,selected_actions = self.select_actions(family)
-        Profiler.start("quotient::restrict_quotient")
-
-        # construct bitvector of selected actions
-        selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
+        Profiler.start("quotient::restrict_mdp")
         
-        # construct the submodel
-        Profiler.start("    submodel")
-        keep_unreachable_states = True
-        all_states = stormpy.BitVector(self.quotient_mdp.nr_states, True)
+        keep_unreachable_states = True # TODO investigate this
+        all_states = stormpy.BitVector(mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
-            self.quotient_mdp, all_states, selected_actions_bv, keep_unreachable_states, self.subsystem_builder_options
+            mdp, all_states, selected_actions_bv, keep_unreachable_states, self.subsystem_builder_options
         )
-        Profiler.resume()
-
+        
         model = submodel_construction.model
         state_map = list(submodel_construction.new_to_old_state_mapping)
         choice_map = list(submodel_construction.new_to_old_action_mapping)
+
         Profiler.resume()
-        return hole_selected_actions,selected_actions,model,state_map,choice_map
+        return model,state_map,choice_map
+
+
+
+    def restrict_quotient(self, selected_actions_bv):
+        return self.restrict_mdp(self.quotient_mdp, selected_actions_bv)        
 
     
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
-        hole_selected_actions,selected_actions,model,state_map,choice_map = self.restrict_quotient(family)
+
+        # select actions compatible with the family and restrict the quotient
+        hole_selected_actions,selected_actions,selected_actions_bv = self.select_actions(family)
+        model,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
+
+        # cash restriction information
         family.hole_selected_actions = hole_selected_actions
         family.selected_actions = selected_actions
+
+        # encapsulate MDP
         family.mdp = MDP(model, self, state_map, choice_map, family)
         family.mdp.analysis_hints = family.translate_analysis_hints()
 
+    
+    @staticmethod
+    def mdp_to_dtmc(mdp):
+        tm = mdp.transition_matrix
+        tm.make_row_grouping_trivial()
+        components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
+        dtmc = stormpy.storage.SparseDtmc(components)
+        return dtmc
+
+    
     def build_chain(self, family):
         assert family.size == 1
 
-        # restrict quotient
-        _,_,sub_mdp,state_map,choice_map = self.restrict_quotient(family)
-        
-        # convert restricted MDP to DTMC
-        tm = sub_mdp.transition_matrix
-        tm.make_row_grouping_trivial()
-        components = stormpy.storage.SparseModelComponents(tm, sub_mdp.labeling, sub_mdp.reward_models)
-        dtmc = stormpy.storage.SparseDtmc(components)
+        _,_,selected_actions_bv = self.select_actions(family)
+        mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
+        dtmc = QuotientContainer.mdp_to_dtmc(mdp)
 
         return DTMC(dtmc,self,state_map,choice_map)
 
@@ -166,8 +176,89 @@ class QuotientContainer:
 
         return selection
 
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values):
+    
+    @staticmethod
+    def make_vector_defined(vector):
+        vector_noinf = [ value if value != math.inf else 0 for value in vector]
+        default_value = sum(vector_noinf) / len(vector)
+        vector_valid = [ value if value != math.inf else default_value for value in vector]
+        return vector_valid
+
+    
+    def choice_values(self, mdp, prop, result):
+        '''
+        Get choice values after model checking MDP against a property.
+        Value of choice c: s -> s' is computed as
+        ev(s) * [ rew(c) + P(s,c,s') * mc(s') ], where
+        - ev(s) is the expected number of visits of state s in DTMC induced by
+          the primary scheduler
+        - rew(c) is the reward associated with choice (c)
+        - P(s,c,s') is the probability of transitioning from s to s' under action c
+        - mc(s') is the model checking result in state s'
+        '''
+        Profiler.start("quotient::choice_values")
+
+        # multiply probability with model checking results
+        choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix, result.get_values())
+        choice_values = QuotientContainer.make_vector_defined(choice_values)
+
+        # if the associated reward model has state-action rewards, then these must be added to choice values
+        if prop.reward:
+            reward_name = prop.formula.reward_name
+            rm = mdp.model.reward_models.get(reward_name)
+            assert not rm.has_transition_rewards and (rm.has_state_rewards != rm.has_state_action_rewards)
+            if rm.has_state_action_rewards:
+                choice_rewards = list(rm.state_action_rewards)
+                assert mdp.choices == len(choice_rewards)
+                for choice in range(mdp.choices):
+                    choice_values[choice] += choice_rewards[choice]
+
+        # sanity check
+        for choice in range(mdp.choices):
+            assert not math.isnan(choice_values[choice])
+
+        Profiler.resume()
+
+        return choice_values
+
+
+    def expected_visits(self, mdp, prop, scheduler):
+        '''
+        Compute expected number of visits in the states of DTMC induced by
+        this scheduler.
+        '''
+
+        if not QuotientContainer.compute_expected_visits:
+            return [1] * mdp.states
+        
+        # extract DTMC induced by this MDP-scheduler
+        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        sub_mdp,state_map,_ = self.restrict_mdp(mdp.model, choices)
+        dtmc = QuotientContainer.mdp_to_dtmc(sub_mdp)
+
+        # compute visits
+        dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc).get_values()
+        dtmc_visits = list(dtmc_visits)
+
+        # handle infinity- and zero-visits
+        if prop.minimizing:
+            dtmc_visits = QuotientContainer.make_vector_defined(dtmc_visits)
+        else:
+            dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
+        
+        # map vector of expected visits onto the state space of the quotient MDP
+        expected_visits = [0] * mdp.states
+        for state in range(dtmc.nr_states):
+            mdp_state = state_map[state]
+            visits = dtmc_visits[state]
+            expected_visits[mdp_state] = visits
+
+        return expected_visits
+
+
+    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
         Profiler.start("    states loop")
+
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
@@ -208,10 +299,9 @@ class QuotientContainer:
                 if min_value is None:
                     continue
                 max_value = hole_max[hole_index]
-                difference = max_value - min_value
-                if math.isnan(difference):
-                    assert max_value == min_value and min_value == math.inf
-                    difference = 0
+                difference = (max_value - min_value) * expected_visits[state]
+                assert not math.isnan(difference)
+                    
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
 
@@ -224,37 +314,27 @@ class QuotientContainer:
         Profiler.resume()
         return inconsistent_differences
 
+    
     def scheduler_selection_quantitative(self, mdp, prop, result):
         '''
         Get hole options involved in the scheduler selection.
         Use numeric values to filter spurious inconsistencies.
         '''
-        # return super().scheduler_selection_quantitative(mdp,prop,result)
         Profiler.start("quotient::scheduler_selection_quantitative")
 
-        # get qualitative scheduler selection, filter inconsistent assignments        
-        selection = self.scheduler_selection(mdp, result.scheduler)
+        scheduler = result.scheduler
 
+        # get qualitative scheduler selection, filter inconsistent assignments
+        selection = self.scheduler_selection(mdp, scheduler)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
         if len(inconsistent_assignments) == 0:
             Profiler.resume()
-            return selection,None
+            return selection,None,None,None
 
-        choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix,result.get_values())
-        choice_values = list(choice_values)
-
-        if prop.reward:
-            # if the associated reward model has state-action rewards, then these must be added to choice values
-            reward_name = prop.formula.reward_name
-            rm = mdp.model.reward_models.get(reward_name)
-            assert not rm.has_transition_rewards and (rm.has_state_rewards != rm.has_state_action_rewards)
-            if rm.has_state_action_rewards:
-                choice_rewards = list(rm.state_action_rewards)
-                assert mdp.choices == len(choice_rewards)
-                for choice in range(mdp.choices):
-                    choice_values[choice] += choice_rewards[choice]
-
-        inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values)
+        # extract choice values, compute expected visits and estimate scheduler difference
+        choice_values = self.choice_values(mdp, prop, result)
+        expected_visits = self.expected_visits(mdp, prop, result.scheduler)
+        inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values, expected_visits)
 
         # filter differences below epsilon
         for hole_index in inconsistent_assignments:
@@ -262,7 +342,7 @@ class QuotientContainer:
                 selection[hole_index] = [selection[hole_index][0]]
 
         Profiler.resume()
-        return selection,inconsistent_differences
+        return selection,choice_values,expected_visits,inconsistent_differences
         
 
     def scheduler_consistent(self, mdp, prop, result):
@@ -273,7 +353,12 @@ class QuotientContainer:
         :return whether the scheduler is consistent
         '''
         # selection = self.scheduler_selection(mdp, result.scheduler)
-        selection,scores = self.scheduler_selection_quantitative(mdp, prop, result)
+
+        if mdp.is_dtmc:
+            selection = [[mdp.design_space[hole_index].options[0]] for hole_index in mdp.design_space.hole_indices]
+            return selection, None, None, True
+        
+        selection,choice_values,expected_visits,scores = self.scheduler_selection_quantitative(mdp, prop, result)
         consistent = True
         for hole_index in mdp.design_space.hole_indices:
             options = selection[hole_index]
@@ -282,8 +367,9 @@ class QuotientContainer:
             if options == []:
                 selection[hole_index] = [mdp.design_space[hole_index].options[0]]
 
-        return selection,scores,consistent
+        return selection,choice_values,expected_visits,scores,consistent
 
+    
     def suboptions_half(self, mdp, splitter):
         ''' Split options of a splitter into to halves. '''
         options = mdp.design_space[splitter].options
@@ -352,7 +438,15 @@ class QuotientContainer:
         assert not mdp.is_dtmc
 
         # split family wrt last undecided result
-        hole_assignments,scores = mdp.scheduler_results[next(reversed(mdp.scheduler_results))]
+        if family.analysis_result.optimality_result is not None:
+            result = family.analysis_result.optimality_result
+        else:
+            # pick first undecided constraint
+            undecided = family.analysis_result.constraints_result.undecided_constraints[0]
+            result = family.analysis_result.constraints_result.results[undecided]
+
+        hole_assignments = result.primary_selection
+        scores = result.primary_scores
         
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
@@ -402,7 +496,6 @@ class DTMCQuotientContainer(QuotientContainer):
 
         # build quotient MDP       
         edge_to_hole_options = unfolder.edge_to_hole_options
-        logger.debug("Constructing quotient MDP ... ")
         self.quotient_mdp = stormpy.build_sparse_model_with_options(unfolder.jani_unfolded, MarkovChain.builder_options)
         logger.debug(f"Constructed quotient MDP with {self.quotient_mdp.nr_states} states.")
 
@@ -450,9 +543,6 @@ class MDPQuotientContainer(QuotientContainer):
 
 class POMDPQuotientContainer(QuotientContainer):
 
-    # merge_holes_in_observation = False
-    merge_holes_in_observation = True
-
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -470,7 +560,15 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # (unfolded) quotient MDP attributes
         self.pomdp_manager = None
+        
+        # for each observation, a list of holes
+        self.obs_to_holes = []
+        # number of distinct actions associated with this hole
+        self.hole_num_actions = None
+        # number of distinct memory updates associated with this hole
+        self.hole_num_updates = None
 
+        
         # construct quotient POMDP
         if not self.sketch.is_explicit:
             MarkovChain.builder_options.set_build_choice_labels(True)
@@ -536,7 +634,7 @@ class POMDPQuotientContainer(QuotientContainer):
         output += "]"
         return output
 
-    def unfold_partial_memory(self):
+    def unfold_memory(self):
         
         # reset basic attributes
         self.quotient_mdp = None
@@ -544,227 +642,139 @@ class POMDPQuotientContainer(QuotientContainer):
         self.default_actions = None
         self.state_to_holes = None
 
-        # number of distinct actions associated with this hole
+        # reset family attributes
+        self.obs_to_holes = []
         self.hole_num_actions = None
-        # number of distinct memory updates associated with this hole
         self.hole_num_updates = None
         
         # unfold MDP using manager
-        logger.debug("Constructing quotient MDP ... ")
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
         logger.debug(f"Constructed quotient MDP with {self.quotient_mdp.nr_states} states.")
 
-        # shortcuts
+        # short aliases
         pm = self.pomdp_manager
         pomdp = self.pomdp
         mdp = self.quotient_mdp
 
-        '''
-        PM attributes:
+        # create holes
+        holes = Holes()
+        self.obs_to_holes = []
+        self.hole_num_actions = []
+        self.hole_num_updates = []
 
-        observation_memory_size: obs -> allocated states (default: 1)
+        for obs in range(self.observations):
+            ah = pm.action_holes[obs]
+            mh = pm.memory_holes[obs]
 
-        num_holes: total # of holes
-        action_holes: obs -> list of action holes
-        memory_holes: obs -> list of memory holes
-        hole_options: hole -> # of options
+            obs_label = self.observation_labels[obs]
+            num_actions = self.actions_at_observation[obs]
+            num_updates = pm.max_successor_memory_size[obs]
+            action_labels = self.action_labels_at_observation[obs]
+            action_labels_str = [str(labels) for labels in action_labels]
+            memory_labels_str = [str(o) for o in range(num_updates)]
 
-        state_prototype: MDP state -> POMDP state
-        row_action_hole,row_action_option: MDP choice -> action hole/option (or num_holes)
-        row_memory_hole,row_memory_option: MDP choice -> memory hole/option (or num_holes)
-        '''
-        
-        if not POMDPQuotientContainer.merge_holes_in_observation:
-            # create holes
-            holes = Holes()
-            for hole_index in range(pm.num_holes):
-                holes.append(None)
+            assert len(ah) == 0 or len(mh) == 0 or len(ah) == len(mh)
 
-            # create action holes
-            for obs,hole_indices in enumerate(pm.action_holes):
-                obs_label = self.observation_labels[obs]
-                action_labels = self.action_labels_at_observation[obs]
-                for mem,hole_index in enumerate(hole_indices):
+            obs_holes = []
+            if len(ah) == 0 and len(mh) == 0:
+                # no holes
+                pass
+
+            elif len(mh) == 0:
+                # only action holes
+                for mem,old_hole_index in enumerate(ah):
+
                     name = "A({},{})".format(obs_label,mem)
-                    options = list(range(pm.hole_options[hole_index]))
-                    option_labels = [str(labels) for labels in action_labels]
-                    hole = Hole(name, options, option_labels)
-                    holes[hole_index] = hole
+                    options = list(range(num_actions))
+                    hole = Hole(name, options, action_labels_str)
 
-            # create memory holes
-            for obs,hole_indices in enumerate(pm.memory_holes):
-                obs_label = self.observation_labels[obs]
-                for mem,hole_index in enumerate(hole_indices):
+                    obs_holes.append(holes.num_holes)
+                    holes.append(hole)
+                    self.hole_num_actions.append(num_actions)
+                    self.hole_num_updates.append(num_updates)
+            
+            elif len(ah) == 0:
+                # only memory holes
+                for mem,old_hole_index in enumerate(mh):
                     name = "M({},{})".format(obs_label,mem)
-                    options = list(range(pm.hole_options[hole_index]))
-                    option_labels = [str(o) for o in options]
+                    options = list(range(num_updates))
+                    memory_labels_str = [str(o) for o in options]
+                    hole = Hole(name, options, memory_labels_str)
+
+                    obs_holes.append(holes.num_holes)
+                    holes.append(hole)
+                    self.hole_num_actions.append(num_actions)
+                    self.hole_num_updates.append(num_updates)
+
+            else:
+                # pairs of action-memory holes - merge into a single hole
+                for mem,action_hole in enumerate(ah):
+                    memory_hole = mh[mem]
+
+                    name = "(AM({},{})".format(obs_label,mem)
+                    
+                    num_options = num_actions * num_updates
+                    options = list(range(num_options))
+
+                    option_labels = []
+                    for action_option in range(num_actions):
+                        for memory_option in range(num_updates):
+                            option_label = action_labels_str[action_option] + "+" + memory_labels_str[memory_option]
+                            option_labels.append(option_label)
+
                     hole = Hole(name, options, option_labels)
-                    holes[hole_index] = hole
+                    obs_holes.append(holes.num_holes)
+                    holes.append(hole)
+                    self.hole_num_actions.append(num_actions)
+                    self.hole_num_updates.append(num_updates)
 
-            # create domains for each hole
-            self.sketch.design_space = DesignSpace(holes)
-            self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
-            
-            # printo info about this unfolding
-            # print("# of holes: ", pm.num_holes)
-            # print("design space size: ", self.sketch.design_space.size)
-            # print("", flush=True)
+            self.obs_to_holes.append(obs_holes)
 
-            # associate actions with hole combinations (colors)
-            self.action_to_hole_options = []
-            num_choices = mdp.nr_choices
+        # associate actions with hole combinations (explicit)
+        self.action_to_hole_options = []
+        num_choices = mdp.nr_choices
 
-            
-            row_action_hole = list(pm.row_action_hole)
-            row_memory_hole = list(pm.row_memory_hole)
-            row_action_option = list(pm.row_action_option)
-            row_memory_option = list(pm.row_memory_option)
-            num_holes = pm.num_holes
-            for row in range(num_choices):
-                relevant_holes = {}
-                action_hole = row_action_hole[row]
-                if action_hole != num_holes:
-                    relevant_holes[action_hole] = row_action_option[row]
-                memory_hole = row_memory_hole[row]
-                if memory_hole != num_holes:
-                    relevant_holes[memory_hole] = row_memory_option[row]
-                if not relevant_holes:
-                    self.action_to_hole_options.append({})
-                else:
-                    self.action_to_hole_options.append(relevant_holes)
+        # reverse mapping
+        self.hole_option_to_actions = [[] for hole in holes]
+        for hole_index,hole in enumerate(holes):
+            self.hole_option_to_actions[hole_index] = [[] for option in hole.options]
 
-            self.compute_default_actions()
-            self.compute_state_to_holes()
+        state_prototype = list(pm.state_prototype)
+        state_memory = list(pm.state_memory)
+        tm = mdp.transition_matrix
+        for state in range(mdp.nr_states):
+            pomdp_state = state_prototype[state]
+            obs = pomdp.observations[pomdp_state]
+            obs_holes = self.obs_to_holes[obs]
+            if not obs_holes:
+                self.action_to_hole_options.append({})
+                continue
 
-        else:
+            mem = state_memory[state]
+            hole_index = obs_holes[mem]
 
-            # create holes
-            holes = Holes()
+            option = 0
+            for row in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                self.action_to_hole_options.append({hole_index:option})
+                self.hole_option_to_actions[hole_index][option].append(row)
+                option += 1
 
-            # for each observation, a list of holes
-            obs_to_holes = []
+        self.compute_default_actions()
+        self.compute_state_to_holes()
 
-            self.hole_num_actions = []
-            self.hole_num_updates = []
+        # sanity check
+        for state in range(mdp.nr_states):
+            assert len(self.state_to_holes[state]) <= 1
 
-            hole_options = list(pm.hole_options)
+        self.sketch.design_space = DesignSpace(holes)
+        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
 
-            for obs in range(self.observations):
-                ah = pm.action_holes[obs]
-                mh = pm.memory_holes[obs]
-
-                obs_label = self.observation_labels[obs]
-                num_actions = self.actions_at_observation[obs]
-                num_updates = pm.max_successor_memory_size[obs]
-                action_labels = self.action_labels_at_observation[obs]
-                action_labels_str = [str(labels) for labels in action_labels]
-                memory_labels_str = [str(o) for o in range(num_updates)]
-
-                assert len(ah) == 0 or len(mh) == 0 or len(ah) == len(mh)
-
-                obs_holes = []
-                if len(ah) == 0 and len(mh) == 0:
-                    # no holes
-                    pass
-
-                elif len(mh) == 0:
-                    # only action holes
-                    for mem,old_hole_index in enumerate(ah):
-
-                        name = "A({},{})".format(obs_label,mem)
-                        options = list(range(num_actions))
-                        hole = Hole(name, options, action_labels_str)
-
-                        obs_holes.append(holes.num_holes)
-                        holes.append(hole)
-                        self.hole_num_actions.append(num_actions)
-                        self.hole_num_updates.append(num_updates)
-                
-                elif len(ah) == 0:
-                    # only memory holes
-                    for mem,old_hole_index in enumerate(mh):
-                        name = "M({},{})".format(obs_label,mem)
-                        options = list(range(num_updates))
-                        memory_labels_str = [str(o) for o in options]
-                        hole = Hole(name, options, memory_labels_str)
-
-                        obs_holes.append(holes.num_holes)
-                        holes.append(hole)
-                        self.hole_num_actions.append(num_actions)
-                        self.hole_num_updates.append(num_updates)
-
-                else:
-                    # pairs of action-memory holes - merge into a single hole
-                    for mem,action_hole in enumerate(ah):
-                        memory_hole = mh[mem]
-
-                        name = "(AM({},{})".format(obs_label,mem)
-                        
-                        num_options = num_actions * num_updates
-                        options = list(range(num_options))
-
-                        option_labels = []
-                        for action_option in range(num_actions):
-                            for memory_option in range(num_updates):
-                                option_label = action_labels_str[action_option] + "+" + memory_labels_str[memory_option]
-                                option_labels.append(option_label)
-
-                        hole = Hole(name, options, option_labels)
-                        obs_holes.append(holes.num_holes)
-                        holes.append(hole)
-                        self.hole_num_actions.append(num_actions)
-                        self.hole_num_updates.append(num_updates)
-
-                obs_to_holes.append(obs_holes)
-
-            # associate actions with hole combinations (explicit)
-            self.action_to_hole_options = []
-            num_choices = mdp.nr_choices
-
-            # reverse mapping
-            self.hole_option_to_actions = [[] for hole in holes]
-            for hole_index,hole in enumerate(holes):
-                self.hole_option_to_actions[hole_index] = [[] for option in hole.options]
-
-            state_prototype = list(pm.state_prototype)
-            state_memory = list(pm.state_memory)
-            tm = mdp.transition_matrix
-            for state in range(mdp.nr_states):
-                pomdp_state = state_prototype[state]
-                obs = pomdp.observations[pomdp_state]
-                obs_holes = obs_to_holes[obs]
-                if not obs_holes:
-                    self.action_to_hole_options.append({})
-                    continue
-
-                mem = state_memory[state]
-                hole_index = obs_holes[mem]
-
-                # assert tm.get_row_group_end(state) - tm.get_row_group_start(state) == holes[hole_index].size
-
-                option = 0
-                for row in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                    self.action_to_hole_options.append({hole_index:option})
-                    self.hole_option_to_actions[hole_index][option].append(row)
-                    option += 1
-
-            self.compute_default_actions()
-            self.compute_state_to_holes()
-
-            # sanity check
-            for state in range(mdp.nr_states):
-                assert len(self.state_to_holes[state]) <= 1
-
-            self.sketch.design_space = DesignSpace(holes)
-            self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
-            
 
     def select_actions(self, family):
 
-        if not POMDPQuotientContainer.merge_holes_in_observation:
-            return super().select_actions(family)
-
         Profiler.start("quotient::select_actions")
+
+        assert family is not None
 
         if family.parent_info is None:
             hole_selected_actions = []
@@ -786,14 +796,14 @@ class POMDPQuotientContainer(QuotientContainer):
         for actions in hole_selected_actions:
             selected_actions += actions
 
+        # construct bitvector of selected actions
+        selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
+
         Profiler.resume()
-        return hole_selected_actions, selected_actions
+        return hole_selected_actions, None, selected_actions_bv
 
     
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values):
-
-        if not POMDPQuotientContainer.merge_holes_in_observation:
-            return super().estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values)
+    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
 
         # create inverse map
         # TODO optimize this for multiple properties
@@ -807,70 +817,123 @@ class POMDPQuotientContainer(QuotientContainer):
             difference_sum = 0
             states_affected = 0
             for choice_index,_ in enumerate(self.hole_option_to_actions[hole_index][0]):
+
+                choice_0_global = self.hole_option_to_actions[hole_index][options[0]][choice_index]
+                choice_0 = quotient_to_restricted_action_map[choice_0_global]
+                assert choice_0 is not None
+                source_state = mdp.choice_to_state[choice_0]
+                source_state_visits = expected_visits[source_state]
+                if source_state_visits == 0:
+                    continue
+
                 state_values = []
                 for option in options:
                     choice_global = self.hole_option_to_actions[hole_index][option][choice_index]
                     choice = quotient_to_restricted_action_map[choice_global]
                     choice_value = choice_values[choice]
                     state_values.append(choice_value)
+                
                 min_value = min(state_values)
                 max_value = max(state_values)
-                difference = max_value - min_value
-                if math.isnan(difference):
-                    assert max_value == min_value and min_value == math.inf
-                    difference = 0
+                difference = (max_value - min_value) * source_state_visits
+                assert not math.isnan(difference)
                 difference_sum += difference
                 states_affected += 1
-            inconsistent_differences[hole_index] = difference_sum / states_affected
+            
+            if states_affected == 0:
+                hole_score = 0
+            else:
+                hole_score = difference_sum / states_affected
+            inconsistent_differences[hole_index] = hole_score
 
         return inconsistent_differences
 
-    def suboptions_enumerate(self, mdp, splitter, used_options):
-
-        if not POMDPQuotientContainer.merge_holes_in_observation or True:
-            return super().suboptions_enumerate(mdp, splitter, used_options)
-
-        # check if splitter is a merged hole
-        num_actions = self.hole_num_actions[splitter]
-        num_updates = self.hole_num_updates[splitter]
-        if num_actions == 0 or num_updates == 0:
-            # non-merged hole
-            return super().suboptions_enumerated(mdp, splitter, used_options)
-        
-        # merged hole
-        assert len(used_options) > 1
-        
-        # use first two holes to decide whether inconsistency was in actions or updates
-        all_options = mdp.design_space[splitter].options
-        option_0 = used_options[0]
-        option_1 = used_options[1]
-        other_suboptions = []
-        if option_0 % num_actions == option_1 % num_actions:
-            # inconsistent actions: aggregate wrt actions and split
-            used_actions = set([option//num_actions for option in used_options])
-            core_suboptions = {action:[] for action in used_actions}
-            for option in all_options:
-                if option//num_actions in used_actions:
-                    core_suboptions[option//num_actions].append(option)
-                else:
-                    other_suboptions.append(option)
-        else:
-            # inconsistent updates: aggregate wrt udpates and split
-            used_updates = set([option%num_actions for option in used_options])
-            core_suboptions = {update:[] for update in used_updates}
-            for option in all_options:
-                if option%num_actions in used_updates:
-                    core_suboptions[option%num_actions].append(option)
-                else:
-                    other_suboptions.append(option)
-        
-        core_suboptions = list(core_suboptions.values())
-        
-        return core_suboptions, other_suboptions
-
     
+    def break_symmetry(self, family, memoryless_inconsistencies):
 
+        quo = self.sketch.quotient
 
+        # mark observations having multiple actions and multiple holes, where it makes sense to break symmetry
+        obs_with_multiple_holes = { obs for obs in range(quo.observations) if len(quo.obs_to_holes[obs]) > 1 and quo.actions_at_observation[obs] > 1}
+        if len(obs_with_multiple_holes) == 0:
+            return family
+
+        # go through each observation of interest and break symmetry
+        restricted_family = family.copy()
+        for obs in obs_with_multiple_holes:
+            obs_holes = self.sketch.quotient.obs_to_holes[obs]
+            # print("breaking symmetry in observation", obs, obs_holes)
+
+            if obs in memoryless_inconsistencies:
+                # use inconsistencies to break symmetries
+                actions = memoryless_inconsistencies[obs]
+            else:
+                # remove actions one by one
+                actions = list(range(quo.hole_num_actions[obs]))
             
+            for action_index,hole_index in enumerate(obs_holes):
+                action = actions[action_index % len(actions)]
+            
+            # for action_index,hole_index in enumerate(obs_holes):
+            #     if action_index >= len(actions):
+            #         break
+            #     action = actions[action_index]
+            
+                # remove action from options
+                options = [option for option in family[hole_index].options if option // quo.hole_num_updates[hole_index] != action]
+                # print("{} -> {}".format(family[hole_index].options,options))
+                restricted_family[hole_index].assume_options(options)
+        logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
+        
+        return restricted_family
+
+    def break_symmetry_2(self, family, selection):
+
+        # options that are left in the hole
+        selection = [ options.copy() for options in selection ]
+        print(selection)
+
+        # for each observation round-robin inconsistencies from the holes
+
+        options_removed = [[] for hole in selection ]
+        
+        for obs in range(self.sketch.quotient.observations):
+            obs_holes = self.sketch.quotient.obs_to_holes[obs]
+            if len(obs_holes) <= 1:
+                continue
+            
+            # count all different assignments in these holes
+            option_count = [0] * family[obs_holes[0]].size
+            for hole in obs_holes:
+                for option in selection[hole]:
+                    option_count[option] += 1
+
+            # go through each hole and try to remove duplicates
+            while True:
+                changed = False
+                for hole in obs_holes:
+                    can_remove = [option for option in selection[hole] if option_count[option] > 1]
+                    if not can_remove:
+                        continue
+                    option = can_remove[0]
+                    selection[hole].remove(option)
+                    options_removed[hole].append(option)
+                    option_count[option] -= 1
+                    changed = True
+                if not changed:
+                    break
+
+        print(options_removed)
+        print(selection)
+
+        # remove selected options from the family
+        restricted_family = family.copy()
+        for hole,removed in enumerate(options_removed):
+            new_options = [ option for option in family[hole].options if option not in removed ]
+            restricted_family[hole].assume_options(new_options)
+        
+        logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
+        return restricted_family
+
 
 

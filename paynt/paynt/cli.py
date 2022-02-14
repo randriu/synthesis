@@ -71,7 +71,7 @@ def paynt(
 
     # choose synthesis method
     if sketch.is_pomdp and pomdp:
-        synthesizer = SynthesizerPOMDP(sketch)
+        synthesizer = SynthesizerPOMDP(sketch, method)
     elif method == "onebyone":
         synthesizer = Synthesizer1By1(sketch)
     elif method == "cegis":

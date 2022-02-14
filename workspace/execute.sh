@@ -65,12 +65,12 @@ function hybrid() {
 
 function run() {
 
-    # timeout=3s
-
     # parallel=true
 
-    pomdp_mem_size=3
-    # pomdp_strategy=true
+    # timeout=5s
+
+    # pomdp_mem_size=1
+    pomdp_strategy=true
 
     ### running ###
 
@@ -100,6 +100,8 @@ function run() {
     # model="pomdp/voihp/network-prio-2-8-20"
     # model="pomdp/voihp/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
+
+    # model="pomdp/rocks-08"
 
     ar $model
     # hybrid $model

@@ -152,3 +152,7 @@ class Statistic:
         summary = f"{specification}\n{timing}\n{design_space}\n{explored}\n" \
                   f"{family_stats}\n{result}\n{assignment}"
         return summary
+
+    def print(self):
+        print(self.get_summary())
+        Profiler.print_all()

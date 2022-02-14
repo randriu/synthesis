@@ -81,7 +81,7 @@ class Sketch:
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
             self.quotient.pomdp_manager.set_memory_size(Sketch.POMDP_MEM_SIZE)
-            self.quotient.unfold_partial_memory()
+            self.quotient.unfold_memory()
         else:
             raise TypeError("sketch type is not supported")
 

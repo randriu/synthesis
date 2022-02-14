@@ -6,7 +6,7 @@ import operator
 class Property:
 
     # model checking precision
-    mc_precision = 1e-5
+    mc_precision = 1e-6
     
     ''' Wrapper over a stormpy property. '''
     def __init__(self, prop):
@@ -104,7 +104,8 @@ class OptimalityProperty(Property):
         self.epsilon = epsilon
 
     def __str__(self):
-        return f"{self.formula_str} [eps = {self.epsilon}]"
+        eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
+        return f"{self.formula_str} {eps}"
 
     def meets_op(self, a, b):
         return b is None or super().meets_op(a,b)
@@ -122,6 +123,14 @@ class OptimalityProperty(Property):
             self.threshold = optimum * (1 - self.epsilon)
         else:
             self.threshold = optimum * (1 + self.epsilon)
+
+    def suboptimal_value(self):
+        assert self.optimum is not None
+        if self.minimizing:
+            return self.optimum * (1 + self.mc_precision)
+        else:
+            return self.optimum * (1 - self.mc_precision)
+
 
 
 class Specification:
@@ -162,7 +171,6 @@ class Specification:
 
 
 
-
 class PropertyResult:
     def __init__(self, prop, result, value):
         self.property = prop
@@ -199,11 +207,20 @@ class SpecificationResult:
         return str(self.constraints_result) + " : " + str(self.optimality_result)
 
 class MdpPropertyResult:
-    def __init__(self, prop, primary, secondary, feasibility):
+    def __init__(self,
+        prop, primary, secondary, feasibility,
+        primary_selection, primary_choice_values, primary_expected_visits,
+        primary_scores
+    ):
         self.property = prop
         self.primary = primary
         self.secondary = secondary
         self.feasibility = feasibility
+
+        self.primary_selection = primary_selection
+        self.primary_choice_values = primary_choice_values
+        self.primary_expected_visits = primary_expected_visits
+        self.primary_scores = primary_scores
 
     def __str__(self):
         prim = str(self.primary)
@@ -229,8 +246,13 @@ class MdpConstraintsResult:
                 self.feasibility = None
 
 class MdpOptimalityResult(MdpPropertyResult):
-    def __init__(self, prop, primary, secondary, improving_assignment, can_improve):
-        super().__init__(prop, primary, secondary, None)
+    def __init__(self,
+        prop, primary, secondary,
+        improving_assignment, can_improve,
+        primary_selection, primary_choice_values, primary_expected_visits,
+        primary_scores
+    ):
+        super().__init__(prop, primary, secondary, None, primary_selection, primary_choice_values, primary_expected_visits, primary_scores)
         self.improving_assignment = improving_assignment
         self.can_improve = can_improve
 

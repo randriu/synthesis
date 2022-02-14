@@ -52,6 +52,7 @@ class Hole:
             return self.name + ": {" + ",".join(labels) + "}"
 
     def assume_options(self, options):
+        assert len(options) > 0
         self.options = options
 
     def copy(self):
@@ -196,6 +197,8 @@ class DesignSpace(Holes):
         self.hole_clauses = None
         self.encoding = None
 
+        self.has_assignments = None
+
         self.hole_selected_actions = None
         self.selected_actions = None
         self.refinement_depth = 0
@@ -278,6 +281,8 @@ class DesignSpace(Holes):
             else:
                 pass
 
+        self.has_assignments = True
+
     def pick_assignment(self):
         '''
         Pick any (feasible) hole assignment.
@@ -286,10 +291,16 @@ class DesignSpace(Holes):
         # get satisfiable assignment within this design space
         if not self.encoded:
             self.encode()
+
+        if not self.has_assignments:
+            return None
         
         if DesignSpace.use_python_z3:
+            Profiler.start("SMT solving")
             solver_result = DesignSpace.solver.check(self.encoding)
+            Profiler.resume()
             if solver_result == z3.unsat:
+                self.has_assignments = False
                 return None
             sat_model = DesignSpace.solver.model()
             hole_options = []
@@ -297,8 +308,11 @@ class DesignSpace(Holes):
                 option = sat_model[var].as_long()
                 hole_options.append([option])
         elif DesignSpace.use_cvc:
+            Profiler.start("SMT solving")
             solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
+            Profiler.resume()
             if solver_result.isUnsat():
+                self.has_assignments = False
                 return None
             hole_options = []
             for hole_index,var in enumerate(DesignSpace.solver_vars):
@@ -312,6 +326,19 @@ class DesignSpace(Holes):
 
         return assignment
 
+    def pick_assignment_priority(self, priority_subfamily):
+        if priority_subfamily is None:
+            return self.pick_assignment()
+
+        # explore priority subfamily first
+        assignment = priority_subfamily.pick_assignment()
+        if assignment is not None:
+            return assignment
+
+        # explore remaining members
+        return self.pick_assignment()
+
+
     def exclude_assignment(self, assignment, conflict):
         '''
         Exclude assignment from the design space using provided conflict.
@@ -319,6 +346,9 @@ class DesignSpace(Holes):
         :param conflict indices of relevant holes in the corresponding counterexample
         :return estimate of pruned assignments
         '''
+        if not self.encoded:
+            self.encode()
+
         pruning_estimate = 1
         counterexample_clauses = []
         for hole_index,var in enumerate(DesignSpace.solver_vars):
@@ -361,6 +391,7 @@ class DesignSpace(Holes):
         DesignSpace.solver.push()
         DesignSpace.solver_depth += 1
 
+    
     def generalize_hint(self, hint):
         hint_global = dict()
         hint = list(hint.get_values())
@@ -368,12 +399,14 @@ class DesignSpace(Holes):
             hint_global[self.mdp.quotient_state_map[state]] = hint[state]
         return hint_global
 
+    
     def generalize_hints(self, result):
         prop = result.property
         hint_prim = self.generalize_hint(result.primary.result)
         hint_seco = self.generalize_hint(result.secondary.result) if result.secondary is not None else None
         return prop, (hint_prim, hint_seco)
 
+    
     def collect_analysis_hints(self):
         Profiler.start("holes::collect_analysis_hints")
         res = self.analysis_result
@@ -387,6 +420,7 @@ class DesignSpace(Holes):
         Profiler.resume()
         return analysis_hints
 
+    
     def translate_analysis_hint(self, hint):
         if hint is None:
             return None
@@ -395,6 +429,7 @@ class DesignSpace(Holes):
             global_state = self.mdp.quotient_state_map[state]
             translated_hint[state] = hint[global_state]
 
+    
     def translate_analysis_hints(self):
         if not DesignSpace.store_hints or self.parent_info is None:
             return None

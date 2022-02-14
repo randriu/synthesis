@@ -43,7 +43,8 @@ function paynt() {
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiments_total}: ${benchmark}, method: ${method}"
     # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} || echo "TO" >> ${logfile} &
-    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} &
+    # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} &
+    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} "--pomdp" > ${logfile} &
 }
 
 ## experiment section ##########################################################
@@ -74,7 +75,7 @@ for k in {1..1}; do
     experiment_current=0
     echo "-- k=$k"
     pomdp_mem_size=$k
-    experiment_name="ar-k=${k}-warm-pruning"
+    experiment_name="${method}_incomplete_k=${k}"
     for benchmark in `ls $benchmarks_dir`; do
         paynt "${experiment_name}" "${benchmark}" ${method} ${timeout}
     done
