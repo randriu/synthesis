@@ -106,7 +106,7 @@ class QuotientContainer:
         '''
         Profiler.start("quotient::restrict_mdp")
         
-        keep_unreachable_states = True # TODO investigate this
+        keep_unreachable_states = False # TODO investigate this
         all_states = stormpy.BitVector(mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
             mdp, all_states, selected_actions_bv, keep_unreachable_states, self.subsystem_builder_options
@@ -164,9 +164,15 @@ class QuotientContainer:
         assert scheduler.memoryless and scheduler.deterministic
         
         Profiler.start("quotient::scheduler_selection")
-        choice_selection = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+
+        # construct DTMC that corresponds to this scheduler and filter reachable states/choices
+        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        dtmc,_,choice_map = self.restrict_mdp(mdp.model, choices)
+        choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
+        
+        # map relevant choices to hole options
         selection = [set() for hole_index in mdp.design_space.hole_indices]
-        for choice in choice_selection:
+        for choice in choices:
             global_choice = mdp.quotient_choice_map[choice]
             choice_options = self.action_to_hole_options[global_choice]
             for hole_index,option in choice_options.items():
@@ -356,7 +362,7 @@ class QuotientContainer:
 
         if mdp.is_dtmc:
             selection = [[mdp.design_space[hole_index].options[0]] for hole_index in mdp.design_space.hole_indices]
-            return selection, None, None, True
+            return selection, None, None, None, True
         
         selection,choice_values,expected_visits,scores = self.scheduler_selection_quantitative(mdp, prop, result)
         consistent = True
@@ -816,13 +822,17 @@ class POMDPQuotientContainer(QuotientContainer):
         for hole_index,options in inconsistent_assignments.items():
             difference_sum = 0
             states_affected = 0
-            for choice_index,_ in enumerate(self.hole_option_to_actions[hole_index][0]):
+            edges_0 = self.hole_option_to_actions[hole_index][options[0]]
+            for choice_index,_ in enumerate(edges_0):
 
-                choice_0_global = self.hole_option_to_actions[hole_index][options[0]][choice_index]
+                choice_0_global = edges_0[choice_index]
                 choice_0 = quotient_to_restricted_action_map[choice_0_global]
-                assert choice_0 is not None
+                if choice_0 is None:
+                    continue
+                
                 source_state = mdp.choice_to_state[choice_0]
                 source_state_visits = expected_visits[source_state]
+                # assert source_state_visits != 0
                 if source_state_visits == 0:
                     continue
 
@@ -849,27 +859,25 @@ class POMDPQuotientContainer(QuotientContainer):
         return inconsistent_differences
 
     
-    def break_symmetry(self, family, memoryless_inconsistencies):
-
-        quo = self.sketch.quotient
+    def break_symmetry(self, family, action_inconsistencies):
 
         # mark observations having multiple actions and multiple holes, where it makes sense to break symmetry
-        obs_with_multiple_holes = { obs for obs in range(quo.observations) if len(quo.obs_to_holes[obs]) > 1 and quo.actions_at_observation[obs] > 1}
+        obs_with_multiple_holes = { obs for obs,holes in enumerate(self.obs_holes) if len(holes) > 1 }
         if len(obs_with_multiple_holes) == 0:
             return family
 
         # go through each observation of interest and break symmetry
         restricted_family = family.copy()
         for obs in obs_with_multiple_holes:
-            obs_holes = self.sketch.quotient.obs_to_holes[obs]
+            obs_holes = self.obs_to_holes[obs]
             # print("breaking symmetry in observation", obs, obs_holes)
 
-            if obs in memoryless_inconsistencies:
+            if obs in action_inconsistencies:
                 # use inconsistencies to break symmetries
-                actions = memoryless_inconsistencies[obs]
+                actions = action_inconsistencies[obs]
             else:
                 # remove actions one by one
-                actions = list(range(quo.hole_num_actions[obs]))
+                actions = list(range(self.hole_num_actions[obs]))
             
             for action_index,hole_index in enumerate(obs_holes):
                 action = actions[action_index % len(actions)]
@@ -934,6 +942,78 @@ class POMDPQuotientContainer(QuotientContainer):
         
         logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
         return restricted_family
+
+    def sift_actions_and_updates(self, hole, options):
+        actions = set()
+        updates = set()
+        num_updates = self.hole_num_updates[hole]
+        for option in options:
+            actions.add(option // num_updates)
+            updates.add(option %  num_updates)
+        return actions,updates
+
+    def disable_action(self, family, hole, action):
+        num_actions = self.hole_num_actions(hole)
+        num_updates = self.hole_num_updates(hole)
+        to_remove = [ (action * num_updates + update) for update in range(num_updates)]
+        new_options = [ option for option in family[hole].options if option not in to_remove ]
+        family.assume_hole_options(hole, new_options)
+
+    
+    def break_symmetry_3(self, family, action_inconsistencies, memory_inconsistencies):
+        
+        print("breaking symmetry using {} and {}".format(action_inconsistencies, memory_inconsistencies))
+
+        # go through each observation of interest and break symmetry
+        restricted_family = family.copy()
+        for obs in range(self.observations):
+            
+            num_actions = self.actions_at_observation[obs]
+            num_updates = self.pomdp_manager.max_successor_memory_size[obs]
+
+            obs_holes = self.obs_to_holes[obs]
+            num_holes = len(obs_holes)
+
+
+            all_actions = [action for action in range(num_actions)]
+            selected_actions = [all_actions.copy() for hole in obs_holes]
+            
+            all_updates = [update for update in range(num_updates)]
+            selected_updates = [all_updates.copy() for hole in obs_holes]
+
+            inconsistencies = list(action_inconsistencies[obs])
+            num_inc = len(inconsistencies)
+            if num_inc > 1:
+                # action inconsistency: allocate inconsistent actions between holes
+                ignored_actions = [action for action in all_actions if action not in inconsistencies]
+                selected_actions = [ignored_actions.copy() for hole in obs_holes]
+                for index in range(max(num_holes,num_inc)):
+                    selected_actions[index % num_holes].append(inconsistencies[index % num_inc])
+            else:
+                inconsistencies = list(memory_inconsistencies[obs])
+                num_inc = len(inconsistencies)
+                if num_inc > 1:
+                    # memory inconsistency: distribute inconsistent updates between holes
+                    ignored_updates = [update for update in all_updates if update not in inconsistencies]
+                    selected_updates = [ignored_updates.copy() for hole in obs_holes]
+                    for index in range(max(num_holes,num_inc)):
+                        selected_updates[index % num_holes].append(inconsistencies[index % num_inc])
+
+            # create options for each hole
+            for index in range(num_holes):
+                hole = obs_holes[index]
+                actions = selected_actions[index]
+                updates = selected_updates[index]
+                options = []
+                for action in actions:
+                    for update in updates:
+                        options.append(action * num_updates + update)
+                restricted_family[hole].assume_options(options)
+
+        logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
+
+        return restricted_family
+
 
 
 

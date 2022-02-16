@@ -67,7 +67,7 @@ function run() {
 
     # parallel=true
 
-    # timeout=5s
+    # timeout=2s
 
     # pomdp_mem_size=1
     pomdp_strategy=true
@@ -78,7 +78,7 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    model="pomdp/maze/concise"
+    # model="pomdp/maze/concise"
 
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
@@ -87,7 +87,7 @@ function run() {
 
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp/drone-4-1"
-    # model="pomdp/voihp/grid-avoid-4-0.1"
+    model="pomdp/voihp/grid-avoid-4-0.1"
     # model="pomdp/voihp/grid-4-0.1"
     # model="pomdp/voihp/grid-4-0.3"
     # model="pomdp/voihp/maze2-0.1"

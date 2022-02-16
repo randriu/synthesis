@@ -75,7 +75,7 @@ for k in {1..1}; do
     experiment_current=0
     echo "-- k=$k"
     pomdp_mem_size=$k
-    experiment_name="${method}_incomplete_k=${k}"
+    experiment_name="${method}_${timeout}_${threads}_k=${k}"
     for benchmark in `ls $benchmarks_dir`; do
         paynt "${experiment_name}" "${benchmark}" ${method} ${timeout}
     done
