@@ -197,7 +197,7 @@ class DesignSpace(Holes):
         self.hole_clauses = None
         self.encoding = None
 
-        self.has_assignments = None
+        self.has_assignments = True
 
         self.hole_selected_actions = None
         self.selected_actions = None

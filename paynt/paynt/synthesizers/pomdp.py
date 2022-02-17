@@ -57,7 +57,7 @@ class SynthesizerPOMDP():
         choice_values = spec.optimality_result.primary_choice_values
         expected_visits = spec.optimality_result.primary_expected_visits
         scores = spec.optimality_result.primary_scores
-        
+
         return mdp, spec, selection, choice_values, expected_visits, scores
 
 
@@ -76,7 +76,8 @@ class SynthesizerPOMDP():
         # start with k=1
         self.sketch.quotient.pomdp_manager.set_memory_size(1)
 
-        for iteration in range(10):
+        while True:
+        # for iteration in range(100):
             
             print("\n------------------------------------------------------------\n")
 
@@ -84,13 +85,16 @@ class SynthesizerPOMDP():
             self.sketch.quotient.unfold_memory()
             
             # use inconsistencies to break symmetry
-            family = self.sketch.quotient.break_symmetry_3(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
+            # family = self.sketch.quotient.break_symmetry_3(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
+            family = self.sketch.design_space
 
             # solve MDP that corresponds to this restricted family
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
             
-            # ? assuming that primary direction was not enough ?
-            assert spec.optimality_result.feasibility is None
+            # check whether that primary direction was not enough ?
+            if not spec.optimality_result.can_improve:
+                logger.info("Optimum matches the upper bound of a symmetry-free MDP.")
+                break
             
             # synthesize optimal assignment
             synthesized_assignment = self.synthesize(family)
@@ -206,33 +210,41 @@ class SynthesizerPOMDP():
             print("hole scores: ", hole_scores)
 
             max_score = max(hole_scores.values())
+
+            hole_scores = {h:v for h,v in hole_scores.items() if v / max_score > 0.01 }
+
             with_max_score = [hole for hole in hole_scores if hole_scores[hole] == max_score]
-            selected_hole = with_max_score[0]
-            selected_options = selection[selected_hole]
-            
-            print("selected hole: ", selected_hole)
-            print("hole has options: ", selected_options)
-
-            # identify observation having this hole
-            for obs in range(self.sketch.quotient.observations):
-                if selected_hole in self.sketch.quotient.obs_to_holes[obs]:
-                    selected_observation = obs
-                    break
-            print("selected observation: ", selected_observation)
-
-            # identify whether this hole is inconsistent in actions or updates
-            assert len(selected_options) > 1
-            actions,updates = self.sketch.quotient.sift_actions_and_updates(selected_hole, selected_options)
-            print("actions & updates: ", actions, updates)
-            if len(actions) > 1:
-                # action inconsistency
-                action_inconsistencies[obs] |= actions
-            else:
-                memory_inconsistencies[obs] |= updates
+            # selected_hole = with_max_score[0]
 
 
-            # inject memory and continue
-            self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
+            for selected_hole in [with_max_score[0]]:
+            # for selected_hole in hole_scores:
+            # for selected_hole in family.hole_indices:
+                selected_options = selection[selected_hole]
+                
+                print("selected hole: ", selected_hole)
+                # print("hole has options: ", selected_options)
+
+                # identify observation having this hole
+                for obs in range(self.sketch.quotient.observations):
+                    if selected_hole in self.sketch.quotient.obs_to_holes[obs]:
+                        selected_observation = obs
+                        break
+                print("selected observation: ", selected_observation)
+
+                if len(selected_options) > 1:
+                    # identify whether this hole is inconsistent in actions or updates
+                    actions,updates = self.sketch.quotient.sift_actions_and_updates(selected_hole, selected_options)
+                    print("actions & updates: ", actions, updates)
+                    if len(actions) > 1:
+                        # action inconsistency
+                        action_inconsistencies[obs] |= actions
+                    else:
+                        memory_inconsistencies[obs] |= updates
+                
+                # inject memory and continue
+                self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
+
         
 
 

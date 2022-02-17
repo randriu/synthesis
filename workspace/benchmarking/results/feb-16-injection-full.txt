@@ -1,0 +1,435 @@
+--------------------------------------------------------------------------------
+
+
+# k=4
+
+-- crypt-4
+
+k=1
+Processed 0.0% members, elapsed 55.0 s, ETA: 8.411379286170776e+26 s [29095 iters], *=0.33333, SAT=-
+
+
+-- drone-4-1
+
+k=1
+Processed 0.0017% members, elapsed 55.0 s, ETA: 3191177.2 s [5430 iters], *=0.78697, SAT=-
+
+
+-- grid-4-0.1
+
+feasible: no
+hole scores:  {0: 0.14814814828691175}
+selected hole:  0
+hole has options:  [0, 3]
+selected observation:  0
+actions & updates:  {0, 3} {0}
+
+optimal: 4.701739
+hole scores:  {0: 0.038770827215098294, 1: 0.024308079465062436}
+selected hole:  0
+hole has options:  [0, 1]
+selected observation:  0
+actions & updates:  {0} {0, 1}
+
+optimal: 4.701739
+hole scores:  {1: 0.05488827678970829, 2: 0.09134328129891049}
+selected hole:  2
+hole has options:  [0, 1, 2]
+selected observation:  0
+actions & updates:  {0} {0, 1, 2}
+
+optimal: 4.701739
+hole scores:  {2: 0.12714936323728446, 3: 0.06146756840001138}
+selected hole:  2
+hole has options:  [0, 2, 3]
+selected observation:  0
+actions & updates:  {0} {0, 2, 3}
+
+optimal: 4.701739
+hole scores:  {2: 5.1803828716435454e-15, 3: 0.059393939549573976, 4: 0.07218181818169268}
+selected hole:  4
+hole has options:  [0, 2, 3, 4]
+selected observation:  0
+actions & updates:  {0} {0, 2, 3, 4}
+
+2022-02-16 11:46:17,673 MainThread - paynt.synthesizers.statistic - INFO - > Processed 5.32% members, elapsed 50.0 s, ETA: 939.9 s [76429 iters], *=4.70174, SAT=-
+
+-- grid-4-0.3
+
+feasible: no
+hole scores:  {0: 0.19047619263794618}
+selected hole:  0
+hole has options:  [0, 3]
+selected observation:  0
+actions & updates:  {0, 3} {0}
+
+optimal: 6.314724
+hole scores:  {0: 0.059491059504976455, 1: 0.04339527624781444}
+selected hole:  0
+hole has options:  [0, 1]
+selected observation:  0
+actions & updates:  {0} {0, 1}
+
+optimal: 6.314724
+hole scores:  {1: 0.07551683599100209, 2: 0.08349955842955221}
+selected hole:  2
+hole has options:  [0, 1, 2]
+selected observation:  0
+actions & updates:  {0} {0, 1, 2}
+
+optimal: 6.314724
+hole scores:  {2: 0.1405675849241891, 3: 0.06078996929581404}
+selected hole:  2
+hole has options:  [0, 2, 3]
+selected observation:  0
+actions & updates:  {0} {0, 2, 3}
+
+optimal: 6.314724
+hole scores:  {2: 1.1015852780225204e-12, 3: 0.056264201829779405, 4: 0.06681527844069904}
+selected hole:  4
+hole has options:  [0, 2, 3, 4]
+selected observation:  0
+actions & updates:  {0} {0, 2, 3, 4}
+
+Processed 8.2898% members, elapsed 55.0 s, ETA: 663.5 s [80837 iters], *=6.31472, SAT=-
+
+-- grid-avoid-4-0.1
+
+optimal: 0.214286
+hole scores:  {0: 0.01020408163265306}
+selected hole:  0
+hole has options:  [0, 2, 3]
+selected observation:  0
+actions & updates:  {0, 2, 3} {0}
+
+optimal: 0.214286
+hole scores:  {0: 0.015306122448979591}
+selected hole:  0
+hole has options:  [0, 6]
+selected observation:  0
+actions & updates:  {0, 3} {0}
+
+optimal: 0.851776
+hole scores:  {0: 0.005098207577546421, 2: 0.005489197933117651}
+selected hole:  2
+hole has options:  [9, 3]
+selected observation:  0
+actions & updates:  {1, 3} {0}
+
+optimal: 0.851776
+hole scores:  {0: 0.006673247059905856, 1: 0.0035714285714285713, 3: 0.0029547371164844595}
+selected hole:  0
+hole has options:  [0, 1, 3]
+selected observation:  0
+actions & updates:  {0} {0, 1, 3}
+
+optimal: 0.916119
+hole scores:  {0: 0.0008894868542160622, 3: 4.637879781363034e-05, 4: 0.0004638215532507508}
+selected hole:  0
+hole has options:  [0, 1, 3]
+selected observation:  0
+actions & updates:  {0} {0, 1, 3}
+
+optimal: 0.916119
+hole scores:  {0: 0.006673247059905856, 1: 0.0035714285714285713, 3: 0.0029547371164844595}
+selected hole:  0
+hole has options:  [0, 1, 3]
+selected observation:  0
+actions & updates:  {0} {0, 1, 3}
+
+Processed 0.0015% members, elapsed 50.0 s, ETA: 3203682.2 s [40042 iters], *=0.91612, SAT=-
+
+-- grid-avoid-4-0
+
+
+optimal: 0.214286
+hole scores:  {0: 0.01020408163265306}
+selected hole:  0
+hole has options:  [0, 2, 3]
+selected observation:  0
+actions & updates:  {0, 2, 3} {0}
+
+optimal: 0.214286
+hole scores:  {0: 0.015306122448979591}
+selected hole:  0
+hole has options:  [0, 6]
+selected observation:  0
+actions & updates:  {0, 3} {0}
+
+optimal: 0.857143
+hole scores:  {0: 0.00510204081632653, 2: 0.007936507936507936}
+selected hole:  2
+hole has options:  [9]
+selected observation:  0
+
+optimal: 0.928571
+hole scores:  {3: 0.00510204081632653}
+selected hole:  3
+hole has options:  [4]
+selected observation:  0
+
+optimal: 0.928571
+hole scores:  {0: 0.01020408163265306}
+selected hole:  0
+hole has options:  [0, 2, 7]
+selected observation:  0
+actions & updates:  {0, 1} {0, 2}
+
+Optimum matches the upper bound of a symmetry-free MDP.
+
+-- maze2-0.1
+
+
+feasible: no
+hole scores:  {0: 0.9971509791526761, 4: 0.8547008546941341}
+selected hole:  0
+hole has options:  [2, 3]
+selected observation:  0
+actions & updates:  {2, 3} {0}
+
+feasible: no
+hole scores:  {0: 0.324643867479984, 5: 0.8547008546941341}
+selected hole:  5
+hole has options:  [0, 1]
+selected observation:  4
+actions & updates:  {0, 1} {0}
+
+optimal: 6.324786
+hole scores:  {0: 0.05982905982905965, 5: 0.047008547007280466}
+selected hole:  0
+hole has options:  [1, 4]
+selected observation:  0
+actions & updates:  {0, 2} {0, 1}
+
+optimal: 6.324786
+hole scores:  {1: 0.324643867479984, 7: 0.4696581196579497}
+selected hole:  7
+hole has options:  [3, 4]
+selected observation:  4
+actions & updates:  {1, 2} {0, 1}
+
+optimal: 6.324786
+hole scores:  {1: 0.324643867479984, 7: 0.4696581196579497}
+selected hole:  7
+hole has options:  [9, 4]
+selected observation:  4
+actions & updates:  {1, 3} {0, 1}
+
+optimal: 6.324786
+hole scores:  {1: 0.3246438676107938, 7: 0.05042735042668509}
+selected hole:  1
+hole has options:  [5, 7]
+selected observation:  0
+actions & updates:  {1, 2} {1, 2}
+
+optimal: 6.324786
+hole scores:  {2: 0.15925925690262954, 9: 0.15384615384487454}
+selected hole:  2
+hole has options:  [10, 11]
+selected observation:  0
+actions & updates:  {2} {2, 3}
+
+optimal: 6.324786
+hole scores:  {2: 0.15925925690262954, 10: 0.15384615384487454}
+selected hole:  2
+hole has options:  [12, 13]
+selected observation:  0
+actions & updates:  {2} {2, 3}
+
+optimal: 6.324786
+hole scores:  {2: 0.15925925690262954, 11: 0.15384615384487454}
+selected hole:  2
+hole has options:  [14, 15]
+selected observation:  0
+actions & updates:  {2} {2, 3}
+
+optimal: 6.324786
+hole scores:  {6: 0.08461538357225055, 10: 0.05042735042708575}
+selected hole:  6
+hole has options:  [16, 17]
+selected observation:  0
+actions & updates:  {2} {2, 3}
+
+-- maze2-0
+
+feasible: no
+hole scores:  {0: 0.8974358974358975, 4: 0.7692307692307693}
+selected hole:  0
+hole has options:  [2, 3]
+selected observation:  0
+actions & updates:  {2, 3} {0}
+
+feasible: no
+hole scores:  {0: 0.2948717948717949, 1: 0.46153846153846156, 5: 0.7692307692307693}
+selected hole:  5
+hole has options:  [0, 1]
+selected observation:  4
+actions & updates:  {0, 1} {0}
+
+optimal: 5.692308
+hole scores:  {0: 0.05128205128205129, 5: 0.038461538461538464}
+selected hole:  0
+hole has options:  [1, 4]
+selected observation:  0
+actions & updates:  {0, 2} {0, 1}
+
+optimal: 5.692308
+hole scores:  {1: 0.2948717948717949, 2: 0.46153846153846156, 7: 0.42307692307692313}
+selected hole:  2
+hole has options:  [9, 11]
+selected observation:  0
+actions & updates:  {3} {0, 2}
+
+optimal: 5.692308
+hole scores:  {1: 0.2948717948717949, 2: 0.46153846153846156, 8: 0.42307692307692313}
+selected hole:  2
+hole has options:  [12, 14]
+selected observation:  0
+actions & updates:  {3} {0, 2}
+
+optimal: 5.692308
+hole scores:  {1: 0.2948717948717949, 2: 0.46153846153846156, 9: 0.42307692307692313}
+selected hole:  2
+hole has options:  [17, 15]
+selected observation:  0
+actions & updates:  {3} {0, 2}
+
+optimal: 5.692308
+hole scores:  {1: 0.2948717948717949, 2: 0.46153846153846156, 10: 0.42307692307692313}
+selected hole:  2
+hole has options:  [18, 20]
+selected observation:  0
+actions & updates:  {3} {0, 2}
+
+optimal: 5.692308
+hole scores:  {1: 0.2948717948717949, 2: 0.46153846153846156, 11: 0.42307692307692313}
+selected hole:  2
+hole has options:  [21, 23]
+selected observation:  0
+actions & updates:  {3} {0, 2}
+
+Processed 0.0446% members, elapsed 50.0 s, ETA: 111872.8 s [71143 iters], *=5.69231, SAT=-
+
+-- network-2-8-20
+
+k=1
+Processed 0.0% members, elapsed 55.0 s, ETA: 2.416539334807281e+87 s [4652 iters], *=4.25186, SAT=-
+
+-- network-prio-2-8-20
+
+k=1
+Processed 0.0% members, elapsed 15.1 s, ETA: 15084815.7 s [126 iters], *=-, SAT=-
+
+-- nrp-8
+
+
+optimal: 0.125
+hole scores:  {0: 0.020833333333333332, 1: 0.015625, 2: 0.025, 3: 0.03125, 5: 0.041666666666666664, 6: 0.017857142857142856, 7: 0.0625}
+selected hole:  7
+hole has options:  [0, 1]
+selected observation:  24
+actions & updates:  {0, 1} {0}
+
+optimal: 0.125
+hole scores:  {0: 0.125, 1: 0.125, 2: 0.125, 3: 0.125, 4: 0.125, 6: 0.125, 7: 0.125}
+selected hole:  0
+hole has options:  [0, 1]
+selected observation:  1
+actions & updates:  {0, 1} {0}
+
+optimal: 0.125
+hole scores:  {2: 0.125, 3: 0.125, 4: 0.125, 5: 0.125, 6: 0.125, 8: 0.125, 9: 0.125}
+selected hole:  2
+hole has options:  [0, 1]
+selected observation:  3
+actions & updates:  {0, 1} {0}
+
+optimal: 0.125
+hole scores:  {4: 0.125, 5: 0.125, 6: 0.125, 7: 0.125, 9: 0.125, 10: 0.125, 11: 0.125}
+selected hole:  4
+hole has options:  [0, 1]
+selected observation:  7
+actions & updates:  {0, 1} {0}
+
+optimal: 0.125
+hole scores:  {6: 0.125, 7: 0.125, 8: 0.125, 9: 0.125, 11: 0.125, 12: 0.125, 13: 0.125}
+selected hole:  6
+hole has options:  [0, 1]
+selected observation:  8
+actions & updates:  {0} {0, 1}
+
+optimal: 0.125
+hole scores:  {8: 0.125, 9: 0.125, 10: 0.125, 12: 0.125, 13: 0.125, 14: 0.125}
+selected hole:  8
+hole has options:  [0, 1]
+selected observation:  9
+actions & updates:  {0} {0, 1}
+
+optimal: 0.125
+hole scores:  {1: 0.125, 10: 0.125, 11: 0.125, 13: 0.125, 14: 0.125, 15: 0.125}
+selected hole:  1
+hole has options:  [2, 3]
+selected observation:  1
+actions & updates:  {1} {0, 1}
+
+optimal: 0.125
+hole scores:  {1: 0.125, 11: 0.125, 12: 0.125, 14: 0.125, 15: 0.125, 16: 0.125}
+selected hole:  1
+hole has options:  [2, 3]
+selected observation:  1
+actions & updates:  {1} {0, 1}
+
+optimal: 0.125
+hole scores:  {1: 0.125, 12: 0.125, 13: 0.125, 15: 0.125, 16: 0.125, 17: 0.125}
+selected hole:  1
+hole has options:  [2, 3]
+selected observation:  1
+actions & updates:  {1} {0, 1}
+
+optimal: 0.125
+hole scores:  {1: 0.125, 13: 0.125, 14: 0.125, 16: 0.125, 17: 0.125, 18: 0.125}
+selected hole:  1
+hole has options:  [2, 3]
+selected observation:  1
+actions & updates:  {1} {0, 1}
+
+-- refuel-06
+
+optimal: 0.350026
+hole scores:  {3: 0.023417689295872342, 7: 0.020381376336676346, 8: 0.02142834002412143, 9: 0.015143257235770351, 10: 0.01598432292964389, 12: 0.06624682060694036}
+selected hole:  12
+hole has options:  [0]
+selected observation:  18
+
+optimal: 0.350026
+hole scores:  {3: 1.185012114396165, 8: 0.3392493171849438, 10: 0.09554999999999993}
+selected hole:  3
+hole has options:  [1, 2]
+selected observation:  6
+actions & updates:  {1, 2} {0}
+
+optimal: 0.43839
+hole scores:  {4: 0.043016384018575445, 8: 0.024282133441731996, 9: 0.03936211176568524, 11: 0.060365366558267755}
+selected hole:  11
+hole has options:  [2, 3]
+selected observation:  16
+actions & updates:  {2, 3} {0}
+
+optimal: 0.62809
+hole scores:  {4: 0.04301638401857561, 8: 0.036015000000000026, 9: 0.03936211176568539, 12: 0.025620000000000018}
+selected hole:  4
+hole has options:  [0]
+selected observation:  6
+
+optimal: 0.62809
+hole scores:  {3: 1.1730841010783093, 10: 0.3870452618176028}
+selected hole:  3
+hole has options:  [3, 6]
+selected observation:  6
+actions & updates:  {1, 3} {0, 1}
+
+-- rocks-12
+
+k=1
+Processed 0.0% members, elapsed 55.0 s, ETA: 1.0355778721403639e+29 s [2909 iters], *=42.0, SAT=-
+

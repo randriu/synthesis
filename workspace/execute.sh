@@ -42,7 +42,7 @@ function paynt() {
     fi
     local pomdp_memory_set="--pomdp-memory-size=$pomdp_mem_size"
 
-    local paynt_call="python3 ${paynt_exe} $project $method ${pomdp_flag} ${pomdp_memory_set}"
+    local paynt_call="python3 ${paynt_exe} $project ${method} ${pomdp_flag} ${pomdp_memory_set}"
     echo \$ ${paynt_call}
 
     eval timeout ${timeout} ${paynt_call} ${parallelity}
@@ -67,9 +67,9 @@ function run() {
 
     # parallel=true
 
-    # timeout=2s
+    # timeout=30s
 
-    # pomdp_mem_size=1
+    pomdp_mem_size=2
     pomdp_strategy=true
 
     ### running ###
@@ -87,11 +87,11 @@ function run() {
 
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp/drone-4-1"
-    model="pomdp/voihp/grid-avoid-4-0.1"
+    # model="pomdp/voihp-easy/grid-avoid-4-0.1"
     # model="pomdp/voihp/grid-4-0.1"
     # model="pomdp/voihp/grid-4-0.3"
     # model="pomdp/voihp/maze2-0.1"
-    # model="pomdp/voihp/refuel-06"
+    model="pomdp/voihp/refuel-06"
     # model="pomdp/voihp/rocks-12"
 
     # model="pomdp/voihp/crypt-4"

@@ -25,6 +25,8 @@ class QuotientContainer:
     inconsistency_threshold = 0
     # whether choice values will be weighted by expected number of visits
     compute_expected_visits = True
+    # whether subfamilies are discarded in the splitting process
+    discard_subfamilies = False
 
     def __init__(self, sketch):
 
@@ -421,18 +423,19 @@ class QuotientContainer:
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        # reduce simple holes
-        # ds_before = reduced_design_space.size
-        # for hole_index in reduced_design_space.hole_indices:
-        #     if mdp.hole_simple[hole_index]:
-        #         assert len(hole_assignments[hole_index]) == 1
-        #         reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
-        # ds_after = reduced_design_space.size
-        # self.discarded += ds_before - ds_after
+        if QuotientContainer.discard_subfamilies:
+            # reduce simple holes
+            ds_before = reduced_design_space.size
+            for hole_index in reduced_design_space.hole_indices:
+                if mdp.hole_simple[hole_index]:
+                    assert len(hole_assignments[hole_index]) == 1
+                    reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+            ds_after = reduced_design_space.size
+            self.discarded += ds_before - ds_after
 
-        # discard other suboptions
-        # suboptions = core_suboptions
-        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
+            # discard other suboptions
+            suboptions = core_suboptions
+            # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
 
@@ -870,7 +873,6 @@ class POMDPQuotientContainer(QuotientContainer):
         restricted_family = family.copy()
         for obs in obs_with_multiple_holes:
             obs_holes = self.obs_to_holes[obs]
-            # print("breaking symmetry in observation", obs, obs_holes)
 
             if obs in action_inconsistencies:
                 # use inconsistencies to break symmetries
@@ -882,16 +884,11 @@ class POMDPQuotientContainer(QuotientContainer):
             for action_index,hole_index in enumerate(obs_holes):
                 action = actions[action_index % len(actions)]
             
-            # for action_index,hole_index in enumerate(obs_holes):
-            #     if action_index >= len(actions):
-            #         break
-            #     action = actions[action_index]
-            
                 # remove action from options
                 options = [option for option in family[hole_index].options if option // quo.hole_num_updates[hole_index] != action]
                 # print("{} -> {}".format(family[hole_index].options,options))
                 restricted_family[hole_index].assume_options(options)
-        logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
+        # logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
         
         return restricted_family
 
@@ -962,8 +959,6 @@ class POMDPQuotientContainer(QuotientContainer):
     
     def break_symmetry_3(self, family, action_inconsistencies, memory_inconsistencies):
         
-        print("breaking symmetry using {} and {}".format(action_inconsistencies, memory_inconsistencies))
-
         # go through each observation of interest and break symmetry
         restricted_family = family.copy()
         for obs in range(self.observations):

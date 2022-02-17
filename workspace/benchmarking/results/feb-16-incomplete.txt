@@ -1,0 +1,66 @@
+--------------------------------------------------------------------------------
+
+
+-- crypt-4
+
+# 1 min
+Processed 0.0% members, elapsed 55.0 s, [25773 iters], *=0.33333
+
+# 10 min
+Processed 0.0% members, elapsed 595.0 s, [235835 iters], *=0.33333
+
+
+-- drone-4-1
+
+# 1 min
+Processed 100.0% members, elapsed 55.0 s, [2890 iters], *=0.78156
+
+# 10 min
+Processed 100.0% members, elapsed 595.0 s, [39571 iters], *=0.86703
+
+
+-- network-2-8-20
+
+# 1 min
+Processed 0.0% members, elapsed 55.0 s, [4601 iters], *=4.25186
+
+# 10 min
+Processed 0.0% members, elapsed 595.0 s, [43912 iters], *=4.24404
+
+
+
+-- network-prio-2-8-20
+
+# 1 min
+> covered 49.0% of 31.0 sec
+Processed 0.0% members, elapsed 15.0 s, [121 iters], *=-
+
+# 10 min
+
+> quotient::restrict_mdp : 19.5%
+> models::MarkovChain : 22.4%
+>   MC prim : 14.1%
+> quotient::scheduler_selection_quantitative : 11.4%
+> quotient::scheduler_selection : 8.3%
+> quotient::choice_values : 5.7%
+> quotient::split : 8.7%
+> covered 97.0% of 571.5 sec
+
+Processed 0.0% members, elapsed 555.1 s, [6260 iters], *=539.51457
+
+
+-- refuel-06
+
+# 1 min
+~10 injections, *=.62809
+
+# 10 min
+plenty of injections, *=.62809
+
+-- rocks-12
+
+# 1 min
+Processed 0.0% members, elapsed 50.0 s, [1295 iters], *=42.0
+
+# 10 min
+Processed 0.0% members, elapsed 590.0 s, [22317 iters], *=42.0

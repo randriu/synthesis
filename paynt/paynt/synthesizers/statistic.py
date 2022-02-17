@@ -49,7 +49,7 @@ class Statistic:
 
         self.timer = Timer()
 
-        self.status_period = 5
+        self.status_period = 3
         self.status_time = self.status_period
 
     def start(self):
@@ -84,7 +84,7 @@ class Statistic:
         # percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.timer.read(),1)
         time_estimate = round(time_estimate,1)
-        iters = self.iterations_mdp # + self.iterations_dtmc
+        iters = (self.iterations_mdp,self.iterations_dtmc)
         avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
         optimum = "-"
         threshold = "-"
@@ -97,11 +97,11 @@ class Statistic:
             sat_size = len(ds.solver.getAssertions())
         elif ds.use_python_z3:
             sat_size = len(ds.solver.assertions())
-        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [{iters} iters], *={optimum}, SAT={sat_size}"
+        return f"> Processed {percentage_rejected}% members, elapsed {time_elapsed} s, ETA: {time_estimate} s [iters: {iters}], *={optimum}, SAT={sat_size}"
 
     def print_status(self):
         if self.timer.read() > self.status_time:
-            Profiler.print_all()
+            # Profiler.print_all()
             logger.info(self.status())
             self.status_time += self.status_period
 
@@ -155,4 +155,4 @@ class Statistic:
 
     def print(self):
         print(self.get_summary())
-        Profiler.print_all()
+        # Profiler.print_all()

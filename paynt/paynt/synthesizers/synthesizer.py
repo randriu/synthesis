@@ -10,17 +10,21 @@ logger = logging.getLogger(__name__)
 # TODO
 # X 1) memory injection
 # X 2) symmetry breaking
-#   3) stopping criteria
+# X 3) stopping criteria
 #   4) experiment headlines (where > ATVA, where > NFA [grid-av MO], hard benchmark with good results, )
 # X 5) remove consistent holes from conflicts
 # X 6) use primary scheduler from AR to select assignments for CEGIS
-#   7) use MDP scheduler for memory injection ?
-#   8) CEGIS time allocation
+# X 7) use MDP scheduler for memory injection ?
+# X 8) CEGIS time allocation
 #   -) use belief-based
 
 
 
 class Synthesizer:
+
+    use_optimum_update_timeout = True
+    optimum_update_iters_limit = 4000
+    since_last_optimum_update = 0
 
     def __init__(self, sketch):
         self.sketch = sketch
@@ -41,7 +45,6 @@ class Synthesizer:
 
     def run(self):
         Profiler.start("synthesis")
-        self.sketch.quotient.discarded = 0
         # self.sketch.specification.optimality.update_optimum(0.96)
         opt_assignment = self.synthesize(self.sketch.design_space)
         Profiler.stop()
@@ -118,6 +121,8 @@ class SynthesizerAR(Synthesizer):
                 can_improve = res.optimality_result.can_improve
                 if res.optimality_result.improving_assignment is not None:
                     satisfying_assignment = res.optimality_result.improving_assignment
+                    print("new opt = ", self.sketch.specification.optimality.optimum)
+                    Synthesizer.since_last_optimum_update = 0
         
         if not can_improve:
             self.explore(family)
@@ -131,12 +136,16 @@ class SynthesizerAR(Synthesizer):
         logger.info("Synthesis initiated.")
         self.stat.start()
 
+        self.sketch.quotient.discarded = 0
+        Synthesizer.since_last_optimum_update = 0
+
         satisfying_assignment = None
         families = [family]
         while families:
-            
-            # if self.stat.iterations_mdp == 10:
-            #     exit()
+
+            Synthesizer.since_last_optimum_update += 1
+            if Synthesizer.use_optimum_update_timeout and Synthesizer.since_last_optimum_update > Synthesizer.optimum_update_iters_limit:
+                break
             
             if SynthesizerAR.exploration_order_dfs:
                 family = families.pop(-1)
@@ -183,7 +192,8 @@ class SynthesizerCEGIS(Synthesizer):
         conflict_filtered = []
         for hole in conflict:
             scheduler_options = scheduler_selection[hole]
-            if len(scheduler_options) == 1 and assignment[hole].options[0] == scheduler_options[0]:
+            # if len(scheduler_options) == 1 and assignment[hole].options[0] == scheduler_options[0]:
+            if len(scheduler_options) == 1:
                 continue
             conflict_filtered.append(hole)
 
@@ -198,6 +208,7 @@ class SynthesizerCEGIS(Synthesizer):
         
         # logger.debug("analyzing assignment {}".format(assignment))
         Profiler.start("CEGIS analysis")
+        # print("assignment = ", assignment)
         
         # build DTMC
         Profiler.start("    dtmc construction")
@@ -220,6 +231,8 @@ class SynthesizerCEGIS(Synthesizer):
                 return True, True, None
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
                 self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
+                print("new opt = ", self.sketch.specification.optimality.optimum)
+                Synthesizer.since_last_optimum_update = 0
                 improving = True
 
         # construct conflict wrt each unsatisfiable property
@@ -258,6 +271,7 @@ class SynthesizerCEGIS(Synthesizer):
             conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
             Profiler.resume()
             conflicts.append(conflict)
+
                     
         # use conflicts to exclude the generalizations of this assignment
         pruned_estimate = 0
@@ -321,7 +335,9 @@ class SynthesizerCEGIS(Synthesizer):
 class StageControl:
 
     # strategy
-    strategy_equal = True
+    strategy_equal = False
+    
+    only_ar = False
     only_cegis = False
 
     def __init__(self, members_total):
@@ -346,8 +362,6 @@ class StageControl:
         return self.timer_ar.running
 
     def start_ar(self):
-        # print(self.pruned_ar, self.pruned_cegis)
-        # print(self.timer_ar.read(), self.timer_cegis.read())
         self.timer_cegis.stop()
         self.timer_ar.start()
 
@@ -366,30 +380,38 @@ class StageControl:
         :return True if cegis time is over
         """
         
+        # whether only AR is performed
+        if StageControl.only_ar:
+            return True
+
+        # whether only CEGIS is performed
         if StageControl.only_cegis:
             return False
 
+        # whether CEGIS has more time
         if self.timer_cegis.read() < self.timer_ar.read() * self.cegis_efficiency:
             return False
 
-        # calculate average success rate, adjust cegis time allocation factor
+        # stop CEGIS
         self.timer_cegis.stop()
 
+        # if equal, do not readjust allocation factor
         if StageControl.strategy_equal:
             return True
 
-        factor = 1
+        # print(self.timer_ar.read(), self.timer_cegis.read())
 
-        if self.pruned_ar == 0 and self.pruned_cegis == 0:
-            self.cegis_efficiency = 1 / factor
-        elif self.pruned_ar == 0 and self.pruned_cegis > 0:
-            self.cegis_efficiency = 2 / factor
-        elif self.pruned_ar > 0 and self.pruned_cegis == 0:
-            self.cegis_efficiency = 0.5 / factor
-        else:
-            success_rate_cegis = self.pruned_cegis / self.timer_cegis.read()
-            success_rate_ar = self.pruned_ar / self.timer_ar.read()
-            self.cegis_efficiency = success_rate_cegis / success_rate_ar / factor
+        # calculate average success rate, adjust cegis time allocation factor
+        # if self.pruned_ar == 0 and self.pruned_cegis == 0:
+        #     self.cegis_efficiency = 1 / factor
+        # elif self.pruned_ar == 0 and self.pruned_cegis > 0:
+        #     self.cegis_efficiency = 2 / factor
+        # elif self.pruned_ar > 0 and self.pruned_cegis == 0:
+        #     self.cegis_efficiency = 0.5 / factor
+        # else:
+        #     success_rate_cegis = self.pruned_cegis / self.timer_cegis.read()
+        #     success_rate_ar = self.pruned_ar / self.timer_ar.read()
+        #     self.cegis_efficiency = success_rate_cegis / success_rate_ar / factor
         return True
 
 
@@ -402,6 +424,10 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
     def synthesize(self, family):
 
         logger.info("Synthesis initiated.")
+
+        self.sketch.quotient.discarded = 0
+        Synthesizer.since_last_optimum_update = 0
+
         self.stat.start()
         self.stage_control = StageControl(family.size)
 
@@ -419,6 +445,10 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         families = [family]
 
         while families:
+
+            Synthesizer.since_last_optimum_update += 1
+            if Synthesizer.use_optimum_update_timeout and Synthesizer.since_last_optimum_update > Synthesizer.optimum_update_iters_limit:
+                break
             
             # MDP analysis
             self.stage_control.start_ar()
@@ -441,6 +471,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 break
             if feasibility == False:
                 self.stage_control.prune_ar(family.size)
+                # print("ar pruned ", family.size)
                 continue
 
             # undecided: initiate CEGIS analysis
@@ -458,9 +489,14 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             sat = False
             while True:
 
+                if self.stage_control.cegis_step():
+                    # CEGIS timeout
+                    break
+
                 # pick assignment
                 assignment = family.pick_assignment_priority(priority_subfamily)
                 if assignment is None:
+                    print("     no assignment", family.size)
                     break
                 
                 # analyze this assignment
@@ -469,11 +505,8 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                     satisfying_assignment = assignment
                 if sat:
                     break
-                
-                # assignment is UNSAT
-                if self.stage_control.cegis_step():
-                    # CEGIS timeout
-                    break
+
+                # assignment is UNSAT: move on to the next assignment
 
             if sat:
                 break
@@ -484,8 +517,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 continue
 
         
-            # CEGIS could not process the family: split
-            subfamilies = self.sketch.quotient.split(family)
+            subfamilies = self.sketch.quotient.split(family, hc)
             families = families + subfamilies
 
         ce_generator.print_profiling()
