@@ -1,0 +1,335 @@
+--------------------------------------------------------------------------------
+
+
+-- grid-4-0.1
+
+Rmin
+
+k=1:
+feasible: no
+
+selected observation:  0
+optimal: 4.701739
+
+selected observation:  0
+optimal: 4.701739
+
+total time: < 0.1s
+
+ATVA (refine): ≥4.56 (1 min), ≥4.61 (30 min)
+
+
+-- grid-4-0.3
+
+Rmin
+
+k=1:
+feasible: no
+
+selected observation:  0
+optimal: 6.314724
+
+selected observation:  0
+optimal: 6.314724
+
+total time: < 0.1s
+
+ATVA (refine): ≥5.92 (1 min), ≥5.92 (30 min)
+
+
+-- grid-avoid-4-0.1
+
+Pmax
+
+k=1:
+optimal: 0.214286
+
+selected observation:  0
+optimal: 0.214286
+
+selected observation:  0
+optimal: 0.851776
+
+selected observation:  0
+optimal: 0.851776
+
+selected observation:  0
+optimal: 0.916119
+
+total time: ~10 sec
+
+ATVA (refine): ≤0.94 (1 min), ≤0.94 (30 min)
+
+without symmetry breaking we can find *=0.926768
+
+-- grid-avoid-4-0
+
+Pmax
+
+k=1:
+optimal: 0.214286
+
+selected observation:  0
+optimal: 0.214286
+
+selected observation:  0
+optimal: 0.857143
+
+selected observation:  0
+optimal: 0.928571
+
+selected observation:  0
+optimal: 0.928571
+
+total time: <1 sec
+
+ATVA (refine): ≤0.93 (1 min), ≤0.93 (30 min)
+
+
+-- maze2-0.1
+
+Rmin
+
+k=1:
+feasible: no
+
+selected observation:  0
+feasible: no
+
+selected observation:  4
+optimal: 6.324786
+
+selected observation:  0
+optimal: 6.324786
+
+selected observation:  4
+optimal: 6.324786
+
+total time: <1 sec
+
+ATVA (refine): ≥6.32 (1 min), ≥6.32 (30 min)
+
+
+-- maze2-0
+
+Rmin
+
+k=1:
+feasible: no
+
+selected observation:  0
+feasible: no
+
+selected observation:  4
+optimal: 5.692308
+
+selected observation:  0
+optimal: 5.692308
+
+total time: <1 sec
+
+ATVA (refine): =5.69* (1 min), =5.69* (30 min)
+
+--------------------------------------------------------------------------------
+
+EXP-0 = default settings, 30 min timeout
+
+-- crypt-4
+
+no injections, opt is not updated
+Processed 0.0% members, elapsed 1785.0 s, [iters: (502860, 0)], *=0.33333
+
+-- drone-4-1
+
+no injections, opt is updated regularly
+Processed 5.1777% members, elapsed 1785.0 s, [iters: (94731, 0)], *=0.86904
+
+-- network-2-8-20
+
+no injections, opt is updated rarely
+Processed 0.0% members, elapsed 1782.0 s, [iters: (93664, 0)], *=4.24165
+
+
+-- network-prio-2-8-20
+
+no injections, opt is updated rarely
+Processed 0.0% members, elapsed 1722.1 s, [iters: (21314, 0)], *=539.51465
+
+-- refuel-06
+
+~10 injections, 0.62 found after ~5 injections
+optimal: 0.62809
+
+-- rocks-12
+
+no injections, opt is not updated
+Processed 0.0% members, elapsed 1779.0 s, [iters: (44330, 0)], *=42.0
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+EXP-3 = EXP-1 + discarding selected subfamilies
+
+-- crypt-4
+
+~50 injections, opt does not change
+optimal: 0.333333
+
+-- drone-4-1
+
+~10 injections, opt gradually changes, the result is worse than in EXP-0
+optimal: 0.86719
+
+-- network-2-8-20
+
+k=1:
+optimal: 4.247096
+
+selected observation:  979
+optimal: 4.196074
+
+selected observation:  1013
+optimal: 4.163074
+
+selected observation:  794
+optimal: 4.121499
+
+selected observation:  14
+optimal: 4.071731
+
+selected observation:  1028
+optimal: 4.026891
+
+selected observation:  280
+*=3.98748
+
+opt is much better than EXP-0
+
+ATVA (refine): ≥3.2 (1 min), ≥3.2 (30 min)
+
+
+
+
+-- network-prio-2-8-20
+
+0 injections, behaviour is the same as in EXP-1
+Processed 0.0% members, elapsed 1722.0 s, ETA: 1722031327.1 s [iters: (21224, 0)], *=539.51465
+
+-- refuel-06
+
+~60 injections, opt is worse than EXP-1
+optimal: 0.43839
+
+-- rocks-12
+
+~7 injections, opt does not change, same as EXP-1
+optimal: 42.0
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+
+
+EXP-1 = EXP-0 + synthesis interruption after 10000 splits
+
+-- crypt-4
+
+~50 injections, opt does not change
+optimal: 0.333333
+
+-- drone-4-1
+
+~5 injections, opt changes, but does not converge faster than EXP-0
+optimal: 0.868724
+
+-- network-2-8-20
+
+~5 injections, opt is slightly worse than EXP-0
+optimal: 4.247096
+
+-- network-prio-2-8-20
+
+0 injections, MDP iterations are slow => behaviour is the same as in EXP-0
+Processed 0.0% members, elapsed 1728.0 s, ETA: 1728036489.2 s [iters: (22181, 0)], *=539.51465
+
+-- refuel-06
+
+~15 injections, same behaviour as EXP-0
+optimal: 0.62809
+
+-- rocks-12
+
+~7 injections, opt does not change
+optimal: 42.0
+
+
+--------------------------------------------------------------------------------
+
+EXP-2 = EXP-1 synthesis interruption after 10000 splits + discarding selected subfamilies
+
+-- crypt-4
+
+~50 injections, opt does not change
+optimal: 0.333333
+
+-- drone-4-1
+
+~5 injections, opt gradually changes, the result is worse than in EXP-1
+optimal: 0.86703
+
+-- network-2-8-20
+
+~5 injections, opt is the same as in EXP-1
+optimal: 4.2471
+
+-- network-prio-2-8-20
+
+0 injections, behaviour is the same as in EXP-1
+Processed 0.0% members, elapsed 1722.0 s, ETA: 1722031327.1 s [iters: (21224, 0)], *=539.51465
+
+-- refuel-06
+
+~60 injections, opt is worse than EXP-1
+optimal: 0.43839
+
+-- rocks-12
+
+~7 injections, opt does not change, same as EXP-1
+optimal: 42.0
+
+
+
+
+--------------------------------------------------------------------------------
+
+- table 1: 'universal' memory injection
+    TACAS bounds
+    our results
+        good result in recent time
+        the best result in long time
+        + include size of FSC = # of states in MDP ?
+
+- table 2: special cases = what happens if
+    no memory injection
+    no discarding, no escape, no generalization, ...
+
+TODO
+zilberstein
+
+leonore
+
+multi-objective
+
+hybrid

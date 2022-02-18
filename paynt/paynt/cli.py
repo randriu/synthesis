@@ -6,22 +6,21 @@ from . import version
 
 from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import *
+from .synthesizers.quotient import POMDPQuotientContainer
 from .synthesizers.pomdp import SynthesizerPOMDP
 
 import logging
 # logger = logging.getLogger(__name__)
 
-def setup_logger(log_path):
-    """
-    Setup routine for logging. 
-
-    :param log_path: 
-    :return: 
-    """
+def setup_logger(log_path = None):
+    ''' Setup routine for logging. '''
+    
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
+    # root.setLevel(logging.INFO)
 
-    formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
+    # formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(filename)s - %(message)s')
 
     handlers = []
     if log_path is not None:
@@ -38,28 +37,28 @@ def setup_logger(log_path):
     return handlers
 
 
-# def dump_stats_to_file(path, keyword, constants, description, *args):
-#     logger.debug("Storing stats...")
-#     pickle.dump((keyword, constants, description, *args), open(path, "wb"))
-#     logger.info("Stored stats at {}".format(path))
-
 @click.command()
-@click.option('--project', required=True, help="root", )
-@click.option('--sketch', default="sketch.templ", help="the sketch")
-@click.option('--properties', default="sketch.properties", help="path to properties file")
+@click.option("--project", required=True, help="root", )
+@click.option("--sketch", default="sketch.templ", help="name of the sketch file")
+@click.option("--properties", default="sketch.props", help="name of the properties file")
 @click.option("--constants", default="", help="constant assignment string", )
-@click.option('--export-jani', is_flag=True, default=False, help="set to export JANI model to 'output.jani'")
-@click.option('--pomdp', is_flag=True, default=False, help="enable incremental synthesis of controllers for a POMDP")
-@click.option('--pomdp-memory-size', default=1, help="implicit memory size for POMDP FCSs")
-# @click.option('--short-summary', '-ss', help="Print also short synthesis summary", is_flag=True, default=False)
-@click.argument("method", type=click.Choice(['onebyone', 'cegis', 'ar', 'hybrid', 'evo'], case_sensitive=False))
-def paynt(
-        project, sketch, properties, constants, export_jani, pomdp, pomdp_memory_size, method
-):
-    print("This is Paynt version {}.".format(version()))
+@click.argument("method", type=click.Choice(['onebyone', 'cegis', 'ar', 'hybrid'], case_sensitive=False), default="ar")
 
-    Sketch.POMDP_MEM_SIZE = pomdp_memory_size
-    Sketch.EXPORT_JANI = export_jani
+@click.option("--export-jani", is_flag=True, default=False, help="export JANI model to 'output.jani' and abort")
+
+@click.option("--incomplete-search", is_flag=True, default=False, help="use incomplete search during the synthesis")
+
+@click.option("--fsc-synthesis", is_flag=True, default=False, help="enable incremental synthesis of FSCs for a POMDP")
+@click.option("--pomdp-memory-size", default=1, help="implicit memory size for POMDP FSCs")
+
+def paynt(
+        project, sketch, properties, constants, method, export_jani, incomplete_search, fsc_synthesis, pomdp_memory_size, 
+):
+    logger.info("This is Paynt version {}.".format(version()))
+
+    Sketch.export_jani = export_jani
+    Synthesizer.incomplete_search = incomplete_search
+    POMDPQuotientContainer.pomdp_memory_size = pomdp_memory_size
 
     # parse sketch
     if not os.path.isdir(project):
@@ -67,10 +66,9 @@ def paynt(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, properties)
     sketch = Sketch(sketch_path, properties_path, constants)
-    # exit()
 
     # choose synthesis method
-    if sketch.is_pomdp and pomdp:
+    if sketch.is_pomdp and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(sketch, method)
     elif method == "onebyone":
         synthesizer = Synthesizer1By1(sketch)
@@ -85,12 +83,13 @@ def paynt(
     else:
         assert None
 
+    # run synthesis
     synthesizer.run()
-    synthesizer.print_stats()
 
 
 def main():
-    setup_logger("paynt.log")
+    # setup_logger("paynt.log")
+    setup_logger()
     paynt()
 
 

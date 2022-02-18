@@ -15,9 +15,8 @@ logger = logging.getLogger(__name__)
 
 class Sketch:
 
-    # implicit size for full memory exploration
-    POMDP_MEM_SIZE = 1
-    EXPORT_JANI = False
+    # if True, unfolded JANI is exported and the program is aborted
+    export_jani = False
 
     def __init__(self, sketch_path, properties_path, constant_str):
 
@@ -40,6 +39,7 @@ class Sketch:
         self.explicit_model = Sketch.read_explicit_model(sketch_path)
         if self.is_explicit:
             logger.info(f"Successfully parsed model in explicit format.")
+            self.design_space = DesignSpace()
         else:
             logger.info(f"Assuming a sketch in a PRISM format ...")
             self.prism, hole_definitions = Sketch.load_sketch(sketch_path)
@@ -80,7 +80,7 @@ class Sketch:
             self.quotient = MDPQuotientContainer(self)
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
-            self.quotient.pomdp_manager.set_memory_size(Sketch.POMDP_MEM_SIZE)
+            self.quotient.pomdp_manager.set_memory_size(POMDPQuotientContainer.pomdp_memory_size)
             self.quotient.unfold_memory()
         else:
             raise TypeError("sketch type is not supported")
@@ -111,6 +111,54 @@ class Sketch:
             return self.explicit_model.is_nondeterministic_model and self.explicit_model.is_partially_observable
         else:
             return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
+
+    @classmethod
+    def parse_pomdp_solve_file(cls):
+        with open('/home/may/actions.txt') as f:
+            matrix = f.readlines()
+
+        with open('/home/may/obs.txt') as f:
+            obs = f.readlines()
+
+        state_obs = []
+        for line in obs:
+            line = line.replace("\n","")
+            line = line.split(" ")
+            if '' in line:
+                line.remove('')
+            line = [float(entry) for entry in line ]
+            max_prob = max(line)
+            state_ob = line.index(max_prob)
+            state_obs.append(state_ob)
+        # print(state_obs)
+        # print(max(state_obs))
+        # print(len(state_obs))
+        
+        rows = []
+        for line in matrix:
+            line = line.replace("\n", "")
+            line = line.replace(" ", "")
+            line = line.split(":")
+            line = line[1:]
+            action = int(line[0])
+            source = int(line[1])
+            target = int(line[2])
+            prob = float(line[3])
+            rows.append((action,source,target,prob))
+
+        current_source = None
+        current_action = None
+        for row in rows:
+            action,source,target,prob = row
+            if source != current_source:
+                current_source = source
+                print("state ", current_source, " {", state_obs[current_source], "}", sep="")
+            if current_action != action:
+                current_action = action
+                print("#action ", current_action, " [0]", sep="")
+            print("##", target, " : ", prob, sep="")
+            
+        exit()
 
     @classmethod
     def read_explicit_model(cls, path):

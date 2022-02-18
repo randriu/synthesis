@@ -11,6 +11,8 @@ from .statistic import Statistic
 from ..sketch.jani import JaniUnfolder
 from ..sketch.holes import Hole,Holes,DesignSpace
 
+from .synthesizer import Synthesizer
+
 from ..profiler import Profiler
 
 from .models import MarkovChain,MDP,DTMC
@@ -21,15 +23,7 @@ logger = logging.getLogger(__name__)
 
 class QuotientContainer:
 
-    # holes with avg choice value difference below this threshold will be considered consistent
-    inconsistency_threshold = 0
-    # whether choice values will be weighted by expected number of visits
-    compute_expected_visits = True
-    # whether subfamilies are discarded in the splitting process
-    discard_subfamilies = False
-
     def __init__(self, sketch):
-
         # model origin
         self.sketch = sketch
         
@@ -236,9 +230,6 @@ class QuotientContainer:
         this scheduler.
         '''
 
-        if not QuotientContainer.compute_expected_visits:
-            return [1] * mdp.states
-        
         # extract DTMC induced by this MDP-scheduler
         choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         sub_mdp,state_map,_ = self.restrict_mdp(mdp.model, choices)
@@ -338,16 +329,11 @@ class QuotientContainer:
         if len(inconsistent_assignments) == 0:
             Profiler.resume()
             return selection,None,None,None
-
+        
         # extract choice values, compute expected visits and estimate scheduler difference
         choice_values = self.choice_values(mdp, prop, result)
         expected_visits = self.expected_visits(mdp, prop, result.scheduler)
         inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values, expected_visits)
-
-        # filter differences below epsilon
-        for hole_index in inconsistent_assignments:
-            if inconsistent_differences[hole_index] <= QuotientContainer.inconsistency_threshold:
-                selection[hole_index] = [selection[hole_index][0]]
 
         Profiler.resume()
         return selection,choice_values,expected_visits,inconsistent_differences
@@ -365,6 +351,7 @@ class QuotientContainer:
         if mdp.is_dtmc:
             selection = [[mdp.design_space[hole_index].options[0]] for hole_index in mdp.design_space.hole_indices]
             return selection, None, None, None, True
+
         
         selection,choice_values,expected_visits,scores = self.scheduler_selection_quantitative(mdp, prop, result)
         consistent = True
@@ -423,19 +410,21 @@ class QuotientContainer:
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        if QuotientContainer.discard_subfamilies:
-            # reduce simple holes
-            ds_before = reduced_design_space.size
-            for hole_index in reduced_design_space.hole_indices:
-                if mdp.hole_simple[hole_index]:
-                    assert len(hole_assignments[hole_index]) == 1
-                    reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
-            ds_after = reduced_design_space.size
-            self.discarded += ds_before - ds_after
+        if not Synthesizer.incomplete_search:
+            return reduced_design_space, suboptions
+        
+        # reduce simple holes
+        ds_before = reduced_design_space.size
+        for hole_index in reduced_design_space.hole_indices:
+            if mdp.hole_simple[hole_index]:
+                assert len(hole_assignments[hole_index]) == 1
+                reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+        ds_after = reduced_design_space.size
+        self.discarded += ds_before - ds_after
 
-            # discard other suboptions
-            suboptions = core_suboptions
-            # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
+        # discard other suboptions
+        suboptions = core_suboptions
+        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
 
@@ -506,7 +495,7 @@ class DTMCQuotientContainer(QuotientContainer):
         # build quotient MDP       
         edge_to_hole_options = unfolder.edge_to_hole_options
         self.quotient_mdp = stormpy.build_sparse_model_with_options(unfolder.jani_unfolded, MarkovChain.builder_options)
-        logger.debug(f"Constructed quotient MDP with {self.quotient_mdp.nr_states} states.")
+        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         # associate each action of a quotient MDP with hole options
         # remember default actions (actions taken in each hole assignment)
@@ -552,6 +541,9 @@ class MDPQuotientContainer(QuotientContainer):
 
 class POMDPQuotientContainer(QuotientContainer):
 
+    # implicit size for POMDP unfolding
+    pomdp_memory_size = 1
+    
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -658,7 +650,7 @@ class POMDPQuotientContainer(QuotientContainer):
         
         # unfold MDP using manager
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        logger.debug(f"Constructed quotient MDP with {self.quotient_mdp.nr_states} states.")
+        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         # short aliases
         pm = self.pomdp_manager

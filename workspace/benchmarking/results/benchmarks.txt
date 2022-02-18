@@ -1,55 +1,66 @@
 --------------------------------------------------------------------------------
 
 
-# k=4
-
--- crypt-4
-
-
-
--- drone-4-1
-
+# easy
 
 
 -- grid-4-0.1
 
 
-
 -- grid-4-0.3
-
 
 
 -- grid-avoid-4-0.1
 
 
-
 -- grid-avoid-4-0
-
 
 
 -- maze2-0.1
 
 
-
 -- maze2-0
-
-
-
--- network-2-8-20
-
-
-
--- network-prio-2-8-20
-
 
 
 -- nrp-8
 
 
 
+
+# hard
+
+
+
+
+-- crypt-4
+
+
+-- drone-4-1
+
+
+-- drone-4-2
+
+
+-- network-2-8-20
+
+
+-- network-3-8-20
+
+
+-- network-prio-2-8-20
+
+
+-- network-prio-3-8-20
+
+
 -- refuel-06
 
 
+-- refuel-08
+
 
 -- rocks-12
+
+
+-- rocks-16
 

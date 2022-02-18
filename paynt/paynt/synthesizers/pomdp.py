@@ -46,6 +46,20 @@ class SynthesizerPOMDP():
         return assignment
 
 
+    def strategy_full(self):
+        self.sketch.quotient.pomdp_manager.set_memory_size(Sketch.pomdp_memory_size)
+        self.sketch.quotient.unfold_memory()
+        self.synthesize(self.sketch.design_space)
+
+    
+    def strategy_iterative(self):
+        mem_size = Sketch.pomdp_memory_size
+        while True:
+            self.sketch.quotient.pomdp_manager.set_memory_size(mem_size)
+            self.sketch.quotient.unfold_memory()
+            self.synthesize(self.sketch.design_space)
+
+    
     def solve_mdp(self, family):
 
         # solve quotient MDP
@@ -60,9 +74,9 @@ class SynthesizerPOMDP():
 
         return mdp, spec, selection, choice_values, expected_visits, scores
 
-
     
     def strategy_expected(self):
+
 
         # assuming optimality
         assert self.sketch.specification.optimality is not None
@@ -75,6 +89,10 @@ class SynthesizerPOMDP():
 
         # start with k=1
         self.sketch.quotient.pomdp_manager.set_memory_size(1)
+        memory_injections = 0
+        best_assignment = None
+        fsc_synthesis_timer = Timer()
+        fsc_synthesis_timer.start()
 
         while True:
         # for iteration in range(100):
@@ -85,9 +103,8 @@ class SynthesizerPOMDP():
             self.sketch.quotient.unfold_memory()
             
             # use inconsistencies to break symmetry
-            # family = self.sketch.quotient.break_symmetry_3(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
-            family = self.sketch.design_space
-
+            family = self.sketch.quotient.break_symmetry_3(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
+            
             # solve MDP that corresponds to this restricted family
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
             
@@ -102,22 +119,15 @@ class SynthesizerPOMDP():
             # identify hole that we want to improve
             selected_hole = None
             selected_options = None
-            if synthesized_assignment is None:
-                # no new assignment: the hole of interest is the one with the
-                # maximum score in the symmetry-free MDP
-                pass
-                
-
-            else:
+            if synthesized_assignment is not None:
                 # synthesized solution exists: hole of interest is the one where
                 # the fully-observable improves upon the synthesized action
                 # the most
+                best_assignment = synthesized_assignment
 
                 # for each state of the sub-MDP, compute potential state improvement
                 state_improvement = [None] * mdp.states
                 scheduler = spec.optimality_result.primary.result.scheduler
-                # print(family)
-                # print(synthesized_assignment)
                 for state in range(mdp.states):
                     # nothing to do if the state is not labeled by any hole
                     quotient_state = mdp.quotient_state_map[state]
@@ -125,15 +135,12 @@ class SynthesizerPOMDP():
                     if not holes:
                         continue
                     hole = list(holes)[0]
-                    # print("state {} [{}], hole = {}".format(state,quotient_state,hole))
                     
                     # get choice obtained by the MDP model checker
                     choice_0 = mdp.model.transition_matrix.get_row_group_start(state)
                     mdp_choice = scheduler.get_choice(state).get_deterministic_choice()
                     mdp_choice = choice_0 + mdp_choice
-                    # mdp_choice_global = mdp.quotient_choice_map[mdp_choice]
-                    # mdp_choice_label = self.sketch.quotient.action_to_hole_options[mdp_choice_global]
-
+                    
                     # get choice implied by the synthesizer
                     syn_option = synthesized_assignment[hole].options[0]
                     nci = mdp.model.nondeterministic_choice_indices
@@ -144,9 +151,6 @@ class SynthesizerPOMDP():
                             syn_choice = choice
                             break
                     
-                    # syn_choice_global = mdp.quotient_choice_map[syn_choice]
-                    # syn_choice_label = self.sketch.quotient.action_to_hole_options[syn_choice_global]
-
                     # estimate improvement
                     mdp_value = choice_values[mdp_choice]
                     syn_value = choice_values[syn_choice]
@@ -154,8 +158,8 @@ class SynthesizerPOMDP():
                     
                     state_improvement[state] = improvement
 
-                    # print("{} -> {} = {} -> {}".format(syn_choice,mdp_choice, syn_value,mdp_value))
-                    # print("({} -> {}".format(syn_choice_label,mdp_choice_label))
+                # had there been no new assignment, the hole of interest will
+                # be the one with the maximum score in the symmetry-free MDP
 
                 # map improvements in states of this sub-MDP to states of the quotient
                 quotient_state_improvement = [None] * self.sketch.quotient.quotient_mdp.nr_states
@@ -182,13 +186,8 @@ class SynthesizerPOMDP():
                 for state in range(dtmc.states):
                     quotient_state = dtmc.quotient_state_map[state]
                     improvement = quotient_state_improvement[quotient_state]
-                    # if quotient_state == 15:
-                    # print("syn visits = ", dtmc_visits[state])
-                    
                     if improvement is None:
                         continue
-
-                    # print("state {}, we = {} * {}".format(quotient_state, dtmc_visits[state], improvement))
 
                     weighted_improvement = improvement * dtmc_visits[state]
                     assert not math.isnan(weighted_improvement), "{}*{} = nan".format(improvement,dtmc_visits[state])
@@ -196,65 +195,52 @@ class SynthesizerPOMDP():
                     hole_differences[hole] += weighted_improvement
                     hole_states_affected[hole] += 1
 
-                print(hole_differences)
                 hole_differences_avg = [0] * family.num_holes
                 for hole in family.hole_indices:
                     if hole_states_affected[hole] != 0:
                         hole_differences_avg[hole] = hole_differences[hole] / hole_states_affected[hole]
-
                 hole_scores = {hole:hole_differences_avg[hole] for hole in family.hole_indices if hole_differences_avg[hole]>0}
-                print(hole_differences_avg)
                     
-            
-            print()
-            print("hole scores: ", hole_scores)
-
             max_score = max(hole_scores.values())
-
             hole_scores = {h:v for h,v in hole_scores.items() if v / max_score > 0.01 }
-
             with_max_score = [hole for hole in hole_scores if hole_scores[hole] == max_score]
-            # selected_hole = with_max_score[0]
+            selected_hole = with_max_score[0]
+            selected_options = selection[selected_hole]
+            
+            # print()
+            # print("hole scores: ", hole_scores)
+            # print("selected hole: ", selected_hole)
+            # print("hole has options: ", selected_options)
 
+            # identify observation having this hole
+            for obs in range(self.sketch.quotient.observations):
+                if selected_hole in self.sketch.quotient.obs_to_holes[obs]:
+                    selected_observation = obs
+                    break
 
-            for selected_hole in [with_max_score[0]]:
-            # for selected_hole in hole_scores:
-            # for selected_hole in family.hole_indices:
-                selected_options = selection[selected_hole]
+            if len(selected_options) > 1:
+                # identify whether this hole is inconsistent in actions or updates
+                actions,updates = self.sketch.quotient.sift_actions_and_updates(selected_hole, selected_options)
+                if len(actions) > 1:
+                    # action inconsistency
+                    action_inconsistencies[obs] |= actions
+                else:
+                    memory_inconsistencies[obs] |= updates
                 
-                print("selected hole: ", selected_hole)
-                # print("hole has options: ", selected_options)
+            # inject memory and continue
+            self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
+            memory_injections += 1
+            logger.info("Injected memory into observation {}.".format(selected_observation))
+            
+            opt = round(self.sketch.specification.optimality.optimum,3)
+            elapsed = round(fsc_synthesis_timer.read(),1)
+            logger.info("FSC synthesis: elapsed {} s, opt = {}, injections: {}.".format(elapsed, opt, memory_injections))
+            # logger.info("FSC: {}".format(best_assignment))
 
-                # identify observation having this hole
-                for obs in range(self.sketch.quotient.observations):
-                    if selected_hole in self.sketch.quotient.obs_to_holes[obs]:
-                        selected_observation = obs
-                        break
-                print("selected observation: ", selected_observation)
-
-                if len(selected_options) > 1:
-                    # identify whether this hole is inconsistent in actions or updates
-                    actions,updates = self.sketch.quotient.sift_actions_and_updates(selected_hole, selected_options)
-                    print("actions & updates: ", actions, updates)
-                    if len(actions) > 1:
-                        # action inconsistency
-                        action_inconsistencies[obs] |= actions
-                    else:
-                        memory_inconsistencies[obs] |= updates
-                
-                # inject memory and continue
-                self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
-
-        
-
-
-    def strategy_full(self):
-        self.sketch.quotient.pomdp_manager.set_memory_size(3)
-        self.sketch.quotient.unfold_memory()
-        self.synthesize()
 
     def run(self):
         # self.strategy_full()
+        # self.strategy_iterative()
         self.strategy_expected()
 
 

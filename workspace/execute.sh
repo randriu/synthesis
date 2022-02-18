@@ -8,9 +8,9 @@ fi
 
 # default parameters
 timeout=100d
-parallel=false
 pomdp_mem_size=1
-pomdp_strategy=false
+fsc_synthesis=false
+incomplete_search=false
 
 # workspace settings
 paynt_exe="$SYNTHESIS/paynt/paynt.py"
@@ -30,47 +30,33 @@ function paynt() {
     local project="--project ${projects_dir}/$1/"
     local method=$2
 
-    # global settings
-    local parallelity=""
-    if [ ${parallel} = "true" ]; then
-        parallelity="&"
+    local incomplete_search_flag=""
+    if [ ${incomplete_search} = "true" ]; then
+        incomplete_search_flag="--incomplete-search"
     fi
 
-    local pomdp_flag=""
-    if [ ${pomdp_strategy} = "true" ]; then
-        pomdp_flag="--pomdp"
+    local fsc_flag=""
+    if [ ${fsc_synthesis} = "true" ]; then
+        fsc_flag="--fsc-synthesis"
     fi
     local pomdp_memory_set="--pomdp-memory-size=$pomdp_mem_size"
 
-    local paynt_call="python3 ${paynt_exe} $project ${method} ${pomdp_flag} ${pomdp_memory_set}"
+    local paynt_call="python3 ${paynt_exe} ${project} ${method} ${incomplete_search_flag} ${fsc_flag} ${pomdp_memory_set}"
     echo \$ ${paynt_call}
 
-    eval timeout ${timeout} ${paynt_call} ${parallelity}
+    eval timeout ${timeout} ${paynt_call}
 }
 
-function onebyone() {
-    paynt $1 onebyone
-}
-function cegis() {
-    paynt $1 cegis
-}
-function ar() {
-    paynt $1 ar
-}
-function hybrid() {
-    paynt $1 hybrid
-}
 
 # --- sandbox ------------------------------------------------------------------
 
 function run() {
 
-    # parallel=true
+    # timeout=5s
 
-    # timeout=30s
-
-    pomdp_mem_size=2
-    pomdp_strategy=true
+    pomdp_mem_size=1
+    # fsc_synthesis=true
+    # incomplete_search=true
 
     ### running ###
 
@@ -84,14 +70,15 @@ function run() {
     # model="pomdp/grid/intercept"
     # model="pomdp/grid/evade"
     # model="pomdp/grid/simple-mo"
+    # model="pomdp/grid/large"
 
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp/drone-4-1"
     # model="pomdp/voihp-easy/grid-avoid-4-0.1"
     # model="pomdp/voihp/grid-4-0.1"
-    # model="pomdp/voihp/grid-4-0.3"
-    # model="pomdp/voihp/maze2-0.1"
-    model="pomdp/voihp/refuel-06"
+    # model="pomdp/voihp-easy/grid-4-0.3"
+    # model="pomdp/voihp-easy/maze2-0.1"
+    # model="pomdp/voihp/refuel-06"
     # model="pomdp/voihp/rocks-12"
 
     # model="pomdp/voihp/crypt-4"
@@ -101,11 +88,13 @@ function run() {
     # model="pomdp/voihp/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
 
-    # model="pomdp/rocks-08"
+    # model="pomdp/leonore/cheese"
+    # model="pomdp/leonore/hallway"
+    model="pomdp/voihp-other/hallway"
 
-    ar $model
-    # hybrid $model
-    # cegis $model
+    paynt $model ar
+    # paynt $model hybrid
+    # paynt $model cegis
 }
 
 # --- execution ----------------------------------------------------------------
@@ -115,14 +104,6 @@ run
 
 # --- archive ------------------------------------------------------------------
 
-### leonore ###
-
-    # model="pomdp/leonore/refuel"
-    # model="pomdp/leonore/avoid"
-    # model="pomdp/leonore/sketch"
-    # model="pomdp/leonore/cheese"
-
-    
     ### cav ###
     # model="cav/grid"
     # model="cav/dpm"

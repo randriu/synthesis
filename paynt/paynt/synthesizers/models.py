@@ -110,6 +110,7 @@ class MarkovChain:
             result = self.model_check_formula(formula)
         else:
             result = self.model_check_formula_hint(formula, hint)
+        
         value = result.at(self.initial_state)
         Profiler.resume()
         return PropertyResult(prop, result, value)

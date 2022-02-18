@@ -36,15 +36,22 @@ function paynt() {
 
     # collect other arguments
     local project="--project ${benchmarks_dir}/${benchmark}"
-    local method=$3
-    local pomdp="--pomdp-memory-size=${pomdp_mem_size}"
-    local timeout=$4
-    
+    local timeout=$3
+
+    local incomplete_search_flag=""
+    if [ ${incomplete_search} = "true" ]; then
+        incomplete_search_flag="--incomplete-search"
+    fi
+
+    local fsc_flag=""
+    if [ ${fsc_synthesis} = "true" ]; then
+        fsc_flag="--fsc-synthesis"
+    fi
+
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiments_total}: ${benchmark}, method: ${method}"
-    # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} || echo "TO" >> ${logfile} &
     # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} &
-    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} "--pomdp" > ${logfile} &
+    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${incomplete_search_flag} ${fsc_flag} >${logfile} 2>&1 &
 }
 
 ## experiment section ##########################################################
@@ -55,7 +62,8 @@ function paynt() {
 # benchmarks=( dpm maze herman pole grid )
 # experiments_total=5
 
-benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/voihp"
+suite=hard
+benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/voihp-${suite}"
 experiments_total=`ls $benchmarks_dir/ | wc -l`
 
 # create folder for log files
@@ -66,18 +74,20 @@ source $SYNTHESIS_ENV/bin/activate
 
 ## experiments
 
-method=ar
-pomdp_mem_size=1
+
+method=hybrid
+fsc_synthesis=true
+incomplete_search=true
+
+name="${suite}_${incomplete_search}_${method}"
 
 echo "-- evaluating "
 # for benchmark in "${benchmarks[@]}"; do
 for k in {1..1}; do
     experiment_current=0
-    echo "-- k=$k"
-    pomdp_mem_size=$k
-    experiment_name="${method}_${timeout}_${threads}"
+    experiment_name="${name}_${timeout}_${threads}"
     for benchmark in `ls $benchmarks_dir`; do
-        paynt "${experiment_name}" "${benchmark}" ${method} ${timeout}
+        paynt "${experiment_name}" "${benchmark}" ${timeout}
     done
 done
 # wait for the remaining experiments to finish

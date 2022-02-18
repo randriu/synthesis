@@ -359,13 +359,15 @@ class DesignSpace(Holes):
                 if not self[hole_index].is_unrefined:
                     counterexample_clauses.append(self.hole_clauses[hole_index])
                 pruning_estimate *= self[hole_index].size
-        assert len(counterexample_clauses) > 0  # not sure about this
 
         if DesignSpace.use_python_z3:
+            assert len(counterexample_clauses) > 0  # TODO handle this
             counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
             DesignSpace.solver.add(counterexample_encoding)
         elif DesignSpace.use_cvc:
-            if len(counterexample_clauses) == 1:
+            if len(counterexample_clauses) == 0:
+                counterexample_encoding = DesignSpace.solver.mkFalse()
+            elif len(counterexample_clauses) == 1:
                 counterexample_encoding = counterexample_clauses[0].notTerm()
             else:
                 counterexample_encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, counterexample_clauses).notTerm()
@@ -428,6 +430,7 @@ class DesignSpace(Holes):
         for state in range(self.mdp.states):
             global_state = self.mdp.quotient_state_map[state]
             translated_hint[state] = hint[global_state]
+        return translated_hint
 
     
     def translate_analysis_hints(self):

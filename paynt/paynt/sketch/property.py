@@ -3,10 +3,13 @@ import stormpy
 import math
 import operator
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Property:
 
     # model checking precision
-    mc_precision = 1e-6
+    mc_precision = 1e-5
     
     ''' Wrapper over a stormpy property. '''
     def __init__(self, prop):
@@ -118,6 +121,7 @@ class OptimalityProperty(Property):
 
     def update_optimum(self, optimum):
         assert self.improves_optimum(optimum)
+        logger.debug(f"New opt = {optimum}.")
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)
