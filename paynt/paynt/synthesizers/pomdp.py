@@ -199,10 +199,16 @@ class SynthesizerPOMDP():
                 for hole in family.hole_indices:
                     if hole_states_affected[hole] != 0:
                         hole_differences_avg[hole] = hole_differences[hole] / hole_states_affected[hole]
-                hole_scores = {hole:hole_differences_avg[hole] for hole in family.hole_indices if hole_differences_avg[hole]>0}
-                    
+                all_scores = {hole:hole_differences_avg[hole] for hole in family.hole_indices}
+                nonzero_scores = {h:v for h,v in all_scores.items() if v>0}
+                if len(nonzero_scores) > 0:
+                    hole_scores = nonzero_scores
+                else:
+                    hole_scores = all_scores
+
             max_score = max(hole_scores.values())
-            hole_scores = {h:v for h,v in hole_scores.items() if v / max_score > 0.01 }
+            if max_score > 0:
+                hole_scores = {h:v for h,v in hole_scores.items() if v / max_score > 0.01 }
             with_max_score = [hole for hole in hole_scores if hole_scores[hole] == max_score]
             selected_hole = with_max_score[0]
             selected_options = selection[selected_hole]
@@ -226,16 +232,19 @@ class SynthesizerPOMDP():
                     action_inconsistencies[obs] |= actions
                 else:
                     memory_inconsistencies[obs] |= updates
-                
+            
+            # print status
+            opt = "-"
+            if self.sketch.specification.optimality.optimum is not None:
+                opt = round(self.sketch.specification.optimality.optimum,3)
+            elapsed = round(fsc_synthesis_timer.read(),1)
+            logger.info("FSC synthesis: elapsed {} s, opt = {}, injections: {}.".format(elapsed, opt, memory_injections))
+            # logger.info("FSC: {}".format(best_assignment))
+
             # inject memory and continue
             self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
             memory_injections += 1
             logger.info("Injected memory into observation {}.".format(selected_observation))
-            
-            opt = round(self.sketch.specification.optimality.optimum,3)
-            elapsed = round(fsc_synthesis_timer.read(),1)
-            logger.info("FSC synthesis: elapsed {} s, opt = {}, injections: {}.".format(elapsed, opt, memory_injections))
-            # logger.info("FSC: {}".format(best_assignment))
 
 
     def run(self):

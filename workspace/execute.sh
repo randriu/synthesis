@@ -52,9 +52,9 @@ function paynt() {
 
 function run() {
 
-    # timeout=5s
+    # timeout=2s
 
-    pomdp_mem_size=1
+    pomdp_mem_size=3
     # fsc_synthesis=true
     # incomplete_search=true
 
@@ -73,24 +73,26 @@ function run() {
     # model="pomdp/grid/large"
 
     ### verification of indefinite-horizon POMDPs ###
-    # model="pomdp/voihp/drone-4-1"
-    # model="pomdp/voihp-easy/grid-avoid-4-0.1"
-    # model="pomdp/voihp/grid-4-0.1"
+    # model="pomdp/voihp-easy/grid-4-0.1"
     # model="pomdp/voihp-easy/grid-4-0.3"
+    # model="pomdp/voihp-easy/grid-avoid-4-0.1"
+    # model="pomdp/voihp-all/grid-avoid-4-0"
     # model="pomdp/voihp-easy/maze2-0.1"
-    # model="pomdp/voihp/refuel-06"
-    # model="pomdp/voihp/rocks-12"
-
-    # model="pomdp/voihp/crypt-4"
-    # model="pomdp/voihp/grid-avoid-4-0"
     # model="pomdp/voihp/maze2-0"
-    # model="pomdp/voihp/network-prio-2-8-20"
+    
+    # model="pomdp/voihp-hard/drone-4-1"
+    # model="pomdp/voihp-hard/refuel-06"
+    # model="pomdp/voihp-hard/rocks-12"
+
+    model="pomdp/voihp-all/crypt-4"
+    # model="pomdp/voihp-hard/network-prio-2-8-20"
     # model="pomdp/voihp/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
 
     # model="pomdp/leonore/cheese"
     # model="pomdp/leonore/hallway"
-    model="pomdp/voihp-other/hallway"
+    # model="pomdp/voihp-other/hallway"
+    # model="pomdp/voihp-other/grid-mo"
 
     paynt $model ar
     # paynt $model hybrid

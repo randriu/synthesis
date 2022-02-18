@@ -109,24 +109,12 @@ class SynthesizerAR(Synthesizer):
         family.analysis_result = res
         Profiler.resume()
 
-        satisfying_assignment = None
-        can_improve = res.constraints_result.feasibility is None
-        if res.constraints_result.feasibility == True:
-            if not self.sketch.specification.has_optimality:
-                satisfying_assignment = family.pick_any()
-                return True, satisfying_assignment
-            else:
-                can_improve = res.optimality_result.can_improve
-                if res.optimality_result.improving_assignment is not None:
-                    satisfying_assignment = res.optimality_result.improving_assignment
-                    self.since_last_optimum_update = 0
+        improving_assignment,improving_value,can_improve = res.improving(family)
+        if improving_value is not None:
+            self.sketch.specification.optimality.update_optimum(improving_value)
+            self.since_last_optimum_update = 0
         
-        if not can_improve:
-            self.explore(family)
-            return False, satisfying_assignment
-
-        feasibility = None if can_improve else False
-        return feasibility, satisfying_assignment
+        return can_improve, improving_assignment
     
     
     def synthesize(self, family):
@@ -150,12 +138,11 @@ class SynthesizerAR(Synthesizer):
             else:
                 family = families.pop(0)
 
-            feasibility,assignment = self.analyze_family_ar(family)
-            if assignment is not None:
-                satisfying_assignment = assignment
-            if feasibility == True:
-                break
-            if feasibility == False:
+            can_improve,improving_assignment = self.analyze_family_ar(family)
+            if improving_assignment is not None:
+                satisfying_assignment = improving_assignment
+            if can_improve == False:
+                self.explore(family)
                 continue
 
             # undecided
@@ -408,12 +395,13 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 family.sat_level()
 
             # analyze the family
-            feasibility,improving_assignment = self.analyze_family_ar(family)
+            can_improve,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
-            if feasibility == True:
-                break
-            if feasibility == False:
+            if improving_assignment is not None:
+                satisfying_assignment = improving_assignment
+            if can_improve == False:
+                self.explore(family)
                 continue
 
             # undecided: initiate CEGIS analysis

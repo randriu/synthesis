@@ -89,7 +89,7 @@ class Statistic:
 
         if Statistic.print_profiling:
             Profiler.print_all()
-        print(self.status())
+        print(self.status(), flush=True)
         self.status_horizon += Statistic.status_period
 
 

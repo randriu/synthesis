@@ -412,7 +412,7 @@ class QuotientContainer:
 
         if not Synthesizer.incomplete_search:
             return reduced_design_space, suboptions
-        
+
         # reduce simple holes
         ds_before = reduced_design_space.size
         for hole_index in reduced_design_space.hole_indices:
@@ -436,12 +436,7 @@ class QuotientContainer:
         assert not mdp.is_dtmc
 
         # split family wrt last undecided result
-        if family.analysis_result.optimality_result is not None:
-            result = family.analysis_result.optimality_result
-        else:
-            # pick first undecided constraint
-            undecided = family.analysis_result.constraints_result.undecided_constraints[0]
-            result = family.analysis_result.constraints_result.results[undecided]
+        result = family.analysis_result.undecided_result()
 
         hole_assignments = result.primary_selection
         scores = result.primary_scores
@@ -476,10 +471,9 @@ class QuotientContainer:
         dtmc = self.build_chain(assignment)
         opt_result = dtmc.model_check_property(opt_prop)
         if opt_prop.improves_optimum(opt_result.value):
-            opt_prop.update_optimum(opt_result.value)
-            return assignment
+            return assignment, opt_result.value
         else:
-            return None
+            return None, None
 
 
 
@@ -878,7 +872,6 @@ class POMDPQuotientContainer(QuotientContainer):
             
                 # remove action from options
                 options = [option for option in family[hole_index].options if option // quo.hole_num_updates[hole_index] != action]
-                # print("{} -> {}".format(family[hole_index].options,options))
                 restricted_family[hole_index].assume_options(options)
         # logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
         
@@ -888,7 +881,6 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # options that are left in the hole
         selection = [ options.copy() for options in selection ]
-        print(selection)
 
         # for each observation round-robin inconsistencies from the holes
 
@@ -919,9 +911,6 @@ class POMDPQuotientContainer(QuotientContainer):
                     changed = True
                 if not changed:
                     break
-
-        print(options_removed)
-        print(selection)
 
         # remove selected options from the family
         restricted_family = family.copy()

@@ -51,7 +51,7 @@ function paynt() {
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiments_total}: ${benchmark}, method: ${method}"
     # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} &
-    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${incomplete_search_flag} ${fsc_flag} >${logfile} 2>&1 &
+    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${incomplete_search_flag} ${fsc_flag} >${logfile} &
 }
 
 ## experiment section ##########################################################
@@ -62,7 +62,7 @@ function paynt() {
 # benchmarks=( dpm maze herman pole grid )
 # experiments_total=5
 
-suite=hard
+suite=all
 benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/voihp-${suite}"
 experiments_total=`ls $benchmarks_dir/ | wc -l`
 

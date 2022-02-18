@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class Property:
 
     # model checking precision
-    mc_precision = 1e-5
+    mc_precision = 1e-4
     
     ''' Wrapper over a stormpy property. '''
     def __init__(self, prop):
@@ -202,6 +202,7 @@ class ConstraintsResult:
     def __str__(self):
         return ",".join([str(result) for result in self.results])
 
+
 class SpecificationResult:
     def __init__(self, constraints_result, optimality_result):
         self.constraints_result = constraints_result
@@ -209,6 +210,26 @@ class SpecificationResult:
 
     def __str__(self):
         return str(self.constraints_result) + " : " + str(self.optimality_result)
+
+    def improving(self, family):
+        ''' Interpret MDP specification result. '''
+        if self.constraints_result.feasibility is False:
+            return None,None,False
+        if self.constraints_result.feasibility is None:
+            return None,None,True
+
+        if self.optimality_result is None:
+            improving_assignment = family.pick_any()
+            return improving_assignment, None, False
+    
+        opt = self.optimality_result
+        return opt.improving_assignment, opt.improving_value, opt.can_improve
+
+    def undecided_result(self):
+        if self.optimality_result is not None and self.optimality_result.can_improve:
+            return self.optimality_result
+        return self.constraints_result.results[self.constraints_result.undecided_constraints[0]]
+            
 
 class MdpPropertyResult:
     def __init__(self,
@@ -249,14 +270,21 @@ class MdpConstraintsResult:
             if result.feasibility == None:
                 self.feasibility = None
 
+    def __str__(self):
+        return ",".join([str(result) for result in self.results])
+
 class MdpOptimalityResult(MdpPropertyResult):
     def __init__(self,
         prop, primary, secondary,
-        improving_assignment, can_improve,
+        improving_assignment, improving_value, can_improve,
         primary_selection, primary_choice_values, primary_expected_visits,
         primary_scores
     ):
-        super().__init__(prop, primary, secondary, None, primary_selection, primary_choice_values, primary_expected_visits, primary_scores)
+        super().__init__(
+            prop, primary, secondary, None,
+            primary_selection, primary_choice_values, primary_expected_visits,
+            primary_scores)
         self.improving_assignment = improving_assignment
+        self.improving_value = improving_value
         self.can_improve = can_improve
 
