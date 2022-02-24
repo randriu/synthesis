@@ -75,9 +75,9 @@ source $SYNTHESIS_ENV/bin/activate
 ## experiments
 
 
-method=hybrid
+method=ar
 fsc_synthesis=true
-incomplete_search=true
+# incomplete_search=false
 
 name="${suite}_${incomplete_search}_${method}"
 

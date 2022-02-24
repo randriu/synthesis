@@ -10,6 +10,8 @@ class Property:
 
     # model checking precision
     mc_precision = 1e-4
+    # precision for comparing floats
+    float_precision = 1e-10
     
     ''' Wrapper over a stormpy property. '''
     def __init__(self, prop):
@@ -61,11 +63,17 @@ class Property:
         return self.formula.is_reward_operator
 
     @staticmethod
-    def above_precision(a, b):
+    def above_mc_precision(a, b):
         return abs(a-b) > Property.mc_precision
 
+    @staticmethod
+    def above_float_precision(a, b):
+        return abs(a-b) > Property.float_precision
+
     def meets_op(self, a, b):
-        return Property.above_precision(a,b) and self.op(a,b)
+        ''' For constraints, we do not want to distinguish between small differences. '''
+        # return not Property.above_float_precision(a,b) or self.op(a,b)
+        return self.op(a,b)
 
     def meets_threshold(self, value):
         return self.meets_op(value, self.threshold)
@@ -111,7 +119,8 @@ class OptimalityProperty(Property):
         return f"{self.formula_str} {eps}"
 
     def meets_op(self, a, b):
-        return b is None or super().meets_op(a,b)
+        ''' For optimality objective, we want to accept improvements above model checking precision. '''
+        return b is None or (Property.above_mc_precision(a,b) and self.op(a,b))
 
     def satisfies_threshold(self, value):
         return self.result_valid(value) and self.meets_op(value, self.threshold)
@@ -213,17 +222,30 @@ class SpecificationResult:
 
     def improving(self, family):
         ''' Interpret MDP specification result. '''
-        if self.constraints_result.feasibility is False:
-            return None,None,False
-        if self.constraints_result.feasibility is None:
-            return None,None,True
 
-        if self.optimality_result is None:
-            improving_assignment = family.pick_any()
-            return improving_assignment, None, False
-    
+        cr = self.constraints_result
         opt = self.optimality_result
-        return opt.improving_assignment, opt.improving_value, opt.can_improve
+
+        if cr.feasibility == True:
+            # either no constraints or constraints were satisfied
+            if opt is not None:
+                return opt.improving_assignment, opt.improving_value, opt.can_improve
+            else:
+                improving_assignment = family.pick_any()
+                return improving_assignment, None, False
+
+        if cr.feasibility == False:
+            return None,None,False
+
+        # constraints undecided: try to push optimality assignment
+        if opt is not None: 
+            can_improve = opt.improving_value is None and opt.can_improve
+            return opt.improving_assignment, opt.improving_value, can_improve
+        else:
+            return None, None, True
+
+    
+        
 
     def undecided_result(self):
         if self.optimality_result is not None and self.optimality_result.can_improve:

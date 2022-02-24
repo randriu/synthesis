@@ -17,10 +17,6 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerPOMDP():
 
-    # whether action holes will be restricted before synthesis
-    # break_action_symmetry = False
-    break_action_symmetry = True
-
     def __init__(self, sketch, method):
         assert sketch.is_pomdp
         self.sketch = sketch
@@ -53,11 +49,12 @@ class SynthesizerPOMDP():
 
     
     def strategy_iterative(self):
-        mem_size = Sketch.pomdp_memory_size
+        mem_size = POMDPQuotientContainer.pomdp_memory_size
         while True:
             self.sketch.quotient.pomdp_manager.set_memory_size(mem_size)
             self.sketch.quotient.unfold_memory()
             self.synthesize(self.sketch.design_space)
+            mem_size += 1
 
     
     def solve_mdp(self, family):
@@ -67,10 +64,24 @@ class SynthesizerPOMDP():
         mdp = family.mdp
         spec = mdp.check_specification(self.sketch.specification)
 
-        selection = spec.optimality_result.primary_selection
-        choice_values = spec.optimality_result.primary_choice_values
-        expected_visits = spec.optimality_result.primary_expected_visits
-        scores = spec.optimality_result.primary_scores
+        hole_scores = {}
+        all_results = spec.constraints_result.results.copy()
+        if spec.optimality_result is not None:
+            all_results.append(spec.optimality_result)
+        # print([res.primary_scores for res in all_results])
+
+        for index,res in enumerate(spec.constraints_result.results):
+            for hole,score in res.primary_scores.items():
+                hole_score = hole_scores.get(hole,0)
+                hole_scores[hole] = hole_score + score
+
+
+        result = spec.optimality_result
+        selection = result.primary_selection
+        choice_values = result.primary_choice_values
+        expected_visits = result.primary_expected_visits
+        # scores = result.primary_scores
+        scores = hole_scores
 
         return mdp, spec, selection, choice_values, expected_visits, scores
 
@@ -104,7 +115,7 @@ class SynthesizerPOMDP():
             
             # use inconsistencies to break symmetry
             family = self.sketch.quotient.break_symmetry_3(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
-            
+
             # solve MDP that corresponds to this restricted family
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
             

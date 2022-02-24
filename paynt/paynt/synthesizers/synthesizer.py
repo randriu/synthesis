@@ -13,8 +13,7 @@ class Synthesizer:
 
     # synthesis escape criterion
     use_optimum_update_timeout = False
-    optimum_update_iters_limit = 10000
-
+    optimum_update_iters_limit = 100000
     
     def __init__(self, sketch):
         self.sketch = sketch
@@ -36,8 +35,15 @@ class Synthesizer:
         self.stat.print()
     
     def run(self):
-        # self.sketch.specification.optimality.update_optimum(15.6)
-        self.synthesize(self.sketch.design_space)
+        # self.sketch.specification.optimality.update_optimum(11.08)
+        assignment = self.synthesize(self.sketch.design_space)
+        print(assignment)
+
+        if assignment is not None:
+            dtmc = self.sketch.quotient.build_chain(assignment)
+            spec = dtmc.check_specification(self.sketch.specification)
+            print(spec)
+        
         self.print_stats()
     
     def explore(self, family):
@@ -110,10 +116,11 @@ class SynthesizerAR(Synthesizer):
         Profiler.resume()
 
         improving_assignment,improving_value,can_improve = res.improving(family)
+        # print(improving_value, can_improve)
         if improving_value is not None:
             self.sketch.specification.optimality.update_optimum(improving_value)
             self.since_last_optimum_update = 0
-        
+
         return can_improve, improving_assignment
     
     

@@ -347,12 +347,10 @@ class QuotientContainer:
         :return whether the scheduler is consistent
         '''
         # selection = self.scheduler_selection(mdp, result.scheduler)
-
         if mdp.is_dtmc:
             selection = [[mdp.design_space[hole_index].options[0]] for hole_index in mdp.design_space.hole_indices]
             return selection, None, None, None, True
 
-        
         selection,choice_values,expected_visits,scores = self.scheduler_selection_quantitative(mdp, prop, result)
         consistent = True
         for hole_index in mdp.design_space.hole_indices:
@@ -388,7 +386,6 @@ class QuotientContainer:
         assert len(used_options) > 1
         core_suboptions = [[option] for option in used_options]
         other_suboptions = [option for option in mdp.design_space[splitter].options if option not in used_options]
-        memory_holes = [hole for holes in self.pomdp_manager.memory_holes for hole in holes]
         return core_suboptions, other_suboptions
 
     def holes_with_max_score(self, hole_score):
@@ -440,11 +437,17 @@ class QuotientContainer:
 
         hole_assignments = result.primary_selection
         scores = result.primary_scores
+        if scores is None:
+            scores = {hole:0 for hole in mdp.design_space.hole_indices if len(mdp.design_space[hole].options) > 1}
         
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
-        assert len(hole_assignments[splitter]) > 1
-        core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
+        if len(hole_assignments[splitter]) > 1:
+            core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
+        else:
+            assert len(mdp.design_space[splitter].options) > 1
+            core_suboptions = self.suboptions_half(mdp, splitter)
+            other_suboptions = []
 
         new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions)
         
@@ -462,16 +465,17 @@ class QuotientContainer:
         Profiler.resume()
         return design_subspaces
 
-    def double_check_assignment(self, assignment, opt_prop):
+    def double_check_assignment(self, assignment):
         '''
         Double-check whether this assignment truly improves optimum.
         :return singleton family if the assignment truly improves optimum
         '''
         assert assignment.size == 1
         dtmc = self.build_chain(assignment)
-        opt_result = dtmc.model_check_property(opt_prop)
-        if opt_prop.improves_optimum(opt_result.value):
-            return assignment, opt_result.value
+        res = dtmc.check_specification(self.sketch.specification)
+        # opt_result = dtmc.model_check_property(opt_prop)
+        if res.constraints_result.all_sat and self.sketch.specification.optimality.improves_optimum(res.optimality_result.value):
+            return assignment, res.optimality_result.value
         else:
             return None, None
 
@@ -802,9 +806,10 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # create inverse map
         # TODO optimize this for multiple properties
-        quotient_to_restricted_action_map = [None] * self.quotient_mdp.nr_choices
-        for action in range(mdp.choices):
-            quotient_to_restricted_action_map[mdp.quotient_choice_map[action]] = action
+        if mdp.quotient_to_restricted_action_map is None:
+            quotient_to_restricted_action_map = [None] * self.quotient_mdp.nr_choices
+            for action in range(mdp.choices):
+                quotient_to_restricted_action_map[mdp.quotient_choice_map[action]] = action
 
         # for each hole, compute its difference sum and a number of affected states
         inconsistent_differences = {}
