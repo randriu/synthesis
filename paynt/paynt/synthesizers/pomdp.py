@@ -70,10 +70,11 @@ class SynthesizerPOMDP():
             all_results.append(spec.optimality_result)
         # print([res.primary_scores for res in all_results])
 
-        for index,res in enumerate(spec.constraints_result.results):
+        for index,res in enumerate(all_results):
             for hole,score in res.primary_scores.items():
                 hole_score = hole_scores.get(hole,0)
                 hole_scores[hole] = hole_score + score
+
 
 
         result = spec.optimality_result
@@ -105,8 +106,14 @@ class SynthesizerPOMDP():
         fsc_synthesis_timer = Timer()
         fsc_synthesis_timer.start()
 
+        holes_to_inject = [1,3];
+
         while True:
         # for iteration in range(100):
+
+            if memory_injections == 3:
+                break
+            # print(self.sketch.quotient.observation_labels)
             
             print("\n------------------------------------------------------------\n")
 
@@ -222,6 +229,7 @@ class SynthesizerPOMDP():
                 hole_scores = {h:v for h,v in hole_scores.items() if v / max_score > 0.01 }
             with_max_score = [hole for hole in hole_scores if hole_scores[hole] == max_score]
             selected_hole = with_max_score[0]
+            # selected_hole = holes_to_inject[0]
             selected_options = selection[selected_hole]
             
             # print()
@@ -250,7 +258,7 @@ class SynthesizerPOMDP():
                 opt = round(self.sketch.specification.optimality.optimum,3)
             elapsed = round(fsc_synthesis_timer.read(),1)
             logger.info("FSC synthesis: elapsed {} s, opt = {}, injections: {}.".format(elapsed, opt, memory_injections))
-            # logger.info("FSC: {}".format(best_assignment))
+            logger.info("FSC: {}".format(best_assignment))
 
             # inject memory and continue
             self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)

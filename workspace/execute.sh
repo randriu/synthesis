@@ -52,10 +52,10 @@ function paynt() {
 
 function run() {
 
-    # timeout=5s
+    # timeout=3s
 
-    pomdp_mem_size=3
-    # fsc_synthesis=true
+    pomdp_mem_size=1
+    fsc_synthesis=true
     # incomplete_search=true
 
     ### running ###
@@ -96,7 +96,7 @@ function run() {
     # model="pomdp/voihp-all/hallway"
     # model="pomdp/voihp-other/grid-avoid-0-mo"
     # model="pomdp/voihp-other/maze-mo"
-    model="pomdp/voihp-other/maze-mo-2"
+    model="pomdp/voihp-other/maze-paper"
 
     paynt $model ar
     # paynt $model hybrid

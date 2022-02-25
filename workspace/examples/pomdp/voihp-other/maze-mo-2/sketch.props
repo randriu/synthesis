@@ -1,7 +1,0 @@
-P>=0.6 [ (!bad) U goal ]
-//Pmax=? [ (!bad) U goal ]
-
-//P>=0.7 [ (!bad) U (goal | (x=2 & y=3)) ]
-//R{"steps"}<=4 [ F (goal | bad | (x=2 & y=3)) ]
-
-R{"steps"}min=? [ F (goal | bad) ]

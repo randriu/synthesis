@@ -244,7 +244,7 @@ class QuotientContainer:
             dtmc_visits = QuotientContainer.make_vector_defined(dtmc_visits)
         else:
             dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
-        
+
         # map vector of expected visits onto the state space of the quotient MDP
         expected_visits = [0] * mdp.states
         for state in range(dtmc.nr_states):
@@ -836,7 +836,7 @@ class POMDPQuotientContainer(QuotientContainer):
                     choice = quotient_to_restricted_action_map[choice_global]
                     choice_value = choice_values[choice]
                     state_values.append(choice_value)
-                
+
                 min_value = min(state_values)
                 max_value = max(state_values)
                 difference = (max_value - min_value) * source_state_visits
@@ -991,6 +991,7 @@ class POMDPQuotientContainer(QuotientContainer):
                         options.append(action * num_updates + update)
                 restricted_family[hole].assume_options(options)
 
+        print(restricted_family)
         logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
 
         return restricted_family
