@@ -37,6 +37,7 @@ class Sketch:
         logger.info(f"Loading sketch from {sketch_path}...")
         logger.info(f"Attempting to parse model in explicit format ...")
         self.explicit_model = Sketch.read_explicit_model(sketch_path)
+
         if self.is_explicit:
             logger.info(f"Successfully parsed model in explicit format.")
             self.design_space = DesignSpace()
@@ -200,11 +201,10 @@ class Sketch:
 
         # try to parse temporary sketch and then delete it
         try:
-            prism = stormpy.parse_prism_program(tmp_path)
+            prism = stormpy.parse_prism_program(tmp_path, prism_compat=True)
             os.remove(tmp_path)
         except:
             os.remove(tmp_path)
-            exit()
 
         return prism, hole_definitions
 
