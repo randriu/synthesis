@@ -2,7 +2,7 @@ import re
 import pygraphviz as pgv
 
 def parse_hole(name) -> object:
-    assert re.match(r"[AM]\(\[(o=\d)?\],\d\)",
+    assert re.match(r"[AM]\(\[.*\],\d\)",
                     name), "Cannot use restrict function, hole name doesn't match"
     hole = {}
     hole["type"] = "Memory" if name[0] == "M" else "Assignment"
