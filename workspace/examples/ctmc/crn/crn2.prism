@@ -1,0 +1,29 @@
+ma
+
+// t1: B -> [1] A
+// t2: A -> [2] B
+
+const int MAX=2;
+
+const double inf = 100;
+
+formula exit_rate = (b>0 ? 1 : 0) + (a>0 ? 2 : 0);
+formula aplus = min(a+1,MAX);
+formula bplus = min(b+1,MAX);
+
+module species
+
+    a: [0..MAX] init 1;
+    b: [0..MAX] init 1;
+    f: [0..2] init 0;
+
+    [choose] f=0 -> 1/3 : (f'=1) + 2/3 : (f'=2);
+    
+    <> f=1 & b>0 -> exit_rate : (b'=b-1) & (a'=aplus) & (f'=0);
+    <> f=1 & b=0 -> inf : (f'=0);
+
+    <> f=2 & a>0 -> exit_rate : (a'=a-1) & (b'=bplus) & (f'=0);
+    <> f=2 & a=0 -> inf : (f'=0);
+
+    
+endmodule

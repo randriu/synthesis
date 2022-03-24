@@ -75,8 +75,8 @@ class Sketch:
 
         if self.is_dtmc:
             self.quotient = DTMCQuotientContainer(self)
-        elif self.is_ctmc:
-            self.quotient = CTMCQuotientContainer(self)
+        elif self.is_ma:
+            self.quotient = MAQuotientContainer(self)
         elif self.is_mdp:
             self.quotient = MDPQuotientContainer(self)
         elif self.is_pomdp:
@@ -101,7 +101,11 @@ class Sketch:
     @property
     def is_ctmc(self):
         return not self.is_explicit and self.prism.model_type == stormpy.storage.PrismModelType.CTMC
-    
+
+    @property
+    def is_ma(self):
+        return not self.is_explicit and self.prism.model_type == stormpy.storage.PrismModelType.MA
+
     @property
     def is_mdp(self):
         return not self.is_explicit and self.prism.model_type == stormpy.storage.PrismModelType.MDP
@@ -159,7 +163,7 @@ class Sketch:
                 print("#action ", current_action, " [0]", sep="")
             print("##", target, " : ", prob, sep="")
             
-        exit()
+        # exit()
 
     @classmethod
     def read_explicit_model(cls, path):

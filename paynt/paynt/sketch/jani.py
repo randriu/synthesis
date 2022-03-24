@@ -42,7 +42,7 @@ class JaniUnfolder():
         self.jani_unfolded = None
         self.combination_coloring = None
         self.edge_to_color = None
-        self.unfold_jani(jani, sketch.design_space, sketch.EXPORT_JANI)
+        self.unfold_jani(jani, sketch.design_space, sketch.export_jani)
 
 
     # Unfold holes in the jani program

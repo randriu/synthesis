@@ -106,13 +106,9 @@ class SynthesizerPOMDP():
         fsc_synthesis_timer = Timer()
         fsc_synthesis_timer.start()
 
-        holes_to_inject = [1,3];
-
         while True:
         # for iteration in range(100):
 
-            if memory_injections == 3:
-                break
             # print(self.sketch.quotient.observation_labels)
             
             print("\n------------------------------------------------------------\n")

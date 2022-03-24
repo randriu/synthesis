@@ -527,6 +527,9 @@ class CTMCQuotientContainer(QuotientContainer):
     def __init__(self, *args):
         super().__init__(*args)
 
+class MAQuotientContainer(QuotientContainer):
+    def __init__(self, *args):
+        super().__init__(*args)
 
 class MDPQuotientContainer(QuotientContainer):
     def __init__(self, *args):
@@ -710,7 +713,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 for mem,action_hole in enumerate(ah):
                     memory_hole = mh[mem]
 
-                    name = "(AM({},{})".format(obs_label,mem)
+                    name = "AM({},{})".format(obs_label,mem)
                     
                     num_options = num_actions * num_updates
                     options = list(range(num_options))

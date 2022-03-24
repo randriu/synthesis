@@ -1,0 +1,69 @@
+ma
+
+// sketch
+// L in {A,B}, r2 in {1,2}
+
+// t1: L -> [1] A
+// t2: A -> [r2] B
+
+// stage updates
+const int CLK_MAX = 3;
+formula clk_upd = clk=CLK_MAX ? 0 : clk+1;
+
+// species
+const int MAX=2;
+formula L = l=0 ? a : b;
+formula aplus = min(a+1,MAX);
+formula bplus = min(b+1,MAX);
+
+// whether action is enabled
+formula t1_en = b>0;
+formula t2_en = a>0;
+
+// individual reaction rates
+formula t1_rate = 1;
+formula t2_rate = r2=0 ? 1 : 2;
+formula rate_sum = t1_rate + t2_rate;
+
+// exit rate
+formula exit_rate = (t1_en ? 2 : 0) + (t2_en ? 5 : 0);
+
+const double inf = 10000;
+
+module species
+
+    clk: [0..CLK_MAX] init 0;
+    r2: [0..1] init 0;
+    t: [1..2] init 1;
+    l: [0..1] init 0;
+
+    a: [0..MAX] init 1;
+    b: [0..MAX] init 1;
+
+    // choose rate combination
+    //[rate] clk=0 -> (clk'=1) & (r2'=0);
+    [rate] clk=0 -> (clk'=1) & (r2'=1);
+    
+    // choose reaction
+    [reaction] clk=1 -> t1_rate/rate_sum: (t'=1) & (clk'=2) + t2_rate/rate_sum: (t'=2) & (clk'=2);
+
+    // choose the world
+    //[world] clk=2 & t=1 -> (l'=0) & (clk'=3);
+    [world] clk=2 & t=1 -> (l'=1) & (clk'=3);
+
+    [world] clk=2 & t=2 -> (clk'=3);
+    
+    // execute reaction 1
+    
+    <> clk=3 & t=1 & l=0 & t1_en -> exit_rate: (clk'=0) & (r2'=0) & (t'=1) & (l'=0);
+    <> clk=3 & t=1 & l=1 & t1_en -> exit_rate: (b'=b-1) & (a'=aplus) & (clk'=0) & (r2'=0) & (t'=1) & (l'=0);
+
+    // execute reaction 2
+
+    <> clk=3 & t=2 & t2_en -> exit_rate: (a'=a-1) & (b'=bplus) & (clk'=0) & (r2'=0) & (t'=1) & (l'=0);
+    
+    <> clk=3 & t=1 & !t1_en -> inf: (clk'=0) & (r2'=0) & (t'=1) & (l'=0);
+    <> clk=3 & t=2 & !t2_en -> inf: (clk'=0) & (r2'=0) & (t'=1) & (l'=0);
+    
+
+endmodule

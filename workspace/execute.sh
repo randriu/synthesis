@@ -52,10 +52,10 @@ function paynt() {
 
 function run() {
 
-    timeout=3s
+    # timeout=3s
 
-    # pomdp_mem_size=1
-    # fsc_synthesis=true
+    pomdp_mem_size=1
+    fsc_synthesis=true
     # incomplete_search=true
 
     ### running ###
@@ -74,7 +74,7 @@ function run() {
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp-all/grid-4-0.1"
     # model="pomdp/voihp-all/grid-4-0.3"
-    # model="pomdp/voihp-all/grid-avoid-4-0.1"
+    model="pomdp/voihp-all/grid-avoid-4-0.1"
     # model="pomdp/voihp-all/grid-avoid-4-0"
     # model="pomdp/voihp-all/maze2-0.1"
     # model="pomdp/voihp/maze2-0"
@@ -100,7 +100,7 @@ function run() {
 
     ### CTMC
 
-    model="ctmc/cluster"
+    # model="ctmc/simple"
 
     paynt $model ar
     # paynt $model hybrid

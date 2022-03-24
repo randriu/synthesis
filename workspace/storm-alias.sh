@@ -279,7 +279,7 @@ bind '"\e4"':"\"db 4 \C-m\""
 
 storm() {
     cd $STORM_BLD/bin
-    local cmd="./storm --explchecks --build-overlapping-guards-label $1"
+    local cmd="$STORM_BLD/bin/storm --explchecks --build-overlapping-guards-label $1"
     eval $cmd
     cd -
 }
