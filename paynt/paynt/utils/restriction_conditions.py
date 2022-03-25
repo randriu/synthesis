@@ -1,8 +1,9 @@
 
 import re
+from .utils import *
 
 
-class RestrictionConditions:
+class Conditions:
     conditions = {}
 
     def __init__(self) -> None:
@@ -41,24 +42,32 @@ class RestrictionConditions:
     def cond6(self, current, next, _):
         return next == current
 
-def restrict(self, design_space=None, condition=lambda current, next: current > next, name="Restrict"):
-    if design_space is None:
-        design_space = self.design_space
-        pass
+
+def restrict(design_space, condition=lambda current, next, _: current > next, name="Restrict"):
 
     original_size = design_space.size
-    options = 0
+    total_options = 0
     removed = 0
+
     for hole in design_space:
         assert re.match(
-            r"[AM]\(\[.*],\d\)", hole.name), "Cannot use restrict function, hole name doesn't match"
+            r"[AM]{1,2}\(\[.*],\d\)", hole.name), "Cannot use restrict function, hole {} doesn't match".format(hole.name)
 
         if hole.name[0] == "M":
             current = int(hole.name[-2])
-            max = sorted(hole.options)[-2]
+            max = sorted(hole.options)[-1]
             for option in hole.options.copy():
-                options += 1
+                total_options += 1
                 if condition(current, option, max):
+                    hole.options.remove(option)
+                    removed += 1
+        elif hole.name[0] == "A" and hole.name[1] == "M":
+            current = int(hole.name[-2])
+            options, max = parse_am_labels(hole)
+
+            for (next, option) in zip(options, hole.options.copy()):
+                total_options += 1
+                if condition(current, next, max):
                     hole.options.remove(option)
                     removed += 1
 
@@ -68,9 +77,9 @@ def restrict(self, design_space=None, condition=lambda current, next: current > 
             format((design_space.size/original_size)*100, ".10f")
         ), "of original size")
 
-    if options:
+    if total_options:
         print("[{}]\tRemoved {}%".format(
             name.upper(),
-            format((removed/options)*100, ".10f")
-        ), "of options")
+            format((removed/total_options)*100, ".10f")
+        ), "of total_options")
     return design_space
