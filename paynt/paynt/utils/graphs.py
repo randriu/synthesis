@@ -1,16 +1,7 @@
 import re
 import pygraphviz as pgv
 
-def parse_hole(name) -> object:
-    assert re.match(r"[AM]\(\[.*\],\d\)",
-                    name), "Cannot use restrict function, hole name doesn't match"
-    hole = {}
-    hole["type"] = "Memory" if name[0] == "M" else "Assignment"
-    hole["memory"] = int(name[-2])
-    hole["observation"] = int(name[5]) if re.match(
-        r"[MA]\(\[o=\d\],\d\)", name) else 0
-
-    return hole
+from .utils import *
 
 
 class Graph:
@@ -30,8 +21,7 @@ class Graph:
         """
         self.nodes = {}
         for hole in design_space:
-            tmp = parse_hole(hole.name)
-            tmp["next"] = list(hole.options)
+            tmp = parse_hole(hole)
 
             for next in tmp["next"]:
                 if tmp["type"] == "Assignment":
