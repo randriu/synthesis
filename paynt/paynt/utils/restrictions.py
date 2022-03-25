@@ -83,3 +83,4 @@ def restrict(design_space, condition=lambda current, next, _: current > next, na
             format((removed/total_options)*100, ".10f")
         ), "of total_options")
     return design_space
+
