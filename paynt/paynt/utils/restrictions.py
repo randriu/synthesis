@@ -54,7 +54,7 @@ def restrict(design_space, condition=lambda current, next, _: current > next, na
             r"[AM]{1,2}\(\[.*],\d\)", hole.name), "Cannot use restrict function, hole {} doesn't match".format(hole.name)
 
         if hole.name[0] == "M":
-            current = int(hole.name[-2])
+            current = get_current_memory(hole.name)
             max = sorted(hole.options)[-1]
             for option in hole.options.copy():
                 total_options += 1
@@ -62,7 +62,7 @@ def restrict(design_space, condition=lambda current, next, _: current > next, na
                     hole.options.remove(option)
                     removed += 1
         elif hole.name[0] == "A" and hole.name[1] == "M":
-            current = int(hole.name[-2])
+            current = get_current_memory(hole.name)
             options, max = parse_am_labels(hole)
 
             for (next, option) in zip(options, hole.options.copy()):

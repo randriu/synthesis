@@ -13,11 +13,14 @@ def parse_am_labels(hole):
     return (options, max)
 
 
+def get_current_memory(name):
+    return int(re.findall(r"[AM]{1,2}\(\[.*\],(\d)\)", name)[0])
+
 def parse_hole(hole) -> object:
     assert re.match(r"[AM]{1,2}\(\[.*\],\d\)",
                     hole.name), "Cannot use restrict function, hole name doesn't match"
     parsed = {}
-    parsed["memory"] = re.findall(r"[AM]{1,2}\(\[.*\],(\d)\)", hole.name)[0]
+    parsed["memory"] = get_current_memory(hole.name)
     parsed["next"] = list(hole.options)
 
     observation = re.findall(r"[AM]{1,2}\(\[(.*)],\d\)", hole.name)
