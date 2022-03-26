@@ -8,13 +8,15 @@ def parse_am_labels(hole):
             r"{.*}\+\d", hole.option_labels[option]), "Hole option label {} doesn't match".format(hole.option_labels[option])
         opt = re.findall(r"{.*}\+(\d)", hole.option_labels[option])[0]
         options.append(int(opt))
-    max = sorted(list(set(options)))[-1]
+
+    max = None if not options else sorted(list(set(options)))[-1]
 
     return (options, max)
 
 
 def get_current_memory(name):
     return int(re.findall(r"[AM]{1,2}\(\[.*\],(\d)\)", name)[0])
+
 
 def parse_hole(hole) -> object:
     assert re.match(r"[AM]{1,2}\(\[.*\],\d\)",
