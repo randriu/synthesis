@@ -7,14 +7,16 @@ from . import version
 from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import *
 from .synthesizers.quotient import POMDPQuotientContainer
+from .synthesizers.incremental import SynthesizerPOMDPIncremental
 from .synthesizers.pomdp import SynthesizerPOMDP
 
 import logging
 # logger = logging.getLogger(__name__)
 
-def setup_logger(log_path = None):
+
+def setup_logger(log_path=None):
     ''' Setup routine for logging. '''
-    
+
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     # root.setLevel(logging.INFO)
@@ -43,16 +45,13 @@ def setup_logger(log_path = None):
 @click.option("--properties", default="sketch.props", help="name of the properties file")
 @click.option("--constants", default="", help="constant assignment string", )
 @click.argument("method", type=click.Choice(['onebyone', 'cegis', 'ar', 'hybrid'], case_sensitive=False), default="ar")
-
 @click.option("--export-jani", is_flag=True, default=False, help="export JANI model to 'output.jani' and abort")
-
 @click.option("--incomplete-search", is_flag=True, default=False, help="use incomplete search during the synthesis")
-
 @click.option("--fsc-synthesis", is_flag=True, default=False, help="enable incremental synthesis of FSCs for a POMDP")
 @click.option("--pomdp-memory-size", default=1, help="implicit memory size for POMDP FSCs")
-
+@click.option("--incremental", nargs=2, default=[0, 0], type=int, help="enable incremental synthesis of FSC for a POMDP within a memory size with applied restrictions")
 def paynt(
-        project, sketch, properties, constants, method, export_jani, incomplete_search, fsc_synthesis, pomdp_memory_size, 
+        project, sketch, properties, constants, method, export_jani, incomplete_search, fsc_synthesis, pomdp_memory_size, incremental
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -69,7 +68,11 @@ def paynt(
 
     # choose synthesis method
     if sketch.is_pomdp and fsc_synthesis:
-        synthesizer = SynthesizerPOMDP(sketch, method)
+        if incremental:
+            synthesizer = SynthesizerPOMDPIncremental(
+                sketch, method, min=incremental[0], max=incremental[1])
+        else:
+            synthesizer = SynthesizerPOMDP(sketch, method)
     elif method == "onebyone":
         synthesizer = Synthesizer1By1(sketch)
     elif method == "cegis":
