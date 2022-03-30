@@ -189,7 +189,7 @@ class DesignSpace(Holes):
 
     # whether hints will be stored for subsequent MDP model checking
     store_hints = True
-
+    
     def __init__(self, holes = [], parent_info = None):
         super().__init__(holes)
 
@@ -204,6 +204,7 @@ class DesignSpace(Holes):
         self.refinement_depth = 0
         self.property_indices = None
 
+        self.analysis_result = None
         self.splitter = None
         self.parent_info = parent_info
         if parent_info is not None:

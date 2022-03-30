@@ -52,10 +52,10 @@ function paynt() {
 
 function run() {
 
-    # timeout=3s
+    timeout=3s
 
     pomdp_mem_size=1
-    fsc_synthesis=true
+    # fsc_synthesis=true
     # incomplete_search=true
 
     ### running ###
@@ -64,7 +64,7 @@ function run() {
     # model="coin/more"
     # model="dice/5"
 
-    # model="pomdp/maze/concise"
+    model="pomdp/maze"
 
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"
@@ -74,7 +74,7 @@ function run() {
     ### verification of indefinite-horizon POMDPs ###
     # model="pomdp/voihp-all/grid-4-0.1"
     # model="pomdp/voihp-all/grid-4-0.3"
-    model="pomdp/voihp-all/grid-avoid-4-0.1"
+    # model="pomdp/voihp-all/grid-avoid-4-0.1"
     # model="pomdp/voihp-all/grid-avoid-4-0"
     # model="pomdp/voihp-all/maze2-0.1"
     # model="pomdp/voihp/maze2-0"
@@ -102,9 +102,9 @@ function run() {
 
     # model="ctmc/simple"
 
-    paynt $model ar
+    # paynt $model ar
     # paynt $model hybrid
-    # paynt $model cegis
+    paynt $model cegis
 }
 
 # --- execution ----------------------------------------------------------------

@@ -188,6 +188,8 @@ class SynthesizerCEGIS(Synthesizer):
         :return (1) specification satisfiability (True/False)
         :return (2) whether this is an improving assignment
         """
+
+        assert family.mdp is not None, "analyzed family does not have an associated quotient MPD"
         
         Profiler.start("CEGIS analysis")
         
@@ -271,8 +273,8 @@ class SynthesizerCEGIS(Synthesizer):
             c = self.sketch.specification.optimality
             assert not (c.reward and not c.minimizing), msg
 
-        # map mdp states to hole indices
-        family.mdp = self.sketch.quotient.build(family)
+        # build the quotient, map mdp states to hole indices
+        self.sketch.quotient.build(family)
         self.sketch.quotient.compute_state_to_holes()
         quotient_relevant_holes = self.sketch.quotient.state_to_holes
 
