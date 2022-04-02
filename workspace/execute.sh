@@ -52,7 +52,7 @@ function paynt() {
 
 function run() {
 
-    timeout=3s
+    # timeout=10s
 
     pomdp_mem_size=1
     # fsc_synthesis=true
@@ -63,8 +63,9 @@ function run() {
     # model="coin"
     # model="coin/more"
     # model="dice/5"
+    model="dtmc/maze/concise"
 
-    model="pomdp/maze"
+    # model="pomdp/maze"
 
     # model="pomdp/grid/obstacle"
     # model="pomdp/grid/intercept"

@@ -136,6 +136,9 @@ class QuotientContainer:
         family.mdp = MDP(model, self, state_map, choice_map, family)
         family.mdp.analysis_hints = family.translate_analysis_hints()
 
+        # prepare to discard designs
+        self.discarded = 0
+
     
     @staticmethod
     def mdp_to_dtmc(mdp):
