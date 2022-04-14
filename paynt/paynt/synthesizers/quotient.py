@@ -997,7 +997,7 @@ class POMDPQuotientContainer(QuotientContainer):
                         options.append(action * num_updates + update)
                 restricted_family[hole].assume_options(options)
 
-        print(restricted_family)
+        # print(restricted_family)
         logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
 
         return restricted_family

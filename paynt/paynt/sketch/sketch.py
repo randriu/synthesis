@@ -118,54 +118,6 @@ class Sketch:
             return self.prism.model_type == stormpy.storage.PrismModelType.POMDP
 
     @classmethod
-    def parse_pomdp_solve_file(cls):
-        with open('/home/may/actions.txt') as f:
-            matrix = f.readlines()
-
-        with open('/home/may/obs.txt') as f:
-            obs = f.readlines()
-
-        state_obs = []
-        for line in obs:
-            line = line.replace("\n","")
-            line = line.split(" ")
-            if '' in line:
-                line.remove('')
-            line = [float(entry) for entry in line ]
-            max_prob = max(line)
-            state_ob = line.index(max_prob)
-            state_obs.append(state_ob)
-        # print(state_obs)
-        # print(max(state_obs))
-        # print(len(state_obs))
-        
-        rows = []
-        for line in matrix:
-            line = line.replace("\n", "")
-            line = line.replace(" ", "")
-            line = line.split(":")
-            line = line[1:]
-            action = int(line[0])
-            source = int(line[1])
-            target = int(line[2])
-            prob = float(line[3])
-            rows.append((action,source,target,prob))
-
-        current_source = None
-        current_action = None
-        for row in rows:
-            action,source,target,prob = row
-            if source != current_source:
-                current_source = source
-                print("state ", current_source, " {", state_obs[current_source], "}", sep="")
-            if current_action != action:
-                current_action = action
-                print("#action ", current_action, " [0]", sep="")
-            print("##", target, " : ", prob, sep="")
-            
-        # exit()
-
-    @classmethod
     def read_explicit_model(cls, path):
         explicit_model = None
         try:

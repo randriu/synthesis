@@ -52,7 +52,7 @@ function paynt() {
 
 function run() {
 
-    # timeout=10s
+    timeout=3s
 
     pomdp_mem_size=1
     # fsc_synthesis=true
@@ -63,7 +63,7 @@ function run() {
     # model="coin"
     # model="coin/more"
     # model="dice/5"
-    model="dtmc/maze/concise"
+    # model="dtmc/maze/concise"
 
     # model="pomdp/maze"
 
@@ -83,12 +83,12 @@ function run() {
 
     
     # model="pomdp/voihp-hard/drone-4-1"
-    # model="pomdp/voihp-all/refuel-06"
+    model="pomdp/voihp-all/refuel-06"
     # model="pomdp/voihp-hard/rocks-12"
 
     # model="pomdp/voihp-all/crypt-4"
-    # model="pomdp/voihp-hard/network-prio-2-8-20"
-    # model="pomdp/voihp/network-2-8-20"
+    # model="pomdp/voihp-all/network-prio-2-8-20"
+    # model="pomdp/voihp-all/network-2-8-20"
     # model="pomdp/voihp/nrp-8"
 
 
@@ -99,13 +99,14 @@ function run() {
     # model="pomdp/voihp-other/maze-mo"
     # model="pomdp/voihp-other/maze-paper"
 
-    ### CTMC
+    ### test
 
     # model="ctmc/simple"
+    model="mdp/maze"
 
-    # paynt $model ar
+    paynt $model ar
     # paynt $model hybrid
-    paynt $model cegis
+    # paynt $model cegis
 }
 
 # --- execution ----------------------------------------------------------------
