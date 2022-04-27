@@ -37,12 +37,15 @@ class Synthesizer:
     def run(self):
         # self.sketch.specification.optimality.update_optimum(11.08)
         assignment = self.synthesize(self.sketch.design_space)
-        print(assignment)
+
+        print("")
+        logger.info("Printing synthesized assignment below:")
+        logger.info(str(assignment))
 
         if assignment is not None:
             dtmc = self.sketch.quotient.build_chain(assignment)
             spec = dtmc.check_specification(self.sketch.specification)
-            print(spec)
+            logger.info("Double-checking specification satisfiability: {}".format(spec))
         
         self.print_stats()
     
@@ -192,6 +195,7 @@ class SynthesizerCEGIS(Synthesizer):
         assert family.mdp is not None, "analyzed family does not have an associated quotient MPD"
         
         Profiler.start("CEGIS analysis")
+        # print(assignment)
         
         # build DTMC
         dtmc = self.sketch.quotient.build_chain(assignment)
@@ -248,6 +252,7 @@ class SynthesizerCEGIS(Synthesizer):
             Profiler.resume()
             conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
             conflicts.append(conflict)
+        # print(conflicts)
 
         # use conflicts to exclude the generalizations of this assignment
         Profiler.start("holes::exclude_assignment")

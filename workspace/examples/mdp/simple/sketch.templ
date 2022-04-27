@@ -1,20 +1,17 @@
 mdp
 
-hole int s0h in {0,1,2};
-hole int s0t in {0,1,2};
-hole double p in {0.5,0.6};
+module m
+    s : [0..4] init 0;
+    
+    [up]     s=0 -> (s'=1);
+    [down]   s=0 -> (s'=2);
+    
+    [up]     s=1 -> true;
+    [down]   s=1 -> (s'=3);
 
-module dice
-    s : [0..2] init 0;
-    [] s=1 | s=2 -> true;
-    [] s=0 -> p : (s' = s0h) + 1-p : (s' = s0t);
-    [] s=0 -> p : (s' = s0h) + 1-p : (s' = s0t);
 endmodule
 
-formula heads = (s = 2);
-formula tails = (s = 1);
-
-formula finished = heads | tails;
+formula target = s=3;
 
 rewards "steps"
     true : 1;

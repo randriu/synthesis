@@ -17,6 +17,8 @@ class Sketch:
 
     # if True, unfolded JANI is exported and the program is aborted
     export_jani = False
+    # if True, the sketch is assumed to be a hole-free MDP
+    hyperproperty_synthesis = False
 
     def __init__(self, sketch_path, properties_path, constant_str):
 
@@ -78,7 +80,10 @@ class Sketch:
         elif self.is_ma:
             self.quotient = MAQuotientContainer(self)
         elif self.is_mdp:
-            self.quotient = MDPQuotientContainer(self)
+            if Sketch.hyperproperty_synthesis:
+                self.quotient = HyperPropertyQuotientContainer(self)
+            else:
+                self.quotient = MDPQuotientContainer(self)
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
             self.quotient.pomdp_manager.set_memory_size(POMDPQuotientContainer.pomdp_memory_size)

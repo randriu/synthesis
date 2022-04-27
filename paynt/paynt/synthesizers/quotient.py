@@ -539,8 +539,60 @@ class MDPQuotientContainer(QuotientContainer):
         super().__init__(*args)
 
     def build_chain(self, assignment):
-        model = self.sketch.restrict_prism(assignment)
         return MDP(model, self, None, None, assignment)
+
+class HyperPropertyQuotientContainer(QuotientContainer):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+        # build the quotient
+        MarkovChain.builder_options.set_build_choice_labels(True)
+        self.quotient_mdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
+        MarkovChain.builder_options.set_build_choice_labels(False)
+        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
+
+        # to each state, construct a hole with options corresponding to actions
+        # available at this state; associate each action with the corresponding
+        # hole-option pair
+        holes = Holes()
+
+        assert self.quotient_mdp.has_choice_labeling()
+        assert self.quotient_mdp.has_state_valuations()
+
+        self.action_to_hole_options = []
+        for state in range(self.quotient_mdp.nr_states):
+            
+            # skip states without nondeterminism
+            num_actions = self.quotient_mdp.get_nr_available_actions(state)
+            if num_actions == 1:
+                self.action_to_hole_options.append({})
+                continue
+
+            # a hole to be created
+            hole_name = self.quotient_mdp.state_valuations.get_string(state)
+            hole_options = list(range(num_actions))
+
+            # extract labels for each option
+            hole_option_labels = []
+            for offset in range(num_actions):
+                choice = self.quotient_mdp.get_choice_index(state,offset)
+                labels = self.quotient_mdp.choice_labeling.get_labels_of_choice(choice)
+                hole_option_labels.append(labels)
+                self.action_to_hole_options.append({len(holes):offset})
+            hole_option_labels = [str(labels) for labels in hole_option_labels]
+
+            
+            hole = Hole(hole_name, hole_options, hole_option_labels)
+            holes.append(hole)
+        
+        # only now sketch has the corresponding design space
+        self.sketch.design_space = DesignSpace(holes)
+        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
+
+        self.compute_default_actions()
+        self.compute_state_to_holes()
+
+        logger.info("Design space: {}".format(self.sketch.design_space.size))
 
 
 class POMDPQuotientContainer(QuotientContainer):

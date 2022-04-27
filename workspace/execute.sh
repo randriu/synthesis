@@ -41,7 +41,7 @@ function paynt() {
     fi
     local pomdp_memory_set="--pomdp-memory-size=$pomdp_mem_size"
 
-    local paynt_call="python3 ${paynt_exe} ${project} ${method} ${incomplete_search_flag} ${fsc_flag} ${pomdp_memory_set}"
+    local paynt_call="python3 ${paynt_exe} ${project} ${method} ${incomplete_search_flag} ${fsc_flag} ${pomdp_memory_set} --hyperproperty"
     echo \$ ${paynt_call}
 
     eval timeout ${timeout} ${paynt_call}
@@ -52,7 +52,7 @@ function paynt() {
 
 function run() {
 
-    timeout=3s
+    # timeout=3s
 
     pomdp_mem_size=1
     # fsc_synthesis=true
@@ -102,11 +102,12 @@ function run() {
     ### test
 
     # model="ctmc/simple"
-    model="mdp/maze"
+    model="mdp/simple"
+    # model="mdp/maze"
 
-    paynt $model ar
+    # paynt $model ar
     # paynt $model hybrid
-    # paynt $model cegis
+    paynt $model cegis
 }
 
 # --- execution ----------------------------------------------------------------
