@@ -1,0 +1,100 @@
+pomdp
+
+// 3 | x   x
+// 2 |   x   x
+// 1 | x   x
+// 0 |   x   T
+// y __________
+//   x 0 1 2 3 
+
+// can go in this direction
+formula n  = ((x%2=1)	& (y<2))	| ((x%2=0) & (y<3));
+formula ne = (((x%2=1)	& (y<2))	| ((x%2=0) & (y<3))) & (x<3);
+formula se = ((x%2=1)	& (y>0))	| ((x%2=0) & (y>1))	 & (x<3);
+formula s  = ((x%2=1)	& (y>0))	| ((x%2=0) & (y>1));
+formula sw = ((x%2=1)	& (y>0))	| ((x%2=0) & (y>1))  & (x>0);
+formula nw = (((x%2=1)	& (y<2)) 	| ((x%2=0) & (y<3))) & (x>0);
+
+// target cell
+formula goal = x=3 & y=0;
+// formula bad = (x=0 | x=4) & y=0;
+
+// updates of coordinates (if possible)
+formula yn = n ? y+2 : y;
+
+formula yne = ne ? y+1 : y;
+formula xne = ne ? x+1 : x;
+
+formula yse = se ? y-1 : y;
+formula xse = se ? x+1 : x;
+
+formula ys = s ? x-2 : x;
+
+formula ysw = sw ? y-1 : y;
+formula xsw = sw ? x-1 : x;
+
+formula ynw = nw ? y+1 : y;
+formula xnw = nw ? x+1 : x;
+
+
+// corresponding observables
+observable "n" = clk=1 & n;
+observable "ne" = clk=1 & n;
+observable "se" = clk=1 & s;
+observable "s" = clk=1 & s;
+observable "sw" = clk=1 & s;
+observable "nw" = clk=1 & n;
+observable "goal" = goal;
+// observable "bad" = bad;
+
+
+// modules
+
+module clock
+    // 0 - init, 1 - drive
+    clk : [0..1] init 0;
+
+    // random placement
+    [place] clk=0 -> (clk'=1);
+    
+    // drive
+    [north]			clk=1 -> true;
+    [north_east]	clk=1 -> true;
+	[south_east]	clk=1 -> true;
+    [south]			clk=1 -> true;
+	[south_west]	clk=1 -> true;
+    [north_west]	clk=1 -> true;
+endmodule
+
+module maze
+
+	x : [0..3] init 0;
+    y : [0..3] init 0;
+	
+	// initialisation
+	[place] true ->
+		  1/7 :    (x'=0)&(y'=1)
+		+ 1/7 :    (x'=0)&(y'=3)
+		+ 1/7 :    (x'=1)&(y'=0)
+		+ 1/7 :    (x'=1)&(y'=2)
+		+ 1/7 :    (x'=2)&(y'=1)
+		+ 1/7 :    (x'=2)&(y'=3)
+		+ 1/7 :    (x'=3)&(y'=2);
+
+	// moving around the maze (all combinations)
+    
+    [north]			true -> 0.8: (y'=yn) + 0.2: true;
+    [north_east]	true -> 0.8: (y'=yne) & (x'=xne) + 0.2: true;
+    [south_east]	true -> 0.8: (y'=yse) & (x'=xse) + 0.2: true;
+    [south]			true -> 0.8: (y'=ys) + 0.2: true;
+    [south_west]	true -> 0.8: (y'=ysw) & (x'=xsw) + 0.2: true;
+    [north_west]	true -> 0.8: (y'=ynw) & (x'=xnw) + 0.2: true;
+	
+endmodule
+
+// rewards
+
+rewards "steps"
+	clk=1: 1;
+endrewards
+
