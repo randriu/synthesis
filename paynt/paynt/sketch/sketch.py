@@ -230,10 +230,10 @@ class Sketch:
 
  
     @classmethod
-    def parse_specification(cls, prism, constant_map, properites_path):
+    def parse_specification(cls, prism, constant_map, properties_path):
         # read lines
         lines = []
-        with open(properites_path) as file:
+        with open(properties_path) as file:
             for line in file:
                 line = line.replace(" ", "")
                 line = line.replace("\n", "")
