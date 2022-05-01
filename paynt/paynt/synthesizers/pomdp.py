@@ -17,10 +17,11 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerPOMDP():
 
-    def __init__(self, sketch, method):
+    def __init__(self, sketch, method, strategy):
         assert sketch.is_pomdp
         self.sketch = sketch
         self.synthesizer = None
+        self.strategy = strategy
         if method == "ar":
             self.synthesizer = SynthesizerAR
         elif method == "hybrid":
@@ -41,22 +42,29 @@ class SynthesizerPOMDP():
         self.total_iters += synthesizer.stat.iterations_mdp
         return assignment
 
-
     def strategy_full(self):
-        self.sketch.quotient.pomdp_manager.set_memory_size(Sketch.pomdp_memory_size)
+        f = open("workspace/log/output.csv", "a")
+        f.write(
+            f"\n{self.sketch.sketch_path},Full,{Sketch.pomdp_memory_size},")
+        f.close()
+        self.sketch.quotient.pomdp_manager.set_memory_size(
+            Sketch.pomdp_memory_size)
         self.sketch.quotient.unfold_memory()
         self.synthesize(self.sketch.design_space)
 
-    
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.pomdp_memory_size
         while True:
+            f = open("workspace/log/output.csv", "a")
+            f.write(
+                f"\n{self.sketch.sketch_path},Iterative,{mem_size},")
+            f.close()
+
             self.sketch.quotient.pomdp_manager.set_memory_size(mem_size)
             self.sketch.quotient.unfold_memory()
             self.synthesize(self.sketch.design_space)
             mem_size += 1
 
-    
     def solve_mdp(self, family):
 
         # solve quotient MDP
@@ -112,6 +120,11 @@ class SynthesizerPOMDP():
             # print(self.sketch.quotient.observation_labels)
             
             print("\n------------------------------------------------------------\n")
+
+            f = open("workspace/log/output.csv", "a")
+            f.write(
+                f"\n{self.sketch.sketch_path},Injection,{memory_injections},")
+            f.close()
 
             # construct the quotient
             self.sketch.quotient.unfold_memory()
@@ -241,7 +254,8 @@ class SynthesizerPOMDP():
 
             if len(selected_options) > 1:
                 # identify whether this hole is inconsistent in actions or updates
-                actions,updates = self.sketch.quotient.sift_actions_and_updates(selected_hole, selected_options)
+                actions, updates = self.sketch.quotient.sift_actions_and_updates(
+                    selected_hole, selected_options)
                 if len(actions) > 1:
                     # action inconsistency
                     action_inconsistencies[obs] |= actions
@@ -263,11 +277,10 @@ class SynthesizerPOMDP():
 
 
     def run(self):
-        # self.strategy_full()
-        # self.strategy_iterative()
-        self.strategy_expected()
 
-
-
-
-
+        if self.strategy == "full":
+            self.strategy_full()
+        elif self.strategy == "iterative":
+            self.strategy_iterative()
+        else:
+            self.strategy_expected()

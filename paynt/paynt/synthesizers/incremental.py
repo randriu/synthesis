@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 class SynthesizerPOMDPIncremental(SynthesizerPOMDP):
 
     def __init__(self, sketch, method, min=0, max=0):
-        super().__init__(sketch, method)
-        self.design_space = deepcopy(sketch.design_space)
+        super().__init__(sketch, method, strategy=None)
 
         self.mem_size = min
         self.max_size = max
@@ -33,10 +32,10 @@ class SynthesizerPOMDPIncremental(SynthesizerPOMDP):
                     item["name"],
                 )
 
-                if self.sketch.design_space.size > 6 and item["synthesize"]:
-
+                if self.sketch.design_space.size and item["synthesize"]:
                     f = open("workspace/log/output.csv", "a")
-                    f.write(f"\n{item['name']},{self.mem_size},")
+                    f.write(
+                        f"\n{self.sketch.sketch_path},{item['name']},{self.mem_size},")
                     f.close()
-                    res = self.synthesize(self.sketch.design_space)
+                    self.synthesize(self.sketch.design_space)
             self.mem_size += 1

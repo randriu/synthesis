@@ -23,7 +23,8 @@ class Conditions:
                 "Simple circle", self.__simple_circle, True, False, True),
             self.__create_condition(
                 "Circle both ways", self.__simple_circle_backward),
-            self.__create_condition("With loops 2", self.__self_loops),
+            self.__create_condition(
+                "Circle both ways with loops", self.__self_loops),
         ]
 
     def __create_condition(self, name, condition, rewrite=False, restrict=False, synthesize=True):

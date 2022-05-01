@@ -14,7 +14,6 @@ class Synthesizer:
     # synthesis escape criterion
     use_optimum_update_timeout = False
     optimum_update_iters_limit = 100000
-    maximum_syntesis_time = 900
     
     def __init__(self, sketch):
         self.sketch = sketch
@@ -137,9 +136,6 @@ class SynthesizerAR(Synthesizer):
         satisfying_assignment = None
         families = [family]
         while families:
-
-            if self.stat.synthesis_time.read() > Synthesizer.maximum_syntesis_time:
-                break
 
             if self.no_optimum_update_limit_reached():
                 break
@@ -392,9 +388,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
         while families:
 
             if self.no_optimum_update_limit_reached():
-                break
-            
-            if self.stat.synthesis_time.read() > Synthesizer.maximum_syntesis_time:
                 break
 
             # initiate AR analysis

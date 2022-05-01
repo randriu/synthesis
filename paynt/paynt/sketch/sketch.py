@@ -22,7 +22,9 @@ class Sketch:
 
         Profiler.initialize()
         Profiler.start("sketch")
-        
+
+        self.sketch_path = sketch_path
+
         self.explicit_model = None
         self.prism = None
         self.hole_expressions = None

@@ -142,8 +142,15 @@ class Statistic:
                 f"{sep}"
         return summary
 
-    
-    def print(self):    
+
+    def print(self):
         if Statistic.print_profiling:
             Profiler.print_all()
         print(self.get_summary())
+        
+        explored = int((self.synthesizer.explored /
+                       self.sketch.design_space.size) * 100)
+        f = open("workspace/log/output.csv", "a")
+        f.write(
+            f"{explored},{self.optimum},{self.synthesis_time.time},{self.sketch.design_space.size}")
+        f.close()
