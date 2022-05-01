@@ -4,6 +4,8 @@ from .models import MarkovChain, DTMC, MDP
 from .quotient import QuotientContainer,POMDPQuotientContainer
 from .synthesizer import SynthesizerAR, SynthesizerHybrid
 
+from ..utils.graphs import Graph
+
 from ..profiler import Timer,Profiler
 
 from ..sketch.holes import Holes,DesignSpace
@@ -32,7 +34,7 @@ class SynthesizerPOMDP():
     def print_stats(self):
         pass
     
-    def synthesize(self, family, print_stats = True):
+    def synthesize(self, family, print_stats=True):
         self.sketch.quotient.discarded = 0
         synthesizer = self.synthesizer(self.sketch)
         family.property_indices = self.sketch.design_space.property_indices
@@ -50,19 +52,23 @@ class SynthesizerPOMDP():
         self.sketch.quotient.pomdp_manager.set_memory_size(
             Sketch.pomdp_memory_size)
         self.sketch.quotient.unfold_memory()
-        self.synthesize(self.sketch.design_space)
+        res = self.synthesize(self.sketch.design_space)
+        print("RESULT", res)
 
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.pomdp_memory_size
         while True:
             f = open("workspace/log/output.csv", "a")
             f.write(
-                f"\n{self.sketch.sketch_path},Iterative,{mem_size},")
+                f"\n{self.sketch.sketch_path},Iterative,Iterative,{mem_size},")
             f.close()
 
             self.sketch.quotient.pomdp_manager.set_memory_size(mem_size)
             self.sketch.quotient.unfold_memory()
-            self.synthesize(self.sketch.design_space)
+            res = self.synthesize(self.sketch.design_space)
+            print("RESULT", res)
+            Graph().print(res, "workspace/log/" +
+                          self.sketch.sketch_path[25:-13].replace("/", "_") + "/iterative_" + str(mem_size), False)
             mem_size += 1
 
     def solve_mdp(self, family):
@@ -123,7 +129,7 @@ class SynthesizerPOMDP():
 
             f = open("workspace/log/output.csv", "a")
             f.write(
-                f"\n{self.sketch.sketch_path},Injection,{memory_injections},")
+                f"\n{self.sketch.sketch_path},Injection,Injection,{memory_injections},")
             f.close()
 
             # construct the quotient
@@ -274,6 +280,10 @@ class SynthesizerPOMDP():
             self.sketch.quotient.pomdp_manager.inject_memory(selected_observation)
             memory_injections += 1
             logger.info("Injected memory into observation {}.".format(selected_observation))
+
+            print("RESULT", best_assignment)
+            Graph().print(best_assignment, "workspace/log/" +
+                          self.sketch.sketch_path[25:-13].replace("/", "_") + "/injection_" + str(memory_injections), True)
 
 
     def run(self):

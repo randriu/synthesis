@@ -35,7 +35,11 @@ class SynthesizerPOMDPIncremental(SynthesizerPOMDP):
                 if self.sketch.design_space.size and item["synthesize"]:
                     f = open("workspace/log/output.csv", "a")
                     f.write(
-                        f"\n{self.sketch.sketch_path},{item['name']},{self.mem_size},")
+                        f"\n{self.sketch.sketch_path},Full incremental,{item['name']},{self.mem_size},")
                     f.close()
-                    self.synthesize(self.sketch.design_space)
+                    res = self.synthesize(self.sketch.design_space)
+                    print("RESULT", res)
+                    Graph().print(res, "workspace/log/" +
+                                  self.sketch.sketch_path[25:-13].replace("/", "_") + "/incremental_" + str(self.mem_size), True)
+
             self.mem_size += 1

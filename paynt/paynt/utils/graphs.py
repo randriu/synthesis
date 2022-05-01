@@ -1,4 +1,4 @@
-import re
+import os
 import pygraphviz as pgv
 
 from .utils import *
@@ -52,16 +52,28 @@ class Graph:
                     self.graph.add_edge(start, end)
         self.graph.layout("circo")
 
-    def print(self, design_space, file_name="out", show_labels=False, args="-Gsize=5! -Gratio=\"expand\" -Gnodesep=.5") -> None:
+    def print(self, design_space, file_name="out", show_labels=False, args="-Gsize=10! -Gratio=\"expand\" -Gnodesep=.5") -> None:
         """Prints a graph in .png format.
 
             design_space: list of Holes
             file_name: name of file where the graph will be saved without the extention (e.g. file_name=file => file.png)
             args: string with Graphvix arguments to specify the output format
         """
+
+        if not design_space:
+            return
+
         self.parse(design_space)
         self.create_graph(show_labels=show_labels)
-        self.graph.draw(file_name + ".png", format="png", args=args)
+
+        dir = "/".join(file_name.split("/")[:-1])
+        if not os.path.exists(dir):
+            os.mkdir(dir)
+
+        try:
+            self.graph.draw(file_name + ".png", format="png", args=args)
+        except:
+            pass
 
     def __str__(self) -> str:
         return self.graph.string()

@@ -152,5 +152,5 @@ class Statistic:
                        self.sketch.design_space.size) * 100)
         f = open("workspace/log/output.csv", "a")
         f.write(
-            f"{explored},{self.optimum},{self.synthesis_time.time},{self.sketch.design_space.size}")
+            f"{explored},{self.optimum},{self.synthesis_time.time},{self.sketch.design_space.size},{self.iterations_mdp}")
         f.close()

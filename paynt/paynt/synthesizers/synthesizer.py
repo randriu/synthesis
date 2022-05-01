@@ -2,6 +2,7 @@ import stormpy.synthesis
 
 from .statistic import Statistic
 from ..profiler import Timer,Profiler
+from ..utils.graphs import Graph
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,7 +15,6 @@ class Synthesizer:
     # synthesis escape criterion
     use_optimum_update_timeout = False
     optimum_update_iters_limit = 100000
-    maximum_syntesis_time = 900
     
     def __init__(self, sketch):
         self.sketch = sketch
@@ -137,9 +137,6 @@ class SynthesizerAR(Synthesizer):
         satisfying_assignment = None
         families = [family]
         while families:
-
-            if self.stat.synthesis_time.read() > Synthesizer.maximum_syntesis_time:
-                break
 
             if self.no_optimum_update_limit_reached():
                 break
@@ -299,6 +296,7 @@ class SynthesizerCEGIS(Synthesizer):
             sat, improving = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
             if improving:
                 satisfying_assignment = assignment
+                print(satisfying_assignment)
             if sat:
                 break
             
@@ -442,6 +440,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 sat, improving = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
                 if improving:
                     satisfying_assignment = assignment
+                    print(satisfying_assignment)
                 if sat:
                     break
 
