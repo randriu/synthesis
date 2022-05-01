@@ -32,32 +32,34 @@ module grid
 			+ 1/14 : (o'=1) & (x'=0) & (y'=2)
 			+ 1/14 : (o'=1) & (x'=0) & (y'=3)
 			+ 1/14 : (o'=1) & (x'=1) & (y'=0)
-			//+ 1/15 : (o'=1) & (x'=1) & (y'=1)
+			//+ 1/15 : (o'=1) & (x'=1) & (y'=1) // bad
 			+ 1/14 : (o'=1) & (x'=1) & (y'=2)
 			+ 1/14 : (o'=1) & (x'=1) & (y'=3)	
 			+ 1/14 : (o'=1) & (x'=2) & (y'=0)
 			+ 1/14 : (o'=1) & (x'=2) & (y'=1)
-			+ 1/14 : (o'=1) & (x'=2) & (y'=2)
+			// + 1/14 : (o'=1) & (x'=2) & (y'=2) // target
 			+ 1/14 : (o'=1) & (x'=2) & (y'=3)	
-			// + 1/15 : (o'=1) & (x'=3) & (y'=0) this is the traget
+			+ 1/15 : (o'=1) & (x'=3) & (y'=0)
 			+ 1/14 : (o'=1) & (x'=3) & (y'=1)
 			+ 1/14 : (o'=1) & (x'=3) & (y'=2)
 			+ 1/14 : (o'=1) & (x'=3) & (y'=3);
 			
 	// move around the grid
-	[east] o=1 & !(x=2 & y=0) &!(x=0 & y=1) -> (1-sl): (x'=min(x+1,3)) + sl: (x'=x)&(y'=y)&(o'=o); // not reached target
-	[east] o=1 & x=0 & y=1 -> (1-sl): (x'=1) & (o'=3) + sl: (x'=x)&(y'=y)&(o'=o); // reached bad state
-	[east] o=1 & x=2 & y=0 -> (1-sl): (x'=min(x+1,3)) & (o'=2) + sl: (x'=x)&(y'=y)&(o'=o); // reached target
+	[east] o=1 & !(x=1 & y=2) & !(x=0 & y=1) -> (1-sl): (x'=min(x+1,3)) + sl: true; // not reached target
+	[east] o=1 & x=0 & y=1 -> (1-sl): (x'=1) & (o'=3) + sl: true; // reached bad state
+	[east] o=1 & x=1 & y=2 -> (1-sl): (x'=min(x+1,3)) & (o'=2) + sl: true; // reached target
 	
-	[west] o=1 & !(x=2 & y=1) -> (1-sl): (x'=max(x-1,0)) + sl: (x'=x)&(y'=y)&(o'=o); // not reached target
-	[west] o=1 & x=2 & y=1 -> (1-sl): (x'=1) & (o'=3) + sl: (x'=x)&(y'=y)&(o'=o); // reached bad state
+	[west] o=1 & !(x=2 & y=1) & !(x=3 & y=2) -> (1-sl): (x'=max(x-1,0)) + sl: true; // not reached target
+	[west] o=1 & x=2 & y=1 -> (1-sl): (x'=1) & (o'=3) + sl: true; // reached bad state
+	[west] o=1 & x=3 & y=2 -> (1-sl): (x'=min(x+1,3)) & (o'=2) + sl: true; // reached target
 
-	[north] o=1 & !(x=1 & y=0)-> (1-sl): (y'=min(y+1,3)) + sl: (x'=x)&(y'=y)&(o'=o); // reached target
-	[north]	o=1 & (x=1 & y=0) -> (1-sl): (y'=1) & (o'=3) + sl: (x'=x)&(y'=y)&(o'=o); //reached bad state
+	[north] o=1 & !(x=1 & y=0) & !(x=2 & y=1) -> (1-sl): (y'=min(y+1,3)) + sl: true; // reached target
+	[north]	o=1 & (x=1 & y=0) -> (1-sl): (y'=1) & (o'=3) + sl: true; //reached bad state
+	[north] o=1 & x=2 & y=1 -> (1-sl): (x'=min(x+1,3)) & (o'=2) + sl: true; // reached target
 	
-	[south] o=1 & !(x=3 & y=1) & !(x=1 & y=2) -> (1-sl): (y'=max(y-1,0)) + sl: (x'=x)&(y'=y)&(o'=o); // not reached target
-	[south] o=1 & x=3 & y=1 -> (1-sl): (y'=max(y-1,0)) & (o'=2) + sl: (x'=x)&(y'=y)&(o'=o); // reached target
-	[south] o=1 & x=1 & y=2 -> (1-sl): (y'=1) & (o'=3) + sl: (x'=x)&(y'=y)&(o'=o); //reached bad state	
+	[south] o=1 & !(x=3 & y=1) & !(x=2 & y=3) -> (1-sl): (y'=max(y-1,0)) + sl: true; // not reached target
+	[south] o=1 & x=3 & y=1 -> (1-sl): (y'=max(y-1,0)) & (o'=2) + sl: true; // reached target
+	[south] o=1 & x=2 & y=3 -> (1-sl): (y'=1) & (o'=3) + sl: true; //reached bad state	
 	
 	// reached target
 	[done] o=2 -> true;
