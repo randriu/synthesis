@@ -1,6 +1,7 @@
 #!/bin/bash
 
-for example in grid/center # maze maze_avoid maze_hexa grid/avoid grid/avoid_2 grid/avoid_3 grid/avoid_4 grid/hexa grid/simple
+# grid/center maze maze_avoid maze_hexa grid/avoid grid/avoid_2 grid/avoid_3 grid/avoid_4 grid/hexa grid/simple
+for example in maze_hexa # grid/center maze maze_avoid maze_hexa grid/avoid grid/avoid_2 grid/avoid_3 grid/avoid_4 grid/hexa grid/simple
 do
     props=$(find "workspace/examples/pomdp/$example" -type f -printf "%f\n" | grep prop)
     example="workspace/examples/pomdp/$example"
