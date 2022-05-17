@@ -51,6 +51,7 @@ class SynthesizerPOMDP():
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.pomdp_memory_size
         while True:
+            logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             self.sketch.quotient.pomdp_manager.set_memory_size(mem_size)
             self.sketch.quotient.unfold_memory()
             self.synthesize(self.sketch.design_space)
@@ -106,21 +107,26 @@ class SynthesizerPOMDP():
         fsc_synthesis_timer = Timer()
         fsc_synthesis_timer.start()
 
-        while True:
-        # for iteration in range(100):
+        # while True:
+        for iteration in range(4):
 
             # print(self.sketch.quotient.observation_labels)
             
             print("\n------------------------------------------------------------\n")
+
+            # print(action_inconsistencies)
+            # print(memory_inconsistencies)
 
             # construct the quotient
             self.sketch.quotient.unfold_memory()
             
             # use inconsistencies to break symmetry
             family = self.sketch.quotient.break_symmetry_3(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
+            # family = self.sketch.design_space
 
             # solve MDP that corresponds to this restricted family
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
+            # print(expected_visits)
             
             # check whether that primary direction was not enough ?
             if not spec.optimality_result.can_improve:
@@ -228,10 +234,10 @@ class SynthesizerPOMDP():
             # selected_hole = holes_to_inject[0]
             selected_options = selection[selected_hole]
             
-            # print()
-            # print("hole scores: ", hole_scores)
-            # print("selected hole: ", selected_hole)
-            # print("hole has options: ", selected_options)
+            print()
+            print("hole scores: ", hole_scores)
+            print("selected hole: ", selected_hole)
+            print("hole has options: ", selected_options)
 
             # identify observation having this hole
             for obs in range(self.sketch.quotient.observations):

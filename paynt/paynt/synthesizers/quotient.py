@@ -1056,4 +1056,20 @@ class POMDPQuotientContainer(QuotientContainer):
 
 
 
+    def remove_simpler_controllers(self):
+        '''
+        Assuming that this is a quotient describing k-FSCs, remove solutions
+        that correspond to l-FSCs, where l < k.
+        '''
+        pass
+
+        # mem_size = self.pomdp_manager.observation_memory_size[0]
+        # if mem_size == 1:
+        #     return
+        # ds = self.sketch.design_space
+        # print(ds)
+        # exit()
+
+
+
 
