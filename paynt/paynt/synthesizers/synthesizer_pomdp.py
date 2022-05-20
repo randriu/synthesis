@@ -1,7 +1,10 @@
 import stormpy
 from .statistic import Statistic
 from .models import MarkovChain, DTMC, MDP
-from .quotient import QuotientContainer,POMDPQuotientContainer
+
+from .quotient import QuotientContainer
+from .quotient_pomdp import POMDPQuotientContainer
+
 from .synthesizer import SynthesizerAR, SynthesizerHybrid
 
 from ..profiler import Timer,Profiler

@@ -18,6 +18,7 @@ projects_dir="$SYNTHESIS/workspace/examples"
 log_dir="$SYNTHESIS/workspace/log"
 log_file="${log_dir}/log_${core}.txt"
 
+
 # ------------------------------------------------------------------------------
 # functions
 
@@ -53,10 +54,10 @@ function paynt() {
 
 function run() {
 
-    timeout=1m
+    timeout=10s
 
-    pomdp_mem_size=1
-    fsc_synthesis=true
+    pomdp_mem_size=3
+    # fsc_synthesis=true
     # incomplete_search=true
 
     ### running ###
@@ -105,7 +106,7 @@ function run() {
     # model="ctmc/simple"
     # model="mdp/simple"
     # model="mdp/maze"
-    # model="pomdp/maze/mba"
+    model="pomdp/maze/mba"
 
     # model="pomdp/sarsop/hallway"
     # model="pomdp/sarsop/hallway-single"
@@ -117,11 +118,11 @@ function run() {
     # model="pomdp/sarsop/prism-grid-4-0.1"
     # model="pomdp/sarsop/prism-maze-alex"
 
-    model="pomdp/sarsop/current"
+    # model="pomdp/sarsop/current"
 
     # other_flags="--export-pomdp"
     # other_flags="--sketch sketch.pomdp --properties props.pomdp"
-    other_flags="--sketch sketch.pomdp"
+    # other_flags="--sketch sketch.pomdp"
 
 
     paynt $model ar
