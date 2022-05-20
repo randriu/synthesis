@@ -40,11 +40,13 @@ def setup_logger(log_path = None):
 @click.command()
 @click.option("--project", required=True, help="root", )
 @click.option("--sketch", default="sketch.templ", help="name of the sketch file")
+
 @click.option("--properties", default="sketch.props", help="name of the properties file")
 @click.option("--constants", default="", help="constant assignment string", )
 @click.argument("method", type=click.Choice(['onebyone', 'cegis', 'ar', 'hybrid'], case_sensitive=False), default="ar")
 
 @click.option("--export-jani", is_flag=True, default=False, help="export JANI model to 'output.jani' and abort")
+@click.option("--export-pomdp", is_flag=True, default=False, help="export POMDP-solve model to '*.pomdp' and abort")
 
 @click.option("--incomplete-search", is_flag=True, default=False, help="use incomplete search during the synthesis")
 
@@ -54,13 +56,15 @@ def setup_logger(log_path = None):
 @click.option("--hyperproperty", is_flag=True, default=False, help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 
 def paynt(
-        project, sketch, properties, constants, method, export_jani,
+        project, sketch, properties, constants, method,
+        export_jani, export_pomdp,
         incomplete_search, fsc_synthesis, pomdp_memory_size,
         hyperproperty
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
     Sketch.export_jani = export_jani
+    Sketch.export_pomdp = export_pomdp
     Sketch.hyperproperty_synthesis = hyperproperty
     Synthesizer.incomplete_search = incomplete_search
     POMDPQuotientContainer.pomdp_memory_size = pomdp_memory_size

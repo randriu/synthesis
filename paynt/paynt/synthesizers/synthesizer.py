@@ -91,6 +91,7 @@ class Synthesizer1By1(Synthesizer):
 
         self.stat.finished(satisfying_assignment)
         Profiler.stop()
+
         return satisfying_assignment
 
 
@@ -161,6 +162,11 @@ class SynthesizerAR(Synthesizer):
 
         self.stat.finished(satisfying_assignment)
         Profiler.stop()
+
+        # if satisfying_assignment is not None:
+        #     dtmc = self.sketch.quotient.build_chain(satisfying_assignment)
+        #     spec = dtmc.check_specification(self.sketch.specification)
+        #     logger.info("Double-checking specification satisfiability: {}".format(spec))
         return satisfying_assignment
 
 

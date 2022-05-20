@@ -28,6 +28,7 @@ function reset_log() {
 function paynt() {
     # argument settings
     local project="--project ${projects_dir}/$1/"
+    # local sketch="--sketch sketch.pomdp"
     local method=$2
 
     local incomplete_search_flag=""
@@ -41,7 +42,7 @@ function paynt() {
     fi
     local pomdp_memory_set="--pomdp-memory-size=$pomdp_mem_size"
 
-    local paynt_call="python3 ${paynt_exe} ${project} ${method} ${incomplete_search_flag} ${fsc_flag} ${pomdp_memory_set} --hyperproperty"
+    local paynt_call="python3 ${paynt_exe} ${project} ${sketch} ${method} ${incomplete_search_flag} ${fsc_flag} ${pomdp_memory_set} ${other_flags}"
     echo \$ ${paynt_call}
 
     eval timeout ${timeout} ${paynt_call}
@@ -52,10 +53,10 @@ function paynt() {
 
 function run() {
 
-    # timeout=3s
+    timeout=1m
 
     pomdp_mem_size=1
-    # fsc_synthesis=true
+    fsc_synthesis=true
     # incomplete_search=true
 
     ### running ###
@@ -83,7 +84,7 @@ function run() {
 
     
     # model="pomdp/voihp-hard/drone-4-1"
-    model="pomdp/voihp-all/refuel-06"
+    # model="pomdp/voihp-all/refuel-06"
     # model="pomdp/voihp-hard/rocks-12"
 
     # model="pomdp/voihp-all/crypt-4"
@@ -102,12 +103,30 @@ function run() {
     ### test
 
     # model="ctmc/simple"
-    model="mdp/simple"
+    # model="mdp/simple"
     # model="mdp/maze"
+    # model="pomdp/maze/mba"
 
-    # paynt $model ar
+    # model="pomdp/sarsop/hallway"
+    # model="pomdp/sarsop/hallway-single"
+    # model="pomdp/sarsop/4x4.95"
+    # model="pomdp/sarsop/4x5x2.95"
+    # model="pomdp/sarsop/1d"
+    # model="pomdp/sarsop/simple"
+
+    # model="pomdp/sarsop/prism-grid-4-0.1"
+    # model="pomdp/sarsop/prism-maze-alex"
+
+    model="pomdp/sarsop/current"
+
+    # other_flags="--export-pomdp"
+    # other_flags="--sketch sketch.pomdp --properties props.pomdp"
+    other_flags="--sketch sketch.pomdp"
+
+
+    paynt $model ar
     # paynt $model hybrid
-    paynt $model cegis
+    # paynt $model cegis
 }
 
 # --- execution ----------------------------------------------------------------

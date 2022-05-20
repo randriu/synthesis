@@ -38,6 +38,7 @@ class SynthesizerPOMDP():
         assignment = synthesizer.synthesize(family)
         if print_stats:
             synthesizer.print_stats()
+        print(assignment)
         self.total_iters += synthesizer.stat.iterations_mdp
         return assignment
 
@@ -51,6 +52,7 @@ class SynthesizerPOMDP():
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.pomdp_memory_size
         while True:
+        # for x in range(2):
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             self.sketch.quotient.pomdp_manager.set_memory_size(mem_size)
             self.sketch.quotient.unfold_memory()
@@ -107,8 +109,8 @@ class SynthesizerPOMDP():
         fsc_synthesis_timer = Timer()
         fsc_synthesis_timer.start()
 
-        # while True:
-        for iteration in range(4):
+        while True:
+        # for iteration in range(4):
 
             # print(self.sketch.quotient.observation_labels)
             
@@ -270,8 +272,8 @@ class SynthesizerPOMDP():
 
     def run(self):
         # self.strategy_full()
-        # self.strategy_iterative()
-        self.strategy_expected()
+        self.strategy_iterative()
+        # self.strategy_expected()
 
 
 
