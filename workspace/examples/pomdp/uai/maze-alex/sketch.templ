@@ -15,7 +15,7 @@ formula l = y=3 & x>0;
 
 // target cell
 formula goal = x=2 & y=0;
-formula bad = x=0 & y=0;
+formula bad = (x=0 | x=4) & y=0;
 
 // updates of coordinates (if possible)
 formula yu = u ? (y+1) : y;
@@ -24,13 +24,12 @@ formula yd = d ? (y-1) : y;
 formula xl = l ? (x-1) : x;
 
 // corresponding observables
-observable "start" = clk=0;
 observable "u" = clk=1 & u;
 observable "r" = clk=1 & r;
 observable "d" = clk=1 & d;
 observable "l" = clk=1 & l;
 observable "goal" = goal;
-//observable "bad" = bad;
+observable "bad" = bad;
 
 
 // modules
@@ -56,25 +55,26 @@ module maze
 	
 	// initialisation
 	[place] true ->
-          1/12 :    (x'=0)&(y'=1)
-		+ 1/12 :    (x'=0)&(y'=2)
-		+ 1/12 :    (x'=0)&(y'=3)
-		+ 1/12 :    (x'=1)&(y'=3)
-		+ 1/12 :    (x'=2)&(y'=1)
-		+ 1/12 :    (x'=2)&(y'=2)
-		+ 1/12 :    (x'=2)&(y'=3)
-		+ 1/12 :    (x'=3)&(y'=3)
-		+ 1/12 :    (x'=4)&(y'=0)
-		+ 1/12 :    (x'=4)&(y'=1)
-		+ 1/12 :    (x'=4)&(y'=2)
-		+ 1/12 :    (x'=4)&(y'=3);
+          1/13 :    (x'=0)&(y'=0)
+        + 1/13 :    (x'=0)&(y'=1)
+		+ 1/13 :    (x'=0)&(y'=2)
+		+ 1/13 :    (x'=0)&(y'=3)
+		+ 1/13 :    (x'=1)&(y'=3)
+		+ 1/13 :    (x'=2)&(y'=0)
+		+ 1/13 :    (x'=2)&(y'=1)
+		+ 1/13 :    (x'=2)&(y'=2)
+		+ 1/13 :    (x'=2)&(y'=3)
+		+ 1/13 :    (x'=3)&(y'=3)
+		+ 1/13 :    (x'=4)&(y'=1)
+		+ 1/13 :    (x'=4)&(y'=2)
+		+ 1/13 :    (x'=4)&(y'=3);
 
 	// moving around the maze (all combinations)
     
-    [up]        true -> 0.9: (y'=yu) + 0.1: (x'=xr);
-    [right]     true -> 0.9: (x'=xr) + 0.1: (y'=yd);
-    [down]      true -> 0.9: (y'=yd) + 0.1: (x'=xl);
-    [left]      true -> 0.9: (x'=xl) + 0.1: (y'=yu);
+    [up]        true -> 0.8: (y'=yu) + 0.08: (x'=xr) + 0.08: (x'=xl) + 0.04: (y'=yd);
+    [right]     true -> 0.8: (x'=xr) + 0.08: (y'=yu) + 0.08: (y'=yd) + 0.04: (x'=xl);
+    [down]      true -> 0.8: (y'=yd) + 0.08: (x'=xr) + 0.08: (x'=xl) + 0.04: (y'=yu);
+    [left]      true -> 0.8: (x'=xl) + 0.08: (y'=yu) + 0.08: (y'=yd) + 0.04: (x'=xr);
 	
 endmodule
 
