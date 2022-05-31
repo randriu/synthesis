@@ -3,6 +3,8 @@ import stormpy.synthesis
 from .statistic import Statistic
 from ..profiler import Timer,Profiler
 
+from .quotient_pomdp import POMDPQuotientContainer
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -149,6 +151,12 @@ class SynthesizerAR(Synthesizer):
             else:
                 family = families.pop(0)
 
+            # TODO
+            # print()
+            # print(self.sketch.quotient.family_index(family))
+            # if self.sketch.quotient.family_index(family) < POMDPQuotientContainer.current_family_index:
+            #     continue
+
             can_improve,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
@@ -286,8 +294,7 @@ class SynthesizerCEGIS(Synthesizer):
 
         # build the quotient, map mdp states to hole indices
         self.sketch.quotient.build(family)
-        self.sketch.quotient.compute_state_to_holes()
-        quotient_relevant_holes = self.sketch.quotient.state_to_holes
+        quotient_relevant_holes = self.sketch.quotient.coloring.state_to_holes
 
         # initialize CE generator
         formulae = self.sketch.specification.stormpy_formulae()

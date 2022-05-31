@@ -19,9 +19,15 @@ namespace storm {
                 auto num_prototype_rows = pomdp.getNumberOfChoices();
                 auto num_observations = pomdp.getNrObservations();
                 this->observation_actions.resize(num_observations,0);
+                this->observation_successors.resize(num_observations);
                 this->prototype_row_index.resize(num_prototype_rows,0);
+
+                std::vector<std::set<uint64_t>> observation_successor_sets;
+                observation_successor_sets.resize(num_observations);
                 
                 for(uint64_t prototype_state = 0; prototype_state < num_prototype_states; prototype_state++) {
+                    auto observation = pomdp.getObservation(prototype_state);
+                    
                     auto const& row_group_indices = pomdp.getTransitionMatrix().getRowGroupIndices();
                     uint64_t row_index = 0;
                     for (
@@ -31,13 +37,24 @@ namespace storm {
                     ) {
                         this->prototype_row_index[prototype_row] = row_index;
                         row_index++;
+
+                        for(auto const &entry: this->pomdp.getTransitionMatrix().getRow(prototype_row)) {
+                            auto dst = entry.getColumn();
+                            auto dst_obs = this->pomdp.getObservation(dst);
+                            observation_successor_sets[observation].insert(dst_obs);
+                        } 
                     }
                     
-                    auto observation = pomdp.getObservation(prototype_state);
                     if(this->observation_actions[observation] != 0) {
                         continue;
                     }
                     this->observation_actions[observation] = pomdp.getTransitionMatrix().getRowGroupSize(prototype_state);
+                }
+                for(uint64_t obs = 0; obs < num_observations; obs++) {
+                    this->observation_successors[obs] = std::vector<uint64_t>(
+                        observation_successor_sets[obs].begin(),
+                        observation_successor_sets[obs].end()
+                        );
                 }
 
 
@@ -78,73 +95,17 @@ namespace storm {
 
  
             template<typename ValueType>
-            uint64_t PomdpManager<ValueType>::maxSuccessorMemorySize(uint64_t prototype_row) {
-                uint64_t max_memory_size = 0; // can safely start at 0
-                for(auto const &entry: this->pomdp.getTransitionMatrix().getRow(prototype_row)) {
-                    auto dst = entry.getColumn();
-                    auto obs = this->pomdp.getObservation(dst);
-                    auto memory_size = this->observation_memory_size[obs];
-                    if(max_memory_size < memory_size) {
-                        max_memory_size = memory_size;
-                    } 
-                }
-                return max_memory_size;
-            }
-
- 
-            template<typename ValueType>
-            void PomdpManager<ValueType>::buildTransitionMatrix() {
-                // for each row, identify maximum memory size among all destinations
-                // this will define the number of copies we need to make of each row
-                std::vector<uint64_t> row_prototype_copies(this->pomdp.getNumberOfChoices());
-                for (uint64_t prototype_row = 0; prototype_row < this->pomdp.getNumberOfChoices(); prototype_row++) {
-                    row_prototype_copies[prototype_row] = this->maxSuccessorMemorySize(prototype_row);
-                }
-
-                this->row_groups.resize(this->num_states+1);
-                this->row_prototype.clear();
-                this->row_memory.clear();
-                
-                for(uint64_t state = 0; state < this->num_states; state++) {
-                    this->row_groups[state] = this->row_prototype.size();
-                    auto prototype_state = this->state_prototype[state];
-                    auto const& row_group_indices = this->pomdp.getTransitionMatrix().getRowGroupIndices();
-                    for (
-                        uint64_t prototype_row = row_group_indices[prototype_state];
-                        prototype_row < row_group_indices[prototype_state + 1];
-                        prototype_row++
-                    ) {
-                        // create the required number of copies of this row
-                        // each transition will be associated with its own memory update
-                        for(uint64_t dst_mem = 0; dst_mem < row_prototype_copies[prototype_row]; dst_mem++) {
-                            this->row_prototype.push_back(prototype_row);
-                            this->row_memory.push_back(dst_mem);
-                        }
-                    }
-                }
-                this->num_rows = this->row_prototype.size();
-                this->row_groups[this->num_states] = this->num_rows;
-            }
-
-
-            template<typename ValueType>
             void PomdpManager<ValueType>::buildTransitionMatrixSpurious() {
-
+                // for each observation, define the maximum successor memory size
                 // this will define the number of copies we need to make of each row
-                std::fill(this->max_successor_memory_size.begin(),this->max_successor_memory_size.end(),0);
-                for(uint64_t prototype_state = 0; prototype_state < this->pomdp.getNumberOfStates(); prototype_state++) {
-                    auto observation = this->pomdp.getObservation(prototype_state);
-                    auto const& row_group_indices = this->pomdp.getTransitionMatrix().getRowGroupIndices();
-                    for (
-                        uint64_t prototype_row = row_group_indices[prototype_state];
-                        prototype_row < row_group_indices[prototype_state + 1];
-                        prototype_row++
-                    ) {
-                        auto row_max = this->maxSuccessorMemorySize(prototype_row);
-                        if(max_successor_memory_size[observation] < row_max) {
-                            max_successor_memory_size[observation] = row_max;
+                for(uint64_t obs = 0; obs < this->pomdp.getNrObservations(); obs++) {
+                    uint64_t max_mem_size = 0;
+                    for(auto dst_obs: this->observation_successors[obs]) {
+                        if(max_mem_size < this->observation_memory_size[dst_obs]) {
+                            max_mem_size = this->observation_memory_size[dst_obs];
                         }
                     }
+                    this->max_successor_memory_size[obs] = max_mem_size;
                 }
 
                 this->row_groups.resize(this->num_states+1);
@@ -257,7 +218,6 @@ namespace storm {
             template<typename ValueType>
             std::shared_ptr<storm::models::sparse::Mdp<ValueType>> PomdpManager<ValueType>::constructMdp() {
                 this->buildStateSpace();
-                // this->buildTransitionMatrix();
                 this->buildTransitionMatrixSpurious();
 
                 storm::storage::sparse::ModelComponents<ValueType> components;

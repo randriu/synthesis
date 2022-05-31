@@ -5,7 +5,6 @@ from .holes import Hole, Holes, DesignSpace
 from ..synthesizers.models import MarkovChain
 from ..synthesizers.quotient import *
 from ..synthesizers.quotient_pomdp import *
-from ..profiler import Profiler
 
 from collections import defaultdict
 
@@ -14,8 +13,18 @@ import re
 import uuid
 
 import logging
+# logger = logging.getLogger(__name__)
 
 class PomdpParser:
+
+    @classmethod
+    def substitute_suffix(cls, path, delimiter, suffix):
+        output_path = path.split(delimiter)
+        output_path[-1] = suffix
+        output_path = '.'.join(output_path)
+        return output_path
+        
+
 
     @classmethod
     def read_pomdp_model(cls, sketch_path):
@@ -105,13 +114,9 @@ observations: {}
                 desc += f"R: * : {state} : * : * {rew}\n"
 
 
-        output_path = path.split('.')
-        output_path[-1] = '.pomdp'
-        output_path = ''.join(output_path)
-        property_path = path.split('/')
-        property_path[-1] = 'props.pomdp'
-        property_path = '/'.join(property_path)
-        
+        output_path = PomdpParser.substitute_suffix(path, '.', 'pomdp')
+        property_path = PomdpParser.substitute_suffix(path, '/', props.pomdp)
+
         logger.info("Printing POMDP in pomdp-solve format to {} ...".format(output_path))
         with open(output_path, 'w') as f:
             f.write(desc)
@@ -120,7 +125,6 @@ observations: {}
             f.write('R{"rew0"}max=? [F "target"]')
         logger.info("Write OK, aborting ...")
         exit()
-
 
     @classmethod
     def read_pomdp_solve_format(cls, path):

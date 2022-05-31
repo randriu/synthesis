@@ -15,11 +15,14 @@ import re
 import uuid
 
 import logging
+# logger = logging.getLogger(__name__)
 
 class Sketch:
 
     # if True, unfolded JANI is exported and the program is aborted
     export_jani = False
+    # if True, the model is exported to *.drn and the program is aborted
+    export_drn = False
     # if True, POMDP is exported to *.pomdp and the program is aborted
     export_pomdp = False
     # if True, the sketch is assumed to be a hole-free MDP
@@ -91,17 +94,20 @@ class Sketch:
                 self.quotient = MDPQuotientContainer(self)
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
-            self.quotient.pomdp_manager.set_memory_size(POMDPQuotientContainer.pomdp_memory_size)
-            self.quotient.unfold_memory()
             if Sketch.export_pomdp:
                 PomdpParser.write_model_in_pomdp_solve_format(sketch_path, self.quotient)
+                exit()
+            if Sketch.export_drn:
+                output_path = PomdpParser.substitute_suffix(sketch_path, '.', 'drn')
+                self.quotient.build()
+                model = self.quotient.quotient_mdp.model
+                stormpy.export_to_drn(model, output_path)
                 exit()
         else:
             raise TypeError("sketch type is not supported")
 
         logger.info(f"Sketch parsing complete.")
         Profiler.stop()
-
 
     @property
     def is_explicit(self):
@@ -299,6 +305,12 @@ class Sketch:
         program = self.prism.define_constants(substitution)
         model = stormpy.build_sparse_model_with_options(program, MarkovChain.builder_options)
         return model
+        
+        
+
+
+
+    
 
     
     

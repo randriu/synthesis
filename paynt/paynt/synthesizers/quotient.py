@@ -11,7 +11,7 @@ from .statistic import Statistic
 from ..sketch.jani import JaniUnfolder
 from ..sketch.holes import Hole,Holes,DesignSpace
 
-from .synthesizer import Synthesizer
+# from .synthesizer import Synthesizer
 
 from ..profiler import Profiler
 
@@ -19,6 +19,194 @@ from .models import MarkovChain,MDP,DTMC
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+class MdpColoring:
+    ''' Labeling of actions of an MDP with hole options. '''
+
+    def __init__(self, mdp, holes, action_to_hole_options):
+
+        # reference to the quotient MDP
+        self.mdp = mdp
+        # design space
+        self.holes = holes
+        # for each choice of the quotient MDP contains a set of hole-option labelings
+        self.action_to_hole_options = action_to_hole_options
+
+        # bitvector of quotient MDP choices not labeled by any hole
+        self.default_actions = None
+        # for each state of the quotient MDP, a set of holes associated with the actions in this state
+        self.state_to_holes = None
+        # whether each state is marked by at most one hole
+        self.simple_coloring = None
+        # to each hole-option pair a list of actions colored by this combination
+        self.hole_option_to_actions = None
+
+        # compute default actions
+        self.default_actions = stormpy.BitVector(self.mdp.nr_choices, False)
+        for choice in range(self.mdp.nr_choices):
+            if not self.action_to_hole_options[choice]:
+                self.default_actions.set(choice)
+
+        # collect relevant holes in states
+        tm = self.mdp.transition_matrix
+        self.state_to_holes = []
+        for state in range(self.mdp.nr_states):
+            relevant_holes = set()
+            for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                relevant_holes.update(set(self.action_to_hole_options[action].keys()))
+            self.state_to_holes.append(relevant_holes)
+
+        self.simple_coloring = all([
+            len(self.state_to_holes[state])<=1
+            for state in range(self.mdp.nr_states)
+        ])
+        
+        # construct reverse coloring
+        self.hole_option_to_actions = [[] for hole in self.holes]
+        for hole_index,hole in enumerate(self.holes):
+            self.hole_option_to_actions[hole_index] = [[] for option in hole.options]
+        for action in range(self.mdp.nr_choices):
+            for hole_index,option in self.action_to_hole_options[action].items():
+                self.hole_option_to_actions[hole_index][option].append(action)
+
+    
+    def simplify_coloring(self):
+        assert False
+        print(self.action_to_hole_options)
+        
+        # merge action-memory holes in the same obs-mem pair
+        # WARNING: in general, this is not safe -- apply only to POMDPs
+        pairs_to_merge = [
+            self.state_to_holes[state]
+            for state in range(self.quotient_mdp.nr_states)
+            if len(self.state_to_holes[state]) > 1
+        ]
+        pairs_to_merge = set([frozenset(x) for x in pairs_to_merge])
+        pairs_to_merge = [list(x) for x in pairs_to_merge]
+
+        hole_merged = [False for hole in holes]
+        for pair in pairs_to_merge:
+            for hole_index in pair:
+                hole_merged[hole_index] = True
+        
+        print(pairs_to_merge)
+        print(hole_merged)
+
+        hole_new_to_old = []
+        hole_old_to_new = [None for hole in holes]
+
+        # copy unmerged holes
+        holes_new = Holes()
+        for hole_index,hole in enumerate(holes):
+            if not hole_merged[hole_index]:
+                hole_old_to_new[hole_index] = len(holes_new)
+                hole_new_to_old.append([hole_index])
+                holes_new.append(hole.copy())
+
+        # merge holes
+        for pair in pairs_to_merge:
+            hole_new_to_old.append(pair)
+            for hole_index in pair:
+                hole_old_to_new[hole_index] = len(holes_new)
+
+            ah_index = pair[0]
+            mh_index = pair[1]
+            ah = holes[ah_index]
+            mh = holes[mh_index]
+
+            # merge holes
+            name = ah.name + "+" + mh.name
+            options = list(range(ah.size * mh.size))
+            option_labels = []
+            for action in ah.option_labels:
+                for update in mh.option_labels:
+                    option_labels.append(action + "+" + update)
+            hole = Hole(name,options,option_labels)
+            holes_new.append(hole)
+
+        action_to_hole_options_new = []
+        for action in range(self.quotient_mdp.nr_choices):
+            old_hole_options = self.action_to_hole_options[action]
+            old_hole_options = [(hole,option) for hole,option in old_hole_options.items()]
+            new_hole_options = {}
+            if len(old_hole_options) == 1:
+                old_hole_index,option = old_hole_options[0]
+                new_hole_options = {hole_old_to_new[old_hole_index]:option}
+            if len(old_hole_options) == 2:
+                ah_index,ah_option = old_hole_options[0]
+                mh_index,mh_option = old_hole_options[1]
+                new_hole_index = hole_old_to_new[ah_index]
+                option = ah_option * holes[mh_index].size + mh_option
+                new_hole_options = {new_hole_index:option}
+
+            action_to_hole_options_new.append(new_hole_options)
+
+        print(action_to_hole_options_new)
+
+        print(holes_new)
+        exit()
+
+    
+    def select_actions(self, family):
+        ''' Select non-default actions relevant in the provided design space. '''
+        Profiler.start("coloring::select_actions")
+
+
+        hole_selected_actions = None
+        selected_actions = None
+
+        if not self.simple_coloring:
+            if family.parent_info is None:
+                # select from the super-quotient
+                selected_actions = []
+                for action in range(self.mdp.nr_choices):
+                    if self.default_actions[action]:
+                        continue
+                    hole_options = self.action_to_hole_options[action]
+                    if family.includes(hole_options):
+                        selected_actions.append(action)
+            else:
+                # filter each action in the parent wrt newly restricted design space
+                parent_actions = family.parent_info.selected_actions
+                selected_actions = []
+                for action in parent_actions:
+                    hole_options = self.action_to_hole_options[action]
+                    # if family.includes(hole_options):
+                    if family.parent_info.splitter not in hole_options or family.includes(hole_options):
+                        selected_actions.append(action)
+        else:
+            if family.parent_info is None:
+                hole_selected_actions = []
+                for hole_index,hole in enumerate(family):
+                    hole_actions = []
+                    for option in hole.options:
+                        hole_actions += self.hole_option_to_actions[hole_index][option]
+                    hole_selected_actions.append(hole_actions)
+
+            else:
+                hole_selected_actions = family.parent_info.hole_selected_actions.copy()
+                splitter = family.parent_info.splitter
+                splitter_actions = []
+                for option in family[splitter].options:
+                    splitter_actions += self.hole_option_to_actions[splitter][option]
+                hole_selected_actions[splitter] = splitter_actions
+
+            selected_actions = []
+            for actions in hole_selected_actions:
+                selected_actions += actions
+
+        # construct bitvector of selected actions
+        selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
+        
+        Profiler.resume()
+        return hole_selected_actions,selected_actions,selected_actions_bv
+
+
+
+
+    
+        
 
 
 class QuotientContainer:
@@ -29,13 +217,8 @@ class QuotientContainer:
         
         # qoutient MDP for the super-family
         self.quotient_mdp = None
-
-        # for each choice of the quotient MDP contains a set of hole-option labelings
-        self.action_to_hole_options = None
-        # bitvector of quotient MDP choices not labeled by any hole
-        self.default_actions = None
-        # for each state of the quotient MDP, a set of holes associated with the actions in this state
-        self.state_to_holes = None
+        # coloring of the quotient
+        self.coloring = None
 
         # builder options
         self.subsystem_builder_options = stormpy.SubsystemBuilderOptions()
@@ -44,53 +227,7 @@ class QuotientContainer:
 
         # (optional) counter of discarded assignments
         self.discarded = None
-
     
-    def compute_default_actions(self):
-        self.default_actions = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
-        for choice in range(self.quotient_mdp.nr_choices):
-            if not self.action_to_hole_options[choice]:
-                self.default_actions.set(choice)
-
-    
-    def compute_state_to_holes(self):
-        tm = self.quotient_mdp.transition_matrix
-        self.state_to_holes = []
-        for state in range(self.quotient_mdp.nr_states):
-            relevant_holes = set()
-            for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                relevant_holes.update(set(self.action_to_hole_options[action].keys()))
-            self.state_to_holes.append(relevant_holes)
-
-
-    def select_actions(self, family):
-        ''' Select non-default actions relevant in the provided design space. '''
-        Profiler.start("quotient::select_actions")
-
-        if family.parent_info is None:
-            # select from the super-quotient
-            selected_actions = []
-            for action in range(self.quotient_mdp.nr_choices):
-                if self.default_actions[action]:
-                    continue
-                hole_options = self.action_to_hole_options[action]
-                if family.includes(hole_options):
-                    selected_actions.append(action)
-        else:
-            # filter each action in the parent wrt newly restricted design space
-            parent_actions = family.parent_info.selected_actions
-            selected_actions = []
-            for action in parent_actions:
-                hole_options = self.action_to_hole_options[action]
-                # if family.includes(hole_options):
-                if family.parent_info.splitter not in hole_options or family.includes(hole_options):
-                    selected_actions.append(action)
-
-        # construct bitvector of selected actions
-        selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
-        
-        Profiler.resume()
-        return None,selected_actions,selected_actions_bv
 
     def restrict_mdp(self, mdp, selected_actions_bv):
         '''
@@ -115,8 +252,7 @@ class QuotientContainer:
         Profiler.resume()
         return model,state_map,choice_map
 
-
-
+ 
     def restrict_quotient(self, selected_actions_bv):
         return self.restrict_mdp(self.quotient_mdp, selected_actions_bv)        
 
@@ -125,7 +261,7 @@ class QuotientContainer:
         ''' Construct the quotient MDP for the family. '''
 
         # select actions compatible with the family and restrict the quotient
-        hole_selected_actions,selected_actions,selected_actions_bv = self.select_actions(family)
+        hole_selected_actions,selected_actions,selected_actions_bv = self.coloring.select_actions(family)
         model,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
 
         # cash restriction information
@@ -152,12 +288,13 @@ class QuotientContainer:
     def build_chain(self, family):
         assert family.size == 1
 
-        _,_,selected_actions_bv = self.select_actions(family)
+        _,_,selected_actions_bv = self.coloring.select_actions(family)
         mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
         dtmc = QuotientContainer.mdp_to_dtmc(mdp)
 
         return DTMC(dtmc,self,state_map,choice_map)
 
+    
     def scheduler_selection(self, mdp, scheduler):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
@@ -173,13 +310,13 @@ class QuotientContainer:
         selection = [set() for hole_index in mdp.design_space.hole_indices]
         for choice in choices:
             global_choice = mdp.quotient_choice_map[choice]
-            choice_options = self.action_to_hole_options[global_choice]
+            choice_options = self.coloring.action_to_hole_options[global_choice]
             for hole_index,option in choice_options.items():
                 selection[hole_index].add(option)
         selection = [list(options) for options in selection]
         Profiler.resume()
 
-        return selection
+        return selection    
 
     
     @staticmethod
@@ -275,10 +412,10 @@ class QuotientContainer:
             for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
                 
                 choice_global = mdp.quotient_choice_map[choice]
-                if self.default_actions.get(choice_global):
+                if self.coloring.default_actions.get(choice_global):
                     continue
 
-                choice_options = self.action_to_hole_options[choice_global]
+                choice_options = self.coloring.action_to_hole_options[choice_global]
 
                 # collect holes in which this action is inconsistent
                 inconsistent_holes = []
@@ -410,20 +547,20 @@ class QuotientContainer:
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        if not Synthesizer.incomplete_search:
-            return reduced_design_space, suboptions
+        # if not Synthesizer.incomplete_search:
+        #     return reduced_design_space, suboptions
 
         # reduce simple holes
-        ds_before = reduced_design_space.size
-        for hole_index in reduced_design_space.hole_indices:
-            if mdp.hole_simple[hole_index]:
-                assert len(hole_assignments[hole_index]) == 1
-                reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
-        ds_after = reduced_design_space.size
-        self.discarded += ds_before - ds_after
+        # ds_before = reduced_design_space.size
+        # for hole_index in reduced_design_space.hole_indices:
+        #     if mdp.hole_simple[hole_index]:
+        #         assert len(hole_assignments[hole_index]) == 1
+        #         reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+        # ds_after = reduced_design_space.size
+        # self.discarded += ds_before - ds_after
 
         # discard other suboptions
-        suboptions = core_suboptions
+        # suboptions = core_suboptions
         # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
@@ -503,7 +640,7 @@ class DTMCQuotientContainer(QuotientContainer):
         # TODO handle overlapping colors
         num_choices = self.quotient_mdp.nr_choices
 
-        self.action_to_hole_options = []
+        action_to_hole_options = []
         tm = self.quotient_mdp.transition_matrix
         for choice in range(num_choices):
             edges = self.quotient_mdp.choice_origins.get_edge_index_set(choice)            
@@ -520,19 +657,37 @@ class DTMCQuotientContainer(QuotientContainer):
             for hole_index,options in hole_options.items():
                 assert len(options) == 1
             hole_options = {hole_index:list(options)[0] for hole_index,options in hole_options.items()}
-            self.action_to_hole_options.append(hole_options)
+            action_to_hole_options.append(hole_options)
 
-        self.compute_default_actions()
-        self.compute_state_to_holes()
+        self.coloring = MdpColoring(self.quotient_mdp, self.sketch.design_space, action_to_hole_options)
 
 
 class CTMCQuotientContainer(QuotientContainer):
     def __init__(self, *args):
         super().__init__(*args)
 
+
 class MAQuotientContainer(QuotientContainer):
     def __init__(self, *args):
         super().__init__(*args)
+
+        # construct the quotient
+        self.quotient_mdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
+
+        # construct design space
+        holes = Holes()
+        hole_X = Hole("X", [0,1], ["alpha", "beta"])
+        holes.append(hole_X)
+        ds = DesignSpace(holes)
+        ds.property_indices = self.sketch.specification.all_constraint_indices()
+        self.sketch.design_space = ds
+
+        # find state with valuation [s=0]
+        action_to_hole_options = [{0:0}, {0:1}, {}, {}, {}, {}]
+        self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
+        
+    
+
 
 class MDPQuotientContainer(QuotientContainer):
     def __init__(self, *args):
@@ -559,13 +714,13 @@ class HyperPropertyQuotientContainer(QuotientContainer):
         assert self.quotient_mdp.has_choice_labeling()
         assert self.quotient_mdp.has_state_valuations()
 
-        self.action_to_hole_options = []
+        action_to_hole_options = []
         for state in range(self.quotient_mdp.nr_states):
             
             # skip states without nondeterminism
             num_actions = self.quotient_mdp.get_nr_available_actions(state)
             if num_actions == 1:
-                self.action_to_hole_options.append({})
+                action_to_hole_options.append({})
                 continue
 
             # a hole to be created
@@ -578,7 +733,7 @@ class HyperPropertyQuotientContainer(QuotientContainer):
                 choice = self.quotient_mdp.get_choice_index(state,offset)
                 labels = self.quotient_mdp.choice_labeling.get_labels_of_choice(choice)
                 hole_option_labels.append(labels)
-                self.action_to_hole_options.append({len(holes):offset})
+                action_to_hole_options.append({len(holes):offset})
             hole_option_labels = [str(labels) for labels in hole_option_labels]
 
             
@@ -586,11 +741,12 @@ class HyperPropertyQuotientContainer(QuotientContainer):
             holes.append(hole)
         
         # only now sketch has the corresponding design space
-        self.sketch.design_space = DesignSpace(holes)
-        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
+        ds = DesignSpace(holes)
+        ds.property_indices = self.sketch.specification.all_constraint_indices()
+        self.sketch.design_space = ds
 
-        self.compute_default_actions()
-        self.compute_state_to_holes()
+        # construct coloring
+        self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
 
         logger.info("Design space: {}".format(self.sketch.design_space.size))
 

@@ -15,6 +15,8 @@ namespace storm {
 
             // number of actions available at this observation
             std::vector<uint64_t> observation_actions;
+            // for each observation, a list of successor observations
+            std::vector<std::vector<uint64_t>> observation_successors;
             
             /** Memory manipulation . */
 

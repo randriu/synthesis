@@ -38,36 +38,52 @@ def setup_logger(log_path = None):
 
 
 @click.command()
-@click.option("--project", required=True, help="root", )
-@click.option("--sketch", default="sketch.templ", help="name of the sketch file")
+@click.option("--project", required=True, help="project path", )
 
-@click.option("--properties", default="sketch.props", help="name of the properties file")
+@click.option("--sketch", default="sketch.templ", show_default=True,
+    help="name of the sketch file in the project")
+@click.option("--filetype",
+    type=click.Choice(['prism', 'jani', 'pomdp', 'drn'], case_sensitive=False),
+    default="prism", show_default=True,
+    help="input file format")
+@click.option("--export",
+    type=click.Choice(['prism', 'jani', 'pomdp', 'drn'], case_sensitive=False),
+    help="export the model to *.jani/*.pomdp/*.drn and abort")
+
+@click.option("--properties", default="sketch.props", show_default=True,
+    help="name of the properties file in the project")
 @click.option("--constants", default="", help="constant assignment string", )
 
-@click.option("--export-jani", is_flag=True, default=False, help="export JANI model to 'output.jani' and abort")
-@click.option("--export-pomdp", is_flag=True, default=False, help="export POMDP-solve model to '*.pomdp' and abort")
-
-@click.argument("method", type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid'], case_sensitive=False), default="ar")
-@click.option("--incomplete-search", is_flag=True, default=False, help="use incomplete search during the synthesis")
-
-@click.option("--fsc-synthesis", is_flag=True, default=False, help="enable incremental synthesis of FSCs for a POMDP")
-@click.option("--pomdp-memory-size", default=1, help="implicit memory size for POMDP FSCs")
-
-@click.option("--hyperproperty", is_flag=True, default=False, help="enable synthesis of an MDP scheduler wrt a hyperproperty")
+@click.option("--method",
+    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid'], case_sensitive=False),
+    default="ar", show_default=True,
+    help="synthesis method"
+    )
+@click.option("--incomplete-search", is_flag=True, default=False,
+    help="use incomplete search during the synthesis")
+@click.option("--fsc-synthesis", is_flag=True, default=False,
+    help="enable incremental synthesis of FSCs for a POMDP")
+@click.option("--pomdp-memory-size", default=1,
+    help="implicit memory size for POMDP FSCs")
+@click.option("--hyperproperty", is_flag=True, default=False,
+    help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 
 def paynt(
-        project, sketch, properties, constants,
-        export_jani, export_pomdp,
-        method, incomplete_search, fsc_synthesis, pomdp_memory_size,
+        project,
+        sketch, filetype, export,
+        properties, constants,
+        method,
+        incomplete_search, fsc_synthesis, pomdp_memory_size,
         hyperproperty
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
-    Sketch.export_jani = export_jani
-    Sketch.export_pomdp = export_pomdp
+    Sketch.filetype = filetype
+    Sketch.export_option = export
+    
     Sketch.hyperproperty_synthesis = hyperproperty
     Synthesizer.incomplete_search = incomplete_search
-    POMDPQuotientContainer.pomdp_memory_size = pomdp_memory_size
+    POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
 
     # parse sketch
     if not os.path.isdir(project):

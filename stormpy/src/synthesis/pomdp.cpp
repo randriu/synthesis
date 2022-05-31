@@ -14,6 +14,7 @@ void define_pomdp(py::module& m) {
         .def_property_readonly("state_memory", [](storm::synthesis::PomdpManager<double>& manager) {return manager.state_memory;}, "TODO")
         .def_property_readonly("observation_memory_size", [](storm::synthesis::PomdpManager<double>& manager) {return manager.observation_memory_size;}, "TODO")
         .def_property_readonly("observation_actions", [](storm::synthesis::PomdpManager<double>& manager) {return manager.observation_actions;}, "TODO")
+        .def_property_readonly("observation_successors", [](storm::synthesis::PomdpManager<double>& manager) {return manager.observation_successors;}, "TODO")
         .def_property_readonly("max_successor_memory_size", [](storm::synthesis::PomdpManager<double>& manager) {return manager.max_successor_memory_size;}, "TODO")
         .def_property_readonly("num_holes", [](storm::synthesis::PomdpManager<double>& manager) {return manager.num_holes;}, "TODO")
         .def_property_readonly("action_holes", [](storm::synthesis::PomdpManager<double>& manager) {return manager.action_holes;}, "TODO")

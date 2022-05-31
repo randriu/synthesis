@@ -55,7 +55,7 @@ class MarkovChain:
         design_space = self.quotient_container.sketch.design_space
         hole_to_states = [0 for hole in design_space]
         for state in range(self.states):
-            for hole in quotient_container.state_to_holes[self.quotient_state_map[state]]:
+            for hole in quotient_container.coloring.state_to_holes[self.quotient_state_map[state]]:
                 hole_to_states[hole] += 1
         self.hole_simple = [hole_to_states[hole] == 1 for hole in design_space.hole_indices]
 
