@@ -4,7 +4,6 @@ from .property import Property, OptimalityProperty, Specification
 from .holes import CombinationColoring
 from ..synthesizers.models import MarkovChain
 
-
 import itertools
 from collections import defaultdict
 

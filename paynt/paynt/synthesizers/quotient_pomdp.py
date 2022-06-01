@@ -2,20 +2,15 @@ import stormpy
 import stormpy.synthesis
 import stormpy.pomdp
 
-import math
-import re
-import itertools
-
-from .statistic import Statistic
-
-from ..sketch.jani import JaniUnfolder
+from .models import MarkovChain,MDP,DTMC
 from ..sketch.holes import Hole,Holes,DesignSpace
-
-from .quotient import MdpColoring,QuotientContainer
+from .quotient import QuotientContainer
+from. coloring import MdpColoring
 
 from ..profiler import Profiler
 
-from .models import MarkovChain,MDP,DTMC
+import math
+import re
 
 import logging
 logger = logging.getLogger(__name__)
@@ -158,48 +153,48 @@ class POMDPQuotientContainer(QuotientContainer):
         self.unfold_memory()
 
 
-    def family_observation_index(self, family, obs):
+    # def family_observation_index(self, family, obs):
 
-        # collect all actions and all memory updates
-        # actions = set()
-        # for hole in self.observation_action_holes[obs]:
-        #     actions.update(family[hole].options)
-        updates = set()
-        for hole in self.observation_memory_holes[obs]:
-            updates.update(family[hole].options)
-        return len(updates)
-        # return max(len(actions),len(updates))
+    #     # collect all actions and all memory updates
+    #     # actions = set()
+    #     # for hole in self.observation_action_holes[obs]:
+    #     #     actions.update(family[hole].options)
+    #     updates = set()
+    #     for hole in self.observation_memory_holes[obs]:
+    #         updates.update(family[hole].options)
+    #     return len(updates)
+    #     # return max(len(actions),len(updates))
         
-    def family_index(self,family):
+    # def family_index(self,family):
 
-        # get reachable holes
-        reachable_choices = [
-            family.mdp.quotient_choice_map[choice]
-            for choice in range(family.mdp.choices)
-        ]
-        reachable_holes = set()
-        for choice in reachable_choices:
-            choice_holes = self.coloring.action_to_hole_options[choice].keys()
-            reachable_holes.update(choice_holes)
+    #     # get reachable holes
+    #     reachable_choices = [
+    #         family.mdp.quotient_choice_map[choice]
+    #         for choice in range(family.mdp.choices)
+    #     ]
+    #     reachable_holes = set()
+    #     for choice in reachable_choices:
+    #         choice_holes = self.coloring.action_to_hole_options[choice].keys()
+    #         reachable_holes.update(choice_holes)
 
-        # in each observation, count how many action/memory holes are reachable;
-        # observation index is then the maximum number of action OR memory holes
-        # associated with this observation
-        obs_indices = []
-        for obs in range(self.observations):
-            reachable_action_holes = [
-                hole for hole in self.observation_action_holes[obs]
-                if hole in reachable_holes
-            ]
-            reachable_memory_holes = [
-                hole for hole in self.observation_memory_holes[obs]
-                if hole in reachable_holes
-            ]
-            obs_index = max(len(reachable_action_holes),len(reachable_memory_holes))
-            obs_indices.append(obs_index)
+    #     # in each observation, count how many action/memory holes are reachable;
+    #     # observation index is then the maximum number of action OR memory holes
+    #     # associated with this observation
+    #     obs_indices = []
+    #     for obs in range(self.observations):
+    #         reachable_action_holes = [
+    #             hole for hole in self.observation_action_holes[obs]
+    #             if hole in reachable_holes
+    #         ]
+    #         reachable_memory_holes = [
+    #             hole for hole in self.observation_memory_holes[obs]
+    #             if hole in reachable_holes
+    #         ]
+    #         obs_index = max(len(reachable_action_holes),len(reachable_memory_holes))
+    #         obs_indices.append(obs_index)
 
-        # family index is the maximum observation index
-        return max(obs_indices)
+    #     # family index is the maximum observation index
+    #     return max(obs_indices)
 
     # def split(self,family):
 
@@ -244,7 +239,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.memory_hole_prototypes = [None] * self.observations
         for obs in range(self.observations):
             num_updates = pm.max_successor_memory_size[obs]
-            if num_updates == 1:
+            if num_updates <= 1:
                 continue
             name = self.create_hole_name(obs,mem="*",action_hole=False)
             options = list(range(num_updates))

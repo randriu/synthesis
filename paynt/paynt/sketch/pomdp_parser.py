@@ -2,6 +2,8 @@ import stormpy
 
 from collections import defaultdict
 
+from . import sketch
+
 import os
 import re
 import uuid
@@ -51,8 +53,9 @@ class PomdpParser:
         pomdp = quotient.pomdp
 
         num_states = pomdp.nr_states
+        num_choices = pomdp.nr_choices
         num_obs = quotient.observations
-        num_choices = max([quotient.actions_at_observation[obs] for obs in range(num_obs)])
+        max_num_choices = max([quotient.actions_at_observation[obs] for obs in range(num_obs)])
 
         desc = """\
 # auto-generated from PRISM program
@@ -63,7 +66,7 @@ states: {}
 actions: {}
 observations: {}
 
-""".format(num_states,num_choices,num_obs)
+""".format(num_states,max_num_choices,num_obs)
 
         # initial state
         state_init = pomdp.initial_states[0]
@@ -95,20 +98,35 @@ observations: {}
         # rewards
         desc += "\n# rewards\n\n"
 
+        # assuming a single reward model
         rewards = next(iter(pomdp.reward_models.values()))
-        assert rewards.has_state_rewards and not rewards.has_state_action_rewards
+
+        # convert rewards to state-based
+        state_rewards = []
+        if rewards.has_state_rewards:
+            state_rewards = list(rewards.state_rewards)
+        elif rewards.has_state_action_rewards:
+            state_action_rewards = list(rewards.state_action_rewards)
+            for state in range(num_states):
+                group_start = tm.get_row_group_start(state)
+                state_rewards.append(state_action_rewards[group_start])
+        else:
+            raise TypeError("unknown reward type")
+                
+        # print state-based rewards
         for state in range(num_states):
-            rew = rewards.state_rewards[state]
+            rew = state_rewards[state]
             if rew != 0:
                 desc += f"R: * : {state} : * : * {rew}\n"
-
-        output_path = Sketch.substitute_suffix(path, '.', 'pomdp')
-        property_path = Sketch.substitute_suffix(path, '/', props.pomdp)
+        
+        # ready to print
+        output_path = sketch.Sketch.substitute_suffix(path, '.', 'pomdp')
+        property_path = sketch.Sketch.substitute_suffix(path, '/', 'props.pomdp')
 
         logger.info("Writing POMDP in pomdp-solve format to {} ...".format(output_path))
         with open(output_path, 'w') as f:
             f.write(desc)
-        logger.info("Writing default discounting property to {} ...".format(property_path))
+        logger.info("Writing default discount property to {} ...".format(property_path))
         with open(property_path, 'w') as f:
             f.write('R{"rew0"}max=? [F "target"]')
         logger.info("Write OK, aborting ...")

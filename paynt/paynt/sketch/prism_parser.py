@@ -1,7 +1,7 @@
+import stormpy
+
 from .property import Property, OptimalityProperty, Specification
 from .holes import Hole, Holes, DesignSpace
-
-import stormpy
 
 import os
 import re

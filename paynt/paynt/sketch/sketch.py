@@ -1,10 +1,13 @@
+import stormpy
+
 from .prism_parser import PrismParser
 from .jani import JaniUnfolder
 from .pomdp_parser import PomdpParser
-from ..synthesizers.models import MarkovChain
-from ..profiler import Profiler
+from ..synthesizers.quotient import *
+from ..synthesizers.quotient_pomdp import POMDPQuotientContainer
 
-import stormpy
+from ..synthesizers.models import MarkovChain
+from ..profiler import Profiler 
 
 import logging
 logger = logging.getLogger(__name__)
@@ -44,7 +47,7 @@ class Sketch:
         # for each hole, a list of parsed PRISM expressions used for subsitutions
         self.hole_expressions = None        
         # (dtmc sketch) jani unfolder
-        jani_unfolder = None
+        self.jani_unfolder = None
 
         # load the skect
         logger.info(f"Loading sketch from {sketch_path}...")
@@ -66,7 +69,7 @@ class Sketch:
 
         logger.info(f"Initializing the quotient ...")
         if self.is_dtmc:
-            self.quotient = DTMCQuotientContainer(self, jani_unfolder.action_to_hole_options)
+            self.quotient = DTMCQuotientContainer(self, self.jani_unfolder.action_to_hole_options)
         elif self.is_ma:
             self.quotient = MAQuotientContainer(self)
         elif self.is_mdp:
@@ -74,13 +77,15 @@ class Sketch:
             self.quotient = HyperPropertyQuotientContainer(self)
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
+        else:
+            raise TypeError("unknown sketch type")
 
         if export is not None:
             if export == "jani":
-                jani_unfolder.write_jani(sketch_path)
-                exit()
+                assert self.jani_unfolder is not None, "Jani unfolder was not used"
+                self.jani_unfolder.write_jani(sketch_path)
             if export == "drn":
-                output_path = PomdpParser.substitute_suffix(sketch_path, '.', 'drn')
+                output_path = Sketch.substitute_suffix(sketch_path, '.', 'drn')
                 stormpy.export_to_drn(self.explicit_quotient, output_path)
             if export == "pomdp":
                 assert self.is_pomdp, "cannot --export pomdp with non-POMDP sketches"
@@ -102,15 +107,15 @@ class Sketch:
         specification = PrismParser.parse_specification(properties_path, prism, constant_map)
 
         # if PRISM describes a DTMC, unfold hole options in jani
-        jani_unfolder = None
         if prism.model_type == stormpy.storage.PrismModelType.DTMC:
             # unfold hole options in Jani
-            jani_unfolder = JaniUnfolder(prism, self.hole_expressions, specification, self.design_space)
-            specification = jani_unfolder.specification
-            quotient_mdp = jani_unfolder.quotient_mdp
+            self.jani_unfolder = JaniUnfolder(prism, self.hole_expressions, specification, self.design_space)
+            specification = self.jani_unfolder.specification
+            quotient_mdp = self.jani_unfolder.quotient_mdp
 
         # specification is now finalized and will be used during the
         # construction of Markov chains
+        self.prism = prism
         self.update_specification(specification)
         
         # construct the quotient if one has not been constructed yet
@@ -129,9 +134,6 @@ class Sketch:
         self.explicit_quotient = quotient_mdp
         logger.debug("Constructed quotient MDP having {} states and {} actions.".format(
             quotient_mdp.nr_states, quotient_mdp.nr_choices))
-
-        # return Jani program if one must be printed
-        return jani_unfolder
 
     def is_prism_and_of_type(self, of_type):
         return self.prism is not None and self.prism.model_type == of_type

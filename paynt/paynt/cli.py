@@ -59,7 +59,7 @@ def setup_logger(log_path = None):
     help="synthesis method"
     )
 @click.option("--incomplete-search", is_flag=True, default=False,
-    help="use incomplete search during the synthesis")
+    help="use incomplete search during synthesis")
 @click.option("--fsc-synthesis", is_flag=True, default=False,
     help="enable incremental synthesis of FSCs for a POMDP")
 @click.option("--pomdp-memory-size", default=1, show_default=True,
@@ -94,7 +94,6 @@ def paynt(
     
     # parse sketch
     sketch = Sketch(sketch_path, filetype, export, properties_path, constants)
-    exit()
 
     # choose the synthesis method and run the corresponding synthesizer
     if sketch.is_pomdp and fsc_synthesis:
