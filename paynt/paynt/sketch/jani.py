@@ -2,6 +2,8 @@ import stormpy
 
 from .property import Property, OptimalityProperty, Specification
 from .holes import CombinationColoring
+from ..synthesizers.models import MarkovChain
+
 
 import itertools
 from collections import defaultdict
@@ -12,41 +14,70 @@ logger = logging.getLogger(__name__)
 class JaniUnfolder():
     ''' Unfolder of hole combinations into JANI program. '''
 
-    def __init__(self, sketch):
+    def __init__(self, prism, hole_expressions, specification, design_space):
 
         logger.debug("Constructing JANI program...")
         
         # pack properties
-        properties = sketch.specification.stormpy_properties()
+        properties = specification.stormpy_properties()
         
         # construct jani
-        jani, new_properties = sketch.prism.to_jani(properties)
+        jani, new_properties = prism.to_jani(properties)
 
         # unpack properties
         properties = new_properties
         opt = None
         eps = None
-        if sketch.specification.has_optimality:
+        if specification.has_optimality:
             properties = new_properties[:-1]
             opt = new_properties[-1]
-            eps = sketch.specification.optimality.epsilon
+            eps = specification.optimality.epsilon
 
         # when translating PRISM to JANI, some properties may change their
         # atoms, so we need to re-wrap all properties
         properties = [Property(p) for p in properties]
         optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
         self.specification = Specification(properties,optimality_property)
+        MarkovChain.initialize(self.specification.stormpy_formulae())
 
         # unfold holes in the program
-        self.hole_expressions = sketch.hole_expressions
+        self.hole_expressions = hole_expressions
         self.jani_unfolded = None
         self.combination_coloring = None
         self.edge_to_color = None
-        self.unfold_jani(jani, sketch.design_space, sketch.export_jani)
+        self.unfold_jani(jani, design_space)
+
+        # construct the coloring
+        quotient_mdp = stormpy.build_sparse_model_with_options(self.jani_unfolded, MarkovChain.builder_options)
+
+        # associate each action of a quotient MDP with hole options
+        # TODO handle conflicting colors
+        action_to_hole_options = []
+        tm = quotient_mdp.transition_matrix
+        for choice in range(quotient_mdp.nr_choices):
+            edges = quotient_mdp.choice_origins.get_edge_index_set(choice)
+            hole_options = {}
+            for edge in edges:
+                combination = self.edge_to_hole_options.get(edge, None)
+                if combination is None:
+                    continue
+                for hole_index,option in combination.items():
+                    options = hole_options.get(hole_index,set())
+                    options.add(option)
+                    hole_options[hole_index] = options
+
+            for hole_index,options in hole_options.items():
+                assert len(options) == 1
+            hole_options = {hole_index:list(options)[0] for hole_index,options in hole_options.items()}
+            action_to_hole_options.append(hole_options)
+
+        self.quotient_mdp = quotient_mdp
+        self.action_to_hole_options = action_to_hole_options
+        return
 
 
     # Unfold holes in the jani program
-    def unfold_jani(self, jani, design_space, export_jani):
+    def unfold_jani(self, jani, design_space):
         # ensure that jani.constants are in the same order as our holes
         open_constants = [c for c in jani.constants if not c.defined]
         expression_variables = [c.expression_variable for c in open_constants]
@@ -70,14 +101,6 @@ class JaniUnfolder():
         jani_program.set_model_type(stormpy.JaniModelType.MDP)
         jani_program.finalize()
         jani_program.check_valid()
-
-        if export_jani:
-            filename = "output.jani"
-            logger.debug(f"Writing unfolded program to {filename}")
-            with open(filename, "w") as f:
-                f.write(str(jani_program))
-            logger.debug("Done writing file.")
-            exit()
 
         # collect colors of each edge
         edge_to_hole_options = {}
@@ -182,3 +205,10 @@ class JaniUnfolder():
             edge.source_location_index, edge.action_index, edge.rate, templ_edge, dests
         )
         return new_edge
+
+    def write_jani(self, sketch_path):
+        output_path = Sketch.substitute_suffix(sketch_path, '.', 'jani')
+        logger.debug(f"Writing unfolded program to {output_path}")
+        with open(output_path, "w") as f:
+            f.write(str(jani_program))
+        logger.debug("Write OK, aborting...")

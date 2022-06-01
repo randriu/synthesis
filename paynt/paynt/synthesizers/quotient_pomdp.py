@@ -20,6 +20,7 @@ from .models import MarkovChain,MDP,DTMC
 import logging
 logger = logging.getLogger(__name__)
 
+
 class POMDPQuotientContainer(QuotientContainer):
 
     # implicit size for POMDP unfolding
@@ -64,13 +65,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.is_action_hole = None
 
         # construct the quotient POMDP
-        if not self.sketch.is_explicit:
-            MarkovChain.builder_options.set_build_choice_labels(True)
-            self.pomdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
-            MarkovChain.builder_options.set_build_choice_labels(False)
-            assert self.pomdp.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-        else:
-            self.pomdp = self.sketch.explicit_model
+        self.pomdp = self.sketch.explicit_quotient
         self.pomdp = stormpy.pomdp.make_canonic(self.pomdp)
         # ^ this also asserts that states with the same observation have the
         # same number and the same order of available actions
@@ -176,11 +171,50 @@ class POMDPQuotientContainer(QuotientContainer):
         # return max(len(actions),len(updates))
         
     def family_index(self,family):
-        print(family.size)
-        return max([
-            self.family_observation_index(family,obs)
-            for obs in range(self.observations)
-        ])
+
+        # get reachable holes
+        reachable_choices = [
+            family.mdp.quotient_choice_map[choice]
+            for choice in range(family.mdp.choices)
+        ]
+        reachable_holes = set()
+        for choice in reachable_choices:
+            choice_holes = self.coloring.action_to_hole_options[choice].keys()
+            reachable_holes.update(choice_holes)
+
+        # in each observation, count how many action/memory holes are reachable;
+        # observation index is then the maximum number of action OR memory holes
+        # associated with this observation
+        obs_indices = []
+        for obs in range(self.observations):
+            reachable_action_holes = [
+                hole for hole in self.observation_action_holes[obs]
+                if hole in reachable_holes
+            ]
+            reachable_memory_holes = [
+                hole for hole in self.observation_memory_holes[obs]
+                if hole in reachable_holes
+            ]
+            obs_index = max(len(reachable_action_holes),len(reachable_memory_holes))
+            obs_indices.append(obs_index)
+
+        # family index is the maximum observation index
+        return max(obs_indices)
+
+    # def split(self,family):
+
+    #     if POMDPQuotientContainer.current_family_index == 1:
+    #         return super().split(family)
+
+    #     # split hole having number of options equal to the current family index
+    #     splitter = None
+    #     for obs in range(self.observations):
+    #         for hole in self.observation_memory_holes[obs]:
+    #             if len(family[hole].options) == POMDPQuotientContainer.current_family_index:
+    #                 splitter = hole
+    #     print(splitter)
+    #     exit()
+
 
     def unfold_memory(self):
         

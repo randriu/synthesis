@@ -623,41 +623,10 @@ class QuotientContainer:
 
 class DTMCQuotientContainer(QuotientContainer):
     
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, sketch, action_to_hole_options):
+        super().__init__(sketch)
 
-        # unfold jani program
-        unfolder = JaniUnfolder(self.sketch)
-        self.sketch.specification = unfolder.specification
-
-        # build quotient MDP       
-        edge_to_hole_options = unfolder.edge_to_hole_options
-        self.quotient_mdp = stormpy.build_sparse_model_with_options(unfolder.jani_unfolded, MarkovChain.builder_options)
-        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
-
-        # associate each action of a quotient MDP with hole options
-        # remember default actions (actions taken in each hole assignment)
-        # TODO handle overlapping colors
-        num_choices = self.quotient_mdp.nr_choices
-
-        action_to_hole_options = []
-        tm = self.quotient_mdp.transition_matrix
-        for choice in range(num_choices):
-            edges = self.quotient_mdp.choice_origins.get_edge_index_set(choice)            
-            hole_options = {}
-            for edge in edges:
-                combination = edge_to_hole_options.get(edge, None)
-                if combination is None:
-                    continue
-                for hole_index,option in combination.items():
-                    options = hole_options.get(hole_index,set())
-                    options.add(option)
-                    hole_options[hole_index] = options
-
-            for hole_index,options in hole_options.items():
-                assert len(options) == 1
-            hole_options = {hole_index:list(options)[0] for hole_index,options in hole_options.items()}
-            action_to_hole_options.append(hole_options)
+        self.quotient_mdp = self.sketch.explicit_quotient
 
         self.coloring = MdpColoring(self.quotient_mdp, self.sketch.design_space, action_to_hole_options)
 
@@ -672,39 +641,25 @@ class MAQuotientContainer(QuotientContainer):
         super().__init__(*args)
 
         # construct the quotient
-        self.quotient_mdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
+        self.quotient_mdp = self.sketch.explicit_quotient
 
         # construct design space
         holes = Holes()
         hole_X = Hole("X", [0,1], ["alpha", "beta"])
         holes.append(hole_X)
-        ds = DesignSpace(holes)
-        ds.property_indices = self.sketch.specification.all_constraint_indices()
-        self.sketch.design_space = ds
+        self.sketch.set_design_space(DesignSpace(holes))
 
         # find state with valuation [s=0]
         action_to_hole_options = [{0:0}, {0:1}, {}, {}, {}, {}]
         self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
         
     
-
-
-class MDPQuotientContainer(QuotientContainer):
-    def __init__(self, *args):
-        super().__init__(*args)
-
-    def build_chain(self, assignment):
-        return MDP(model, self, None, None, assignment)
-
 class HyperPropertyQuotientContainer(QuotientContainer):
     def __init__(self, *args):
         super().__init__(*args)
 
         # build the quotient
-        MarkovChain.builder_options.set_build_choice_labels(True)
-        self.quotient_mdp = stormpy.build_sparse_model_with_options(self.sketch.prism, MarkovChain.builder_options)
-        MarkovChain.builder_options.set_build_choice_labels(False)
-        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
+        self.quotient_mdp = self.sketch.explicit_quotient
 
         # to each state, construct a hole with options corresponding to actions
         # available at this state; associate each action with the corresponding
@@ -741,9 +696,7 @@ class HyperPropertyQuotientContainer(QuotientContainer):
             holes.append(hole)
         
         # only now sketch has the corresponding design space
-        ds = DesignSpace(holes)
-        ds.property_indices = self.sketch.specification.all_constraint_indices()
-        self.sketch.design_space = ds
+        self.sketch.set_design_space(DesignSpace(holes))
 
         # construct coloring
         self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)

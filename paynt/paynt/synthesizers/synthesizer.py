@@ -117,6 +117,16 @@ class SynthesizerAR(Synthesizer):
         self.sketch.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
 
+        # TODO
+        # print()
+        # index = self.sketch.quotient.family_index(family)
+        # print(index)
+        # print()
+        # if index < POMDPQuotientContainer.current_family_index:
+        #     print("WOW")
+        #     exit()
+        #     return False,None
+
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
         Profiler.resume()
@@ -150,12 +160,6 @@ class SynthesizerAR(Synthesizer):
                 family = families.pop(-1)
             else:
                 family = families.pop(0)
-
-            # TODO
-            # print()
-            # print(self.sketch.quotient.family_index(family))
-            # if self.sketch.quotient.family_index(family) < POMDPQuotientContainer.current_family_index:
-            #     continue
 
             can_improve,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:

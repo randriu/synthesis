@@ -1,11 +1,5 @@
 import stormpy
 
-from .property import Property, OptimalityProperty, Specification
-from .holes import Hole, Holes, DesignSpace
-from ..synthesizers.models import MarkovChain
-from ..synthesizers.quotient import *
-from ..synthesizers.quotient_pomdp import *
-
 from collections import defaultdict
 
 import os
@@ -13,48 +7,43 @@ import re
 import uuid
 
 import logging
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
 
 class PomdpParser:
 
     @classmethod
-    def substitute_suffix(cls, path, delimiter, suffix):
-        output_path = path.split(delimiter)
-        output_path[-1] = suffix
-        output_path = '.'.join(output_path)
-        return output_path
-        
-
-
-    @classmethod
-    def read_pomdp_model(cls, sketch_path):
-        # attempt to read in a pomdp-solve format
-        drn = PomdpParser.read_pomdp_solve_format(sketch_path)
-        if drn is None:
-            # failure
-            explicit_model = PomdpParser.read_explicit_format(sketch_path)
-        else:
-            # success: write drn model to temporary file and try to parse
-            drn_path = sketch_path + str(uuid.uuid4())
-            with open(drn_path, 'w') as f:
-                f.write(drn)
-            explicit_model = PomdpParser.read_explicit_format(drn_path)
-
-            # removing temporary file
-            os.remove(drn_path)
-        return explicit_model
-
-
-    @classmethod
-    def read_explicit_format(cls, sketch_path):
+    def read_pomdp_drn(cls, sketch_path):
         explicit_model = None
         try:
             builder_options = stormpy.core.DirectEncodingParserOptions()
             builder_options.build_choice_labels = True
-            explicit_model = stormpy.core._build_sparse_model_from_drn(sketch_path, builder_options)
+            explicit_model = stormpy.core._build_sparse_model_from_drn(
+                sketch_path, builder_options)
         except:
-            pass
+            raise ValueError('Failed to read sketch file in a .drn format')
         return explicit_model
+
+    @classmethod
+    def read_pomdp_solve(cls, sketch_path):
+        # attempt to read in a pomdp-solve format
+        drn = PomdpParser.read_pomdp_solve_format(sketch_path)
+        assert drn is not None, 'Failed to read sketch file in a .pomdp format'
+        
+        # success: write drn model to temporary file and try to parse
+        explicit_model = None
+        drn_path = sketch_path + str(uuid.uuid4())
+        with open(drn_path, 'w') as f:
+            f.write(drn)
+        try:
+            explicit_model = PomdpParser.read_pomdp_drn(drn_path)
+            os.remove(drn_path)
+        except ValueError:
+            os.remove(drn_path)
+            exit(1)
+
+        return explicit_model
+
 
     @classmethod
     def write_model_in_pomdp_solve_format(cls, path, quotient):
@@ -113,14 +102,13 @@ observations: {}
             if rew != 0:
                 desc += f"R: * : {state} : * : * {rew}\n"
 
+        output_path = Sketch.substitute_suffix(path, '.', 'pomdp')
+        property_path = Sketch.substitute_suffix(path, '/', props.pomdp)
 
-        output_path = PomdpParser.substitute_suffix(path, '.', 'pomdp')
-        property_path = PomdpParser.substitute_suffix(path, '/', props.pomdp)
-
-        logger.info("Printing POMDP in pomdp-solve format to {} ...".format(output_path))
+        logger.info("Writing POMDP in pomdp-solve format to {} ...".format(output_path))
         with open(output_path, 'w') as f:
             f.write(desc)
-        logger.info("Printing default discounting property to {} ...".format(property_path))
+        logger.info("Writing default discounting property to {} ...".format(property_path))
         with open(property_path, 'w') as f:
             f.write('R{"rew0"}max=? [F "target"]')
         logger.info("Write OK, aborting ...")
