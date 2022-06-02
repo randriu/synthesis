@@ -24,6 +24,10 @@ class POMDPQuotientContainer(QuotientContainer):
     # TODO
     current_family_index = None
 
+    # if True, action-memory hole pairs will be merged into a single hole
+    # use_simplified_coloring = False
+    use_simplified_coloring = True
+    
     def __init__(self, *args):
         super().__init__(*args)
 
@@ -210,8 +214,19 @@ class POMDPQuotientContainer(QuotientContainer):
     #     print(splitter)
     #     exit()
 
-
+    
     def unfold_memory(self):
+        self.unfold_memory_new()
+        if self.use_simplified_coloring:
+            # store old coloring
+            self.design_space_old = self.sketch.design_space
+            self.coloring_old = self.coloring
+            # replace with simplified one
+            design_space_new,self.coloring,self.obs_to_holes,self.hole_pair_map = self.simplify_coloring()
+            self.sketch.set_design_space(design_space_new)
+
+    
+    def unfold_memory_new(self):
         
         # reset attributes
         self.quotient_mdp = None
@@ -297,22 +312,128 @@ class POMDPQuotientContainer(QuotientContainer):
         self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
 
 
+    def simplify_coloring(self):
+
+        # merge action-memory holes in the same obs-mem pair
+        obs_to_holes = [[] for obs in range(self.observations)]
+
+        # for each action-memory hole pair, a mapping of its option pairs to new options
+        hole_pair_map = {}
+
+        all_holes = Holes()
+        for obs in range(self.observations):
+
+            ah = self.action_hole_prototypes[obs]
+            mh = self.memory_hole_prototypes[obs]
+            
+            if ah is not None and mh is None:
+                # only action holes
+                for old_hole_index in self.observation_action_holes[obs]:
+                    old_hole = self.sketch.design_space[old_hole_index]
+                    new_hole_index = all_holes.num_holes
+                    new_hole = old_hole.copy()
+                    hole_pair_map[old_hole_index] = new_hole_index
+                    all_holes.append(new_hole)
+                    obs_to_holes[obs].append(new_hole_index)
+
+            if ah is None and mh is not None:
+                # only memory holes
+                for old_hole_index in self.observation_memory_holes[obs]:
+                    old_hole = self.sketch.design_space[old_hole_index]
+                    new_hole_index = all_holes.num_holes
+                    hole_pair_map[old_hole_index] = new_hole_index
+                    new_hole = old_hole.copy()
+                    all_holes.append(new_hole)
+                    obs_to_holes[obs].append(new_hole_index)
+
+            if ah is not None and mh is not None:
+                # both types of holes
+                for mem in range(self.observation_memory_size[obs]):
+                    action_hole_index = self.observation_action_holes[obs][mem]
+                    memory_hole_index = self.observation_memory_holes[obs][mem]
+
+                    action_hole = self.sketch.design_space[action_hole_index]
+                    memory_hole = self.sketch.design_space[memory_hole_index]
+
+                    name = "AM({},{})".format(self.observation_labels[obs],mem)
+
+                    option_dict = {}
+                    options = []
+                    option_labels = []
+                    for action_option in ah.options:
+                        for memory_option in mh.options:
+                            option_label = ah.option_labels[action_option] + "+" + mh.option_labels[memory_option]
+                            option_labels.append(option_label)
+
+                            option_dict[(action_option,memory_option)] = len(options)
+                            options.append(len(options))
+
+                    new_hole_index = all_holes.num_holes
+                    obs_to_holes[obs].append(new_hole_index)
+                    hole = Hole(name, options, option_labels)
+                    hole_pair_map[(action_hole_index,memory_hole_index)] = (new_hole_index,option_dict)
+                    all_holes.append(hole)
+
+        # modify the coloring
+        action_to_hole_options = self.coloring.action_to_hole_options.copy()
+        for action in range(self.quotient_mdp.nr_choices):
+            hole_options_old = self.coloring.action_to_hole_options[action]
+            if len(hole_options_old) == 0:
+                continue
+
+            if len(hole_options_old) == 1:
+                old_index = next(iter(hole_options_old.keys()))
+                new_index = hole_pair_map[old_index]
+                new_option = hole_options_old[old_index]
+                action_to_hole_options[action] = {new_index : new_option}
+                continue
+
+            # 2 holes
+            indices = list(hole_options_old.keys())
+            ah_index = indices[0]
+            mh_index = indices[1]
+
+            ah_option = hole_options_old[ah_index]
+            mh_option = hole_options_old[mh_index]
+
+            new_hole,new_map = hole_pair_map[(ah_index,mh_index)]
+            new_hole_options = {new_hole: new_map[(ah_option,mh_option)]}
+            action_to_hole_options[action] = new_hole_options
+
+        design_space_new = DesignSpace(all_holes)
+        coloring_new = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
+
+        return design_space_new, coloring_new, obs_to_holes, hole_pair_map
+
+
+
+
+    
+
 
     
 
     
-    def unfold_memory2(self):
-        
-        # reset basic attributes
+    def unfold_memory_uai(self):
+
+        # reset attributes
         self.quotient_mdp = None
         self.coloring = None
-
-        # reset family attributes
+        self.memory_hole_prototypes = None
+        
+        self.observation_action_holes = None
+        self.observation_memory_holes = None
+        self.is_action_hole = None
+        
+        # legacy attributes
         self.obs_to_holes = []
         self.hole_num_actions = []
         self.hole_num_updates = []
         
-        # unfold MDP using manager
+        # use manager to unfold POMDP
+        logger.debug(
+            "Unfolding POMDP using the following memory allocation vector: {} ..."
+            .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
 
         # short aliases
@@ -322,9 +443,23 @@ class POMDPQuotientContainer(QuotientContainer):
 
         logger.debug(f"Constructed quotient MDP having {mdp.nr_states} states and {mdp.nr_choices} actions.")
 
+        # detect which observations now involve memory updates
+        self.memory_hole_prototypes = [None] * self.observations
+        for obs in range(self.observations):
+            num_updates = pm.max_successor_memory_size[obs]
+            if num_updates <= 1:
+                continue
+            name = self.create_hole_name(obs,mem="*",action_hole=False)
+            options = list(range(num_updates))
+            option_labels = [str(x) for x in range(num_updates)]
+            hole = Hole(name,options,option_labels)
+            self.memory_hole_prototypes[obs] = hole
+
         # create holes
         holes = Holes()
-        self.obs_to_holes = []
+        self.observation_action_holes = []
+        self.observation_memory_holes = []
+        self.is_action_hole = []
 
         for obs in range(self.observations):
             ah = pm.action_holes[obs]
@@ -419,8 +554,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
         self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
 
-        self.sketch.design_space = DesignSpace(holes)
-        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
+        self.sketch.set_design_space(DesignSpace(hole))
+
     
 
     
@@ -476,97 +611,17 @@ class POMDPQuotientContainer(QuotientContainer):
         return inconsistent_differences
 
     
-    def break_symmetry_1(self, family, action_inconsistencies):
-
-        # mark observations having multiple actions and multiple holes, where it makes sense to break symmetry
-        obs_with_multiple_holes = { obs for obs,holes in enumerate(self.obs_holes) if len(holes) > 1 }
-        if len(obs_with_multiple_holes) == 0:
-            return family
-
-        # go through each observation of interest and break symmetry
-        restricted_family = family.copy()
-        for obs in obs_with_multiple_holes:
-            obs_holes = self.obs_to_holes[obs]
-
-            if obs in action_inconsistencies:
-                # use inconsistencies to break symmetries
-                actions = action_inconsistencies[obs]
-            else:
-                # remove actions one by one
-                actions = list(range(self.hole_num_actions[obs]))
-            
-            for action_index,hole_index in enumerate(obs_holes):
-                action = actions[action_index % len(actions)]
-            
-                # remove action from options
-                options = [option for option in family[hole_index].options if option // quo.hole_num_updates[hole_index] != action]
-                restricted_family[hole_index].assume_options(options)
-        # logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
-        
-        return restricted_family
-
-    def break_symmetry_2(self, family, selection):
-
-        # options that are left in the hole
-        selection = [ options.copy() for options in selection ]
-
-        # for each observation round-robin inconsistencies from the holes
-
-        options_removed = [[] for hole in selection ]
-        
-        for obs in range(self.sketch.quotient.observations):
-            obs_holes = self.sketch.quotient.obs_to_holes[obs]
-            if len(obs_holes) <= 1:
-                continue
-            
-            # count all different assignments in these holes
-            option_count = [0] * family[obs_holes[0]].size
-            for hole in obs_holes:
-                for option in selection[hole]:
-                    option_count[option] += 1
-
-            # go through each hole and try to remove duplicates
-            while True:
-                changed = False
-                for hole in obs_holes:
-                    can_remove = [option for option in selection[hole] if option_count[option] > 1]
-                    if not can_remove:
-                        continue
-                    option = can_remove[0]
-                    selection[hole].remove(option)
-                    options_removed[hole].append(option)
-                    option_count[option] -= 1
-                    changed = True
-                if not changed:
-                    break
-
-        # remove selected options from the family
-        restricted_family = family.copy()
-        for hole,removed in enumerate(options_removed):
-            new_options = [ option for option in family[hole].options if option not in removed ]
-            restricted_family[hole].assume_options(new_options)
-        
-        logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
-        return restricted_family
-
-    def sift_actions_and_updates(self, hole, options):
+    
+    def sift_actions_and_updates(self, obs, hole, options):
         actions = set()
         updates = set()
-        num_updates = self.hole_num_updates[hole]
+        num_updates = self.pomdp_manager.max_successor_memory_size[obs]
         for option in options:
             actions.add(option // num_updates)
             updates.add(option %  num_updates)
         return actions,updates
 
-    def disable_action(self, family, hole, action):
-        num_actions = self.hole_num_actions(hole)
-        num_updates = self.hole_num_updates(hole)
-        to_remove = [ (action * num_updates + update) for update in range(num_updates)]
-        new_options = [ option for option in family[hole].options if option not in to_remove ]
-        family.assume_hole_options(hole, new_options)
-
-    
-    def break_symmetry_3(self, family, action_inconsistencies, memory_inconsistencies):
+    def break_symmetry_uai(self, family, action_inconsistencies, memory_inconsistencies):
         
         # go through each observation of interest and break symmetry
         restricted_family = family.copy()

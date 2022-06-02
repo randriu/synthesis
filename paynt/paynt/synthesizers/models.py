@@ -113,6 +113,7 @@ class MarkovChain:
         
         value = result.at(self.initial_state)
         Profiler.resume()
+
         return PropertyResult(prop, result, value)
 
 

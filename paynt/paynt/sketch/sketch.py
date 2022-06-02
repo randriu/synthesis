@@ -14,7 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class Sketch:
-    '''Basic container for a sketch: a program, a quotient and a specification.'''
+    '''
+    Basic container for a sketch: a program, a specification and a quotient
+    container.'''
 
     # if True, the sketch is assumed to be a hole-free MDP
     hyperproperty_synthesis = False
