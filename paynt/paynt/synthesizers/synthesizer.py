@@ -3,8 +3,6 @@ import stormpy.synthesis
 from .statistic import Statistic
 from ..profiler import Timer,Profiler
 
-from .quotient_pomdp import POMDPQuotientContainer
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -395,7 +393,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         self.stage_control = StageControl()
 
-        quotient_relevant_holes = self.sketch.quotient.state_to_holes
+        quotient_relevant_holes = self.sketch.quotient.coloring.state_to_holes
         formulae = self.sketch.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
             self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,

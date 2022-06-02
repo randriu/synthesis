@@ -3,6 +3,7 @@ from . import version
 from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import *
 from .synthesizers.synthesizer_pomdp import SynthesizerPOMDP
+from .synthesizers.quotient_pomdp import POMDPQuotientContainer
 
 import click
 import sys

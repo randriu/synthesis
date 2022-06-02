@@ -5,6 +5,8 @@ from ..sketch.holes import Hole,Holes,DesignSpace
 from .models import MarkovChain,MDP,DTMC
 from .coloring import MdpColoring
 
+from .synthesizer import Synthesizer
+
 from ..profiler import Profiler
 
 import math
@@ -352,21 +354,21 @@ class QuotientContainer:
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        # if not Synthesizer.incomplete_search:
-        #     return reduced_design_space, suboptions
+        if not Synthesizer.incomplete_search:
+            return reduced_design_space, suboptions
 
         # reduce simple holes
-        # ds_before = reduced_design_space.size
-        # for hole_index in reduced_design_space.hole_indices:
-        #     if mdp.hole_simple[hole_index]:
-        #         assert len(hole_assignments[hole_index]) == 1
-        #         reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
-        # ds_after = reduced_design_space.size
-        # self.discarded += ds_before - ds_after
+        ds_before = reduced_design_space.size
+        for hole_index in reduced_design_space.hole_indices:
+            if mdp.hole_simple[hole_index]:
+                assert len(hole_assignments[hole_index]) == 1
+                reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+        ds_after = reduced_design_space.size
+        self.discarded += ds_before - ds_after
 
         # discard other suboptions
-        # suboptions = core_suboptions
-        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
+        suboptions = core_suboptions
+        self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
 
