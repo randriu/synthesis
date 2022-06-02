@@ -36,7 +36,13 @@ function paynt() {
 
     # collect other arguments
     local project="--project ${benchmarks_dir}/${benchmark}"
+    # hallway drn firx
+    if [ ${benchmark} = "hallway" ]; then
+        project="${project} --filetype drn"
+    fi
     local timeout=$3
+
+    local method_flag="--method ${method}"
 
     local incomplete_search_flag=""
     if [ ${incomplete_search} = "true" ]; then
@@ -50,8 +56,8 @@ function paynt() {
 
     ((experiment_current+=1))
     echo "experiment ${experiment_current}/${experiments_total}: ${benchmark}, method: ${method}"
-    # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${pomdp} > ${logfile} &
-    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method} ${incomplete_search_flag} ${fsc_flag} >${logfile} &
+    # timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${property} ${method_flag} ${pomdp} > ${logfile} &
+    timeout ${timeout} python3 $PAYNT_DIR/paynt.py ${project} ${method_flag} ${incomplete_search_flag} ${fsc_flag} >${logfile} &
 }
 
 ## experiment section ##########################################################
@@ -62,8 +68,8 @@ function paynt() {
 # benchmarks=( dpm maze herman pole grid )
 # experiments_total=5
 
-suite=all
-benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/voihp-${suite}"
+# suite=all
+benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/uai"
 experiments_total=`ls $benchmarks_dir/ | wc -l`
 
 # create folder for log files
@@ -77,9 +83,9 @@ source $SYNTHESIS_ENV/bin/activate
 
 method=ar
 fsc_synthesis=true
-# incomplete_search=false
+incomplete_search=false
 
-name="${suite}_${incomplete_search}_${method}"
+name="${incomplete_search}_${method}"
 
 echo "-- evaluating "
 # for benchmark in "${benchmarks[@]}"; do

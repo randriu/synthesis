@@ -30,7 +30,7 @@ function paynt() {
     # argument settings
     local project="--project ${projects_dir}/$1/"
     # local sketch="--sketch sketch.pomdp"
-    local method=$2
+    local method="--method $2"
 
     local incomplete_search_flag=""
     if [ ${incomplete_search} = "true" ]; then
@@ -54,10 +54,10 @@ function paynt() {
 
 function run() {
 
-    timeout=10s
+    timeout=300s
 
-    pomdp_mem_size=3
-    # fsc_synthesis=true
+    # pomdp_mem_size=1
+    fsc_synthesis=true
     # incomplete_search=true
 
     ### running ###
@@ -67,46 +67,29 @@ function run() {
     # model="dice/5"
     # model="dtmc/maze/concise"
 
-    # model="pomdp/maze"
+    ### uai
+    # model="pomdp/uai/crypt-4"
+    # model="pomdp/uai/drone-4-1"
+    # model="pomdp/uai/drone-4-2"
+    # model="pomdp/uai/grid-avoid-4-0"
+    # model="pomdp/uai/grid-avoid-4-0.1"
+    # model="pomdp/uai/grid-large-30-5"
+    model="pomdp/uai/hallway"
+    other_flags="--filetype drn"
+    # model="pomdp/uai/maze-alex"
+    # model="pomdp/uai/network-prio-2-8-20"
+    # model="pomdp/uai/nrp-8"
+    # model="pomdp/uai/refuel-06"
+    # model="pomdp/uai/rocks-12"
 
-    # model="pomdp/grid/obstacle"
-    # model="pomdp/grid/intercept"
-    # model="pomdp/grid/evade"
-    # model="pomdp/voihp-all/grid-large-10-5"
-
-    ### verification of indefinite-horizon POMDPs ###
-    # model="pomdp/voihp-all/grid-4-0.1"
-    # model="pomdp/voihp-all/grid-4-0.3"
-    # model="pomdp/voihp-all/grid-avoid-4-0.1"
-    # model="pomdp/voihp-all/grid-avoid-4-0"
-    # model="pomdp/voihp-all/maze2-0.1"
-    # model="pomdp/voihp/maze2-0"
-    # model="pomdp/voihp-other/maze-alex"
-
-    
-    # model="pomdp/voihp-hard/drone-4-1"
-    # model="pomdp/voihp-all/refuel-06"
-    # model="pomdp/voihp-hard/rocks-12"
-
-    # model="pomdp/voihp-all/crypt-4"
-    # model="pomdp/voihp-all/network-prio-2-8-20"
-    # model="pomdp/voihp-all/network-2-8-20"
-    # model="pomdp/voihp/nrp-8"
-
-
-    # model="pomdp/leonore/cheese"
-    # model="pomdp/leonore/hallway"
-    # model="pomdp/voihp-all/hallway"
-    # model="pomdp/voihp-other/grid-avoid-0-mo"
-    # model="pomdp/voihp-other/maze-mo"
-    # model="pomdp/voihp-other/maze-paper"
 
     ### test
 
     # model="ctmc/simple"
     # model="mdp/simple"
     # model="mdp/maze"
-    model="pomdp/maze/mba"
+    # model="pomdp/maze"
+    # model="pomdp/maze/mba"
 
     # model="pomdp/sarsop/hallway"
     # model="pomdp/sarsop/hallway-single"
@@ -120,10 +103,15 @@ function run() {
 
     # model="pomdp/sarsop/current"
 
-    # other_flags="--export-pomdp"
+    # other_flags="--help"
+    # other_flags="--sketch sketch.pomdp --filetype pomdp --export drn"
+    # other_flags="--sketch sketch.pomdp --filetype pomdp"
+    # other_flags="--sketch sketch.drn --filetype drn --export pomdp"
+    # other_flags="--sketch sketch.drn --filetype drn"
+
     # other_flags="--sketch sketch.pomdp --properties props.pomdp"
     # other_flags="--sketch sketch.pomdp"
-
+    # other_flags="--props sketch.props"
 
     paynt $model ar
     # paynt $model hybrid
