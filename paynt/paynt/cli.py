@@ -63,6 +63,8 @@ def setup_logger(log_path = None):
     help="use incomplete search during synthesis")
 @click.option("--fsc-synthesis", is_flag=True, default=False,
     help="enable incremental synthesis of FSCs for a POMDP")
+@click.option("--fsc-memory-injection", is_flag=True, default=False,
+    help="use incremental memory injection for FSC synthesis instead of iterative search")
 @click.option("--pomdp-memory-size", default=1, show_default=True,
     help="implicit memory size for POMDP FSCs")
 @click.option("--hyperproperty", is_flag=True, default=False,
@@ -73,7 +75,7 @@ def paynt(
         sketch, props, constants,
         filetype, export,
         method,
-        incomplete_search, fsc_synthesis, pomdp_memory_size,
+        incomplete_search, fsc_synthesis, fsc_memory_injection, pomdp_memory_size,
         hyperproperty
 ):
     logger.info("This is Paynt version {}.".format(version()))
@@ -81,6 +83,7 @@ def paynt(
     # set CLI parameters
     Synthesizer.incomplete_search = incomplete_search
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
+    SynthesizerPOMDP.use_memory_injection = fsc_memory_injection
     Sketch.hyperproperty_synthesis = hyperproperty
 
     # check paths of input files

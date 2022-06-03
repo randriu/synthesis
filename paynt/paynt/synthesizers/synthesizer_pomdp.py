@@ -55,6 +55,9 @@ class HoleTree:
 
 class SynthesizerPOMDP:
 
+    # if True, strategy_expected_uai will be used for FSC synthesis
+    use_memory_injection = False
+
     def __init__(self, sketch, method):
         assert sketch.is_pomdp
         self.sketch = sketch
@@ -581,9 +584,11 @@ class SynthesizerPOMDP:
 
 
     def run(self):
-        # self.strategy_iterative()
-        # self.strategy_expected()
-        self.strategy_expected_uai()
+        if self.use_memory_injection:
+            # self.strategy_expected()
+            self.strategy_expected_uai()
+        else:
+            self.strategy_iterative()
 
 
 

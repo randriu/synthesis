@@ -368,7 +368,7 @@ class QuotientContainer:
 
         # discard other suboptions
         suboptions = core_suboptions
-        self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
+        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
 
