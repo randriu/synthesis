@@ -87,10 +87,12 @@ class SynthesizerPOMDP:
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.initial_memory_size
         while True:
-        # for x in range(3):
+        # for x in range(10):
             POMDPQuotientContainer.current_family_index = mem_size
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             self.sketch.quotient.set_global_memory_size(mem_size)
+            # self.sketch.quotient.set_imperfect_memory_size(mem_size)
+            # self.sketch.quotient.design_space_counter()
             self.synthesize(self.sketch.design_space)
             mem_size += 1
 

@@ -47,6 +47,8 @@ class POMDPQuotientContainer(QuotientContainer):
         self.action_labels_at_observation = None
         # for each observation, a prototype of an action hole
         self.action_hole_prototypes = None
+        # for each observation, number of states associated with it
+        self.observation_states = None
         
         # attributes associated with an unfolded quotient MDP
         
@@ -112,10 +114,16 @@ class POMDPQuotientContainer(QuotientContainer):
             hole = Hole(name, options, option_labels)
             self.action_hole_prototypes[obs] = hole
 
+        # mark perfect observations
+        self.observation_states = [0 for obs in range(self.observations)]
+        for state in range(self.pomdp.nr_states):
+            obs = self.pomdp.observations[state]
+            self.observation_states[obs] += 1
 
         # initialize POMDP manager
         self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
         # do initial unfolding
+        # self.set_imperfect_memory_size(POMDPQuotientContainer.initial_memory_size)
         self.set_global_memory_size(POMDPQuotientContainer.initial_memory_size)
         
         
@@ -146,15 +154,47 @@ class POMDPQuotientContainer(QuotientContainer):
         output += "]"
         return output
 
+    def set_manager_memory_vector(self):
+        # TODO fix this hack
+        self.pomdp_manager.set_memory_size(0)
+        for obs in range(self.observations):
+            for x in range(self.observation_memory_size[obs]):
+                self.pomdp_manager.inject_memory(obs)
+
     def set_global_memory_size(self, memory_size):
         self.observation_memory_size = [memory_size] * self.observations
-        self.pomdp_manager.set_memory_size(memory_size)
+        self.set_manager_memory_vector()
+        self.unfold_memory()
+
+    def set_imperfect_memory_size(self, memory_size):
+        ''' Set given memory size only to imperfect observations. '''
+        self.observation_memory_size = [
+            memory_size if self.observation_states[obs]>1 else 1
+            for obs in range(self.observations)
+        ]
+        self.set_manager_memory_vector()
         self.unfold_memory()
     
     def increase_memory_size(self, obs):
         self.observation_memory_size[obs] += 1
-        self.pomdp_manager.inject_memory(obs)
+        self.set_manager_memory_vector()
         self.unfold_memory()
+
+    def design_space_counter(self):
+        ds = self.sketch.design_space.copy()
+        print("ds: ", ds)
+        for obs in range(self.observations):
+            print(self.observation_memory_holes[obs])
+            for mem,hole in enumerate(self.observation_memory_holes[obs]):
+                print(ds[hole])
+                new_options = [mem]
+                if mem < max(ds[hole].options):
+                    new_options += [mem+1]
+                print(new_options)
+                ds[hole].assume_options(new_options)
+                print(ds[hole])
+                print()
+        self.sketch.set_design_space(ds)
 
 
     # def family_observation_index(self, family, obs):

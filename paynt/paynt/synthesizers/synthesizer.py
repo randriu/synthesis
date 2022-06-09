@@ -6,6 +6,11 @@ from ..profiler import Timer,Profiler
 import logging
 logger = logging.getLogger(__name__)
 
+# import multiprocessing as mp
+# import os
+# import time
+
+
 class Synthesizer:
 
     # if True, some subfamilies can be discarded and some holes can be generalized
@@ -115,16 +120,6 @@ class SynthesizerAR(Synthesizer):
         self.sketch.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
 
-        # TODO
-        # print()
-        # index = self.sketch.quotient.family_index(family)
-        # print(index)
-        # print()
-        # if index < POMDPQuotientContainer.current_family_index:
-        #     print("WOW")
-        #     exit()
-        #     return False,None
-
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
         Profiler.resume()
@@ -136,6 +131,67 @@ class SynthesizerAR(Synthesizer):
             self.since_last_optimum_update = 0
 
         return can_improve, improving_assignment
+
+    # def solve_mdp(family, sketch, result_queue):
+
+    #     # print(mp.current_process(), formula)
+    #     # return 42
+
+    #     sketch.quotient.build(family)
+    #     # print(family.mdp.states)
+
+    #     res = family.mdp.check_specification(sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+    #     print(mp.current_process(), res)
+    #     # print(dir(res))
+        
+    #     # result_queue.put(os.getpid())
+    #     result_queue.put(res)
+
+    #     # return res
+    #     # return None
+
+
+    # def solve_in_parallel(self, families):
+
+    #     # family = families[0]
+        
+    #     # f = self.sketch.specification.optimality.formula
+    #     # print(f)
+    #     # print(type(f))
+    #     # print(dir(f))
+    #     # exit()
+    #     # pool =  mp.Pool(8)
+    #     # res = pool.apply_async(SynthesizerAR.solve_mdp, f)
+    #     # print(res.get())
+        
+    #     # families_with_sketch = zip(families, [self.sketch] * len(families))
+    #     # result = pool.map(SynthesizerAR.solve_mdp, families_with_sketch)
+    #     # print(result)
+
+    #     # for res in results:
+    #         # print(res.get())
+    #     # pool.close()
+    #     # exit()
+
+    #     print(mp.cpu_count())
+    #     result_queue = mp.Queue()
+
+    #     processes = [mp.Process(target=SynthesizerAR.solve_mdp, args=(families[x],self.sketch,result_queue)) for x in range(len(families))]
+
+    #     for p in processes:
+    #         p.start()
+
+    #     for p in processes:
+    #         p.join()
+
+    #     print(result_queue.get())
+    #     # for p in processes:
+    #     #     print(result_queue.get())
+
+    #     # print(families[0].mdp)
+    #     print('finished')
+
+    #     exit()
     
     
     def synthesize(self, family):
@@ -149,10 +205,14 @@ class SynthesizerAR(Synthesizer):
 
         satisfying_assignment = None
         families = [family]
+
         while families:
 
             if self.no_optimum_update_limit_reached():
                 break
+
+            # if len(families) > 4:
+            #     self.solve_in_parallel(families)
             
             if SynthesizerAR.exploration_order_dfs:
                 family = families.pop(-1)
