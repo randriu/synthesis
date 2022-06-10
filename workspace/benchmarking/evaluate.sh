@@ -65,10 +65,6 @@ function paynt() {
 
 # benchmark setup
 
-# benchmarks=( dpm maze herman pole grid )
-# experiments_total=5
-
-# suite=all
 benchmarks_dir="$SYNTHESIS/workspace/examples/pomdp/uai"
 experiments_total=`ls $benchmarks_dir/ | wc -l`
 
@@ -79,7 +75,6 @@ mkdir -p logs
 source $SYNTHESIS_ENV/bin/activate
 
 ## experiments
-
 
 method=ar
 fsc_synthesis=true

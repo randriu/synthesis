@@ -41,14 +41,14 @@ module species
     b: [0..MAX] init 1;
 
     // choose rate combination
-    //[rate] clk=0 -> (clk'=1) & (r2'=0);
+    [rate] clk=0 -> (clk'=1) & (r2'=0);
     [rate] clk=0 -> (clk'=1) & (r2'=1);
     
     // choose reaction
     [reaction] clk=1 -> t1_rate/rate_sum: (t'=1) & (clk'=2) + t2_rate/rate_sum: (t'=2) & (clk'=2);
 
     // choose the world
-    //[world] clk=2 & t=1 -> (l'=0) & (clk'=3);
+    [world] clk=2 & t=1 -> (l'=0) & (clk'=3);
     [world] clk=2 & t=1 -> (l'=1) & (clk'=3);
 
     [world] clk=2 & t=2 -> (clk'=3);

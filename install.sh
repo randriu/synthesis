@@ -3,15 +3,14 @@
 # download prerequisites
 # git clone -b master14 https://github.com/smtrat/carl
 # git clone https://github.com/moves-rwth/pycarl.git
-# wget https://zenodo.org/record/4288652/files/moves-rwth/storm-1.6.3.zip
-# wget https://github.com/moves-rwth/stormpy/archive/1.6.3.zip
+# wget https://github.com/moves-rwth/storm/archive/1.6.4.zip
+# wget https://github.com/moves-rwth/stormpy/archive/1.6.4.zip
 
 set -ex
 
-INSTALL_OFFLINE=false
 INSTALL_DEPENDENCIES=true
 
-if [ "$INSTALL_OFFLINE" = true ] || [ "$INSTALL_DEPENDENCIES" = true ]; then
+if [ "$INSTALL_DEPENDENCIES" = true ]; then
     if [[ ! $(sudo echo 0) ]]; then echo "sudo authentication failed"; exit; fi
 fi
 
@@ -50,76 +49,63 @@ if [ "$INSTALL_DEPENDENCIES" = true ]; then
     sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 fi
 
-# offline dependencies
-if [ "$INSTALL_OFFLINE" = true ]; then
-    sudo echo "export PATH=$PATH:$HOME/.local/bin" >> $HOME/.profile
-    source $HOME/.profile
-    cd $TACAS_DEPENDENCIES
-    unzip storm-eigen.zip
-    pip3 install --no-index -f pip-packages -r python-requirements
-    sudo dpkg -i apt-packages/*.deb
-    cd $SYNTHESIS
-fi
 
 # set up python environment
 virtualenv -p python3 $SYNTHESIS_ENV
 source $SYNTHESIS_ENV/bin/activate
-if [ "$INSTALL_OFFLINE" = true ]; then
-    cd $TACAS_DEPENDENCIES
-    pip3 install --no-index -f pip-packages -r python-requirements
-    cd $SYNTHESIS
-else
-    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
-fi
+pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
+pip3 install Cython scikit-build
 deactivate
 
-# carl
-cd $PREREQUISITES
-mkdir -p carl/build
-cd carl/build
+# build carl
+mkdir -p $PREREQUISITES/carl/build
+cd $PREREQUISITES/carl/build
 cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
 make lib_carl --jobs $THREADS
 #[TEST] make test
-cd $SYNTHESIS
+cd -
 
-#pycarl
+# build pycarl
 cd $PREREQUISITES/pycarl
-source $SYNTHESIS_ENV/bin/activate
-python3 setup.py build_ext --jobs $THREADS --disable-parser develop
+enva
+python3 setup.py build_ext --jobs $COMPILE_JOBS develop
 #[TEST] python3 setup.py test
-deactivate
+envd
+cd -
+
+# build cvc5 (optional)
+cd $PREREQUISITES/cvc5
+enva
+./configure.sh --prefix="." --auto-download --python-bindings
+cd build
+make --jobs $COMPILE_JOBS
+make install
+envd
 cd $SYNTHESIS
 
-# storm
+# build storm
 mkdir -p $SYNTHESIS/storm/build
-if [ "$INSTALL_TACAS21" = true ]; then
-    cp $TACAS_DEPENDENCIES/storm_3rdparty_CMakeLists.txt $SYNTHESIS/storm/resources/3rdparty/CMakeLists.txt
-    mkdir -p $SYNTHESIS/storm/build/include/resources/3rdparty/
-    cp -r $TACAS_DEPENDENCIES/StormEigen/ $SYNTHESIS/storm/build/include/resources/3rdparty/
-fi
 cd $SYNTHESIS/storm/build
 cmake ..
 make storm-main storm-synthesis --jobs $THREADS
 #[TEST] make check --jobs $THREADS
-cd $SYNTHESIS
+cd -
 
-# stormpy
+# build stormpy
 cd $SYNTHESIS/stormpy
 source $SYNTHESIS_ENV/bin/activate
 python3 setup.py build_ext --jobs $THREADS develop
 #[TEST] python3 setup.py test
 deactivate
-cd $SYNTHESIS
+cd -
 
-# paynt
+# setup paynt
 cd $SYNTHESIS/paynt
 source $SYNTHESIS_ENV/bin/activate
 python3 setup.py install
 #[TEST] python3 setup.py test
 deactivate
-cd $SYNTHESIS
-
-# tacas21-install
+cd -
 
 # test
 # source env/bin/activate

@@ -44,6 +44,14 @@ prerequisites-prepare() {
     cd -
 }
 
+storm-dependencies() {
+    sudo apt update
+    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install texlive-latex-extra
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
+    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+}
+
 alias enva='source $SYNTHESIS_ENV/bin/activate'
 alias envd='deactivate'
 
@@ -86,41 +94,33 @@ prerequisites-build-cvc5() {
     cd -
 }
 
-storm-dependencies() {
-    sudo apt update
-    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
-    sudo apt -y install texlive-latex-extra
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip
-    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
-}
-
 ### storm and stormpy ##########################################################
 
 storm-config() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD
     cmake ..
-    cd ~-
+    cd -
 }
 
 storm-config-debug() {
     mkdir -p $STORM_BLD_DEBUG
     cd $STORM_BLD_DEBUG
     cmake .. -DSTORM_DEVELOPER=ON -DSTORM_USE_LTO=OFF
-    cd ~-
+    cd -
 }
 
 storm-build() {
     cd $STORM_BLD
     make storm-main storm-synthesis --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
-    cd ~-
+    cd -
 }
 
 storm-build-debug() {
     cd $STORM_BLD_DEBUG
     make storm-main storm-synthesis --jobs $COMPILE_JOBS
-    cd ~-
+    cd -
 }
 
 stormpy-build() {
@@ -129,7 +129,7 @@ stormpy-build() {
     python3 setup.py build_ext --build-temp $STORMPY_BLD --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     envd
-    cd ~-
+    cd -
 }
 
 stormpy-build-debug() {
@@ -138,7 +138,7 @@ stormpy-build-debug() {
     python3 setup.py build_ext --build-temp $STORMPY_BLD --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     envd
-    cd ~-
+    cd -
 }
 
 paynt-install() {
@@ -147,11 +147,7 @@ paynt-install() {
     python3 setup.py install
     # python3 setup.py test
     envd
-    cd ~-
-}
-
-paynt-check() {
-    cd $PAYNT_DIR
+    cd -
 }
 
 synthesis-install() {
@@ -188,115 +184,6 @@ synthesis-install() {
     paynt-install
 
     # check
-    paynt workspace/examples/coin
+    # TODO
 }
-
-### development ################################################################
-
-# aliases
-
-# alias sc='storm-config'
-# alias sb='storm-build'
-# alias pb='stormpy-build'
-# alias sr='storm-rebuild'
-
-
-### executing paynt ##########################################################
-
-export WORKSPACE=$SYNTHESIS/workspace
-export PAYNT_LOG=$WORKSPACE/log
-
-function paynt() {
-    local args=$@
-    enva
-    python3 $PAYNT_DIR/paynt.py ${args}
-    envd
-}
-
-function paynt-execute() {
-    local core=0
-    if [ -n "$1" ]; then
-        core=$1
-    fi
-    local exp_sh=$WORKSPACE/execute.sh
-    local run_sh=$PAYNT_LOG/run_${core}.sh
-
-    mkdir -p $PAYNT_LOG
-    cd $PAYNT_LOG
-    cp $exp_sh $run_sh
-    enva
-    bash $run_sh $core
-    envd
-    cd ~-
-}
-function d() {
-    paynt-execute $1
-}
-function db() {
-    paynt-execute $1 & disown
-}
-
-alias dpid='pgrep -f "^python3 .*/paynt.py .*"'
-alias dtime='ps -aux | grep "python3 .*/paynt.py"'
-alias dshow='pgrep -af "^python3 .*/paynt.py .*"'
-alias dcount='pgrep -afc "^python3 .*/paynt.py .*"'
-alias dkill='dpid | xargs kill'
-alias k='dkill'
-alias dclear='rm $PAYNT_LOG/*'
-
-dlog() {
-    cat $PAYNT_LOG/log_$1.txt
-}
-
-dhead() {
-    dlog $1 | head -n 50
-}
-dtail() {
-    dlog $1 | tail -n 50
-}
-
-
-### binds ###
-
-bind '"\ei"':"\"storm-config \C-m\""
-bind '"\ek"':"\"storm-config-debug \C-m\""
-bind '"\eo"':"\"storm-build \C-m\""
-bind '"\el"':"\"storm-build-debug \C-m\""
-bind '"\ep"':"\"stormpy-build \C-m\""
-bind '"\e;"':"\"stormpy-build-debug \C-m\""
-
-bind '"\ed"':"\"db \C-m\""
-bind '"\e1"':"\"db 1 \C-m\""
-bind '"\e2"':"\"db 2 \C-m\""
-bind '"\e3"':"\"db 3 \C-m\""
-bind '"\e4"':"\"db 4 \C-m\""
-# bind '"\e5"':"\"db 5 \C-m\""
-# bind '"\e6"':"\"db 6 \C-m\""
-# bind '"\e7"':"\"db 7 \C-m\""
-# bind '"\e8"':"\"db 8 \C-m\""
-
-### executing storm  ###########################################################
-
-storm() {
-    cd $STORM_BLD/bin
-    local cmd="$STORM_BLD/bin/storm --explchecks --build-overlapping-guards-label $1"
-    eval $cmd
-    cd -
-}
-
-storm-jani() {
-    storm "--jani $PAYNT_DIR/output_0.jani --prop $PAYNT_DIR/workspace/examples/cav/maze/orig/compute.properties"
-}
-
-storm-eval() {
-    storm "$1 --prop $2 --constants $3"
-}
-
-dice() {
-    storm-eval "--prism $DICE/sketch.templ" $DICE/compute.properties "CMAX=0,THRESHOLD=0,$1"
-}
-
-
-# useful flags
-# ./storm-pomdp --prism $SYNTHESIS/workspace/examples/pomdp/maze/concise/sketch.templ --constants CMAX=2,THRESHOLD=1.0 --prop $SYNTHESIS/workspace/examples/pomdp/maze/concise/sketch.properties -ec --io:exportexplicit test.drn
 
