@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy), python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for Storm and Stormpy, prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/gargantophob/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy), python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for Storm and Stormpy, prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -10,14 +10,40 @@ Most of the algorithms are described in
 - [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
 - [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
 
-### Image with the pre-installed tool
 
-An image of an Ubuntu 20.04 LTS virtual machine with the pre-installed tool is available on [zenodo](https://doi.org/10.5281/zenodo.4726056). Compilation and installation of the tool from scratch on your system or VM will be discussed in the end of this README. To boot the VM, you will need [VirtualBox](https://www.virtualbox.org/).
+## Installation
 
-- username: cav21
-- password: cav21
+To install the tool on your system, download the repository, navigate to the root folder of the tool and simply run
 
-Home folder `/home/cav21` contains the paper, this README and folder `synthesis` containing the artifact.
+```shell
+./install.sh
+```
+
+The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. To accelerate compilation, the install script makes use of multiple cores. Such multi-core compilation is quite memory-intensive: as a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a machine with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory. In such a case, you can modify variable `threads` in the script `install.sh` to match your preferences; setting the variable to 1 corresponds to a single-core compilation.
+
+
+### Installation (developer notes)
+
+The script `workspace/alias-storm.sh` contains useful macros for (re-)compiling Storm/Stormpy. Once loaded from the root folder:
+```shell
+source workspace/alias-storm.sh
+```
+a number of command-line macros become available. Command `synthesis-install` showcases the basic commands in the step-by-step installation of PAYNT.
+
+Since PAYNT is written in Python language, it does not need to be re-built when modifying its source code. If the source code of Storm has been modified, but not its header files, it needs to be re-built (`storm-build`). If the header files were also modified, the re-configuration as well as Stormpy recompilation are necessary:
+```shell
+storm-config
+storm-build
+stormpy-build
+```
+
+If you need to frequently modify the Storm source code, it might be a good idea to develop it in the debug mode:
+```shell
+storm-config-debug
+storm-build-debug
+```
+Building in the debug mode using the commands above also disables link-time optimizations, accelerating compilation. The script uses different folders for the release (`storm/build`) and the debug (`storm/build_debug`) versions of Storm.
+
 
 ## Getting started with PAYNT 
 
@@ -26,7 +52,7 @@ Having the tool installed, you can quickly test it by navigating to the tool fol
 ```sh
 cd /home/cav21/synthesis
 source env/bin/activate
-python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properties hybrid
+python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properties --method hybrid
 ```
 
 The syntax of the command is described in more detail in the following chapters of this README.
@@ -61,8 +87,7 @@ In particular, we will describe
 - how to read the output of PAYNT
 - how to create your own sketches and specifications
 
-In the end, we will discuss how to install and test PAYNT on your system.
-Finally, file [experiments/README_evaluation.md](./experiments/README_evaluation.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
+TODO Finally, file [experiments/README_evaluation.md](./experiments/README_evaluation.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
 The file also contains exploration of synthesis problems beyond the presented experiment suite.
 
 ### Structure of this repository
@@ -102,9 +127,6 @@ Finally, the last argument specifies the selected synthesis method: `hybrid`.
 
 PAYNT has some advanced options for developers.
 - ``--help``: shows the help message of the PAYNT and exit the program
-- ``--short-summary``: also prints a one-line short summary of the synthesis
-- ``--ce-maxsat``: enables the construction of counter-examples using MaxSat approach and also their evaluation. For recreating experiments in [2].
-- ``--ce-quality``: evaluates the counter-example quality when using the hybrid approach. Used to recreate experiments in [2].
 
 
 ### Reading the output of PAYNT
@@ -142,7 +164,7 @@ In our case, PAYNT printed a hole assignment yielding optimal solution as well a
 
 ### Sketching language
 
-PAYNT takes as an input a sketch -- program description in `PRISM` (or `JANI`) language containing some undefined parameters (holes) with associated options from domains -- and a specification given as a list of temporal logic constraints (interpreted as a conjunction of theses constrains) possibly including an optimal objective. Before explaining the sketching language, let us briefly present the key ideas of the `PRISM` language -- the full documentation of the language is available [in the PRISM manual](https://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction).
+PAYNT takes as an input a sketch -- program description in `PRISM` language containing some undefined parameters (holes) with associated options from domains -- and a specification given as a list of temporal logic constraints (interpreted as a conjunction of these constrains) possibly including an optimal objective. Before explaining the sketching language, let us briefly present the key ideas of the `PRISM` language -- the full documentation of the language is available [in the PRISM manual](https://www.prismmodelchecker.org/manual/ThePRISMLanguage/Introduction).
 
 A `PRISM` program consists of one or more reactive modules that may interact with each other using synchronisation. A module has a set of (bounded) variables that span its state space. Possible transitions between states of a module are described by a set of guarded commands of the form:
 
@@ -292,13 +314,4 @@ python3 -m pytest --cov=./../paynt/ --cov-report term-missing test_synthesis.py 
 This command prints the coverage report, displaying the resulting coverage for individual source files.
 Our tests currently cover more than `90%` of the source code lines, even though the result shows `82%` because `~10%` of the source code is only temporary functions for debugging purposes that have no functionality.
 
-## Installation
-
-To install the tool on your system, download the repository, navigate to the root folder of the tool and simply run
-
-```shell
-./install.sh
-```
-
-The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. Be aware that upgrading the OS of the VM may cause problems with installation. To accelerate compilation, we recommend enabling multiple CPU cores on your VM. Such multi-core compilation is quite memory-intensive, therefore, we recommend allocating a significant amount of RAM on your VM as well. As a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a VM with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory: try to allocate more RAM for your VM or disable multi-core compilation (see variable `threads` in the script `install.sh`). The corresponding VM containing pre-compiled tool was created by installing the tool using the script above.
 

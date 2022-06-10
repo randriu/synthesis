@@ -153,8 +153,8 @@ paynt-install() {
 synthesis-install() {
 
     # clone repository
-    git clone https://github.com/randriu/synthesis.git
-    # git clone git@github.com:randriu/synthesis.git
+    # git clone https://github.com/randriu/synthesis.git
+    git clone git@github.com:randriu/synthesis.git
     cd synthesis
     
     # load aliases
