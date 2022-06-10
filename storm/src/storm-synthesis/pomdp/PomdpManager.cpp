@@ -315,16 +315,18 @@ namespace storm {
 
 
             template<typename ValueType>
-            void PomdpManager<ValueType>::injectMemory(uint64_t observation) {
-                this->observation_memory_size[observation]++;
+            void PomdpManager<ValueType>::setObservationMemorySize(uint64_t obs, uint64_t memory_size) {
+                assert(obs < this->pomdp.getNrObservations());
+                this->observation_memory_size[obs] = memory_size;
             }
 
             template<typename ValueType>
-            void PomdpManager<ValueType>::setMemorySize(uint64_t memory_size) {
+            void PomdpManager<ValueType>::setGlobalMemorySize(uint64_t memory_size) {
                 for(uint64_t obs = 0; obs < this->pomdp.getNrObservations(); obs++) {
                     this->observation_memory_size[obs] = memory_size;
                 }
             }
+
 
             template class PomdpManager<double>;
 

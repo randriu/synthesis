@@ -23,10 +23,10 @@ namespace storm {
             // for each observation contains the number of allocated memory states (initially 1)
             std::vector<uint64_t> observation_memory_size;
             
-            // inject 1 state into a selected observation
-            void injectMemory(uint64_t observation);
+            // set memory size to a selected observation
+            void setObservationMemorySize(uint64_t obs, uint64_t memory_size);
             // set memory size to all observations
-            void setMemorySize(uint64_t memory_size);
+            void setGlobalMemorySize(uint64_t memory_size);
 
             // unfold memory model into the POMDP
             std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();

@@ -155,11 +155,9 @@ class POMDPQuotientContainer(QuotientContainer):
         return output
 
     def set_manager_memory_vector(self):
-        # TODO fix this hack
-        self.pomdp_manager.set_memory_size(0)
         for obs in range(self.observations):
-            for x in range(self.observation_memory_size[obs]):
-                self.pomdp_manager.inject_memory(obs)
+            mem = self.observation_memory_size[obs]
+            self.pomdp_manager.set_observation_memory_size(obs,mem)
 
     def set_global_memory_size(self, memory_size):
         self.observation_memory_size = [memory_size] * self.observations
@@ -180,6 +178,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.set_manager_memory_vector()
         self.unfold_memory()
 
+    
     def design_space_counter(self):
         ds = self.sketch.design_space.copy()
         print("ds: ", ds)
@@ -256,17 +255,6 @@ class POMDPQuotientContainer(QuotientContainer):
 
     
     def unfold_memory(self):
-        self.unfold_memory_new()
-        if self.use_simplified_coloring:
-            # store old coloring
-            self.design_space_old = self.sketch.design_space
-            self.coloring_old = self.coloring
-            # replace with simplified one
-            design_space_new,self.coloring,self.obs_to_holes,self.hole_pair_map = self.simplify_coloring()
-            self.sketch.set_design_space(design_space_new)
-
-    
-    def unfold_memory_new(self):
         
         # reset attributes
         self.quotient_mdp = None
@@ -350,6 +338,17 @@ class POMDPQuotientContainer(QuotientContainer):
         # finalize the design space
         self.sketch.design_space = DesignSpace(all_holes)
         self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
+
+        # the design space is ready
+        if not self.use_simplified_coloring:
+            return
+        
+        # store old coloring
+        self.design_space_old = self.sketch.design_space
+        self.coloring_old = self.coloring
+        # replace with simplified one
+        design_space_new,self.coloring,self.obs_to_holes,self.hole_pair_map = self.simplify_coloring()
+        self.sketch.set_design_space(design_space_new)
 
 
     def simplify_coloring(self):
