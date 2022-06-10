@@ -34,6 +34,12 @@ class Sketch:
 
         Profiler.initialize()
         Profiler.start("sketch")
+
+        # TODO
+        self.sketch_path = sketch_path
+        self.filetype = filetype
+        self.properties_path = properties_path
+        self.constant_str = constant_str
         
         # design space; might be initialized by the quotient
         self.design_space = None

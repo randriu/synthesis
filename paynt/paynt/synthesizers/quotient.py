@@ -5,8 +5,6 @@ from ..sketch.holes import Hole,Holes,DesignSpace
 from .models import MarkovChain,MDP,DTMC
 from .coloring import MdpColoring
 
-from .synthesizer import Synthesizer
-
 from ..profiler import Profiler
 
 import math
@@ -345,7 +343,7 @@ class QuotientContainer:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    def discard(self, mdp, hole_assignments, core_suboptions, other_suboptions):
+    def discard(self, mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search):
 
         # default result
         reduced_design_space = mdp.design_space.copy()
@@ -354,7 +352,7 @@ class QuotientContainer:
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        if not Synthesizer.incomplete_search:
+        if not incomplete_search:
             return reduced_design_space, suboptions
 
         # reduce simple holes
@@ -373,7 +371,7 @@ class QuotientContainer:
         return reduced_design_space, suboptions
 
 
-    def split(self, family):
+    def split(self, family, incomplete_search):
         Profiler.start("quotient::split")
 
         mdp = family.mdp
@@ -396,7 +394,7 @@ class QuotientContainer:
             core_suboptions = self.suboptions_half(mdp, splitter)
             other_suboptions = []
 
-        new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions)
+        new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
         
         # construct corresponding design subspaces
         design_subspaces = []

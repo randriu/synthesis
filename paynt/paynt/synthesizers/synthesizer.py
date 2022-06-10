@@ -1,14 +1,15 @@
 import stormpy.synthesis
 
+from ..sketch.sketch import Sketch
 from .statistic import Statistic
 from ..profiler import Timer,Profiler
 
 import logging
 logger = logging.getLogger(__name__)
 
-# import multiprocessing as mp
-# import os
-# import time
+import multiprocessing as mp
+import os
+import time
 
 
 class Synthesizer:
@@ -100,10 +101,136 @@ class Synthesizer1By1(Synthesizer):
         return satisfying_assignment
 
 
+# global variable
+sketch = None
+
+def initializer(sketch_path, filetype, properties_path, constant_str):
+    print("Initializing worker process ", os.getpid())
+    global sketch
+    sketch = Sketch(sketch_path, filetype, None, properties_path, constant_str)
+
+def solve_mdp(family_queue, result_queue):
+
+    print("Process {} started".format(os.getpid()))
+    family = family_queue.get()
+    print("Process {} got family with size {}.".format(os.getpid(), family.size))
+
+    print(sketch.sketch_path)
+
+    sketch.quotient.build(family)
+    # self.stat.iteration_mdp(family.mdp.states)
+
+    res = family.mdp.check_specification(sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+    # print(res)
+
+    result_queue.put(os.getpid())
+    # result_queue.put(res)
+    # family.analysis_result = res
+    # Profiler.resume()
+
+    # improving_assignment,improving_value,can_improve = res.improving(family)
+    # # print(improving_value, can_improve)
+    # if improving_value is not None:
+    #     self.sketch.specification.optimality.update_optimum(improving_value)
+    #     self.since_last_optimum_update = 0
+
+    # return can_improve, improving_assignment
+
+    print(os.getpid(), " finished")
+
+    # sketch.quotient.build(family)
+    # # print(family.mdp.states)
+
+    # res = family.mdp.check_specification(sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+    # print(mp.current_process(), res)
+    # # print(dir(res))
+    
+    # # 
+    # result_queue.put(res)
+
+    # return res
+    # return None
 class SynthesizerAR(Synthesizer):
 
     # family exploration order: True = DFS, False = BFS
     exploration_order_dfs = True
+
+    def solve_in_parallel(self, families):
+
+        start = time.perf_counter()
+
+
+        # sketch = Sketch(sketch_path, filetype, None, properties_path, constant_str)        
+
+
+
+        with mp.Pool(
+            processes = 1,
+            initializer = initializer,
+            initargs = (self.sketch.sketch_path,self.sketch.filetype,
+                self.sketch.properties_path, self.sketch.constant_str)
+        ) as pool:
+            
+
+            print("master started")
+
+            manager = mp.Manager()
+            family_queue = manager.Queue()
+            result_queue = manager.Queue()
+
+            result = pool.apply_async(
+                func=solve_mdp, args=(family_queue,result_queue)
+            )
+            family = families[0]
+            family.parent_info = None
+            family_queue.put(family)
+
+            result = result_queue.get()
+            print(result)
+
+
+
+            print("master finished")
+
+
+
+        finish = time.perf_counter()
+        total_time = round(finish-start, 4)
+        
+        print("Finished in: ", total_time)
+        exit()
+
+        # family = families[0]
+        
+        # f = self.sketch.specification.optimality.formula
+        # print(f)
+        # print(type(f))
+        # print(dir(f))
+        # exit()
+        # pool =  mp.Pool(8)
+        # res = pool.apply_async(SynthesizerAR.solve_mdp, f)
+        # print(res.get())
+        
+        # families_with_sketch = zip(families, [self.sketch] * len(families))
+        # result = pool.map(SynthesizerAR.solve_mdp, families_with_sketch)
+        # print(result)
+
+        # for res in results:
+            # print(res.get())
+        # pool.close()
+        # exit()
+
+        print(mp.cpu_count())
+        result_queue = mp.Queue()
+
+        print(result_queue.get())
+        # for p in processes:
+        #     print(result_queue.get())
+
+        # print(families[0].mdp)
+        print('finished')
+
+        exit()
     
     @property
     def method_name(self):
@@ -132,67 +259,6 @@ class SynthesizerAR(Synthesizer):
 
         return can_improve, improving_assignment
 
-    # def solve_mdp(family, sketch, result_queue):
-
-    #     # print(mp.current_process(), formula)
-    #     # return 42
-
-    #     sketch.quotient.build(family)
-    #     # print(family.mdp.states)
-
-    #     res = family.mdp.check_specification(sketch.specification, property_indices = family.property_indices, short_evaluation = True)
-    #     print(mp.current_process(), res)
-    #     # print(dir(res))
-        
-    #     # result_queue.put(os.getpid())
-    #     result_queue.put(res)
-
-    #     # return res
-    #     # return None
-
-
-    # def solve_in_parallel(self, families):
-
-    #     # family = families[0]
-        
-    #     # f = self.sketch.specification.optimality.formula
-    #     # print(f)
-    #     # print(type(f))
-    #     # print(dir(f))
-    #     # exit()
-    #     # pool =  mp.Pool(8)
-    #     # res = pool.apply_async(SynthesizerAR.solve_mdp, f)
-    #     # print(res.get())
-        
-    #     # families_with_sketch = zip(families, [self.sketch] * len(families))
-    #     # result = pool.map(SynthesizerAR.solve_mdp, families_with_sketch)
-    #     # print(result)
-
-    #     # for res in results:
-    #         # print(res.get())
-    #     # pool.close()
-    #     # exit()
-
-    #     print(mp.cpu_count())
-    #     result_queue = mp.Queue()
-
-    #     processes = [mp.Process(target=SynthesizerAR.solve_mdp, args=(families[x],self.sketch,result_queue)) for x in range(len(families))]
-
-    #     for p in processes:
-    #         p.start()
-
-    #     for p in processes:
-    #         p.join()
-
-    #     print(result_queue.get())
-    #     # for p in processes:
-    #     #     print(result_queue.get())
-
-    #     # print(families[0].mdp)
-    #     print('finished')
-
-    #     exit()
-    
     
     def synthesize(self, family):
 
@@ -211,8 +277,8 @@ class SynthesizerAR(Synthesizer):
             if self.no_optimum_update_limit_reached():
                 break
 
-            # if len(families) > 4:
-            #     self.solve_in_parallel(families)
+            if len(families) > 4:
+                self.solve_in_parallel(families)
             
             if SynthesizerAR.exploration_order_dfs:
                 family = families.pop(-1)
@@ -227,7 +293,7 @@ class SynthesizerAR(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.sketch.quotient.split(family)
+            subfamilies = self.sketch.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
         self.stat.finished(satisfying_assignment)
@@ -530,7 +596,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 self.explore(family)
                 continue
         
-            subfamilies = self.sketch.quotient.split(family)
+            subfamilies = self.sketch.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
         # ce_generator.print_profiling()
