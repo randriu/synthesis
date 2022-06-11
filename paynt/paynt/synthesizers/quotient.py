@@ -150,6 +150,13 @@ class QuotientContainer:
                 assert mdp.choices == len(choice_rewards)
                 for choice in range(mdp.choices):
                     choice_values[choice] += choice_rewards[choice]
+            else:
+                state_rewards = list(rm.state_rewards)
+                assert mdp.states == len(state_rewards)
+                tm = mdp.model.transition_matrix
+                for state in range(mdp.states):
+                    for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                        choice_values[choice] += state_rewards[state]
 
         # sanity check
         for choice in range(mdp.choices):
