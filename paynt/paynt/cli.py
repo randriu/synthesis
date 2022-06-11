@@ -3,7 +3,7 @@ from . import version
 from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import *
 from .synthesizers.synthesizer_pomdp import SynthesizerPOMDP
-from .synthesizers.synthesizer_ar_concurrent import SynthesizerARConcurrent
+from .synthesizers.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 from .synthesizers.quotient_pomdp import POMDPQuotientContainer
 
 import click
@@ -58,7 +58,7 @@ def setup_logger(log_path = None):
     help="export the model to *.drn/*.pomdp and abort")
 
 @click.option("--method",
-    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid', 'ar_concurrent']),
+    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid', 'ar_multicore']),
     default="ar", show_default=True,
     help="synthesis method"
     )
@@ -114,7 +114,7 @@ def paynt(
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(sketch)
     elif method == "ar_concurrent":
-        synthesizer = SynthesizerARConcurrent(sketch)
+        synthesizer = SynthesizerMultiCoreAR(sketch)
     else:
         pass
     
@@ -123,7 +123,6 @@ def paynt(
     # # stats = pr.create_stats()
     # # print(stats)
     # pstats.Stats(pr).sort_stats('tottime').print_stats(10)
-    # exit()
     
     synthesizer.run()
 

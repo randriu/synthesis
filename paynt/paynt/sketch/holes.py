@@ -462,8 +462,6 @@ class DesignSpace(Holes):
         pi.mdp = self.mdp
         return pi
 
-                
-
 
 
 

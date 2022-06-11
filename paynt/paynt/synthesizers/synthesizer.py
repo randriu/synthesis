@@ -125,6 +125,8 @@ class SynthesizerAR(Synthesizer):
         if improving_value is not None:
             self.sketch.specification.optimality.update_optimum(improving_value)
             self.since_last_optimum_update = 0
+        # print(res, can_improve)
+        # print(res.optimality_result.primary.result.get_values())
 
         return can_improve, improving_assignment
 

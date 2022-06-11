@@ -6,6 +6,7 @@ from .quotient import QuotientContainer
 from .quotient_pomdp import POMDPQuotientContainer
 
 from .synthesizer import SynthesizerAR, SynthesizerHybrid
+from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 from ..profiler import Timer,Profiler
 
@@ -64,6 +65,8 @@ class SynthesizerPOMDP:
         self.synthesizer = None
         if method == "ar":
             self.synthesizer = SynthesizerAR
+        elif method == "ar_multicore":
+            self.synthesizer = SynthesizerMultiCoreAR
         elif method == "hybrid":
             self.synthesizer = SynthesizerHybrid
         self.total_iters = 0
@@ -87,11 +90,12 @@ class SynthesizerPOMDP:
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.initial_memory_size
         while True:
-        # for x in range(10):
+        # for x in range(2):
             POMDPQuotientContainer.current_family_index = mem_size
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             # self.sketch.quotient.set_global_memory_size(mem_size)
             self.sketch.quotient.set_imperfect_memory_size(mem_size)
+            self.sketch.quotient.remove_simpler_controllers(mem_size)
             # self.sketch.quotient.design_space_counter()
             self.synthesize(self.sketch.design_space)
             mem_size += 1

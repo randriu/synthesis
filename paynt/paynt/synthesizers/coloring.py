@@ -2,8 +2,6 @@ import stormpy
 
 from ..sketch.holes import Hole,Holes
 
-from ..profiler import Profiler
-
 import logging
 logger = logging.getLogger(__name__)
 
@@ -62,7 +60,6 @@ class MdpColoring:
     
     def select_actions(self, family):
         ''' Select non-default actions relevant in the provided design space. '''
-        Profiler.start("coloring::select_actions")
 
 
         hole_selected_actions = None
@@ -111,5 +108,4 @@ class MdpColoring:
         # construct bitvector of selected actions
         selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
         
-        Profiler.resume()
         return hole_selected_actions,selected_actions,selected_actions_bv

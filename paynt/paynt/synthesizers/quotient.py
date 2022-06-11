@@ -5,8 +5,6 @@ from ..sketch.holes import Hole,Holes,DesignSpace
 from .models import MarkovChain,MDP,DTMC
 from .coloring import MdpColoring
 
-from ..profiler import Profiler
-
 import math
 import itertools
 
@@ -42,8 +40,6 @@ class QuotientContainer:
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
         '''
-        Profiler.start("quotient::restrict_mdp")
-        
         keep_unreachable_states = False # TODO investigate this
         all_states = stormpy.BitVector(mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
@@ -54,7 +50,6 @@ class QuotientContainer:
         state_map = list(submodel_construction.new_to_old_state_mapping)
         choice_map = list(submodel_construction.new_to_old_action_mapping)
 
-        Profiler.resume()
         return model,state_map,choice_map
 
  
@@ -104,8 +99,6 @@ class QuotientContainer:
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
         
-        Profiler.start("quotient::scheduler_selection")
-
         # construct DTMC that corresponds to this scheduler and filter reachable states/choices
         choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         dtmc,_,choice_map = self.restrict_mdp(mdp.model, choices)
@@ -119,7 +112,6 @@ class QuotientContainer:
             for hole_index,option in choice_options.items():
                 selection[hole_index].add(option)
         selection = [list(options) for options in selection]
-        Profiler.resume()
 
         return selection    
 
@@ -143,7 +135,6 @@ class QuotientContainer:
         - P(s,c,s') is the probability of transitioning from s to s' under action c
         - mc(s') is the model checking result in state s'
         '''
-        Profiler.start("quotient::choice_values")
 
         # multiply probability with model checking results
         choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix, result.get_values())
@@ -163,8 +154,6 @@ class QuotientContainer:
         # sanity check
         for choice in range(mdp.choices):
             assert not math.isnan(choice_values[choice])
-
-        Profiler.resume()
 
         return choice_values
 
@@ -201,7 +190,6 @@ class QuotientContainer:
 
 
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
-        Profiler.start("    states loop")
 
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
@@ -255,7 +243,6 @@ class QuotientContainer:
             for hole_index in inconsistent_assignments
             }
 
-        Profiler.resume()
         return inconsistent_differences
 
     
@@ -264,7 +251,6 @@ class QuotientContainer:
         Get hole options involved in the scheduler selection.
         Use numeric values to filter spurious inconsistencies.
         '''
-        Profiler.start("quotient::scheduler_selection_quantitative")
 
         scheduler = result.scheduler
 
@@ -272,7 +258,6 @@ class QuotientContainer:
         selection = self.scheduler_selection(mdp, scheduler)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
         if len(inconsistent_assignments) == 0:
-            Profiler.resume()
             return selection,None,None,None
         
         # extract choice values, compute expected visits and estimate scheduler difference
@@ -280,7 +265,6 @@ class QuotientContainer:
         expected_visits = self.expected_visits(mdp, prop, result.scheduler)
         inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values, expected_visits)
 
-        Profiler.resume()
         return selection,choice_values,expected_visits,inconsistent_differences
         
 
@@ -372,7 +356,6 @@ class QuotientContainer:
 
 
     def split(self, family, incomplete_search):
-        Profiler.start("quotient::split")
 
         mdp = family.mdp
         assert not mdp.is_dtmc
@@ -393,6 +376,7 @@ class QuotientContainer:
             assert len(mdp.design_space[splitter].options) > 1
             core_suboptions = self.suboptions_half(mdp, splitter)
             other_suboptions = []
+        # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
 
         new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
         
@@ -407,7 +391,6 @@ class QuotientContainer:
             design_subspace.assume_hole_options(splitter, suboption)
             design_subspaces.append(design_subspace)
 
-        Profiler.resume()
         return design_subspaces
 
     def double_check_assignment(self, assignment):

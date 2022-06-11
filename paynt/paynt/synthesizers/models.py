@@ -1,7 +1,6 @@
 import stormpy
 
 from ..sketch.property import *
-from ..profiler import Profiler
 
 from collections import OrderedDict
 
@@ -35,20 +34,12 @@ class MarkovChain:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
-        Profiler.start("models::MarkovChain")
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
         self.model = model
         self.quotient_container = quotient_container
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
-
-        # map choices to their origin states
-        self.choice_to_state = []
-        tm = model.transition_matrix
-        for state in range(model.nr_states):
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                self.choice_to_state.append(state)
 
         # identify simple holes
         tm = self.model.transition_matrix
@@ -60,7 +51,6 @@ class MarkovChain:
         self.hole_simple = [hole_to_states[hole] == 1 for hole in design_space.hole_indices]
 
         self.analysis_hints = None
-        Profiler.resume()
     
     @property
     def states(self):
@@ -97,7 +87,6 @@ class MarkovChain:
 
     def model_check_property(self, prop, alt = False):
         direction = "prim" if not alt else "seco"
-        Profiler.start(f"  MC {direction}")
         # get hint
         hint = None
         if self.analysis_hints is not None:
@@ -112,7 +101,6 @@ class MarkovChain:
             result = self.model_check_formula_hint(formula, hint)
         
         value = result.at(self.initial_state)
-        Profiler.resume()
 
         return PropertyResult(prop, result, value)
 

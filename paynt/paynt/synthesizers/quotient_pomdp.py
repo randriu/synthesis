@@ -25,8 +25,8 @@ class POMDPQuotientContainer(QuotientContainer):
     current_family_index = None
 
     # if True, action-memory hole pairs will be merged into a single hole
-    # use_simplified_coloring = False
-    use_simplified_coloring = True
+    use_simplified_coloring = False
+    # use_simplified_coloring = True
     
     def __init__(self, *args):
         super().__init__(*args)
@@ -341,13 +341,30 @@ class POMDPQuotientContainer(QuotientContainer):
         # the design space is ready
         if not self.use_simplified_coloring:
             return
-        
+
         # store old coloring
         self.design_space_old = self.sketch.design_space
         self.coloring_old = self.coloring
         # replace with simplified one
         design_space_new,self.coloring,self.obs_to_holes,self.hole_pair_map = self.simplify_coloring()
         self.sketch.set_design_space(design_space_new)
+
+
+    def remove_simpler_controllers(self, current_mem_size):
+
+        if current_mem_size == 1:
+            return
+
+        # print(self.observation_memory_holes)
+        
+        # ds = self.sketch.design_space.copy()
+        # obs = self.observation_labels.index('[start=1]')
+        # mem_hole_index = self.observation_memory_holes[obs][0]
+        # mem_hole = ds[mem_hole_index]
+        # mem_hole.assume_options([0])
+        
+        # self.sketch.set_design_space(ds)
+        return
 
 
     def simplify_coloring(self):
@@ -457,6 +474,13 @@ class POMDPQuotientContainer(QuotientContainer):
             for action in range(mdp.choices):
                 quotient_to_restricted_action_map[mdp.quotient_choice_map[action]] = action
 
+        # map choices to their origin states
+        choice_to_state = []
+        tm = mdp.model.transition_matrix
+        for state in range(mdp.model.nr_states):
+            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                choice_to_state.append(state)
+
 
         # for each hole, compute its difference sum and a number of affected states
         inconsistent_differences = {}
@@ -471,7 +495,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 if choice_0 is None:
                     continue
                 
-                source_state = mdp.choice_to_state[choice_0]
+                source_state = choice_to_state[choice_0]
                 source_state_visits = expected_visits[source_state]
                 # assert source_state_visits != 0
                 if source_state_visits == 0:
