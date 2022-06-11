@@ -123,8 +123,8 @@ class POMDPQuotientContainer(QuotientContainer):
         # initialize POMDP manager
         self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
         # do initial unfolding
-        # self.set_imperfect_memory_size(POMDPQuotientContainer.initial_memory_size)
-        self.set_global_memory_size(POMDPQuotientContainer.initial_memory_size)
+        self.set_imperfect_memory_size(POMDPQuotientContainer.initial_memory_size)
+        # self.set_global_memory_size(POMDPQuotientContainer.initial_memory_size)
         
         
 

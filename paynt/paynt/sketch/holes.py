@@ -404,21 +404,22 @@ class DesignSpace(Holes):
 
     
     def generalize_hints(self, result):
-        prop = result.property
         hint_prim = self.generalize_hint(result.primary.result)
         hint_seco = self.generalize_hint(result.secondary.result) if result.secondary is not None else None
-        return prop, (hint_prim, hint_seco)
+        return (hint_prim, hint_seco)
 
     
-    def collect_analysis_hints(self):
+    def collect_analysis_hints(self, specification):
         Profiler.start("holes::collect_analysis_hints")
         res = self.analysis_result
         analysis_hints = dict()
         for index in res.constraints_result.undecided_constraints:
-            prop, hints = self.generalize_hints(res.constraints_result.results[index])
+            prop = specification.constraints[index]
+            hints = self.generalize_hints(res.constraints_result.results[index])
             analysis_hints[prop] = hints
         if res.optimality_result is not None:
-            prop, hints = self.generalize_hints(res.optimality_result)
+            prop = specification.optimality
+            hints = self.generalize_hints(res.optimality_result)
             analysis_hints[prop] = hints
         Profiler.resume()
         return analysis_hints
@@ -449,12 +450,12 @@ class DesignSpace(Holes):
         Profiler.resume()
         return analysis_hints
 
-    def collect_parent_info(self):
+    def collect_parent_info(self, specification):
         pi = ParentInfo()
         pi.hole_selected_actions = self.hole_selected_actions
         pi.selected_actions = self.selected_actions
         pi.refinement_depth = self.refinement_depth
-        pi.analysis_hints = self.collect_analysis_hints()
+        pi.analysis_hints = self.collect_analysis_hints(specification)
         cr = self.analysis_result.constraints_result
         pi.property_indices = cr.undecided_constraints if cr is not None else []
         pi.splitter = self.splitter

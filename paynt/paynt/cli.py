@@ -3,14 +3,17 @@ from . import version
 from .sketch.sketch import Sketch
 from .synthesizers.synthesizer import *
 from .synthesizers.synthesizer_pomdp import SynthesizerPOMDP
+from .synthesizers.synthesizer_ar_concurrent import SynthesizerARConcurrent
 from .synthesizers.quotient_pomdp import POMDPQuotientContainer
 
 import click
 import sys
 import os
+import cProfile, pstats
 
 import logging
 # logger = logging.getLogger(__name__)
+
 
 def setup_logger(log_path = None):
     ''' Setup routine for logging. '''
@@ -55,7 +58,7 @@ def setup_logger(log_path = None):
     help="export the model to *.drn/*.pomdp and abort")
 
 @click.option("--method",
-    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid']),
+    type=click.Choice(['onebyone', 'ar', 'cegis', 'hybrid', 'ar_concurrent']),
     default="ar", show_default=True,
     help="synthesis method"
     )
@@ -95,7 +98,7 @@ def paynt(
         raise ValueError(f"The sketch file {sketch_path} does not exist")
     if not os.path.isfile(properties_path):
         raise ValueError(f"The properties file {properties_path} does not exist")
-    
+
     # parse sketch
     sketch = Sketch(sketch_path, filetype, export, properties_path, constants)
 
@@ -110,8 +113,18 @@ def paynt(
         synthesizer = SynthesizerCEGIS(sketch)
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(sketch)
+    elif method == "ar_concurrent":
+        synthesizer = SynthesizerARConcurrent(sketch)
     else:
         pass
+    
+    # with cProfile.Profile() as pr:
+    #     synthesizer.run()
+    # # stats = pr.create_stats()
+    # # print(stats)
+    # pstats.Stats(pr).sort_stats('tottime').print_stats(10)
+    # exit()
+    
     synthesizer.run()
 
 

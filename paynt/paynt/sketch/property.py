@@ -186,7 +186,6 @@ class Specification:
 
 class PropertyResult:
     def __init__(self, prop, result, value):
-        self.property = prop
         self.result = result
         self.value = value
         self.sat = prop.satisfies_threshold(value)
@@ -259,7 +258,7 @@ class MdpPropertyResult:
         primary_selection, primary_choice_values, primary_expected_visits,
         primary_scores
     ):
-        self.property = prop
+        self.minimizing = prop.minimizing
         self.primary = primary
         self.secondary = secondary
         self.feasibility = feasibility
@@ -272,7 +271,7 @@ class MdpPropertyResult:
     def __str__(self):
         prim = str(self.primary)
         seco = str(self.secondary)
-        if self.property.minimizing:
+        if self.minimizing:
             return "{} - {}".format(prim,seco)
         else:
             return "{} - {}".format(seco,prim)

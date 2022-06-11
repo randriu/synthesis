@@ -400,7 +400,7 @@ class QuotientContainer:
         design_subspaces = []
         
         family.splitter = splitter
-        parent_info = family.collect_parent_info()
+        parent_info = family.collect_parent_info(self.sketch.specification)
         for suboption in suboptions:
             subholes = new_design_space.subholes(splitter, suboption)
             design_subspace = DesignSpace(subholes, parent_info)
