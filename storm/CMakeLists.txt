@@ -470,6 +470,7 @@ if (STORM_GIT_VERSION_STRING MATCHES "NOTFOUND")
 	include(version.cmake)
 	message(WARNING "Storm - Git version information not available, statically assuming version ${STORM_VERSION_MAJOR}.${STORM_VERSION_MINOR}.${STORM_VERSION_PATCH}.")
 else()
+	include(version.cmake) #+
 	set(STORM_VERSION_SOURCE "VersionSource::Git")
 	if ("${STORM_VERSION_APPENDIX}" MATCHES "^.*dirty.*$")
 		set(STORM_VERSION_DIRTY "DirtyState::Dirty")
