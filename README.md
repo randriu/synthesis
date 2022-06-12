@@ -45,13 +45,14 @@ storm-build-debug
 Building in the debug mode using the commands above also disables link-time optimizations, accelerating compilation. The script uses different folders for the release (`storm/build`) and the debug (`storm/build_debug`) versions of Storm.
 
 ## Running PAYNT
+
 Upon enabling the Python environment:
 
 ```shell
 source env/bin/activate
 ```
 
-PAYNT is executed using the command in the following form:
+PAYNT can be executed using the command in the following form:
 
 ```shell
 python3 paynt/paynt.py [OPTIONS]
@@ -62,12 +63,10 @@ where the most important options are:
 - ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
 - ``--props PROPS``: the file in the ``PROJECT`` folder containing specification to synthesise against [default: ``sketch.props``]
 - ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
-
 Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
 - ``--filetype [prism|drn|pomdp]``: input file format [default: ``prism``]
 - ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
 - ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
-
 Other options:
 - ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
 - ``--incomplete-search``:  uses incomplete search during synthesis
@@ -76,15 +75,21 @@ Other options:
 
 Here are various PAYNT calls:
 ```shell
-python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --props easy.properties hybrid
+python3 paynt/paynt.py --project models/cav21/maze --props hard.props
+python3 paynt/paynt.py --project models/cav21/maze --props hard.props --method hybrid
+python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0
+python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
+timeout 10s python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
 ```
 
 
 
+# PAYNT tutorial (TBD)
+
 For instance, here is a simple PAYNT call:
 
 ```shell
-python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --properties easy.properties hybrid
+python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --properties easy.props hybrid
 ```
 
 The `--project` option specifies the path to the benchmark folder: now we will investigate the __Grid__ model discussed in [1].
@@ -99,11 +104,11 @@ Having the tool installed, you can quickly test it by navigating to the tool fol
 ```sh
 cd /home/cav21/synthesis
 source env/bin/activate
-python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.properties --method hybrid
+python3 paynt/paynt.py --project cav21-benchmark/dpm-demo  --properties sketch.props --method hybrid
 ```
 
 The syntax of the command is described in more detail in the following chapters of this README.
-For now, we can see that we ask PAYNT to look at the sketch (located in directory ``cav21-benchmark/dpm-demo``) for the dynamic power manager discussed in Section 2 in [1] and synthesize it wrt. specification in file ``cav21-benchmark/dpm-demo/sketch.properties`` using the advanced hybrid approach.
+For now, we can see that we ask PAYNT to look at the sketch (located in directory ``cav21-benchmark/dpm-demo``) for the dynamic power manager discussed in Section 2 in [1] and synthesize it wrt. specification in file ``cav21-benchmark/dpm-demo/sketch.props`` using the advanced hybrid approach.
 The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
@@ -126,26 +131,16 @@ The python environment can be deactivated by runnning
 deactivate
 ```
 
-### Contents of this README
 
-The remainder of this README fully describes how to synthesize probabilistic programs using PAYNT.
-In particular, we will describe
-- how to run PAYNT
-- how to read the output of PAYNT
-- how to create your own sketches and specifications
-
-TODO Finally, file [experiments/README_evaluation.md](./experiments/README_evaluation.md) contains instructions on **how to reconstruct experiments discussed in [1]**.
-The file also contains exploration of synthesis problems beyond the presented experiment suite.
-
-### Structure of this repository
+## Structure of this repository
 
 - `install.sh` is a script allowing to automatically install dependencies and compile the tool on your system
 - `paynt` is the main directory that contains all PAYNT source files; the directory additionally includes tests (`paynt/paynt_tests`) as well as configuration files
-- `storm` and `stormpy` directories contain the source code of Storm and Stormpy, including our modules for synthesis
-- other dependencies are collected in `prerequisites`.
-- directory `cav21-benchmark` includes the benchmarks evaluated in the paper.
-- directory `experiments` includes the scripts that allow to reconstruct experiments in our paper; for details, please refer to `experiments/README_evaluation.md`
-- `workspace` is a directory that includes the various versions of benchmarks, e.g. those used in previous publications; some of these benchmarks are explored in advanced experiments described in `experiments/README_evaluation.md`
+- `storm` and `stormpy` directories contain the source code of Storm and Stormpy, including our modules for the synthesis
+- `prerequisites` directory contains other dependencies
+- `models` is a directory that includes the various versions of benchmarks, e.g. those used in previous publications
+
+
 
 ## Synthesizing probabilistic programs with PAYNT
 
