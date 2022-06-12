@@ -63,7 +63,7 @@ alias envd='deactivate'
 
 python-environment() {
     pip3 install virtualenv
-    virtualenv -p python3 $SYNTHESIS_ENV
+    python3 -m venv $SYNTHESIS_ENV
     enva
     pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
     pip3 install toml # CVC5

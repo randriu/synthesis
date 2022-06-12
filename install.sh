@@ -47,12 +47,12 @@ if [ "$INSTALL_DEPENDENCIES" = true ]; then
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
     sudo apt -y install texlive-latex-extra
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip virtualenv
-    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+    # sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 fi
 
 
 # set up python environment
-virtualenv -p python3 $SYNTHESIS_ENV
+python3 -m venv $SYNTHESIS_ENV
 source $SYNTHESIS_ENV/bin/activate
 pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
 pip3 install toml # CVC5
