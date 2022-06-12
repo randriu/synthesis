@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification (see below for more information), and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in python and uses [Stormpy](https://github.com/moves-rwth/stormpy), python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for Storm and Stormpy, prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for Storm and Stormpy, prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -24,13 +24,13 @@ The script will automatically install dependencies and compile prerequisites nec
 
 ### Installation (developer notes)
 
-The script `workspace/alias-storm.sh` contains useful macros for (re-)compiling Storm/Stormpy. Once loaded from the root folder:
+The script `alias-storm.sh` contains useful macros for (re-)compiling Storm/Stormpy. Once loaded from the root folder:
 ```shell
-source workspace/alias-storm.sh
+source alias-storm.sh
 ```
 a number of command-line macros become available. Command `synthesis-install` showcases the basic commands in the step-by-step installation of PAYNT.
 
-Since PAYNT is written in Python language, it does not need to be re-built when modifying its source code. If the source code of Storm has been modified, but not its header files, it needs to be re-built (`storm-build`). If the header files were also modified, the re-configuration as well as Stormpy recompilation are necessary:
+In the development process, if the source code of Storm has been modified, but not its header files, it needs to be re-built (`storm-build`). If the header files were also modified, the re-configuration as well as Stormpy recompilation are necessary:
 ```shell
 storm-config
 storm-build
@@ -44,6 +44,53 @@ storm-build-debug
 ```
 Building in the debug mode using the commands above also disables link-time optimizations, accelerating compilation. The script uses different folders for the release (`storm/build`) and the debug (`storm/build_debug`) versions of Storm.
 
+## Running PAYNT
+Upon enabling the Python environment:
+
+```shell
+source env/bin/activate
+```
+
+PAYNT is executed using the command in the following form:
+
+```shell
+python3 paynt/paynt.py [OPTIONS]
+```
+where the most important options are:
+- ``--project PROJECT``: the path to the benchmark folder [required]
+- ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description [default: ``sketch.templ``]
+- ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
+- ``--props PROPS``: the file in the ``PROJECT`` folder containing specification to synthesise against [default: ``sketch.props``]
+- ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
+
+Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
+- ``--filetype [prism|drn|pomdp]``: input file format [default: ``prism``]
+- ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
+- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
+
+Other options:
+- ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
+- ``--incomplete-search``:  uses incomplete search during synthesis
+- ``--help``: shows the help message of the PAYNT and aborts
+
+
+Here are various PAYNT calls:
+```shell
+python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --props easy.properties hybrid
+```
+
+
+
+For instance, here is a simple PAYNT call:
+
+```shell
+python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --properties easy.properties hybrid
+```
+
+The `--project` option specifies the path to the benchmark folder: now we will investigate the __Grid__ model discussed in [1].
+PAYNT inspects the content of this folder and locates the required files for the synthesis process: the sketch and the specification list.
+In the example above, the sketch file is `cav21-benchmark/grid/sketch.templ` (in this case, `--sketch` option could have been omitted), the specification file is `cav21-benchmark/grid/easy.properties` and the sketch does not have undefined constants, only holes.
+Finally, the last argument specifies the selected synthesis method: `hybrid`.
 
 ## Getting started with PAYNT 
 
@@ -102,31 +149,6 @@ The file also contains exploration of synthesis problems beyond the presented ex
 
 ## Synthesizing probabilistic programs with PAYNT
 
-### Running PAYNT
-PAYNT is executed using the command in the following form:
-
-```shell
-python3 paynt/paynt.py [OPTIONS] [hybrid|cegar|cegis|onebyone]
-```
-where the most important options are: 
-- ``--project PROJECT``: specifies the path to the benchmark folder [required]
-- ``--sketch FILE_IN_PROJECT``: specifies the file containing the template description in the PRISM guarded command language [default: ``sketch.templ``]
-- ``--properties FILE_IN_PROJECT``: specifies the file containing specifications to synthesise against [default: ``sketch.properties``]
-- ``--constants STRING``: specifies the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1`` as standard for PRISM programs.
-- 
-For instance, here is a simple PAYNT call:
-
-```shell
-python3 paynt/paynt.py --project cav21-benchmark/grid --sketch sketch.templ --properties easy.properties hybrid
-```
-
-The `--project` option specifies the path to the benchmark folder: now we will investigate the __Grid__ model discussed in [1].
-PAYNT inspects the content of this folder and locates the required files for the synthesis process: the sketch and the specification list.
-In the example above, the sketch file is `cav21-benchmark/grid/sketch.templ` (in this case, `--sketch` option could have been omitted), the specification file is `cav21-benchmark/grid/easy.properties` and the sketch does not have undefined constants, only holes.
-Finally, the last argument specifies the selected synthesis method: `hybrid`.
-
-PAYNT has some advanced options for developers.
-- ``--help``: shows the help message of the PAYNT and exit the program
 
 
 ### Reading the output of PAYNT

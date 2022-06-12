@@ -56,9 +56,6 @@ class HoleTree:
 
 class SynthesizerPOMDP:
 
-    # if True, strategy_expected_uai will be used for FSC synthesis
-    use_memory_injection = False
-
     def __init__(self, sketch, method):
         assert sketch.is_pomdp
         self.sketch = sketch
@@ -87,15 +84,22 @@ class SynthesizerPOMDP:
         return assignment
 
 
-    def strategy_iterative(self):
+    def strategy_iterative(self, unfold_imperfect_only):
+        '''
+        @param unfold_imperfect_only if True, only imperfect observations will be unfolded
+        '''
         mem_size = POMDPQuotientContainer.initial_memory_size
         while True:
         # for x in range(2):
+            
             POMDPQuotientContainer.current_family_index = mem_size
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
-            # self.sketch.quotient.set_global_memory_size(mem_size)
-            self.sketch.quotient.set_imperfect_memory_size(mem_size)
-            self.sketch.quotient.remove_simpler_controllers(mem_size)
+            if unfold_imperfect_only:
+                self.sketch.quotient.set_imperfect_memory_size(mem_size)
+            else:
+                self.sketch.quotient.set_global_memory_size(mem_size)
+            
+            # self.sketch.quotient.remove_simpler_controllers(mem_size)
             # self.sketch.quotient.design_space_counter()
             self.synthesize(self.sketch.design_space)
             mem_size += 1
@@ -590,11 +594,12 @@ class SynthesizerPOMDP:
 
 
     def run(self):
-        if self.use_memory_injection:
-            # self.strategy_expected()
-            self.strategy_expected_uai()
-        else:
-            self.strategy_iterative()
+        # choose the synthesis strategy:
+
+        # self.strategy_expected()
+        # self.strategy_expected_uai()
+        self.strategy_iterative(unfold_imperfect_only=False)
+        # self.strategy_iterative(unfold_imperfect_only=True)
 
 
 
