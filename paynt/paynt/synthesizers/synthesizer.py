@@ -37,6 +37,7 @@ class Synthesizer:
     
     def run(self):
         # self.sketch.specification.optimality.update_optimum(11.08)
+        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
         assignment = self.synthesize(self.sketch.design_space)
 
         print("")
@@ -206,7 +207,8 @@ class SynthesizerCEGIS(Synthesizer):
         :return (2) whether this is an improving assignment
         """
 
-        assert family.mdp is not None, "analyzed family does not have an associated quotient MPD"
+        assert family.property_indices is not None, "analyzed family does not have the relevant properties list"
+        assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
         
         Profiler.start("CEGIS analysis")
         # print(assignment)

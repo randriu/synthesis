@@ -110,7 +110,7 @@ def paynt(
         synthesizer = SynthesizerCEGIS(sketch)
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(sketch)
-    elif method == "ar_concurrent":
+    elif method == "ar_multicore":
         synthesizer = SynthesizerMultiCoreAR(sketch)
     else:
         pass

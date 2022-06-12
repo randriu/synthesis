@@ -177,7 +177,6 @@ class MDP(MarkovChain):
                 # extract_scheduler=True,
                 environment=self.environment
             )
-            assert False
 
         feasibility = True if secondary.sat else None
         return MdpPropertyResult(prop, primary, secondary, feasibility, selection, choice_values, expected_visits, scores)
