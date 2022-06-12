@@ -270,6 +270,7 @@ class POMDPQuotientContainer(QuotientContainer):
             "Unfolding POMDP using the following memory allocation vector: {} ..."
             .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
+        # self.quotient_mdp = self.pomdp_manager.construct_mdp_aposteriori()
 
         # short aliases
         pm = self.pomdp_manager

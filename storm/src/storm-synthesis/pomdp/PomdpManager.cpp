@@ -241,6 +241,11 @@ namespace storm {
                 return this->mdp;
             }
 
+            template<typename ValueType>
+            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> PomdpManager<ValueType>::constructMdpAposteriori() {
+                // TODO
+                return this->constructMdp();
+            }
 
             template<typename ValueType>
             storm::models::sparse::StateLabeling PomdpManager<ValueType>::constructStateLabeling() {

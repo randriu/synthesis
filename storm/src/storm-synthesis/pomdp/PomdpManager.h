@@ -28,8 +28,10 @@ namespace storm {
             // set memory size to all observations
             void setGlobalMemorySize(uint64_t memory_size);
 
-            // unfold memory model into the POMDP
+            // unfold memory model (a priori memory update) into the POMDP
             std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
+            // unfold memory model (a posteriori memory update) into the POMDP
+            std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdpAposteriori();
             
             /** Design space associated with this POMDP. */
 
