@@ -55,6 +55,7 @@ fi
 virtualenv -p python3 $SYNTHESIS_ENV
 source $SYNTHESIS_ENV/bin/activate
 pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
+pip3 install toml # CVC5
 pip3 install Cython scikit-build
 deactivate
 
@@ -68,20 +69,20 @@ cd -
 
 # build pycarl
 cd $PRE_TOOLS/pycarl
-enva
+source $SYNTHESIS_ENV/bin/activate
 python3 setup.py build_ext --jobs $COMPILE_JOBS develop
 #[TEST] python3 setup.py test
-envd
+deactivate
 cd -
 
 # build cvc5 (optional)
 cd $PRE_TOOLS/cvc5
-enva
+source $SYNTHESIS_ENV/bin/activate
 ./configure.sh --prefix="." --auto-download --python-bindings
 cd build
 make --jobs $COMPILE_JOBS
 make install
-envd
+deactivate
 cd $SYNTHESIS
 
 # build storm
