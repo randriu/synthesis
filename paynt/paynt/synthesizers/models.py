@@ -25,7 +25,7 @@ class MarkovChain:
         se = cls.environment.solver_environment
 
         se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
-        se.minmax_solver_environment.precision = stormpy.Rational(Property.mc_precision)
+        # se.minmax_solver_environment.precision = stormpy.Rational(Property.mc_precision)
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration

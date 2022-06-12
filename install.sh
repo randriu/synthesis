@@ -19,17 +19,18 @@ THREADS=$(nproc)
 
 SYNTHESIS=`pwd`
 PREREQUISITES=$SYNTHESIS/prerequisites
-DOWNLOADS=$PREREQUISITES/downloads
-TACAS_DEPENDENCIES=$PREREQUISITES/tacas-dependencies
+PRE_DOWNLOADS=$PREREQUISITES/downloads
+PRE_TOOLS=$PREREQUISITES/tools
 SYNTHESIS_ENV=$SYNTHESIS/env
 
 # unzip downloaded prerequisites
-cd $PREREQUISITES
-unzip $DOWNLOADS/carl.zip
-mv carl-master14 carl
-unzip $DOWNLOADS/pycarl.zip
-mv pycarl-master pycarl
-cd $SYNTHESIS
+mkdir -p $PRE_TOOLS
+cd $PRE_TOOLS
+unzip $PRE_DOWNLOADS/carl.zip
+unzip $PRE_DOWNLOADS/pycarl.zip
+unzip $PRE_DOWNLOADS/cvc5.zip
+mv cvc5-cvc5-0.0.6 cvc5
+cd -
 
 # dependencies
 if [ "$INSTALL_DEPENDENCIES" = true ]; then
@@ -58,15 +59,15 @@ pip3 install Cython scikit-build
 deactivate
 
 # build carl
-mkdir -p $PREREQUISITES/carl/build
-cd $PREREQUISITES/carl/build
+mkdir -p $PRE_TOOLS/carl/build
+cd $PRE_TOOLS/carl/build
 cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
 make lib_carl --jobs $THREADS
 #[TEST] make test
 cd -
 
 # build pycarl
-cd $PREREQUISITES/pycarl
+cd $PRE_TOOLS/pycarl
 enva
 python3 setup.py build_ext --jobs $COMPILE_JOBS develop
 #[TEST] python3 setup.py test
@@ -74,7 +75,7 @@ envd
 cd -
 
 # build cvc5 (optional)
-cd $PREREQUISITES/cvc5
+cd $PRE_TOOLS/cvc5
 enva
 ./configure.sh --prefix="." --auto-download --python-bindings
 cd build

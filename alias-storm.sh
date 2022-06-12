@@ -8,7 +8,9 @@ export COMPILE_JOBS=$(nproc)
 
 export SYNTHESIS=`pwd`
 export PREREQUISITES=$SYNTHESIS/prerequisites
-export DOWNLOADS=$PREREQUISITES/downloads
+export PRE_DOWNLOADS=$PREREQUISITES/downloads
+export PRE_TOOLS=$PREREQUISITES/tools
+
 
 export SYNTHESIS_ENV=$SYNTHESIS/env
 
@@ -24,22 +26,26 @@ export PAYNT_DIR=$SYNTHESIS/paynt
 ### prerequisites ##############################################################
 
 prerequisites-download() {
-    cd $DOWNLOADS
-    wget https://github.com/ths-rwth/carl/archive/refs/heads/master14.zip -O carl.zip
-    wget https://github.com/moves-rwth/pycarl/archive/refs/tags/2.0.5.zip -O pycarl.zip
+    mkdir -p $PRE_DOWNLOADS
+    cd $PRE_DOWNLOADS
+    
+    git clone -b master14 https://github.com/ths-rwth/carl carl
+    zip -r carl.zip carl && rm -rf carl
+    git clone https://github.com/moves-rwth/pycarl.git pycarl
+    zip -r pycarl.zip pycarl && rm -rf pycarl
     wget https://github.com/cvc5/cvc5/archive/refs/tags/cvc5-0.0.6.zip -O cvc5.zip
-    # wget https://github.com/moves-rwth/storm/archive/refs/tags/1.6.4.zip -O storm.zip
-    # wget https://github.com/moves-rwth/stormpy/archive/refs/tags/1.6.4.zip -O stormpy.zip
+    # git clone -b stable https://github.com/moves-rwth/storm.git storm
+    # git clone -b stable https://github.com/moves-rwth/stormpy.git stormpy
+    
     cd -
 }
 
 prerequisites-prepare() {
-    cd $PREREQUISITES    
-    unzip $DOWNLOADS/carl.zip
-    mv carl-master14 carl
-    unzip $DOWNLOADS/pycarl.zip
-    mv pycarl-2.0.5 pycarl
-    unzip $DOWNLOADS/cvc5.zip
+    mkdir -p $PRE_TOOLS
+    cd $PRE_TOOLS
+    unzip $PRE_DOWNLOADS/carl.zip
+    unzip $PRE_DOWNLOADS/pycarl.zip
+    unzip $PRE_DOWNLOADS/cvc5.zip
     mv cvc5-cvc5-0.0.6 cvc5
     cd -
 }
@@ -65,8 +71,8 @@ python-environment() {
 }
 
 prerequisites-build-carl() {
-    mkdir -p $PREREQUISITES/carl/build
-    cd $PREREQUISITES/carl/build
+    mkdir -p $PRE_TOOLS/carl/build
+    cd $PRE_TOOLS/carl/build
     cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
     make lib_carl --jobs $COMPILE_JOBS
     #[TEST] make test
@@ -74,7 +80,7 @@ prerequisites-build-carl() {
 }
 
 prerequisites-build-pycarl() {
-    cd $PREREQUISITES/pycarl
+    cd $PRE_TOOLS/pycarl
     enva
     python3 setup.py build_ext --jobs $COMPILE_JOBS develop
     #[TEST] python3 setup.py test
@@ -83,8 +89,7 @@ prerequisites-build-pycarl() {
 }
 
 prerequisites-build-cvc5() {
-    # configuration
-    cd $PREREQUISITES/cvc5
+    cd $PRE_TOOLS/cvc5
     enva
     ./configure.sh --prefix="." --auto-download --python-bindings
     cd build
