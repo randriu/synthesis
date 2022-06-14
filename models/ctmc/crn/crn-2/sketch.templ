@@ -1,0 +1,163 @@
+ma
+
+// sketch
+// t1: - -> [r1] V
+// t2: A -> [r2] c1*X
+// t3: A+B -> [3] c2*V + c3*Y
+// t4: B+2C ->[r4] c4*Z
+
+// V in {A,B}, X in {B,C}, Y in {A,B,C}, Z in {C,D}
+// r1 in {1,2}, r2 in {2,3}, r4 in {3,4}
+// c1,...,c4 in {1,2}
+
+
+// stage updates
+const int CLK_MAX = 3;
+formula clk_upd = clk=CLK_MAX ? 0 : clk+1;
+
+// species
+const int MAX=10;
+formula V = v=0 ? a : b;
+formula X = x=0 ? b : c;
+formula Y = y=0 ? a : (y=1 ? b : c);
+formula Z = z=0 ? c : d;
+
+// whether action is enabled
+formula t1_en = true;
+formula t2_en = a>0;
+formula t3_en = a>0 & b>0;
+formula t4_en = b>0 & c>1;
+
+// individual reaction rates
+formula t1_rate = r1;
+formula t2_rate = a*r2;
+formula t3_rate = a*b*3;
+formula t4_rate = b*c*r4;
+formula rate_sum = t1_rate + t2_rate + t3_rate + t4_rate;
+
+// exit rate
+formula exit_rate = (t1_en ? t1_rate : 0) + (t2_en ? t2_rate : 0) + (t3_en ? t3_rate : 0) + (t4_en ? t4_rate : 0);
+
+const double inf = 10000;
+
+module species
+
+    clk: [0..CLK_MAX] init 0;
+
+    a: [0..MAX] init 0;
+    b: [0..MAX] init 0;
+    c: [0..MAX] init 0;
+    d: [0..MAX] init 0;
+
+    r1: [0..2] init 0;
+    r2: [0..3] init 0;
+    r4: [0..4] init 0;
+
+    t: [1..4] init 1;
+
+    v: [0..1] init 0;
+    x: [0..1] init 0;
+    y: [0..2] init 0;
+    z: [0..1] init 0;
+
+    c1: [0..2] init 0;
+    c2: [0..2] init 0;
+    c3: [0..2] init 0;
+    c4: [0..2] init 0;
+
+
+    // choose rate combination
+    // r1 in {1,2}, r2 in {2,3}, r4 in {3,4}
+    [rate] clk=0 -> (clk'=1) & (r1'=1) & (r2'=2) & (r4'=3);
+    [rate] clk=0 -> (clk'=1) & (r1'=1) & (r2'=2) & (r4'=4);
+    [rate] clk=0 -> (clk'=1) & (r1'=1) & (r2'=3) & (r4'=3);
+    [rate] clk=0 -> (clk'=1) & (r1'=1) & (r2'=3) & (r4'=4);
+    [rate] clk=0 -> (clk'=1) & (r1'=2) & (r2'=2) & (r4'=3);
+    [rate] clk=0 -> (clk'=1) & (r1'=2) & (r2'=2) & (r4'=4);
+    [rate] clk=0 -> (clk'=1) & (r1'=2) & (r2'=3) & (r4'=3);
+    [rate] clk=0 -> (clk'=1) & (r1'=2) & (r2'=3) & (r4'=4);
+
+    
+    // choose reaction
+    [reaction] clk=1 ->
+        t1_rate/rate_sum: (clk'=2) & (t'=1)
+      + t2_rate/rate_sum: (clk'=2) & (t'=2)
+      + t3_rate/rate_sum: (clk'=2) & (t'=3)
+      + t4_rate/rate_sum: (clk'=2) & (t'=4);
+
+    // choose the world
+    
+    // t1: - -> [r1] V
+    [t1] clk=2 & t=1 -> (clk'=3) & (v'=0);
+    [t1] clk=2 & t=1 -> (clk'=3) & (v'=1);
+
+    // t2: A -> [r2] c1*X
+    [t2] clk=2 & t=2 -> (clk'=3) & (c1'=1) & (x'=0);
+    [t2] clk=2 & t=2 -> (clk'=3) & (c1'=1) & (x'=1);
+    [t2] clk=2 & t=2 -> (clk'=3) & (c1'=2) & (x'=0);
+    [t2] clk=2 & t=2 -> (clk'=3) & (c1'=2) & (x'=1);
+
+    // t3: A+B -> [3] c2*V + c3*Y
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=0) & (c3'=0) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=0) & (c3'=0) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=0) & (c3'=0) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=0) & (c3'=1) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=0) & (c3'=1) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=0) & (c3'=1) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=1) & (c3'=0) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=1) & (c3'=0) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=1) & (c3'=0) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=1) & (c3'=1) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=1) & (c3'=1) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=1) & (v'=1) & (c3'=1) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=0) & (c3'=0) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=0) & (c3'=0) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=0) & (c3'=0) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=0) & (c3'=1) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=0) & (c3'=1) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=0) & (c3'=1) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=1) & (c3'=0) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=1) & (c3'=0) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=1) & (c3'=0) & (y'=2);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=1) & (c3'=1) & (y'=0);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=1) & (c3'=1) & (y'=1);
+    [t3] clk=2 & t=3 -> (clk'=3) & (c2'=2) & (v'=1) & (c3'=1) & (y'=2);
+
+    // t4: B+2C ->[r4] c4*Z
+    [t4] clk=2 & t=4 -> (clk'=3) & (c4'=1) & (z'=0);
+    [t4] clk=2 & t=4 -> (clk'=3) & (c4'=1) & (z'=1);
+    [t4] clk=2 & t=4 -> (clk'=3) & (c4'=2) & (z'=0);
+    [t4] clk=2 & t=4 -> (clk'=3) & (c4'=2) & (z'=1);
+
+    
+    // execute t1
+    // t1: - -> [r1] V
+    <> clk=3 & t=1 & t1_en & v=0 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=min(a+1,MAX));
+    <> clk=3 & t=1 & t1_en & v=1 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (b'=min(b+1,MAX));
+
+    // execute t2
+    // t2: A -> [r2] c1*X
+    <> clk=3 & t=2 & t2_en & x=0 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=a-1) & (b'=min(b+c1,MAX));
+    <> clk=3 & t=2 & t2_en & x=0 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=a-1) & (c'=min(c+c1,MAX));
+    
+    // execute t3
+    // t3: A+B -> [3] c2*V + c3*Y
+    <> clk=3 & t=3 & t3_en & v=0 & y=0 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=min(a-1+c2+c3,MAX)) & (b'=b-1);
+    <> clk=3 & t=3 & t3_en & v=0 & y=1 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=min(a-1+c2,MAX)) & (b'=min(b-1+c3,MAX));
+    <> clk=3 & t=3 & t3_en & v=0 & y=2 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=min(a-1+c2,MAX)) & (b'=b-1) & (c'=min(c+c3,MAX));
+    
+    <> clk=3 & t=3 & t3_en & v=1 & y=0 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=min(a-1+c3,MAX)) & (b'=min(b-1+c2,MAX));
+    <> clk=3 & t=3 & t3_en & v=1 & y=1 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=a-1) & (b'=min(b-1+c2+c3,MAX));
+    <> clk=3 & t=3 & t3_en & v=1 & y=2 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (a'=a-1) & (b'=min(b-1+c2,MAX)) & (c'=min(c+c3,MAX));
+
+
+    // execute t4
+    // t4: B+2C ->[r4] c4*Z
+
+    <> clk=3 & t=4 & t4_en & z=0 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (b'=b-1) & (c'=min(Z-2+c4,MAX));
+    <> clk=3 & t=4 & t4_en & z=1 -> exit_rate: (clk'=0) & (r1'=0) & (r2'=0) & (r4'=0) & (t'=1) & (v'=0) & (x'=0) & (y'=0) & (z'=0) & (c1'=0) & (c2'=0) & (c3'=0) & (c4'=0) & (b'=b-1) & (c'=c-2) & (d'=min(Z+c4,MAX));
+
+
+    
+
+endmodule
