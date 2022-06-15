@@ -70,7 +70,7 @@ cd -
 # build pycarl
 cd $PRE_TOOLS/pycarl
 source $SYNTHESIS_ENV/bin/activate
-python3 setup.py build_ext --jobs $COMPILE_JOBS develop
+python3 setup.py build_ext --jobs $THREADS develop
 #[TEST] python3 setup.py test
 deactivate
 cd -
@@ -80,7 +80,7 @@ cd $PRE_TOOLS/cvc5
 source $SYNTHESIS_ENV/bin/activate
 ./configure.sh --prefix="." --auto-download --python-bindings
 cd build
-make --jobs $COMPILE_JOBS
+make --jobs $THREADS
 make install
 deactivate
 cd $SYNTHESIS
