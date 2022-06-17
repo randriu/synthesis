@@ -46,7 +46,7 @@ if [ "$INSTALL_DEPENDENCIES" = true ]; then
     sudo apt update
     sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
     sudo apt -y install texlive-latex-extra
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip virtualenv
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
     # sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 fi
 

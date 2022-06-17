@@ -8,7 +8,7 @@ import multiprocessing as mp
 import os
 import time
 
-# global variable containing, sketch, the quotient, the specification ...
+# global variable containing sketch: the quotient, the specification, etc.
 # when a process is spawned (forked), it will inherit the sketch from the parent
 sketch = None
 
