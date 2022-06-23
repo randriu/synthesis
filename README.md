@@ -13,6 +13,13 @@ Most of the algorithms are described in
 
 ## Installation
 
+PAYNT requires the [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
+Upon installing Stormpy within a Python environment, you can activate the environment and call Paynt by running
+
+```shell
+python3 paynt/paynt.py [OPTIONS]
+```
+
 To install the tool on your system, download the repository, navigate to the root folder of the tool and simply run
 
 ```shell
