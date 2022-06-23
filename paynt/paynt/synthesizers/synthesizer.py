@@ -36,7 +36,7 @@ class Synthesizer:
         self.stat.print()
     
     def run(self):
-        # self.sketch.specification.optimality.update_optimum(11.08)
+        # self.sketch.specification.optimality.update_optimum(0.9)
         self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
         assignment = self.synthesize(self.sketch.design_space)
 
@@ -119,6 +119,7 @@ class SynthesizerAR(Synthesizer):
 
         res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
+        # print(res)
         Profiler.resume()
 
         improving_assignment,improving_value,can_improve = res.improving(family)

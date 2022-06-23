@@ -161,6 +161,8 @@ synthesis-install() {
     # clone repository
     # git clone https://github.com/randriu/synthesis.git
     git clone git@github.com:randriu/synthesis.git
+    git clone -b synthesis git@github.com:randriu/storm.git
+    git clone -b synthesis git@github.com:randriu/stormpy.git
     cd synthesis
     
     # load aliases
