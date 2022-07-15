@@ -6,3 +6,5 @@ env/
 
 *.log
 *.jani
+
+__pycache__/
