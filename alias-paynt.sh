@@ -1,20 +1,29 @@
 #!/bin/bash
+# usage: source alias-storm.sh
 
 # compilation parameters
 
+# multi-core compilation
 export COMPILE_JOBS=$(nproc)
+# single-core compilation:
+# export COMPILE_JOBS=1 
 
 # environment variables
 
 export SYNTHESIS=`pwd`
 export PREREQUISITES=$SYNTHESIS/prerequisites
-
 export SYNTHESIS_ENV=$SYNTHESIS/env
 
 export STORM_BLD=$SYNTHESIS/storm/build
 export STORM_BLD_DEBUG=$SYNTHESIS/storm/build_debug
 
 export STORMPY_BLD=$SYNTHESIS/stormpy/build
+
+# environment aliases
+
+alias enva='source $SYNTHESIS_ENV/bin/activate'
+alias envd='deactivate'
+
 
 ### prerequisites ##############################################################
 
@@ -35,19 +44,14 @@ prerequisites-download() {
     cd -
 }
 
-paynt-download() {
+storm-download() {
     cd $SYNTHESIS
-    git clone git@github.com:randriu/synthesis.git paynt
     git clone -b synthesis git@github.com:randriu/storm.git storm
     git clone -b synthesis git@github.com:randriu/stormpy.git stormpy
     cd -
 }
 
-alias enva='source $SYNTHESIS_ENV/bin/activate'
-alias envd='deactivate'
-
 python-environment() {
-    pip3 install virtualenv
     python3 -m venv $SYNTHESIS_ENV
     enva
     pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
@@ -133,35 +137,35 @@ stormpy-build-debug() {
     cd -
 }
 
-paynt-install() {
-    cd $SYNTHESIS/paynt
-    enva
-    python3 setup.py install
-    # python3 setup.py test
-    envd
-    cd -
-}
+# paynt-install() {
+#     cd $SYNTHESIS/paynt
+#     enva
+#     python3 setup.py install
+#     # python3 setup.py test
+#     envd
+#     cd -
+# }
 
 synthesis-install() {
-
-    # source storm-alias.sh
     
+    # install dependencies
     storm-dependencies
-
+    # download prerequisites
     prerequisites-download
-    paynt-download
-    
+    # download synthesis versions of storm & stormpy
+    storm-download
+    # setup python environment
     python-environment
-
-    prerequisites-download
+    
+    # build prerequisites
     prerequisites-build-carl
     prerequisites-build-pycarl
     prerequisites-build-cvc5
 
+    # build storm & stormpy
     storm-config
     storm-build
     stormpy-build
-    # paynt-install
 
     # check
     # TODO

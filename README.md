@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. This repository contains the source code of PAYNT along with adaptations for Storm and Stormpy, prerequisites for PAYNT. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/randriu/storm/tree/synthesis) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/randriu/stormpy/tree/synthesis), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -9,31 +9,83 @@ Most of the algorithms are described in
 - [2] Inductive Synthesis for Probabilistic Programs Reaches New Horizons by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, TACAS 2021
 - [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
 - [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
+- [5] Inductive Synthesis of Finite-State Controllers for POMDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, UAI 2022.
 
 
 ## Installation
 
 PAYNT requires the [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
-Upon installing Stormpy within a Python environment, you can activate the environment and call Paynt by running
+Upon installing Stormpy within a Python environment, you can activate your environment and call PAYNT, e.g.
 
 ```shell
-python3 paynt/paynt.py [OPTIONS]
+source env/bin/activate
+python3 paynt.py --help
 ```
 
-To install the tool on your system, download the repository, navigate to the root folder of the tool and simply run
+If you do not have Stormpy installed, you can download this repository, navigate to the root folder and run the installation script described in `alias-paynt.sh`:
 
 ```shell
-./install.sh
+git clone git@github.com:randriu/synthesis.git
+cd synthesis
+source alias-paynt.sh
+synthesis-install
 ```
 
-The script will automatically install dependencies and compile prerequisites necessary to run PAYNT. Compilation of the tool and of all of its prerequisites might take a couple of hours. To accelerate compilation, the install script makes use of multiple cores. Such multi-core compilation is quite memory-intensive: as a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a machine with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory. In such a case, you can modify variable `threads` in the script `install.sh` to match your preferences; setting the variable to 1 corresponds to a single-core compilation.
+The script will automatically install dependencies and compile all the prerequisites necessary to run PAYNT. Complete compilation might take a couple of hours. To accelerate compilation, the install script makes use of multiple cores. Such multi-core compilation is quite memory-intensive: as a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a machine with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory. In such a case, you can modify variable `COMPILE_JOBS` in `alias-paynt.sh` to match your preferences; setting the variable to 1 corresponds to a single-core compilation.
 
 
-### Installation (developer notes)
+## Running PAYNT
 
-The script `alias-storm.sh` contains useful macros for (re-)compiling Storm/Stormpy. Once loaded from the root folder:
+Upon enabling the Python environment, e.g.
+
 ```shell
-source alias-storm.sh
+source env/bin/activate
+```
+
+PAYNT can be executed using the command in the following form:
+
+```shell
+python3 paynt.py [OPTIONS]
+```
+where the most important options are:
+- ``--project PROJECT``: the path to the benchmark folder [required]
+- ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description or a POMDP program [default: ``sketch.templ``]
+- ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
+- ``--props PROPS``: the file in the ``PROJECT`` folder containing synthesis specification [default: ``sketch.props``]
+- ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
+
+Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
+- ``--filetype [prism|drn|pomdp]``: input file format [default: ``prism``]
+- ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
+- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
+
+Other options:
+- ``--help``: shows the help message of the PAYNT and aborts
+- ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
+- ``--incomplete-search``:  uses incomplete search during synthesis
+
+
+Here are various PAYNT calls:
+```shell
+python3 paynt.py --project models/cav21/maze --props hard.props
+python3 paynt.py --project models/cav21/maze --props hard.props --method hybrid
+python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0
+python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
+python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
+timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
+```
+
+The python environment can be deactivated by runnning
+```sh
+deactivate
+```
+
+
+### Developer notes
+
+The script `alias-paynt.sh` contains useful macros for (re-)compiling Storm/Stormpy. Once loaded from the root folder:
+```shell
+source alias-paynt.sh
 ```
 a number of command-line macros become available. Command `synthesis-install` showcases the basic commands in the step-by-step installation of PAYNT.
 
@@ -51,51 +103,6 @@ storm-build-debug
 ```
 Building in the debug mode using the commands above also disables link-time optimizations, accelerating compilation. The script uses different folders for the release (`storm/build`) and the debug (`storm/build_debug`) versions of Storm.
 
-## Running PAYNT
-
-Upon enabling the Python environment:
-
-```shell
-source env/bin/activate
-```
-
-PAYNT can be executed using the command in the following form:
-
-```shell
-python3 paynt/paynt.py [OPTIONS]
-```
-where the most important options are:
-- ``--project PROJECT``: the path to the benchmark folder [required]
-- ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description [default: ``sketch.templ``]
-- ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
-- ``--props PROPS``: the file in the ``PROJECT`` folder containing specification to synthesise against [default: ``sketch.props``]
-- ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
-
-Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
-- ``--filetype [prism|drn|pomdp]``: input file format [default: ``prism``]
-- ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
-- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
-
-Other options:
-- ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
-- ``--incomplete-search``:  uses incomplete search during synthesis
-- ``--help``: shows the help message of the PAYNT and aborts
-
-
-Here are various PAYNT calls:
-```shell
-python3 paynt/paynt.py --project models/cav21/maze --props hard.props
-python3 paynt/paynt.py --project models/cav21/maze --props hard.props --method hybrid
-python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0
-python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
-python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
-timeout 10s python3 paynt/paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
-```
-
-The python environment can be deactivated by runnning
-```sh
-deactivate
-```
 
 
 # PAYNT tutorial (TBD)
@@ -144,15 +151,6 @@ The python environment can be deactivated by runnning
 ```sh
 deactivate
 ```
-
-
-## Structure of this repository
-
-- `install.sh` is a script allowing to automatically install dependencies and compile the tool on your system
-- `paynt` is the main directory that contains all PAYNT source files; the directory additionally includes tests (`paynt/paynt_tests`) as well as configuration files
-- `storm` and `stormpy` directories contain the source code of Storm and Stormpy, including our modules for the synthesis
-- `prerequisites` directory contains other dependencies
-- `models` is a directory that includes the various versions of benchmarks, e.g. those used in previous publications
 
 
 
