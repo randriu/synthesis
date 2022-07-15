@@ -1,1 +1,6 @@
 __pycache__/
+
+env/
+prerequisites/
+storm/
+stormpy/
