@@ -14,8 +14,8 @@ Most of the algorithms are described in
 
 ## Installation
 
-PAYNT requires the [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
-Upon installing Stormpy within a Python environment, you can activate your environment and call PAYNT, e.g.
+PAYNT requires the [synthesis fork of Storm](https://github.com/randriu/storm/tree/synthesis) and the corresponding [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
+Upon installing Stormpy within a Python environment, you can activate this environment and call PAYNT, e.g.
 
 ```shell
 source env/bin/activate
@@ -31,7 +31,7 @@ source alias-paynt.sh
 synthesis-install
 ```
 
-The script will automatically install dependencies and compile all the prerequisites necessary to run PAYNT. Complete compilation might take a couple of hours. To accelerate compilation, the install script makes use of multiple cores. Such multi-core compilation is quite memory-intensive: as a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a machine with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory. In such a case, you can modify variable `COMPILE_JOBS` in `alias-paynt.sh` to match your preferences; setting the variable to 1 corresponds to a single-core compilation.
+The script will automatically install dependencies and compile all the prerequisites necessary to run PAYNT. Complete compilation might take a couple of hours. To accelerate compilation, the install script makes use of multiple cores. Such multi-core compilation is quite memory-intensive: as a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a machine with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory. In such a case, you can modify variable `COMPILE_JOBS` in `alias-paynt.sh` to match your preferences; setting the variable to 1 corresponds to the single-core compilation.
 
 
 ## Running PAYNT
