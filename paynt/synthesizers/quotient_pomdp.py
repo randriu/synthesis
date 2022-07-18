@@ -20,6 +20,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
     # implicit size for POMDP unfolding
     initial_memory_size = 1
+    # if True, export the (labeled) optimal DTMC
+    export_optimal_dtmc = False
 
     # TODO
     current_family_index = None
@@ -587,4 +589,47 @@ class POMDPQuotientContainer(QuotientContainer):
         logger.debug("Symmetry breaking: reduced design space from {} to {}".format(family.size, restricted_family.size))
 
         return restricted_family
+
+
+    def export_result(self, dtmc):
+
+        # export POMDP
+        pomdp_path = "pomdp.drn"
+        logger.info("Exporting POMDP to {}".format(pomdp_path))
+        stormpy.export_to_drn(self.pomdp, pomdp_path)
+        
+        # label states with a pomdp_state:memory_node pair
+        # label choices with a pomdp_choice:memory_update pair
+        state_labeling = dtmc.model.labeling
+        choice_labeling = stormpy.storage.ChoiceLabeling(dtmc.choices)
+        for state in range(dtmc.states):
+            mdp_state = dtmc.quotient_state_map[state]
+            mdp_choice = dtmc.quotient_choice_map[state]
+
+            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
+            memory_node = self.pomdp_manager.state_memory[mdp_state]
+            state_label = "{}:{}".format(pomdp_state,memory_node)
+            if not state_labeling.contains_label(state_label):
+                state_labeling.add_label(state_label)
+            state_labeling.add_label_to_state(state_label,state)
+
+            pomdp_action_index = self.pomdp_manager.row_action_option[mdp_choice]
+            pomdp_choice = self.pomdp.get_choice_index(pomdp_state, pomdp_action_index)
+            memory_update = self.pomdp_manager.row_memory_option[mdp_choice]
+            choice_label = "{}:{}".format(pomdp_choice,memory_update)
+            if not choice_labeling.contains_label(choice_label):
+                choice_labeling.add_label(choice_label)
+            # state and choices indices coincide for DTMCs
+            choice_labeling.add_label_to_choice(choice_label,state)    
+
+        # add choice labeling to the model
+        m = dtmc.model
+        components = stormpy.storage.SparseModelComponents(m.transition_matrix,m.labeling,m.reward_models)
+        components.choice_labeling = choice_labeling
+        dtmc.model = stormpy.storage.SparseDtmc(components)
+
+        # export DTMC
+        dtmc_path = "dtmc.drn"
+        logger.info("Exporting optimal DTMC to {}".format(dtmc_path))
+        stormpy.export_to_drn(dtmc.model, dtmc_path)
 

@@ -64,12 +64,12 @@ def setup_logger(log_path = None):
     )
 @click.option("--incomplete-search", is_flag=True, default=False,
     help="use incomplete search during synthesis")
-@click.option("--print-optimal-actions", is_flag=True, default=False,
-    help="print action indices inducing the optimal Markov chain")
 @click.option("--fsc-synthesis", is_flag=True, default=False,
     help="enable incremental synthesis of FSCs for a POMDP")
 @click.option("--pomdp-memory-size", default=1, show_default=True,
     help="implicit memory size for POMDP FSCs")
+@click.option("--fsc-export-result", is_flag=True, default=False,
+    help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
 @click.option("--hyperproperty", is_flag=True, default=False,
     help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 
@@ -78,16 +78,16 @@ def paynt(
         sketch, props, constants,
         filetype, export,
         method,
-        incomplete_search, print_optimal_actions,
-        fsc_synthesis, pomdp_memory_size,
+        incomplete_search,
+        fsc_synthesis, pomdp_memory_size, fsc_export_result,
         hyperproperty
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
     # set CLI parameters
     Synthesizer.incomplete_search = incomplete_search
-    Synthesizer.print_optimal_actions = print_optimal_actions
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
+    POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
     Sketch.hyperproperty_synthesis = hyperproperty
 
     # check paths of input files

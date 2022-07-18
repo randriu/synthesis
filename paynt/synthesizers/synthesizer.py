@@ -11,10 +11,6 @@ class Synthesizer:
 
     # if True, some subfamilies can be discarded and some holes can be generalized
     incomplete_search = False
-    # if True and the synthesis found a solution, a list of actions indices that
-    # induce he obtained solution will be printed
-    print_optimal_actions = False
-
 
     # synthesis escape criterion
     use_optimum_update_timeout = False
@@ -52,9 +48,8 @@ class Synthesizer:
             dtmc = self.sketch.quotient.build_chain(assignment)
             spec = dtmc.check_specification(self.sketch.specification)
             logger.info("Double-checking specification satisfiability: {}".format(spec))
-            if Synthesizer.print_optimal_actions:
-                logger.info("Printing action indices that induce the optimal Markov chain below:")
-                print(dtmc.quotient_choice_map)
+            if self.sketch.is_pomdp and self.sketch.quotient.export_optimal_dtmc:
+                self.sketch.quotient.export_result(dtmc)
         
         self.print_stats()
     

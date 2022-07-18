@@ -597,8 +597,8 @@ class SynthesizerPOMDP:
         # choose the synthesis strategy:
 
         # self.strategy_expected_uai()
-        self.strategy_iterative(unfold_imperfect_only=False)
-        # self.strategy_iterative(unfold_imperfect_only=True)
+        # self.strategy_iterative(unfold_imperfect_only=False)
+        self.strategy_iterative(unfold_imperfect_only=True)
 
 
 

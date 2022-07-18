@@ -95,7 +95,7 @@ class Sketch:
                 self.jani_unfolder.write_jani(sketch_path)
             if export == "drn":
                 output_path = Sketch.substitute_suffix(sketch_path, '.', 'drn')
-                stormpy.export_to_drn(self.quotient.quotient_mdp, output_path)
+                stormpy.export_to_drn(self.explicit_quotient, output_path)
             if export == "pomdp":
                 assert self.is_pomdp, "cannot --export pomdp with non-POMDP sketches"
                 PomdpParser.write_model_in_pomdp_solve_format(sketch_path, self.quotient)
