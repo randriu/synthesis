@@ -26,7 +26,7 @@ class Sketch:
         '''Subsitute the suffix behind the last delimiter with the suffix.'''
         output_string = string.split(delimiter)
         output_string[-1] = str(suffix)
-        output_string = '.'.join(output_string)
+        output_string = delimiter.join(output_string)
         return output_string
 
     def __init__(self, sketch_path, filetype, export,
@@ -85,6 +85,7 @@ class Sketch:
             self.quotient = HyperPropertyQuotientContainer(self)
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
+            print(self.quotient.quotient_mdp.nr_states)
         else:
             raise TypeError("unknown sketch type")
 
@@ -94,7 +95,7 @@ class Sketch:
                 self.jani_unfolder.write_jani(sketch_path)
             if export == "drn":
                 output_path = Sketch.substitute_suffix(sketch_path, '.', 'drn')
-                stormpy.export_to_drn(self.explicit_quotient, output_path)
+                stormpy.export_to_drn(self.quotient.quotient_mdp, output_path)
             if export == "pomdp":
                 assert self.is_pomdp, "cannot --export pomdp with non-POMDP sketches"
                 PomdpParser.write_model_in_pomdp_solve_format(sketch_path, self.quotient)

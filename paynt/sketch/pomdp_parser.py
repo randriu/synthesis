@@ -96,28 +96,30 @@ observations: {}
             desc += f"O: * : {state} : {pomdp.observations[state]} 1\n"
 
         # rewards
-        desc += "\n# rewards\n\n"
+        if len(pomdp.reward_models) > 0:
+            # rewards
+            desc += "\n# rewards\n\n"
 
-        # assuming a single reward model
-        rewards = next(iter(pomdp.reward_models.values()))
+            # assuming a single reward model
+            rewards = next(iter(pomdp.reward_models.values()))
 
-        # convert rewards to state-based
-        state_rewards = []
-        if rewards.has_state_rewards:
-            state_rewards = list(rewards.state_rewards)
-        elif rewards.has_state_action_rewards:
-            state_action_rewards = list(rewards.state_action_rewards)
+            # convert rewards to state-based
+            state_rewards = []
+            if rewards.has_state_rewards:
+                state_rewards = list(rewards.state_rewards)
+            elif rewards.has_state_action_rewards:
+                state_action_rewards = list(rewards.state_action_rewards)
+                for state in range(num_states):
+                    group_start = tm.get_row_group_start(state)
+                    state_rewards.append(state_action_rewards[group_start])
+            else:
+                raise TypeError("unknown reward type")
+                    
+            # print state-based rewards
             for state in range(num_states):
-                group_start = tm.get_row_group_start(state)
-                state_rewards.append(state_action_rewards[group_start])
-        else:
-            raise TypeError("unknown reward type")
-                
-        # print state-based rewards
-        for state in range(num_states):
-            rew = state_rewards[state]
-            if rew != 0:
-                desc += f"R: * : {state} : * : * {rew}\n"
+                rew = state_rewards[state]
+                if rew != 0:
+                    desc += f"R: * : {state} : * : * {rew}\n"
         
         # ready to print
         output_path = sketch.Sketch.substitute_suffix(path, '.', 'pomdp')
