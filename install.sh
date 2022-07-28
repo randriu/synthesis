@@ -15,8 +15,8 @@ if [ "$INSTALL_OFFLINE" = true ] || [ "$INSTALL_DEPENDENCIES" = true ]; then
     if [[ ! $(sudo echo 0) ]]; then echo "sudo authentication failed"; exit; fi
 fi
 
-THREADS=$(nproc)
-# THREADS=1 # uncomment this to disable multi-core compilation
+# THREADS=$(nproc)
+THREADS=1 # uncomment this to disable multi-core compilation
 
 SYNTHESIS=`pwd`
 PREREQUISITES=$SYNTHESIS/prerequisites
@@ -26,6 +26,8 @@ SYNTHESIS_ENV=$SYNTHESIS/env
 
 # unzip downloaded prerequisites
 cd $PREREQUISITES
+mkdir carl
+mkdir pycarl-master
 unzip $DOWNLOADS/carl.zip
 mv carl-master14 carl
 unzip $DOWNLOADS/pycarl.zip
