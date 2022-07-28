@@ -51,11 +51,12 @@ def setup_logger(log_path=None):
 @click.option("--pomdp-memory-size", default=1, help="implicit memory size for POMDP FSCs")
 @click.option("--incremental", nargs=2, default=[0, 0], type=int, help="enable incremental synthesis of FSC for a POMDP within a memory size with applied restrictions")
 @click.option("--strategy", type=click.Choice(['full', 'iterative', 'injection']), default="full", help="define strategy")
+@click.option("--reset-optimum", is_flag=True, default=False, help="reset the optimality property after each synthesis loop")
 @click.option("--hyperproperty", is_flag=True, default=False, help="enable synthesis an MDP scheduler wrt a hyperproperty")
 def paynt(
         project, sketch, properties, constants, method, export_jani,
         incomplete_search, fsc_synthesis, pomdp_memory_size,
-        hyperproperty, incremental, strategy
+        incremental, strategy, reset_optimum, hyperproperty
     ):
 
     logger.info("This is Paynt version {}.".format(version()))
@@ -75,7 +76,7 @@ def paynt(
     if sketch.is_pomdp:
         if incremental != (0, 0):
             synthesizer = SynthesizerPOMDPIncremental(
-                sketch, method, min=incremental[0], max=incremental[1])
+                sketch, method, min=incremental[0], max=incremental[1], reset_optimum=reset_optimum)
         elif fsc_synthesis:
             synthesizer = SynthesizerPOMDP(sketch, method, strategy)
     elif method == "onebyone":

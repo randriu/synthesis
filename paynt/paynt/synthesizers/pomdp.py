@@ -19,11 +19,12 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerPOMDP():
 
-    def __init__(self, sketch, method, strategy):
+    def __init__(self, sketch, method, strategy, reset_optimum = False):
         assert sketch.is_pomdp
         self.sketch = sketch
         self.synthesizer = None
         self.strategy = strategy
+        self.reset_optimum = reset_optimum
         if method == "ar":
             self.synthesizer = SynthesizerAR
         elif method == "hybrid":
@@ -58,6 +59,8 @@ class SynthesizerPOMDP():
     def strategy_iterative(self):
         mem_size = POMDPQuotientContainer.pomdp_memory_size
         while True:
+            if self.reset_optimum:
+                self.sketch.specification.optimality.optimum = None
             f = open("workspace/log/output.csv", "a")
             f.write(
                 f"\n{self.sketch.sketch_path},Iterative,Iterative,{mem_size},")
@@ -67,8 +70,8 @@ class SynthesizerPOMDP():
             self.sketch.quotient.unfold_memory()
             res = self.synthesize(self.sketch.design_space)
             print("RESULT", res)
-            Graph().print(res, "workspace/log/" +
-                          self.sketch.sketch_path[25:-13].replace("/", "_") + "/iterative_" + str(mem_size), False)
+            Graph().print(self.sketch.design_space, "workspace/log/" +
+                          self.sketch.sketch_path[25:-13].replace("/", "_") + "/iterative" + str(mem_size), True)
             mem_size += 1
 
     def solve_mdp(self, family):
@@ -131,6 +134,9 @@ class SynthesizerPOMDP():
             f.write(
                 f"\n{self.sketch.sketch_path},Injection,Injection,{memory_injections},")
             f.close()
+            if self.reset_optimum:
+                self.sketch.specification.optimality.optimum = None
+
 
             # construct the quotient
             self.sketch.quotient.unfold_memory()
@@ -283,7 +289,7 @@ class SynthesizerPOMDP():
 
             print("RESULT", best_assignment)
             Graph().print(best_assignment, "workspace/log/" +
-                          self.sketch.sketch_path[25:-13].replace("/", "_") + "/injection_" + str(memory_injections), True)
+                          self.sketch.sketch_path[25:-13].replace("/", "_") + "/injection" + str(memory_injections), True)
 
 
     def run(self):

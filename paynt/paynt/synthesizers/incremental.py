@@ -1,4 +1,3 @@
-from copy import deepcopy
 
 from ..utils.graphs import Graph
 from .pomdp import SynthesizerPOMDP
@@ -9,11 +8,12 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerPOMDPIncremental(SynthesizerPOMDP):
 
-    def __init__(self, sketch, method, min=0, max=0):
+    def __init__(self, sketch, method, min=0, max=0, reset_optimum=False):
         super().__init__(sketch, method, strategy=None)
 
         self.mem_size = min
         self.max_size = max
+        self.reset_optimum = reset_optimum
 
     def run(self):
 
@@ -23,6 +23,8 @@ class SynthesizerPOMDPIncremental(SynthesizerPOMDP):
 
             for item in Conditions().conditions:
 
+                if self.reset_optimum:
+                    self.sketch.specification.optimality.optimum = None 
                 self.sketch.design_space = set_memory(
                     self.sketch.design_space,
                     self.mem_size,
