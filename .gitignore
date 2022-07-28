@@ -3,6 +3,9 @@ stormpy/build/
 stormpy/.pytest_cache/
 stormpy/.eggs/
 env/
+scripts/tables
+scripts/tables_old
+scripts/*.pdf
 
 *.log
 *.jani
