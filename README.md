@@ -8,6 +8,13 @@ To install the program, run the installation script:
 ./install.sh
 ```
 
+## Running the program
+
+To run the program you use the script`./scripts/run.sh` which runs all three of the approaches on the four interesting benchmarks.
+
+Before you run the program, make sure the folder `|workspace/log` exists and that you have the Python environment loaded (`source env/bin/activate`).
+
+
 ## Options:
 
 ```
@@ -27,9 +34,3 @@ Options:
                                   synthesis loop
   --help                          Show this message and exit.
   ```
-
-## Running the program
-
-To run the program you use the script`./scripts/run.sh` which runs all three of the approaches on the four interesting benchmarks.
-
-Before you run the program, make sure the folder `|workspace/log` exists and that you have the Python environment loaded (`source env/bin/activate`).
