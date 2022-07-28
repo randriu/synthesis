@@ -25,6 +25,6 @@ do
         --project $example ar \
         --fsc-synthesis \
         --pomdp-memory-size 1 \
-        --incremental 1 4
+        --incremental 1 0
 done 
     
