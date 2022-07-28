@@ -71,21 +71,21 @@ if [ "$INSTALL_OFFLINE" = true ]; then
     pip3 install --no-index -f pip-packages -r python-requirements
     cd $SYNTHESIS
 else
-    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click pygraphviz
 fi
 deactivate
 
 # carl
 cd $PREREQUISITES
-mkdir -p carl/build
-cd carl/build
+mkdir -p carl/carl-master14/build
+cd carl/carl-master14/build
 cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
 make lib_carl --jobs $THREADS
 #[TEST] make test
 cd $SYNTHESIS
 
 #pycarl
-cd $PREREQUISITES/pycarl
+cd $PREREQUISITES/pycarl-2.0.5
 source $SYNTHESIS_ENV/bin/activate
 python3 setup.py build_ext --jobs $THREADS --disable-parser develop
 #[TEST] python3 setup.py test
