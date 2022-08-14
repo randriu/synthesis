@@ -72,6 +72,13 @@ def setup_logger(log_path = None):
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
 @click.option("--hyperproperty", is_flag=True, default=False,
     help="enable synthesis of an MDP scheduler wrt a hyperproperty")
+@click.option(
+    "--ce-generator",
+    default="storm",
+    type=click.Choice(["storm", "switss"]),
+    show_default=True,
+    help="Counter example generator",
+)
 
 def paynt(
         project,
@@ -80,7 +87,8 @@ def paynt(
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty
+        hyperproperty,
+        ce_generator,
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -111,7 +119,7 @@ def paynt(
     elif method == "ar":
         synthesizer = SynthesizerAR(sketch)
     elif method == "cegis":
-        synthesizer = SynthesizerCEGIS(sketch)
+        synthesizer = SynthesizerCEGIS(sketch=sketch, ce_generator=ce_generator)
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(sketch)
     elif method == "ar_multicore":
