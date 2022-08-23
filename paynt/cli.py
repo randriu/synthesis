@@ -14,6 +14,13 @@ import cProfile, pstats
 import logging
 # logger = logging.getLogger(__name__)
 
+import stormpy
+import stormpy.synthesis
+print("yo")
+result = stormpy.synthesis.madp_test("/home/may/MADP/problems/dectiger.dpomdp")
+print(result)
+print("yo")
+exit()
 
 def setup_logger(log_path = None):
     ''' Setup routine for logging. '''

@@ -1,0 +1,101 @@
+decpomdp
+
+#define place_tiger 1/2:(tiger'=0) + 1/2:(tiger'=1)
+
+// can go in this direction
+formula u = y<1;
+formula r = y=1 & x<2;
+formula d = y>0 & (x=0 | x=2);
+formula l = y=1 & x>0;
+
+// target cell
+formula goal = x=2 & y=0;
+
+// updates of coordinates (if possible)
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+// corresponding observables
+observable "start" = clk=0;
+observable "u" = clk=1 & u;
+//observable "r" = clk=1 & r;
+//observable "d" = clk=1 & d;
+//observable "l" = clk=1 & l;
+observable "goal" = goal;
+
+
+// modules
+
+module clock
+    // 0 - init, 1 - drive
+    clk : [0..1] init 0;
+
+    // random placement
+    [place] clk=0 -> (clk'=1);
+    
+    // drive
+    [up] 	clk=1 -> true;
+    [right] clk=1 -> true;
+    [down] 	clk=1 -> true;
+    [left]  clk=1 -> true;
+endmodule
+
+
+module tiger
+    tiger: [0..1];
+    [place] true -> 1/2:(tiger'=0) + 1/2:(tiger'=1);
+    
+    [listen+open_left]  true -> place_tiger;
+    [listen+open_right] true -> place_tiger;
+    [open_left+listen]  true -> place_tiger;
+    [open_left+open_left]   true -> place_tiger;
+    [open_left+open_right]  true -> place_tiger;
+    [open_right+listen]     true -> place_tiger;
+    [open_right+open_left]  true -> place_tiger;
+    [open_right+open_right] true -> place_tiger;
+endmodule
+
+
+module agent1
+    [listen]        true -> true;
+    [open_left]     true -> true;
+    [open_right]    true -> true;
+endmodule
+
+
+module agent2
+    [listen]        true -> true;
+    [open_left]     true -> true;
+    [open_right]    true -> true;
+endmodule
+
+
+observations obs_1
+    hear_tiger_1: [0..1];
+    [listen] tiger=0: 0.85: (hear_tiger_1'=0) + 0.15: (hear_tiger_1'=1);
+endobservations
+
+
+rewards "rew"
+	[listen+listen] true: -2;
+    [listen+open_left] tiger=0: -101;
+    [listen+open_left] tiger=1: 9;
+    [listen+open_right] tiger=0: 9;
+    [listen+open_right] tiger=1: -101;
+
+    [open_left+listen] tiger=0: -101;
+    [open_left+listen] tiger=1: 9;
+    [open_left+open_left] tiger=0: -50;
+    [open_left+open_left] tiger=1: 20;
+    [open_left+open_right] true: -100;
+
+    [open_right+listen] tiger=0: 9;
+    [open_right+listen] tiger=1: -101;
+    [open_right+open_left] true: -100;
+    [open_right+open_right] tiger=0: 20;
+    [open_right+open_right] tiger=1: -50;
+endrewards
+
+
