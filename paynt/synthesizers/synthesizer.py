@@ -205,6 +205,31 @@ class SynthesizerCEGIS(Synthesizer):
 
         return conflict_filtered
 
+    
+    def construct_conflicts(self, family, assignment, dtmc, conflict_requests, ce_generator):
+        
+        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+        
+        conflicts = []
+        for request in conflict_requests:
+            index,prop,property_result = request
+
+            threshold = prop.threshold
+
+            bounds = None
+            scheduler_selection = None
+            if property_result is not None:
+                bounds = property_result.primary.result
+                scheduler_selection = property_result.primary_selection
+
+            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
+            conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
+            conflicts.append(conflict)
+        
+        return conflicts
+
+    
+
     def analyze_family_assignment_cegis(self, family, assignment, ce_generator):
         """
         :return (1) specification satisfiability (True/False)
@@ -251,34 +276,11 @@ class SynthesizerCEGIS(Synthesizer):
             property_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
             conflict_requests.append( (index,prop,property_result) )
 
-        # prepare DTMC for CE generation
-        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
-
-        # construct conflict to each unsatisfiable property
-        conflicts = []
-        for request in conflict_requests:
-            index,prop,property_result = request
-
-            threshold = prop.threshold
-
-            bounds = None
-            scheduler_selection = None
-            if property_result is not None:
-                bounds = property_result.primary.result
-                scheduler_selection = property_result.primary_selection
-
-            Profiler.start("storm::construct_conflict")
-            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
-            Profiler.resume()
-            conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
-            conflicts.append(conflict)
-        # print(conflicts)
+        conflicts = self.construct_conflicts(family, assignment, dtmc, conflict_requests, ce_generator)
 
         # use conflicts to exclude the generalizations of this assignment
-        Profiler.start("holes::exclude_assignment")
         for conflict in conflicts:
             family.exclude_assignment(assignment, conflict)
-        Profiler.resume()
 
         Profiler.resume()
         return False, improving
