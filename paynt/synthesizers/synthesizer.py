@@ -212,15 +212,15 @@ class SynthesizerCEGIS(Synthesizer):
         
         conflicts = []
         for request in conflict_requests:
-            index,prop,property_result = request
+            index,prop,_,family_result = request
 
             threshold = prop.threshold
 
             bounds = None
             scheduler_selection = None
-            if property_result is not None:
-                bounds = property_result.primary.result
-                scheduler_selection = property_result.primary_selection
+            if family_result is not None:
+                bounds = family_result.primary.result
+                scheduler_selection = family_result.primary_selection
 
             conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
             conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
@@ -265,16 +265,18 @@ class SynthesizerCEGIS(Synthesizer):
         # pack all unsatisfiable properties as well as their MDP results (if exists)
         conflict_requests = []
         for index in family.property_indices:
-            if spec.constraints_result.results[index].sat:
+            member_result = spec.constraints_result.results[index]
+            if member_result.sat:
                 continue
             prop = self.sketch.specification.constraints[index]
-            property_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
-            conflict_requests.append( (index,prop,property_result) )
+            family_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
+            conflict_requests.append( (index,prop,member_result,family_result) )
         if self.sketch.specification.has_optimality:
+            member_result = spec.optimality_result
             index = len(self.sketch.specification.constraints)
             prop = self.sketch.specification.optimality
-            property_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
-            conflict_requests.append( (index,prop,property_result) )
+            family_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
+            conflict_requests.append( (index,prop,member_result,family_result) )
 
         conflicts = self.construct_conflicts(family, assignment, dtmc, conflict_requests, ce_generator)
 
