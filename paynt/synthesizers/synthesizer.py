@@ -1,4 +1,5 @@
 import stormpy.synthesis
+from stormpy import ComparisonType
 
 from .statistic import Statistic
 from ..profiler import Timer,Profiler
@@ -204,6 +205,31 @@ class SynthesizerCEGIS(Synthesizer):
 
         return conflict_filtered
 
+    
+    def construct_conflicts(self, family, assignment, dtmc, conflict_requests, ce_generator):
+        
+        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+        
+        conflicts = []
+        for request in conflict_requests:
+            index,prop,_,family_result = request
+
+            threshold = prop.threshold
+
+            bounds = None
+            scheduler_selection = None
+            if family_result is not None:
+                bounds = family_result.primary.result
+                scheduler_selection = family_result.primary_selection
+
+            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
+            conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
+            conflicts.append(conflict)
+        
+        return conflicts
+
+    
+
     def analyze_family_assignment_cegis(self, family, assignment, ce_generator):
         """
         :return (1) specification satisfiability (True/False)
@@ -212,16 +238,16 @@ class SynthesizerCEGIS(Synthesizer):
 
         assert family.property_indices is not None, "analyzed family does not have the relevant properties list"
         assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
-        
+
         Profiler.start("CEGIS analysis")
         # print(assignment)
-        
+
         # build DTMC
         dtmc = self.sketch.quotient.build_chain(assignment)
         self.stat.iteration_dtmc(dtmc.states)
-        
+
         # model check all properties
-        spec = dtmc.check_specification(self.sketch.specification, 
+        spec = dtmc.check_specification(self.sketch.specification,
             property_indices = family.property_indices, short_evaluation = False)
 
         # analyze model checking results
@@ -239,48 +265,36 @@ class SynthesizerCEGIS(Synthesizer):
         # pack all unsatisfiable properties as well as their MDP results (if exists)
         conflict_requests = []
         for index in family.property_indices:
-            if spec.constraints_result.results[index].sat:
+            member_result = spec.constraints_result.results[index]
+            if member_result.sat:
                 continue
             prop = self.sketch.specification.constraints[index]
-            property_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
-            conflict_requests.append( (index,prop,property_result) )
+            family_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
+            conflict_requests.append( (index,prop,member_result,family_result) )
         if self.sketch.specification.has_optimality:
+            member_result = spec.optimality_result
             index = len(self.sketch.specification.constraints)
             prop = self.sketch.specification.optimality
-            property_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
-            conflict_requests.append( (index,prop,property_result) )
+            family_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
+            conflict_requests.append( (index,prop,member_result,family_result) )
 
-        # prepare DTMC for CE generation
-        ce_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
-
-        # construct conflict to each unsatisfiable property
-        conflicts = []
-        for request in conflict_requests:
-            index,prop,property_result = request
-
-            threshold = prop.threshold
-
-            bounds = None
-            scheduler_selection = None
-            if property_result is not None:
-                bounds = property_result.primary.result
-                scheduler_selection = property_result.primary_selection
-
-            Profiler.start("storm::construct_conflict")
-            conflict = ce_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
-            Profiler.resume()
-            conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
-            conflicts.append(conflict)
-        # print(conflicts)
+        conflicts = self.construct_conflicts(family, assignment, dtmc, conflict_requests, ce_generator)
 
         # use conflicts to exclude the generalizations of this assignment
-        Profiler.start("holes::exclude_assignment")
         for conflict in conflicts:
             family.exclude_assignment(assignment, conflict)
-        Profiler.resume()
-        
+
         Profiler.resume()
         return False, improving
+
+
+    def initialize_ce_generator(self):
+        quotient_relevant_holes = self.sketch.quotient.coloring.state_to_holes
+        formulae = self.sketch.specification.stormpy_formulae()
+        ce_generator = stormpy.synthesis.CounterexampleGenerator(
+            self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
+            quotient_relevant_holes, formulae)
+        return ce_generator
 
     def synthesize(self, family):
 
@@ -299,13 +313,8 @@ class SynthesizerCEGIS(Synthesizer):
 
         # build the quotient, map mdp states to hole indices
         self.sketch.quotient.build(family)
-        quotient_relevant_holes = self.sketch.quotient.coloring.state_to_holes
-
-        # initialize CE generator
-        formulae = self.sketch.specification.stormpy_formulae()
-        ce_generator = stormpy.synthesis.CounterexampleGenerator(
-            self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
-            quotient_relevant_holes, formulae)
+        
+        ce_generator = self.initialize_ce_generator()
 
         # use sketch design space as a SAT baseline
         self.sketch.design_space.sat_initialize()

@@ -362,8 +362,10 @@ class DesignSpace(Holes):
                 pruning_estimate *= self[hole_index].size
 
         if DesignSpace.use_python_z3:
-            assert len(counterexample_clauses) > 0  # TODO handle this
-            counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
+            if len(counterexample_clauses) == 0:
+                counterexample_encoding = False
+            else:
+                counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
             DesignSpace.solver.add(counterexample_encoding)
         elif DesignSpace.use_cvc:
             if len(counterexample_clauses) == 0:

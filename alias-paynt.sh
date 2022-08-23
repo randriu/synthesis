@@ -41,6 +41,8 @@ prerequisites-download() {
     git clone --depth 1 --branch master14 https://github.com/ths-rwth/carl carl
     git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
     git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
+    # TODO: use original SWITSS repo after merge request
+    git clone --depth 1 --branch paynt-integration https://github.com/JakubFrejlach/switss.git switss
     cd -
 }
 
@@ -88,7 +90,16 @@ prerequisites-build-cvc5() {
     envd
     cd -
 }
-    
+
+prerequisites-build-switss() {
+    # configuration
+    cd $PREREQUISITES/switss
+    enva
+    pip3 install -r requirements.txt
+    python3 setup.py install
+    envd
+    cd -
+}
 
 ### storm and stormpy ##########################################################
 
@@ -161,6 +172,7 @@ synthesis-install() {
     prerequisites-build-carl
     prerequisites-build-pycarl
     prerequisites-build-cvc5
+    prerequisites-build-switss
 
     # build storm & stormpy
     storm-config
