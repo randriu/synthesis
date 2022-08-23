@@ -148,14 +148,14 @@ stormpy-build-debug() {
     cd -
 }
 
-paynt-install() {
-    cd $SYNTHESIS/paynt
-    enva
-    python3 setup.py install
-    # python3 setup.py test
-    envd
-    cd -
-}
+# paynt-install() {
+#     cd $SYNTHESIS/paynt
+#     enva
+#     python3 setup.py install
+#     # python3 setup.py test
+#     envd
+#     cd -
+# }
 
 synthesis-install() {
     

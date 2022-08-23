@@ -5,6 +5,7 @@ from .synthesizers.synthesizer import *
 from .synthesizers.synthesizer_pomdp import SynthesizerPOMDP
 from .synthesizers.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 from .synthesizers.quotient_pomdp import POMDPQuotientContainer
+from .synthesizers.synthesizer_switss import SynthesizerSwitss
 
 import click
 import sys
@@ -77,7 +78,7 @@ def setup_logger(log_path = None):
     default="storm",
     type=click.Choice(["storm", "switss"]),
     show_default=True,
-    help="Counter example generator",
+    help="counterexample generator",
 )
 
 def paynt(
@@ -88,7 +89,7 @@ def paynt(
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
         hyperproperty,
-        ce_generator,
+        ce_generator
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -119,7 +120,10 @@ def paynt(
     elif method == "ar":
         synthesizer = SynthesizerAR(sketch)
     elif method == "cegis":
-        synthesizer = SynthesizerCEGIS(sketch=sketch, ce_generator=ce_generator)
+        if ce_generator == "storm":
+            synthesizer = SynthesizerCEGIS(sketch)
+        elif ce_generator == "switss":
+            synthesizer = SynthesizerSwitss(sketch)
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(sketch)
     elif method == "ar_multicore":
