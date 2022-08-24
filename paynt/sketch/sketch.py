@@ -85,7 +85,6 @@ class Sketch:
             self.quotient = HyperPropertyQuotientContainer(self)
         elif self.is_pomdp:
             self.quotient = POMDPQuotientContainer(self)
-            print(self.quotient.quotient_mdp.nr_states)
         else:
             raise TypeError("unknown sketch type")
 
