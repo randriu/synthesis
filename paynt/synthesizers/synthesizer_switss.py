@@ -1,3 +1,5 @@
+import stormpy
+
 from switss.model import MDP, ReachabilityForm
 from switss.model import DTMC as SWITSS_DTMC
 from switss.problem.qsheur import QSHeur
@@ -28,7 +30,12 @@ class SynthesizerSwitss(SynthesizerCEGIS):
             if prop.minimizing:
                 # safety
                 threshold = prop.threshold
-                target_label = str(prop.property.raw_formula.subformula.subformula)
+                subformula = prop.property.raw_formula.subformula.subformula
+                if isinstance(subformula, stormpy.logic.AtomicLabelFormula):
+                    target_label = subformula.label
+                else:
+                    assert isinstance(subformula, stormpy.logic.AtomicExpressionFormula)
+                    target_label = str(subformula)
             else:
                 # liveness: flip threshold
                 threshold =  1 - prop.threshold
