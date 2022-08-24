@@ -257,7 +257,10 @@ class SynthesizerCEGIS(Synthesizer):
                 Profiler.resume()
                 return True, True
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
-                self.sketch.specification.optimality.update_optimum(spec.optimality_result.value)
+                opt = self.sketch.specification.optimality
+                opt.update_optimum(spec.optimality_result.value)
+                if not opt.reward and opt.minimizing and opt.threshold == 0:
+                    return True, True
                 self.since_last_optimum_update = 0
                 improving = True
 
