@@ -57,7 +57,7 @@ class Sketch:
         # (dtmc sketch) jani unfolder
         self.jani_unfolder = None
 
-        # load the skect
+        # load the sketch
         logger.info(f"Loading sketch from {sketch_path}...")
         if filetype == "prism":
             self.read_prism(sketch_path, constant_str, properties_path)
@@ -108,10 +108,7 @@ class Sketch:
     
     def read_prism(self, sketch_path, constant_str, properties_path):
 
-        # read PRISM file
         prism, self.hole_expressions, self.design_space, constant_map = PrismParser.read_prism_sketch(sketch_path, constant_str)
-
-        # parse specification
         specification = PrismParser.parse_specification(properties_path, prism, constant_map)
 
         # if PRISM describes a DTMC, unfold hole options in jani
@@ -125,19 +122,11 @@ class Sketch:
         # construction of Markov chains
         self.prism = prism
         self.update_specification(specification)
-        
+
         # construct the quotient if one has not been constructed yet
-        if prism.model_type == stormpy.storage.PrismModelType.MA:
-            quotient_mdp = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
-        if prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]:
-            MarkovChain.builder_options.set_build_choice_labels(True)
-            quotient_mdp = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
-            MarkovChain.builder_options.set_build_choice_labels(False)
-        
-        # forbid overlapping guards
-        og = quotient_mdp.labeling.get_states("overlap_guards").number_of_set_bits()
-        assert og == 0, "explicit model has overlapping guards"
-        
+        if prism.model_type != stormpy.storage.PrismModelType.DTMC:
+            quotient_mdp = MarkovChain.from_prism(self.prism)
+
         # success
         self.explicit_quotient = quotient_mdp
         logger.debug("Constructed quotient MDP having {} states and {} actions.".format(

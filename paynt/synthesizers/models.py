@@ -33,6 +33,23 @@ class MarkovChain:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
+    
+    @classmethod
+    def from_prism(self, prism):
+        if prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]:
+            # TODO why do we disable choice labels here?
+            MarkovChain.builder_options.set_build_choice_labels(True)
+            model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
+            MarkovChain.builder_options.set_build_choice_labels(False)
+        if prism.model_type == stormpy.storage.PrismModelType.MA:
+            model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
+
+        og = model.labeling.get_states("overlap_guards").number_of_set_bits()
+        assert og == 0, "PRISM program contains overlapping guards"
+
+        return model
+
+    
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
