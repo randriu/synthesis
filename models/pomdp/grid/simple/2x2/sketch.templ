@@ -1,0 +1,59 @@
+pomdp
+
+// grid dimensions
+const int M_MAX = 1;
+const int X_MAX = M_MAX;
+const int Y_MAX = M_MAX;
+
+// target
+const int X_T = M_MAX;
+const int Y_T = 0;
+
+// number of placeable cells
+formula PC = (X_MAX+1)*(Y_MAX+1) - 1;
+
+// coordinate updates
+formula xl = max(x-1,0);
+formula xr = min(x+1,X_MAX);
+
+formula yd = max(y-1,0);
+formula yu = min(y+1,Y_MAX);
+
+// slipping coefficient
+const double sl=0.1;
+
+// stages: 1) random placement 2) moving in the grid 3) goal reached
+formula placing = (x=-1) & (y=-1);
+formula moving = !placing & !goal;
+formula goal = x=X_T & y=Y_T;
+
+// observables: placing, moving, goal
+observable "moving" = moving;
+observable "goal" = goal;
+
+module grid
+    
+    x : [-1..X_MAX]; // x coordinate
+    y : [-1..Y_MAX]; // y coordinate
+        
+    // initially randomly placed within the grid (not at the target)
+    [] placing ->
+    1/PC:(x'=0)&(y'=0) + 1/PC:(x'=0)&(y'=1)
+  + 1/PC:(x'=1)&(y'=1);
+            
+    // moving around the grid
+    [up]    moving -> (1-sl): (y'=yu) + sl: true;
+    [right] moving -> (1-sl): (x'=xr) + sl: true;
+    [down]  moving -> (1-sl): (y'=yd) + sl: true;
+    [left]  moving -> (1-sl): (x'=xl) + sl: true;
+
+    // target reached
+    // [done] goal -> true;
+    
+endmodule
+
+// reward structure for number of steps to reach the target
+rewards "steps"
+    moving : 1;
+endrewards
+

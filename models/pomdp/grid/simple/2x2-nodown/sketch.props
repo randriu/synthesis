@@ -1,0 +1,3 @@
+//R{"steps"}min=? [F goal]
+//Pmax=? [F goal]
+P>0.3 [F goal]

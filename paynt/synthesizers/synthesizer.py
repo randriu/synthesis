@@ -41,11 +41,11 @@ class Synthesizer:
         self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
         assignment = self.synthesize(self.sketch.design_space)
 
-        print("")
-        logger.info("Printing synthesized assignment below:")
-        logger.info(str(assignment))
 
+        print("")
         if assignment is not None:
+            logger.info("Printing synthesized assignment below:")
+            logger.info(str(assignment))
             dtmc = self.sketch.quotient.build_chain(assignment)
             spec = dtmc.check_specification(self.sketch.specification)
             logger.info("Double-checking specification satisfiability: {}".format(spec))
