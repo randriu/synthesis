@@ -30,13 +30,10 @@ class Sketch:
         return output_string
 
     def __init__(self, sketch_path, filetype, export,
-        properties_path, constant_str):
+        properties_path, constant_str, relative_error):
 
-        Profiler.initialize()
-
-        # design space; might be initialized by the quotient
+        # TODO design space might be initialized by the quotient, decouple this
         self.design_space = None
-        # the specification
         self.specification = None
         # quotient model explicitly
         self.explicit_quotient = None
@@ -45,30 +42,24 @@ class Sketch:
 
         # PRISM program
         self.prism = None
-        # for each hole, a list of parsed PRISM expressions used for subsitutions
+        # (dtmc sketch) for each hole, a list of parsed PRISM expressions used
+        # for subsitutions
         self.hole_expressions = None        
         # (dtmc sketch) jani unfolder
         self.jani_unfolder = None
 
-        # load the sketch
-        logger.info(f"Loading sketch from {sketch_path}...")
+        logger.info(f"loading sketch from {sketch_path} ...")
         if filetype == "prism":
-            self.read_prism(sketch_path, constant_str, properties_path)
-        elif filetype == "drn":
-            self.explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
-            spec = PrismParser.parse_specification(properties_path)
-            self.update_specification(spec)
-        elif filetype == "pomdp":
-            self.explicit_quotient = PomdpParser.read_pomdp_solve(sketch_path)
-            spec = PrismParser.parse_specification(properties_path)
-            self.update_specification(spec)
+            self.read_prism(sketch_path, constant_str, properties_path, relative_error)
         else:
-            raise TypeError("unknown input filetype")
-                    
-        logger.info(f"Found the following specification: {self.specification}")
+            if filetype == "drn":
+                self.explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
+            else: #filetype == "pomdp"
+                self.explicit_quotient = PomdpParser.read_pomdp_solve(sketch_path)
+            spec = PrismParser.parse_specification(properties_path, relative_error)
+            self.update_specification(spec)            
 
-
-        logger.info(f"Initializing the quotient ...")
+        logger.info(f"initializing the quotient...")
         if self.is_dtmc:
             self.quotient = DTMCQuotientContainer(self, self.jani_unfolder.action_to_hole_options)
         elif self.is_mdp:
@@ -91,15 +82,15 @@ class Sketch:
                 PomdpParser.write_model_in_pomdp_solve_format(sketch_path, self.quotient)
             exit(0)
         
-        logger.info(f"Sketch parsing complete.")
-        logger.info(f"Sketch has {self.design_space.num_holes} holes")
-        logger.info(f"Design space size: {self.design_space.size}")
+        logger.info(f"sketch parsing complete")
+        logger.info(f"sketch has {self.design_space.num_holes} holes")
+        logger.info(f"design space size: {self.design_space.size}")
 
     
-    def read_prism(self, sketch_path, constant_str, properties_path):
+    def read_prism(self, sketch_path, constant_str, properties_path, relative_error):
 
         prism, self.hole_expressions, self.design_space, constant_map = PrismParser.read_prism_sketch(sketch_path, constant_str)
-        specification = PrismParser.parse_specification(properties_path, prism, constant_map)
+        specification = PrismParser.parse_specification(properties_path, relative_error, prism, constant_map)
 
         # if PRISM describes a DTMC, unfold hole options in jani
         if prism.model_type == stormpy.storage.PrismModelType.DTMC:
@@ -119,7 +110,7 @@ class Sketch:
 
         # success
         self.explicit_quotient = quotient_mdp
-        logger.debug("Constructed quotient MDP having {} states and {} actions.".format(
+        logger.debug("constructed quotient MDP having {} states and {} actions".format(
             quotient_mdp.nr_states, quotient_mdp.nr_choices))
 
     def is_prism_and_of_type(self, of_type):

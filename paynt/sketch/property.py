@@ -207,7 +207,7 @@ class ConstraintsResult:
 
     @property
     def all_sat(self):
-        for result in results:
+        for result in self.results:
             if result is not None and result.sat == False:
                 return False
         return True

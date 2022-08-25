@@ -42,13 +42,15 @@ def setup_logger(log_path = None):
 
 
 @click.command()
-@click.option("--project", required=True, help="project path", )
-
+@click.option("--project", required=True, type=click.Path(exists=True),
+    help="project path")
 @click.option("--sketch", default="sketch.templ", show_default=True,
     help="name of the sketch file in the project")
 @click.option("--props", default="sketch.props", show_default=True,
     help="name of the properties file in the project")
-@click.option("--constants", default="", help="constant assignment string", )
+@click.option("--constants", default="", help="constant assignment string")
+@click.option("--relative-error", type=click.FLOAT, default="0", show_default=True,
+    help="relative error for optimal synthesis")
 
 @click.option("--filetype",
     type=click.Choice(['prism', 'drn', 'pomdp']),
@@ -63,6 +65,7 @@ def setup_logger(log_path = None):
     default="ar", show_default=True,
     help="synthesis method"
     )
+
 @click.option("--incomplete-search", is_flag=True, default=False,
     help="use incomplete search during synthesis")
 @click.option("--fsc-synthesis", is_flag=True, default=False,
@@ -82,8 +85,7 @@ def setup_logger(log_path = None):
 )
 
 def paynt(
-        project,
-        sketch, props, constants,
+        project, sketch, props, constants, relative_error,
         filetype, export,
         method,
         incomplete_search,
@@ -102,15 +104,13 @@ def paynt(
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    if not os.path.isdir(project):
-        raise ValueError(f"The project folder {project} does not exist")
     if not os.path.isfile(sketch_path):
-        raise ValueError(f"The sketch file {sketch_path} does not exist")
+        raise ValueError(f"the sketch file {sketch_path} does not exist")
     if not os.path.isfile(properties_path):
-        raise ValueError(f"The properties file {properties_path} does not exist")
+        raise ValueError(f"the properties file {properties_path} does not exist")
 
     # parse sketch
-    sketch = Sketch(sketch_path, filetype, export, properties_path, constants)
+    sketch = Sketch(sketch_path, filetype, export, properties_path, constants, relative_error)
 
     # choose the synthesis method and run the corresponding synthesizer
     if sketch.is_pomdp and fsc_synthesis:
@@ -131,6 +131,7 @@ def paynt(
     else:
         pass
     
+    Profiler.initialize()
     # with cProfile.Profile() as pr:
     #     synthesizer.run()
     # stats = pr.create_stats()

@@ -28,7 +28,7 @@ class PrismParser:
         # parse constants
         constant_map = None
         if constant_str != '':
-            logger.info(f"Assuming constant definitions: '{constant_str}' ...")
+            logger.info(f"assuming constant definitions '{constant_str}' ...")
             constant_map = PrismParser.map_constants(prism, expression_parser, constant_str)
             prism = prism.define_constants(constant_map)
             prism = prism.substitute_constants()
@@ -37,7 +37,7 @@ class PrismParser:
         hole_expressions = None
         design_space = None
         if len(hole_definitions) > 0:
-            logger.info("Processing hole definitions ...")
+            logger.info("processing hole definitions...")
             prism, hole_expressions, design_space = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
         
@@ -97,7 +97,7 @@ class PrismParser:
         for constant_definition in constant_definitions:
             key_value = constant_definition.split("=")
             if len(key_value) != 2:
-                raise ValueError(f"Expected key=value pair, got '{constant_definition}'.")
+                raise ValueError(f"expected key=value pair, got '{constant_definition}'")
 
             expr = expression_parser.parse(key_value[1])
             name = key_value[0]
@@ -149,53 +149,33 @@ class PrismParser:
 
  
     @classmethod
-    def parse_specification(cls, properties_path, prism = None, constant_map = None):
+    def parse_specification(cls, properties_path, relative_error, prism = None, constant_map = None):
 
-        logger.info(f"Loading properties from {properties_path} ...")
-
-        # read lines
-        lines = []
+        logger.info(f"loading properties from {properties_path} ...")
+        lines = ""
         with open(properties_path) as file:
             for line in file:
-                # line = line.replace(" ", "")
-                line = line.replace("\n", "")
-                if line == "" or line.startswith("//"):
-                    continue
-                lines.append(line)
+                lines += line + ";"
+        if prism is not None:
+            props = stormpy.parse_properties_for_prism_program(lines, prism)
+        else:
+            props = stormpy.parse_properties_without_context(lines)
 
-        # strip relative error
-        lines_properties = ""
-        relative_error_re = re.compile(r'^(.*)\{(.*?)\}(=\?.*?$)')
-        relative_error_str = None
-        for line in lines:
-            match = relative_error_re.search(line)
-            if match is not None:
-                relative_error_str = match.group(2)
-                line = match.group(1) + match.group(3)
-            lines_properties += line + ";"
-        optimality_epsilon = float(relative_error_str) if relative_error_str is not None else 0
-
-        # parse all properties
+        # check properties
         constraints = []
         optimality = None
-
-        if prism is not None:
-            props = stormpy.parse_properties_for_prism_program(lines_properties, prism)
-        else:
-            props = stormpy.parse_properties_without_context(lines_properties)
         for prop in props:
             rf = prop.raw_formula
-            assert rf.has_bound != rf.has_optimality_type, "optimizing formula contains a bound or a comparison formula does not"
+            assert rf.has_bound != rf.has_optimality_type, \
+                "optimizing formula contains a bound or a comparison formula does not"
             if rf.has_bound:
-                # comparison formula
                 constraints.append(prop)
             else:
-                # optimality formula
-                assert optimality is None, "two optimality formulae specified"
+                assert optimality is None, "more than one optimality formula specified"
                 optimality = prop
 
+        # substitute constants in properties
         if constant_map is not None:
-            # substitute constants in properties
             for p in constraints:
                 p.raw_formula.substitute(constant_map)
             if optimality is not None:
@@ -204,9 +184,10 @@ class PrismParser:
         # wrap properties
         constraints = [Property(p) for p in constraints]
         if optimality is not None:
-            optimality = OptimalityProperty(optimality, optimality_epsilon)
-
+            optimality = OptimalityProperty(optimality, relative_error)
         specification = Specification(constraints,optimality)
+
+        logger.info(f"found the following specification: {self.specification}")
         return specification
 
 
