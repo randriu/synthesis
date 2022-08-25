@@ -159,7 +159,7 @@ class PrismParser:
             for line in file:
                 # line = line.replace(" ", "")
                 line = line.replace("\n", "")
-                if not line or line == "" or line.startswith("//"):
+                if line == "" or line.startswith("//"):
                     continue
                 lines.append(line)
 
@@ -176,8 +176,8 @@ class PrismParser:
         optimality_epsilon = float(relative_error_str) if relative_error_str is not None else 0
 
         # parse all properties
-        properties = []
-        optimality_property = None
+        constraints = []
+        optimality = None
 
         if prism is not None:
             props = stormpy.parse_properties_for_prism_program(lines_properties, prism)
@@ -188,25 +188,25 @@ class PrismParser:
             assert rf.has_bound != rf.has_optimality_type, "optimizing formula contains a bound or a comparison formula does not"
             if rf.has_bound:
                 # comparison formula
-                properties.append(prop)
+                constraints.append(prop)
             else:
                 # optimality formula
-                assert optimality_property is None, "two optimality formulae specified"
-                optimality_property = prop
+                assert optimality is None, "two optimality formulae specified"
+                optimality = prop
 
         if constant_map is not None:
             # substitute constants in properties
-            for p in properties:
+            for p in constraints:
                 p.raw_formula.substitute(constant_map)
-            if optimality_property is not None:
-                optimality_property.raw_formula.substitute(constant_map)
+            if optimality is not None:
+                optimality.raw_formula.substitute(constant_map)
 
         # wrap properties
-        properties = [Property(p) for p in properties]
-        if optimality_property is not None:
-            optimality_property = OptimalityProperty(optimality_property, optimality_epsilon)
+        constraints = [Property(p) for p in constraints]
+        if optimality is not None:
+            optimality = OptimalityProperty(optimality, optimality_epsilon)
 
-        specification = Specification(properties,optimality_property)
+        specification = Specification(constraints,optimality)
         return specification
 
 

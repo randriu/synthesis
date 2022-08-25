@@ -425,28 +425,6 @@ class DTMCQuotientContainer(QuotientContainer):
 
         self.coloring = MdpColoring(self.quotient_mdp, self.sketch.design_space, action_to_hole_options)
 
-
-class CTMCQuotientContainer(QuotientContainer):
-    def __init__(self, *args):
-        super().__init__(*args)
-
-
-class MAQuotientContainer(QuotientContainer):
-    def __init__(self, *args):
-        super().__init__(*args)
-
-        # construct the quotient
-        self.quotient_mdp = self.sketch.explicit_quotient
-
-        # construct design space
-        holes = Holes()
-        hole_X = Hole("X", [0,1], ["alpha", "beta"])
-        holes.append(hole_X)
-        self.sketch.set_design_space(DesignSpace(holes))
-
-        # find state with valuation [s=0]
-        action_to_hole_options = [{0:0}, {0:1}, {}, {}, {}, {}]
-        self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
         
     
 class HyperPropertyQuotientContainer(QuotientContainer):

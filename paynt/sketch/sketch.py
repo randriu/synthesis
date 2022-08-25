@@ -33,14 +33,7 @@ class Sketch:
         properties_path, constant_str):
 
         Profiler.initialize()
-        Profiler.start("sketch")
 
-        # TODO
-        self.sketch_path = sketch_path
-        self.filetype = filetype
-        self.properties_path = properties_path
-        self.constant_str = constant_str
-        
         # design space; might be initialized by the quotient
         self.design_space = None
         # the specification
@@ -78,8 +71,6 @@ class Sketch:
         logger.info(f"Initializing the quotient ...")
         if self.is_dtmc:
             self.quotient = DTMCQuotientContainer(self, self.jani_unfolder.action_to_hole_options)
-        elif self.is_ma:
-            self.quotient = MAQuotientContainer(self)
         elif self.is_mdp:
             assert Sketch.hyperproperty_synthesis, "must use --hyperproperty option with MDP input files"
             self.quotient = HyperPropertyQuotientContainer(self)
@@ -98,12 +89,11 @@ class Sketch:
             if export == "pomdp":
                 assert self.is_pomdp, "cannot --export pomdp with non-POMDP sketches"
                 PomdpParser.write_model_in_pomdp_solve_format(sketch_path, self.quotient)
-            exit()
+            exit(0)
         
         logger.info(f"Sketch parsing complete.")
         logger.info(f"Sketch has {self.design_space.num_holes} holes")
         logger.info(f"Design space size: {self.design_space.size}")
-        Profiler.stop()
 
     
     def read_prism(self, sketch_path, constant_str, properties_path):
@@ -147,14 +137,6 @@ class Sketch:
     @property
     def is_dtmc(self):
         return self.is_prism_and_of_type(stormpy.storage.PrismModelType.DTMC)
-    
-    @property
-    def is_ctmc(self):
-        return self.is_prism_and_of_type(stormpy.storage.PrismModelType.CTMC)
-
-    @property
-    def is_ma(self):
-        return self.is_prism_and_of_type(stormpy.storage.PrismModelType.MA)
 
     @property
     def is_mdp(self):

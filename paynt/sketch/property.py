@@ -201,14 +201,17 @@ class ConstraintsResult:
     '''
     def __init__(self, results):
         self.results = results
-        self.all_sat = True
-        for result in results:
-            if result is not None and result.sat == False:
-                self.all_sat = False
-                break
 
     def __str__(self):
         return ",".join([str(result) for result in self.results])
+
+    @property
+    def all_sat(self):
+        for result in results:
+            if result is not None and result.sat == False:
+                return False
+        return True
+
 
 
 class SpecificationResult:
