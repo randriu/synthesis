@@ -1,11 +1,12 @@
 from . import version
 
-from .sketch.sketch import Sketch
-from .synthesizers.synthesizer import *
-from .synthesizers.synthesizer_pomdp import SynthesizerPOMDP
-from .synthesizers.synthesizer_multicore_ar import SynthesizerMultiCoreAR
-from .synthesizers.quotient_pomdp import POMDPQuotientContainer
-from .synthesizers.synthesizer_switss import SynthesizerSwitss
+from .parser.sketch import Sketch
+from .quotient.quotient_pomdp import POMDPQuotientContainer
+
+from .synthesizer.synthesizer import *
+from .synthesizer.synthesizer_pomdp import SynthesizerPOMDP
+from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
+from .synthesizer.synthesizer_switss import SynthesizerSWITSS
 
 import click
 import sys
@@ -125,7 +126,7 @@ def paynt(
         if ce_generator == "storm":
             synthesizer = SynthesizerCEGIS(quotient)
         elif ce_generator == "switss":
-            synthesizer = SynthesizerSwitss(quotient)
+            synthesizer = SynthesizerSWITSS(quotient)
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(quotient)
     elif method == "ar_multicore":

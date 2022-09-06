@@ -1,6 +1,6 @@
 import stormpy
 
-from ..sketch.property import *
+from .property import *
 
 from collections import OrderedDict
 

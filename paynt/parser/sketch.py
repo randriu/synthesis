@@ -2,8 +2,8 @@ import stormpy
 
 from .prism_parser import PrismParser
 from .pomdp_parser import PomdpParser
-from ..synthesizers.quotient import *
-from ..synthesizers.quotient_pomdp import POMDPQuotientContainer
+from ..quotient.quotient import *
+from ..quotient.quotient_pomdp import POMDPQuotientContainer
 
 import logging
 logger = logging.getLogger(__name__)

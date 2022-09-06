@@ -1,7 +1,7 @@
 import stormpy
 import stormpy.synthesis
 
-from ..sketch.holes import Hole,Holes,DesignSpace
+from .holes import Hole,Holes,DesignSpace
 from .models import MarkovChain,MDP,DTMC
 from .coloring import MdpColoring
 

@@ -1,15 +1,16 @@
 from .synthesizer import Synthesizer,SynthesizerAR
 from .statistic import Statistic
 
-import logging
-logger = logging.getLogger(__name__)
-
 import multiprocessing as mp
 import os
 import time
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 # global variable containing the quotient
-# when a process is spawned (forked), it will inherit the quotient from the parent
+# when a process is spawned (forked), it will inherit this quotient from the parent
 quotient = None
 
 import cProfile, pstats

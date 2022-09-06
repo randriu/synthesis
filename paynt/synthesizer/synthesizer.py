@@ -2,7 +2,8 @@ import stormpy.synthesis
 from stormpy import ComparisonType
 
 from .statistic import Statistic
-from ..profiler import Timer
+
+from ..utils.profiler import Timer
 
 import logging
 logger = logging.getLogger(__name__)

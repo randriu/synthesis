@@ -1,16 +1,14 @@
 import stormpy
+
 from .statistic import Statistic
-from .models import MarkovChain, DTMC, MDP
-
-from .quotient import QuotientContainer
-from .quotient_pomdp import POMDPQuotientContainer
-
 from .synthesizer import SynthesizerAR, SynthesizerHybrid
 from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
-from ..profiler import Timer
-
-from ..sketch.holes import Holes,DesignSpace
+from ..quotient.holes import Holes,DesignSpace
+from ..quotient.models import MarkovChain, DTMC, MDP
+from ..quotient.quotient import QuotientContainer
+from ..quotient.quotient_pomdp import POMDPQuotientContainer
+from ..utils.profiler import Timer
 
 import math
 from collections import defaultdict

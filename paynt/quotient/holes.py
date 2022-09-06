@@ -1,3 +1,5 @@
+import stormpy.synthesis
+
 import math
 import itertools
 
@@ -8,8 +10,6 @@ import sys
 import importlib
 if importlib.util.find_spec('pycvc5') is not None:
     import pycvc5
-
-import stormpy.synthesis
 
 import logging
 logger = logging.getLogger(__name__)

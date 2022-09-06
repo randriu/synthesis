@@ -3,9 +3,9 @@ import stormpy.synthesis
 import stormpy.pomdp
 
 from .models import MarkovChain,MDP,DTMC
-from ..sketch.holes import Hole,Holes,DesignSpace
+from .holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
-from. coloring import MdpColoring
+from .coloring import MdpColoring
 
 import math
 import re

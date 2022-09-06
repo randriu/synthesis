@@ -1,11 +1,10 @@
 import stormpy
 
-from .property import Property, OptimalityProperty, Specification
-from .holes import Hole, Holes, DesignSpace
 from .jani import JaniUnfolder
-
-from ..synthesizers.models import MarkovChain
-from ..synthesizers.coloring import MdpColoring
+from ..quotient.property import Property, OptimalityProperty, Specification
+from ..quotient.holes import Hole, Holes, DesignSpace
+from ..quotient.models import MarkovChain
+from ..quotient.coloring import MdpColoring
 
 import os
 import re

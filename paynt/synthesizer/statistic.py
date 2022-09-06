@@ -1,4 +1,4 @@
-from ..profiler import Timer,Profiler
+from ..utils.profiler import Timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,8 +22,6 @@ class Statistic:
 
     # parameters
     status_period = 3
-    print_profiling = False
-
     
     def __init__(self, synthesizer):
         
@@ -87,8 +85,6 @@ class Statistic:
         if not self.synthesis_time.read() > self.status_horizon:
             return
 
-        if Statistic.print_profiling:
-            Profiler.print_all()
         print(self.status(), flush=True)
         self.status_horizon += Statistic.status_period
 
@@ -144,6 +140,4 @@ class Statistic:
 
     
     def print(self):    
-        if Statistic.print_profiling:
-            Profiler.print_all()
         print(self.get_summary())

@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SynthesizerSwitss(SynthesizerCEGIS):
+class SynthesizerSWITSS(SynthesizerCEGIS):
 
     @property
     def method_name(self):
