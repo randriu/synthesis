@@ -59,7 +59,8 @@ class Statistic:
 
     
     def status(self):
-        fraction_rejected = (self.synthesizer.explored + self.quotient.discarded) / self.quotient.design_space.size
+        discarded = self.quotient.discarded if self.quotient.discarded is not None else 0
+        fraction_rejected = (self.synthesizer.explored + discarded) / self.quotient.design_space.size
         time_estimate = safe_division(self.synthesis_time.read(), fraction_rejected)
         percentage_rejected = int(fraction_rejected * 1000000) / 10000.0
         # percentage_rejected = fraction_rejected * 100

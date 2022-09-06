@@ -4,7 +4,7 @@ from switss.model import MDP, ReachabilityForm
 from switss.model import DTMC as SWITSS_DTMC
 from switss.problem.qsheur import QSHeur
 
-from .synthesizer import SynthesizerCEGIS
+from .synthesizer_cegis import SynthesizerCEGIS
 
 import logging
 logger = logging.getLogger(__name__)

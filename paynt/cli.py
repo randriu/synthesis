@@ -3,7 +3,11 @@ from . import version
 from .parser.sketch import Sketch
 from .quotient.quotient_pomdp import POMDPQuotientContainer
 
-from .synthesizer.synthesizer import *
+from .synthesizer.synthesizer import Synthesizer
+from .synthesizer.synthesizer_onebyone import SynthesizerOneByOne
+from .synthesizer.synthesizer_ar import SynthesizerAR
+from .synthesizer.synthesizer_cegis import SynthesizerCEGIS
+from .synthesizer.synthesizer_hybrid import SynthesizerHybrid
 from .synthesizer.synthesizer_pomdp import SynthesizerPOMDP
 from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 from .synthesizer.synthesizer_switss import SynthesizerSWITSS
@@ -14,7 +18,7 @@ import os
 import cProfile, pstats
 
 import logging
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def setup_logger(log_path = None):
@@ -75,8 +79,6 @@ def setup_logger(log_path = None):
     help="implicit memory size for POMDP FSCs")
 @click.option("--fsc-export-result", is_flag=True, default=False,
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
-@click.option("--hyperproperty", is_flag=True, default=False,
-    help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 @click.option(
     "--ce-generator",
     default="storm",
@@ -93,7 +95,7 @@ def paynt(
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty, ce_generator,
+        ce_generator,
         profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
@@ -102,7 +104,6 @@ def paynt(
     Synthesizer.incomplete_search = incomplete_search
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
-    Sketch.hyperproperty_synthesis = hyperproperty
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
@@ -119,7 +120,7 @@ def paynt(
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method)
     elif method == "onebyone":
-        synthesizer = Synthesizer1By1(quotient)
+        synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":
         synthesizer = SynthesizerAR(quotient)
     elif method == "cegis":

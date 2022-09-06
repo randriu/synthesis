@@ -1,5 +1,6 @@
-from .synthesizer import Synthesizer,SynthesizerAR
 from .statistic import Statistic
+from .synthesizer import Synthesizer
+from .synthesizer_ar import SynthesizerAR
 
 import multiprocessing as mp
 import os

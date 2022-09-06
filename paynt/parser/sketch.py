@@ -11,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 class Sketch:
 
-    # if True, the sketch is assumed to be a hole-free MDP
-    hyperproperty_synthesis = False
 
     @classmethod
     def substitute_suffix(cls, string, delimiter, replacer):
@@ -67,7 +65,7 @@ class Sketch:
             if explicit_quotient.is_partially_observable:
                 quotient_container = POMDPQuotientContainer(explicit_quotient, specification)
             else:
-                assert Sketch.hyperproperty_synthesis, "must use --hyperproperty option with MDP input files"
-                quotient_container = HyperPropertyQuotientContainer(explicit_quotient, specification)
+                # left intentionally blank
+                pass
         return quotient_container
 

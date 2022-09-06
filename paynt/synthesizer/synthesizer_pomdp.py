@@ -1,7 +1,8 @@
 import stormpy
 
 from .statistic import Statistic
-from .synthesizer import SynthesizerAR, SynthesizerHybrid
+from .synthesizer_ar import SynthesizerAR
+from .synthesizer_hybrid import SynthesizerHybrid
 from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 from ..quotient.holes import Holes,DesignSpace
