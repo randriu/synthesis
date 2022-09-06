@@ -41,6 +41,11 @@ class Sketch:
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
+        specification.check()
+        if specification.contains_until_properties() and filetype != "prism":
+            logger.info("WARNING: using until formula with non-PRISM input")
+        specification.transform_until_to_eventually()
+
         if export is not None:
             if export == "jani":
                 assert jani_unfolder is not None, "jani unfolder was not used"

@@ -40,14 +40,14 @@ class Property:
         else:
             self.formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
         self.formula_alt = Property.alt_formula(self.formula)
-        self.formula_str = rf
         
     @staticmethod
     def alt_formula(formula):
-        ''' Construct alternative quantitative formula to use in AR. '''
+        '''
+        :return formula with the opposite optimality type
+        '''
         formula_alt = formula.clone()
         optimality_type = formula.optimality_type
-        # negate optimality type
         if optimality_type == stormpy.OptimizationDirection.Minimize:
             optimality_type = stormpy.OptimizationDirection.Maximize
         else:
@@ -56,7 +56,7 @@ class Property:
         return formula_alt
 
     def __str__(self):
-        return str(self.formula_str)
+        return str(self.property.raw_formula)
 
     @property
     def reward(self):
@@ -85,6 +85,19 @@ class Property:
         ''' check if DTMC model checking result satisfies the property '''
         return self.result_valid(value) and self.meets_threshold(value)
 
+    @property
+    def is_until(self):
+        return self.formula.subformula.is_until_formula
+
+    def transform_until_to_eventually(self):
+        if not self.is_until:
+            return
+        logger.info("converting until formula to eventually...")
+        formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
+        prop = stormpy.core.Property("", formula)
+        self.__init__(prop)
+
+
 
 class OptimalityProperty(Property):
     '''
@@ -108,7 +121,6 @@ class OptimalityProperty(Property):
         # construct quantitative formula (without bound) for explicit model checking
         self.formula = rf.clone()
         self.formula_alt = Property.alt_formula(self.formula)
-        self.formula_str = rf
 
         # additional optimality stuff
         self.optimum = None
@@ -116,7 +128,7 @@ class OptimalityProperty(Property):
 
     def __str__(self):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
-        return f"{self.formula_str} {eps}"
+        return f"{str(self.property.raw_formula)} {eps}"
 
     def meets_op(self, a, b):
         ''' For optimality objective, we want to accept improvements above model checking precision. '''
@@ -144,6 +156,14 @@ class OptimalityProperty(Property):
         else:
             return self.optimum * (1 - self.mc_precision)
 
+    def transform_until_to_eventually(self):
+        if not self.is_until:
+            return
+        logger.info("converting until formula to eventually...")
+        formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
+        prop = stormpy.core.Property("", formula)
+        self.__init__(prop, self.epsilon)
+
 
 
 class Specification:
@@ -170,6 +190,12 @@ class Specification:
     def all_constraint_indices(self):
         return [i for i,_ in enumerate(self.constraints)]
 
+    def all_properties(self):
+        properties = [c for c in self.constraints]
+        if self.has_optimality:
+            properties += [self.optimality]
+        return properties
+
     def stormpy_properties(self):
         properties = [c.property for c in self.constraints]
         if self.has_optimality:
@@ -177,10 +203,21 @@ class Specification:
         return properties
 
     def stormpy_formulae(self):
-        mc_formulae = [c.formula for c in self.constraints]
+        formulae = [c.formula for c in self.constraints]
         if self.has_optimality:
-            mc_formulae += [self.optimality.formula]
-        return mc_formulae
+            formulae += [self.optimality.formula]
+        return formulae
+
+    def contains_until_properties(self):
+        return any([p.is_until for p in self.all_properties()])
+
+    def transform_until_to_eventually(self):
+        for p in self.all_properties(): 
+            p.transform_until_to_eventually()
+
+    def check(self):
+        # TODO
+        pass
 
 
 
