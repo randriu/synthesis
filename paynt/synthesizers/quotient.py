@@ -430,7 +430,7 @@ class DTMCQuotientContainer(QuotientContainer):
             quotient_mdp = quotient_mdp, coloring = coloring,
             specification = specification)
 
-        self.design_space = coloring.holes
+        self.design_space = DesignSpace(coloring.holes)
 
         # logger.info(f"sketch has {design_space.num_holes} holes")
         # logger.info(f"design space size: {design_space.size}")

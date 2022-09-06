@@ -9,8 +9,6 @@ import importlib
 if importlib.util.find_spec('pycvc5') is not None:
     import pycvc5
 
-from ..profiler import Profiler
-
 import stormpy.synthesis
 
 import logging
@@ -297,9 +295,7 @@ class DesignSpace(Holes):
             return None
         
         if DesignSpace.use_python_z3:
-            Profiler.start("SMT solving")
             solver_result = DesignSpace.solver.check(self.encoding)
-            Profiler.resume()
             if solver_result == z3.unsat:
                 self.has_assignments = False
                 return None
@@ -309,9 +305,7 @@ class DesignSpace(Holes):
                 option = sat_model[var].as_long()
                 hole_options.append([option])
         elif DesignSpace.use_cvc:
-            Profiler.start("SMT solving")
             solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
-            Profiler.resume()
             if solver_result.isUnsat():
                 self.has_assignments = False
                 return None
@@ -412,7 +406,6 @@ class DesignSpace(Holes):
 
     
     def collect_analysis_hints(self, specification):
-        Profiler.start("holes::collect_analysis_hints")
         res = self.analysis_result
         analysis_hints = dict()
         for index in res.constraints_result.undecided_constraints:
@@ -423,7 +416,6 @@ class DesignSpace(Holes):
             prop = specification.optimality
             hints = self.generalize_hints(res.optimality_result)
             analysis_hints[prop] = hints
-        Profiler.resume()
         return analysis_hints
 
     
@@ -441,7 +433,6 @@ class DesignSpace(Holes):
         if not DesignSpace.store_hints or self.parent_info is None:
             return None
 
-        Profiler.start("holes::translate_analysis_hints")
         analysis_hints = dict()
         for prop,hints in self.parent_info.analysis_hints.items():
             hint_prim,hint_seco = hints
@@ -449,7 +440,6 @@ class DesignSpace(Holes):
             translated_hint_seco = self.translate_analysis_hint(hint_seco)
             analysis_hints[prop] = (translated_hint_prim,translated_hint_seco)
 
-        Profiler.resume()
         return analysis_hints
 
     def collect_parent_info(self, specification):

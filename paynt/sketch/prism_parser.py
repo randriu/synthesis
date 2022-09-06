@@ -36,10 +36,10 @@ class PrismParser:
 
         # parse hole definitions
         hole_expressions = None
-        design_space = None
+        holes = None
         if len(hole_definitions) > 0:
             logger.info("processing hole definitions...")
-            prism, hole_expressions, design_space = PrismParser.parse_holes(
+            prism, hole_expressions, holes = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
 
         specification = PrismParser.parse_specification(properties_path, relative_error, prism, constant_map)
@@ -49,10 +49,10 @@ class PrismParser:
         jani_unfolder = None
         if prism.model_type == stormpy.storage.PrismModelType.DTMC:
             # unfold hole options
-            jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, design_space)
+            jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, holes)
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
-            coloring = MdpColoring(quotient_mdp, design_space, jani_unfolder.action_to_hole_options)
+            coloring = MdpColoring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
 
         if prism.model_type != stormpy.storage.PrismModelType.DTMC:
             quotient_mdp = MarkovChain.from_prism(prism)
@@ -156,9 +156,9 @@ class PrismParser:
         prism = prism.define_constants(trivial_holes_definitions)
         prism = prism.substitute_constants()
     
-        design_space = DesignSpace(holes)
+        holes
 
-        return prism, hole_expressions, design_space
+        return prism, hole_expressions, holes
 
  
     @classmethod

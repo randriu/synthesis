@@ -83,6 +83,8 @@ def setup_logger(log_path = None):
     show_default=True,
     help="counterexample generator",
 )
+@click.option("--profiling", is_flag=True, default=False,
+    help="run profiling")
 
 def paynt(
         project, sketch, props, constants, relative_error,
@@ -90,8 +92,8 @@ def paynt(
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty,
-        ce_generator
+        hyperproperty, ce_generator,
+        profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -131,14 +133,14 @@ def paynt(
     else:
         pass
     
-    Profiler.initialize()
-    # with cProfile.Profile() as pr:
-    #     synthesizer.run()
-    # stats = pr.create_stats()
-    # print(stats)
-    # pstats.Stats(pr).sort_stats('tottime').print_stats(10)
-    
-    synthesizer.run()
+    if not profiling:
+        synthesizer.run()
+    else:
+        with cProfile.Profile() as pr:
+            synthesizer.run()
+        stats = pr.create_stats()
+        print(stats)
+        pstats.Stats(pr).sort_stats('tottime').print_stats(10)
 
 
 def main():
