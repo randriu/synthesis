@@ -46,14 +46,13 @@ class PomdpParser:
 
 
     @classmethod
-    def write_model_in_pomdp_solve_format(cls, quotient, output_path, property_path):
-
-        pomdp = quotient.pomdp
+    def write_model_in_pomdp_solve_format(cls, pomdp, output_path, property_path):
 
         num_states = pomdp.nr_states
         num_choices = pomdp.nr_choices
-        num_obs = quotient.observations
-        max_num_choices = max([quotient.actions_at_observation[obs] for obs in range(num_obs)])
+        num_obs = pomdp.nr_observations
+        max_num_choices = max([pomdp.get_nr_available_actions(state) for state in range(num_states)])
+
 
         desc = """\
 # auto-generated from PRISM program

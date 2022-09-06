@@ -30,7 +30,6 @@ class Sketch:
         specification = None
         coloring = None
         jani_unfolder = None
-        quotient_container = None
 
         logger.info(f"loading sketch from {sketch_path} ...")
         if filetype == "prism":
@@ -41,21 +40,8 @@ class Sketch:
             else: #filetype == "pomdp"
                 explicit_quotient = PomdpParser.read_pomdp_solve(sketch_path)
             specification = PrismParser.parse_specification(properties_path, relative_error)
-        logger.debug("constructed quotient MDP having {} states and {} actions".format(
+        logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
-
-        logger.info(f"initializing the quotient...")
-        if jani_unfolder is not None:
-            quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
-        else:
-            assert explicit_quotient.is_nondeterministic_model
-            if explicit_quotient.is_partially_observable:
-                quotient_container = POMDPQuotientContainer(explicit_quotient, specification)
-            else:
-                assert Sketch.hyperproperty_synthesis, "must use --hyperproperty option with MDP input files"
-                quotient_container = HyperPropertyQuotientContainer(explicit_quotient, specification)
-
-        logger.info(f"sketch parsing complete")
 
         if export is not None:
             if export == "jani":
@@ -67,10 +53,21 @@ class Sketch:
             if export == "pomdp":
                 assert explicit_quotient.is_nondeterministic_model and explicit_quotient.is_partially_observable, \
                     "cannot '--export pomdp' with non-POMDP sketches"
-                output_path = sketch.Sketch.substitute_suffix(sketch_path, '.', 'pomdp')
-                property_path = sketch.Sketch.substitute_suffix(sketch_path, '/', 'props.pomdp')
-                PomdpParser.write_model_in_pomdp_solve_format(quotient_container, output_path, property_path)
+                output_path = Sketch.substitute_suffix(sketch_path, '.', 'pomdp')
+                property_path = Sketch.substitute_suffix(sketch_path, '/', 'props.pomdp')
+                PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
             exit(0)
-        
+
+        logger.info(f"initializing quotient container...")
+        quotient_container = None
+        if jani_unfolder is not None:
+            quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
+        else:
+            assert explicit_quotient.is_nondeterministic_model
+            if explicit_quotient.is_partially_observable:
+                quotient_container = POMDPQuotientContainer(explicit_quotient, specification)
+            else:
+                assert Sketch.hyperproperty_synthesis, "must use --hyperproperty option with MDP input files"
+                quotient_container = HyperPropertyQuotientContainer(explicit_quotient, specification)
         return quotient_container
 

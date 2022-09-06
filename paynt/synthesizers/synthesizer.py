@@ -235,11 +235,8 @@ class SynthesizerCEGIS(Synthesizer):
 
         # print(assignment)
 
-        # build DTMC
         dtmc = self.quotient.build_chain(assignment)
         self.stat.iteration_dtmc(dtmc.states)
-
-        # model check all properties
         spec = dtmc.check_specification(self.quotient.specification,
             property_indices = family.property_indices, short_evaluation = False)
 
@@ -290,10 +287,10 @@ class SynthesizerCEGIS(Synthesizer):
             quotient_relevant_holes, formulae)
         return ce_generator
 
+    
     def synthesize(self, family):
 
         logger.info("Synthesis initiated.")
-        
         self.stat.start()
 
         # assert that no reward formula is maximizing
