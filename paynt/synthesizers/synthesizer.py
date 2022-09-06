@@ -2,7 +2,7 @@ import stormpy.synthesis
 from stormpy import ComparisonType
 
 from .statistic import Statistic
-from ..profiler import Timer,Profiler
+from ..profiler import Timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,9 +17,9 @@ class Synthesizer:
     use_optimum_update_timeout = False
     optimum_update_iters_limit = 100000
     
-    def __init__(self, sketch):
-        self.sketch = sketch
-        self.stat = Statistic(sketch, self)
+    def __init__(self, quotient):
+        self.quotient = quotient
+        self.stat = Statistic(self)
         self.explored = 0
 
         self.since_last_optimum_update = 0
@@ -37,20 +37,20 @@ class Synthesizer:
         self.stat.print()
     
     def run(self):
-        # self.sketch.specification.optimality.update_optimum(0.9)
-        self.sketch.design_space.property_indices = self.sketch.specification.all_constraint_indices()
-        assignment = self.synthesize(self.sketch.design_space)
+        # self.quotient.specification.optimality.update_optimum(0.9)
+        self.quotient.design_space.property_indices = self.quotient.specification.all_constraint_indices()
+        assignment = self.synthesize(self.quotient.design_space)
 
 
         print("")
         if assignment is not None:
             logger.info("Printing synthesized assignment below:")
             logger.info(str(assignment))
-            dtmc = self.sketch.quotient.build_chain(assignment)
-            spec = dtmc.check_specification(self.sketch.specification)
+            dtmc = self.quotient.build_chain(assignment)
+            spec = dtmc.check_specification(self.quotient.specification)
             logger.info("Double-checking specification satisfiability: {}".format(spec))
-            if self.sketch.is_pomdp and self.sketch.quotient.export_optimal_dtmc:
-                self.sketch.quotient.export_result(dtmc)
+            if self.quotient.export_optimal_dtmc:
+                self.quotient.export_result(dtmc)
         
         self.print_stats()
     
@@ -73,29 +73,27 @@ class Synthesizer1By1(Synthesizer):
         
         logger.info("Synthesis initiated.")
 
-        Profiler.start("synthesis")
         self.stat.start()
 
         satisfying_assignment = None
         for hole_combination in family.all_combinations():
             
             assignment = family.construct_assignment(hole_combination)
-            chain = self.sketch.quotient.build_chain(assignment)
+            chain = self.quotient.build_chain(assignment)
             self.stat.iteration_dtmc(chain.states)
-            result = chain.check_specification(self.sketch.specification, short_evaluation = True)
+            result = chain.check_specification(self.quotient.specification, short_evaluation = True)
             self.explore(assignment)
 
             if not result.constraints_result.all_sat:
                 continue
-            if not self.sketch.specification.has_optimality:
+            if not self.quotient.specification.has_optimality:
                 satisfying_assignment = assignment
                 break
             if result.optimality_result.improves_optimum:
-                self.sketch.specification.optimality.update_optimum(result.optimality_result.value)
+                self.quotient.specification.optimality.update_optimum(result.optimality_result.value)
                 satisfying_assignment = assignment
 
         self.stat.finished(satisfying_assignment)
-        Profiler.stop()
 
         return satisfying_assignment
 
@@ -115,20 +113,18 @@ class SynthesizerAR(Synthesizer):
         :return (2) new satisfying assignment (or None)
         """
         # logger.debug("analyzing family {}".format(family))
-        Profiler.start("synthesizer::analyze_family_ar")
         
-        self.sketch.quotient.build(family)
+        self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
 
-        res = family.mdp.check_specification(self.sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+        res = family.mdp.check_specification(self.quotient.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
         # print(res)
-        Profiler.resume()
 
         improving_assignment,improving_value,can_improve = res.improving(family)
         # print(improving_value, can_improve)
         if improving_value is not None:
-            self.sketch.specification.optimality.update_optimum(improving_value)
+            self.quotient.specification.optimality.update_optimum(improving_value)
             self.since_last_optimum_update = 0
         # print(res, can_improve)
         # print(res.optimality_result.primary.result.get_values())
@@ -141,10 +137,9 @@ class SynthesizerAR(Synthesizer):
 
         logger.info("Synthesis initiated.")
         
-        Profiler.start("synthesis")
         self.stat.start()
 
-        self.sketch.quotient.discarded = 0
+        self.quotient.discarded = 0
 
         satisfying_assignment = None
         families = [family]
@@ -170,15 +165,14 @@ class SynthesizerAR(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.sketch.quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
         self.stat.finished(satisfying_assignment)
-        Profiler.stop()
 
         # if satisfying_assignment is not None:
-        #     dtmc = self.sketch.quotient.build_chain(satisfying_assignment)
-        #     spec = dtmc.check_specification(self.sketch.specification)
+        #     dtmc = self.quotient.build_chain(satisfying_assignment)
+        #     spec = dtmc.check_specification(self.quotient.specification)
         #     logger.info("Double-checking specification satisfiability: {}".format(spec))
         return satisfying_assignment
 
@@ -239,25 +233,23 @@ class SynthesizerCEGIS(Synthesizer):
         assert family.property_indices is not None, "analyzed family does not have the relevant properties list"
         assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
 
-        Profiler.start("CEGIS analysis")
         # print(assignment)
 
         # build DTMC
-        dtmc = self.sketch.quotient.build_chain(assignment)
+        dtmc = self.quotient.build_chain(assignment)
         self.stat.iteration_dtmc(dtmc.states)
 
         # model check all properties
-        spec = dtmc.check_specification(self.sketch.specification,
+        spec = dtmc.check_specification(self.quotient.specification,
             property_indices = family.property_indices, short_evaluation = False)
 
         # analyze model checking results
         improving = False
         if spec.constraints_result.all_sat:
-            if not self.sketch.specification.has_optimality:
-                Profiler.resume()
+            if not self.quotient.specification.has_optimality:
                 return True, True
             if spec.optimality_result is not None and spec.optimality_result.improves_optimum:
-                opt = self.sketch.specification.optimality
+                opt = self.quotient.specification.optimality
                 opt.update_optimum(spec.optimality_result.value)
                 if not opt.reward and opt.minimizing and opt.threshold == 0:
                     return True, True
@@ -271,13 +263,13 @@ class SynthesizerCEGIS(Synthesizer):
             member_result = spec.constraints_result.results[index]
             if member_result.sat:
                 continue
-            prop = self.sketch.specification.constraints[index]
+            prop = self.quotient.specification.constraints[index]
             family_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
             conflict_requests.append( (index,prop,member_result,family_result) )
-        if self.sketch.specification.has_optimality:
+        if self.quotient.specification.has_optimality:
             member_result = spec.optimality_result
-            index = len(self.sketch.specification.constraints)
-            prop = self.sketch.specification.optimality
+            index = len(self.quotient.specification.constraints)
+            prop = self.quotient.specification.optimality
             family_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
             conflict_requests.append( (index,prop,member_result,family_result) )
 
@@ -287,15 +279,14 @@ class SynthesizerCEGIS(Synthesizer):
         for conflict in conflicts:
             family.exclude_assignment(assignment, conflict)
 
-        Profiler.resume()
         return False, improving
 
 
     def initialize_ce_generator(self):
-        quotient_relevant_holes = self.sketch.quotient.coloring.state_to_holes
-        formulae = self.sketch.specification.stormpy_formulae()
+        quotient_relevant_holes = self.quotient.coloring.state_to_holes
+        formulae = self.quotient.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
-            self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
+            self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
             quotient_relevant_holes, formulae)
         return ce_generator
 
@@ -303,24 +294,23 @@ class SynthesizerCEGIS(Synthesizer):
 
         logger.info("Synthesis initiated.")
         
-        Profiler.start("synthesis")
         self.stat.start()
 
         # assert that no reward formula is maximizing
         msg = "Cannot use CEGIS for maximizing reward formulae -- consider using AR or hybrid methods."
-        for c in self.sketch.specification.constraints:
+        for c in self.quotient.specification.constraints:
             assert not (c.reward and not c.minimizing), msg
-        if self.sketch.specification.has_optimality:
-            c = self.sketch.specification.optimality
+        if self.quotient.specification.has_optimality:
+            c = self.quotient.specification.optimality
             assert not (c.reward and not c.minimizing), msg
 
         # build the quotient, map mdp states to hole indices
-        self.sketch.quotient.build(family)
+        self.quotient.build(family)
         
         ce_generator = self.initialize_ce_generator()
 
         # use sketch design space as a SAT baseline
-        self.sketch.design_space.sat_initialize()
+        self.quotient.design_space.sat_initialize()
         
         # CEGIS loop
         satisfying_assignment = None
@@ -337,7 +327,6 @@ class SynthesizerCEGIS(Synthesizer):
             assignment = family.pick_assignment()
 
         self.stat.finished(satisfying_assignment)
-        Profiler.stop()
         return satisfying_assignment
 
 
@@ -401,21 +390,20 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
         logger.info("Synthesis initiated.")
         
-        Profiler.start("synthesis")
         self.stat.start()
 
-        self.sketch.quotient.discarded = 0
+        self.quotient.discarded = 0
 
         self.stage_control = StageControl()
 
-        quotient_relevant_holes = self.sketch.quotient.coloring.state_to_holes
-        formulae = self.sketch.specification.stormpy_formulae()
+        quotient_relevant_holes = self.quotient.coloring.state_to_holes
+        formulae = self.quotient.specification.stormpy_formulae()
         ce_generator = stormpy.synthesis.CounterexampleGenerator(
-            self.sketch.quotient.quotient_mdp, self.sketch.design_space.num_holes,
+            self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
             quotient_relevant_holes, formulae)
 
         # use sketch design space as a SAT baseline
-        self.sketch.design_space.sat_initialize()
+        self.quotient.design_space.sat_initialize()
 
         # AR loop
         satisfying_assignment = None
@@ -485,12 +473,11 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 self.explore(family)
                 continue
         
-            subfamilies = self.sketch.quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
         # ce_generator.print_profiling()
 
         self.stat.finished(satisfying_assignment)
-        Profiler.stop()
         return satisfying_assignment
 

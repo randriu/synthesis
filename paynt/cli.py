@@ -110,24 +110,24 @@ def paynt(
         raise ValueError(f"the properties file {properties_path} does not exist")
 
     # parse sketch
-    sketch = Sketch(sketch_path, filetype, export, properties_path, constants, relative_error)
+    quotient = Sketch.load_sketch(sketch_path, filetype, export, properties_path, constants, relative_error)
 
     # choose the synthesis method and run the corresponding synthesizer
-    if sketch.is_pomdp and fsc_synthesis:
-        synthesizer = SynthesizerPOMDP(sketch, method)
+    if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
+        synthesizer = SynthesizerPOMDP(quotient, method)
     elif method == "onebyone":
-        synthesizer = Synthesizer1By1(sketch)
+        synthesizer = Synthesizer1By1(quotient)
     elif method == "ar":
-        synthesizer = SynthesizerAR(sketch)
+        synthesizer = SynthesizerAR(quotient)
     elif method == "cegis":
         if ce_generator == "storm":
-            synthesizer = SynthesizerCEGIS(sketch)
+            synthesizer = SynthesizerCEGIS(quotient)
         elif ce_generator == "switss":
-            synthesizer = SynthesizerSwitss(sketch)
+            synthesizer = SynthesizerSwitss(quotient)
     elif method == "hybrid":
-        synthesizer = SynthesizerHybrid(sketch)
+        synthesizer = SynthesizerHybrid(quotient)
     elif method == "ar_multicore":
-        synthesizer = SynthesizerMultiCoreAR(sketch)
+        synthesizer = SynthesizerMultiCoreAR(quotient)
     else:
         pass
     

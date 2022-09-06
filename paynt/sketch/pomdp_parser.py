@@ -2,8 +2,6 @@ import stormpy
 
 from collections import defaultdict
 
-from . import sketch
-
 import os
 import re
 import uuid
@@ -48,7 +46,7 @@ class PomdpParser:
 
 
     @classmethod
-    def write_model_in_pomdp_solve_format(cls, path, quotient):
+    def write_model_in_pomdp_solve_format(cls, quotient, output_path, property_path):
 
         pomdp = quotient.pomdp
 
@@ -122,9 +120,6 @@ observations: {}
                     desc += f"R: * : {state} : * : * {rew}\n"
         
         # ready to print
-        output_path = sketch.Sketch.substitute_suffix(path, '.', 'pomdp')
-        property_path = sketch.Sketch.substitute_suffix(path, '/', 'props.pomdp')
-
         logger.info("Writing POMDP in pomdp-solve format to {} ...".format(output_path))
         with open(output_path, 'w') as f:
             f.write(desc)
@@ -134,6 +129,7 @@ observations: {}
         logger.info("Write OK, aborting ...")
         exit()
 
+    
     @classmethod
     def read_pomdp_solve_format(cls, path):
 

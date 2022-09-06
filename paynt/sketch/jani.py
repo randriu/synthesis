@@ -37,7 +37,7 @@ class JaniUnfolder():
         properties = [Property(p) for p in properties]
         optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
         self.specification = Specification(properties,optimality_property)
-        MarkovChain.initialize(self.specification.stormpy_formulae())
+        MarkovChain.initialize(self.specification)
 
         # unfold holes in the program
         self.hole_expressions = hole_expressions

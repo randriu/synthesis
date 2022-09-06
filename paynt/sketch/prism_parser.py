@@ -2,6 +2,10 @@ import stormpy
 
 from .property import Property, OptimalityProperty, Specification
 from .holes import Hole, Holes, DesignSpace
+from .jani import JaniUnfolder
+
+from ..synthesizers.models import MarkovChain
+from ..synthesizers.coloring import MdpColoring
 
 import os
 import re
@@ -10,14 +14,11 @@ import uuid
 import logging
 logger = logging.getLogger(__name__)
 
+
 class PrismParser:
 
     @classmethod
-    def read_prism_sketch(cls, sketch_path, constant_str):
-        '''
-        Read PRISM program from sketch_path; parse hole definitions (if any);
-        parse constant definitions and substitute these into the PRISM program.
-        '''
+    def read_prism(cls, sketch_path, constant_str, properties_path, relative_error):
 
         # parse the program
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
@@ -40,13 +41,25 @@ class PrismParser:
             logger.info("processing hole definitions...")
             prism, hole_expressions, design_space = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
-        
-        # success
-        return prism, hole_expressions, design_space, constant_map
 
-        
+        specification = PrismParser.parse_specification(properties_path, relative_error, prism, constant_map)
 
+        # construct the quotient
+        coloring = None
+        jani_unfolder = None
+        if prism.model_type == stormpy.storage.PrismModelType.DTMC:
+            # unfold hole options
+            jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, design_space)
+            specification = jani_unfolder.specification
+            quotient_mdp = jani_unfolder.quotient_mdp
+            coloring = MdpColoring(quotient_mdp, design_space, jani_unfolder.action_to_hole_options)
 
+        if prism.model_type != stormpy.storage.PrismModelType.DTMC:
+            quotient_mdp = MarkovChain.from_prism(prism)
+
+        return quotient_mdp, specification, coloring, jani_unfolder
+
+    
     @classmethod
     def load_sketch_prism(cls, sketch_path):
         # read lines
@@ -187,13 +200,8 @@ class PrismParser:
             optimality = OptimalityProperty(optimality, relative_error)
         specification = Specification(constraints,optimality)
 
-        logger.info(f"found the following specification: {self.specification}")
+        MarkovChain.initialize(specification)
+
+        logger.info(f"found the following specification: {specification}")
         return specification
 
-
-
-
-    
-
-    
-    

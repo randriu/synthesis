@@ -8,7 +8,7 @@ from .quotient_pomdp import POMDPQuotientContainer
 from .synthesizer import SynthesizerAR, SynthesizerHybrid
 from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
-from ..profiler import Timer,Profiler
+from ..profiler import Timer
 
 from ..sketch.holes import Holes,DesignSpace
 
@@ -56,9 +56,8 @@ class HoleTree:
 
 class SynthesizerPOMDP:
 
-    def __init__(self, sketch, method):
-        assert sketch.is_pomdp
-        self.sketch = sketch
+    def __init__(self, quotient, method):
+        self.quotient = quotient
         self.synthesizer = None
         if method == "ar":
             self.synthesizer = SynthesizerAR
@@ -67,15 +66,14 @@ class SynthesizerPOMDP:
         elif method == "hybrid":
             self.synthesizer = SynthesizerHybrid
         self.total_iters = 0
-        Profiler.initialize()
 
     def print_stats(self):
         pass
     
     def synthesize(self, family, print_stats = True):
-        self.sketch.quotient.discarded = 0
-        synthesizer = self.synthesizer(self.sketch)
-        family.property_indices = self.sketch.design_space.property_indices
+        self.quotient.discarded = 0
+        synthesizer = self.synthesizer(self.quotient)
+        family.property_indices = self.quotient.design_space.property_indices
         assignment = synthesizer.synthesize(family)
         if print_stats:
             synthesizer.print_stats()
@@ -95,22 +93,22 @@ class SynthesizerPOMDP:
             POMDPQuotientContainer.current_family_index = mem_size
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             if unfold_imperfect_only:
-                self.sketch.quotient.set_imperfect_memory_size(mem_size)
+                self.quotient.set_imperfect_memory_size(mem_size)
             else:
-                self.sketch.quotient.set_global_memory_size(mem_size)
+                self.quotient.set_global_memory_size(mem_size)
             
-            # self.sketch.quotient.remove_simpler_controllers(mem_size)
-            # self.sketch.quotient.design_space_counter()
-            self.synthesize(self.sketch.design_space)
+            # self.quotient.remove_simpler_controllers(mem_size)
+            # self.quotient.design_space_counter()
+            self.synthesize(self.quotient.design_space)
             mem_size += 1
 
     
     def solve_mdp(self, family):
 
         # solve quotient MDP
-        self.sketch.quotient.build(family)
+        self.quotient.build(family)
         mdp = family.mdp
-        spec = mdp.check_specification(self.sketch.specification)
+        spec = mdp.check_specification(self.quotient.specification)
 
         # nothing more to do if optimality cannot be improved
         if not spec.optimality_result.can_improve:
@@ -134,7 +132,7 @@ class SynthesizerPOMDP:
         # # print(dir())
         # print(mdp.states)
         # scheduler = result.primary.result.scheduler
-        # print(self.sketch.quotient.coloring.state_to_holes)
+        # print(self.quotient.coloring.state_to_holes)
         # print(spec.optimality_result.primary_scores)
         # p = spec.optimality_result.primary.result
         # for state in range(mdp.states):
@@ -144,27 +142,27 @@ class SynthesizerPOMDP:
         #     row = mdp.model.transition_matrix.get_row(global_choice)
         #     print("scheduler choice: {}/{}".format(local_choice,global_choice))
         #     quotient_choice = mdp.quotient_choice_map[global_choice]
-        #     print("choice colors: ", self.sketch.quotient.coloring.action_to_hole_options[quotient_choice])
+        #     print("choice colors: ", self.quotient.coloring.action_to_hole_options[quotient_choice])
         #     print("matrix row: ", row)
         #     quotient_state = mdp.quotient_state_map[state]
-        #     relevant_holes = self.sketch.quotient.coloring.state_to_holes[quotient_state]
+        #     relevant_holes = self.quotient.coloring.state_to_holes[quotient_state]
         #     obs = None
         #     for hole in relevant_holes:
-        #         for obs in range(self.sketch.quotient.observations):
-        #             action_holes = self.sketch.quotient.observation_action_holes[obs]
+        #         for obs in range(self.quotient.observations):
+        #             action_holes = self.quotient.observation_action_holes[obs]
         #             if hole in action_holes:
         #                 selected_obs = obs
         #                 selected_mem = action_holes.index(hole)
         #                 hole_is_action = True
         #                 break
-        #             memory_holes = self.sketch.quotient.observation_memory_holes[obs]
+        #             memory_holes = self.quotient.observation_memory_holes[obs]
         #             if hole in memory_holes:
         #                 selected_obs = obs
         #                 selected_mem = memory_holes.index(hole)
         #                 hole_is_action = False
         #                 break
         #         print("hole corresponds to observation ({},{}) [{}]".format(selected_obs,selected_mem,hole_is_action))
-        #     # print("relevant holes: ", self.sketch.quotient.)
+        #     # print("relevant holes: ", self.quotient.)
         #     print(p.get_values()[state])
         #     print()
         #     # print(prototype_state)
@@ -183,16 +181,16 @@ class SynthesizerPOMDP:
     def strategy_expected(self):
 
         # assuming optimality
-        assert self.sketch.specification.optimality is not None
+        assert self.quotient.specification.optimality is not None
 
-        num_obs = self.sketch.quotient.observations
-        observation_successors = self.sketch.quotient.pomdp_manager.observation_successors
+        num_obs = self.quotient.observations
+        observation_successors = self.quotient.pomdp_manager.observation_successors
 
         # for each observation, create a root of an action hole tree
         action_hole_trees = [None] * num_obs
         memory_hole_trees = [None] * num_obs
         for obs in range(num_obs):
-            ah = self.sketch.quotient.action_hole_prototypes[obs]
+            ah = self.quotient.action_hole_prototypes[obs]
             if ah is not None:
                 action_hole_trees[obs] = HoleTree(ah.options)
             memory_hole_trees[obs] = HoleTree([0])
@@ -211,7 +209,7 @@ class SynthesizerPOMDP:
             print([str(tree) for tree in memory_hole_trees])
             
             # construct and solve the quotient
-            family = self.sketch.design_space
+            family = self.quotient.design_space
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
             
             # check whether that primary direction was not enough ?
@@ -224,10 +222,10 @@ class SynthesizerPOMDP:
 
             # print status
             opt = "-"
-            if self.sketch.specification.optimality.optimum is not None:
-                opt = round(self.sketch.specification.optimality.optimum,3)
+            if self.quotient.specification.optimality.optimum is not None:
+                opt = round(self.quotient.specification.optimality.optimum,3)
             elapsed = round(fsc_synthesis_timer.read(),1)
-            memory_injections = sum(self.sketch.quotient.observation_memory_size) - num_obs
+            memory_injections = sum(self.quotient.observation_memory_size) - num_obs
             logger.info("FSC synthesis: elapsed {} s, opt = {}, injections: {}.".format(elapsed, opt, memory_injections))
             logger.info("FSC: {}".format(best_assignment))
            
@@ -248,7 +246,7 @@ class SynthesizerPOMDP:
                 # for state in range(mdp.states):
                 #     # nothing to do if the state is not labeled by any hole
                 #     quotient_state = mdp.quotient_state_map[state]
-                #     holes = self.sketch.quotient.coloring.state_to_holes[quotient_state]
+                #     holes = self.quotient.coloring.state_to_holes[quotient_state]
                 #     if not holes:
                 #         continue
                 #     hole = list(holes)[0]
@@ -263,7 +261,7 @@ class SynthesizerPOMDP:
                 #     nci = mdp.model.nondeterministic_choice_indices
                 #     for choice in range(nci[state],nci[state+1]):
                 #         choice_global = mdp.quotient_choice_map[choice]
-                #         choice_color = self.sketch.quotient.coloring.action_to_hole_options[choice_global]
+                #         choice_color = self.quotient.coloring.action_to_hole_options[choice_global]
                 #         if choice_color == {hole:syn_option}:
                 #             syn_choice = choice
                 #             break
@@ -279,19 +277,19 @@ class SynthesizerPOMDP:
                 # # be the one with the maximum score in the symmetry-free MDP
 
                 # # map improvements in states of this sub-MDP to states of the quotient
-                # quotient_state_improvement = [None] * self.sketch.quotient.quotient_mdp.nr_states
+                # quotient_state_improvement = [None] * self.quotient.quotient_mdp.nr_states
                 # for state in range(mdp.states):
                 #     quotient_state_improvement[mdp.quotient_state_map[state]] = state_improvement[state]
 
                 # # extract DTMC corresponding to the synthesized solution
-                # dtmc = self.sketch.quotient.build_chain(synthesized_assignment)
+                # dtmc = self.quotient.build_chain(synthesized_assignment)
 
                 # # compute expected visits for this dtmc
                 # dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
                 # dtmc_visits = list(dtmc_visits)
 
                 # # handle infinity- and zero-visits
-                # if self.sketch.specification.optimality.minimizing:
+                # if self.quotient.specification.optimality.minimizing:
                 #     dtmc_visits = QuotientContainer.make_vector_defined(dtmc_visits)
                 # else:
                 #     dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
@@ -308,7 +306,7 @@ class SynthesizerPOMDP:
 
                 #     weighted_improvement = improvement * dtmc_visits[state]
                 #     assert not math.isnan(weighted_improvement), "{}*{} = nan".format(improvement,dtmc_visits[state])
-                #     hole = list(self.sketch.quotient.coloring.state_to_holes[quotient_state])[0]
+                #     hole = list(self.quotient.coloring.state_to_holes[quotient_state])[0]
                 #     hole_differences[hole] += weighted_improvement
                 #     hole_states_affected[hole] += 1
 
@@ -332,14 +330,14 @@ class SynthesizerPOMDP:
             selected_options = selection[selected_hole]
 
             # identify observation having this hole
-            for obs in range(self.sketch.quotient.observations):
-                action_holes = self.sketch.quotient.observation_action_holes[obs]
+            for obs in range(self.quotient.observations):
+                action_holes = self.quotient.observation_action_holes[obs]
                 if selected_hole in action_holes:
                     selected_obs = obs
                     selected_mem = action_holes.index(selected_hole)
                     hole_is_action = True
                     break
-                memory_holes = self.sketch.quotient.observation_memory_holes[obs]
+                memory_holes = self.quotient.observation_memory_holes[obs]
                 if selected_hole in memory_holes:
                     selected_obs = obs
                     selected_mem = memory_holes.index(selected_hole)
@@ -348,7 +346,7 @@ class SynthesizerPOMDP:
 
 
             print()
-            hole_scores_printable = {self.sketch.design_space[hole].name : score for hole,score in hole_scores.items()} 
+            hole_scores_printable = {self.quotient.design_space[hole].name : score for hole,score in hole_scores.items()} 
             print("hole scores: ", hole_scores)
             print("hole scores (printable): ", hole_scores_printable)
             print("selected hole: {}, ({})".format(selected_hole, family[selected_hole]))
@@ -367,10 +365,10 @@ class SynthesizerPOMDP:
             
             # increase memory size in the selected observation to reflect all inconsistencies
             # detect which observation were affected by this increase
-            old_successor_size = self.sketch.quotient.pomdp_manager.max_successor_memory_size
+            old_successor_size = self.quotient.pomdp_manager.max_successor_memory_size
             for x in range(len(selected_options)-1):
-                self.sketch.quotient.increase_memory_size(selected_obs)
-            new_successor_size = self.sketch.quotient.pomdp_manager.max_successor_memory_size
+                self.quotient.increase_memory_size(selected_obs)
+            new_successor_size = self.quotient.pomdp_manager.max_successor_memory_size
             affected_obs = []
 
             for obs in range(num_obs):
@@ -392,40 +390,40 @@ class SynthesizerPOMDP:
 
             # reconstruct design space using the history of symmetry breakings
             
-            restricted_family = self.sketch.design_space.copy()
+            restricted_family = self.quotient.design_space.copy()
             for obs in range(num_obs):
 
-                action_holes = self.sketch.quotient.observation_action_holes[obs]
+                action_holes = self.quotient.observation_action_holes[obs]
                 if len(action_holes) > 0:
                     tree = action_hole_trees[obs]
                     for index,options in enumerate(tree.nodes):
                         restricted_family[action_holes[index]].assume_options(options)
 
-                memory_holes = self.sketch.quotient.observation_memory_holes[obs]
+                memory_holes = self.quotient.observation_memory_holes[obs]
                 if len(memory_holes) > 0:
                     tree = memory_hole_trees[obs]
                     for index,options in enumerate(tree.nodes):
                         restricted_family[memory_holes[index]].assume_options(options)
 
             print(restricted_family)
-            logger.debug("Symmetry breaking: reduced design space from {} to {}".format(self.sketch.design_space.size, restricted_family.size))
-            self.sketch.design_space = restricted_family
+            logger.debug("Symmetry breaking: reduced design space from {} to {}".format(self.quotient.design_space.size, restricted_family.size))
+            self.quotient.design_space = restricted_family
 
 
     def strategy_expected_uai(self):
 
 
         # assuming optimality
-        assert self.sketch.specification.optimality is not None
+        assert self.quotient.specification.optimality is not None
 
         # for each observation will contain a set of observed action inconsistencies
-        action_inconsistencies = [set() for obs in range(self.sketch.quotient.observations)]
+        action_inconsistencies = [set() for obs in range(self.quotient.observations)]
         # for each observation (that doesn't have action inconsistencies) will
         # contain a set of observed memory inconsistencies
-        memory_inconsistencies = [set() for obs in range(self.sketch.quotient.observations)]
+        memory_inconsistencies = [set() for obs in range(self.quotient.observations)]
 
         # start with k=1
-        self.sketch.quotient.set_global_memory_size(1)
+        self.quotient.set_global_memory_size(1)
         memory_injections = 0
         best_assignment = None
         fsc_synthesis_timer = Timer()
@@ -434,7 +432,7 @@ class SynthesizerPOMDP:
         while True:
         # for iteration in range(4):
 
-            # print(self.sketch.quotient.observation_labels)
+            # print(self.quotient.observation_labels)
             
             print("\n------------------------------------------------------------\n")
 
@@ -442,11 +440,11 @@ class SynthesizerPOMDP:
             # print(memory_inconsistencies)
 
             # construct the quotient
-            # self.sketch.quotient.unfold_memory()
+            # self.quotient.unfold_memory()
             
             # use inconsistencies to break symmetry
-            family = self.sketch.quotient.break_symmetry_uai(self.sketch.design_space, action_inconsistencies, memory_inconsistencies)
-            # family = self.sketch.design_space
+            family = self.quotient.break_symmetry_uai(self.quotient.design_space, action_inconsistencies, memory_inconsistencies)
+            # family = self.quotient.design_space
 
             # solve MDP that corresponds to this restricted family
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
@@ -475,7 +473,7 @@ class SynthesizerPOMDP:
                 for state in range(mdp.states):
                     # nothing to do if the state is not labeled by any hole
                     quotient_state = mdp.quotient_state_map[state]
-                    holes = self.sketch.quotient.coloring.state_to_holes[quotient_state]
+                    holes = self.quotient.coloring.state_to_holes[quotient_state]
                     if not holes:
                         continue
                     hole = list(holes)[0]
@@ -490,7 +488,7 @@ class SynthesizerPOMDP:
                     nci = mdp.model.nondeterministic_choice_indices
                     for choice in range(nci[state],nci[state+1]):
                         choice_global = mdp.quotient_choice_map[choice]
-                        choice_color = self.sketch.quotient.coloring.action_to_hole_options[choice_global]
+                        choice_color = self.quotient.coloring.action_to_hole_options[choice_global]
                         if choice_color == {hole:syn_option}:
                             syn_choice = choice
                             break
@@ -506,19 +504,19 @@ class SynthesizerPOMDP:
                 # be the one with the maximum score in the symmetry-free MDP
 
                 # map improvements in states of this sub-MDP to states of the quotient
-                quotient_state_improvement = [None] * self.sketch.quotient.quotient_mdp.nr_states
+                quotient_state_improvement = [None] * self.quotient.quotient_mdp.nr_states
                 for state in range(mdp.states):
                     quotient_state_improvement[mdp.quotient_state_map[state]] = state_improvement[state]
 
                 # extract DTMC corresponding to the synthesized solution
-                dtmc = self.sketch.quotient.build_chain(synthesized_assignment)
+                dtmc = self.quotient.build_chain(synthesized_assignment)
 
                 # compute expected visits for this dtmc
                 dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
                 dtmc_visits = list(dtmc_visits)
 
                 # handle infinity- and zero-visits
-                if self.sketch.specification.optimality.minimizing:
+                if self.quotient.specification.optimality.minimizing:
                     dtmc_visits = QuotientContainer.make_vector_defined(dtmc_visits)
                 else:
                     dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
@@ -535,7 +533,7 @@ class SynthesizerPOMDP:
 
                     weighted_improvement = improvement * dtmc_visits[state]
                     assert not math.isnan(weighted_improvement), "{}*{} = nan".format(improvement,dtmc_visits[state])
-                    hole = list(self.sketch.quotient.coloring.state_to_holes[quotient_state])[0]
+                    hole = list(self.quotient.coloring.state_to_holes[quotient_state])[0]
                     hole_differences[hole] += weighted_improvement
                     hole_states_affected[hole] += 1
 
@@ -564,14 +562,14 @@ class SynthesizerPOMDP:
             print("hole has options: ", selected_options)
 
             # identify observation having this hole
-            for obs in range(self.sketch.quotient.observations):
-                if selected_hole in self.sketch.quotient.obs_to_holes[obs]:
+            for obs in range(self.quotient.observations):
+                if selected_hole in self.quotient.obs_to_holes[obs]:
                     selected_observation = obs
                     break
 
             if len(selected_options) > 1:
                 # identify whether this hole is inconsistent in actions or updates
-                actions,updates = self.sketch.quotient.sift_actions_and_updates(selected_observation, selected_hole, selected_options)
+                actions,updates = self.quotient.sift_actions_and_updates(selected_observation, selected_hole, selected_options)
                 if len(actions) > 1:
                     # action inconsistency
                     action_inconsistencies[obs] |= actions
@@ -580,15 +578,15 @@ class SynthesizerPOMDP:
             
             # print status
             opt = "-"
-            if self.sketch.specification.optimality.optimum is not None:
-                opt = round(self.sketch.specification.optimality.optimum,3)
+            if self.quotient.specification.optimality.optimum is not None:
+                opt = round(self.quotient.specification.optimality.optimum,3)
             elapsed = round(fsc_synthesis_timer.read(),1)
             logger.info("FSC synthesis: elapsed {} s, opt = {}, injections: {}.".format(elapsed, opt, memory_injections))
             # logger.info("FSC synthesis: assignment: {}".format(best_assignment))
 
             # inject memory and continue
             logger.info("Injecting memory into observation {} ...".format(selected_observation))
-            self.sketch.quotient.increase_memory_size(selected_observation)
+            self.quotient.increase_memory_size(selected_observation)
             memory_injections += 1
                 
 

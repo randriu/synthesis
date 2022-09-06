@@ -7,8 +7,6 @@ from ..sketch.holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
 from. coloring import MdpColoring
 
-from ..profiler import Profiler
-
 import math
 import re
 
@@ -20,8 +18,6 @@ class POMDPQuotientContainer(QuotientContainer):
 
     # implicit size for POMDP unfolding
     initial_memory_size = 1
-    # if True, export the (labeled) optimal DTMC
-    export_optimal_dtmc = False
 
     # TODO
     current_family_index = None
@@ -30,11 +26,12 @@ class POMDPQuotientContainer(QuotientContainer):
     use_simplified_coloring = False
     # use_simplified_coloring = True
     
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, pomdp, specification):
+        super().__init__(specification = specification)
 
-        # default quotient attributes
+        # unfolded POMDP
         self.quotient_mdp = None
+        self.design_space = None
         self.coloring = None
 
         # attributes associated with a (folded) POMDP
@@ -68,8 +65,8 @@ class POMDPQuotientContainer(QuotientContainer):
         self.is_action_hole = None
 
         # construct the quotient POMDP
-        self.pomdp = self.sketch.explicit_quotient
-        self.pomdp = stormpy.pomdp.make_canonic(self.pomdp)
+        self.pomdp = pomdp
+        self.pomdp = stormpy.pomdp.make_canonic(pomdp)
         # ^ this also asserts that states with the same observation have the
         # same number and the same order of available actions
 
@@ -130,7 +127,6 @@ class POMDPQuotientContainer(QuotientContainer):
         
         
 
-    
     @property
     def observations(self):
         return self.pomdp.nr_observations
@@ -182,7 +178,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
     
     def design_space_counter(self):
-        ds = self.sketch.design_space.copy()
+        ds = self.design_space.copy()
         print("ds: ", ds)
         for obs in range(self.observations):
             print(self.observation_memory_holes[obs])
@@ -195,65 +191,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 ds[hole].assume_options(new_options)
                 print(ds[hole])
                 print()
-        self.sketch.set_design_space(ds)
-
-
-    # def family_observation_index(self, family, obs):
-
-    #     # collect all actions and all memory updates
-    #     # actions = set()
-    #     # for hole in self.observation_action_holes[obs]:
-    #     #     actions.update(family[hole].options)
-    #     updates = set()
-    #     for hole in self.observation_memory_holes[obs]:
-    #         updates.update(family[hole].options)
-    #     return len(updates)
-    #     # return max(len(actions),len(updates))
-        
-    # def family_index(self,family):
-
-    #     # get reachable holes
-    #     reachable_choices = [
-    #         family.mdp.quotient_choice_map[choice]
-    #         for choice in range(family.mdp.choices)
-    #     ]
-    #     reachable_holes = set()
-    #     for choice in reachable_choices:
-    #         choice_holes = self.coloring.action_to_hole_options[choice].keys()
-    #         reachable_holes.update(choice_holes)
-
-    #     # in each observation, count how many action/memory holes are reachable;
-    #     # observation index is then the maximum number of action OR memory holes
-    #     # associated with this observation
-    #     obs_indices = []
-    #     for obs in range(self.observations):
-    #         reachable_action_holes = [
-    #             hole for hole in self.observation_action_holes[obs]
-    #             if hole in reachable_holes
-    #         ]
-    #         reachable_memory_holes = [
-    #             hole for hole in self.observation_memory_holes[obs]
-    #             if hole in reachable_holes
-    #         ]
-    #         obs_index = max(len(reachable_action_holes),len(reachable_memory_holes))
-    #         obs_indices.append(obs_index)
-
-    #     # family index is the maximum observation index
-    #     return max(obs_indices)
-
-    # def split(self,family):
-
-    #     if POMDPQuotientContainer.current_family_index == 1:
-    #         return super().split(family)
-
-    #     # split hole having number of options equal to the current family index
-    #     splitter = None
-    #     for obs in range(self.observations):
-    #         for hole in self.observation_memory_holes[obs]:
-    #             if len(family[hole].options) == POMDPQuotientContainer.current_family_index:
-    #                 splitter = hole
-    #     print(splitter)
-    #     exit()
+        self.design_space = ds
 
     
     def unfold_memory(self):
@@ -339,18 +277,18 @@ class POMDPQuotientContainer(QuotientContainer):
         self.coloring = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
         
         # finalize the design space
-        self.sketch.set_design_space(DesignSpace(all_holes))
+        self.design_space = DesignSpace(all_holes)
 
         # the design space is ready
         if not self.use_simplified_coloring:
             return
 
         # store old coloring
-        self.design_space_old = self.sketch.design_space
+        self.design_space_old = self.design_space
         self.coloring_old = self.coloring
         # replace with simplified one
         design_space_new,self.coloring,self.obs_to_holes,self.hole_pair_map = self.simplify_coloring()
-        self.sketch.set_design_space(design_space_new)
+        self.design_space = design_space_new
 
 
     def remove_simpler_controllers(self, current_mem_size):
@@ -360,13 +298,13 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # print(self.observation_memory_holes)
         
-        # ds = self.sketch.design_space.copy()
+        # ds = self.design_space.copy()
         # obs = self.observation_labels.index('[start=1]')
         # mem_hole_index = self.observation_memory_holes[obs][0]
         # mem_hole = ds[mem_hole_index]
         # mem_hole.assume_options([0])
         
-        # self.sketch.set_design_space(ds)
+        # self.design_space = ds
         return
 
 
@@ -387,7 +325,7 @@ class POMDPQuotientContainer(QuotientContainer):
             if ah is not None and mh is None:
                 # only action holes
                 for old_hole_index in self.observation_action_holes[obs]:
-                    old_hole = self.sketch.design_space[old_hole_index]
+                    old_hole = self.design_space[old_hole_index]
                     new_hole_index = all_holes.num_holes
                     new_hole = old_hole.copy()
                     hole_pair_map[old_hole_index] = new_hole_index
@@ -397,7 +335,7 @@ class POMDPQuotientContainer(QuotientContainer):
             if ah is None and mh is not None:
                 # only memory holes
                 for old_hole_index in self.observation_memory_holes[obs]:
-                    old_hole = self.sketch.design_space[old_hole_index]
+                    old_hole = self.design_space[old_hole_index]
                     new_hole_index = all_holes.num_holes
                     hole_pair_map[old_hole_index] = new_hole_index
                     new_hole = old_hole.copy()
@@ -410,8 +348,8 @@ class POMDPQuotientContainer(QuotientContainer):
                     action_hole_index = self.observation_action_holes[obs][mem]
                     memory_hole_index = self.observation_memory_holes[obs][mem]
 
-                    action_hole = self.sketch.design_space[action_hole_index]
-                    memory_hole = self.sketch.design_space[memory_hole_index]
+                    action_hole = self.design_space[action_hole_index]
+                    memory_hole = self.design_space[memory_hole_index]
 
                     name = "AM({},{})".format(self.observation_labels[obs],mem)
 

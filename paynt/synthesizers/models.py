@@ -12,8 +12,9 @@ class MarkovChain:
     environment = None
 
     @classmethod
-    def initialize(cls, formulae):
+    def initialize(cls, specification):
         # builder options
+        formulae = specification.stormpy_formulae()
         cls.builder_options = stormpy.BuilderOptions(formulae)
         cls.builder_options.set_build_with_choice_origins(True)
         cls.builder_options.set_build_state_valuations(True)
@@ -58,9 +59,9 @@ class MarkovChain:
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
 
+        # TODO why is this computed here?
         # identify simple holes
-        tm = self.model.transition_matrix
-        design_space = self.quotient_container.sketch.design_space
+        design_space = quotient_container.design_space
         hole_to_states = [0 for hole in design_space]
         for state in range(self.states):
             for hole in quotient_container.coloring.state_to_holes[self.quotient_state_map[state]]:

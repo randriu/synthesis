@@ -25,10 +25,10 @@ class Statistic:
     print_profiling = False
 
     
-    def __init__(self, sketch, synthesizer):
+    def __init__(self, synthesizer):
         
         self.synthesizer = synthesizer
-        self.sketch = sketch
+        self.quotient = self.synthesizer.quotient
 
         self.iterations_dtmc = 0
         self.acc_size_dtmc = 0
@@ -61,7 +61,7 @@ class Statistic:
 
     
     def status(self):
-        fraction_rejected = (self.synthesizer.explored + self.synthesizer.sketch.quotient.discarded) / self.sketch.design_space.size
+        fraction_rejected = (self.synthesizer.explored + self.quotient.discarded) / self.quotient.design_space.size
         time_estimate = safe_division(self.synthesis_time.read(), fraction_rejected)
         percentage_rejected = int(fraction_rejected * 1000000) / 10000.0
         # percentage_rejected = fraction_rejected * 100
@@ -70,12 +70,12 @@ class Statistic:
         iters = (self.iterations_mdp,self.iterations_dtmc)
         avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
         optimum = "-"
-        spec = self.sketch.specification
+        spec = self.quotient.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
             optimum = round(spec.optimality.optimum,3)
         
         # sat_size = "-"
-        # ds = self.synthesizer.sketch.design_space
+        # ds = self.synthesizer.quotient.design_space
         # if ds.use_cvc:
         #     sat_size = len(ds.solver.getAssertions())
         # elif ds.use_python_z3:
@@ -102,24 +102,24 @@ class Statistic:
             self.feasible = True
             self.assignment = str(assignment)
         self.optimum = None
-        if self.sketch.specification.has_optimality:
-            self.optimum = self.sketch.specification.optimality.optimum
+        if self.quotient.specification.has_optimality:
+            self.optimum = self.quotient.specification.optimality.optimum
 
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
         self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
 
     def get_summary(self):
-        spec = self.sketch.specification
+        spec = self.quotient.specification
         specification = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(spec.constraints)]) + "\n"
         specification += f"optimality objective: {str(spec.optimality)}\n" if spec.has_optimality else ""
 
-        fraction_explored = int((self.synthesizer.explored / self.sketch.design_space.size) * 100)
+        fraction_explored = int((self.synthesizer.explored / self.quotient.design_space.size) * 100)
         explored = f"explored: {fraction_explored} %"
 
-        super_quotient_states = self.sketch.quotient.quotient_mdp.nr_states
-        super_quotient_actions = self.sketch.quotient.quotient_mdp.nr_choices
+        super_quotient_states = self.quotient.quotient_mdp.nr_states
+        super_quotient_actions = self.quotient.quotient_mdp.nr_choices
 
-        design_space = f"number of holes: {self.sketch.design_space.num_holes}, family size: {self.sketch.design_space.size}, super quotient: {super_quotient_states} states / {super_quotient_actions} actions"
+        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size}, super quotient: {super_quotient_states} states / {super_quotient_actions} actions"
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_time.time, 2)} s"
 
         family_stats = ""
