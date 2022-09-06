@@ -8,9 +8,9 @@ import multiprocessing as mp
 import os
 import time
 
-# global variable containing sketch: the quotient, the specification, etc.
-# when a process is spawned (forked), it will inherit the sketch from the parent
-sketch = None
+# global variable containing the quotient
+# when a process is spawned (forked), it will inherit the quotient from the parent
+quotient = None
 
 import cProfile, pstats
 profile = None
@@ -31,12 +31,12 @@ def solve_family(args):
 
         # synchronize optimum
         if optimum is not None:
-            sketch.specification.optimality.optimum = optimum
+            quotient.specification.optimality.optimum = optimum
 
-        sketch.quotient.build(family)
+        quotient.build(family)
         # self.stat.iteration_mdp(family.mdp.states)
 
-        res = family.mdp.check_specification(sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+        res = family.mdp.check_specification(quotient.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
 
         improving_assignment,improving_value,can_improve = res.improving(family)
@@ -44,7 +44,7 @@ def solve_family(args):
         
         subfamilies = []
         if can_improve:
-            subfamilies = sketch.quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = quotient.split(family, Synthesizer.incomplete_search)
             # remove parent info since Property is not pickleable
             for subfamily in subfamilies:
                 subfamily.parent_info = None
@@ -63,15 +63,15 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
 
         self.stat.start()
 
-        self.sketch.quotient.discarded = 0
+        self.quotient.discarded = 0
 
         satisfying_assignment = None
         families = [family]
 
         start_time = time.perf_counter()
 
-        global sketch
-        sketch = self.sketch
+        global quotient
+        quotient = self.quotient
         global profile
         profile = cProfile.Profile()
         # profile.enable()
@@ -86,8 +86,8 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
 
                 # get current optimum
                 optimum = None
-                if self.sketch.specification.has_optimality:
-                    optimum = self.sketch.specification.optimality.optimum
+                if self.quotient.specification.has_optimality:
+                    optimum = self.quotient.specification.optimality.optimum
 
                 # work with some number of families
                 # print("submitting ", len(families), " families")
@@ -115,8 +115,8 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
                         self.stat.iteration_mdp(entry)
 
                     if improving_value is not None:
-                        if self.sketch.specification.optimality.improves_optimum(improving_value):
-                            self.sketch.specification.optimality.update_optimum(improving_value)
+                        if self.quotient.specification.optimality.improves_optimum(improving_value):
+                            self.quotient.specification.optimality.update_optimum(improving_value)
                             satisfying_assignment = improving_assignment
                     
                     new_families += subfamilies
@@ -156,7 +156,7 @@ def solve_batch(args):
 
         # synchronize optimum
         if optimum is not None:
-            sketch.specification.optimality.optimum = optimum
+            quotient.specification.optimality.optimum = optimum
 
         mdp_states = []
         improving_value = None
@@ -171,15 +171,15 @@ def solve_batch(args):
                 break
 
             family = subfamilies.pop(-1)
-            sketch.quotient.build(family)
-            res = family.mdp.check_specification(sketch.specification, property_indices = family.property_indices, short_evaluation = True)
+            quotient.build(family)
+            res = family.mdp.check_specification(quotient.specification, property_indices = family.property_indices, short_evaluation = True)
             family.analysis_result = res
             mdp_states.append(family.mdp.states)
 
             improving_assignment,improving_value,can_improve = res.improving(family)
             
             if can_improve:
-                subfamilies += sketch.quotient.split(family, Synthesizer.incomplete_search)
+                subfamilies += quotient.split(family, Synthesizer.incomplete_search)
 
             if improving_value is not None:
                 break
@@ -192,5 +192,5 @@ def solve_batch(args):
         return (mdp_states, improving_value, improving_assignment, subfamilies)
 
     except:
-        print("some error")
+        print("meaningful error message")
         return None
