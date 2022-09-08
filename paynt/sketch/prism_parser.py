@@ -187,13 +187,5 @@ class PrismParser:
             optimality = OptimalityProperty(optimality, relative_error)
         specification = Specification(constraints,optimality)
 
-        logger.info(f"found the following specification: {self.specification}")
+        logger.info(f"found the following specification: {specification}")
         return specification
-
-
-
-
-    
-
-    
-    
