@@ -53,6 +53,8 @@ class PrismParser:
             quotient_mdp = jani_unfolder.quotient_mdp
             coloring = MdpColoring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
 
+        MarkovChain.initialize(specification)
+
         if prism.model_type != stormpy.storage.PrismModelType.DTMC:
             quotient_mdp = MarkovChain.from_prism(prism)
 
