@@ -199,8 +199,5 @@ class PrismParser:
             optimality = OptimalityProperty(optimality, relative_error)
         specification = Specification(constraints,optimality)
 
-        MarkovChain.initialize(specification)
-
         logger.info(f"found the following specification: {specification}")
         return specification
-
