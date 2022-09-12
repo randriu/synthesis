@@ -1,11 +1,16 @@
 from . import version
 
-from .sketch.sketch import Sketch
-from .synthesizers.synthesizer import *
-from .synthesizers.synthesizer_pomdp import SynthesizerPOMDP
-from .synthesizers.synthesizer_multicore_ar import SynthesizerMultiCoreAR
-from .synthesizers.quotient_pomdp import POMDPQuotientContainer
-from .synthesizers.synthesizer_switss import SynthesizerSwitss
+from .parser.sketch import Sketch
+from .quotient.quotient_pomdp import POMDPQuotientContainer
+
+from .synthesizer.synthesizer import Synthesizer
+from .synthesizer.synthesizer_onebyone import SynthesizerOneByOne
+from .synthesizer.synthesizer_ar import SynthesizerAR
+from .synthesizer.synthesizer_cegis import SynthesizerCEGIS
+from .synthesizer.synthesizer_hybrid import SynthesizerHybrid
+from .synthesizer.synthesizer_pomdp import SynthesizerPOMDP
+from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
+from .synthesizer.synthesizer_switss import SynthesizerSWITSS
 
 import click
 import sys
@@ -13,7 +18,7 @@ import os
 import cProfile, pstats
 
 import logging
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def setup_logger(log_path = None):
@@ -42,13 +47,15 @@ def setup_logger(log_path = None):
 
 
 @click.command()
-@click.option("--project", required=True, help="project path", )
-
+@click.option("--project", required=True, type=click.Path(exists=True),
+    help="project path")
 @click.option("--sketch", default="sketch.templ", show_default=True,
     help="name of the sketch file in the project")
 @click.option("--props", default="sketch.props", show_default=True,
     help="name of the properties file in the project")
-@click.option("--constants", default="", help="constant assignment string", )
+@click.option("--constants", default="", help="constant assignment string")
+@click.option("--relative-error", type=click.FLOAT, default="0", show_default=True,
+    help="relative error for optimal synthesis")
 
 @click.option("--filetype",
     type=click.Choice(['prism', 'drn', 'pomdp']),
@@ -63,6 +70,7 @@ def setup_logger(log_path = None):
     default="ar", show_default=True,
     help="synthesis method"
     )
+
 @click.option("--incomplete-search", is_flag=True, default=False,
     help="use incomplete search during synthesis")
 @click.option("--fsc-synthesis", is_flag=True, default=False,
@@ -71,8 +79,6 @@ def setup_logger(log_path = None):
     help="implicit memory size for POMDP FSCs")
 @click.option("--fsc-export-result", is_flag=True, default=False,
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
-@click.option("--hyperproperty", is_flag=True, default=False,
-    help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 @click.option(
     "--ce-generator",
     default="storm",
@@ -80,16 +86,17 @@ def setup_logger(log_path = None):
     show_default=True,
     help="counterexample generator",
 )
+@click.option("--profiling", is_flag=True, default=False,
+    help="run profiling")
 
 def paynt(
-        project,
-        sketch, props, constants,
+        project, sketch, props, constants, relative_error,
         filetype, export,
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty,
-        ce_generator
+        ce_generator,
+        profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -97,47 +104,45 @@ def paynt(
     Synthesizer.incomplete_search = incomplete_search
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
-    Sketch.hyperproperty_synthesis = hyperproperty
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    if not os.path.isdir(project):
-        raise ValueError(f"The project folder {project} does not exist")
     if not os.path.isfile(sketch_path):
-        raise ValueError(f"The sketch file {sketch_path} does not exist")
+        raise ValueError(f"the sketch file {sketch_path} does not exist")
     if not os.path.isfile(properties_path):
-        raise ValueError(f"The properties file {properties_path} does not exist")
+        raise ValueError(f"the properties file {properties_path} does not exist")
 
-    # parse sketch
-    sketch = Sketch(sketch_path, filetype, export, properties_path, constants)
+    quotient = Sketch.load_sketch(sketch_path, filetype, export,
+        properties_path, constants, relative_error)
 
     # choose the synthesis method and run the corresponding synthesizer
-    if sketch.is_pomdp and fsc_synthesis:
-        synthesizer = SynthesizerPOMDP(sketch, method)
+    if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
+        synthesizer = SynthesizerPOMDP(quotient, method)
     elif method == "onebyone":
-        synthesizer = Synthesizer1By1(sketch)
+        synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":
-        synthesizer = SynthesizerAR(sketch)
+        synthesizer = SynthesizerAR(quotient)
     elif method == "cegis":
         if ce_generator == "storm":
-            synthesizer = SynthesizerCEGIS(sketch)
+            synthesizer = SynthesizerCEGIS(quotient)
         elif ce_generator == "switss":
-            synthesizer = SynthesizerSwitss(sketch)
+            synthesizer = SynthesizerSWITSS(quotient)
     elif method == "hybrid":
-        synthesizer = SynthesizerHybrid(sketch)
+        synthesizer = SynthesizerHybrid(quotient)
     elif method == "ar_multicore":
-        synthesizer = SynthesizerMultiCoreAR(sketch)
+        synthesizer = SynthesizerMultiCoreAR(quotient)
     else:
         pass
     
-    # with cProfile.Profile() as pr:
-    #     synthesizer.run()
-    # stats = pr.create_stats()
-    # print(stats)
-    # pstats.Stats(pr).sort_stats('tottime').print_stats(10)
-    
-    synthesizer.run()
+    if not profiling:
+        synthesizer.run()
+    else:
+        with cProfile.Profile() as pr:
+            synthesizer.run()
+        stats = pr.create_stats()
+        print(stats)
+        pstats.Stats(pr).sort_stats('tottime').print_stats(10)
 
 
 def main():

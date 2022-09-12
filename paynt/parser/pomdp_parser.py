@@ -2,8 +2,6 @@ import stormpy
 
 from collections import defaultdict
 
-from . import sketch
-
 import os
 import re
 import uuid
@@ -48,14 +46,13 @@ class PomdpParser:
 
 
     @classmethod
-    def write_model_in_pomdp_solve_format(cls, path, quotient):
-
-        pomdp = quotient.pomdp
+    def write_model_in_pomdp_solve_format(cls, pomdp, output_path, property_path):
 
         num_states = pomdp.nr_states
         num_choices = pomdp.nr_choices
-        num_obs = quotient.observations
-        max_num_choices = max([quotient.actions_at_observation[obs] for obs in range(num_obs)])
+        num_obs = pomdp.nr_observations
+        max_num_choices = max([pomdp.get_nr_available_actions(state) for state in range(num_states)])
+
 
         desc = """\
 # auto-generated from PRISM program
@@ -122,9 +119,6 @@ observations: {}
                     desc += f"R: * : {state} : * : * {rew}\n"
         
         # ready to print
-        output_path = sketch.Sketch.substitute_suffix(path, '.', 'pomdp')
-        property_path = sketch.Sketch.substitute_suffix(path, '/', 'props.pomdp')
-
         logger.info("Writing POMDP in pomdp-solve format to {} ...".format(output_path))
         with open(output_path, 'w') as f:
             f.write(desc)
@@ -134,6 +128,7 @@ observations: {}
         logger.info("Write OK, aborting ...")
         exit()
 
+    
     @classmethod
     def read_pomdp_solve_format(cls, path):
 

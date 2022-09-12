@@ -1,7 +1,7 @@
 import stormpy
 import stormpy.synthesis
 
-from ..sketch.holes import Hole,Holes,DesignSpace
+from .holes import Hole,Holes,DesignSpace
 from .models import MarkovChain,MDP,DTMC
 from .coloring import MdpColoring
 
@@ -14,14 +14,17 @@ logger = logging.getLogger(__name__)
 
 class QuotientContainer:
 
-    def __init__(self, sketch):
-        # model origin
-        self.sketch = sketch
+    # if True, export the (labeled) optimal DTMC
+    export_optimal_dtmc = False
+
+    def __init__(self, quotient_mdp = None, coloring = None,
+        specification = None):
         
-        # qoutient MDP for the super-family
-        self.quotient_mdp = None
-        # coloring of the quotient
-        self.coloring = None
+        # colored qoutient MDP for the super-family
+        self.quotient_mdp = quotient_mdp
+        self.coloring = coloring
+        self.specification = specification
+        self.design_space = None
 
         # builder options
         self.subsystem_builder_options = stormpy.SubsystemBuilderOptions()
@@ -30,6 +33,10 @@ class QuotientContainer:
 
         # (optional) counter of discarded assignments
         self.discarded = None
+
+    def export_result(self, dtmc):
+        ''' to be overridden '''
+        pass
     
 
     def restrict_mdp(self, mdp, selected_actions_bv):
@@ -391,7 +398,7 @@ class QuotientContainer:
         design_subspaces = []
         
         family.splitter = splitter
-        parent_info = family.collect_parent_info(self.sketch.specification)
+        parent_info = family.collect_parent_info(self.specification)
         for suboption in suboptions:
             subholes = new_design_space.subholes(splitter, suboption)
             design_subspace = DesignSpace(subholes, parent_info)
@@ -407,9 +414,9 @@ class QuotientContainer:
         '''
         assert assignment.size == 1
         dtmc = self.build_chain(assignment)
-        res = dtmc.check_specification(self.sketch.specification)
+        res = dtmc.check_specification(self.specification)
         # opt_result = dtmc.model_check_property(opt_prop)
-        if res.constraints_result.all_sat and self.sketch.specification.optimality.improves_optimum(res.optimality_result.value):
+        if res.constraints_result.all_sat and self.specification.optimality.improves_optimum(res.optimality_result.value):
             return assignment, res.optimality_result.value
         else:
             return None, None
@@ -418,83 +425,13 @@ class QuotientContainer:
 
 class DTMCQuotientContainer(QuotientContainer):
     
-    def __init__(self, sketch, action_to_hole_options):
-        super().__init__(sketch)
+    def __init__(self, quotient_mdp, coloring, specification):
+        super().__init__(
+            quotient_mdp = quotient_mdp, coloring = coloring,
+            specification = specification)
 
-        self.quotient_mdp = self.sketch.explicit_quotient
+        self.design_space = DesignSpace(coloring.holes)
 
-        self.coloring = MdpColoring(self.quotient_mdp, self.sketch.design_space, action_to_hole_options)
-
-
-class CTMCQuotientContainer(QuotientContainer):
-    def __init__(self, *args):
-        super().__init__(*args)
-
-
-class MAQuotientContainer(QuotientContainer):
-    def __init__(self, *args):
-        super().__init__(*args)
-
-        # construct the quotient
-        self.quotient_mdp = self.sketch.explicit_quotient
-
-        # construct design space
-        holes = Holes()
-        hole_X = Hole("X", [0,1], ["alpha", "beta"])
-        holes.append(hole_X)
-        self.sketch.set_design_space(DesignSpace(holes))
-
-        # find state with valuation [s=0]
-        action_to_hole_options = [{0:0}, {0:1}, {}, {}, {}, {}]
-        self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
-        
-    
-class HyperPropertyQuotientContainer(QuotientContainer):
-    def __init__(self, *args):
-        super().__init__(*args)
-
-        # build the quotient
-        self.quotient_mdp = self.sketch.explicit_quotient
-
-        # to each state, construct a hole with options corresponding to actions
-        # available at this state; associate each action with the corresponding
-        # hole-option pair
-        holes = Holes()
-
-        assert self.quotient_mdp.has_choice_labeling()
-        assert self.quotient_mdp.has_state_valuations()
-
-        action_to_hole_options = []
-        for state in range(self.quotient_mdp.nr_states):
-            
-            # skip states without nondeterminism
-            num_actions = self.quotient_mdp.get_nr_available_actions(state)
-            if num_actions == 1:
-                action_to_hole_options.append({})
-                continue
-
-            # a hole to be created
-            hole_name = self.quotient_mdp.state_valuations.get_string(state)
-            hole_options = list(range(num_actions))
-
-            # extract labels for each option
-            hole_option_labels = []
-            for offset in range(num_actions):
-                choice = self.quotient_mdp.get_choice_index(state,offset)
-                labels = self.quotient_mdp.choice_labeling.get_labels_of_choice(choice)
-                hole_option_labels.append(labels)
-                action_to_hole_options.append({len(holes):offset})
-            hole_option_labels = [str(labels) for labels in hole_option_labels]
-
-            
-            hole = Hole(hole_name, hole_options, hole_option_labels)
-            holes.append(hole)
-        
-        # only now sketch has the corresponding design space
-        self.sketch.set_design_space(DesignSpace(holes))
-
-        # construct coloring
-        self.coloring = MdpColoring(self.quotient_mdp, holes, action_to_hole_options)
-
-        logger.info("Design space: {}".format(self.sketch.design_space.size))
+        # logger.info(f"sketch has {design_space.num_holes} holes")
+        # logger.info(f"design space size: {design_space.size}")
 

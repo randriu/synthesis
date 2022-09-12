@@ -1,7 +1,10 @@
 import stormpy
 
-from .property import Property, OptimalityProperty, Specification
-from .holes import Hole, Holes, DesignSpace
+from .jani import JaniUnfolder
+from ..quotient.property import Property, OptimalityProperty, Specification
+from ..quotient.holes import Hole, Holes, DesignSpace
+from ..quotient.models import MarkovChain
+from ..quotient.coloring import MdpColoring
 
 import os
 import re
@@ -10,14 +13,11 @@ import uuid
 import logging
 logger = logging.getLogger(__name__)
 
+
 class PrismParser:
 
     @classmethod
-    def read_prism_sketch(cls, sketch_path, constant_str):
-        '''
-        Read PRISM program from sketch_path; parse hole definitions (if any);
-        parse constant definitions and substitute these into the PRISM program.
-        '''
+    def read_prism(cls, sketch_path, constant_str, properties_path, relative_error):
 
         # parse the program
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
@@ -28,25 +28,39 @@ class PrismParser:
         # parse constants
         constant_map = None
         if constant_str != '':
-            logger.info(f"Assuming constant definitions: '{constant_str}' ...")
+            logger.info(f"assuming constant definitions '{constant_str}' ...")
             constant_map = PrismParser.map_constants(prism, expression_parser, constant_str)
             prism = prism.define_constants(constant_map)
             prism = prism.substitute_constants()
 
         # parse hole definitions
         hole_expressions = None
-        design_space = None
+        holes = None
         if len(hole_definitions) > 0:
-            logger.info("Processing hole definitions ...")
-            prism, hole_expressions, design_space = PrismParser.parse_holes(
+            logger.info("processing hole definitions...")
+            prism, hole_expressions, holes = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
-        
-        # success
-        return prism, hole_expressions, design_space, constant_map
 
-        
+        specification = PrismParser.parse_specification(properties_path, relative_error, prism, constant_map)
 
+        # construct the quotient
+        coloring = None
+        jani_unfolder = None
+        if prism.model_type == stormpy.storage.PrismModelType.DTMC:
+            # unfold hole options
+            jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, holes)
+            specification = jani_unfolder.specification
+            quotient_mdp = jani_unfolder.quotient_mdp
+            coloring = MdpColoring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
 
+        MarkovChain.initialize(specification)
+
+        if prism.model_type != stormpy.storage.PrismModelType.DTMC:
+            quotient_mdp = MarkovChain.from_prism(prism)
+
+        return quotient_mdp, specification, coloring, jani_unfolder
+
+    
     @classmethod
     def load_sketch_prism(cls, sketch_path):
         # read lines
@@ -97,7 +111,7 @@ class PrismParser:
         for constant_definition in constant_definitions:
             key_value = constant_definition.split("=")
             if len(key_value) != 2:
-                raise ValueError(f"Expected key=value pair, got '{constant_definition}'.")
+                raise ValueError(f"expected key=value pair, got '{constant_definition}'")
 
             expr = expression_parser.parse(key_value[1])
             name = key_value[0]
@@ -143,76 +157,49 @@ class PrismParser:
         prism = prism.define_constants(trivial_holes_definitions)
         prism = prism.substitute_constants()
     
-        design_space = DesignSpace(holes)
+        holes
 
-        return prism, hole_expressions, design_space
+        return prism, hole_expressions, holes
 
  
     @classmethod
-    def parse_specification(cls, properties_path, prism = None, constant_map = None):
+    def parse_specification(cls, properties_path, relative_error, prism = None, constant_map = None):
 
-        logger.info(f"Loading properties from {properties_path} ...")
-
-        # read lines
-        lines = []
+        logger.info(f"loading properties from {properties_path} ...")
+        lines = ""
         with open(properties_path) as file:
             for line in file:
-                # line = line.replace(" ", "")
-                line = line.replace("\n", "")
-                if not line or line == "" or line.startswith("//"):
-                    continue
-                lines.append(line)
-
-        # strip relative error
-        lines_properties = ""
-        relative_error_re = re.compile(r'^(.*)\{(.*?)\}(=\?.*?$)')
-        relative_error_str = None
-        for line in lines:
-            match = relative_error_re.search(line)
-            if match is not None:
-                relative_error_str = match.group(2)
-                line = match.group(1) + match.group(3)
-            lines_properties += line + ";"
-        optimality_epsilon = float(relative_error_str) if relative_error_str is not None else 0
-
-        # parse all properties
-        properties = []
-        optimality_property = None
-
+                lines += line + ";"
         if prism is not None:
-            props = stormpy.parse_properties_for_prism_program(lines_properties, prism)
+            props = stormpy.parse_properties_for_prism_program(lines, prism)
         else:
-            props = stormpy.parse_properties_without_context(lines_properties)
+            props = stormpy.parse_properties_without_context(lines)
+
+        # check properties
+        constraints = []
+        optimality = None
         for prop in props:
             rf = prop.raw_formula
-            assert rf.has_bound != rf.has_optimality_type, "optimizing formula contains a bound or a comparison formula does not"
+            assert rf.has_bound != rf.has_optimality_type, \
+                "optimizing formula contains a bound or a comparison formula does not"
             if rf.has_bound:
-                # comparison formula
-                properties.append(prop)
+                constraints.append(prop)
             else:
-                # optimality formula
-                assert optimality_property is None, "two optimality formulae specified"
-                optimality_property = prop
+                assert optimality is None, "more than one optimality formula specified"
+                optimality = prop
 
+        # substitute constants in properties
         if constant_map is not None:
-            # substitute constants in properties
-            for p in properties:
+            for p in constraints:
                 p.raw_formula.substitute(constant_map)
-            if optimality_property is not None:
-                optimality_property.raw_formula.substitute(constant_map)
+            if optimality is not None:
+                optimality.raw_formula.substitute(constant_map)
 
         # wrap properties
-        properties = [Property(p) for p in properties]
-        if optimality_property is not None:
-            optimality_property = OptimalityProperty(optimality_property, optimality_epsilon)
+        constraints = [Property(p) for p in constraints]
+        if optimality is not None:
+            optimality = OptimalityProperty(optimality, relative_error)
+        specification = Specification(constraints,optimality)
 
-        specification = Specification(properties,optimality_property)
+        logger.info(f"found the following specification: {specification}")
         return specification
-
-
-
-
-    
-
-    
-    

@@ -1,0 +1,62 @@
+pomdp
+
+// grid dimensions
+const int M_MAX = 3;
+const int X_MAX = M_MAX;
+const int Y_MAX = M_MAX;
+
+// number of placeable cells
+formula PC = (X_MAX+1)*(Y_MAX+1) - 2;
+
+// stages: 1) random placement 2) moving in the grid 3) goal reached
+formula placing = (x=-1) & (y=-1);
+
+formula goal = x=0 & y=Y_MAX;
+formula trap = x=X_MAX & y=0;
+
+formula moving = !placing & !goal & !trap;
+
+
+// coordinate updates
+formula xl = max(x-1,0);
+formula xr = min(x+1,X_MAX);
+
+formula yd = max(y-1,0);
+formula yu = min(y+1,Y_MAX);
+
+// slipping coefficient
+const double sl=0.1;
+
+// observables: placing, moving, targets/traps
+observable "moving" = moving;
+observable "goal" = goal;
+observable "trap" = trap;
+
+module grid
+    
+    x : [-1..X_MAX]; // x coordinate
+    y : [-1..Y_MAX]; // y coordinate
+        
+    // initially randomly placed within the grid (not at the target/trap)
+    [] placing ->
+    1/PC:(x'=0)&(y'=0) + 1/PC:(x'=0)&(y'=1) + 1/PC:(x'=0)&(y'=2)
+  + 1/PC:(x'=1)&(y'=0) + 1/PC:(x'=1)&(y'=1) + 1/PC:(x'=1)&(y'=2) + 1/PC:(x'=1)&(y'=3)
+  + 1/PC:(x'=2)&(y'=0) + 1/PC:(x'=2)&(y'=1) + 1/PC:(x'=2)&(y'=2) + 1/PC:(x'=2)&(y'=3)
+  + 1/PC:(x'=3)&(y'=1) + 1/PC:(x'=3)&(y'=2) + 1/PC:(x'=3)&(y'=3);
+            
+    // moving around the grid
+    [up]    moving -> (1-sl): (y'=yu) + sl: true;
+    [right] moving -> (1-sl): (x'=xr) + sl: true;
+    [down]  moving -> (1-sl): (y'=yd) + sl: true;
+    [left]  moving -> (1-sl): (x'=xl) + sl: true;
+
+    // target reached
+    // [done] goal -> true;
+    
+endmodule
+
+// reward structure for number of steps to reach the target
+rewards "steps"
+    moving : 1;
+endrewards
+

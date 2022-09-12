@@ -1,6 +1,6 @@
 import stormpy
 
-from ..sketch.holes import Hole,Holes
+from .holes import Hole,Holes
 
 import logging
 logger = logging.getLogger(__name__)

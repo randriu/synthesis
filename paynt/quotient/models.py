@@ -1,6 +1,6 @@
 import stormpy
 
-from ..sketch.property import *
+from .property import *
 
 from collections import OrderedDict
 
@@ -12,8 +12,9 @@ class MarkovChain:
     environment = None
 
     @classmethod
-    def initialize(cls, formulae):
+    def initialize(cls, specification):
         # builder options
+        formulae = specification.stormpy_formulae()
         cls.builder_options = stormpy.BuilderOptions(formulae)
         cls.builder_options.set_build_with_choice_origins(True)
         cls.builder_options.set_build_state_valuations(True)
@@ -33,6 +34,23 @@ class MarkovChain:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
+    
+    @classmethod
+    def from_prism(self, prism):
+        if prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]:
+            # TODO why do we disable choice labels here?
+            MarkovChain.builder_options.set_build_choice_labels(True)
+            model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
+            MarkovChain.builder_options.set_build_choice_labels(False)
+        if prism.model_type == stormpy.storage.PrismModelType.MA:
+            model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
+
+        og = model.labeling.get_states("overlap_guards").number_of_set_bits()
+        assert og == 0, "PRISM program contains overlapping guards"
+
+        return model
+
+    
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
@@ -41,9 +59,9 @@ class MarkovChain:
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
 
+        # TODO why is this computed here?
         # identify simple holes
-        tm = self.model.transition_matrix
-        design_space = self.quotient_container.sketch.design_space
+        design_space = quotient_container.design_space
         hole_to_states = [0 for hole in design_space]
         for state in range(self.states):
             for hole in quotient_container.coloring.state_to_holes[self.quotient_state_map[state]]:
