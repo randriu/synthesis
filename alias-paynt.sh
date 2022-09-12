@@ -6,7 +6,7 @@
 # multi-core compilation
 export COMPILE_JOBS=$(nproc)
 # single-core compilation:
-# export COMPILE_JOBS=1 
+# export COMPILE_JOBS=1
 
 # environment variables
 
@@ -42,7 +42,7 @@ prerequisites-download() {
     git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
     git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
     # TODO: use original SWITSS repo after merge request
-    git clone --depth 1 --branch paynt-integration https://github.com/JakubFrejlach/switss.git switss
+    # git clone --depth 1 --branch paynt-integration https://github.com/JakubFrejlach/switss.git switss
     cd -
 }
 
@@ -172,7 +172,7 @@ synthesis-install() {
     prerequisites-build-carl
     prerequisites-build-pycarl
     prerequisites-build-cvc5
-    prerequisites-build-switss
+    # prerequisites-build-switss
 
     # build storm & stormpy
     storm-config
