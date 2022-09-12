@@ -1,0 +1,6 @@
+//R{"steps"}min=? [F goal]
+//Pmax=? [F goal]
+//P<=.56 [ !trap U goal]
+//P>=.55 [ !trap U goal]
+Pmin=? [ !trap U goal]
+//Pmin=? [F trap]
