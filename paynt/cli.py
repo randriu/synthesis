@@ -113,6 +113,15 @@ def paynt(
     if not os.path.isfile(properties_path):
         raise ValueError(f"the properties file {properties_path} does not exist")
 
+    import stormpy.synthesis
+    # r = stormpy.synthesis.parse_madp("asdf")
+    r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/MADP/problems/dectiger.dpomdp")
+    # r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/MADP/problems/2generals.dpomdp")
+    # r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/pomdp/pomdp-solve-5.4/problems/network.POMDP")
+    # r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/pomdp/pomdp-solve-5.4/problems/network.POMDP")
+    print("stormpy returned: ", r)
+    exit()
+    
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
 
@@ -134,7 +143,7 @@ def paynt(
         synthesizer = SynthesizerMultiCoreAR(quotient)
     else:
         pass
-    
+
     if not profiling:
         synthesizer.run()
     else:
