@@ -72,6 +72,8 @@ def setup_logger(log_path = None):
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
 @click.option("--hyperproperty", is_flag=True, default=False,
     help="enable synthesis of an MDP scheduler wrt a hyperproperty")
+@click.option("--storm-file", is_flag=False, default=None,
+    help="storm result file")
 
 def paynt(
         project,
@@ -80,7 +82,7 @@ def paynt(
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty
+        hyperproperty, storm_file
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -89,6 +91,7 @@ def paynt(
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
     Sketch.hyperproperty_synthesis = hyperproperty
+    POMDPQuotientContainer.storm_file = storm_file
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)

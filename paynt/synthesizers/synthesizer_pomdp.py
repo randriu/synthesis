@@ -5,7 +5,7 @@ from .models import MarkovChain, DTMC, MDP
 from .quotient import QuotientContainer
 from .quotient_pomdp import POMDPQuotientContainer
 
-from .synthesizer import SynthesizerAR, SynthesizerHybrid
+from .synthesizer import SynthesizerARStorm, SynthesizerAR, SynthesizerHybrid
 from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 from ..profiler import Timer,Profiler
@@ -61,7 +61,7 @@ class SynthesizerPOMDP:
         self.sketch = sketch
         self.synthesizer = None
         if method == "ar":
-            self.synthesizer = SynthesizerAR
+            self.synthesizer = SynthesizerARStorm
         elif method == "ar_multicore":
             self.synthesizer = SynthesizerMultiCoreAR
         elif method == "hybrid":
@@ -89,6 +89,8 @@ class SynthesizerPOMDP:
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
         mem_size = POMDPQuotientContainer.initial_memory_size
+
+        #self.sketch.specification.optimality.update_optimum(26)
         while True:
         # for x in range(2):
             
@@ -98,11 +100,29 @@ class SynthesizerPOMDP:
                 self.sketch.quotient.set_imperfect_memory_size(mem_size)
             else:
                 self.sketch.quotient.set_global_memory_size(mem_size)
+
+            family = self.sketch.design_space
+
+            # DEBUG
+            restrictions = self.sketch.quotient.get_restrictions()
+            print(restrictions)
+
+            restricted_family = self.sketch.quotient.get_restricted_family(family)
+            restricted_subfamilies = self.sketch.quotient.get_restricted_subfamilies(family)
+
+            print(restricted_subfamilies)
+
+            self.synthesizer.subfamilies_buffer = restricted_subfamilies
+            self.synthesizer.unresticted_family = family
+            self.synthesizer.explored_restrictions = []
             
             # self.sketch.quotient.remove_simpler_controllers(mem_size)
             # self.sketch.quotient.design_space_counter()
-            self.synthesize(self.sketch.design_space)
+            self.synthesize(restricted_family)
             mem_size += 1
+            
+            #break
+
 
     
     def solve_mdp(self, family):
