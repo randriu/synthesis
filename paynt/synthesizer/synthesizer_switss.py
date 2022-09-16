@@ -1,12 +1,16 @@
-from opcode import hasconst
 import stormpy
-from scipy.sparse import dok_matrix
-
-from switss.model import MDP, ReachabilityForm
-from switss.model import DTMC as SWITSS_DTMC
-from switss.problem.qsheur import QSHeur
 
 from .synthesizer_cegis import SynthesizerCEGIS
+
+# import switss stuff if installed
+import importlib
+if importlib.util.find_spec('switss') is not None:
+    from switss.model import MDP, ReachabilityForm
+    from switss.model import DTMC as SWITSS_DTMC
+    from switss.problem.qsheur import QSHeur
+
+from opcode import hasconst
+from scipy.sparse import dok_matrix
 
 import logging
 logger = logging.getLogger(__name__)
