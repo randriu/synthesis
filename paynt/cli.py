@@ -58,7 +58,7 @@ def setup_logger(log_path = None):
     help="relative error for optimal synthesis")
 
 @click.option("--filetype",
-    type=click.Choice(['prism', 'drn', 'pomdp']),
+    type=click.Choice(['prism', 'drn', 'pomdp', 'dpomdp']),
     default="prism", show_default=True,
     help="input file format")
 @click.option("--export",
@@ -113,17 +113,10 @@ def paynt(
     if not os.path.isfile(properties_path):
         raise ValueError(f"the properties file {properties_path} does not exist")
 
-    import stormpy.synthesis
-    # r = stormpy.synthesis.parse_madp("asdf")
-    r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/MADP/problems/dectiger.dpomdp")
-    # r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/MADP/problems/2generals.dpomdp")
-    # r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/pomdp/pomdp-solve-5.4/problems/network.POMDP")
-    # r = stormpy.synthesis.parse_madp("/home/may/phd/synthesis/pomdp/pomdp/pomdp-solve-5.4/problems/network.POMDP")
-    print("stormpy returned: ", r)
-    exit()
-    
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
+
+    exit()
 
     # choose the synthesis method and run the corresponding synthesizer
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
