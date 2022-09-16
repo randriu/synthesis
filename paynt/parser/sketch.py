@@ -39,7 +39,7 @@ class Sketch:
             elif filetype == "pomdp":
                 explicit_quotient = PomdpParser.read_pomdp_solve(sketch_path)
             else: # filetype == "dpompd"
-                explicit_quotient = stormpy.synthesis.parse_madp(sketch_path)
+                explicit_quotient = stormpy.synthesis.parse_decpomdp(sketch_path)
                 # TODO specification
                 quotient_container = DecPomdpQuotientContainer(explicit_quotient)
                 return quotient_container

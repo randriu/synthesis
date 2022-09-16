@@ -20,7 +20,9 @@ class DecPomdpQuotientContainer(QuotientContainer):
     def __init__(self, decpomdp):
         
         self.decpomdp = decpomdp
-        print("dec-POMDP has ? agents and ? states")
+        assert decpomdp is not None
+        print(f"dec-POMDP has {decpomdp.num_agents} agents and {decpomdp.num_states} states")
+        print("exiting...")
         exit()
         
 
