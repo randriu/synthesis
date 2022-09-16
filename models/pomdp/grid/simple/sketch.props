@@ -1,7 +1,0 @@
-// minimum steps to reach goal
-R{"steps"}min=? [ F "goal" ]
-
-// max probability reach goal (use with step bound property)
-//Pmax=? [ F "goal" ]
-
-
