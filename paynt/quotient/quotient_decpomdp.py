@@ -22,6 +22,8 @@ class DecPomdpQuotientContainer(QuotientContainer):
         self.decpomdp = decpomdp
         assert decpomdp is not None
         print(f"dec-POMDP has {decpomdp.num_agents} agents and {decpomdp.num_states} states")
+        print("reward vectors:")
+        print(decpomdp.row_reward)
         print("exiting...")
         exit()
         

@@ -116,8 +116,6 @@ def paynt(
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
 
-    exit()
-
     # choose the synthesis method and run the corresponding synthesizer
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method)
