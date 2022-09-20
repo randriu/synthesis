@@ -4,6 +4,7 @@ from .prism_parser import PrismParser
 from .pomdp_parser import PomdpParser
 from ..quotient.quotient import *
 from ..quotient.quotient_pomdp import POMDPQuotientContainer
+from ..quotient.quotient_decpomdp import DecPomdpQuotientContainer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -35,15 +36,21 @@ class Sketch:
         else:
             if filetype == "drn":
                 explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
-            else: #filetype == "pomdp"
+            elif filetype == "pomdp":
                 explicit_quotient = PomdpParser.read_pomdp_solve(sketch_path)
+            else: # filetype == "dpompd"
+                explicit_quotient = stormpy.synthesis.parse_decpomdp(sketch_path)
+                # TODO specification
+                quotient_container = DecPomdpQuotientContainer(explicit_quotient)
+                return quotient_container
             specification = PrismParser.parse_specification(properties_path, relative_error)
+        
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
         specification.check()
         if specification.contains_until_properties() and filetype != "prism":
-            logger.info("WARNING: using until formula with non-PRISM input")
+            logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
         specification.transform_until_to_eventually()
 
         if export is not None:

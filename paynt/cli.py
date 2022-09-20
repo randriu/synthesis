@@ -58,7 +58,7 @@ def setup_logger(log_path = None):
     help="relative error for optimal synthesis")
 
 @click.option("--filetype",
-    type=click.Choice(['prism', 'drn', 'pomdp']),
+    type=click.Choice(['prism', 'drn', 'pomdp', 'dpomdp']),
     default="prism", show_default=True,
     help="input file format")
 @click.option("--export",
@@ -141,7 +141,7 @@ def paynt(
         synthesizer = SynthesizerMultiCoreAR(quotient)
     else:
         pass
-    
+
     if not profiling:
         synthesizer.run()
     else:

@@ -1,0 +1,102 @@
+dtmc
+
+// constants used in renaming (identities of cryptographers)
+const int p1 = 1;
+const int p2 = 2;
+const int p3 = 3;
+
+hole int A_true_0_0 in {0,1};
+hole int A_true_0_1 in {0,1};
+hole int A_true_1_0 in {0,1};
+hole int A_true_1_1 in {0,1};
+hole int A_false_0_0 in {0,1};
+hole int A_false_0_1 in {0,1};
+hole int A_false_1_0 in {0,1};
+hole int A_false_1_1 in {0,1};
+
+hole int D_0_0_0 in {0,1};
+hole int D_0_0_1 in {0,1};
+hole int D_0_1_0 in {0,1};
+hole int D_0_1_1 in {0,1};
+hole int D_1_0_0 in {0,1};
+hole int D_1_0_1 in {0,1};
+hole int D_1_1_0 in {0,1};
+hole int D_1_1_1 in {0,1};
+
+module stages
+	
+  clk : [0..3];
+  // 0->1 choose payer
+  // 1->2 toss coin
+  // 2->3 read coin & state result
+  // 3->4 declare who is the payer
+  [choose_payer] clk = 0 -> (clk' = clk+1);
+  [toss_coin] clk = 1 -> (clk' = clk+1);
+  [announce]  clk = 2 -> (clk' = clk+1);
+  [declare]   clk = 3 -> (clk' = clk+1);
+endmodule
+
+
+// module for first cryptographer
+module crypt1
+  
+  coin1 : [0..1]; // result of the coin toss
+  announce1 : [0..1]; // announced result
+
+  [toss_coin] true -> 0.5 : (coin1'=0) + 0.5 : (coin1'=1);
+  
+  [announce] payer=p1 & coin1=0 & coin2=0 -> (announce1'=A_true_0_0);
+  [announce] payer=p1 & coin1=0 & coin2=1 -> (announce1'=A_true_0_1);
+  [announce] payer=p1 & coin1=1 & coin2=0 -> (announce1'=A_true_1_0);
+  [announce] payer=p1 & coin1=1 & coin2=1 -> (announce1'=A_true_1_1);
+  
+  [announce] payer!=p1 & coin1=0 & coin2=0 -> (announce1'=A_false_0_0);
+  [announce] payer!=p1 & coin1=0 & coin2=1 -> (announce1'=A_false_0_1);
+  [announce] payer!=p1 & coin1=1 & coin2=0 -> (announce1'=A_false_1_0);
+  [announce] payer!=p1 & coin1=1 & coin2=1 -> (announce1'=A_false_1_1);
+
+endmodule
+
+module payment
+  // true payer identity (0 - NSA, 1..3 - cryptographers)
+  payer : [0..3];
+  
+  // announced payer identity (false - NSA, true - cryptographers)
+  declared_payer : [0..1];
+
+  [choose_payer] true -> 1/4:(payer'=0) + 1/4:(payer'=1) + 1/4:(payer'=2) + 1/4:(payer'=3);
+
+  [declare] announce1=0 & announce2=0 & announce3=0 -> (declared_payer'=D_0_0_0);
+  [declare] announce1=0 & announce2=0 & announce3=1 -> (declared_payer'=D_0_0_1);
+  [declare] announce1=0 & announce2=1 & announce3=0 -> (declared_payer'=D_0_1_0);
+  [declare] announce1=0 & announce2=1 & announce3=1 -> (declared_payer'=D_0_1_1);
+
+  [declare] announce1=1 & announce2=0 & announce3=0 -> (declared_payer'=D_1_0_0);
+  [declare] announce1=1 & announce2=0 & announce3=1 -> (declared_payer'=D_1_0_1);
+  [declare] announce1=1 & announce2=1 & announce3=0 -> (declared_payer'=D_1_1_0);
+  [declare] announce1=1 & announce2=1 & announce3=1 -> (declared_payer'=D_1_1_1);
+
+endmodule
+
+// construct further cryptographers through renaming
+module crypt2 = crypt1 [ coin1=coin2, p1=p2, announce1=announce2, coin2=coin3 ] endmodule
+module crypt3 = crypt1 [ coin1=coin3, p1=p3, announce1=announce3, coin2=coin1 ] endmodule
+
+//
+formula nsa_payed = (payer=0);
+formula nsa_declared = (declared_payer=0);
+
+// when protocol has finished
+formula done = (clk=3);
+
+// protocol correct when, upon finishing, the declared payer is consistent with
+// the identity of the true payer
+//formula correct = done & ( payer = nsa_declared );
+formula correct = done & ( (nsa_payed & nsa_declared) |  (!nsa_payed & !nsa_declared));
+
+// unique integer encoding announced result
+//formula outcome = 1*announce1 + 2*announce2 + 4*announce3;
+
+// P[F correct] = 1
+
+

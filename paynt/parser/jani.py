@@ -37,6 +37,7 @@ class JaniUnfolder():
         properties = [Property(p) for p in properties]
         optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
         self.specification = Specification(properties,optimality_property)
+        print(self.specification)
         MarkovChain.initialize(self.specification)
 
         # unfold holes in the program
@@ -206,8 +207,9 @@ class JaniUnfolder():
         return new_edge
 
     def write_jani(self, sketch_path):
-        output_path = Sketch.substitute_suffix(sketch_path, '.', 'jani')
+        from . import sketch
+        output_path = sketch.Sketch.substitute_suffix(sketch_path, '.', 'jani')
         logger.debug(f"Writing unfolded program to {output_path}")
         with open(output_path, "w") as f:
-            f.write(str(jani_program))
+            f.write(str(self.jani_unfolded))
         logger.debug("Write OK, aborting...")
