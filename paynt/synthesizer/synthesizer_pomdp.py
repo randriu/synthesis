@@ -2,6 +2,7 @@ import stormpy
 
 from .statistic import Statistic
 from .synthesizer_ar import SynthesizerAR
+from .synthesizer_ar_storm import SynthesizerARStorm
 from .synthesizer_hybrid import SynthesizerHybrid
 from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
@@ -10,6 +11,8 @@ from ..quotient.models import MarkovChain, DTMC, MDP
 from ..quotient.quotient import QuotientContainer
 from ..quotient.quotient_pomdp import POMDPQuotientContainer
 from ..utils.profiler import Timer
+
+from ..quotient.storm_pomdp_control import StormPOMDPControl
 
 import math
 from collections import defaultdict
@@ -55,16 +58,21 @@ class HoleTree:
 
 class SynthesizerPOMDP:
 
-    def __init__(self, quotient, method):
+    def __init__(self, quotient, method, use_storm):
         self.quotient = quotient
+        self.use_storm = use_storm
         self.synthesizer = None
         if method == "ar":
-            self.synthesizer = SynthesizerARStorm
+            self.synthesizer = SynthesizerAR
         elif method == "ar_multicore":
             self.synthesizer = SynthesizerMultiCoreAR
         elif method == "hybrid":
             self.synthesizer = SynthesizerHybrid
         self.total_iters = 0
+
+        if use_storm:
+            self.storm_control = StormPOMDPControl()
+            self.synthesizer = SynthesizerARStorm
 
     def print_stats(self):
         pass
@@ -80,8 +88,8 @@ class SynthesizerPOMDP:
         self.total_iters += synthesizer.stat.iterations_mdp
         return assignment
 
-
-    def strategy_iterative(self, unfold_imperfect_only):
+    # iterative strategy using Storm analysis to enhance the synthesis
+    def strategy_iterative_storm(self, unfold_imperfect_only):
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
@@ -96,36 +104,50 @@ class SynthesizerPOMDP:
             if unfold_imperfect_only:
                 self.quotient.set_imperfect_memory_size(mem_size)
             else:
-                self.sketch.quotient.set_global_memory_size(mem_size)
+                self.quotient.set_global_memory_size(mem_size)
 
-            family = self.sketch.design_space
+            family = self.quotient.design_space
 
-            # DEBUG
-            restrictions = self.sketch.quotient.get_restrictions()
-            print(restrictions)
+            main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
 
-            restricted_family = self.sketch.quotient.get_restricted_family(family)
-            restricted_subfamilies = self.sketch.quotient.get_restricted_subfamilies(family)
+            # debug
+            #print(self.storm_control.storm_result_dict)  
+            print(main_family)
+            print(subfamily_restrictions)
 
-            print(restricted_subfamilies)
-
-            self.synthesizer.subfamilies_buffer = restricted_subfamilies
+            self.synthesizer.subfamilies_buffer = subfamily_restrictions
             self.synthesizer.unresticted_family = family
             self.synthesizer.explored_restrictions = []
-            
-            # self.sketch.quotient.remove_simpler_controllers(mem_size)
-            # self.sketch.quotient.design_space_counter()
-            self.synthesize(restricted_family)
-                self.quotient.set_global_memory_size(mem_size)
-            
-            # self.quotient.remove_simpler_controllers(mem_size)
-            # self.quotient.design_space_counter()
+        
+            self.synthesize(main_family)
+            self.quotient.set_global_memory_size(mem_size)
+
             self.synthesize(self.quotient.design_space)
             mem_size += 1
             
             #break
 
 
+    def strategy_iterative(self, unfold_imperfect_only):
+        '''
+        @param unfold_imperfect_only if True, only imperfect observations will be unfolded
+        '''
+        mem_size = POMDPQuotientContainer.initial_memory_size
+        while True:
+        # for x in range(2):
+            
+            POMDPQuotientContainer.current_family_index = mem_size
+            logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
+            if unfold_imperfect_only:
+                self.quotient.set_imperfect_memory_size(mem_size)
+            else:
+                self.quotient.set_global_memory_size(mem_size)
+            
+            # self.quotient.remove_simpler_controllers(mem_size)
+            # self.quotient.design_space_counter()
+            self.synthesize(self.quotient.design_space)
+            mem_size += 1
     
     def solve_mdp(self, family):
 
@@ -618,9 +640,18 @@ class SynthesizerPOMDP:
     def run(self):
         # choose the synthesis strategy:
 
-        # self.strategy_expected_uai()
-        # self.strategy_iterative(unfold_imperfect_only=False)
-        self.strategy_iterative(unfold_imperfect_only=True)
+        if self.use_storm:
+            logger.info("Using Storm to enhance synthesis")
+            
+            self.storm_control.run_storm_analysis(self.quotient.pomdp, self.quotient.specification.stormpy_formulae())
+            self.storm_control.parse_storm_result(self.quotient)
+
+            self.strategy_iterative_storm(unfold_imperfect_only=True)
+        else:
+
+            # self.strategy_expected_uai()
+            # self.strategy_iterative(unfold_imperfect_only=False)
+            self.strategy_iterative(unfold_imperfect_only=True)
 
 
 

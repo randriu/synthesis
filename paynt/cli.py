@@ -81,8 +81,8 @@ def setup_logger(log_path = None):
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
 @click.option("--hyperproperty", is_flag=True, default=False,
     help="enable synthesis of an MDP scheduler wrt a hyperproperty")
-@click.option("--storm-file", is_flag=False, default=None,
-    help="storm result file")
+@click.option("--storm-pomdp-analysis", is_flag=True, default=False,
+    help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
 @click.option(
     "--ce-generator",
     default="storm",
@@ -99,7 +99,7 @@ def paynt(
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty, storm_file
+        hyperproperty, storm_pomdp_analysis,
         ce_generator,
         profiling
 ):
@@ -110,7 +110,6 @@ def paynt(
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
     Sketch.hyperproperty_synthesis = hyperproperty
-    POMDPQuotientContainer.storm_file = storm_file
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
@@ -125,7 +124,7 @@ def paynt(
 
     # choose the synthesis method and run the corresponding synthesizer
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
-        synthesizer = SynthesizerPOMDP(quotient, method)
+        synthesizer = SynthesizerPOMDP(quotient, method, storm_pomdp_analysis)
     elif method == "onebyone":
         synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":

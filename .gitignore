@@ -5,5 +5,5 @@ prerequisites/
 storm/
 stormpy/
 
-paynt/build/
-paynt/paynt.egg-info/
+build/
+paynt.egg-info/
