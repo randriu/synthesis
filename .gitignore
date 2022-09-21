@@ -7,3 +7,5 @@ stormpy/
 
 build/
 paynt.egg-info/
+
+experiments/

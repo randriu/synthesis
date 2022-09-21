@@ -10,10 +10,11 @@ class SynthesizerARStorm(Synthesizer):
     exploration_order_dfs = True
 
     # buffer containing subfamilies to be checked after the main restricted family
-    subfamilies_buffer = []
+    subfamilies_buffer = None
 
-    unresticted_family = []
+    unresticted_family = None
 
+    # list of explored restrictions
     explored_restrictions = []
 
     @property

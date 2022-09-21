@@ -58,6 +58,10 @@ class StormPOMDPControl:
             # debug
             #print(state.id, state.labels, get_choice_label(state.id))
 
+            # TODO what if there were no labels in the model?
+            if get_choice_label(state.id) == set():
+                continue
+
             # parse non cut-off states
             if 'cutoff' not in state.labels:
                 for label in state.labels:
@@ -103,8 +107,9 @@ class StormPOMDPControl:
                     cutoff_epxloration.remove(int(scheduler_index))
 
         # removing unrestricted observations
-        for obs, actions in result.items():
-            if len(actions) == 0:
+        observations = list(result.keys())
+        for obs in observations:
+            if len(result[obs]) == 0:
                 del result[obs]
 
         self.storm_result_dict = result           
@@ -210,6 +215,9 @@ class StormPOMDPControl:
             for obs_holes, index in zip(quotient.observation_action_holes, range(len(quotient.observation_action_holes))):
                 if hole in obs_holes:
                     obs = index
+
+            if len(self.storm_result_dict[obs]) == quotient.actions_at_observation[obs]:
+                continue
 
             subfamilies.append({"hole": hole, "restriction": self.storm_result_dict[obs]})
 

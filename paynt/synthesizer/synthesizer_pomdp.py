@@ -89,7 +89,7 @@ class SynthesizerPOMDP:
         return assignment
 
     # iterative strategy using Storm analysis to enhance the synthesis
-    def strategy_iterative_storm(self, unfold_imperfect_only):
+    def strategy_iterative_storm(self, unfold_imperfect_only, unfold_storm=True):
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
@@ -106,6 +106,18 @@ class SynthesizerPOMDP:
             else:
                 self.quotient.set_global_memory_size(mem_size)
 
+            # unfold memory according to Storm data
+            if unfold_storm:
+                for obs, actions in self.storm_control.storm_result_dict.items():
+                    needed_memory = len(actions) - self.quotient.observation_memory_size[obs]
+
+                    if needed_memory > 0:
+
+                        for _ in range(needed_memory):
+                            self.quotient.increase_memory_size(obs)
+
+                        logger.info(f'Added {needed_memory} memory nodes for observation {obs} based on Storm data')
+
             family = self.quotient.design_space
 
             main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
@@ -113,13 +125,24 @@ class SynthesizerPOMDP:
 
             # debug
             #print(self.storm_control.storm_result_dict)  
-            print(main_family)
-            print(subfamily_restrictions)
+            #print(main_family)
+            #print(subfamily_restrictions)
+            #print(main_family.size)
+
 
             self.synthesizer.subfamilies_buffer = subfamily_restrictions
             self.synthesizer.unresticted_family = family
             self.synthesizer.explored_restrictions = []
         
+            # debug
+            #synthesizer = self.synthesizer(self.quotient)
+            #while synthesizer.subfamilies_buffer:
+            #    subfamily_restriction = synthesizer.subfamilies_buffer.pop(0)
+            #    synthesizer.explored_restrictions.append(subfamily_restriction)
+            #    subfamily = synthesizer.create_subfamily(subfamily_restriction["hole"])
+            #    print(subfamily_restriction["restriction"], subfamily.size, subfamily)
+            #break
+
             self.synthesize(main_family)
             self.quotient.set_global_memory_size(mem_size)
 
@@ -646,7 +669,8 @@ class SynthesizerPOMDP:
             self.storm_control.run_storm_analysis(self.quotient.pomdp, self.quotient.specification.stormpy_formulae())
             self.storm_control.parse_storm_result(self.quotient)
 
-            self.strategy_iterative_storm(unfold_imperfect_only=True)
+            self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=False)
+            #self.strategy_iterative_storm(unfold_imperfect_only=True)
         else:
 
             # self.strategy_expected_uai()
