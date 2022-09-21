@@ -106,17 +106,29 @@ class SynthesizerPOMDP:
             else:
                 self.quotient.set_global_memory_size(mem_size)
 
-            # unfold memory according to Storm data
-            if unfold_storm:
-                for obs, actions in self.storm_control.storm_result_dict.items():
-                    needed_memory = len(actions) - self.quotient.observation_memory_size[obs]
+            # unfold memory according to Storm data #1
+            # if unfold_storm:
+            #     for obs, actions in self.storm_control.storm_result_dict.items():
+            #         needed_memory = len(actions) - self.quotient.observation_memory_size[obs]
 
-                    if needed_memory > 0:
+            #         if needed_memory > 0:
 
-                        for _ in range(needed_memory):
-                            self.quotient.increase_memory_size(obs)
+            #             for _ in range(needed_memory):
+            #                 self.quotient.increase_memory_size(obs)
 
-                        logger.info(f'Added {needed_memory} memory nodes for observation {obs} based on Storm data')
+            #             logger.info(f'Added {needed_memory} memory nodes for observation {obs} based on Storm data')
+
+            # unfold memory according to Storm data #2
+            # if unfold_storm:
+            #     for obs, actions in self.storm_control.storm_result_dict.items():
+            #         needed_memory = len(actions) - self.quotient.observation_memory_size[obs]
+
+            #         if needed_memory > 0:
+
+            #             for _ in range(needed_memory):
+            #                 self.quotient.increase_memory_size(obs)
+
+            #             logger.info(f'Added {needed_memory} memory nodes for observation {obs} based on Storm data')
 
             family = self.quotient.design_space
 
@@ -144,9 +156,7 @@ class SynthesizerPOMDP:
             #break
 
             self.synthesize(main_family)
-            self.quotient.set_global_memory_size(mem_size)
 
-            self.synthesize(self.quotient.design_space)
             mem_size += 1
             
             #break
@@ -668,6 +678,14 @@ class SynthesizerPOMDP:
             
             self.storm_control.run_storm_analysis(self.quotient.pomdp, self.quotient.specification.stormpy_formulae())
             self.storm_control.parse_storm_result(self.quotient)
+
+            # Use storm value result as lower-bound
+            logger.info("Updating the lower-bound based on Storm's result")
+            epsilon = 0.01
+            if self.quotient.specification.optimality.minimizing:
+                self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.upper_bound + epsilon)
+            else:
+                self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound - epsilon)
 
             self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=False)
             #self.strategy_iterative_storm(unfold_imperfect_only=True)
