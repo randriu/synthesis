@@ -4,3 +4,6 @@ env/
 prerequisites/
 storm/
 stormpy/
+
+# Visual Studio Code settings
+.vscode/
