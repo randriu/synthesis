@@ -63,7 +63,8 @@ class SynthesizerSWITSS(SynthesizerCEGIS):
             if prop.minimizing:
                 switss_dtmc_rf, _, _ = ReachabilityForm.reduce(switss_dtmc, "init", target_label)
                 results = list(ce_generator.solveiter(switss_dtmc_rf, threshold, "max", ignore_consistency_checks=True))
-                witnessing_subsystem = results[-1].subsystem.subsys.system # TODO: remove unreachable states
+                witnessing_subsystem = results[-1].subsystem.subsys.system
+                witnessing_subsystem = SWITSS_DTMC.remove_unreachable_states(witnessing_subsystem, init_label="init")
 
                 conflict = set([int(label) for label in witnessing_subsystem.states_by_label.keys() if label.isnumeric()])
                 conflict = list(conflict)
@@ -96,7 +97,8 @@ class SynthesizerSWITSS(SynthesizerCEGIS):
                 transformed_switss_dtmc = SWITSS_DTMC(new_transation_matrix, label_to_states=labels)
                 switss_dtmc_rf,_,_ = ReachabilityForm.reduce(transformed_switss_dtmc, "init", target_label)
                 results = list(ce_generator.solveiter(switss_dtmc_rf, threshold, "max", ignore_consistency_checks=True))
-                witnessing_subsystem = results[-1].subsystem.subsys.system # TODO: remove unreachable states
+                witnessing_subsystem = results[-1].subsystem.subsys.system
+                witnessing_subsystem = SWITSS_DTMC.remove_unreachable_states(witnessing_subsystem, init_label="init")
 
                 conflict = set()
                 for state_label in witnessing_subsystem.states_by_label.keys():
@@ -110,4 +112,4 @@ class SynthesizerSWITSS(SynthesizerCEGIS):
             conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
             conflicts.append(conflict)
 
-        return conflicts    
+        return conflicts
