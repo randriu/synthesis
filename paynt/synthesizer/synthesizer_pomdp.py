@@ -106,6 +106,8 @@ class SynthesizerPOMDP:
             else:
                 self.quotient.set_global_memory_size(mem_size)
 
+            family = self.quotient.design_space
+
             # unfold memory according to Storm data #1
             # if unfold_storm:
             #     for obs, actions in self.storm_control.storm_result_dict.items():
@@ -118,28 +120,17 @@ class SynthesizerPOMDP:
 
             #             logger.info(f'Added {needed_memory} memory nodes for observation {obs} based on Storm data')
 
-            # unfold memory according to Storm data #2
-            # if unfold_storm:
-            #     for obs, actions in self.storm_control.storm_result_dict.items():
-            #         needed_memory = len(actions) - self.quotient.observation_memory_size[obs]
-
-            #         if needed_memory > 0:
-
-            #             for _ in range(needed_memory):
-            #                 self.quotient.increase_memory_size(obs)
-
-            #             logger.info(f'Added {needed_memory} memory nodes for observation {obs} based on Storm data')
-
-            family = self.quotient.design_space
 
             main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
             subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+            #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions_symmetry_breaking(self.quotient)
 
             # debug
             #print(self.storm_control.storm_result_dict)  
             #print(main_family)
             #print(subfamily_restrictions)
             #print(main_family.size)
+            #break
 
 
             self.synthesizer.subfamilies_buffer = subfamily_restrictions
@@ -680,12 +671,12 @@ class SynthesizerPOMDP:
             self.storm_control.parse_storm_result(self.quotient)
 
             # Use storm value result as lower-bound
-            logger.info("Updating the lower-bound based on Storm's result")
-            epsilon = 0.01
-            if self.quotient.specification.optimality.minimizing:
-                self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.upper_bound + epsilon)
-            else:
-                self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound - epsilon)
+            #logger.info("Updating the lower-bound based on Storm's result")
+            #epsilon = 0.01
+            #if self.quotient.specification.optimality.minimizing:
+            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.upper_bound + epsilon)
+            #else:
+            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound - epsilon)
 
             self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=False)
             #self.strategy_iterative_storm(unfold_imperfect_only=True)

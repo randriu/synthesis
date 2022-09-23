@@ -27,15 +27,19 @@ class SynthesizerARStorm(Synthesizer):
 
         for exp_hole in self.explored_restrictions:
 
-            if exp_hole["hole"] == hole:
-                selected_actions = [action for action in subfamily[exp_hole["hole"]].options if action not in exp_hole["restriction"]]
+            if hole in exp_hole["holes"]:
+                selected_actions = [action for action in subfamily[hole].options if action not in exp_hole["restriction"]]
             else:
                 selected_actions = exp_hole["restriction"]
 
             if len(selected_actions) == 0:
                 continue
 
-            subfamily[exp_hole["hole"]].assume_options(selected_actions)
+            if hole in exp_hole["holes"]:
+                subfamily[hole].assume_options(selected_actions)
+            else:
+                for h in exp_hole["holes"]:
+                    subfamily[h].assume_options(selected_actions)
 
         return subfamily
 
@@ -124,7 +128,7 @@ class SynthesizerARStorm(Synthesizer):
 
             self.explored_restrictions.append(subfamily_restriction)
 
-            subfamily = self.create_subfamily(subfamily_restriction["hole"])
+            subfamily = self.create_subfamily(subfamily_restriction["holes"][0])
 
             families = [subfamily]
 

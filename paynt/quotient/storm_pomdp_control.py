@@ -219,7 +219,31 @@ class StormPOMDPControl:
             if len(self.storm_result_dict[obs]) == quotient.actions_at_observation[obs]:
                 continue
 
-            subfamilies.append({"hole": hole, "restriction": self.storm_result_dict[obs]})
+            subfamilies.append({"holes": [hole], "restriction": self.storm_result_dict[obs]})
+
+            # debug
+            #print(obs, subfamily.size, subfamily)
+            #subfamilies_size += subfamily.size
+
+        # debug
+        #print(subfamilies_size)
+
+        return subfamilies
+
+
+
+        # returns dictionary containing restrictions for easy creation of subfamilies
+    def get_subfamilies_restrictions_symmetry_breaking(self, quotient):
+
+        subfamilies = []
+
+
+        for obs in self.storm_result_dict.keys():
+
+            if len(self.storm_result_dict[obs]) == quotient.actions_at_observation[obs]:
+                continue
+
+            subfamilies.append({"holes": quotient.observation_action_holes[obs], "restriction": self.storm_result_dict[obs]})
 
             # debug
             #print(obs, subfamily.size, subfamily)
