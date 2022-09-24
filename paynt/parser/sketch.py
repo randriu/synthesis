@@ -44,6 +44,7 @@ class Sketch:
                 quotient_container = DecPomdpQuotientContainer(explicit_quotient)
                 return quotient_container
             specification = PrismParser.parse_specification(properties_path, relative_error)
+            MarkovChain.initialize(specification)
         
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
