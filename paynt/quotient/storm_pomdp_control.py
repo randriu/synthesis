@@ -1,4 +1,5 @@
 from ast import Pass
+from unittest import result
 import stormpy
 import stormpy.synthesis
 import stormpy.pomdp
@@ -14,9 +15,18 @@ class StormPOMDPControl:
     # holds object representing the latest Storm result
     latest_storm_result = None
 
-    # parsed Storm data dictionary
-    storm_result_dict = {}
-    #storm_result_dict_no_cutoffs = {} # possible TODO
+    latest_paynt_result = None
+
+    # parsed best result data dictionary (Starting with data from Storm)
+    result_dict = {}
+    result_dict_no_cutoffs = {}
+
+    # under-approximation value from Storm
+    storm_bounds = None
+
+    is_storm_better = True
+
+
 
     def __init__(self):
         pass
@@ -45,6 +55,16 @@ class StormPOMDPControl:
 
         self.latest_storm_result = result
 
+    def parse_result(self, quotient):
+        if self.is_storm_better:
+            self.parse_storm_result(quotient)
+        else:
+            if self.latest_paynt_result is not None:
+                self.parse_paynt_result(quotient)
+            else:
+                self.result_dict = {}
+            self.result_dict_no_cutoffs = self.result_dict
+
     # parse Storm results into a dictionary
     def parse_storm_result(self, quotient):
         # to make the code cleaner
@@ -53,6 +73,7 @@ class StormPOMDPControl:
         cutoff_epxloration = [x for x in range(len(self.latest_storm_result.cutoff_schedulers))]
 
         result = {x:[] for x in range(quotient.observations)}
+        result_no_cutoffs = {x:[] for x in range(quotient.observations)}
         
         for state in self.latest_storm_result.induced_mc_from_scheduler.states:
             # debug
@@ -77,6 +98,9 @@ class StormPOMDPControl:
 
                         if index >= 0 and index not in result[int(observation)]:
                             result[int(observation)].append(index)
+
+                        if index >= 0 and index not in result_no_cutoffs[int(observation)]:
+                            result_no_cutoffs[int(observation)].append(index)
             # parse cut-off states
             else:
                 if len(cutoff_epxloration) == 0:
@@ -112,7 +136,17 @@ class StormPOMDPControl:
             if len(result[obs]) == 0:
                 del result[obs]
 
-        self.storm_result_dict = result           
+            if len(result_no_cutoffs[obs]) == 0:
+                del result_no_cutoffs[obs]
+
+        if quotient.specification.optimality.minimizing:
+            self.storm_bounds = self.latest_storm_result.upper_bound
+        else:
+            self.storm_bounds = self.latest_storm_result.lower_bound
+
+        logger.info("Result dictionary is based on result from Storm")
+        self.result_dict = result    
+        self.result_dict_no_cutoffs = result_no_cutoffs       
             
 
     # help function for cut-off parsing, returns list of actions for given choice_string
@@ -138,8 +172,38 @@ class StormPOMDPControl:
 
         return result
 
+    def parse_paynt_result(self, quotient):
+
+        result = {x:[] for x in range(quotient.observations)}
+        
+        for hole in self.latest_paynt_result:
+            if hole.name.startswith('M'):
+                continue
+            name = hole.name.strip('A()')
+            obs = name.split(',')[0]
+
+            if hole.options[0] not in result[int(obs)]:
+                result[int(obs)].append(hole.options[0])
+
+        observations = list(result.keys())
+        for obs in observations:
+            if len(result[obs]) == 0:
+                del result[obs]
+
+        logger.info("Result dictionary is based on result from PAYNT")
+        self.result_dict = result
+
+
     # returns the main family that will be explored first
-    def get_main_restricted_family(self, family, quotient):
+    def get_main_restricted_family(self, family, quotient, use_cutoffs=True):
+
+        if use_cutoffs or not(self.is_storm_better):
+            result_dict = self.result_dict
+        else:
+            result_dict = self.result_dict_no_cutoffs
+
+        if result_dict == {}:
+            return family
 
         # go through each observation of interest
         restricted_family = family.copy()
@@ -163,10 +227,10 @@ class StormPOMDPControl:
             selected_updates = [all_updates.copy() for _ in mem_obs_holes]
 
             # Action restriction
-            if obs not in self.storm_result_dict.keys():
+            if obs not in result_dict.keys():
                 selected_actions = [[0] for _ in act_obs_holes]
             else:
-                selected_actions = [self.storm_result_dict[obs] for _ in act_obs_holes]
+                selected_actions = [result_dict[obs] for _ in act_obs_holes]
 
             #selected_updates = [[0] for hole in mem_obs_holes]
 
@@ -194,13 +258,21 @@ class StormPOMDPControl:
         return restricted_family
 
     # returns dictionary containing restrictions for easy creation of subfamilies
-    def get_subfamilies_restrictions(self, quotient):
+    def get_subfamilies_restrictions(self, quotient, use_cutoffs=True):
+
+        if use_cutoffs or not(self.is_storm_better):
+            result_dict = self.result_dict
+        else:
+            result_dict = self.result_dict_no_cutoffs
+
+        if result_dict == {}:
+            return {}
 
         subfamilies = []
 
         restricted_holes_list = []
 
-        for observ in self.storm_result_dict.keys():
+        for observ in result_dict.keys():
 
             act_obs_holes = quotient.observation_action_holes[observ]
             restricted_holes_list.extend(act_obs_holes)
@@ -216,10 +288,10 @@ class StormPOMDPControl:
                 if hole in obs_holes:
                     obs = index
 
-            if len(self.storm_result_dict[obs]) == quotient.actions_at_observation[obs]:
+            if len(result_dict[obs]) == quotient.actions_at_observation[obs]:
                 continue
 
-            subfamilies.append({"holes": [hole], "restriction": self.storm_result_dict[obs]})
+            subfamilies.append({"holes": [hole], "restriction": result_dict[obs]})
 
             # debug
             #print(obs, subfamily.size, subfamily)
@@ -233,17 +305,21 @@ class StormPOMDPControl:
 
 
         # returns dictionary containing restrictions for easy creation of subfamilies
-    def get_subfamilies_restrictions_symmetry_breaking(self, quotient):
+    def get_subfamilies_restrictions_symmetry_breaking(self, quotient, use_cutoffs=True):
+
+        if use_cutoffs or not(self.is_storm_better):
+            result_dict = self.result_dict
+        else:
+            result_dict = self.result_dict_no_cutoffs
 
         subfamilies = []
 
+        for obs in result_dict.keys():
 
-        for obs in self.storm_result_dict.keys():
-
-            if len(self.storm_result_dict[obs]) == quotient.actions_at_observation[obs]:
+            if len(result_dict[obs]) == quotient.actions_at_observation[obs]:
                 continue
 
-            subfamilies.append({"holes": quotient.observation_action_holes[obs], "restriction": self.storm_result_dict[obs]})
+            subfamilies.append({"holes": quotient.observation_action_holes[obs], "restriction": result_dict[obs]})
 
             # debug
             #print(obs, subfamily.size, subfamily)
@@ -253,3 +329,25 @@ class StormPOMDPControl:
         #print(subfamilies_size)
 
         return subfamilies
+
+    def update_data(self, paynt_value, minimizing, assignment):
+
+        if paynt_value is None:
+            return
+
+        if minimizing:
+            if paynt_value <= self.storm_bounds:
+                self.is_storm_better = False
+            else:
+                self.is_storm_better = True
+        else:
+            if paynt_value >= self.storm_bounds:
+                self.is_storm_better = False
+            else:
+                self.is_storm_better = True
+
+        if assignment is not None: 
+            self.latest_paynt_result = assignment
+
+        #print(self.is_storm_better)
+

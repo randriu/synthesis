@@ -5,7 +5,4 @@ prerequisites/
 storm/
 stormpy/
 
-build/
-paynt.egg-info/
-
 experiments/
