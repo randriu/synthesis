@@ -58,6 +58,9 @@ class HoleTree:
 
 class SynthesizerPOMDP:
 
+    # Explore only the main family
+    incomplete_exploration = False
+
     def __init__(self, quotient, method, use_storm):
         self.quotient = quotient
         self.use_storm = use_storm
@@ -141,6 +144,8 @@ class SynthesizerPOMDP:
             #print(main_family.size)
             #break
 
+            if self.incomplete_exploration == True:
+                subfamily_restrictions = []
 
             self.synthesizer.subfamilies_buffer = subfamily_restrictions
             self.synthesizer.unresticted_family = family
