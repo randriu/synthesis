@@ -105,12 +105,13 @@ class SynthesizerPOMDP:
 
             # unfold memory according to Storm data #1
             if unfold_storm:
-                #obs_memory_dict = {obs:len(actions) for obs, actions in self.storm_control.result_dict.items()}
-                obs_memory_dict = {obs:len(actions) for obs, actions in self.storm_control.result_dict_no_cutoffs.items()}
+                if mem_size > 1:
+                    #obs_memory_dict = {obs:len(actions) for obs, actions in self.storm_control.result_dict.items()}
+                    obs_memory_dict = {obs:len(actions) for obs, actions in self.storm_control.result_dict_no_cutoffs.items()}
 
-                self.quotient.set_memory_from_result(obs_memory_dict, mem_size)
+                    self.quotient.set_memory_from_result(obs_memory_dict, mem_size)
 
-                logger.info(f'Added memory nodes for observation based on Storm data')
+                    logger.info(f'Added memory nodes for observation based on Storm data')
             else:
                 logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
                 if unfold_imperfect_only:
@@ -120,8 +121,16 @@ class SynthesizerPOMDP:
 
             family = self.quotient.design_space
 
-            main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
-            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+
+            if mem_size == 1:
+                main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+                subfamily_restrictions = []
+            else:
+                main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+                subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+
+            #main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
             #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions_symmetry_breaking(self.quotient, False)
 
             # debug
