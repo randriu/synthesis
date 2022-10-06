@@ -125,20 +125,20 @@ class SynthesizerPOMDP:
             family = self.quotient.design_space
 
 
-            if mem_size == 1:
-                main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
-                subfamily_restrictions = []
-            else:
-                main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
-                subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+            #if mem_size == 1:
+            #    main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            #    subfamily_restrictions = []
+            #else:
+            #    main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            #    subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
 
-            #main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
-            #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+            main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
             #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions_symmetry_breaking(self.quotient, False)
 
             # debug
             #print(self.storm_control.result_dict)
-            #print(self.storm_control.result_dict_no_cutoffs)  
+            #print(self.storm_control.result_dict_no_cutoffs)
             #print(main_family)
             #print(subfamily_restrictions)
             #print(main_family.size)

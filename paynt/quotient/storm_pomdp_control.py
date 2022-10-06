@@ -48,9 +48,10 @@ class StormPOMDPControl:
         logger.info("Storm POMDP analysis completed")
 
         # debug
-        #print(result.lower_bound)
-        #print(result.upper_bound)
+        print(result.lower_bound)
+        print(result.upper_bound)
         #print(result.induced_mc_from_scheduler)
+        #exit()
         #print(result.cutoff_schedulers[0])
 
         self.latest_storm_result = result
