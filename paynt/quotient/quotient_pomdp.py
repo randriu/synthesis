@@ -588,3 +588,36 @@ class POMDPQuotientContainer(QuotientContainer):
         dtmc_path = "dtmc.drn"
         logger.info("Exporting optimal DTMC to {}".format(dtmc_path))
         stormpy.export_to_drn(dtmc.model, dtmc_path)
+
+
+    # constructs pomdp from the quotient MDP
+    def get_family_pomdp(self, mdp):
+        no_obs = self.pomdp.nr_observations
+        #print(mdp.model)
+        tm = mdp.model.transition_matrix
+        components = stormpy.storage.SparseModelComponents(tm, mdp.model.labeling, mdp.model.reward_models)
+
+        if mdp.model.has_choice_labeling():
+            components.choice_labeling = mdp.model.choice_labeling
+               
+        full_observ_list = []
+        for state in range(self.pomdp.nr_states):
+            obs = self.pomdp.get_observation(state)
+            for mem in range(self.observation_memory_size[obs]):
+                full_observ_list.append(obs + mem * no_obs)
+
+        observ_list = []
+        for state in range(mdp.model.nr_states):
+            original_state = mdp.quotient_state_map[state]
+            observ_list.append(full_observ_list[original_state])
+
+        #print(full_observ_list)
+        #print(observ_list)
+
+        components.observability_classes = observ_list
+
+        pomdp = stormpy.storage.SparsePomdp(components)
+        #stormpy.export_to_drn(pomdp, "pomdp-test.out")
+        #print(pomdp)
+
+        return pomdp

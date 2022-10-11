@@ -684,8 +684,8 @@ class SynthesizerPOMDP:
             #else:
             #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound - epsilon)
 
-            self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=True)
-            #self.strategy_iterative_storm(unfold_imperfect_only=True)
+            #self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=True)
+            self.strategy_iterative_storm(unfold_imperfect_only=True)
         else:
 
             # self.strategy_expected_uai()

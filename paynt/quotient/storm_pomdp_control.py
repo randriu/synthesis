@@ -56,6 +56,22 @@ class StormPOMDPControl:
 
         self.latest_storm_result = result
 
+    @staticmethod
+    def storm_pomdp_analysis(model, formulas):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
+        options.use_explicit_cutoff = True
+        options.size_threshold_init = 100000
+        options.use_grid_clipping = False
+        options.exploration_time_limit = 60
+        belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(model, options)
+
+        #logger.info("starting Storm POMDP analysis")
+        result = belmc.check(formulas[0], [])   # calls Storm
+        #logger.info("Storm POMDP analysis completed")
+
+        return result
+
+
     def parse_result(self, quotient):
         if self.is_storm_better:
             self.parse_storm_result(quotient)

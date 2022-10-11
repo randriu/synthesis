@@ -1,4 +1,7 @@
+import stormpy
+from stormpy import pomdp
 from .synthesizer import Synthesizer
+from ..quotient.storm_pomdp_control import StormPOMDPControl
 
 import logging
 logger = logging.getLogger(__name__)
@@ -73,6 +76,30 @@ class SynthesizerARStorm(Synthesizer):
 
         #if res.optimality_result.primary.value > 20:
         #    can_improve = False
+
+        if self.quotient.specification.optimality.optimum and can_improve:
+
+            family_pomdp = self.quotient.get_family_pomdp(family.mdp)
+            #family_pomdp = stormpy.pomdp.make_canonic(family_pomdp)
+
+            #print(family_pomdp)
+            storm_res = StormPOMDPControl.storm_pomdp_analysis(family_pomdp, self.quotient.specification.stormpy_formulae())
+
+            #print(storm_res.lower_bound)
+            #print(storm_res.upper_bound)
+            #print(storm_res.induced_mc_from_scheduler)
+            #print(storm_res.cutoff_schedulers[0])
+
+            if self.quotient.specification.optimality.minimizing:
+                if self.quotient.specification.optimality.optimum <= storm_res.lower_bound:
+                    can_improve = False
+                    #print(self.quotient.specification.optimality.threshold)
+                    logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.lower_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
+            else:
+                if self.quotient.specification.optimality.optimum >= storm_res.upper_bound:
+                    can_improve = False
+                    #print(self.quotient.specification.optimality.threshold)
+                    logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.upper_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
 
         return can_improve, improving_assignment
 
