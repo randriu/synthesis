@@ -12,6 +12,10 @@ from .synthesizer.synthesizer_pomdp import SynthesizerPOMDP
 from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 from .synthesizer.synthesizer_switss import SynthesizerSWITSS
 
+from .quotient.storm_pomdp_control import StormPOMDPControl
+
+from .utils.storm_parallel import ParallelMain
+
 import click
 import sys
 import os
@@ -83,6 +87,8 @@ def setup_logger(log_path = None):
     help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 @click.option("--storm-pomdp-analysis", is_flag=True, default=False,
     help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
+@click.option("--parallel-storm", is_flag=True, default=False,
+    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
 @click.option(
     "--ce-generator",
     default="storm",
@@ -99,7 +105,8 @@ def paynt(
         method,
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty, storm_pomdp_analysis,
+        hyperproperty, 
+        storm_pomdp_analysis, parallel_storm,
         ce_generator,
         profiling
 ):
@@ -122,9 +129,14 @@ def paynt(
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
 
+    if storm_pomdp_analysis:
+        storm_control = StormPOMDPControl()
+    else:
+        storm_control = None
+
     # choose the synthesis method and run the corresponding synthesizer
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
-        synthesizer = SynthesizerPOMDP(quotient, method, storm_pomdp_analysis)
+        synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
     elif method == "onebyone":
         synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":
@@ -141,14 +153,21 @@ def paynt(
     else:
         pass
 
-    if not profiling:
-        synthesizer.run()
+
+
+    if storm_pomdp_analysis and parallel_storm:
+        parallel_main = ParallelMain(synthesizer, storm_control)
+        parallel_main.run()
+
     else:
-        with cProfile.Profile() as pr:
+        if not profiling:
             synthesizer.run()
-        stats = pr.create_stats()
-        print(stats)
-        pstats.Stats(pr).sort_stats('tottime').print_stats(10)
+        else:
+            with cProfile.Profile() as pr:
+                synthesizer.run()
+            stats = pr.create_stats()
+            print(stats)
+            pstats.Stats(pr).sort_stats('tottime').print_stats(10)
 
 
 def main():

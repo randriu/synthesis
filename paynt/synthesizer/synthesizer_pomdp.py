@@ -12,8 +12,6 @@ from ..quotient.quotient import QuotientContainer
 from ..quotient.quotient_pomdp import POMDPQuotientContainer
 from ..utils.profiler import Timer
 
-from ..quotient.storm_pomdp_control import StormPOMDPControl
-
 import math
 from collections import defaultdict
 
@@ -61,9 +59,9 @@ class SynthesizerPOMDP:
     # Explore only the main family
     incomplete_exploration = False
 
-    def __init__(self, quotient, method, use_storm):
+    def __init__(self, quotient, method, storm_control):
         self.quotient = quotient
-        self.use_storm = use_storm
+        self.use_storm = False
         self.synthesizer = None
         if method == "ar":
             self.synthesizer = SynthesizerAR
@@ -73,8 +71,11 @@ class SynthesizerPOMDP:
             self.synthesizer = SynthesizerHybrid
         self.total_iters = 0
 
-        if use_storm:
-            self.storm_control = StormPOMDPControl()
+        if storm_control is not None:
+            self.use_storm = True
+            self.storm_control = storm_control
+            self.storm_control.pomdp = self.quotient.pomdp
+            self.storm_control.spec_formulas = self.quotient.specification.stormpy_formulae()
             self.synthesizer = SynthesizerARStorm
 
     def print_stats(self):
@@ -667,13 +668,14 @@ class SynthesizerPOMDP:
                 
 
 
-    def run(self):
+    def run(self, parallel=False):
         # choose the synthesis strategy:
 
         if self.use_storm:
             logger.info("Using Storm to enhance synthesis")
             
-            self.storm_control.run_storm_analysis(self.quotient.pomdp, self.quotient.specification.stormpy_formulae())
+            if not parallel:
+                self.storm_control.run_storm_analysis()
 
             # Use storm value result as lower-bound
             #logger.info("Updating the lower-bound based on Storm's result")

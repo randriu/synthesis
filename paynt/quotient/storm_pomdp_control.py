@@ -1,5 +1,3 @@
-from ast import Pass
-from unittest import result
 import stormpy
 import stormpy.synthesis
 import stormpy.pomdp
@@ -26,6 +24,12 @@ class StormPOMDPControl:
 
     is_storm_better = True
 
+    # The original POMDP model
+    pomdp = None
+
+    # The specification to be checked
+    spec_formulas = None
+
 
 
     def __init__(self):
@@ -33,18 +37,16 @@ class StormPOMDPControl:
 
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
-    def run_storm_analysis(self, model, formulas):
-        #model = stormpy.build_model(program, formulas)
-        #model = stormpy.pomdp.make_canonic(model)
+    def run_storm_analysis(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
         options.size_threshold_init = 1000000
         options.use_grid_clipping = False
         options.exploration_time_limit = 60
-        belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(model, options)
+        belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
         logger.info("starting Storm POMDP analysis")
-        result = belmc.check(formulas[0], [])   # calls Storm
+        result = belmc.check(self.spec_formulas[0], [])   # calls Storm
         logger.info("Storm POMDP analysis completed")
 
         # debug
@@ -78,7 +80,7 @@ class StormPOMDPControl:
 
 
     def parse_result(self, quotient):
-        if self.is_storm_better:
+        if self.is_storm_better and self.latest_storm_result is not None:
             self.parse_storm_result(quotient)
         else:
             if self.latest_paynt_result is not None:
@@ -354,7 +356,7 @@ class StormPOMDPControl:
 
     def update_data(self, paynt_value, minimizing, assignment):
 
-        if paynt_value is None:
+        if paynt_value is None or self.storm_bounds is None:
             return
 
         if minimizing:
