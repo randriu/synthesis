@@ -98,7 +98,6 @@ class SynthesizerPOMDP:
         '''
         mem_size = POMDPQuotientContainer.initial_memory_size
 
-        #self.sketch.specification.optimality.update_optimum(26)
         while True:
         # for x in range(2):
 
@@ -678,11 +677,10 @@ class SynthesizerPOMDP:
 
             # Use storm value result as lower-bound
             #logger.info("Updating the lower-bound based on Storm's result")
-            #epsilon = 0.01
             #if self.quotient.specification.optimality.minimizing:
-            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.upper_bound + epsilon)
+            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.upper_bound)
             #else:
-            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound - epsilon)
+            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound)
 
             #self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=True)
             self.strategy_iterative_storm(unfold_imperfect_only=True)

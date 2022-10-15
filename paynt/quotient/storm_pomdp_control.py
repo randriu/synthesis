@@ -56,11 +56,12 @@ class StormPOMDPControl:
 
         self.latest_storm_result = result
 
+    # Over-approximation
     @staticmethod
     def storm_pomdp_analysis(model, formulas):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
         options.use_explicit_cutoff = True
-        options.size_threshold_init = 100000
+        options.size_threshold_init = 1000000
         options.use_grid_clipping = False
         options.exploration_time_limit = 60
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(model, options)
@@ -68,6 +69,10 @@ class StormPOMDPControl:
         #logger.info("starting Storm POMDP analysis")
         result = belmc.check(formulas[0], [])   # calls Storm
         #logger.info("Storm POMDP analysis completed")
+
+        # debug
+        #print(result.lower_bound)
+        #print(result.upper_bound)
 
         return result
 

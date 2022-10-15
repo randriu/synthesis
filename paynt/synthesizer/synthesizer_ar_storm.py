@@ -1,4 +1,3 @@
-import stormpy
 from stormpy import pomdp
 from .synthesizer import Synthesizer
 from ..quotient.storm_pomdp_control import StormPOMDPControl
@@ -19,6 +18,9 @@ class SynthesizerARStorm(Synthesizer):
 
     # list of explored restrictions
     explored_restrictions = []
+
+    # if True, Storm over-approximation will be run to help with family pruning
+    storm_pruning = False
 
     @property
     def method_name(self):
@@ -77,10 +79,9 @@ class SynthesizerARStorm(Synthesizer):
         #if res.optimality_result.primary.value > 20:
         #    can_improve = False
 
-        if self.quotient.specification.optimality.optimum and can_improve:
+        if self.quotient.specification.optimality.optimum and can_improve and self.storm_pruning:
 
             family_pomdp = self.quotient.get_family_pomdp(family.mdp)
-            #family_pomdp = stormpy.pomdp.make_canonic(family_pomdp)
 
             #print(family_pomdp)
             storm_res = StormPOMDPControl.storm_pomdp_analysis(family_pomdp, self.quotient.specification.stormpy_formulae())
@@ -95,11 +96,15 @@ class SynthesizerARStorm(Synthesizer):
                     can_improve = False
                     #print(self.quotient.specification.optimality.threshold)
                     logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.lower_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
+                #else:
+                #    logger.info(f"Storm result: {storm_res.lower_bound}. Lower bounds: {storm_res.upper_bound}. Quotient MDP value: {res.optimality_result.primary.value}")
             else:
                 if self.quotient.specification.optimality.optimum >= storm_res.upper_bound:
                     can_improve = False
                     #print(self.quotient.specification.optimality.threshold)
                     logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.upper_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
+                #else:
+                #    logger.info(f"Storm result: {storm_res.upper_bound}. Lower bounds: {storm_res.lower_bound}. Quotient MDP value: {res.optimality_result.primary.value}")
 
         return can_improve, improving_assignment
 
@@ -117,6 +122,7 @@ class SynthesizerARStorm(Synthesizer):
         families = [family]
 
         while families:
+            #print(len(families))
 
             if self.no_optimum_update_limit_reached():
                 break

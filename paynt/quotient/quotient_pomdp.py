@@ -597,27 +597,56 @@ class POMDPQuotientContainer(QuotientContainer):
         tm = mdp.model.transition_matrix
         components = stormpy.storage.SparseModelComponents(tm, mdp.model.labeling, mdp.model.reward_models)
 
-        if mdp.model.has_choice_labeling():
-            components.choice_labeling = mdp.model.choice_labeling
-               
         full_observ_list = []
+        #full_choice_labels = []
         for state in range(self.pomdp.nr_states):
             obs = self.pomdp.get_observation(state)
             for mem in range(self.observation_memory_size[obs]):
                 full_observ_list.append(obs + mem * no_obs)
+                #full_choice_labels.append(list(range(self.pomdp.get_nr_available_actions(state))))
+                
+        #print(full_choice_labels)
+
+        choice_labeling = stormpy.storage.ChoiceLabeling(mdp.choices)
 
         observ_list = []
+        choice_labels = []
         for state in range(mdp.model.nr_states):
             original_state = mdp.quotient_state_map[state]
             observ_list.append(full_observ_list[original_state])
+            actions = [action for action in range(mdp.model.get_nr_available_actions(state))]
+            choice_labels.append(actions)
+
+        # LABELING
+        labels_list = [item for sublists in choice_labels for item in sublists]
+        labels = list(set(labels_list))
+        for label in labels:
+            choice_labeling.add_label(str(label))
+
+        for choice in range(mdp.choices):
+            choice_labeling.add_label_to_choice(str(labels_list[choice]), choice)
+
+        components.choice_labeling = choice_labeling
+
+        #print(choice_labeling)
+
 
         #print(full_observ_list)
         #print(observ_list)
 
+        #print(dir(mdp.model))
+        #print(dir(self.pomdp))
+        #print(mdp.model.get_nr_available_actions(10))
+        #exit()
+
+
         components.observability_classes = observ_list
 
         pomdp = stormpy.storage.SparsePomdp(components)
+        pomdp = stormpy.pomdp.make_canonic(pomdp)
+
         #stormpy.export_to_drn(pomdp, "pomdp-test.out")
         #print(pomdp)
 
+        #exit()
         return pomdp
