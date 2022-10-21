@@ -159,6 +159,19 @@ class SmtSolver():
         '''
         family.encode(self)
         return family.encoding.pick_assignment()
+
+    def pick_assignment_priority(self, family, priority_subfamily):
+
+        if priority_subfamily is None:
+            return self.pick_assignment(family)
+
+        # explore priority subfamily first
+        assignment = self.pick_assignment(priority_subfamily)
+        if assignment is not None:
+            return assignment
+
+        # explore remaining members
+        return self.pick_assignment(family)
     
     
     def exclude_conflicts(self, family, assignment, conflicts):

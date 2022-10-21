@@ -70,14 +70,13 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
     def synthesize_assignment(self, family):
 
-        self.stage_control = StageControl()
-
         self.conflict_generator.initialize()
         smt_solver = SmtSolver(self.quotient.design_space)
 
-        # AR loop
+        # AR-CEGIS loop
         satisfying_assignment = None
         families = [family]
+        self.stage_control = StageControl()
         while families:
 
             # initiate AR analysis
@@ -97,8 +96,6 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             can_improve,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
-            if improving_assignment is not None:
-                satisfying_assignment = improving_assignment
             if can_improve == False:
                 self.explore(family)
                 continue
@@ -112,19 +109,22 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             priority_subfamily.assume_options(scheduler_selection)
 
             # explore family assignments
-            family.encode(smt_solver)
+            family_explored = False
             while True:
 
                 if not self.stage_control.cegis_has_time():
                     break   # CEGIS timeout
 
-                assignment = smt_solver.pick_assignment(family)
-                # assignment = family.pick_assignment_priority(priority_subfamily)
+                family.encode(smt_solver)
+                # assignment = smt_solver.pick_assignment(family)
+                assignment = smt_solver.pick_assignment_priority(family, priority_subfamily)
                 if assignment is None:
+                    family_explored = True
                     break   # explored whole family
                 
                 conflicts, accepting_assignment = self.analyze_family_assignment_cegis(family, assignment)
-                smt_solver.exclude_conflicts(family, assignment, conflicts)
+                pruned = smt_solver.exclude_conflicts(family, assignment, conflicts)
+                self.explored += pruned
 
                 if accepting_assignment is not None:
                     satisfying_assignment = accepting_assignment
@@ -133,8 +133,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
                 # assignment is UNSAT: move on to the next assignment
 
-            if not family.encoding.has_assignments:
-                self.explore(family)
+            if family_explored:
                 continue
         
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)

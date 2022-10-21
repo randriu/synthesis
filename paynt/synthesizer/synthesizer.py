@@ -55,8 +55,4 @@ class Synthesizer:
     
     def explore(self, family):
         self.explored += family.size
-    
-    def no_optimum_update_limit_reached(self):
-        self.since_last_optimum_update += 1
-        return Synthesizer.use_optimum_update_timeout and self.since_last_optimum_update > Synthesizer.optimum_update_iters_limit
 

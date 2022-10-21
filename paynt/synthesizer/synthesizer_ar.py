@@ -31,7 +31,6 @@ class SynthesizerAR(Synthesizer):
         # print(improving_value, can_improve)
         if improving_value is not None:
             self.quotient.specification.optimality.update_optimum(improving_value)
-            self.since_last_optimum_update = 0
         # print(res, can_improve)
         # print(res.optimality_result.primary.result.get_values())
 
@@ -47,9 +46,6 @@ class SynthesizerAR(Synthesizer):
         families = [family]
 
         while families:
-
-            if self.no_optimum_update_limit_reached():
-                break
 
             if SynthesizerAR.exploration_order_dfs:
                 family = families.pop(-1)
