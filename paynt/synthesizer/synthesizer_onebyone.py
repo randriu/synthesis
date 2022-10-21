@@ -10,11 +10,8 @@ class SynthesizerOneByOne(Synthesizer):
     def method_name(self):
         return "1-by-1"
 
-    def synthesize(self, family):
+    def synthesize_assignment(self, family):
         
-        logger.info("Synthesis initiated.")
-        self.stat.start()
-
         satisfying_assignment = None
         for hole_combination in family.all_combinations():
             
@@ -24,15 +21,12 @@ class SynthesizerOneByOne(Synthesizer):
             result = chain.check_specification(self.quotient.specification, short_evaluation = True)
             self.explore(assignment)
 
-            if not result.constraints_result.all_sat:
-                continue
-            if not self.quotient.specification.has_optimality:
+            accepting,improving_value = result.accepting_dtmc(self.quotient.specification)
+            if accepting:
                 satisfying_assignment = assignment
-                break
-            if result.optimality_result.improves_optimum:
-                self.quotient.specification.optimality.update_optimum(result.optimality_result.value)
-                satisfying_assignment = assignment
-
-        self.stat.finished(satisfying_assignment)
+            if improving_value is not None:
+                self.quotient.specification.optimality.update_optimum(improving_value)
+            if accepting and not self.quotient.specification.can_be_improved:
+                return accepting_assignment
 
         return satisfying_assignment

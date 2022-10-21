@@ -39,11 +39,7 @@ class SynthesizerAR(Synthesizer):
 
 
     
-    def synthesize(self, family):
-
-        logger.info("Synthesis initiated.")
-        
-        self.stat.start()
+    def synthesize_assignment(self, family):
 
         self.quotient.discarded = 0
 
@@ -74,11 +70,5 @@ class SynthesizerAR(Synthesizer):
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
-        self.stat.finished(satisfying_assignment)
-
-        # if satisfying_assignment is not None:
-        #     dtmc = self.quotient.build_chain(satisfying_assignment)
-        #     spec = dtmc.check_specification(self.quotient.specification)
-        #     logger.info("Double-checking specification satisfiability: {}".format(spec))
         return satisfying_assignment
 

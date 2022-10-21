@@ -1,15 +1,9 @@
 import stormpy.synthesis
 
+from .smt import FamilyEncoding
+
 import math
 import itertools
-
-import z3
-import sys
-
-# import pycvc5 if installed
-import importlib
-if importlib.util.find_spec('pycvc5') is not None:
-    import pycvc5
 
 import logging
 logger = logging.getLogger(__name__)
@@ -162,7 +156,7 @@ class ParentInfo():
         self.hole_selected_actions = None
         # index of a hole used to split the family
         self.splitter = None
-        
+
 
 class DesignSpace(Holes):
     '''
@@ -172,19 +166,6 @@ class DesignSpace(Holes):
     :note z3 (re-)encoding construction must be invoked manually
     '''
 
-    # z3 solver containing description of the complete design space
-    solver = None
-    # for each hole contains a corresponding solver variable
-    solver_vars = None
-    # for each hole contains a list of equalities [h==opt1,h==opt2,...]
-    solver_clauses = None
-
-    # SMT solver choice
-    use_python_z3 = False
-    use_cvc = False
-    # current depth of push/pop solving
-    solver_depth = 0
-
     # whether hints will be stored for subsequent MDP model checking
     store_hints = True
     
@@ -192,10 +173,9 @@ class DesignSpace(Holes):
         super().__init__(holes)
 
         self.mdp = None
-        self.hole_clauses = None
+        
+        # SMT encoding
         self.encoding = None
-
-        self.has_assignments = True
 
         self.hole_selected_actions = None
         self.selected_actions = None
@@ -211,184 +191,6 @@ class DesignSpace(Holes):
 
     def copy(self):
         return DesignSpace(super().copy())
-
-    def sat_initialize(self):
-        ''' Use this design space as a baseline for future refinements. '''
-
-        DesignSpace.solver_depth = 0
-        if "pycvc5" in sys.modules:
-            DesignSpace.use_cvc = True
-        else:
-            DesignSpace.use_python_z3 = True
-
-        DesignSpace.solver_clauses = []
-        if DesignSpace.use_python_z3:
-            logger.debug("Using Python Z3 for SMT solving.")
-            DesignSpace.solver = z3.Solver()
-            DesignSpace.solver_vars = [z3.Int(hole_index) for hole_index in self.hole_indices]
-            for hole_index,hole in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
-                clauses = [var == option for option in hole.options]
-                DesignSpace.solver_clauses.append(clauses)
-        elif DesignSpace.use_cvc:
-            logger.debug("Using CVC5 for SMT solving.")
-            DesignSpace.solver = pycvc5.Solver()
-            DesignSpace.solver.setOption("produce-models", "true")
-            DesignSpace.solver.setOption("produce-assertions", "true")
-            # DesignSpace.solver.setLogic("ALL")
-            # DesignSpace.solver.setLogic("QF_ALL")
-            DesignSpace.solver.setLogic("QF_DT")
-            # DesignSpace.solver.setLogic("QF_UFDT")
-            # DesignSpace.solver.setLogic("QF_UFLIA")
-            intSort = DesignSpace.solver.getIntegerSort()
-            DesignSpace.solver_vars = [DesignSpace.solver.mkConst(intSort, str(hole_index)) for hole_index in self.hole_indices]
-            for hole_index,hole in enumerate(self):
-                var = DesignSpace.solver_vars[hole_index]
-                clauses = [DesignSpace.solver.mkTerm(pycvc5.Kind.Equal, var, DesignSpace.solver.mkInteger(option)) for option in hole.options]
-                DesignSpace.solver_clauses.append(clauses)
-        else:
-            raise RuntimeError("Need to enable at least one SMT solver.")
-    
-    @property
-    def encoded(self):
-        return self.encoding is not None
-        
-    def encode(self):
-        ''' Encode this design space. '''
-        self.hole_clauses = []
-        for hole_index,hole in enumerate(self):
-            all_clauses = DesignSpace.solver_clauses[hole_index]
-            clauses = [all_clauses[option] for option in hole.options]
-            if len(clauses) == 1:
-                or_clause = clauses[0]
-            else:
-                if DesignSpace.use_python_z3:
-                    or_clause = z3.Or(clauses)
-                elif DesignSpace.use_cvc:
-                    or_clause = DesignSpace.solver.mkTerm(pycvc5.Kind.Or, clauses)
-                else:
-                    pass
-            self.hole_clauses.append(or_clause)
-
-        if len(self.hole_clauses) == 1:
-            self.encoding = self.hole_clauses[0]
-        else:
-            if DesignSpace.use_python_z3:
-                self.encoding = z3.And(self.hole_clauses)
-            elif DesignSpace.use_cvc:
-                self.encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, self.hole_clauses)
-            else:
-                pass
-
-        self.has_assignments = True
-
-    def pick_assignment(self):
-        '''
-        Pick any (feasible) hole assignment.
-        :return None if no instance remains
-        '''
-        # get satisfiable assignment within this design space
-        if not self.encoded:
-            self.encode()
-
-        if not self.has_assignments:
-            return None
-        
-        if DesignSpace.use_python_z3:
-            solver_result = DesignSpace.solver.check(self.encoding)
-            if solver_result == z3.unsat:
-                self.has_assignments = False
-                return None
-            sat_model = DesignSpace.solver.model()
-            hole_options = []
-            for hole_index,var in enumerate(DesignSpace.solver_vars):
-                option = sat_model[var].as_long()
-                hole_options.append([option])
-        elif DesignSpace.use_cvc:
-            solver_result = DesignSpace.solver.checkSatAssuming(self.encoding)
-            if solver_result.isUnsat():
-                self.has_assignments = False
-                return None
-            hole_options = []
-            for hole_index,var in enumerate(DesignSpace.solver_vars):
-                option = DesignSpace.solver.getValue(var).getIntegerValue()
-                hole_options.append([option])
-        else:
-            pass            
-        
-        assignment = self.copy()
-        assignment.assume_options(hole_options)
-
-        return assignment
-
-    def pick_assignment_priority(self, priority_subfamily):
-        if priority_subfamily is None:
-            return self.pick_assignment()
-
-        # explore priority subfamily first
-        assignment = priority_subfamily.pick_assignment()
-        if assignment is not None:
-            return assignment
-
-        # explore remaining members
-        return self.pick_assignment()
-
-
-    def exclude_assignment(self, assignment, conflict):
-        '''
-        Exclude assignment from the design space using provided conflict.
-        :param assignment hole assignment that yielded unsatisfiable DTMC
-        :param conflict indices of relevant holes in the corresponding counterexample
-        :return estimate of pruned assignments
-        '''
-        if not self.encoded:
-            self.encode()
-
-        pruning_estimate = 1
-        counterexample_clauses = []
-        for hole_index,var in enumerate(DesignSpace.solver_vars):
-            if hole_index in conflict:
-                option = assignment[hole_index].options[0]
-                counterexample_clauses.append(DesignSpace.solver_clauses[hole_index][option])
-            else:
-                if not self[hole_index].is_unrefined:
-                    counterexample_clauses.append(self.hole_clauses[hole_index])
-                pruning_estimate *= self[hole_index].size
-
-        if DesignSpace.use_python_z3:
-            if len(counterexample_clauses) == 0:
-                counterexample_encoding = False
-            else:
-                counterexample_encoding = z3.Not(z3.And(counterexample_clauses))
-            DesignSpace.solver.add(counterexample_encoding)
-        elif DesignSpace.use_cvc:
-            if len(counterexample_clauses) == 0:
-                counterexample_encoding = DesignSpace.solver.mkFalse()
-            elif len(counterexample_clauses) == 1:
-                counterexample_encoding = counterexample_clauses[0].notTerm()
-            else:
-                counterexample_encoding = DesignSpace.solver.mkTerm(pycvc5.Kind.And, counterexample_clauses).notTerm()
-            DesignSpace.solver.assertFormula(counterexample_encoding)
-        else:
-            pass
-
-        return pruning_estimate
-
-    def sat_level(self):
-        ''' Reset solver depth level to correspond to refinement level. '''
-
-        if self.refinement_depth == 0:
-            # fresh family, nothing to do
-            return
-
-        # reset to the scope of the parent (refinement_depth - 1)
-        while DesignSpace.solver_depth >= self.refinement_depth:
-            DesignSpace.solver.pop()
-            DesignSpace.solver_depth -= 1
-
-        # create new scope
-        DesignSpace.solver.push()
-        DesignSpace.solver_depth += 1
 
     
     def generalize_hint(self, hint):
@@ -453,6 +255,10 @@ class DesignSpace(Holes):
         pi.splitter = self.splitter
         pi.mdp = self.mdp
         return pi
+
+    def encode(self, smt_solver):
+        if self.encoding is None:
+            self.encoding = FamilyEncoding(smt_solver, self)
 
 
 

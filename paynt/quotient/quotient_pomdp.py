@@ -79,7 +79,7 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_labels = [self.simplify_label(label) for label in self.observation_labels]
         else:
             self.observation_labels = list(range(self.observations))
-        logger.debug(f"Observation labels: {self.observation_labels}")
+        # logger.debug(f"Observation labels: {self.observation_labels}")
 
         # compute actions available at each observation
         self.actions_at_observation = [0] * self.observations

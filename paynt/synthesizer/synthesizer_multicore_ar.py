@@ -61,9 +61,7 @@ def solve_family(args):
 
 class SynthesizerMultiCoreAR(SynthesizerAR):
 
-    def synthesize(self, family):
-
-        self.stat.start()
+    def synthesize_assignment(self, family):
 
         self.quotient.discarded = 0
 
@@ -138,7 +136,6 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
 
         # pstats.Stats(profile).sort_stats('tottime').print_stats(10)
 
-        self.stat.finished(satisfying_assignment)
         return satisfying_assignment
     
     @property

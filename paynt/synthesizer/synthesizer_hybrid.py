@@ -1,7 +1,9 @@
 import stormpy.synthesis
 
+from .synthesizer import Synthesizer
 from .synthesizer_ar import SynthesizerAR
 from .synthesizer_cegis import SynthesizerCEGIS
+from ..quotient.smt import SmtSolver
 
 from ..utils.profiler import Timer
 
@@ -66,33 +68,18 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
     def method_name(self):
         return "hybrid"
 
-    def synthesize(self, family):
-
-        logger.info("Synthesis initiated.")
-        
-        self.stat.start()
-
-        self.quotient.discarded = 0
+    def synthesize_assignment(self, family):
 
         self.stage_control = StageControl()
 
-        quotient_relevant_holes = self.quotient.coloring.state_to_holes
-        formulae = self.quotient.specification.stormpy_formulae()
-        ce_generator = stormpy.synthesis.CounterexampleGenerator(
-            self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
-            quotient_relevant_holes, formulae)
-
-        # use sketch design space as a SAT baseline
-        self.quotient.design_space.sat_initialize()
+        self.conflict_generator.initialize()
+        smt_solver = SmtSolver(self.quotient.design_space)
 
         # AR loop
         satisfying_assignment = None
         families = [family]
         while families:
 
-            if self.no_optimum_update_limit_reached():
-                break
-            
             # initiate AR analysis
             self.stage_control.start_ar()
             
@@ -104,7 +91,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
             # reset SMT solver level
             if SynthesizerAR.exploration_order_dfs:
-                family.sat_level()
+                smt_solver.level(family.refinement_depth)
 
             # analyze the family
             can_improve,improving_assignment = self.analyze_family_ar(family)
@@ -125,39 +112,33 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             priority_subfamily.assume_options(scheduler_selection)
 
             # explore family assignments
-            sat = False
+            family.encode(smt_solver)
             while True:
 
                 if not self.stage_control.cegis_has_time():
-                    # CEGIS timeout
-                    break
+                    break   # CEGIS timeout
 
-                # pick assignment
-                assignment = family.pick_assignment_priority(priority_subfamily)
+                assignment = smt_solver.pick_assignment(family)
+                # assignment = family.pick_assignment_priority(priority_subfamily)
                 if assignment is None:
-                    break
+                    break   # explored whole family
                 
-                # analyze this assignment
-                sat, improving = self.analyze_family_assignment_cegis(family, assignment, ce_generator)
-                if improving:
-                    satisfying_assignment = assignment
-                if sat:
-                    break
+                conflicts, accepting_assignment = self.analyze_family_assignment_cegis(family, assignment)
+                smt_solver.exclude_conflicts(family, assignment, conflicts)
+
+                if accepting_assignment is not None:
+                    satisfying_assignment = accepting_assignment
+                    if not self.quotient.specification.can_be_improved:
+                        return satisfying_assignment
 
                 # assignment is UNSAT: move on to the next assignment
 
-            if sat:
-                break
-            
-            if not family.has_assignments:
+            if not family.encoding.has_assignments:
                 self.explore(family)
                 continue
         
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
-        # ce_generator.print_profiling()
-
-        self.stat.finished(satisfying_assignment)
         return satisfying_assignment
 
