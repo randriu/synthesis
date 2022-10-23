@@ -14,6 +14,8 @@ class SynthesizerARStorm(Synthesizer):
     # buffer containing subfamilies to be checked after the main restricted family
     subfamilies_buffer = None
 
+    subfamily_restrictions = None
+
     unresticted_family = None
 
     # list of explored restrictions
@@ -22,31 +24,50 @@ class SynthesizerARStorm(Synthesizer):
     # if True, Storm over-approximation will be run to help with family pruning
     storm_pruning = False
 
+    storm_control = None
+    s_queue = None
+
     @property
     def method_name(self):
         return "AR"
 
-    def create_subfamily(self, hole):
+    def create_subfamily(self, subfamily_restriction):
 
         subfamily = self.unresticted_family.copy()
 
-        for exp_hole in self.explored_restrictions:
+        for hole_restriction in subfamily_restriction:
 
-            if hole in exp_hole["holes"]:
-                selected_actions = [action for action in subfamily[hole].options if action not in exp_hole["restriction"]]
-            else:
-                selected_actions = exp_hole["restriction"]
+            selected_actions = hole_restriction["restriction"]
 
             if len(selected_actions) == 0:
                 continue
 
-            if hole in exp_hole["holes"]:
-                subfamily[hole].assume_options(selected_actions)
-            else:
-                for h in exp_hole["holes"]:
-                    subfamily[h].assume_options(selected_actions)
+            subfamily[hole_restriction["hole"]].assume_options(selected_actions)
 
         return subfamily
+
+    def storm_split(self, families):
+        #self.storm_control.parse_result(self.quotient)
+        self.subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+
+        #print(self.subfamily_restrictions)
+        
+        subfamilies = []
+        main_families = []
+
+        # TODO MAIN FAMILIES
+        for family in families:
+
+            main_p = self.storm_control.get_main_restricted_family(family, self.quotient)
+            main_families.append(main_p)
+
+            subfamilies_p = self.storm_control.get_subfamilies(self.subfamily_restrictions, family)
+            subfamilies.extend(subfamilies_p)
+
+        logger.info(f"State after Storm splitting: Main families - {len(main_families)}, Subfamilies - {len(subfamilies)}")
+        return main_families, subfamilies
+
+
 
 
     def analyze_family_ar(self, family):
@@ -149,6 +170,14 @@ class SynthesizerARStorm(Synthesizer):
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
+            if self.s_queue is not None:
+                if not self.s_queue.empty():
+                    self.storm_control.result_dict, self.storm_control.storm_bounds = self.s_queue.get()
+                    logger.info("Applying family split according to Storm results")
+                    families, self.subfamilies_buffer = self.storm_split(families)
+
+
+
         logger.info("Main family synthesis done")
         logger.info(f"Subfamilies buffer contains: {len(self.subfamilies_buffer)} families")
         #self.stat.print()
@@ -159,9 +188,9 @@ class SynthesizerARStorm(Synthesizer):
 
             subfamily_restriction = self.subfamilies_buffer.pop(0)
 
-            self.explored_restrictions.append(subfamily_restriction)
+            subfamily = self.create_subfamily(subfamily_restriction)
 
-            subfamily = self.create_subfamily(subfamily_restriction["holes"][0])
+            #print(subfamily.size)
 
             families = [subfamily]
 

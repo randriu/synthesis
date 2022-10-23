@@ -74,6 +74,7 @@ class SynthesizerPOMDP:
         if storm_control is not None:
             self.use_storm = True
             self.storm_control = storm_control
+            self.storm_control.quotient = self.quotient
             self.storm_control.pomdp = self.quotient.pomdp
             self.storm_control.spec_formulas = self.quotient.specification.stormpy_formulae()
             self.synthesizer = SynthesizerARStorm
@@ -99,10 +100,13 @@ class SynthesizerPOMDP:
         '''
         mem_size = POMDPQuotientContainer.initial_memory_size
 
+        self.synthesizer.storm_control = self.storm_control
+
         while True:
         # for x in range(2):
 
-            self.storm_control.parse_result(self.quotient)
+            if self.storm_control.is_storm_better == False:
+                self.storm_control.parse_result(self.quotient)
             
             POMDPQuotientContainer.current_family_index = mem_size
 
@@ -136,18 +140,23 @@ class SynthesizerPOMDP:
             subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
             #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions_symmetry_breaking(self.quotient, False)
 
+            if self.incomplete_exploration == True:
+                subfamily_restrictions = []
+
+            subfamilies = self.storm_control.get_subfamilies(subfamily_restrictions, family)
+
             # debug
             #print(self.storm_control.result_dict)
             #print(self.storm_control.result_dict_no_cutoffs)
             #print(main_family)
             #print(subfamily_restrictions)
+            #print(subfamilies)
             #print(main_family.size)
             #break
 
-            if self.incomplete_exploration == True:
-                subfamily_restrictions = []
 
-            self.synthesizer.subfamilies_buffer = subfamily_restrictions
+            self.synthesizer.subfamilies_buffer = subfamilies
+            self.synthesizer.subfamily_restrictions = subfamily_restrictions
             self.synthesizer.unresticted_family = family
             self.synthesizer.explored_restrictions = []
 
@@ -675,7 +684,7 @@ class SynthesizerPOMDP:
             logger.info("Using Storm to enhance synthesis")
             
             if not parallel:
-                self.storm_control.run_storm_analysis()
+                self.storm_control.get_storm_result()
 
             # Use storm value result as lower-bound
             #logger.info("Updating the lower-bound based on Storm's result")

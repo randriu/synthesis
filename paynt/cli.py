@@ -15,6 +15,9 @@ from .synthesizer.synthesizer_switss import SynthesizerSWITSS
 from .quotient.storm_pomdp_control import StormPOMDPControl
 
 from .utils.storm_parallel import ParallelMain
+# TODO remove?
+from multiprocessing import Manager
+from multiprocessing.managers import BaseManager
 
 import click
 import sys
@@ -155,10 +158,9 @@ def paynt(
 
 
 
-    if storm_pomdp_analysis and parallel_storm:
+    if parallel_storm:
         parallel_main = ParallelMain(synthesizer, storm_control)
         parallel_main.run()
-
     else:
         if not profiling:
             synthesizer.run()

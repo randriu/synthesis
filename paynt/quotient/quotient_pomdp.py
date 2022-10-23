@@ -180,7 +180,7 @@ class POMDPQuotientContainer(QuotientContainer):
         memory_list = []
 
         for obs in range(self.observations):
-            memory = self.observation_memory_size[obs]
+            #memory = self.observation_memory_size[obs]
             if self.observation_states[obs] <= 1:
                 memory = 1
             elif obs in obs_memory_dict.keys():
@@ -283,6 +283,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # create the coloring
         action_to_hole_options = []
+        # TODO make this loop more efficient??
         for action in range(mdp.nr_choices):
             hole_options = {}
             h = pm.row_action_hole[action]

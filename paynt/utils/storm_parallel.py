@@ -6,7 +6,7 @@ import stormpy.pomdp
 
 import time
 
-from multiprocessing import Process
+from multiprocessing import Process, SimpleQueue
 
 
 import logging
@@ -21,11 +21,24 @@ class ParallelMain:
         self.storm_control = storm_control          # STORM
 
     def run(self):
-        storm_process = Process(target=self.storm_control.run_storm_analysis)
+        storm_queue = SimpleQueue()
+        paynt_queue = SimpleQueue()
+
+        self.synthesizer.synthesizer.s_queue = paynt_queue
+        self.storm_control.s_queue = storm_queue
+
+        storm_process = Process(target=self.storm_control.get_storm_result)
         storm_process.start()
 
         paynt_process = Process(target=self.synthesizer.run, args=(True,))
         paynt_process.start()
 
+        storm_process.join()
+
+        storm_result = storm_queue.get()
+        paynt_queue.put(storm_result)
         
         paynt_process.join()
+
+
+        #s_queue.close()

@@ -24,25 +24,39 @@ class StormPOMDPControl:
 
     is_storm_better = True
 
+    quotient = None
+
     # The original POMDP model
     pomdp = None
 
     # The specification to be checked
     spec_formulas = None
 
+    s_queue = None
 
 
     def __init__(self):
         pass
+
+    def get_storm_result(self):
+        self.run_storm_analysis()
+        self.parse_result(self.quotient)
+
+        #print(self.result_dict)
+        #print(self.storm_bounds)
+
+        if self.s_queue is not None:
+            self.s_queue.put((self.result_dict, self.storm_bounds))
 
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
     def run_storm_analysis(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
-        options.size_threshold_init = 1000000
-        options.use_grid_clipping = False
-        options.exploration_time_limit = 60
+        options.size_threshold_init = 0
+        options.use_grid_clipping = True
+        options.clipping_threshold_init = 1
+        options.clipping_grid_res = 4
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
         logger.info("starting Storm POMDP analysis")
@@ -264,7 +278,11 @@ class StormPOMDPControl:
                 actions = selected_actions[index]
                 options = []
                 for action in actions:
+                    if action not in restricted_family[hole].options:
+                        continue
                     options.append(action)
+                if len(options) == 0:
+                    options = [0]
                 restricted_family[hole].assume_options(options)
 
             # Apply memory restrictions
@@ -315,7 +333,7 @@ class StormPOMDPControl:
             if len(result_dict[obs]) == quotient.actions_at_observation[obs]:
                 continue
 
-            subfamilies.append({"holes": [hole], "restriction": result_dict[obs]})
+            subfamilies.append({"hole": hole, "restriction": result_dict[obs]})
 
             # debug
             #print(obs, subfamily.size, subfamily)
@@ -328,31 +346,69 @@ class StormPOMDPControl:
 
 
 
-        # returns dictionary containing restrictions for easy creation of subfamilies
-    def get_subfamilies_restrictions_symmetry_breaking(self, quotient, use_cutoffs=True):
+    # returns dictionary containing restrictions for easy creation of subfamilies
+    # BROKEN NOW !!!!!!!!!!!!!!!!!
+    # def get_subfamilies_restrictions_symmetry_breaking(self, quotient, use_cutoffs=True):
 
-        if use_cutoffs or not(self.is_storm_better):
-            result_dict = self.result_dict
-        else:
-            result_dict = self.result_dict_no_cutoffs
+        # if use_cutoffs or not(self.is_storm_better):
+            # result_dict = self.result_dict
+        # else:
+            # result_dict = self.result_dict_no_cutoffs
+
+        # subfamilies = []
+
+        # for obs in result_dict.keys():
+
+            # if len(result_dict[obs]) == quotient.actions_at_observation[obs]:
+                # continue
+
+            # subfamilies.append({"holes": quotient.observation_action_holes[obs], "restriction": result_dict[obs]})
+
+            # # debug
+            # #print(obs, subfamily.size, subfamily)
+            # #subfamilies_size += subfamily.size
+
+        # # debug
+        # #print(subfamilies_size)
+
+        # return subfamilies
+
+
+    def get_subfamilies(self, restrictions, family):
+
+        if len(restrictions) == 0:
+            return []
 
         subfamilies = []
 
-        for obs in result_dict.keys():
+        for i in range(len(restrictions)):
+            subfamily = []
+            for j in range(i+1):
+                if i != j:
+                    subfamily.append(restrictions[j])
+                else:
+                    actions = [action for action in family[restrictions[j]["hole"]].options if action not in restrictions[j]["restriction"]]
+                    subfamily.append({"hole": restrictions[j]["hole"], "restriction": actions})
 
-            if len(result_dict[obs]) == quotient.actions_at_observation[obs]:
-                continue
+            subfamilies.append(subfamily)
 
-            subfamilies.append({"holes": quotient.observation_action_holes[obs], "restriction": result_dict[obs]})
+        for subfamily in subfamilies:
+            holes = [x["hole"] for x in subfamily]
 
-            # debug
-            #print(obs, subfamily.size, subfamily)
-            #subfamilies_size += subfamily.size
-
-        # debug
-        #print(subfamilies_size)
+            for obs in range(self.quotient.observations):
+                num_actions = self.quotient.actions_at_observation[obs]
+                act_obs_holes = self.quotient.observation_action_holes[obs]
+                for index in range(len(act_obs_holes)):
+                    hole = act_obs_holes[index]
+                    restriction = []
+                    if hole not in holes:
+                        for action in range(num_actions):
+                            if action in family[hole].options:
+                                restriction.append(action)
+                    subfamily.append({"hole": hole, "restriction": restriction})
 
         return subfamilies
+
 
     def update_data(self, paynt_value, minimizing, assignment):
 
