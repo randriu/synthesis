@@ -90,7 +90,6 @@ class SynthesizerARStorm(Synthesizer):
         #print(improving_value, can_improve)
         if improving_value is not None:
             self.quotient.specification.optimality.update_optimum(improving_value)
-            self.since_last_optimum_update = 0
         # print(res, can_improve)
         # print(res.optimality_result.primary.result.get_values())
 
@@ -131,11 +130,7 @@ class SynthesizerARStorm(Synthesizer):
 
 
 
-    def synthesize(self, family):
-
-        logger.info("Synthesis initiated. Storm AR.")
-
-        self.stat.start()
+    def synthesize_assignment(self, family):
 
         self.quotient.discarded = 0
 
@@ -144,9 +139,6 @@ class SynthesizerARStorm(Synthesizer):
 
         while families:
             #print(len(families))
-
-            if self.no_optimum_update_limit_reached():
-                break
 
             if SynthesizerARStorm.exploration_order_dfs:
                 family = families.pop(-1)
@@ -197,9 +189,6 @@ class SynthesizerARStorm(Synthesizer):
             #print(subfamily, len(families))
 
             while families:
-
-                if self.no_optimum_update_limit_reached():
-                    break
 
                 if SynthesizerARStorm.exploration_order_dfs:
                     family = families.pop(-1)
