@@ -97,6 +97,10 @@ class Property:
         prop = stormpy.core.Property("", formula)
         self.__init__(prop)
 
+    @property
+    def can_be_improved(self):
+        return False
+
 
 
 class OptimalityProperty(Property):
@@ -164,6 +168,10 @@ class OptimalityProperty(Property):
         prop = stormpy.core.Property("", formula)
         self.__init__(prop, self.epsilon)
 
+    @property
+    def can_be_improved(self):
+        return not( not self.reward and self.minimizing and self.threshold == 0 )
+
 
 
 class Specification:
@@ -186,6 +194,10 @@ class Specification:
     @property
     def has_optimality(self):
         return self.optimality is not None
+
+    @property
+    def num_properties(self):
+        return len(self.constraints) + (1 if self.has_optimality else 0)
 
     def all_constraint_indices(self):
         return [i for i,_ in enumerate(self.constraints)]
@@ -218,6 +230,16 @@ class Specification:
     def check(self):
         # TODO
         pass
+
+    def can_be_improved(self):
+        return any(prop.can_be_improved for prop in self.all_properties())
+
+    @property
+    def contains_maximizing_reward_properties(self):
+        return any([c.reward and not c.minimizing for c in self.all_properties()])
+
+
+
 
 
 
@@ -258,6 +280,29 @@ class SpecificationResult:
 
     def __str__(self):
         return str(self.constraints_result) + " : " + str(self.optimality_result)
+
+    def accepting_dtmc(self, specification):
+        """
+        :return (1) whether specification is satisfied (dtmc is accepting)
+        :return (2) new optimal value associated with the accepting dtmc
+            (can be None if no optimality)
+        """
+
+        if not self.constraints_result.all_sat:
+            # constraints not sat
+            return False, None
+
+        if self.optimality_result is None:
+            # constraints sat and no optimality
+            return True, None
+        
+        if not self.optimality_result.improves_optimum:
+            # constraints sat and optimality not sat
+            return False, None
+        
+        # constraints sat and optimality sat
+        return True, self.optimality_result.value
+
 
     def improving(self, family):
         ''' Interpret MDP specification result. '''

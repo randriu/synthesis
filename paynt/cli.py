@@ -10,7 +10,6 @@ from .synthesizer.synthesizer_cegis import SynthesizerCEGIS
 from .synthesizer.synthesizer_hybrid import SynthesizerHybrid
 from .synthesizer.synthesizer_pomdp import SynthesizerPOMDP
 from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
-from .synthesizer.synthesizer_switss import SynthesizerSWITSS
 
 from .quotient.storm_pomdp_control import StormPOMDPControl
 
@@ -95,7 +94,7 @@ def setup_logger(log_path = None):
 @click.option(
     "--ce-generator",
     default="storm",
-    type=click.Choice(["storm", "switss"]),
+    type=click.Choice(["storm", "switss", "mdp"]),
     show_default=True,
     help="counterexample generator",
 )
@@ -117,6 +116,7 @@ def paynt(
 
     # set CLI parameters
     Synthesizer.incomplete_search = incomplete_search
+    SynthesizerCEGIS.conflict_generator_type = ce_generator
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
     Sketch.hyperproperty_synthesis = hyperproperty
@@ -145,10 +145,7 @@ def paynt(
     elif method == "ar":
         synthesizer = SynthesizerAR(quotient)
     elif method == "cegis":
-        if ce_generator == "storm":
-            synthesizer = SynthesizerCEGIS(quotient)
-        elif ce_generator == "switss":
-            synthesizer = SynthesizerSWITSS(quotient)
+        synthesizer = SynthesizerCEGIS(quotient)
     elif method == "hybrid":
         synthesizer = SynthesizerHybrid(quotient)
     elif method == "ar_multicore":

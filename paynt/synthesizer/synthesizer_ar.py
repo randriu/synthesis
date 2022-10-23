@@ -31,7 +31,6 @@ class SynthesizerAR(Synthesizer):
         # print(improving_value, can_improve)
         if improving_value is not None:
             self.quotient.specification.optimality.update_optimum(improving_value)
-            self.since_last_optimum_update = 0
         # print(res, can_improve)
         # print(res.optimality_result.primary.result.get_values())
 
@@ -39,11 +38,7 @@ class SynthesizerAR(Synthesizer):
 
 
     
-    def synthesize(self, family):
-
-        logger.info("Synthesis initiated.")
-        
-        self.stat.start()
+    def synthesize_assignment(self, family):
 
         self.quotient.discarded = 0
 
@@ -51,9 +46,6 @@ class SynthesizerAR(Synthesizer):
         families = [family]
 
         while families:
-
-            if self.no_optimum_update_limit_reached():
-                break
 
             if SynthesizerAR.exploration_order_dfs:
                 family = families.pop(-1)
@@ -74,11 +66,5 @@ class SynthesizerAR(Synthesizer):
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
-        self.stat.finished(satisfying_assignment)
-
-        # if satisfying_assignment is not None:
-        #     dtmc = self.quotient.build_chain(satisfying_assignment)
-        #     spec = dtmc.check_specification(self.quotient.specification)
-        #     logger.info("Double-checking specification satisfiability: {}".format(spec))
         return satisfying_assignment
 

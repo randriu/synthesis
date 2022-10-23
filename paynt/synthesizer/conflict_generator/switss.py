@@ -1,6 +1,6 @@
 import stormpy
 
-from .synthesizer_cegis import SynthesizerCEGIS
+from .storm import ConflictGeneratorStorm
 
 # import switss stuff if installed
 import importlib
@@ -16,18 +16,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SynthesizerSWITSS(SynthesizerCEGIS):
+class ConflictGeneratorSwitss(ConflictGeneratorStorm):
 
     @property
-    def method_name(self):
-        return "CEGIS (SWITSS)"
+    def name(self):
+        return "(SWITSS)"
 
+    def initialize(self):
+        self.counterexample_generator = QSHeur(solver="cbc",iterations=10)
 
-    def initialize_ce_generator(self):
-        return QSHeur(solver="cbc",iterations=10)
-
-
-    def construct_conflicts(self, family, assignment, dtmc, conflict_requests, ce_generator):
+    def construct_conflicts(self, family, assignment, dtmc, conflict_requests, accepting_assignment):
 
         conflicts = []
         for request in conflict_requests:
@@ -62,8 +60,9 @@ class SynthesizerSWITSS(SynthesizerCEGIS):
 
             if prop.minimizing:
                 switss_dtmc_rf, _, _ = ReachabilityForm.reduce(switss_dtmc, "init", target_label)
-                results = list(ce_generator.solveiter(switss_dtmc_rf, threshold, "max", ignore_consistency_checks=True))
-                witnessing_subsystem = results[-1].subsystem.subsys.system # TODO: remove unreachable states
+                results = list(self.counterexample_generator.solveiter(switss_dtmc_rf, threshold, "max", ignore_consistency_checks=True))
+                witnessing_subsystem = results[-1].subsystem.subsys.system
+                witnessing_subsystem = SWITSS_DTMC.remove_unreachable_states(witnessing_subsystem, init_label="init")
 
                 conflict = set([int(label) for label in witnessing_subsystem.states_by_label.keys() if label.isnumeric()])
                 conflict = list(conflict)
@@ -95,8 +94,9 @@ class SynthesizerSWITSS(SynthesizerCEGIS):
 
                 transformed_switss_dtmc = SWITSS_DTMC(new_transation_matrix, label_to_states=labels)
                 switss_dtmc_rf,_,_ = ReachabilityForm.reduce(transformed_switss_dtmc, "init", target_label)
-                results = list(ce_generator.solveiter(switss_dtmc_rf, threshold, "max", ignore_consistency_checks=True))
-                witnessing_subsystem = results[-1].subsystem.subsys.system # TODO: remove unreachable states
+                results = list(self.counterexample_generator.solveiter(switss_dtmc_rf, threshold, "max", ignore_consistency_checks=True))
+                witnessing_subsystem = results[-1].subsystem.subsys.system
+                witnessing_subsystem = SWITSS_DTMC.remove_unreachable_states(witnessing_subsystem, init_label="init")
 
                 conflict = set()
                 for state_label in witnessing_subsystem.states_by_label.keys():
@@ -104,10 +104,6 @@ class SynthesizerSWITSS(SynthesizerCEGIS):
                         conflict |= switss_dtmc.labels_by_state[int(state_label)]
                 conflict = [int(hole_id) for hole_id in conflict if hole_id.isnumeric()]
 
-            scheduler_selection = None
-            if family_result is not None:
-                scheduler_selection = family_result.primary_selection
-            conflict = self.generalize_conflict(assignment, conflict, scheduler_selection)
             conflicts.append(conflict)
 
-        return conflicts    
+        return conflicts, accepting_assignment
