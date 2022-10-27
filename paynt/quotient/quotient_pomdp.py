@@ -579,6 +579,8 @@ class POMDPQuotientContainer(QuotientContainer):
         for obs in range(self.observations):
             policies = []
             for mem in range(self.pomdp_manager.observation_memory_size[obs]):
+                if len(obs_state_info[obs][mem]) == 0:
+                    continue
                 _,action,memory_update,_ = obs_state_info[obs][mem][0]
                 state_values = [ {state:value} for state,_,_,value in obs_state_info[obs][mem]]
                 
