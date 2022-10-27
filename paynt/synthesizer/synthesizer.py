@@ -48,7 +48,7 @@ class Synthesizer:
             dtmc = self.quotient.build_chain(assignment)
             result = dtmc.check_specification(self.quotient.specification)
             logger.info("Double-checking specification satisfiability: {}".format(result))
-            if self.quotient.export_optimal_dtmc:
+            if self.quotient.export_optimal_result:
                 self.quotient.export_result(dtmc, result)
         
         self.print_stats()
