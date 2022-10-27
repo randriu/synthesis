@@ -447,15 +447,15 @@ class QuotientContainer:
         for _ in range(num_paths):
             path = mdp.random_path(path_length,state_row_group)
             path_reward = mdp.evaluate_path(path,reward_name)
-            paths.append( (path,path_reward) )
+            paths.append( {"path":path,"reward":path_reward} )
 
         path_json = [json.dumps(path) for path in paths]
         
         output_json = "[\n" + ",\n".join(path_json) + "\n]\n"
 
-        logger.debug("attempting to reconstruct samples from JSON ...")
-        json.loads(output_json)
-        logger.debug("OK")
+        # logger.debug("attempting to reconstruct samples from JSON ...")
+        # json.loads(output_json)
+        # logger.debug("OK")
         
         logger.info("writing generated samples to {} ...".format(output_path))
         with open(output_path, 'w') as f:
