@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class QuotientContainer:
 
     # if True, export the (labeled) optimal DTMC
-    export_optimal_dtmc = False
+    export_optimal_result = False
 
     def __init__(self, quotient_mdp = None, coloring = None,
         specification = None):

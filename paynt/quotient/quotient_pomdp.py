@@ -528,14 +528,81 @@ class POMDPQuotientContainer(QuotientContainer):
 
         return restricted_family
 
+    
+    def export_result(self, dtmc, mc_result):
+        self.export_pomdp()
+        self.export_optimal_dtmc(dtmc)
+        self.export_optimal_scheduler(dtmc, mc_result)
 
-    def export_result(self, dtmc):
-
-        # export POMDP
+    def export_pomdp(self):
         pomdp_path = "pomdp.drn"
         logger.info("Exporting POMDP to {}".format(pomdp_path))
         stormpy.export_to_drn(self.pomdp, pomdp_path)
-        
+
+    def export_optimal_scheduler(self, dtmc, mc_result):
+        # assuming single optimizing property
+        assert self.specification.num_properties == 1 and self.specification.has_optimality
+        dtmc_state_value = mc_result.optimality_result.result.get_values()
+
+        # map states of the DTMC to their POMDP counterparts
+        # label states with the selected actions/memory updates as well as the
+        #   resulting reachability/reward value in the state
+        # group results by observation
+        obs_state_info = []
+        for obs in range(self.observations):
+            mem_size = self.pomdp_manager.observation_memory_size[obs]
+            mem_info = [ [] for _ in range(mem_size) ]
+            obs_state_info.append(mem_info)
+
+        for dtmc_state in range(dtmc.states):
+            
+            value = dtmc_state_value[dtmc_state]
+
+            mdp_state = dtmc.quotient_state_map[dtmc_state]
+            mdp_choice = dtmc.quotient_choice_map[dtmc_state]
+
+            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
+            memory_node = self.pomdp_manager.state_memory[mdp_state]
+
+            observation = self.pomdp.get_observation(pomdp_state)
+
+            pomdp_action_index = self.pomdp_manager.row_action_option[mdp_choice]
+            pomdp_choice = self.pomdp.get_choice_index(pomdp_state, pomdp_action_index)
+            memory_update = self.pomdp_manager.row_memory_option[mdp_choice]
+
+            obs_state_info[observation][memory_node].append( (pomdp_state,pomdp_action_index,memory_update,value) )
+
+        # for each observation and memory node, collect the chosen action + memory
+        #   update as well as state values
+        # use JSON as output format
+        obs_info = []
+        for obs in range(self.observations):
+            policies = []
+            for mem in range(self.pomdp_manager.observation_memory_size[obs]):
+                _,action,memory_update,_ = obs_state_info[obs][mem][0]
+                state_values = [ {state:value} for state,_,_,value in obs_state_info[obs][mem]]
+                
+                policy = {}
+                policy["memory_node"] = mem
+                policy["action"] = action
+                policy["memory_update"] = memory_update
+                policy["state_values"] = state_values
+
+                policies.append( policy )
+            obs_info.append(policies)
+
+        # export JSON
+        import json
+        output_json = json.dumps(obs_info, indent=4)
+        # print(output_json)
+        scheduler_path = "scheduler.json"
+        logger.info("Exporting optimal scheduler to {}".format(scheduler_path))
+        with open(scheduler_path, 'w') as f:
+            print(output_json, file=f)
+
+    
+    def export_optimal_dtmc(self, dtmc):
+
         # label states with a pomdp_state:memory_node pair
         # label choices with a pomdp_choice:memory_update pair
         state_labeling = dtmc.model.labeling
