@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class QuotientContainer:
 
     # if True, export the (labeled) optimal DTMC
-    export_optimal_dtmc = False
+    export_optimal_result = False
 
     def __init__(self, quotient_mdp = None, coloring = None,
         specification = None):
@@ -407,6 +407,7 @@ class QuotientContainer:
 
         return design_subspaces
 
+
     def double_check_assignment(self, assignment):
         '''
         Double-check whether this assignment truly improves optimum.
@@ -420,6 +421,46 @@ class QuotientContainer:
             return assignment, res.optimality_result.value
         else:
             return None, None
+
+    
+    def sample(self):
+        
+        # parameters
+        path_length = 1000
+        num_paths = 100
+        output_path = 'samples.txt'
+
+        import json
+
+        # assuming optimization of reward property
+        assert len(self.specification.constraints) == 0
+        opt = self.specification.optimality
+        assert opt.reward
+        reward_name = opt.formula.reward_name
+        
+        # build the mdp
+        self.build(self.design_space)
+        mdp = self.design_space.mdp
+        state_row_group = mdp.prepare_sampling()
+        
+        paths = []
+        for _ in range(num_paths):
+            path = mdp.random_path(path_length,state_row_group)
+            path_reward = mdp.evaluate_path(path,reward_name)
+            paths.append( {"path":path,"reward":path_reward} )
+
+        path_json = [json.dumps(path) for path in paths]
+        
+        output_json = "[\n" + ",\n".join(path_json) + "\n]\n"
+
+        # logger.debug("attempting to reconstruct samples from JSON ...")
+        # json.loads(output_json)
+        # logger.debug("OK")
+        
+        logger.info("writing generated samples to {} ...".format(output_path))
+        with open(output_path, 'w') as f:
+            print(output_json, end="", file=f)
+        logger.info("done")
 
 
 

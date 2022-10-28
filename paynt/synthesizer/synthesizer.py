@@ -46,10 +46,10 @@ class Synthesizer:
             logger.info("Printing synthesized assignment below:")
             logger.info(str(assignment))
             dtmc = self.quotient.build_chain(assignment)
-            spec = dtmc.check_specification(self.quotient.specification)
-            logger.info("Double-checking specification satisfiability: {}".format(spec))
-            if self.quotient.export_optimal_dtmc:
-                self.quotient.export_result(dtmc)
+            result = dtmc.check_specification(self.quotient.specification)
+            logger.info("Double-checking specification satisfiability: {}".format(result))
+            if self.quotient.export_optimal_result:
+                self.quotient.export_result(dtmc, result)
         
         self.print_stats()
     

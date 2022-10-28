@@ -98,6 +98,8 @@ def setup_logger(log_path = None):
     show_default=True,
     help="counterexample generator",
 )
+@click.option("--sampling", is_flag=True, default=False,
+    help="sample executions")
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
 
@@ -110,6 +112,7 @@ def paynt(
         hyperproperty, 
         storm_pomdp_analysis, parallel_storm,
         ce_generator,
+        sampling,
         profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
@@ -118,8 +121,7 @@ def paynt(
     Synthesizer.incomplete_search = incomplete_search
     SynthesizerCEGIS.conflict_generator_type = ce_generator
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
-    POMDPQuotientContainer.export_optimal_dtmc = fsc_export_result
-    Sketch.hyperproperty_synthesis = hyperproperty
+    POMDPQuotientContainer.export_optimal_result = fsc_export_result
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
@@ -137,6 +139,11 @@ def paynt(
     else:
         storm_control = None
 
+
+    if sampling:
+        quotient.sample()
+        exit()
+        
     # choose the synthesis method and run the corresponding synthesizer
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
