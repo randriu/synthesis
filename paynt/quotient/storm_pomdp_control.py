@@ -122,10 +122,11 @@ class StormPOMDPControl:
                 continue
 
             # parse non cut-off states
-            if 'cutoff' not in state.labels:
+            if 'cutoff' not in state.labels or 'clipping' not in state.labels:
                 for label in state.labels:
-                    if 'obs_' in label:
-                        _, observation = label.split('_')
+                    if '[' in label:
+                        simplified_label = self.quotient.simplify_label(label)
+                        observation = self.quotient.observation_labels.index(simplified_label)
 
                         index = -1
 
