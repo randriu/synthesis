@@ -122,7 +122,7 @@ class StormPOMDPControl:
                 continue
 
             # parse non cut-off states
-            if 'cutoff' not in state.labels or 'clipping' not in state.labels:
+            if 'cutoff' not in state.labels and 'clipping' not in state.labels:
                 for label in state.labels:
                     if '[' in label:
                         simplified_label = self.quotient.simplify_label(label)
@@ -220,9 +220,10 @@ class StormPOMDPControl:
                 continue
             name = hole.name.strip('A()')
             obs = name.split(',')[0]
+            observation = self.quotient.observation_labels.index(obs)
 
-            if hole.options[0] not in result[int(obs)]:
-                result[int(obs)].append(hole.options[0])
+            if hole.options[0] not in result[observation]:
+                result[observation].append(hole.options[0])
 
         observations = list(result.keys())
         for obs in observations:
