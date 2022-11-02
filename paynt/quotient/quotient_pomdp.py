@@ -121,6 +121,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # initialize POMDP manager
         self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
+        # self.pomdp_manager = stormpy.synthesis.PomdpManagerAposteriori(self.pomdp)
+
         # do initial unfolding
         self.set_imperfect_memory_size(POMDPQuotientContainer.initial_memory_size)
         # self.set_global_memory_size(POMDPQuotientContainer.initial_memory_size)
@@ -210,7 +212,6 @@ class POMDPQuotientContainer(QuotientContainer):
             "Unfolding POMDP using the following memory allocation vector: {} ..."
             .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        # self.quotient_mdp = self.pomdp_manager.construct_mdp_aposteriori()
 
         # short aliases
         pm = self.pomdp_manager
