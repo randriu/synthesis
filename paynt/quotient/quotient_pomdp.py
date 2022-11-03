@@ -641,3 +641,9 @@ class POMDPQuotientContainer(QuotientContainer):
         logger.info("Exporting optimal DTMC to {}".format(dtmc_path))
         stormpy.export_to_drn(dtmc.model, dtmc_path)
 
+
+    def pomcp(self):
+        from paynt.quotient.pomcp import POMCP
+        pomcp = POMCP(self)
+        pomcp.foo()
+        exit()

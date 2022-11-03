@@ -119,6 +119,8 @@ def paynt(
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
 
+    quotient.pomcp()
+
 
     if sampling:
         quotient.sample()
