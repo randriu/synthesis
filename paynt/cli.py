@@ -85,8 +85,8 @@ def setup_logger(log_path = None):
     show_default=True,
     help="counterexample generator",
 )
-@click.option("--sampling", is_flag=True, default=False,
-    help="sample executions")
+@click.option("--pomcp", is_flag=True, default=False,
+    help="run POMCP")
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
 
@@ -97,7 +97,7 @@ def paynt(
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
         ce_generator,
-        sampling,
+        pomcp,
         profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
@@ -119,11 +119,10 @@ def paynt(
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
 
-    quotient.pomcp()
-
-
-    if sampling:
-        quotient.sample()
+    if pomcp:
+        from paynt.quotient.pomcp import POMCP
+        p = POMCP(quotient)
+        p.run()
         exit()
         
     # choose the synthesis method and run the corresponding synthesizer
