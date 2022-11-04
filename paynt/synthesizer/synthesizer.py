@@ -19,10 +19,13 @@ class Synthesizer:
         ''' to be overridden '''
         pass
     
-    def synthesize(self, family):
+    def synthesize(self, family = None):
         
         logger.info("Synthesis initiated.")
         self.stat.start()
+
+        if family is None:
+            family = self.quotient.design_space
         
         assignment = self.synthesize_assignment(family)
 

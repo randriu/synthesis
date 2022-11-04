@@ -121,8 +121,7 @@ def paynt(
 
     if pomcp:
         from paynt.quotient.pomcp import POMCP
-        p = POMCP(quotient)
-        p.run()
+        POMCP(quotient).run()
         exit()
         
     # choose the synthesis method and run the corresponding synthesizer

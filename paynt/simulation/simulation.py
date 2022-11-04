@@ -11,11 +11,6 @@ class SimulatedModel:
         # underlying model, can be MDP or POMDP
         self.model = model
 
-        # assuming state reward
-        reward_model = list(self.model.reward_models.values())[0]
-        assert reward_model.state_rewards
-        self.state_rewards = [reward_model.get_state_reward(state) for state in range(self.model.nr_states)]
-        
         # current state for the simulation
         self.current_state = self.initial_state
 
@@ -49,9 +44,10 @@ class SimulatedModel:
     def initial_state(self):
         return self.model.initial_states[0]
 
-    def state_action_reward(self, state, reward):
-        # TODO
-        return self.state_rewards[state]
+    def state_action_reward(self, state, action, reward_name):
+        reward_model = self.model.get_reward_model(reward_name)
+        assert reward_model.state_rewards
+        return reward_model.get_state_reward(state)
 
     @property
     def is_partially_observable(self):
