@@ -57,7 +57,7 @@ def setup_logger(log_path = None):
     help="relative error for optimal synthesis")
 
 @click.option("--filetype",
-    type=click.Choice(['prism', 'drn', 'pomdp', 'dpomdp']),
+    type=click.Choice(['prism', 'drn', 'cassandra']),
     default="prism", show_default=True,
     help="input file format")
 @click.option("--export",
@@ -113,7 +113,7 @@ def paynt(
     properties_path = os.path.join(project, props)
     if not os.path.isfile(sketch_path):
         raise ValueError(f"the sketch file {sketch_path} does not exist")
-    if not os.path.isfile(properties_path):
+    if not filetype=="cassandra" and not os.path.isfile(properties_path):
         raise ValueError(f"the properties file {properties_path} does not exist")
 
     quotient = Sketch.load_sketch(sketch_path, filetype, export,

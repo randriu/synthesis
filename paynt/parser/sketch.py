@@ -6,6 +6,8 @@ from ..quotient.quotient import *
 from ..quotient.quotient_pomdp import POMDPQuotientContainer
 from ..quotient.quotient_decpomdp import DecPomdpQuotientContainer
 
+import paynt
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -33,18 +35,16 @@ class Sketch:
         logger.info(f"loading sketch from {sketch_path} ...")
         if filetype == "prism":
             explicit_quotient, specification, coloring, jani_unfolder = PrismParser.read_prism(sketch_path, constant_str, properties_path, relative_error)
-        else:
-            if filetype == "drn":
-                explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
-            elif filetype == "pomdp":
-                explicit_quotient = PomdpParser.read_pomdp_solve(sketch_path)
-            else: # filetype == "dpompd"
-                explicit_quotient = stormpy.synthesis.parse_decpomdp(sketch_path)
-                # TODO specification
-                quotient_container = DecPomdpQuotientContainer(explicit_quotient)
-                return quotient_container
+        elif filetype == "drn":
+            explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
             specification = PrismParser.parse_specification(properties_path, relative_error)
-            MarkovChain.initialize(specification)
+        else: # filetype == "cassandra"
+            decpomdp_manager = stormpy.synthesis.parse_decpomdp(sketch_path)
+            quotient_container = DecPomdpQuotientContainer(decpomdp_manager)
+            return quotient_container
+             
+        assert specification is not None   
+        MarkovChain.initialize(specification)
         
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))

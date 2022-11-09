@@ -7,37 +7,35 @@ from .holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
 from .quotient_pomdp import POMDPQuotientContainer
 
+import paynt
+
 import logging
 logger = logging.getLogger(__name__)
 
 
 class DecPomdpQuotientContainer(QuotientContainer):
 
-    def __init__(self, decpomdp):
-        
-        assert decpomdp is not None
+    def __init__(self, decpomdp_manager):
 
-        self.decpomdp = decpomdp
-        print(f"dec-POMDP has {decpomdp.num_agents} agents and {decpomdp.num_states} states")
-        print()
+        self.decpomdp_manager = decpomdp_manager
+        logger.info(f"dec-POMDP has {decpomdp_manager.num_agents} agents")
 
-        print("transition matrix:")
-        print(decpomdp.transition_matrix[2])
-        print()
+        # see what happens if you uncomment the line below:
+        decpomdp_manager.apply_discount_factor_transformation()
+        self.quotient = decpomdp_manager.construct_mdp()
+        print("MDP has {} states".format(self.quotient.nr_states))
+        print("transitions from state 1: ", self.quotient.transition_matrix.get_row(1))
 
-        print("reward vectors:")
-        print(decpomdp.row_reward)
-        print()
+        # construct specification
+        reward_name = list(self.quotient.reward_models)[0]
+        optimization_direction = "min" if decpomdp_manager.reward_minimizing else "max"
+        formula_str = 'R{"' + reward_name + '"}' + optimization_direction + '=? [F "sink"]'
+        formula = stormpy.parse_properties_without_context(formula_str)[0]
+        optimality = paynt.quotient.property.OptimalityProperty(formula, 0)
+        specification = paynt.quotient.property.Specification([],optimality)
+        MarkovChain.initialize(specification)
 
-        if decpomdp.reward_minimizing:
-            formula_str = 'R{"rew0"}min=? [F "target"]'
-        else:
-            formula_str = 'R{"rew0"}max=? [F "target"]'
-        print("specification: ", formula_str)
-        print()
-
-        print("exiting...")
-
+        logger.debug("nothing to do, aborting...")
         exit()
         
 

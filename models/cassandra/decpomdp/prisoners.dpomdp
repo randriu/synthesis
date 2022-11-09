@@ -1,7 +1,6 @@
-# This is a Dec-POMDP (.dpomdp) file for the Dec-Tiger problem.
-# For more detailed documentation, see example.dpomdp
-
-# Allright, here we go!
+# This is a Dec-POMDP (.dpomdp) file for the Prisoner's dilemma.
+# For more detailed documentation, see test.dpomdp in the parser subdirectory 
+# (src/parser).
 #
 #The agents. 
 #----------
@@ -11,12 +10,12 @@
 #   agents: agent1_name, name-of-agent2, ... 
 agents: 2 
 #   discount: %f 
-discount: .9
+discount: 1 
 #.0
 #   values: [ reward, cost ] 
 values: reward
 #   states: [ %d, <list of states> ] 
-states: tiger-left tiger-right     
+states: NULL_STATE
 #
 #Examples of this are:
 #   start: 0.3 0.1 0.0 0.2 0.5
@@ -38,8 +37,8 @@ uniform
 #   ...
 #   [ %d, <list of actions> ] 
 actions: 
-listen open-left open-right
-listen open-left open-right
+StaySilent Betray
+StaySilent Betray
 #the (number/list of) observations for each of the agents on a separate line
 #   observations: 
 #   [ %d, <list of observations> ]
@@ -47,8 +46,8 @@ listen open-left open-right
 #   ...
 #   [ %d, <list of observations> ]
 observations: 
-hear-left hear-right
-hear-left hear-right
+O_StaySilent O_Betray
+O_StaySilent O_Betray
 #Transition probabilities
 #   T: <a1 a2...an> : <start-state> : <end-state> : %f
 #or
@@ -65,10 +64,6 @@ hear-left hear-right
 #   [ identity, uniform ]
 T: * :
 uniform
-#T:open-right open-right :
-#uniform
-T: listen listen :
-identity 
 #Observation probabilities
 #    O: <a1 a2...an> : <end-state> : <o1 o2 ... om> : %f
 #or
@@ -80,16 +75,12 @@ identity
 #    %f %f ... %f	    ... 
 #    ...		    ...
 #    %f %f ... %f	    P(jo_1|ja,s_k') ... P(jo_x|ja,s_k') 
-O: * :
-uniform
-O: listen listen : tiger-left : hear-left hear-left : 0.7225
-O: listen listen : tiger-left : hear-left hear-right : 0.1275
-O: listen listen : tiger-left : hear-right hear-left : 0.1275
-O: listen listen : tiger-left : hear-right hear-right : 0.0225
-O: listen listen : tiger-right : hear-right hear-right : 0.7225
-O: listen listen : tiger-right : hear-left hear-right : 0.1275
-O: listen listen : tiger-right : hear-right hear-left : 0.1275
-O: listen listen : tiger-right : hear-left hear-left : 0.0225
+#O: * :
+#uniform
+O: StaySilent StaySilent : * : O_StaySilent O_StaySilent : 1.0
+O: StaySilent Betray : * : O_StaySilent O_Betray : 1.0
+O: Betray StaySilent : * : O_Betray O_StaySilent : 1.0
+O: Betray Betray : * : O_Betray O_Betray : 1.0
 #The rewards
 #or
 #    R: <a1 a2...an> : <start-state> : <end-state> :
@@ -103,20 +94,7 @@ O: listen listen : tiger-right : hear-left hear-left : 0.0225
 #
 #Typical problems only use R(s,ja) which is specified by:
 #   R: <a1 a2...an> : <start-state> : * : * : %f
-R: listen listen: * : * : * : -2
-R: open-left open-left : tiger-left : * : * : -50
-R: open-right open-right : tiger-right : * : * : -50
-R: open-left open-left : tiger-right : * : * : +20
-R: open-right open-right : tiger-left : * : * : 20
-R: open-left open-right: tiger-left : * : * : -100
-R: open-left open-right: tiger-right : * : * : -100
-R: open-right open-left: tiger-left : * : * : -100
-R: open-right open-left: tiger-right : * : * : -100
-R: open-left listen: tiger-left : * : * : -101
-R: listen open-right: tiger-right : * : * : -101
-R: listen open-left: tiger-left : * : * : -101
-R: open-right listen: tiger-right : * : * : -101
-R: listen open-right: tiger-left : * : * : 9
-R: listen open-left: tiger-right : * : * : 9
-R: open-right listen: tiger-left : * : * : 9
-R: open-left listen: tiger-right : * : * : 9
+R: StaySilent StaySilent : * : * : * : -1
+R: StaySilent Betray : * : * : * : -10 
+R: Betray StaySilent : * : * : * : 0 
+R: Betray Betray : * : * : * : -5
