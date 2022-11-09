@@ -21,7 +21,7 @@ class DecPomdpQuotientContainer(QuotientContainer):
         logger.info(f"dec-POMDP has {decpomdp_manager.num_agents} agents")
 
         # see what happens if you uncomment the line below:
-        decpomdp_manager.apply_discount_factor_transformation()
+        # decpomdp_manager.apply_discount_factor_transformation()
         self.quotient = decpomdp_manager.construct_mdp()
         print("MDP has {} states".format(self.quotient.nr_states))
         print("transitions from state 1: ", self.quotient.transition_matrix.get_row(1))
