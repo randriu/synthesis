@@ -19,7 +19,7 @@ class ConflictGeneratorMdp(ConflictGeneratorStorm):
     def construct_conflicts(self, family, assignment, dtmc, conflict_requests, accepting_assignment):
 
         assert len(conflict_requests) == 1, \
-        "we don't know how to handle multiple properties in this mode, consider CEGIS in another mode"
+        "we don't know how to handle multiple conflict requests in this mode, consider CEGIS in another mode"
 
         # generalize simple holes, i.e. starting from the full family, fix each
         # non-simple hole to the option selected by the assignment
