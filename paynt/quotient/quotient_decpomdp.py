@@ -5,7 +5,8 @@ import stormpy.pomdp
 from .models import MarkovChain,MDP,DTMC
 from .holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
-from .quotient_pomdp import POMDPQuotientContainer
+
+import paynt
 
 import logging
 logger = logging.getLogger(__name__)
@@ -13,31 +14,19 @@ logger = logging.getLogger(__name__)
 
 class DecPomdpQuotientContainer(QuotientContainer):
 
-    def __init__(self, decpomdp):
-        
-        assert decpomdp is not None
+    def __init__(self, decpomdp_manager, specification):
+        super().__init__(specification = specification)
 
-        self.decpomdp = decpomdp
-        print(f"dec-POMDP has {decpomdp.num_agents} agents and {decpomdp.num_states} states")
-        print()
+        assert self.decpomdp_manager.num_agents > 1
 
-        print("transition matrix:")
-        print(decpomdp.transition_matrix[2])
-        print()
+        self.decpomdp_manager = decpomdp_manager
+        logger.info(f"dec-POMDP has {self.decpomdp_manager.num_agents} agents")
 
-        print("reward vectors:")
-        print(decpomdp.row_reward)
-        print()
+        self.quotient = self.decpomdp_manager.construct_mdp()
+        print("MDP has {} states".format(self.quotient.nr_states))
+        print("transitions from state 1: ", self.quotient.transition_matrix.get_row(1))
 
-        if decpomdp.reward_minimizing:
-            formula_str = 'R{"rew0"}min=? [F "target"]'
-        else:
-            formula_str = 'R{"rew0"}max=? [F "target"]'
-        print("specification: ", formula_str)
-        print()
-
-        print("exiting...")
-
+        logger.debug("nothing to do, aborting...")
         exit()
         
 

@@ -58,6 +58,7 @@ class SynthesizerAR(Synthesizer):
             can_improve,improving_assignment = self.analyze_family_ar(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
+                # break #FIXME
             if can_improve == False:
                 self.explore(family)
                 continue

@@ -64,7 +64,7 @@ def setup_logger(log_path = None):
     help="relative error for optimal synthesis")
 
 @click.option("--filetype",
-    type=click.Choice(['prism', 'drn', 'pomdp', 'dpomdp']),
+    type=click.Choice(['prism', 'drn', 'cassandra']),
     default="prism", show_default=True,
     help="input file format")
 @click.option("--export",
@@ -98,8 +98,8 @@ def setup_logger(log_path = None):
     show_default=True,
     help="counterexample generator",
 )
-@click.option("--sampling", is_flag=True, default=False,
-    help="sample executions")
+@click.option("--pomcp", is_flag=True, default=False,
+    help="run POMCP")
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
 
@@ -112,7 +112,7 @@ def paynt(
         hyperproperty, 
         storm_pomdp_analysis, parallel_storm,
         ce_generator,
-        sampling,
+        pomcp,
         profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
@@ -128,7 +128,7 @@ def paynt(
     properties_path = os.path.join(project, props)
     if not os.path.isfile(sketch_path):
         raise ValueError(f"the sketch file {sketch_path} does not exist")
-    if not os.path.isfile(properties_path):
+    if not filetype=="cassandra" and not os.path.isfile(properties_path):
         raise ValueError(f"the properties file {properties_path} does not exist")
 
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
@@ -139,9 +139,9 @@ def paynt(
     else:
         storm_control = None
 
-
-    if sampling:
-        quotient.sample()
+    if pomcp:
+        from paynt.quotient.pomcp import POMCP
+        POMCP(quotient).run()
         exit()
         
     # choose the synthesis method and run the corresponding synthesizer

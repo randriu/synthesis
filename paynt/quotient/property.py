@@ -239,7 +239,14 @@ class Specification:
         return any([c.reward and not c.minimizing for c in self.all_properties()])
 
 
+def construct_reward_property(reward_name, minimizing, target_label):
+    direction = "min" if minimizing else "max"
+    formula_str = 'R{"' + reward_name + '"}' + '{}=? [F "{}"]'.format(direction, target_label)
+    formula = stormpy.parse_properties_without_context(formula_str)[0]
+    optimality = OptimalityProperty(formula, 0)
+    return optimality
 
+        
 
 
 

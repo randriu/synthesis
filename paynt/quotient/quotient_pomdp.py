@@ -107,7 +107,7 @@ class POMDPQuotientContainer(QuotientContainer):
             num_actions = self.actions_at_observation[obs]
             if num_actions <= 1:
                 continue
-            name = self.create_hole_name(obs,mem="*",action_hole=True)
+            name = self.create_hole_name(obs,mem="*",is_action_hole=True)
             options = list(range(num_actions))
             option_labels = [str(labels) for labels in self.action_labels_at_observation[obs]]
             hole = Hole(name, options, option_labels)
@@ -133,10 +133,23 @@ class POMDPQuotientContainer(QuotientContainer):
     def observations(self):
         return self.pomdp.nr_observations
 
-    def create_hole_name(self, obs, mem, action_hole):
-        category = "A" if action_hole else "M"
+    def create_hole_name(self, obs, mem, is_action_hole):
+        category = "A" if is_action_hole else "M"
         obs_label = self.observation_labels[obs]
         return "{}({},{})".format(category,obs_label,mem)
+
+    def decode_hole_name(self, name):
+        result = re.search(r"([A|M])\((.*?),(\d+)\)", name)
+        is_action_hole = result.group(1) == "A"
+        observation_label = result.group(2)
+        memory = int(result.group(3))
+
+        observation = None
+        for obs in range(self.observations):
+            if observation_label == self.observation_labels[obs]:
+                observation = obs
+                break
+        return(is_action_hole, observation, memory)
     
     def simplify_label(self,label):
         label = re.sub(r"\s+", "", label)
@@ -244,7 +257,7 @@ class POMDPQuotientContainer(QuotientContainer):
             num_updates = pm.max_successor_memory_size[obs]
             if num_updates <= 1:
                 continue
-            name = self.create_hole_name(obs,mem="*",action_hole=False)
+            name = self.create_hole_name(obs,mem="*",is_action_hole=False)
             options = list(range(num_updates))
             option_labels = [str(x) for x in range(num_updates)]
             hole = Hole(name,options,option_labels)
@@ -549,78 +562,17 @@ class POMDPQuotientContainer(QuotientContainer):
         return restricted_family
 
     
+    
     def export_result(self, dtmc, mc_result):
         self.export_pomdp()
         self.export_optimal_dtmc(dtmc)
-        self.export_optimal_scheduler(dtmc, mc_result)
+        self.export_policy(dtmc, mc_result)
 
+    
     def export_pomdp(self):
         pomdp_path = "pomdp.drn"
         logger.info("Exporting POMDP to {}".format(pomdp_path))
         stormpy.export_to_drn(self.pomdp, pomdp_path)
-
-    def export_optimal_scheduler(self, dtmc, mc_result):
-        # assuming single optimizing property
-        assert self.specification.num_properties == 1 and self.specification.has_optimality
-        dtmc_state_value = mc_result.optimality_result.result.get_values()
-
-        # map states of the DTMC to their POMDP counterparts
-        # label states with the selected actions/memory updates as well as the
-        #   resulting reachability/reward value in the state
-        # group results by observation
-        obs_state_info = []
-        for obs in range(self.observations):
-            mem_size = self.pomdp_manager.observation_memory_size[obs]
-            mem_info = [ [] for _ in range(mem_size) ]
-            obs_state_info.append(mem_info)
-
-        for dtmc_state in range(dtmc.states):
-            
-            value = dtmc_state_value[dtmc_state]
-
-            mdp_state = dtmc.quotient_state_map[dtmc_state]
-            mdp_choice = dtmc.quotient_choice_map[dtmc_state]
-
-            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
-            memory_node = self.pomdp_manager.state_memory[mdp_state]
-
-            observation = self.pomdp.get_observation(pomdp_state)
-
-            pomdp_action_index = self.pomdp_manager.row_action_option[mdp_choice]
-            pomdp_choice = self.pomdp.get_choice_index(pomdp_state, pomdp_action_index)
-            memory_update = self.pomdp_manager.row_memory_option[mdp_choice]
-
-            obs_state_info[observation][memory_node].append( (pomdp_state,pomdp_action_index,memory_update,value) )
-
-        # for each observation and memory node, collect the chosen action + memory
-        #   update as well as state values
-        # use JSON as output format
-        obs_info = []
-        for obs in range(self.observations):
-            policies = []
-            for mem in range(self.pomdp_manager.observation_memory_size[obs]):
-                if len(obs_state_info[obs][mem]) == 0:
-                    continue
-                _,action,memory_update,_ = obs_state_info[obs][mem][0]
-                state_values = [ {state:value} for state,_,_,value in obs_state_info[obs][mem]]
-                
-                policy = {}
-                policy["memory_node"] = mem
-                policy["action"] = action
-                policy["memory_update"] = memory_update
-                policy["state_values"] = state_values
-
-                policies.append( policy )
-            obs_info.append(policies)
-
-        # export JSON
-        import json
-        output_json = json.dumps(obs_info, indent=4)
-        # print(output_json)
-        scheduler_path = "scheduler.json"
-        logger.info("Exporting optimal scheduler to {}".format(scheduler_path))
-        with open(scheduler_path, 'w') as f:
-            print(output_json, file=f)
 
     
     def export_optimal_dtmc(self, dtmc):
@@ -660,6 +612,68 @@ class POMDPQuotientContainer(QuotientContainer):
         logger.info("Exporting optimal DTMC to {}".format(dtmc_path))
         stormpy.export_to_drn(dtmc.model, dtmc_path)
 
+    
+    def collect_policy(self, dtmc, mc_result):
+        # assuming single optimizing property
+        assert self.specification.num_properties == 1 and self.specification.has_optimality
+        dtmc_state_value = mc_result.optimality_result.result.get_values()
+
+        # map states of the DTMC to their POMDP counterparts
+        # label states with the value achieved in the state
+        # group results by observation
+        policy = []
+        for obs in range(self.observations):
+            mem_size = self.pomdp_manager.observation_memory_size[obs]
+            mem_info = [ {} for _ in range(mem_size) ]
+            policy.append(mem_info)
+
+        for dtmc_state in range(dtmc.states):
+            value = dtmc_state_value[dtmc_state]
+            mdp_state = dtmc.quotient_state_map[dtmc_state]
+            mdp_choice = dtmc.quotient_choice_map[dtmc_state]
+
+            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
+            memory_node = self.pomdp_manager.state_memory[mdp_state]
+            observation = self.pomdp.get_observation(pomdp_state)
+
+            policy[observation][memory_node][pomdp_state] = value
+
+        return policy
+
+    def export_policy(self, dtmc, mc_result):
+
+        policy = self.collect_policy(dtmc, mc_result)
+
+        # use JSON as output format
+        obs_info = []
+        for obs in range(self.observations):
+            policies = []
+            for mem in range(self.pomdp_manager.observation_memory_size[obs]):
+                if len(policy[obs][mem]) == 0:
+                    continue
+                state_values = [ {state:value} for state,value in policy[obs][mem].items() ]
+                
+                sub_policy = {}
+                sub_policy["memory_node"] = mem
+                sub_policy["state_values"] = state_values
+
+                policies.append( sub_policy )
+            obs_info.append(policies)
+
+        # export JSON
+        import json
+        output_json = json.dumps(obs_info, indent=4)
+        # print(output_json)
+        scheduler_path = "scheduler.json"
+        logger.info("Exporting optimal scheduler to {}".format(scheduler_path))
+        with open(scheduler_path, 'w') as f:
+            print(output_json, file=f)
+
+    def extract_policy(self, assignment):
+        dtmc = self.build_chain(assignment)
+        mc_result = dtmc.check_specification(self.specification)
+        policy = self.collect_policy(dtmc, mc_result)
+        return policy
 
     # constructs pomdp from the quotient MDP
     def get_family_pomdp(self, mdp):
