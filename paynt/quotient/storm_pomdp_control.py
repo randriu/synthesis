@@ -53,10 +53,15 @@ class StormPOMDPControl:
     def run_storm_analysis(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
-        options.size_threshold_init = 0
-        options.use_grid_clipping = True
-        options.clipping_threshold_init = 1
-        options.clipping_grid_res = 4
+        options.size_threshold_init = 100000
+        #options.size_threshold_factor = 2
+        options.use_grid_clipping = False
+        #options.exploration_time_limit = 60
+        #options.clipping_threshold_init = 1
+        #options.clipping_grid_res = 4
+        #options.gap_threshold_init = 0
+        #options.refine_precision = 0
+        #options.refine = False
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
         logger.info("starting Storm POMDP analysis")

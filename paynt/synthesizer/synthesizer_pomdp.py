@@ -112,7 +112,9 @@ class SynthesizerPOMDP:
 
             # unfold memory according to Storm data #1
             if unfold_storm:
-                if mem_size > 1:
+                # TODO
+                #if mem_size > 1:
+                if True:
                     #obs_memory_dict = {obs:len(actions) for obs, actions in self.storm_control.result_dict.items()}
                     obs_memory_dict = {obs:len(actions) for obs, actions in self.storm_control.result_dict_no_cutoffs.items()}
 
@@ -136,8 +138,8 @@ class SynthesizerPOMDP:
             #    main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
             #    subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
 
-            main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
-            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+            main_family = self.storm_control.get_main_restricted_family(family, self.quotient, use_cutoffs=False)
+            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient, use_cutoffs=False)
             #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions_symmetry_breaking(self.quotient, False)
 
             if self.incomplete_exploration == True:
@@ -146,8 +148,8 @@ class SynthesizerPOMDP:
             subfamilies = self.storm_control.get_subfamilies(subfamily_restrictions, family)
 
             # debug
-            #print(self.storm_control.result_dict)
-            #print(self.storm_control.result_dict_no_cutoffs)
+            print(self.storm_control.result_dict)
+            print(self.storm_control.result_dict_no_cutoffs)
             #print(main_family)
             #print(subfamily_restrictions)
             #print(subfamilies)
