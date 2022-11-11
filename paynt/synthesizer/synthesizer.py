@@ -47,12 +47,12 @@ class Synthesizer:
         print("")
         if assignment is not None:
             logger.info("Printing synthesized assignment below:")
-            logger.info(str(assignment))
+            logger.info(assignment)
             dtmc = self.quotient.build_chain(assignment)
-            result = dtmc.check_specification(self.quotient.specification)
-            logger.info("Double-checking specification satisfiability: {}".format(result))
+            mc_result = dtmc.check_specification(self.quotient.specification)
+            logger.info("Double-checking specification satisfiability: {}".format(mc_result))
             if self.quotient.export_optimal_result:
-                self.quotient.export_result(dtmc, result)
+                self.quotient.export_result(dtmc, mc_result)
         
         self.print_stats()
     
