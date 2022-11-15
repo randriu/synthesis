@@ -1,4 +1,5 @@
 import random
+import numpy
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,7 +15,10 @@ class SimulatedModel:
         # current state for the simulation
         self.current_state = self.initial_state
 
-        # for the purpose of sampling, we extract the transition matrix
+        # [simulation cash] for each state, a number of actions
+        self.state_num_actions = [model.get_nr_available_actions(s) for s in range(model.nr_states)]
+
+        # [simulation cash] transition matrix
         self.state_row_group = []
         tm = self.model.transition_matrix
         for state in range(self.model.nr_states):
@@ -59,14 +63,14 @@ class SimulatedModel:
         return self.model.get_observation(self.current_state)
     
     def sample_action(self, state):
-        num_actions = self.model.get_nr_available_actions(state)
+        num_actions = self.state_num_actions[state]
         action = random.randint(0,num_actions-1)
         return action
     
     def sample_successor(self, state, action):
-        assert self.state_row_group is not None
         succs,probs = self.state_row_group[state][action]
         successor = random.choices(succs, probs)[0]
+        # successor = numpy.random.choice(succs, size=1, p=probs)[0]
         return successor
 
     def sample_path(self, state, length):

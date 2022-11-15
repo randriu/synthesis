@@ -121,7 +121,14 @@ def paynt(
 
     if pomcp:
         from paynt.quotient.pomcp import POMCP
-        POMCP(quotient).run()
+        if not profiling:
+            POMCP(quotient).run()
+        else:
+            with cProfile.Profile() as pr:
+                POMCP(quotient).run()
+            stats = pr.create_stats()
+            print(stats)
+            pstats.Stats(pr).sort_stats('tottime').print_stats(10)
         exit()
         
     # choose the synthesis method and run the corresponding synthesizer
