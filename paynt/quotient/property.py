@@ -199,6 +199,10 @@ class Specification:
     def num_properties(self):
         return len(self.constraints) + (1 if self.has_optimality else 0)
 
+    @property
+    def is_single_property(self):
+        return self.num_properties == 1
+
     def all_constraint_indices(self):
         return [i for i,_ in enumerate(self.constraints)]
 
@@ -227,6 +231,7 @@ class Specification:
         for p in self.all_properties(): 
             p.transform_until_to_eventually()
 
+    
     def check(self):
         # TODO
         pass

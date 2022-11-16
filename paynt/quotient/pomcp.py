@@ -1,10 +1,13 @@
 import paynt
+import stormpy
 
 from .models import MarkovChain,MDP,DTMC
 from .holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
 from .coloring import MdpColoring
 from paynt.simulation.simulation import SimulatedModel
+
+from paynt.synthesizer.synthesizer_ar import SynthesizerAR
 
 import logging
 logger = logging.getLogger(__name__)
@@ -30,7 +33,9 @@ class FSC:
 
     def decide(self, decision_map, observation, memory):
         '''
-        Make decision using decision_map based on the observation and memory value.
+        Make decision using decision_map based on the observation and memory
+        value. decision_map is either self.selected_action or
+        self.selected_update
         '''
         decision = decision_map[observation][memory]
         if decision is None:
@@ -53,6 +58,12 @@ class FSC:
     def suggest_update_in_belief(self, belief_node):
         return self.suggest_update(belief_node.observation, belief_node.fsc_state)
 
+    def play_history(self, history):
+        memory = 0
+        for observation,_ in history:
+            memory = self.suggest_update(observation,memory)
+        return memory
+
 
 
 
@@ -63,7 +74,6 @@ class BeliefNode:
         self.observation = observation
         self.action_nodes = [ActionNode() for action in range(num_actions)]
         self.num_visits = 0
-        self.fsc_state = 0
 
     def __str__(self):
         return f"{self.particles} {[str(n) for n in self.action_nodes]} [{self.num_visits}]"
@@ -89,10 +99,7 @@ class ActionNode:
         self.value += (value - self.value) / self.num_visits
 
     def evaluate(self, minimizing):
-        value = self.value
-        if minimizing:
-            value *= -1
-        return value
+        return self.value if not minimizing else -self.value
 
 
 
@@ -102,29 +109,36 @@ class POMCP:
     
     def __init__(self, quotient):
         self.quotient = quotient
+        assert(self.quotient.specification.is_single_property)
 
-    def create_belief_node(self, observation, fsc_state):
+    def create_belief_node(self, observation):
         num_actions = self.quotient.actions_at_observation[observation]
-        belief_node = BeliefNode(observation, num_actions)
-        belief_node.fsc_state = fsc_state
-        return belief_node
+        return BeliefNode(observation, num_actions)
 
-    def approximate_action_values(self, belief_node, horizon):
+    
+    def predict_action_value(self, state, action, horizon):
+        # rollout
+        next_state = self.simulated_model.sample_successor(state,action)
+        path = self.simulated_model.sample_path(next_state, length=horizon)
+        path_reward = self.simulated_model.path_discounted_reward(path, self.discount_factor)
+        return path_reward
+
+    def predict_state_value(self, state, horizon):
+        num_actions = self.quotient.pomdp.get_nr_available_actions(state)
+        action_values = []
+        for action in range(num_actions):
+            action_value = self.predict_action_value(state, action, horizon)
+            action_values.append(action_value)
+        return action_values
+
+    def predict_belief_values(self, belief_node, horizon):
         state = belief_node.sample()
-        for action,action_node in enumerate(belief_node.action_nodes):
-            # rollout
-            next_state = self.simulated_model.sample_successor(state,action)
-            path = self.simulated_model.sample_path(next_state, length=horizon)
-            path_reward = self.simulated_model.path_discounted_reward(path, self.discount_factor)
-            # reward_value = path_reward + (self.exploration_horizon - horizon)
-            # if reward_value < 90:
-                # print(reward_value)
-                # print(dir(self.simulated_model.model.state_valuations))
-                # print(self.simulated_model.model.state_valuations.get_string(state))
-            action_node.visit(path_reward)
+        action_values = self.predict_state_value(state, horizon)
+        for action,value in enumerate(action_values):
+            belief_node.action_nodes[action].visit(value)
 
-    def approximate_action_value_fsc(self, belief_node):
-
+    
+    def approximate_action_value_fsc(self, belief_node, fsc):
         avg_path_reward = 0
         for simulation in range(self.exploration_iterations):
             path = []
@@ -132,9 +146,9 @@ class POMCP:
             obs = belief_node.observation
             mem = belief_node.fsc_state
             for _ in range(self.exploration_horizon):
-                action = self.fsc.suggest_action(obs,mem)
+                action = fsc.suggest_action(obs,mem)
                 path.append( (state,action ) )
-                mem = self.fsc.suggest_update(obs,mem)
+                mem = fsc.suggest_update(obs,mem)
                 state = self.simulated_model.sample_successor(state,action)
                 obs = next_observation = self.simulated_model.model.get_observation(state)
             path_reward = self.simulated_model.path_discounted_reward(path, self.discount_factor)
@@ -152,7 +166,6 @@ class POMCP:
         return self.best_action(action_evaluations)
 
     def pick_action_exploration(self, belief_node):
-        fsc_action = self.fsc.suggest_action_in_belief(belief_node)
         action_evaluations = []
         for action,action_node in enumerate(belief_node.action_nodes):
 
@@ -161,26 +174,24 @@ class POMCP:
             value_ucb = math.sqrt( math.log(belief_node.num_visits) / action_node.num_visits )
             value_ucb *= self.exploration_constant_ucb
 
-            # value_fsc = 1 if action == fsc_action else 0
-            # value_fsc *= self.exploration_constant_fsc
-
-            total_value = value + value_ucb # + value_fsc
+            total_value = value + value_ucb
             
             action_evaluations.append(total_value)
             
         return self.best_action(action_evaluations)
 
-    def pick_action_play(self, belief_node):
+    def pick_action_play(self, belief_node, fsc, fsc_state):
         action_evaluations = [
             action_node.evaluate(self.minimizing)
             for action,action_node in enumerate(belief_node.action_nodes)
         ]
+        # print("action values: ", action_evaluations)
         self.total_decisions += 1
         best_action = self.best_action(action_evaluations)
-        if self.use_fsc_to_play:
-            fsc_action = self.fsc.suggest_action_in_belief(belief_node)
+        
+        if self.use_fsc_to_play and fsc is not None:
+            fsc_action = fsc.suggest_action_in_belief(belief_node)
             fsc_action_value = self.approximate_action_value_fsc(belief_node)
-            # fsc_action_value = numpy.inf
 
             if fsc_action == best_action:
                 self.actions_same += 1
@@ -189,7 +200,6 @@ class POMCP:
                     self.fsc_better += 1
                 else:
                     self.mcts_better += 1
-
             
             if fsc_action_value > action_evaluations[best_action]:
                 best_action = fsc_action
@@ -204,8 +214,6 @@ class POMCP:
 
         belief_node.num_visits += 1
         action = self.pick_action_exploration(belief_node)
-        # action_fsc = self.fsc.suggest_action_in_belief(belief_node)
-        # assert action == action_fsc
 
         action_reward = self.simulated_model.state_action_reward(state,action,self.reward_name)
 
@@ -217,10 +225,9 @@ class POMCP:
 
         if next_observation not in action_node.belief_nodes:
             # new belief
-            fsc_state = self.fsc.suggest_update_in_belief(belief_node)
-            next_belief_node = self.create_belief_node(next_observation,fsc_state)
+            next_belief_node = self.create_belief_node(next_observation)
             next_belief_node.add(next_state)
-            self.approximate_action_values(next_belief_node, horizon-1)
+            self.predict_belief_values(next_belief_node, horizon-1)
             action_node.belief_nodes[next_observation] = next_belief_node
 
             next_best_action = self.pick_action_value(next_belief_node)
@@ -235,18 +242,11 @@ class POMCP:
         return total_reward
 
     
-    def search_action(self, action, observation, horizon):
+    def build_tree(self, action, observation, horizon):
 
-        
         root = None
-        fsc_state = None
-        if action is None:
-            # action is None when no action has been played, i.e. in the beginning
-            fsc_state = 0
-        else:
-
-            # compute next state of the FSC
-            fsc_state = self.fsc.suggest_update_in_belief(self.root)
+        
+        if action is not None:
             # check if action node has the belief corresponding to this observation
             action_node = self.root.action_nodes[action]
             if observation not in action_node.belief_nodes:
@@ -259,59 +259,110 @@ class POMCP:
         if root is None:
             # cannot re-use the sub-tree: use uniform belief over all states
             # with the given observation
-            root = self.create_belief_node(observation,fsc_state)
+            root = self.create_belief_node(observation)
             for state in range(self.simulated_model.model.nr_states):
                 obs = self.simulated_model.model.get_observation(state)
                 if obs == observation:
                     root.add(state)
-            self.approximate_action_values(root,horizon)
+            self.predict_belief_values(root,horizon)
 
         self.root = root
 
         # nothing to do if only 1 action is available
-        if len(self.root.action_nodes) == 1:
-            return 0
+        # FIXME
+        # if len(self.root.action_nodes) == 1:
+            # return 0
 
         for _ in range(self.exploration_iterations):
             state = self.root.sample()
             self.explore(self.root, state, horizon)
 
-        # print("action values: ", [n.evaluate(self.minimizing) for n in self.root.action_nodes])
-        # return self.pick_action_value(self.root)
-        return self.pick_action_play(self.root)
 
+    def collect_relevant_states(self):
+        state_visits = [0 for state in range(self.quotient.pomdp.nr_states)]
+        nodes = [self.root]
+        while nodes:
+            node = nodes.pop(-1)
+            for state in node.particles:
+                state_visits[state] += 1
+            for action_node in node.action_nodes:
+                for belief_node in action_node.belief_nodes.values():
+                    nodes.append(belief_node)
+        state_relevant = [v>0 for s,v in enumerate(state_visits)]
+        return state_relevant
+    
+    def synthesize(self, initial_belief_node):
+        state_relevant = self.collect_relevant_states()
+        horizon_states = self.builder.collect_horizon(state_relevant)
+        
+        # approximate values in horizon states
+        pomdp = self.quotient.pomdp
+        horizon_values = {}
+        for s in horizon_states:
+            action_values = self.predict_state_value(s, self.exploration_horizon)
+            if self.minimizing:
+                best_value = numpy.min(action_values)
+            else:
+                best_value = numpy.max(action_values)
+            horizon_values[s] = best_value
+
+        # determine initial belief
+        initial_belief = collections.defaultdict(int)
+        for s in initial_belief_node.particles:
+            initial_belief[s] += 1
+        frequency_sum = len(initial_belief_node.particles)
+        for s,frequency in initial_belief.items():
+            initial_belief[s] = frequency / frequency_sum
+
+        subpomdp = self.builder.restrict_pomdp(initial_belief, state_relevant, horizon_values)
+        print(subpomdp)
+        exit()
+
+        # construct initial FSC
+        memory_size = paynt.quotient.quotient_pomdp.POMDPQuotientContainer.initial_memory_size
+        self.quotient.set_imperfect_memory_size(memory_size)
+        synthesizer = SynthesizerAR(self.quotient)
+        assignment = synthesizer.synthesize()
+        assert assignment is not None, "no assignment was found, try to increase memory"
+        fsc = FSC(self.quotient, memory_size, assignment)
+        self.quotient.set_imperfect_memory_size(1)
+        return fsc
 
     def run_simulation(self):
         
         self.simulated_model = SimulatedModel(self.quotient.pomdp)
+
         self.root = None
 
+        # history = []
         accumulated_reward = 0
-        action = None
+        action = None       # last action played
+        fsc = None          # last FSC built
         for depth in range(self.simulation_horizon):
 
-            state = self.simulated_model.current_state
             observation = self.simulated_model.current_observation
             # observation_label = self.quotient.observation_labels[observation]
             # print("s: ", self.simulated_model.current_state, observation, observation_label)
             if self.simulated_model.state_is_absorbing[self.simulated_model.current_state]:
                 break
 
+            # run MCTS
+            self.build_tree(action, observation, self.exploration_horizon)
 
-            action = self.search_action(action, observation, self.exploration_horizon)
-            if self.simulate_fsc:
-                action = self.fsc.suggest_action_in_belief(self.root)
+            # resynthesize FSC
+            fsc = self.synthesize(self.root)
+            # fsc_state = fsc.play_history(history)
+            fsc_state = 0
             
-            # action_fsc = self.fsc.suggest_action_in_belief(self.root)
-            # if action != action_fsc:
-                # print("selected {}, FSC suggests {}".format(action,action_fsc))
-            # assert action == action_fsc
-
+            # pick the best action
+            action = self.pick_action_play(self.root, fsc, fsc_state)
+            
+            # play the action
+            # history.append( (observation,action) )
             reward = self.simulated_model.state_action_reward(self.simulated_model.current_state, action, self.reward_name)
             accumulated_reward += reward
             # action_label = self.quotient.action_labels_at_observation[observation][action]
             # print("a: ", action, action_label)
-
             self.simulated_model.simulate_action(action)
 
         # logger.info("finished, accumulated reward: {}".format(accumulated_reward))
@@ -332,32 +383,24 @@ class POMCP:
 
         self.discount_factor = 1
 
-        self.simulation_iterations = 1
+        self.simulation_iterations = 1000
         self.simulation_horizon = 40
         # self.simulate_fsc = True
         
-        self.exploration_iterations = 80
-        self.exploration_horizon = 40
+        self.exploration_iterations = 20
+        self.exploration_horizon = 20
 
         self.exploration_constant_ucb = 10000
         # self.use_fsc_to_play = True
-
-        # random.seed(42)
-
-        # run synthesis
-        memory_size = paynt.quotient.quotient_pomdp.POMDPQuotientContainer.initial_memory_size
-        self.quotient.set_imperfect_memory_size(memory_size)
-        from paynt.synthesizer.synthesizer_ar import SynthesizerAR
-        synthesizer = SynthesizerAR(self.quotient)
-        assignment = synthesizer.synthesize()
-        assert assignment is not None, "no assignment was found, try to increase memory"
-        self.fsc = FSC(self.quotient, memory_size, assignment)
-        self.quotient.set_imperfect_memory_size(1)
 
         self.total_decisions = 0
         self.actions_same = 0
         self.fsc_better = 0
         self.mcts_better = 0
+
+        # random.seed(42)
+        formula = self.quotient.specification.stormpy_formulae()[0]
+        self.builder = stormpy.synthesis.SubPomdpBuilder(self.quotient.pomdp, formula)
 
         # run simulations
         import progressbar
@@ -368,15 +411,16 @@ class POMCP:
         simulation_values = []
         for simulation in range(self.simulation_iterations):
             simulation_value = self.run_simulation()
-            print(simulation_value)
+            # print(simulation_value)
             simulation_values.append(simulation_value)
             bar.update(simulation)
+
         bar.finish()
 
         simulation_value_avg = numpy.mean(simulation_values)
-        simulation_value_std = numpy.std(simulation_values)
+        # simulation_value_std = numpy.std(simulation_values)
 
-        print("{} simulations: mean value = {} [std={:.2f}]".format(self.simulation_iterations,simulation_value_avg, simulation_value_std))
+        print("{} simulations: mean value = {}".format(self.simulation_iterations,simulation_value_avg))
 
         print("MCTS = FSC: {} / {}".format(self.actions_same, self.total_decisions))
         print("FSC is better: {} / {}".format(self.fsc_better, self.total_decisions))
