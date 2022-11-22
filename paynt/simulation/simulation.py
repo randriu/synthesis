@@ -50,8 +50,8 @@ class SimulatedModel:
 
     def state_action_reward(self, state, action, reward_name):
         reward_model = self.model.get_reward_model(reward_name)
-        assert reward_model.state_rewards
-        return reward_model.get_state_reward(state)
+        action_index = self.model.get_choice_index(state,action)
+        return reward_model.get_state_action_reward(action_index)
 
     @property
     def is_partially_observable(self):
@@ -83,17 +83,15 @@ class SimulatedModel:
             state = self.sample_successor(state,action)
         return path
 
-    def path_discounted_reward(self, path, discount_factor):
+    def path_discounted_reward(self, path, reward_name, discount_factor):
         total_reward = 0
         factor = 1
-        reward_model = list(self.model.reward_models.values())[0]
         for state,action in path:
-            reward = reward_model.get_state_reward(state)
+            reward = self.state_action_reward(state,action,reward_name)
             total_reward += factor * reward
             factor *= discount_factor
         return total_reward
 
-    
     def reset_simulation(self):
         self.current_state = self.initial_state
 

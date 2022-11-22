@@ -120,7 +120,7 @@ class POMCP:
         # rollout
         next_state = self.simulated_model.sample_successor(state,action)
         path = self.simulated_model.sample_path(next_state, length=horizon)
-        path_reward = self.simulated_model.path_discounted_reward(path, self.discount_factor)
+        path_reward = self.simulated_model.path_discounted_reward(path, self.reward_name, self.discount_factor)
         return path_reward
 
     def predict_state_value(self, state, horizon):
@@ -278,9 +278,9 @@ class POMCP:
             self.explore(self.root, state, horizon)
 
 
-    def collect_relevant_states(self):
+    def collect_relevant_states(self, initial_belief_node):
         state_visits = [0 for state in range(self.quotient.pomdp.nr_states)]
-        nodes = [self.root]
+        nodes = [initial_belief_node]
         while nodes:
             node = nodes.pop(-1)
             for state in node.particles:
@@ -288,15 +288,27 @@ class POMCP:
             for action_node in node.action_nodes:
                 for belief_node in action_node.belief_nodes.values():
                     nodes.append(belief_node)
-        state_relevant = [v>0 for s,v in enumerate(state_visits)]
-        return state_relevant
+
+        relevant_states = stormpy.storage.BitVector(self.quotient.pomdp.nr_states,False)
+        for s,v in enumerate(state_visits):
+            if v>0:
+                relevant_states.set(s)
+
+        # add states in the initial belief
+        for state in initial_belief_node.particles:
+            relevant_states.set(state)
+        
+        return relevant_states
     
     def synthesize(self, initial_belief_node):
-        state_relevant = self.collect_relevant_states()
-        horizon_states = self.builder.collect_horizon(state_relevant)
+        relevant_states = self.collect_relevant_states(initial_belief_node)
+        self.builder.set_relevant_states(relevant_states)
         
         # approximate values in horizon states
         pomdp = self.quotient.pomdp
+        horizon_states = self.builder.get_horizon_states()
+        print(relevant_states)
+        print(horizon_states)
         horizon_values = {}
         for s in horizon_states:
             action_values = self.predict_state_value(s, self.exploration_horizon)
@@ -306,15 +318,17 @@ class POMCP:
                 best_value = numpy.max(action_values)
             horizon_values[s] = best_value
 
-        # determine initial belief
-        initial_belief = collections.defaultdict(int)
+        # construct initial distribution from particle belief
+        particle_count = collections.defaultdict(int)
         for s in initial_belief_node.particles:
-            initial_belief[s] += 1
+            particle_count[s] += 1
         frequency_sum = len(initial_belief_node.particles)
-        for s,frequency in initial_belief.items():
+        initial_belief = {}
+        for s,frequency in particle_count.items():
             initial_belief[s] = frequency / frequency_sum
 
-        subpomdp = self.builder.restrict_pomdp(initial_belief, state_relevant, horizon_values)
+        print(initial_belief)
+        subpomdp = self.builder.restrict_pomdp(initial_belief, horizon_values)
         print(subpomdp)
         exit()
 
@@ -377,6 +391,9 @@ class POMCP:
         assert opt.reward
         self.reward_name = opt.formula.reward_name
         self.minimizing = opt.minimizing
+        target_label = str(opt.formula.subformula.subformula)
+        assert self.quotient.pomdp.labeling.contains_label(target_label),\
+            "formula must contain reachability wrt a simple label"
 
         self.simulate_fsc = False
         self.use_fsc_to_play = False
@@ -399,8 +416,7 @@ class POMCP:
         self.mcts_better = 0
 
         # random.seed(42)
-        formula = self.quotient.specification.stormpy_formulae()[0]
-        self.builder = stormpy.synthesis.SubPomdpBuilder(self.quotient.pomdp, formula)
+        self.builder = stormpy.synthesis.SubPomdpBuilder(self.quotient.pomdp, self.reward_name, target_label)
 
         # run simulations
         import progressbar
