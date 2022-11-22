@@ -120,7 +120,7 @@ def paynt(
         properties_path, constants, relative_error)
 
     if pomcp:
-        from paynt.quotient.pomcp import POMCP
+        from paynt.simulation.pomcp import POMCP
         if not profiling:
             POMCP(quotient).run()
         else:

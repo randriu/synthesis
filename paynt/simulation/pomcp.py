@@ -1,13 +1,7 @@
-import paynt
 import stormpy
 
-from .models import MarkovChain,MDP,DTMC
-from .holes import Hole,Holes,DesignSpace
-from .quotient import QuotientContainer
-from .coloring import MdpColoring
+import paynt
 from paynt.simulation.simulation import SimulatedModel
-
-from paynt.synthesizer.synthesizer_ar import SynthesizerAR
 
 import logging
 logger = logging.getLogger(__name__)
@@ -335,7 +329,7 @@ class POMCP:
         # construct initial FSC
         memory_size = paynt.quotient.quotient_pomdp.POMDPQuotientContainer.initial_memory_size
         self.quotient.set_imperfect_memory_size(memory_size)
-        synthesizer = SynthesizerAR(self.quotient)
+        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(self.quotient)
         assignment = synthesizer.synthesize()
         assert assignment is not None, "no assignment was found, try to increase memory"
         fsc = FSC(self.quotient, memory_size, assignment)
