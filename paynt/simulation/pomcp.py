@@ -103,7 +103,16 @@ class POMCP:
     
     def __init__(self, quotient):
         self.quotient = quotient
-        assert(self.quotient.specification.is_single_property)
+        invalid_spec_msg = "expecting a single optimizing reward property"
+        assert self.quotient.specification.is_single_property, invalid_spec_msg
+        assert len(self.quotient.specification.constraints) == 0, invalid_spec_msg
+        opt = self.quotient.specification.optimality
+        assert opt.reward, invalid_spec_msg
+        self.reward_name = opt.formula.reward_name
+        self.minimizing = opt.minimizing
+        self.target_label = str(opt.formula.subformula.subformula)
+        assert self.quotient.pomdp.labeling.contains_label(self.target_label),\
+            "formula must contain reachability wrt a simple label"
 
     def create_belief_node(self, observation):
         num_actions = self.quotient.actions_at_observation[observation]
@@ -379,15 +388,7 @@ class POMCP:
     
     def run(self):
 
-        # assuming reward optimization without constraints
-        assert len(self.quotient.specification.constraints) == 0
-        opt = self.quotient.specification.optimality
-        assert opt.reward
-        self.reward_name = opt.formula.reward_name
-        self.minimizing = opt.minimizing
-        target_label = str(opt.formula.subformula.subformula)
-        assert self.quotient.pomdp.labeling.contains_label(target_label),\
-            "formula must contain reachability wrt a simple label"
+        # SimulatedModel(self.quotient.pomdp).produce_samples()
 
         self.simulate_fsc = False
         self.use_fsc_to_play = False
@@ -410,7 +411,7 @@ class POMCP:
         self.mcts_better = 0
 
         # random.seed(42)
-        self.builder = stormpy.synthesis.SubPomdpBuilder(self.quotient.pomdp, self.reward_name, target_label)
+        self.builder = stormpy.synthesis.SubPomdpBuilder(self.quotient.pomdp, self.reward_name, self.target_label)
 
         # run simulations
         import progressbar
