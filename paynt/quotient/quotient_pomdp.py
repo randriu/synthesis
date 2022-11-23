@@ -79,6 +79,7 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_labels = [self.simplify_label(label) for label in self.observation_labels]
         else:
             self.observation_labels = list(range(self.observations))
+            self.observation_labels = [str(label) for label in self.observation_labels]
         # logger.debug(f"Observation labels: {self.observation_labels}")
 
         # compute actions available at each observation
@@ -99,6 +100,7 @@ class POMDPQuotientContainer(QuotientContainer):
             for offset in range(actions):
                 choice = self.pomdp.get_choice_index(state,offset)
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
+                print(labels)
                 self.action_labels_at_observation[obs].append(labels)
 
         # construct action hole prototypes
