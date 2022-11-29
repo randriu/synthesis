@@ -91,16 +91,16 @@ class MarkovChain:
         return self.model.initial_states[0]
 
     def model_check_formula(self, formula):
-        result = stormpy.model_checking(
+        if not self.is_dtmc:
+            return stormpy.synthesis.verify_mdp(self.environment,self.model,formula,True)
+        return stormpy.model_checking(
             self.model, formula, only_initial_states=False,
             extract_scheduler=(not self.is_dtmc),
-            # extract_scheduler=True,
             environment=self.environment
         )
-        assert result is not None
-        return result
 
     def model_check_formula_hint(self, formula, hint):
+        raise RuntimeError("model checking with hints is not fully supported")
         stormpy.synthesis.set_loglevel_off()
         task = stormpy.core.CheckTask(formula, only_initial_states=False)
         task.set_produce_schedulers(produce_schedulers=True)

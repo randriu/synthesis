@@ -148,7 +148,7 @@ class OptimalityProperty(Property):
         return self.result_valid(value) and self.meets_op(value, self.optimum)
 
     def update_optimum(self, optimum):
-        assert self.improves_optimum(optimum)
+        # assert self.improves_optimum(optimum)
         logger.debug(f"New opt = {optimum}.")
         self.optimum = optimum
         if self.minimizing:
@@ -272,6 +272,10 @@ class PropertyResult:
     def __str__(self):
         return str(self.value)
 
+    def reevaluate(self):
+        pass    # left intentionally blank
+
+
 class ConstraintsResult:
     '''
     A list of property results.
@@ -291,7 +295,6 @@ class ConstraintsResult:
         return True
 
 
-
 class SpecificationResult:
     def __init__(self, constraints_result, optimality_result):
         self.constraints_result = constraints_result
@@ -299,6 +302,9 @@ class SpecificationResult:
 
     def __str__(self):
         return str(self.constraints_result) + " : " + str(self.optimality_result)
+
+    def reevaluate(self):
+        self.optimality_result.reevaluate()
 
     def accepting_dtmc(self, specification):
         """
@@ -346,9 +352,6 @@ class SpecificationResult:
             return opt.improving_assignment, opt.improving_value, can_improve
         else:
             return None, None, True
-
-    
-        
 
     def undecided_result(self):
         if self.optimality_result is not None and self.optimality_result.can_improve:
@@ -412,4 +415,7 @@ class MdpOptimalityResult(MdpPropertyResult):
         self.improving_assignment = improving_assignment
         self.improving_value = improving_value
         self.can_improve = can_improve
+
+    def reevaluate(self):
+        pass
 
