@@ -233,7 +233,8 @@ class MDP(MarkovChain):
             scheduler_assignment = self.design_space.copy()
             scheduler_assignment.assume_options(selection)
             improving_assignment, improving_value = self.quotient_container.double_check_assignment(scheduler_assignment)
-            return MdpOptimalityResult(prop, primary, None, improving_assignment, improving_value, False, selection, choice_values, expected_visits, scores)
+            can_improve = False if improving_assignment is not None else True
+            return MdpOptimalityResult(prop, primary, None, improving_assignment, improving_value, can_improve, selection, choice_values, expected_visits, scores)
 
         if not MDP.compute_secondary_direction:
             return MdpOptimalityResult(prop, primary, None, None, None, True, selection, choice_values, expected_visits, scores)
