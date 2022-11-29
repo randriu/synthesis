@@ -23,14 +23,15 @@ class MarkovChain:
     
         # model checking environment
         cls.environment = stormpy.Environment()
-        
         se = cls.environment.solver_environment
+        
+        stormpy.synthesis.set_precision_native(se.native_solver_environment, Property.mc_precision)
+        stormpy.synthesis.set_precision_minmax(se.minmax_solver_environment, Property.mc_precision)
 
         se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
 
-        # se.minmax_solver_environment.precision = stormpy.Rational(Property.mc_precision)
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
@@ -233,8 +234,7 @@ class MDP(MarkovChain):
             scheduler_assignment = self.design_space.copy()
             scheduler_assignment.assume_options(selection)
             improving_assignment, improving_value = self.quotient_container.double_check_assignment(scheduler_assignment)
-            can_improve = False if improving_assignment is not None else True
-            return MdpOptimalityResult(prop, primary, None, improving_assignment, improving_value, can_improve, selection, choice_values, expected_visits, scores)
+            return MdpOptimalityResult(prop, primary, None, improving_assignment, improving_value, False, selection, choice_values, expected_visits, scores)
 
         if not MDP.compute_secondary_direction:
             return MdpOptimalityResult(prop, primary, None, None, None, True, selection, choice_values, expected_visits, scores)
