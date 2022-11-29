@@ -100,7 +100,6 @@ class POMDPQuotientContainer(QuotientContainer):
             for offset in range(actions):
                 choice = self.pomdp.get_choice_index(state,offset)
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
-                print(labels)
                 self.action_labels_at_observation[obs].append(labels)
 
         # construct action hole prototypes

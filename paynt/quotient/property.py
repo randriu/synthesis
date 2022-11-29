@@ -134,6 +134,9 @@ class OptimalityProperty(Property):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
         return f"{str(self.property.raw_formula)} {eps}"
 
+    def reset(self):
+        self.optimum = None
+
     def meets_op(self, a, b):
         ''' For optimality objective, we want to accept improvements above model checking precision. '''
         return b is None or (Property.above_mc_precision(a,b) and self.op(a,b))
@@ -190,6 +193,10 @@ class Specification:
         else:
             optimality = str(self.optimality) 
         return f"constraints: {constraints}, optimality objective: {optimality}"
+
+    def reset(self):
+        if self.optimality is not None:
+            self.optimality.reset()
         
     @property
     def has_optimality(self):

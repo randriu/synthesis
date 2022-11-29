@@ -127,8 +127,8 @@ class SimulatedModel:
 
 
     def produce_samples(self):
-        num_paths = 1000
-        length = 1000
+        num_paths = 100
+        length = 100
 
         reward_name = list(self.model.reward_models)[0]
 
