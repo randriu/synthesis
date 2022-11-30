@@ -123,11 +123,7 @@ class POMCP:
 
     
     def predict_action_value(self, state, action, horizon):
-        # rollout
-        next_state = self.simulated_model.sample_successor(state,action)
-        path = self.simulated_model.sample_path(next_state, length=horizon)
-        path_reward = self.simulated_model.path_discounted_reward(path, self.reward_name, self.discount_factor)
-        return path_reward
+        return self.simulated_model.state_action_rollout(state,action,horizon,self.reward_name,self.discount_factor)
 
     def predict_state_value(self, state, horizon):
         num_actions = self.pomdp.get_nr_available_actions(state)
@@ -147,17 +143,17 @@ class POMCP:
     def approximate_action_value_fsc(self, belief_node, fsc):
         avg_path_reward = 0
         for simulation in range(self.exploration_iterations):
-            path = []
+            rewards = []
             state = belief_node.sample()
             obs = belief_node.observation
             mem = 0
             for _ in range(self.exploration_horizon):
                 action = fsc.suggest_action(obs,mem)
-                path.append( (state,action ) )
+                rewards.append(self.simulated_model.state_action_reward(state,action,self.reward_name))
                 mem = fsc.suggest_update(obs,mem)
                 state = self.simulated_model.sample_successor(state,action)
                 obs = next_observation = self.simulated_model.model.get_observation(state)
-            path_reward = self.simulated_model.path_discounted_reward(path, self.reward_name, self.discount_factor)
+            path_reward = self.simulated_model.discounted_reward(rewards, self.discount_factor)
             avg_path_reward += (path_reward - avg_path_reward) / (simulation+1)
 
         if self.minimizing:
@@ -355,7 +351,7 @@ class POMCP:
         
         root = self.build_tree(root, action, observation, self.exploration_horizon)
 
-        if self.simulate_fsc or self.use_fsc_to_play:
+        if (self.simulate_fsc or self.use_fsc_to_play) and not self.use_optimal_fsc:
             new_fsc = self.synthesize(root)
             if new_fsc is not None:
                 fsc_state = 0
@@ -371,7 +367,7 @@ class POMCP:
 
     
     def run_simulation(self):
-        self.simulated_model = SimulatedModel(self.pomdp)
+        self.simulated_model.reset_simulation()
 
         accumulated_reward = 0
         root = None
@@ -390,32 +386,31 @@ class POMCP:
     
     def run(self):
 
-        # do not unfol the pomdp
+        # do not unfold the pomdp
         self.quotient.set_imperfect_memory_size(1)
 
-        paynt.quotient.quotient_pomdp.logger.setLevel('CRITICAL')
-        paynt.quotient.property.logger.setLevel('CRITICAL')
-        paynt.synthesizer.synthesizer.logger.setLevel('CRITICAL')
+        # this
+        paynt.quotient.quotient_pomdp.logger.disabled = True
+        paynt.quotient.property.logger.disabled = True
+        paynt.synthesizer.synthesizer.logger.disabled = True
 
+        self.simulated_model = SimulatedModel(self.pomdp)
         # SimulatedModel(self.quotient.pomdp).produce_samples()
 
         self.discount_factor = 1
-
         
         self.simulate_fsc = False
         self.use_optimal_fsc = True
         self.use_fsc_to_play = True
-
         
         self.simulation_iterations = 100
         self.simulation_horizon = 100
         
-        self.exploration_iterations = 5
-        self.exploration_horizon = 5
+        self.exploration_iterations = 10
+        self.exploration_horizon = 10
 
         self.exploration_constant_ucb = 10000
 
-        
         self.total_decisions = 0
         self.actions_same = 0
         self.fsc_better = 0
@@ -424,7 +419,6 @@ class POMCP:
         # random.seed(42)
         self.builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, self.reward_name, self.target_label)
         
-
         if self.use_optimal_fsc:
             memory_size = paynt.quotient.quotient_pomdp.POMDPQuotientContainer.initial_memory_size
             self.quotient.set_imperfect_memory_size(memory_size)

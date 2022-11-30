@@ -1,3 +1,5 @@
+import stormpy.synthesis
+
 import random
 import numpy
 import json
@@ -43,6 +45,24 @@ class SimulatedModel:
                 if not absorbing:
                     break
             self.state_is_absorbing.append(absorbing)
+
+        # quick-test Storm simulation wrapper
+        logger.debug("constructing Storm wrapper...")
+        self.simulated_model_storm = stormpy.synthesis.SimulatedModel(model)
+        
+        state = 10
+        logger.debug(f"sampling random action in state {state}...")
+        action = self.simulated_model_storm.sample_action(state)
+        logger.debug(f"Storm returned action {action}")
+        
+        logger.debug(f"sampling effect of the action...")
+        next_state = self.simulated_model_storm.sample_successor(state,action)
+        logger.debug(f"Storm returned action {next_state}")
+
+        logger.debug(f"executing rollout...")
+        rollout_value = self.simulated_model_storm.state_action_rollout(state,action,10,'rew',0.99)
+        logger.debug(f"Storm returned {rollout_value}")
+        
         
 
     @property
@@ -51,12 +71,6 @@ class SimulatedModel:
 
     def state_valuation(self, state):
         return json.loads(str(self.model.state_valuations.get_json(state)))
-
-
-    def state_action_reward(self, state, action, reward_name):
-        reward_model = self.model.get_reward_model(reward_name)
-        action_index = self.model.get_choice_index(state,action)
-        return reward_model.get_state_action_reward(action_index)
 
     @property
     def is_partially_observable(self):
@@ -67,26 +81,53 @@ class SimulatedModel:
         assert self.is_partially_observable
         return self.model.get_observation(self.current_state)
     
+    def state_action_reward(self, state, action, reward_name):
+        reward_model = self.model.get_reward_model(reward_name)
+        action_index = self.model.get_choice_index(state,action)
+        return reward_model.get_state_action_reward(action_index)
+
     def sample_action(self, state):
+        # return self.simulated_model_storm.sample_action(state)
         num_actions = self.state_num_actions[state]
         action = random.randint(0,num_actions-1)
         return action
     
     def sample_successor(self, state, action):
+        # return self.simulated_model_storm.sample_successor(state,action)
         succs,probs = self.state_row_group[state][action]
         successor = random.choices(succs, probs)[0]
-        # successor = numpy.random.choice(succs, size=1, p=probs)[0]
         return successor
 
-    def sample_path(self, state, length):
-        path = []
+    def discounted_reward(self, rewards, discount_factor):
+        factor = 1
+        total_reward = 0
+        for reward in rewards:
+            total_reward += factor * reward
+            factor *= discount_factor
+        return total_reward
+
+    def state_action_rollout(self, state, action, length, reward_name, discount_factor):
+        # return self.simulated_model_storm.state_action_rollout(state,action,length,reward_name,discount_factor)
+        rewards = []
         for _ in range(length):
             if self.state_is_absorbing[state]:
                 break
-            action = self.sample_action(state)
-            path.append((state,action))
+            reward = self.state_action_reward(state,action,reward_name)
             state = self.sample_successor(state,action)
-        return path
+            action = self.sample_action(state)
+            rewards.append(reward)
+
+        return self.discounted_reward(rewards, discount_factor)
+
+    
+    def reset_simulation(self):
+        self.current_state = self.initial_state
+
+    def simulate_action(self, action):
+        self.current_state = self.sample_successor(self.current_state, action)    
+
+    
+    # sample generation
 
     def sample_path_annotated(self, state, length, reward_name):
         path = []
@@ -103,28 +144,10 @@ class SimulatedModel:
             state = self.sample_successor(state,action)
         return path
 
-    def path_discounted_reward(self, path, reward_name, discount_factor):
-        total_reward = 0
-        factor = 1
-        for state,action in path:
-            reward = self.state_action_reward(state,action,reward_name)
-            total_reward += factor * reward
-            factor *= discount_factor
-        return total_reward
-
-    def reset_simulation(self):
-        self.current_state = self.initial_state
-
-    def simulate_action(self, action):
-        self.current_state = self.sample_successor(self.current_state, action)
-
-    
-
     def export_json(self, output, output_path):
         logger.info("Exporting info to {}".format(output_path))
         with open(output_path, 'w') as f:
             print(json.dumps(output, indent=4), file=f)
-
 
     def produce_samples(self):
         num_paths = 100
@@ -168,8 +191,8 @@ class SimulatedModel:
         # write to files
         self.export_json(state_info, "states.json")
 
-        
         exit()
+        
 
 
     
