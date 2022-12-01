@@ -12,9 +12,9 @@ from multiprocessing import Process, SimpleQueue
 import logging
 logger = logging.getLogger(__name__)
 
-
+# TODO JUST A CONCEPT WE WILL TRY ITERATIVE METHOD FIRST
 # class for managing PAYNT and Storm parallel processes
-class ParallelMain:
+class ParallelControl:
 
     def __init__(self, synthesizer, storm_control):
         self.synthesizer = synthesizer              # PAYNT

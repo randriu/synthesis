@@ -13,7 +13,7 @@ from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 from .quotient.storm_pomdp_control import StormPOMDPControl
 
-from .utils.storm_parallel import ParallelMain
+from .utils.storm_parallel import ParallelControl
 # TODO remove?
 from multiprocessing import Manager
 from multiprocessing.managers import BaseManager
@@ -89,7 +89,7 @@ def setup_logger(log_path = None):
     help="enable synthesis of an MDP scheduler wrt a hyperproperty")
 @click.option("--storm-pomdp-analysis", is_flag=True, default=False,
     help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
-@click.option("--parallel-storm", is_flag=True, default=False,
+@click.option("--storm-parallel", is_flag=True, default=False,
     help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
 @click.option(
     "--ce-generator",
@@ -110,7 +110,7 @@ def paynt(
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, fsc_export_result,
         hyperproperty, 
-        storm_pomdp_analysis, parallel_storm,
+        storm_pomdp_analysis, storm_parallel,
         ce_generator,
         pomcp,
         profiling
@@ -162,8 +162,8 @@ def paynt(
 
 
 
-    if parallel_storm:
-        parallel_main = ParallelMain(synthesizer, storm_control)
+    if storm_parallel:
+        parallel_main = ParallelControl(synthesizer, storm_control)
         parallel_main.run()
     else:
         if not profiling:

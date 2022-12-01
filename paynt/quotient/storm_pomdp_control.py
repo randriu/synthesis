@@ -18,6 +18,7 @@ class StormPOMDPControl:
     # parsed best result data dictionary (Starting with data from Storm)
     result_dict = {}
     result_dict_no_cutoffs = {}
+    result_dict_paynt = {}
 
     # under-approximation value from Storm
     storm_bounds = None
@@ -34,13 +35,14 @@ class StormPOMDPControl:
 
     s_queue = None
 
+    paynt_export = []
 
     def __init__(self):
         pass
 
     def get_storm_result(self):
         self.run_storm_analysis()
-        self.parse_result(self.quotient)
+        self.parse_results(self.quotient)
 
         #print(self.result_dict)
         #print(self.storm_bounds)
@@ -53,7 +55,7 @@ class StormPOMDPControl:
     def run_storm_analysis(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
-        options.size_threshold_init = 100000
+        options.size_threshold_init = 10000
         #options.size_threshold_factor = 2
         options.use_grid_clipping = False
         #options.exploration_time_limit = 60
@@ -61,19 +63,26 @@ class StormPOMDPControl:
         #options.clipping_grid_res = 4
         #options.gap_threshold_init = 0
         #options.refine_precision = 0
-        #options.refine = False
+        #options.refine = True
+        #options.exploration_heuristic =
+        #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
+        #self.paynt_export = []
+        #print(self.paynt_export)
+
         logger.info("starting Storm POMDP analysis")
-        result = belmc.check(self.spec_formulas[0], [])   # calls Storm
+        result = belmc.check(self.spec_formulas[0], self.paynt_export)   # calls Storm
         logger.info("Storm POMDP analysis completed")
 
         # debug
+        print(result.induced_mc_from_scheduler)
         print(result.lower_bound)
         print(result.upper_bound)
-        #print(result.induced_mc_from_scheduler)
+        #print(result.cutoff_schedulers[1])
+        #for sc in result.cutoff_schedulers:
+        #    print(sc)
         #exit()
-        #print(result.cutoff_schedulers[0])
 
         self.latest_storm_result = result
 
@@ -97,7 +106,7 @@ class StormPOMDPControl:
 
         return result
 
-
+    # Probably not neccessary with the introduction of paynt result dict
     def parse_result(self, quotient):
         if self.is_storm_better and self.latest_storm_result is not None:
             self.parse_storm_result(quotient)
@@ -106,7 +115,36 @@ class StormPOMDPControl:
                 self.parse_paynt_result(quotient)
             else:
                 self.result_dict = {}
+                self.result_dict_paynt = {}
             self.result_dict_no_cutoffs = self.result_dict
+
+    def parse_results(self, quotient):
+        if self.latest_storm_result is not None:
+            self.parse_storm_result(quotient)
+        else:
+            self.result_dict = {}
+            self.result_dict_no_cutoffs = {}
+
+        if self.latest_paynt_result is not None:
+            self.parse_paynt_result(quotient)
+        else:
+            self.result_dict_paynt = {}
+
+    def join_results(self):
+        print(self.result_dict)
+        print(self.result_dict_paynt)
+
+        for obs in range(self.quotient.observations):
+            if obs in self.result_dict.keys():
+                if obs in self.result_dict_paynt.keys():
+                    for action in self.result_dict_paynt[obs]:
+                        if action not in self.result_dict[obs]:
+                            self.result_dict[obs].append(action)
+            else:
+                if obs in self.result_dict_paynt.keys():
+                    self.result_dict[obs] = self.result_dict_paynt[obs]
+
+        print(self.result_dict)
 
     # parse Storm results into a dictionary
     def parse_storm_result(self, quotient):
@@ -188,7 +226,7 @@ class StormPOMDPControl:
         else:
             self.storm_bounds = self.latest_storm_result.lower_bound
 
-        logger.info("Result dictionary is based on result from Storm")
+        #logger.info("Result dictionary is based on result from Storm")
         self.result_dict = result    
         self.result_dict_no_cutoffs = result_no_cutoffs       
             
@@ -235,14 +273,16 @@ class StormPOMDPControl:
             if len(result[obs]) == 0:
                 del result[obs]
 
-        logger.info("Result dictionary is based on result from PAYNT")
-        self.result_dict = result
+        #logger.info("Result dictionary is based on result from PAYNT")
+        self.result_dict_paynt = result
 
 
     # returns the main family that will be explored first
     def get_main_restricted_family(self, family, quotient, use_cutoffs=True):
 
-        if use_cutoffs or not(self.is_storm_better):
+        if not self.is_storm_better:
+            result_dict = self.result_dict_paynt
+        elif use_cutoffs:
             result_dict = self.result_dict
         else:
             result_dict = self.result_dict_no_cutoffs
@@ -302,14 +342,16 @@ class StormPOMDPControl:
                 restricted_family[hole].assume_options(options)
 
         #print(restricted_family)
-        logger.debug("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
+        logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
 
         return restricted_family
 
     # returns dictionary containing restrictions for easy creation of subfamilies
     def get_subfamilies_restrictions(self, quotient, use_cutoffs=True):
 
-        if use_cutoffs or not(self.is_storm_better):
+        if not self.is_storm_better:
+            result_dict = self.result_dict_paynt
+        elif use_cutoffs:
             result_dict = self.result_dict
         else:
             result_dict = self.result_dict_no_cutoffs
@@ -435,6 +477,8 @@ class StormPOMDPControl:
 
         if assignment is not None: 
             self.latest_paynt_result = assignment
+            self.paynt_export = self.quotient.extract_policy(assignment)
 
+        #self.is_storm_better = True
         #print(self.is_storm_better)
 

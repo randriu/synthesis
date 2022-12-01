@@ -199,7 +199,7 @@ class POMDPQuotientContainer(QuotientContainer):
             if self.observation_states[obs] <= 1:
                 memory = 1
             elif obs in obs_memory_dict.keys():
-                memory = max(obs_memory_dict[obs], memory_limit)
+                memory = max(obs_memory_dict[obs], self.observation_memory_size[obs]+1)
             else:
                 memory = memory_limit
 
