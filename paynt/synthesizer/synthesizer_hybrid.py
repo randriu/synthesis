@@ -83,17 +83,14 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
             self.stage_control.start_ar()
             
             # choose family
-            if SynthesizerAR.exploration_order_dfs:
-                family = families.pop(-1)
-            else:
-                family = families.pop(0)
+            family = families.pop(-1)
 
             # reset SMT solver level
-            if SynthesizerAR.exploration_order_dfs:
-                smt_solver.level(family.refinement_depth)
+            smt_solver.level(family.refinement_depth)
 
             # analyze the family
-            can_improve,improving_assignment = self.analyze_family_ar(family)
+            self.verify_family(family)
+            can_improve,improving_assignment = self.analyze_family(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
             if can_improve == False:

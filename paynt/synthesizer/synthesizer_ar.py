@@ -6,37 +6,36 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerAR(Synthesizer):
 
-    # family exploration order: True = DFS, False = BFS
-    exploration_order_dfs = True
-
     @property
     def method_name(self):
         return "AR"
 
-    def analyze_family_ar(self, family):
+    
+    def verify_family(self, family):
+        self.quotient.build(family)
+        self.stat.iteration_mdp(family.mdp.states)
+        res = family.mdp.check_specification(self.quotient.specification, property_indices = family.property_indices, short_evaluation = True)
+        family.analysis_result = res
+
+    
+    def analyze_family(self, family):
         """
         :return (1) family feasibility (True/False/None)
         :return (2) new satisfying assignment (or None)
         """
-        # logger.debug("analyzing family {}".format(family))
-        
-        self.quotient.build(family)
-        self.stat.iteration_mdp(family.mdp.states)
-
-        res = family.mdp.check_specification(self.quotient.specification, property_indices = family.property_indices, short_evaluation = True)
-        family.analysis_result = res
-        # print(res)
-
-        improving_assignment,improving_value,can_improve = res.improving(family)
-        # print(improving_value, can_improve)
+        improving_assignment,improving_value,can_improve = family.analysis_result.improving(family)
         if improving_value is not None:
             self.quotient.specification.optimality.update_optimum(improving_value)
-        # print(res, can_improve)
-        # print(res.optimality_result.primary.result.get_values())
-
         return can_improve, improving_assignment
 
 
+    def family_value(self, family):
+        ur = family.analysis_result.undecided_result()
+        value = ur.primary.value
+        # we pick family with maximum value
+        if ur.minimizing:
+            value *= -1
+        return value
     
     def synthesize_assignment(self, family):
 
@@ -47,18 +46,13 @@ class SynthesizerAR(Synthesizer):
 
         while families:
 
-            if SynthesizerAR.exploration_order_dfs:
-                family = families.pop(-1)
-            else:
-                family = families.pop(0)
-
-            # simulate sequential
+            family = families.pop(-1)
             family.parent_info = None
 
-            can_improve,improving_assignment = self.analyze_family_ar(family)
+            self.verify_family(family)
+            can_improve,improving_assignment = self.analyze_family(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
-                # break #FIXME
             if can_improve == False:
                 self.explore(family)
                 continue
@@ -68,4 +62,47 @@ class SynthesizerAR(Synthesizer):
             families = families + subfamilies
 
         return satisfying_assignment
+
+
+    def synthesize_assignment_experimental(self, family):
+
+        self.quotient.discarded = 0
+
+        satisfying_assignment = None
+        families = [family]
+        while families:
+
+            # analyze all families, keep optimal solution
+            for family in families:
+                if family.analysis_result is not None:
+                    continue
+                family.parent_info = None
+                self.verify_family(family)
+                _,improving_assignment = self.analyze_family(family)
+                if improving_assignment is not None:
+                    satisfying_assignment = improving_assignment
+            
+            # analyze families once more and keep undecided ones
+            undecided_families = []
+            for family in families:
+                can_improve,_ = self.analyze_family(family)
+                if can_improve == False:
+                    self.explore(family)
+                else:
+                    undecided_families.append(family)
+            if not undecided_families:
+                break
+            
+            # sort families
+            undecided_families = sorted(undecided_families, key=lambda f: self.family_value(f), reverse=True)
+            # print([self.family_value(f) for f in undecided_families])
+
+            # split family with the best value
+            family = undecided_families[0]
+            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
+            families = subfamilies + undecided_families[1:]
+                
+
+        return satisfying_assignment
+
 

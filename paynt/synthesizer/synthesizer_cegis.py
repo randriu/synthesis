@@ -102,7 +102,7 @@ class SynthesizerCEGIS(Synthesizer):
             accepting_assignment = assignment
         if improving_value is not None:
             self.quotient.specification.optimality.update_optimum(improving_value)
-        if accepting and not self.quotient.specification.can_be_improved:
+        if accepting and not self.quotient.specification.can_be_improved():
             return [], accepting_assignment
 
         conflict_requests = self.collect_conflict_requests(family, mc_result)
@@ -131,13 +131,13 @@ class SynthesizerCEGIS(Synthesizer):
         while assignment is not None:
             
             conflicts, accepting_assignment = self.analyze_family_assignment_cegis(family, assignment)
-            pruned = smt_solver.exclude_conflicts(family, assignment, conflicts)
-            self.explored += pruned
-
             if accepting_assignment is not None:
                 satisfying_assignment = accepting_assignment
-                if not self.quotient.specification.can_be_improved:
+                if not self.quotient.specification.can_be_improved():
                     return satisfying_assignment
+
+            pruned = smt_solver.exclude_conflicts(family, assignment, conflicts)
+            self.explored += pruned
             
             # construct next assignment
             assignment = smt_solver.pick_assignment(family)

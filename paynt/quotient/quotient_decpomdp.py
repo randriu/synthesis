@@ -17,9 +17,9 @@ class DecPomdpQuotientContainer(QuotientContainer):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        assert self.decpomdp_manager.num_agents > 1
-
+        assert decpomdp_manager.num_agents > 1
         self.decpomdp_manager = decpomdp_manager
+
         logger.info(f"dec-POMDP has {self.decpomdp_manager.num_agents} agents")
 
         self.quotient = self.decpomdp_manager.construct_mdp()
