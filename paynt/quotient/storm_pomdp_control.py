@@ -53,19 +53,23 @@ class StormPOMDPControl:
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
     def run_storm_analysis(self):
-        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.use_explicit_cutoff = True
-        options.size_threshold_init = 10000
+        #options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        #options.use_explicit_cutoff = True
+        #options.size_threshold_init = 10000
         #options.size_threshold_factor = 2
-        options.use_grid_clipping = False
-        #options.exploration_time_limit = 60
+        #options.use_grid_clipping = False
+        #options.exploration_time_limit = 1
         #options.clipping_threshold_init = 1
         #options.clipping_grid_res = 4
         #options.gap_threshold_init = 0
         #options.refine_precision = 0
+        #options.refine_step_limit = 10
         #options.refine = True
         #options.exploration_heuristic =
         #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
+
+        options = self.get_cutoff_options(200000)
+
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
         #self.paynt_export = []
@@ -85,6 +89,64 @@ class StormPOMDPControl:
         #exit()
 
         self.latest_storm_result = result
+
+    def get_cutoff_options(self, belief_states=100000):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.use_explicit_cutoff = True
+        options.size_threshold_init = belief_states
+        options.use_grid_clipping = False
+        return options
+
+    def get_overapp_options(self, belief_states=100000):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
+        options.use_explicit_cutoff = True
+        options.size_threshold_init = belief_states
+        options.use_grid_clipping = False
+        return options
+
+    def get_refine_options(self, step_limit=5):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.use_explicit_cutoff = True
+        options.size_threshold_init = 0
+        options.size_threshold_factor = 2
+        options.use_grid_clipping = False
+        options.gap_threshold_init = 0
+        options.refine_precision = 0
+        options.refine_step_limit = step_limit
+        options.refine = True
+        return options
+
+    def get_clip2_options(self):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.use_explicit_cutoff = True
+        options.size_threshold_init = 0
+        #options.size_threshold_factor = 2
+        options.use_grid_clipping = True
+        #options.exploration_time_limit = 1
+        #options.clipping_threshold_init = 1
+        options.clipping_grid_res = 2
+        options.gap_threshold_init = 0
+        #options.refine_precision = 0
+        #options.refine = True
+        #options.exploration_heuristic =
+        #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
+        return options
+
+    def get_clip4_options(self):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.use_explicit_cutoff = True
+        options.size_threshold_init = 0
+        #options.size_threshold_factor = 2
+        options.use_grid_clipping = True
+        #options.exploration_time_limit = 1
+        #options.clipping_threshold_init = 1
+        options.clipping_grid_res = 4
+        options.gap_threshold_init = 0
+        #options.refine_precision = 0
+        #options.refine = True
+        #options.exploration_heuristic =
+        #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
+        return options
 
     # Over-approximation
     @staticmethod
@@ -130,21 +192,19 @@ class StormPOMDPControl:
         else:
             self.result_dict_paynt = {}
 
-    def join_results(self):
-        print(self.result_dict)
-        print(self.result_dict_paynt)
+    def join_results(self, use_cutoffs=True):
+        if use_cutoffs:
+            for obs in range(self.quotient.observations):
+                if obs in self.result_dict.keys():
+                    if obs in self.result_dict_paynt.keys():
+                        for action in self.result_dict_paynt[obs]:
+                            if action not in self.result_dict[obs]:
+                                self.result_dict[obs].append(action)
+                else:
+                    if obs in self.result_dict_paynt.keys():
+                        self.result_dict[obs] = self.result_dict_paynt[obs]
 
-        for obs in range(self.quotient.observations):
-            if obs in self.result_dict.keys():
-                if obs in self.result_dict_paynt.keys():
-                    for action in self.result_dict_paynt[obs]:
-                        if action not in self.result_dict[obs]:
-                            self.result_dict[obs].append(action)
-            else:
-                if obs in self.result_dict_paynt.keys():
-                    self.result_dict[obs] = self.result_dict_paynt[obs]
-
-        print(self.result_dict)
+        
 
     # parse Storm results into a dictionary
     def parse_storm_result(self, quotient):
@@ -183,6 +243,22 @@ class StormPOMDPControl:
 
                         if index >= 0 and index not in result_no_cutoffs[int(observation)]:
                             result_no_cutoffs[int(observation)].append(index)
+                    elif 'obs_' in label:
+                        _, observation = label.split('_')
+
+                        index = -1
+
+                        for i in range(len(quotient.action_labels_at_observation[int(observation)])):
+                            if list(get_choice_label(state.id))[0] in quotient.action_labels_at_observation[int(observation)][i]:
+                                index = i
+                                break
+
+                        if index >= 0 and index not in result[int(observation)]:
+                            result[int(observation)].append(index)
+
+                        if index >= 0 and index not in result_no_cutoffs[int(observation)]:
+                            result_no_cutoffs[int(observation)].append(index)
+                        
             # parse cut-off states
             else:
                 if len(cutoff_epxloration) == 0:
