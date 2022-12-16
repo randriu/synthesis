@@ -209,6 +209,26 @@ class POMDPQuotientContainer(QuotientContainer):
         self.set_manager_memory_vector()
         self.unfold_memory()
 
+    def set_memory_from_result_new(self, obs_memory_dict, obs_memory_dict_cutoff, memory_limit):
+        memory_list = []
+
+        for obs in range(self.observations):
+            #memory = self.observation_memory_size[obs]
+            if self.observation_states[obs] <= 1:
+                memory = 1
+            elif obs in obs_memory_dict.keys():
+                memory = max(obs_memory_dict[obs], self.observation_memory_size[obs]+1)
+            elif obs in obs_memory_dict_cutoff.keys():
+                memory = obs_memory_dict_cutoff[obs]
+            else:
+                memory = memory_limit
+
+            memory_list.append(memory)
+
+        self.observation_memory_size = memory_list
+        self.set_manager_memory_vector()
+        self.unfold_memory()
+
     
     def design_space_counter(self):
         ds = self.design_space.copy()
