@@ -236,7 +236,7 @@ class SynthesizerPOMDP:
         # solve quotient MDP
         self.quotient.build(family)
         mdp = family.mdp
-        spec = mdp.check_specification(self.quotient.specification)
+        spec = mdp.check_specification(self.quotient.specification, short_evaluation=True)
 
         # nothing more to do if optimality cannot be improved
         if not spec.optimality_result.can_improve:

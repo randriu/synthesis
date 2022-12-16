@@ -134,6 +134,9 @@ class OptimalityProperty(Property):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
         return f"{str(self.property.raw_formula)} {eps}"
 
+    def reset(self):
+        self.optimum = None
+
     def meets_op(self, a, b):
         ''' For optimality objective, we want to accept improvements above model checking precision. '''
         return b is None or (Property.above_mc_precision(a,b) and self.op(a,b))
@@ -145,7 +148,7 @@ class OptimalityProperty(Property):
         return self.result_valid(value) and self.meets_op(value, self.optimum)
 
     def update_optimum(self, optimum):
-        assert self.improves_optimum(optimum)
+        # assert self.improves_optimum(optimum)
         logger.debug(f"New opt = {optimum}.")
         self.optimum = optimum
         if self.minimizing:
@@ -190,6 +193,10 @@ class Specification:
         else:
             optimality = str(self.optimality) 
         return f"constraints: {constraints}, optimality objective: {optimality}"
+
+    def reset(self):
+        if self.optimality is not None:
+            self.optimality.reset()
         
     @property
     def has_optimality(self):
@@ -198,6 +205,10 @@ class Specification:
     @property
     def num_properties(self):
         return len(self.constraints) + (1 if self.has_optimality else 0)
+
+    @property
+    def is_single_property(self):
+        return self.num_properties == 1
 
     def all_constraint_indices(self):
         return [i for i,_ in enumerate(self.constraints)]
@@ -227,6 +238,7 @@ class Specification:
         for p in self.all_properties(): 
             p.transform_until_to_eventually()
 
+    
     def check(self):
         # TODO
         pass
@@ -260,6 +272,10 @@ class PropertyResult:
     def __str__(self):
         return str(self.value)
 
+    def reevaluate(self):
+        pass    # left intentionally blank
+
+
 class ConstraintsResult:
     '''
     A list of property results.
@@ -279,7 +295,6 @@ class ConstraintsResult:
         return True
 
 
-
 class SpecificationResult:
     def __init__(self, constraints_result, optimality_result):
         self.constraints_result = constraints_result
@@ -287,6 +302,9 @@ class SpecificationResult:
 
     def __str__(self):
         return str(self.constraints_result) + " : " + str(self.optimality_result)
+
+    def reevaluate(self):
+        self.optimality_result.reevaluate()
 
     def accepting_dtmc(self, specification):
         """
@@ -334,9 +352,6 @@ class SpecificationResult:
             return opt.improving_assignment, opt.improving_value, can_improve
         else:
             return None, None, True
-
-    
-        
 
     def undecided_result(self):
         if self.optimality_result is not None and self.optimality_result.can_improve:
@@ -400,4 +415,7 @@ class MdpOptimalityResult(MdpPropertyResult):
         self.improving_assignment = improving_assignment
         self.improving_value = improving_value
         self.can_improve = can_improve
+
+    def reevaluate(self):
+        pass
 

@@ -24,11 +24,15 @@ class MarkovChain:
     
         # model checking environment
         cls.environment = stormpy.Environment()
-        
         se = cls.environment.solver_environment
+        
+        stormpy.synthesis.set_precision_native(se.native_solver_environment, Property.mc_precision)
+        stormpy.synthesis.set_precision_minmax(se.minmax_solver_environment, Property.mc_precision)
 
-        se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
-        # se.minmax_solver_environment.precision = stormpy.Rational(Property.mc_precision)
+        se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
+        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
+
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
@@ -88,16 +92,16 @@ class MarkovChain:
         return self.model.initial_states[0]
 
     def model_check_formula(self, formula):
-        result = stormpy.model_checking(
+        if not self.is_dtmc:
+            return stormpy.synthesis.verify_mdp(self.environment,self.model,formula,True)
+        return stormpy.model_checking(
             self.model, formula, only_initial_states=False,
             extract_scheduler=(not self.is_dtmc),
-            # extract_scheduler=True,
             environment=self.environment
         )
-        assert result is not None
-        return result
 
     def model_check_formula_hint(self, formula, hint):
+        raise RuntimeError("model checking with hints is not fully supported")
         stormpy.synthesis.set_loglevel_off()
         task = stormpy.core.CheckTask(formula, only_initial_states=False)
         task.set_produce_schedulers(produce_schedulers=True)
