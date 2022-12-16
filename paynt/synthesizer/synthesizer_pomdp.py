@@ -96,7 +96,6 @@ class SynthesizerPOMDP:
             else:
                 self.quotient.set_global_memory_size(mem_size)
             
-            # self.quotient.remove_simpler_controllers(mem_size)
             # self.quotient.design_space_counter()
             self.synthesize(self.quotient.design_space)
             mem_size += 1
