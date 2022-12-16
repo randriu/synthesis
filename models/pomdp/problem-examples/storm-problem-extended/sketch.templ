@@ -1,0 +1,22 @@
+pomdp
+
+formula goal = x=1 | x=100;
+
+observable "in" = x=0;
+observable "o0" = x>1 & x<100;
+observable "goal" = goal;
+
+module test
+
+    x : [0..100] init 0;
+
+    [in]  x=0 -> 0.5: (x'=49) + 0.5: (x'=50);
+
+    [l]   x>1 & x<100 -> 0.5: (x'=x-1) + 0.5: (x'=x);
+    [r]   x>1 & x<100 -> 0.5: (x'=x+1) + 0.5: (x'=x);
+
+endmodule
+
+rewards "steps"
+    true: 1;
+endrewards
