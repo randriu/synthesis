@@ -125,6 +125,7 @@ def paynt(
     SynthesizerCEGIS.conflict_generator_type = ce_generator
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_result = fsc_export_result
+    POMDPQuotientContainer.aposteriori_unfolding = aposteriori_unfolding
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)

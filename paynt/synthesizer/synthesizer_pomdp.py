@@ -214,19 +214,24 @@ class SynthesizerPOMDP:
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
         mem_size = POMDPQuotientContainer.initial_memory_size
+        opt = self.quotient.specification.optimality.optimum
         while True:
-        # for x in range(2):
             
-            POMDPQuotientContainer.current_family_index = mem_size
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             if unfold_imperfect_only:
                 self.quotient.set_imperfect_memory_size(mem_size)
             else:
                 self.quotient.set_global_memory_size(mem_size)
             
-            # self.quotient.remove_simpler_controllers(mem_size)
             # self.quotient.design_space_counter()
             self.synthesize(self.quotient.design_space)
+
+            opt_old = opt
+            opt = self.quotient.specification.optimality.optimum
+
+            # finish if optimum has not been improved
+            if opt_old == opt and opt is not None:
+                break
             mem_size += 1
 
             #break
