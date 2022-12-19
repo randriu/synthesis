@@ -322,8 +322,8 @@ class POMDPQuotientContainer(QuotientContainer):
             # action holes
             for key,index in action_holes.items():
                 num_options = hole_num_options[index]
-                # if num_options <= 1:
-                    # continue
+                if num_options <= 1:
+                    continue
                 mem,prior = key
                 
                 name = self.create_hole_name_aposteriori(True,mem,prior)
@@ -336,8 +336,8 @@ class POMDPQuotientContainer(QuotientContainer):
             # update holes
             for key,index in update_holes.items():
                 num_options = hole_num_options[index]
-                # if num_options <= 1:
-                    # continue
+                if num_options <= 1:
+                    continue
                 mem,prior,posterior = key
 
                 name = self.create_hole_name_aposteriori(False,mem,prior,posterior)
@@ -347,7 +347,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
                 holes[index] = hole
 
-            # # filter out trivial holes
+            # filter out trivial holes
             all_holes = Holes()
             old_to_new_indices = [None] * len(holes)
             for index,hole in enumerate(holes):
@@ -361,11 +361,6 @@ class POMDPQuotientContainer(QuotientContainer):
                 hole_options_new = {old_to_new_indices[hole]:v for hole,v in hole_options.items() if old_to_new_indices[hole] is not None}
                 action_to_hole_options_new.append(hole_options_new)
             action_to_hole_options = action_to_hole_options_new
-
-            # all_holes = Holes()
-            # for hole in holes:
-            #     if hole is not None:
-            #         all_holes.append(hole)
 
             self.coloring = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
             self.design_space = DesignSpace(all_holes)
