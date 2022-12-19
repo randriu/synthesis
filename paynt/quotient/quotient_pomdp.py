@@ -19,9 +19,11 @@ class POMDPQuotientContainer(QuotientContainer):
     # implicit size for POMDP unfolding
     initial_memory_size = 1
 
+    # TODO
+    export_optimal_result = False
+
     # if true, a posteriori unfolding will be applied
-    unfold_aposteriori = False
-    unfold_aposteriori = True
+    aposteriori_unfolding = False
 
     
     def __init__(self, pomdp, specification):
@@ -120,7 +122,7 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_states[obs] += 1
 
         # initialize POMDP manager
-        if not self.unfold_aposteriori:
+        if not self.aposteriori_unfolding:
             self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
         else:
             self.pomdp_manager = stormpy.synthesis.PomdpManagerAposteriori(self.pomdp)
@@ -245,7 +247,7 @@ class POMDPQuotientContainer(QuotientContainer):
 
         logger.debug(f"Constructed quotient MDP having {mdp.nr_states} states and {mdp.nr_choices} actions.")
 
-        if not POMDPQuotientContainer.unfold_aposteriori:
+        if not POMDPQuotientContainer.aposteriori_unfolding:
             # a priori unfolding
 
             # detect which observations now involve memory updates
@@ -373,7 +375,7 @@ class POMDPQuotientContainer(QuotientContainer):
     
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
 
-        if POMDPQuotientContainer.unfold_aposteriori:
+        if POMDPQuotientContainer.aposteriori_unfolding:
             return super().estimate_scheduler_difference(mdp,inconsistent_assignments,choice_values,expected_visits)
 
         # note: the code below is optimized for a priori unfolding
