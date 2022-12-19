@@ -230,8 +230,8 @@ class SynthesizerPOMDP:
             opt = self.quotient.specification.optimality.optimum
 
             # finish if optimum has not been improved
-            if opt_old == opt and opt is not None:
-                break
+            # if opt_old == opt and opt is not None:
+            #     break
             mem_size += 1
 
             #break
