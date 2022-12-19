@@ -395,7 +395,7 @@ class POMDPQuotientContainer(QuotientContainer):
             "Unfolding POMDP using the following memory allocation vector: {} ..."
             .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        logger.debug(f"Constructed quotient MDP having {mdp.nr_states} states and {mdp.nr_choices} actions.")
+        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         if not POMDPQuotientContainer.aposteriori_unfolding:
             all_holes, action_to_hole_options = self.create_coloring()
