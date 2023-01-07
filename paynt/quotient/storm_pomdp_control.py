@@ -2,6 +2,12 @@ import stormpy
 import stormpy.synthesis
 import stormpy.pomdp
 
+from ..quotient.models import MarkovChain
+
+
+from threading import Thread
+from time import sleep
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,6 +28,8 @@ class StormPOMDPControl:
 
     # under-approximation value from Storm
     storm_bounds = None
+
+    paynt_bounds = None
 
     is_storm_better = True
 
@@ -68,7 +76,7 @@ class StormPOMDPControl:
         #options.exploration_heuristic =
         #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
 
-        options = self.get_cutoff_options(200000)
+        options = self.get_cutoff_options(1000)
 
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
@@ -90,6 +98,98 @@ class StormPOMDPControl:
 
         self.latest_storm_result = result
 
+
+    def interactive_storm_setup(self):
+        global belmc
+        belmc = stormpy.pomdp.pomdp.create_interactive_mc(MarkovChain.environment, self.pomdp, False)
+
+    def interactive_storm_start(self):
+        self.storm_thread = Thread(target=self.interactive_run, args=(belmc,))
+        control_thread = Thread(target=self.interactive_control, args=(belmc, True,))
+
+        logger.info("Interactive Storm started")
+        control_thread.start()
+        self.storm_thread.start()
+
+        control_thread.join()
+
+        self.belief_explorer = belmc.get_interactive_belief_explorer()
+
+
+    def interactive_storm_resume(self):
+        control_thread = Thread(target=self.interactive_control, args=(belmc, False,))
+
+        logger.info("Interactive Storm resumed")
+        control_thread.start()
+
+        control_thread.join()
+
+    def interactive_storm_terminate(self):
+        belmc.terminate_unfolding()
+
+    def interactive_run(self, belmc):
+        logger.info("starting Storm POMDP analysis")
+        result = belmc.check(self.spec_formulas[0], [])   # calls Storm
+
+        # debug
+        print(result.induced_mc_from_scheduler)
+        print(result.lower_bound)
+        print(result.upper_bound)
+        #print(result.cutoff_schedulers[1])
+        #for sc in result.cutoff_schedulers:
+        #    print(sc)
+
+        self.latest_storm_result = result
+        self.parse_results(self.quotient)
+        self.update_data()
+        logger.info("Storm POMDP analysis completed")
+
+    def interactive_control(self, belmc, start):
+        if belmc.get_status() == 4:
+            logger.info("Storm terminated by exploring whole belief space.")
+            return
+        if not start:
+            logger.info("Updating FSC values in Storm")
+            #explorer = belmc.get_interactive_belief_explorer()
+            self.belief_explorer.set_fsc_values(self.paynt_export)
+            belmc.continue_unfolding()
+
+        while not belmc.is_exploring():
+            if belmc.get_status() == 4:
+                logger.info("Storm terminated by exploring whole belief space.")
+                return
+            sleep(1)
+
+        sleep(20)
+        logger.info("Pausing Storm")
+        belmc.pause_unfolding()
+
+        while not belmc.is_result_ready():
+            if belmc.get_status() == 4:
+                logger.info("Storm terminated by exploring whole belief space.")
+                return
+            sleep(2)
+
+        result = belmc.get_interactive_result()
+
+        # debug
+        print(result.induced_mc_from_scheduler)
+        print(result.lower_bound)
+        print(result.upper_bound)
+        #print(result.cutoff_schedulers[1])
+        #for sc in result.cutoff_schedulers:
+        #    print(sc)
+
+        self.latest_storm_result = result
+        self.parse_results(self.quotient)
+        self.update_data()
+
+        print(self.result_dict)
+        print(self.result_dict_no_cutoffs)
+        print(self.is_storm_better)
+
+
+
     def get_cutoff_options(self, belief_states=100000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
@@ -104,7 +204,7 @@ class StormPOMDPControl:
         options.use_grid_clipping = False
         return options
 
-    def get_refine_options(self, step_limit=5):
+    def get_refine_options(self, step_limit=0):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
         options.size_threshold_init = 0
@@ -112,7 +212,8 @@ class StormPOMDPControl:
         options.use_grid_clipping = False
         options.gap_threshold_init = 0
         options.refine_precision = 0
-        options.refine_step_limit = step_limit
+        if step_limit > 0:
+            options.refine_step_limit = step_limit
         options.refine = True
         return options
 
@@ -146,6 +247,17 @@ class StormPOMDPControl:
         #options.refine = True
         #options.exploration_heuristic =
         #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
+        return options
+
+    def get_interactive_options(self):
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.use_explicit_cutoff = True
+        options.use_grid_clipping = False
+        options.size_threshold_init = 0
+        options.skip_heuristic_schedulers = False
+        options.interactive_unfolding = True
+        options.gap_threshold_init = 0
+        options.cut_zero_gap = False
         return options
 
     # Over-approximation
@@ -384,8 +496,8 @@ class StormPOMDPControl:
             all_actions = [action for action in range(num_actions)]
             selected_actions = [all_actions.copy() for _ in act_obs_holes]
             
-            all_updates = [update for update in range(num_updates)]
-            selected_updates = [all_updates.copy() for _ in mem_obs_holes]
+            #all_updates = [update for update in range(num_updates)]
+            #selected_updates = [all_updates.copy() for _ in mem_obs_holes]
 
             # Action restriction
             if obs not in result_dict.keys():
@@ -409,13 +521,13 @@ class StormPOMDPControl:
                 restricted_family[hole].assume_options(options)
 
             # Apply memory restrictions
-            for index in range(mem_num_holes):
-                hole = mem_obs_holes[index]
-                updates = selected_updates[index]
-                options = []
-                for update in updates:
-                    options.append(update)
-                restricted_family[hole].assume_options(options)
+            #for index in range(mem_num_holes):
+            #    hole = mem_obs_holes[index]
+            #    updates = selected_updates[index]
+            #    options = []
+            #    for update in updates:
+            #        options.append(update)
+            #    restricted_family[hole].assume_options(options)
 
         #print(restricted_family)
         logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
@@ -535,26 +647,25 @@ class StormPOMDPControl:
         return subfamilies
 
 
-    def update_data(self, paynt_value, minimizing, assignment):
+    def update_data(self):
 
-        if paynt_value is None or self.storm_bounds is None:
+        if self.paynt_bounds is None and self.storm_bounds is None:
             return
 
-        if minimizing:
-            if paynt_value <= self.storm_bounds:
-                self.is_storm_better = False
-            else:
-                self.is_storm_better = True
+        if self.paynt_bounds is None:
+            self.is_storm_better = True
+        elif self.storm_bounds is None:
+            self.is_storm_better = False
         else:
-            if paynt_value >= self.storm_bounds:
-                self.is_storm_better = False
+            if self.quotient.specification.optimality.minimizing:
+                if self.paynt_bounds <= self.storm_bounds:
+                    self.is_storm_better = False
+                else:
+                    self.is_storm_better = True
             else:
-                self.is_storm_better = True
+                if self.paynt_bounds >= self.storm_bounds:
+                    self.is_storm_better = False
+                else:
+                    self.is_storm_better = True
 
-        if assignment is not None: 
-            self.latest_paynt_result = assignment
-            self.paynt_export = self.quotient.extract_policy(assignment)
-
-        #self.is_storm_better = True
-        #print(self.is_storm_better)
 

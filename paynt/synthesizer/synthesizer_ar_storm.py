@@ -2,6 +2,8 @@ from stormpy import pomdp
 from .synthesizer import Synthesizer
 from ..quotient.storm_pomdp_control import StormPOMDPControl
 
+from time import sleep
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -58,11 +60,14 @@ class SynthesizerARStorm(Synthesizer):
         # TODO MAIN FAMILIES
         for family in families:
 
-            main_p = self.storm_control.get_main_restricted_family(family, self.quotient)
+            main_p = self.storm_control.get_main_restricted_family(family, self.quotient, True)
             main_families.append(main_p)
 
             subfamilies_p = self.storm_control.get_subfamilies(self.subfamily_restrictions, family)
             subfamilies.extend(subfamilies_p)
+
+        # TODO
+        subfamilies = []
 
         logger.info(f"State after Storm splitting: Main families - {len(main_families)}, Subfamilies - {len(subfamilies)}")
         return main_families, subfamilies
@@ -139,6 +144,34 @@ class SynthesizerARStorm(Synthesizer):
             families = [family]
 
             while families:
+
+                if self.s_queue is not None:
+                    if not self.s_queue.empty():
+                        self.s_queue.get()
+                        logger.info("Pausing synthesis")
+                        while self.s_queue.empty():
+                            sleep(1)
+                        status = self.s_queue.get()
+                        if status == "resume":
+                            logger.info("Resuming synthesis")
+                            memory_needed = False
+                            for obs in range(self.quotient.observations):
+                                if obs in self.storm_control.result_dict.keys() and self.quotient.observation_memory_size[obs] < len(self.storm_control.result_dict[obs]):
+                                    memory_needed = True
+                                    break
+                            if self.storm_control.is_storm_better:
+                                if memory_needed:
+                                    logger.info("Additional memory needed")
+                                    return satisfying_assignment
+                                else:
+                                    logger.info("Applying family split according to Storm results")
+                                    families, self.subfamilies_buffer = self.storm_split(families)
+                            else:
+                                logger.info("PAYNT's value is better. Prioritizing synthesis results")
+
+                        elif status == "terminate":
+                            exit()
+
                 #print(len(families))
 
                 if SynthesizerARStorm.exploration_order_dfs:
@@ -164,11 +197,13 @@ class SynthesizerARStorm(Synthesizer):
                 subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
                 families = families + subfamilies
 
-                if self.s_queue is not None:
-                    if not self.s_queue.empty():
-                        self.storm_control.result_dict, self.storm_control.storm_bounds = self.s_queue.get()
-                        logger.info("Applying family split according to Storm results")
-                        families, self.subfamilies_buffer = self.storm_split(families)
+                #if self.s_queue is not None:
+                #    if not self.s_queue.empty():
+                #        self.storm_control.result_dict, self.storm_control.storm_bounds = self.s_queue.get()
+                #        logger.info("Applying family split according to Storm results")
+                #        families, self.subfamilies_buffer = self.storm_split(families)
+
+                
 
 
 
