@@ -20,11 +20,11 @@ class POMDPQuotientContainer(QuotientContainer):
     initial_memory_size = 1
 
     # TODO
-    current_family_index = None
+    export_optimal_result = False
 
-    # if True, action-memory hole pairs will be merged into a single hole
-    use_simplified_coloring = False
-    # use_simplified_coloring = True
+    # if true, a posteriori unfolding will be applied
+    aposteriori_unfolding = False
+
     
     def __init__(self, pomdp, specification):
         super().__init__(specification = specification)
@@ -55,6 +55,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.observation_memory_size = None
         # Storm POMDP manager
         self.pomdp_manager = None
+
         # for each observation, a prototype of a memory hole
         self.memory_hole_prototypes = None
         # for each observation, a list of action holes
@@ -121,15 +122,16 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_states[obs] += 1
 
         # initialize POMDP manager
-        self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
-        # self.pomdp_manager = stormpy.synthesis.PomdpManagerAposteriori(self.pomdp)
+        if not self.aposteriori_unfolding:
+            self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
+        else:
+            self.pomdp_manager = stormpy.synthesis.PomdpManagerAposteriori(self.pomdp)
 
         # do initial unfolding
         self.set_imperfect_memory_size(POMDPQuotientContainer.initial_memory_size)
         # self.set_global_memory_size(POMDPQuotientContainer.initial_memory_size)
-        
-        
 
+    
     @property
     def observations(self):
         return self.pomdp.nr_observations
@@ -138,6 +140,16 @@ class POMDPQuotientContainer(QuotientContainer):
         category = "A" if is_action_hole else "M"
         obs_label = self.observation_labels[obs]
         return "{}({},{})".format(category,obs_label,mem)
+
+    def create_hole_name_aposteriori(self, is_action_hole, mem, prior, posterior=None):
+        category = "A" if is_action_hole else "M"
+        prior_label = self.observation_labels[prior]
+        if posterior is None:
+            return "{}({},{})".format(category,mem,prior_label)
+        else:
+            posterior_label = self.observation_labels[posterior]
+            return "{}({},{},{})".format(category,mem,prior_label,posterior_label)
+
 
     def decode_hole_name(self, name):
         result = re.search(r"([A|M])\((.*?),(\d+)\)", name)
@@ -247,30 +259,13 @@ class POMDPQuotientContainer(QuotientContainer):
                 print()
         self.design_space = ds
 
-    
-    def unfold_memory(self):
-        
-        # reset attributes
-        self.quotient_mdp = None
-        self.coloring = None
-        self.memory_hole_prototypes = None
-        
-        self.observation_action_holes = None
-        self.observation_memory_holes = None
-        self.is_action_hole = None
-        
-        # use manager to unfold POMDP
-        logger.debug(
-            "Unfolding POMDP using the following memory allocation vector: {} ..."
-            .format(self.observation_memory_size))
-        self.quotient_mdp = self.pomdp_manager.construct_mdp()
+
+    def create_coloring(self):
 
         # short aliases
         pm = self.pomdp_manager
         pomdp = self.pomdp
         mdp = self.quotient_mdp
-
-        logger.debug(f"Constructed quotient MDP having {mdp.nr_states} states and {mdp.nr_choices} actions.")
 
         # detect which observations now involve memory updates
         self.memory_hole_prototypes = [None] * self.observations
@@ -318,7 +313,6 @@ class POMDPQuotientContainer(QuotientContainer):
 
         # create the coloring
         action_to_hole_options = []
-        # TODO make this loop more efficient??
         for action in range(mdp.nr_choices):
             hole_options = {}
             h = pm.row_action_hole[action]
@@ -328,139 +322,98 @@ class POMDPQuotientContainer(QuotientContainer):
             if h != pm.num_holes:
                 hole_options[h] = pm.row_memory_option[action] 
             action_to_hole_options.append(hole_options)
-        self.coloring = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
+
+        return all_holes, action_to_hole_options
+
+    def create_coloring_aposteriori(self):
+        # a posteriori unfolding
+        action_to_hole_options = self.pomdp_manager.coloring
+        hole_num_options = self.pomdp_manager.hole_num_options
+        action_holes = self.pomdp_manager.action_holes
+        update_holes = self.pomdp_manager.update_holes
+
+        holes = [None] * len(hole_num_options)
         
-        # finalize the design space
-        self.design_space = DesignSpace(all_holes)
-
-        # the design space is ready
-        if not self.use_simplified_coloring:
-            return
-
-        # store old coloring
-        self.design_space_old = self.design_space
-        self.coloring_old = self.coloring
-        # replace with simplified one
-        design_space_new,self.coloring,self.obs_to_holes,self.hole_pair_map = self.simplify_coloring()
-        self.design_space = design_space_new
-
-
-    def remove_simpler_controllers(self, current_mem_size):
-
-        if current_mem_size == 1:
-            return
-
-        # print(self.observation_memory_holes)
-        
-        # ds = self.design_space.copy()
-        # obs = self.observation_labels.index('[start=1]')
-        # mem_hole_index = self.observation_memory_holes[obs][0]
-        # mem_hole = ds[mem_hole_index]
-        # mem_hole.assume_options([0])
-        
-        # self.design_space = ds
-        return
-
-
-    def simplify_coloring(self):
-
-        # merge action-memory holes in the same obs-mem pair
-        obs_to_holes = [[] for obs in range(self.observations)]
-
-        # for each action-memory hole pair, a mapping of its option pairs to new options
-        hole_pair_map = {}
-
-        all_holes = Holes()
-        for obs in range(self.observations):
-
-            ah = self.action_hole_prototypes[obs]
-            mh = self.memory_hole_prototypes[obs]
+        # action holes
+        for key,index in action_holes.items():
+            num_options = hole_num_options[index]
+            if num_options <= 1:
+                continue
+            mem,prior = key
             
-            if ah is not None and mh is None:
-                # only action holes
-                for old_hole_index in self.observation_action_holes[obs]:
-                    old_hole = self.design_space[old_hole_index]
-                    new_hole_index = all_holes.num_holes
-                    new_hole = old_hole.copy()
-                    hole_pair_map[old_hole_index] = new_hole_index
-                    all_holes.append(new_hole)
-                    obs_to_holes[obs].append(new_hole_index)
+            name = self.create_hole_name_aposteriori(True,mem,prior)
+            options = list(range(num_options))
+            option_labels = [str(labels) for labels in self.action_labels_at_observation[prior]]
+            hole = Hole(name,options,option_labels)
 
-            if ah is None and mh is not None:
-                # only memory holes
-                for old_hole_index in self.observation_memory_holes[obs]:
-                    old_hole = self.design_space[old_hole_index]
-                    new_hole_index = all_holes.num_holes
-                    hole_pair_map[old_hole_index] = new_hole_index
-                    new_hole = old_hole.copy()
-                    all_holes.append(new_hole)
-                    obs_to_holes[obs].append(new_hole_index)
+            holes[index] = hole
 
-            if ah is not None and mh is not None:
-                # both types of holes
-                for mem in range(self.observation_memory_size[obs]):
-                    action_hole_index = self.observation_action_holes[obs][mem]
-                    memory_hole_index = self.observation_memory_holes[obs][mem]
-
-                    action_hole = self.design_space[action_hole_index]
-                    memory_hole = self.design_space[memory_hole_index]
-
-                    name = "AM({},{})".format(self.observation_labels[obs],mem)
-
-                    option_dict = {}
-                    options = []
-                    option_labels = []
-                    for action_option in ah.options:
-                        for memory_option in mh.options:
-                            option_label = ah.option_labels[action_option] + "+" + mh.option_labels[memory_option]
-                            option_labels.append(option_label)
-
-                            option_dict[(action_option,memory_option)] = len(options)
-                            options.append(len(options))
-
-                    new_hole_index = all_holes.num_holes
-                    obs_to_holes[obs].append(new_hole_index)
-                    hole = Hole(name, options, option_labels)
-                    hole_pair_map[(action_hole_index,memory_hole_index)] = (new_hole_index,option_dict)
-                    all_holes.append(hole)
-
-        # modify the coloring
-        action_to_hole_options = self.coloring.action_to_hole_options.copy()
-        for action in range(self.quotient_mdp.nr_choices):
-            hole_options_old = self.coloring.action_to_hole_options[action]
-            if len(hole_options_old) == 0:
+        # update holes
+        for key,index in update_holes.items():
+            num_options = hole_num_options[index]
+            if num_options <= 1:
                 continue
+            mem,prior,posterior = key
 
-            if len(hole_options_old) == 1:
-                old_index = next(iter(hole_options_old.keys()))
-                new_index = hole_pair_map[old_index]
-                new_option = hole_options_old[old_index]
-                action_to_hole_options[action] = {new_index : new_option}
+            name = self.create_hole_name_aposteriori(False,mem,prior,posterior)
+            options = list(range(num_options))
+            option_labels = [str(x) for x in range(num_options)]
+            hole = Hole(name,options,option_labels)
+
+            holes[index] = hole
+
+        # filter out trivial holes
+        all_holes = Holes()
+        old_to_new_indices = [None] * len(holes)
+        for index,hole in enumerate(holes):
+            if hole is None:
                 continue
+            old_to_new_indices[index] = all_holes.num_holes
+            all_holes.append(hole)
 
-            # 2 holes
-            indices = list(hole_options_old.keys())
-            ah_index = indices[0]
-            mh_index = indices[1]
+        action_to_hole_options_new = []
+        for hole_options in action_to_hole_options:
+            hole_options_new = {old_to_new_indices[hole]:v for hole,v in hole_options.items() if old_to_new_indices[hole] is not None}
+            action_to_hole_options_new.append(hole_options_new)
+        action_to_hole_options = action_to_hole_options_new
 
-            ah_option = hole_options_old[ah_index]
-            mh_option = hole_options_old[mh_index]
+        return all_holes, action_to_hole_options
 
-            new_hole,new_map = hole_pair_map[(ah_index,mh_index)]
-            new_hole_options = {new_hole: new_map[(ah_option,mh_option)]}
-            action_to_hole_options[action] = new_hole_options
+    
+    def unfold_memory(self):
+        
+        # reset attributes
+        self.quotient_mdp = None
+        self.coloring = None
+        self.memory_hole_prototypes = None
+        
+        self.observation_action_holes = None
+        self.observation_memory_holes = None
+        self.is_action_hole = None
+        
+        logger.debug(
+            "Unfolding POMDP using the following memory allocation vector: {} ..."
+            .format(self.observation_memory_size))
+        self.quotient_mdp = self.pomdp_manager.construct_mdp()
+        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
-        design_space_new = DesignSpace(all_holes)
-        coloring_new = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
+        if not POMDPQuotientContainer.aposteriori_unfolding:
+            all_holes, action_to_hole_options = self.create_coloring()
+        else:
+            all_holes, action_to_hole_options = self.create_coloring_aposteriori()
 
-        return design_space_new, coloring_new, obs_to_holes, hole_pair_map
-
-
+        self.coloring = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
+        self.design_space = DesignSpace(all_holes)
 
     
 
     
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
+
+        if POMDPQuotientContainer.aposteriori_unfolding:
+            return super().estimate_scheduler_difference(mdp,inconsistent_assignments,choice_values,expected_visits)
+
+        # note: the code below is optimized for a priori unfolding
 
         # create inverse map
         # TODO optimize this for multiple properties
@@ -498,6 +451,8 @@ class POMDPQuotientContainer(QuotientContainer):
 
                 state_values = []
                 for option in options:
+
+                    assert len(self.coloring.hole_option_to_actions[hole_index][option]) > choice_index
                     choice_global = self.coloring.hole_option_to_actions[hole_index][option][choice_index]
                     choice = quotient_to_restricted_action_map[choice_global]
                     choice_value = choice_values[choice]
@@ -517,6 +472,10 @@ class POMDPQuotientContainer(QuotientContainer):
             inconsistent_differences[hole_index] = hole_score
 
         return inconsistent_differences
+
+
+    def estimate_scheduler_difference_aposteriori(self, mdp, inconsistent_assignments, choice_values, expected_visits):
+        return None
 
     
     

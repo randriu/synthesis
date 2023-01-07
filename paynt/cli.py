@@ -79,18 +79,21 @@ def setup_logger(log_path = None):
 
 @click.option("--incomplete-search", is_flag=True, default=False,
     help="use incomplete search during synthesis")
+
 @click.option("--fsc-synthesis", is_flag=True, default=False,
     help="enable incremental synthesis of FSCs for a POMDP")
 @click.option("--pomdp-memory-size", default=1, show_default=True,
     help="implicit memory size for POMDP FSCs")
+@click.option("--aposteriori-unfolding", is_flag=True, default=False,
+    help="unfold MDP taking posterior observation of into account")
 @click.option("--fsc-export-result", is_flag=True, default=False,
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
-@click.option("--hyperproperty", is_flag=True, default=False,
-    help="enable synthesis of an MDP scheduler wrt a hyperproperty")
+
 @click.option("--storm-pomdp-analysis", is_flag=True, default=False,
     help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
 @click.option("--storm-parallel", is_flag=True, default=False,
     help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
+
 @click.option(
     "--ce-generator",
     default="storm",
@@ -108,8 +111,8 @@ def paynt(
         filetype, export,
         method,
         incomplete_search,
-        fsc_synthesis, pomdp_memory_size, fsc_export_result,
-        hyperproperty, 
+        fsc_synthesis, pomdp_memory_size, aposteriori_unfolding,
+        fsc_export_result,
         storm_pomdp_analysis, storm_parallel,
         ce_generator,
         pomcp,
@@ -122,6 +125,7 @@ def paynt(
     SynthesizerCEGIS.conflict_generator_type = ce_generator
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_result = fsc_export_result
+    POMDPQuotientContainer.aposteriori_unfolding = aposteriori_unfolding
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
