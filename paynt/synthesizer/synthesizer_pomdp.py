@@ -17,7 +17,7 @@ from collections import defaultdict
 
 from threading import Thread
 from queue import Queue
-from time import sleep
+import time
 
 import logging
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class HoleTree:
 class SynthesizerPOMDP:
 
     # If true explore only the main family
-    incomplete_exploration = True
+    incomplete_exploration = False
 
     def __init__(self, quotient, method, storm_control):
         self.quotient = quotient
@@ -93,18 +93,162 @@ class SynthesizerPOMDP:
         assignment = synthesizer.synthesize(family)
         if print_stats:
             synthesizer.print_stats()
-        print(assignment)
+        #print(assignment)
         self.total_iters += synthesizer.stat.iterations_mdp
 
         # Print extract list for every iteration optimum
         if assignment:
             extracted_result = self.quotient.extract_policy(assignment)
-            print(extracted_result)
+            #print(extracted_result)
 
         return assignment
 
     # iterative strategy using Storm analysis to enhance the synthesis
-    def strategy_iterative_storm(self, unfold_imperfect_only, unfold_storm=True, iterative_storm=True):
+    def strategy_iterative_storm(self, unfold_imperfect_only, unfold_storm=True):
+        '''
+        @param unfold_imperfect_only if True, only imperfect observations will be unfolded
+        '''
+        mem_size = POMDPQuotientContainer.initial_memory_size
+
+        self.synthesizer.storm_control = self.storm_control
+
+        while True:
+        # for x in range(2):
+
+            if self.storm_control.is_storm_better == False:
+                self.storm_control.parse_result(self.quotient)
+            
+            POMDPQuotientContainer.current_family_index = mem_size
+
+            # unfold memory according to the best result
+            if unfold_storm:
+                if mem_size > 1:
+                    obs_memory_dict = {}
+                    if self.storm_control.is_storm_better:
+                        if self.storm_control.is_memory_needed(self.storm_control.result_dict_no_cutoffs):
+                            obs_memory_dict = self.storm_control.memory_vector
+                            logger.info(f'Added memory nodes for observation based on Storm data')
+                        else:
+                            for obs in range(self.quotient.observations):
+                                if obs in self.storm_control.result_dict_no_cutoffs:
+                                    obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
+                                else:
+                                    obs_memory_dict[obs] = self.quotient.observation_memory_size[obs]
+                            logger.info(f'Added memory nodes for observation based on Storm data')
+                    else:
+                        for obs in range(self.quotient.observations):
+                            if self.observation_states[obs]>1:
+                                obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
+                            else:
+                                obs_memory_dict[obs] = 1
+                        logger.info(f'Increase memory in all imperfect observation')
+                    print(obs_memory_dict)
+                    self.quotient.set_memory_from_dict(obs_memory_dict)
+            else:
+                logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
+                if unfold_imperfect_only:
+                    self.quotient.set_imperfect_memory_size(mem_size)
+                else:
+                    self.quotient.set_global_memory_size(mem_size)
+
+            family = self.quotient.design_space
+
+            #if mem_size == 1:
+            #    main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            #    subfamily_restrictions = []
+            #else:
+            #    main_family = self.storm_control.get_main_restricted_family(family, self.quotient)
+            #    subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
+
+            #subfamily_restrictions = self.storm_control.get_subfamilies_restrictions_symmetry_breaking(self.quotient, False)
+
+            if self.storm_control.is_storm_better:
+                if self.incomplete_exploration == True:
+                    main_family = self.storm_control.get_main_restricted_family(family, self.quotient, use_cutoffs=True)
+                    subfamily_restrictions = []
+                else:
+                    #main_family = self.storm_control.get_main_restricted_family(family, self.quotient, use_cutoffs=False)
+                    main_family = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
+                    subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
+
+                subfamilies = self.storm_control.get_subfamilies(subfamily_restrictions, family)
+            else:
+                main_family = family
+                subfamilies = []
+                subfamily_restrictions = []
+
+            # debug
+            print(self.storm_control.result_dict, "\n")
+            print(self.storm_control.result_dict_no_cutoffs)
+            #print(main_family)
+            #print(subfamily_restrictions)
+            #print(subfamilies)
+            #print(main_family.size)
+            #break
+
+            self.synthesizer.subfamilies_buffer = subfamilies
+            self.synthesizer.unresticted_family = family
+
+            assignment = self.synthesize(main_family)
+
+            if assignment is not None:
+                self.storm_control.latest_paynt_result = assignment
+                self.storm_control.paynt_export = self.quotient.extract_policy(assignment)
+                self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
+
+
+            self.storm_control.update_data()
+
+            mem_size += 1
+            
+            #break
+
+    def iterative_storm_loop(self, timeout, paynt_timeout, storm_timeout, iteration_limit=0):
+        self.interactive_queue = Queue()
+        self.synthesizer.s_queue = self.interactive_queue
+        self.storm_control.interactive_storm_setup()
+        iteration = 1
+        paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, True))
+
+        iteration_timeout = time.time() + timeout
+
+        while True:
+            if iteration == 1:
+                paynt_thread.start()
+            else:
+                self.interactive_queue.put("resume")
+
+            logger.info("Timeout for PAYNT started")
+
+            time.sleep(paynt_timeout)
+            self.interactive_queue.put("timeout")
+
+            if iteration == 1:
+                self.storm_control.interactive_storm_start(storm_timeout)
+            else:
+                self.storm_control.interactive_storm_resume(storm_timeout)
+
+            if time.time() > iteration_timeout or iteration == iteration_limit:
+                break
+
+            iteration += 1
+
+        self.interactive_queue.put("terminate")
+        paynt_thread.join()
+
+        self.storm_control.interactive_storm_terminate()
+
+        print("PAYNT results: ")
+        #print(self.storm_control.latest_paynt_result)
+        print(self.storm_control.paynt_bounds)
+
+        print("Storm results: ")
+        #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
+        print(self.storm_control.storm_bounds)
+
+
+    # iterative strategy using Storm analysis to enhance the synthesis
+    def strategy_storm(self, unfold_imperfect_only, unfold_storm=True):
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
@@ -166,8 +310,9 @@ class SynthesizerPOMDP:
                     main_family = self.storm_control.get_main_restricted_family(family, self.quotient, use_cutoffs=True)
                     subfamily_restrictions = []
                 else:
-                    main_family = self.storm_control.get_main_restricted_family(family, self.quotient, use_cutoffs=False)
-                    subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient, use_cutoffs=False)
+                    #main_family = self.storm_control.get_main_restricted_family(family, self.quotient, use_cutoffs=False)
+                    main_family = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
+                    subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
 
                 subfamilies = self.storm_control.get_subfamilies(subfamily_restrictions, family)
             else:
@@ -184,11 +329,8 @@ class SynthesizerPOMDP:
             #print(main_family.size)
             #break
 
-
             self.synthesizer.subfamilies_buffer = subfamilies
-            self.synthesizer.subfamily_restrictions = subfamily_restrictions
             self.synthesizer.unresticted_family = family
-            self.synthesizer.explored_restrictions = []
 
             assignment = self.synthesize(main_family)
 
@@ -201,59 +343,8 @@ class SynthesizerPOMDP:
             self.storm_control.update_data()
 
             mem_size += 1
-
-            # TODO iterative logic
-            #if iterative_storm:
-            #    self.storm_control.get_storm_result()
-            #    self.storm_control.join_results()
-
-                # Size test
-                #original_c = 0
-                #new_c = 0
-                #for obs in range(self.quotient.observations):
-                #    original_c += self.quotient.pomdp_manager.observation_actions[obs]
-                #    if obs in self.storm_control.result_dict.keys():
-                #        new_c += len(self.storm_control.result_dict[obs])
-                #print(self.quotient.observations)
-                #print(original_c, new_c)
-
-                #if br:
-                #    exit()
             
             #break
-
-    def iterative_storm_loop(self, limit, paynt_timeout):
-        self.interactive_queue = Queue()
-        self.synthesizer.s_queue = self.interactive_queue
-        self.storm_control.interactive_storm_setup()
-        iteration = 1
-        paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, True, True))
-
-        while iteration <= limit:
-
-            if iteration == 1:
-                paynt_thread.start()
-            else:
-                self.interactive_queue.put("resume")
-
-            logger.info("Timeout for PAYNT started")
-
-            sleep(paynt_timeout)
-            self.interactive_queue.put("timeout")
-
-            if iteration == 1:
-                self.storm_control.interactive_storm_start()
-            else:
-                self.storm_control.interactive_storm_resume()
-
-            iteration += 1
-
-        self.interactive_queue.put("terminate")
-        paynt_thread.join()
-
-        self.storm_control.interactive_storm_terminate()
-
-
 
 
     def strategy_iterative(self, unfold_imperfect_only):
@@ -775,37 +866,26 @@ class SynthesizerPOMDP:
         # choose the synthesis strategy:
 
         if self.use_storm:
-            logger.info("Using Storm to enhance synthesis")
-            
-            if not parallel:
-                #self.storm_control.get_storm_result()
-                #self.storm_control.interactive_storm()
-                pass
+            logger.info("Storm pomdp option enabled")
 
-            # Use storm value result as lower-bound
-            #logger.info("Updating the lower-bound based on Storm's result")
-            #if self.quotient.specification.optimality.minimizing:
-            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.upper_bound + 0.01)
-            #else:
-            #    self.quotient.specification.optimality.update_optimum(self.storm_control.latest_storm_result.lower_bound - 0.01)
-
-            self.iterative_storm_loop(3, 60)
-
-            #self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=True, iterative_storm=False)
-            #self.strategy_iterative_storm(unfold_imperfect_only=True, unfold_storm=False)
+            if self.storm_control.iteration_timeout is not None:
+                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout, 
+                                          paynt_timeout=self.storm_control.paynt_timeout, 
+                                          storm_timeout=self.storm_control.storm_timeout, 
+                                          iteration_limit=0)
+            elif self.storm_control.get_result is not None:
+                #TODO probably strategy_storm with unfold storm False
+                self.storm_control.run_storm_analysis()
+            else:
+                self.storm_control.get_storm_result()
+                self.strategy_storm(unfold_imperfect_only=True, unfold_storm=True)
         else:
-
             # self.strategy_expected_uai()
             # self.strategy_iterative(unfold_imperfect_only=False)
             self.strategy_iterative(unfold_imperfect_only=True)
 
 
-        print("PAYNT results: ")
-        print(self.storm_control.latest_paynt_result)
-        print(self.storm_control.paynt_bounds)
-
-        print("Storm results: ")
-        print(self.storm_control.storm_bounds)
+        
 
 
 

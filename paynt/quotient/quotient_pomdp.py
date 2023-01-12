@@ -204,19 +204,11 @@ class POMDPQuotientContainer(QuotientContainer):
         self.set_manager_memory_vector()
         self.unfold_memory()
 
-    def set_memory_from_result(self, obs_memory_dict, memory_limit):
+    def set_memory_from_dict(self, obs_memory_dict):
         memory_list = []
 
         for obs in range(self.observations):
-            #memory = self.observation_memory_size[obs]
-            if self.observation_states[obs] <= 1:
-                memory = 1
-            elif obs in obs_memory_dict.keys():
-                memory = max(obs_memory_dict[obs], self.observation_memory_size[obs]+1)
-            else:
-                memory = memory_limit
-
-            memory_list.append(memory)
+            memory_list.append(obs_memory_dict[obs])
 
         self.observation_memory_size = memory_list
         self.set_manager_memory_vector()

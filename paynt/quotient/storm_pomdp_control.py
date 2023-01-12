@@ -16,34 +16,34 @@ logger = logging.getLogger(__name__)
 # class implementing the main components of the Storm integration for FSC synthesis for POMDPs
 class StormPOMDPControl:
 
-    # holds object representing the latest Storm result
-    latest_storm_result = None
+    latest_storm_result = None      # holds object representing the latest Storm result
+    storm_bounds = None             # under-approximation value from Storm
 
+    # PAYNT data and FSC export
     latest_paynt_result = None
+    paynt_bounds = None
+    paynt_export = []
 
     # parsed best result data dictionary (Starting with data from Storm)
     result_dict = {}
     result_dict_no_cutoffs = {}
     result_dict_paynt = {}
-
-    # under-approximation value from Storm
-    storm_bounds = None
-
-    paynt_bounds = None
+    memory_vector = {}
 
     is_storm_better = True
 
+    pomdp = None                    # The original POMDP model
     quotient = None
+    spec_formulas = None            # The specification to be checked
+    storm_options = None
+    get_result = None
 
-    # The original POMDP model
-    pomdp = None
-
-    # The specification to be checked
-    spec_formulas = None
+    # PAYNT/Storm iteration settings
+    iteration_timeout = None
+    paynt_timeout = None
+    storm_timeout = None
 
     s_queue = None
-
-    paynt_export = []
 
     def __init__(self):
         pass
@@ -61,31 +61,30 @@ class StormPOMDPControl:
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
     def run_storm_analysis(self):
-        #options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        #options.use_explicit_cutoff = True
-        #options.size_threshold_init = 10000
-        #options.size_threshold_factor = 2
-        #options.use_grid_clipping = False
-        #options.exploration_time_limit = 1
-        #options.clipping_threshold_init = 1
-        #options.clipping_grid_res = 4
-        #options.gap_threshold_init = 0
-        #options.refine_precision = 0
-        #options.refine_step_limit = 10
-        #options.refine = True
-        #options.exploration_heuristic =
-        #options.preproc_minmax_method = stormpy.MinMaxMethod.policy_iteration
-
-        options = self.get_cutoff_options(1000)
+        if self.storm_options == "cutoff":
+            options = self.get_cutoff_options(1000000)
+        elif self.storm_options == "clip2":
+            options = self.get_clip2_options()
+        elif self.storm_options == "clip4":
+            options = self.get_clip4_options()
+        else:
+            logger.error("Incorrect option setting for Storm was found")
+            exit()
 
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
-        #self.paynt_export = []
+        #self.paynt_export = [[{5: 8.175484045412889, 10: 5.732044228315713}, {10: 5.732044228315713}, {5: 5.73204428890203, 10: 8.175481487608277}], [{13: 7.113606396312573}], [{9: 4.412965226847773}], [{7: 1.3168956249547028, 8: 2.6548045517763708}, {2: 9.741734546300918, 3: 8.42923360857942, 11: 9.74171998507045, 12: 8.42921914560019}, {2: 9.74171200483799, 3: 8.429232535176421, 7: 6.627522109385762, 8: 5.7088973575096755, 11: 9.74171998507045, 12: 8.42921914560019}], [{}, {1: 10.991735439369018, 14: 10.991718913113731}, {1: 10.991735439369018, 14: 10.99171891311373}], [{0: 7.093672533137764}], [{4: 7.113607668625247}], [{6: 0.0}]]
         #print(self.paynt_export)
 
         logger.info("starting Storm POMDP analysis")
         result = belmc.check(self.spec_formulas[0], self.paynt_export)   # calls Storm
         logger.info("Storm POMDP analysis completed")
+
+        if self.get_result is not None:
+            print(result.induced_mc_from_scheduler)
+            print(result.lower_bound)
+            print(result.upper_bound)
+            exit()
 
         # debug
         print(result.induced_mc_from_scheduler)
@@ -94,7 +93,6 @@ class StormPOMDPControl:
         #print(result.cutoff_schedulers[1])
         #for sc in result.cutoff_schedulers:
         #    print(sc)
-        #exit()
 
         self.latest_storm_result = result
 
@@ -103,9 +101,9 @@ class StormPOMDPControl:
         global belmc
         belmc = stormpy.pomdp.pomdp.create_interactive_mc(MarkovChain.environment, self.pomdp, False)
 
-    def interactive_storm_start(self):
+    def interactive_storm_start(self, storm_timeout):
         self.storm_thread = Thread(target=self.interactive_run, args=(belmc,))
-        control_thread = Thread(target=self.interactive_control, args=(belmc, True,))
+        control_thread = Thread(target=self.interactive_control, args=(belmc, True, storm_timeout,))
 
         logger.info("Interactive Storm started")
         control_thread.start()
@@ -116,8 +114,8 @@ class StormPOMDPControl:
         self.belief_explorer = belmc.get_interactive_belief_explorer()
 
 
-    def interactive_storm_resume(self):
-        control_thread = Thread(target=self.interactive_control, args=(belmc, False,))
+    def interactive_storm_resume(self, storm_timeout):
+        control_thread = Thread(target=self.interactive_control, args=(belmc, False, storm_timeout,))
 
         logger.info("Interactive Storm resumed")
         control_thread.start()
@@ -131,20 +129,22 @@ class StormPOMDPControl:
         logger.info("starting Storm POMDP analysis")
         result = belmc.check(self.spec_formulas[0], [])   # calls Storm
 
-        # debug
-        print(result.induced_mc_from_scheduler)
-        print(result.lower_bound)
-        print(result.upper_bound)
-        #print(result.cutoff_schedulers[1])
-        #for sc in result.cutoff_schedulers:
-        #    print(sc)
+        if result.induced_mc_from_scheduler is not None:
+            # debug
+            print(result.induced_mc_from_scheduler)
+            print(result.lower_bound)
+            print(result.upper_bound)
+            #print(result.cutoff_schedulers[1])
+            #for sc in result.cutoff_schedulers:
+            #    print(sc)
 
-        self.latest_storm_result = result
-        self.parse_results(self.quotient)
-        self.update_data()
+            self.latest_storm_result = result
+            self.parse_results(self.quotient)
+            self.update_data()
+
         logger.info("Storm POMDP analysis completed")
 
-    def interactive_control(self, belmc, start):
+    def interactive_control(self, belmc, start, storm_timeout):
         if belmc.get_status() == 4:
             logger.info("Storm terminated by exploring whole belief space.")
             return
@@ -160,7 +160,7 @@ class StormPOMDPControl:
                 return
             sleep(1)
 
-        sleep(20)
+        sleep(storm_timeout)
         logger.info("Pausing Storm")
         belmc.pause_unfolding()
 
@@ -173,7 +173,7 @@ class StormPOMDPControl:
         result = belmc.get_interactive_result()
 
         # debug
-        print(result.induced_mc_from_scheduler)
+        #print(result.induced_mc_from_scheduler)
         print(result.lower_bound)
         print(result.upper_bound)
         #print(result.cutoff_schedulers[1])
@@ -184,9 +184,9 @@ class StormPOMDPControl:
         self.parse_results(self.quotient)
         self.update_data()
 
-        print(self.result_dict)
-        print(self.result_dict_no_cutoffs)
-        print(self.is_storm_better)
+        #print(self.result_dict)
+        #print(self.result_dict_no_cutoffs)
+        #print(self.is_storm_better)
 
 
 
@@ -324,6 +324,7 @@ class StormPOMDPControl:
         get_choice_label = self.latest_storm_result.induced_mc_from_scheduler.choice_labeling.get_labels_of_choice
 
         cutoff_epxloration = [x for x in range(len(self.latest_storm_result.cutoff_schedulers))]
+        finite_mem = False
 
         result = {x:[] for x in range(quotient.observations)}
         result_no_cutoffs = {x:[] for x in range(quotient.observations)}
@@ -373,32 +374,42 @@ class StormPOMDPControl:
                         
             # parse cut-off states
             else:
-                if len(cutoff_epxloration) == 0:
-                    continue
-
-                # debug
-                #print(cutoff_epxloration)
-
-                if 'sched_' in list(get_choice_label(state.id))[0]:
-                    _, scheduler_index = list(get_choice_label(state.id))[0].split('_')
-
-                    if int(scheduler_index) not in cutoff_epxloration:
-                        continue
-
-                    scheduler = self.latest_storm_result.cutoff_schedulers[int(scheduler_index)]
-
-                    for state in range(quotient.pomdp.nr_states):
-
-                        choice_string = str(scheduler.get_choice(state).get_choice())
-                        actions = self.parse_choice_string(choice_string)
-
-                        observation = quotient.pomdp.get_observation(state)
-
+                if 'finite_mem' in state.labels and not finite_mem:
+                    finite_mem = True
+                    self.parse_paynt_result(self.quotient)
+                    for obs, actions in self.result_dict_paynt.items():
                         for action in actions:
-                            if action not in result[observation]:
-                                result[observation].append(action)
-
-                    cutoff_epxloration.remove(int(scheduler_index))
+                            if action not in result_no_cutoffs[obs]:
+                                result_no_cutoffs[obs].append(action)
+                            if action not in result[obs]:
+                                result[obs].append(action)
+                else:
+                    if len(cutoff_epxloration) == 0:
+                        continue
+    
+                    # debug
+                    #print(cutoff_epxloration)
+    
+                    if 'sched_' in list(get_choice_label(state.id))[0]:
+                        _, scheduler_index = list(get_choice_label(state.id))[0].split('_')
+    
+                        if int(scheduler_index) not in cutoff_epxloration:
+                            continue
+    
+                        scheduler = self.latest_storm_result.cutoff_schedulers[int(scheduler_index)]
+    
+                        for state in range(quotient.pomdp.nr_states):
+    
+                            choice_string = str(scheduler.get_choice(state).get_choice())
+                            actions = self.parse_choice_string(choice_string)
+    
+                            observation = quotient.pomdp.get_observation(state)
+    
+                            for action in actions:
+                                if action not in result[observation]:
+                                    result[observation].append(action)
+    
+                        cutoff_epxloration.remove(int(scheduler_index))
 
         # removing unrestricted observations
         observations = list(result.keys())
@@ -505,7 +516,7 @@ class StormPOMDPControl:
             else:
                 selected_actions = [result_dict[obs] for _ in act_obs_holes]
 
-            #selected_updates = [[0] for hole in mem_obs_holes]
+            selected_updates = [[0] for hole in mem_obs_holes]
 
             # Apply action restrictions
             for index in range(act_num_holes):
@@ -534,26 +545,45 @@ class StormPOMDPControl:
 
         return restricted_family
 
-    # returns dictionary containing restrictions for easy creation of subfamilies
-    def get_subfamilies_restrictions(self, quotient, use_cutoffs=True):
+    def get_main_restricted_family_new(self, family, result_dict):
 
-        if not self.is_storm_better:
-            result_dict = self.result_dict_paynt
-        elif use_cutoffs:
-            result_dict = self.result_dict
-        else:
-            result_dict = self.result_dict_no_cutoffs
+        if result_dict == {}:
+            return family
+
+        # go through each observation of interest
+        restricted_family = family.copy()
+        for obs in range(self.quotient.observations):
+            for hole in self.quotient.observation_action_holes[obs]:
+
+                if obs in result_dict.keys():
+                    selected_actions = [action for action in family[hole].options if action in result_dict[obs]]
+                else:
+                    selected_actions = [family[hole].options[0]]
+
+                if len(selected_actions) == 0:
+                    return None
+
+                restricted_family[hole].assume_options(selected_actions)
+
+        #print(restricted_family)
+        logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
+
+        return restricted_family
+
+
+    # returns dictionary containing restrictions for easy creation of subfamilies
+    def get_subfamilies_restrictions(self, family, result_dict):
 
         if result_dict == {}:
             return {}
 
-        subfamilies = []
+        subfamilies_restriction = []
 
         restricted_holes_list = []
 
         for observ in result_dict.keys():
 
-            act_obs_holes = quotient.observation_action_holes[observ]
+            act_obs_holes = self.quotient.observation_action_holes[observ]
             restricted_holes_list.extend(act_obs_holes)
         
         #explored_hole_list = []
@@ -563,14 +593,19 @@ class StormPOMDPControl:
 
         for hole in restricted_holes_list:
 
-            for obs_holes, index in zip(quotient.observation_action_holes, range(len(quotient.observation_action_holes))):
+            for obs_holes, index in zip(self.quotient.observation_action_holes, range(len(self.quotient.observation_action_holes))):
                 if hole in obs_holes:
                     obs = index
 
-            if len(result_dict[obs]) == quotient.actions_at_observation[obs]:
+            if len(result_dict[obs]) == self.quotient.actions_at_observation[obs]:
                 continue
 
-            subfamilies.append({"hole": hole, "restriction": result_dict[obs]})
+            restriction = [action for action in family[hole].options if action in result_dict[obs]]
+
+            if len(restriction) == len(family[hole].options):
+                continue
+
+            subfamilies_restriction.append({"hole": hole, "restriction": restriction})
 
             # debug
             #print(obs, subfamily.size, subfamily)
@@ -579,7 +614,7 @@ class StormPOMDPControl:
         # debug
         #print(subfamilies_size)
 
-        return subfamilies
+        return subfamilies_restriction
 
 
 
@@ -611,7 +646,7 @@ class StormPOMDPControl:
         # return subfamilies
 
 
-    def get_subfamilies(self, restrictions, family):
+    def get_subfamilies_dict(self, restrictions, family):
 
         if len(restrictions) == 0:
             return []
@@ -646,6 +681,34 @@ class StormPOMDPControl:
 
         return subfamilies
 
+    def get_subfamilies(self, restrictions, family):
+
+        subfamilies = []
+
+        for i in range(len(restrictions)):
+            restricted_family = family.copy()
+
+            actions = [action for action in family[restrictions[i]["hole"]].options if action not in restrictions[i]["restriction"]]
+            if len(actions) == 0:
+                actions = [family[restrictions[i]["hole"]].options[0]]
+
+            restricted_family[restrictions[i]['hole']].assume_options(actions)
+
+            for j in range(i):
+                restricted_family[restrictions[j]['hole']].assume_options(restrictions[j]["restriction"])
+
+            subfamilies.append(restricted_family)
+
+        return subfamilies
+
+    def is_memory_needed(self, result_dict):
+        memory_needed = False
+        for obs in range(self.quotient.observations):
+            if self.quotient.observation_memory_size[obs] < self.memory_vector[obs]:
+                memory_needed = True
+                break
+        return memory_needed
+
 
     def update_data(self):
 
@@ -667,5 +730,11 @@ class StormPOMDPControl:
                     self.is_storm_better = False
                 else:
                     self.is_storm_better = True
+
+        for obs in range(self.quotient.observations):
+            if obs in self.result_dict_no_cutoffs.keys():
+                self.memory_vector[obs] = len(self.result_dict_no_cutoffs[obs])
+            else:
+                self.memory_vector[obs] = 1
 
 

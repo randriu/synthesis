@@ -16,12 +16,7 @@ class SynthesizerARStorm(Synthesizer):
     # buffer containing subfamilies to be checked after the main restricted family
     subfamilies_buffer = None
 
-    subfamily_restrictions = None
-
     unresticted_family = None
-
-    # list of explored restrictions
-    explored_restrictions = []
 
     # if True, Storm over-approximation will be run to help with family pruning
     storm_pruning = False
@@ -33,43 +28,27 @@ class SynthesizerARStorm(Synthesizer):
     def method_name(self):
         return "AR"
 
-    def create_subfamily(self, subfamily_restriction):
-
-        subfamily = self.unresticted_family.copy()
-
-        for hole_restriction in subfamily_restriction:
-
-            selected_actions = hole_restriction["restriction"]
-
-            if len(selected_actions) == 0:
-                continue
-
-            subfamily[hole_restriction["hole"]].assume_options(selected_actions)
-
-        return subfamily
-
     def storm_split(self, families):
-        #self.storm_control.parse_result(self.quotient)
-        self.subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(self.quotient)
-
-        #print(self.subfamily_restrictions)
-        
         subfamilies = []
         main_families = []
 
-        # TODO MAIN FAMILIES
         for family in families:
 
-            main_p = self.storm_control.get_main_restricted_family(family, self.quotient, True)
-            main_families.append(main_p)
+            main_p = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
 
-            subfamilies_p = self.storm_control.get_subfamilies(self.subfamily_restrictions, family)
+            if main_p is None:
+                subfamilies.append(family)
+                continue
+
+            main_families.append(main_p)
+            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
+            subfamilies_p = self.storm_control.get_subfamilies(subfamily_restrictions, family)
             subfamilies.extend(subfamilies_p)
 
-        # TODO
-        subfamilies = []
-
         logger.info(f"State after Storm splitting: Main families - {len(main_families)}, Subfamilies - {len(subfamilies)}")
+        if len(main_families) == 0:
+            main_families = subfamilies
+            subfamilies = []
         return main_families, subfamilies
 
 
@@ -137,130 +116,73 @@ class SynthesizerARStorm(Synthesizer):
 
     def synthesize_assignment(self, family):
 
-        try:
-            self.quotient.discarded = 0
+        #try:
+        self.quotient.discarded = 0
 
-            satisfying_assignment = None
-            families = [family]
+        satisfying_assignment = None
+        families = [family]
 
-            while families:
+        while families:
 
-                if self.s_queue is not None:
-                    if not self.s_queue.empty():
-                        self.s_queue.get()
-                        logger.info("Pausing synthesis")
-                        while self.s_queue.empty():
-                            sleep(1)
-                        status = self.s_queue.get()
-                        if status == "resume":
-                            logger.info("Resuming synthesis")
-                            memory_needed = False
-                            for obs in range(self.quotient.observations):
-                                if obs in self.storm_control.result_dict.keys() and self.quotient.observation_memory_size[obs] < len(self.storm_control.result_dict[obs]):
-                                    memory_needed = True
-                                    break
-                            if self.storm_control.is_storm_better:
-                                if memory_needed:
-                                    logger.info("Additional memory needed")
-                                    return satisfying_assignment
-                                else:
-                                    logger.info("Applying family split according to Storm results")
-                                    families, self.subfamilies_buffer = self.storm_split(families)
+            if self.s_queue is not None:
+                if not self.s_queue.empty():
+                    self.s_queue.get()
+                    logger.info("Pausing synthesis")
+                    self.stat.synthesis_time.stop()
+                    while self.s_queue.empty():
+                        sleep(1)
+                    status = self.s_queue.get()
+                    if status == "resume":
+                        logger.info("Resuming synthesis")
+                        if self.storm_control.is_storm_better:
+                            if self.storm_control.is_memory_needed(self.storm_control.result_dict_no_cutoffs):
+                                logger.info("Additional memory needed")
+                                return satisfying_assignment
                             else:
-                                logger.info("PAYNT's value is better. Prioritizing synthesis results")
+                                logger.info("Applying family split according to Storm results")
+                                families, self.subfamilies_buffer = self.storm_split(families)
+                        else:
+                            logger.info("PAYNT's value is better. Prioritizing synthesis results")
+                        self.stat.synthesis_time.start()
 
-                        elif status == "terminate":
-                            exit()
+                    elif status == "terminate":
+                        exit()
 
-                #print(len(families))
+            #print(len(families))
 
-                if SynthesizerARStorm.exploration_order_dfs:
-                    family = families.pop(-1)
-                else:
-                    family = families.pop(0)
+            if SynthesizerARStorm.exploration_order_dfs:
+                family = families.pop(-1)
+            else:
+                family = families.pop(0)
 
-                #print(family)
+            #print(family)
 
-                # simulate sequential
-                family.parent_info = None
+            # simulate sequential
+            family.parent_info = None
 
-                can_improve,improving_assignment = self.analyze_family_ar(family)
-                if improving_assignment is not None:
-                    satisfying_assignment = improving_assignment
-                    #print(satisfying_assignment)
-                if can_improve == False:
-                    self.explore(family)
-                    continue
+            can_improve,improving_assignment = self.analyze_family_ar(family)
+            if improving_assignment is not None:
+                satisfying_assignment = improving_assignment
+                #print(satisfying_assignment)
+            if can_improve == False:
+                self.explore(family)
+                if not families and self.subfamilies_buffer:
+                    logger.info("Main family synthesis done")
+                    logger.info(f"Subfamilies buffer contains: {len(self.subfamilies_buffer)} families")
+                    families = self.subfamilies_buffer
+                    self.subfamilies_buffer = []
+                continue
 
-                #print("split", family)
-                # undecided
-                subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
-                families = families + subfamilies
-
-                #if self.s_queue is not None:
-                #    if not self.s_queue.empty():
-                #        self.storm_control.result_dict, self.storm_control.storm_bounds = self.s_queue.get()
-                #        logger.info("Applying family split according to Storm results")
-                #        families, self.subfamilies_buffer = self.storm_split(families)
-
-                
-
-
-
-            logger.info("Main family synthesis done")
-            logger.info(f"Subfamilies buffer contains: {len(self.subfamilies_buffer)} families")
-            #self.stat.print()
-
-            while self.subfamilies_buffer:
-
-                logger.info(f"{len(self.subfamilies_buffer)} families remaining")
-
-                subfamily_restriction = self.subfamilies_buffer.pop(0)
-
-                subfamily = self.create_subfamily(subfamily_restriction)
-
-                #print(subfamily.size)
-
-                families = [subfamily]
-
-                #print(subfamily, len(families))
-
-                while families:
-
-                    if SynthesizerARStorm.exploration_order_dfs:
-                        family = families.pop(-1)
-                    else:
-                        family = families.pop(0)
-
-                    #print(family)
-
-                    # simulate sequential
-                    family.parent_info = None
-
-                    can_improve,improving_assignment = self.analyze_family_ar(family)
-                    if improving_assignment is not None:
-                        satisfying_assignment = improving_assignment
-                    if can_improve == False:
-                        self.explore(family)
-                        continue
-
-                    #print("split", family)
-                    # undecided
-                    subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
-                    families = families + subfamilies
-
-            self.stat.finished(satisfying_assignment)
-
-            # if satisfying_assignment is not None:
-            #     dtmc = self.sketch.quotient.build_chain(satisfying_assignment)
-            #     spec = dtmc.check_specification(self.sketch.specification)
-            #     logger.info("Double-checking specification satisfiability: {}".format(spec))
-        except:
-            if satisfying_assignment:
-                extracted_result = self.quotient.extract_policy(satisfying_assignment)
-                print(satisfying_assignment)
-                print(extracted_result)
-            exit()
+            #print("split", family)
+            # undecided
+            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
+            families = families + subfamilies
+        #except:
+        #    if satisfying_assignment:
+        #        extracted_result = self.quotient.extract_policy(satisfying_assignment)
+        #        print(satisfying_assignment)
+        #        print(extracted_result)
+        #    exit()
 
         return satisfying_assignment
 
