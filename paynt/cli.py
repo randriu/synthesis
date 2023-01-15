@@ -94,13 +94,23 @@ def setup_logger(log_path = None):
 @click.option(
     "--storm-options",
     default="cutoff",
-    type=click.Choice(["cutoff", "clip2", "clip4"]),
+    type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp"]),
     show_default=True,
-    help="run Storm using pre-defined settings (cutoff, clip2, clip4) and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
+    help="run Storm using pre-defined settings and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
 @click.option("--iterative-storm", nargs=3, type=int, show_default=True, default=None,
     help="runs the iterative PAYNT/Storm integration. Arguments timeout, paynt_timeout, storm_timeout. Can only be used together with --storm-pomdp flag")
 @click.option("--get-storm-result", default=None, type=int,
     help="runs PAYNT for given amount of seconds and returns Storm result using FSC at cutoff. If time is 0 returns pure Storm result. Can only be used together with --storm-pomdp flag")
+@click.option("--prune-storm", is_flag=True, default=False,
+    help="only explore the main family suggested by Storm in each iteration. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
+@click.option("--use-storm-cutoffs", is_flag=True, default=False,
+    help="if set the storm randomized scheduler cutoffs are used during the prioritization of families. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
+@click.option(
+    "--unfold-strategy-storm",
+    default="storm",
+    type=click.Choice(["storm", "paynt", "cutoff"]),
+    show_default=True,
+    help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
 
 #@click.option("--storm-parallel", is_flag=True, default=False,
 #    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
@@ -124,7 +134,8 @@ def paynt(
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, aposteriori_unfolding,
         fsc_export_result,
-        storm_pomdp, iterative_storm, get_storm_result, storm_options,
+        storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
+        use_storm_cutoffs, unfold_strategy_storm,
         ce_generator,
         pomcp,
         profiling
@@ -156,6 +167,8 @@ def paynt(
             storm_control.get_result = get_storm_result
         if iterative_storm is not None:
             storm_control.iteration_timeout, storm_control.paynt_timeout, storm_control.storm_timeout = iterative_storm
+        storm_control.use_cutoffs = use_storm_cutoffs
+        storm_control.unfold_strategy_storm = unfold_strategy_storm
     else:
         storm_control = None
 
@@ -186,6 +199,14 @@ def paynt(
         synthesizer = SynthesizerMultiCoreAR(quotient)
     else:
         pass
+
+    if storm_pomdp:
+        if prune_storm:
+            synthesizer.incomplete_exploration = True
+        if unfold_strategy_storm == "paynt":
+            synthesizer.unfold_storm = False
+        elif unfold_strategy_storm == "cutoff":
+            synthesizer.unfold_cutoff = True
 
     if not profiling:
         synthesizer.run()

@@ -33,15 +33,22 @@ class SynthesizerARStorm(Synthesizer):
         main_families = []
 
         for family in families:
-
-            main_p = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
+            if self.storm_control.use_cutoffs:
+                main_p = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict)
+            else:
+                main_p = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
 
             if main_p is None:
                 subfamilies.append(family)
                 continue
 
             main_families.append(main_p)
-            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
+
+            if self.storm_control.use_cutoffs:
+                subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict)
+            else:
+                subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
+
             subfamilies_p = self.storm_control.get_subfamilies(subfamily_restrictions, family)
             subfamilies.extend(subfamilies_p)
 
@@ -135,7 +142,7 @@ class SynthesizerARStorm(Synthesizer):
                     if status == "resume":
                         logger.info("Resuming synthesis")
                         if self.storm_control.is_storm_better:
-                            if self.storm_control.is_memory_needed(self.storm_control.result_dict_no_cutoffs):
+                            if self.storm_control.is_memory_needed():
                                 logger.info("Additional memory needed")
                                 return satisfying_assignment
                             else:
@@ -146,7 +153,8 @@ class SynthesizerARStorm(Synthesizer):
                         self.stat.synthesis_time.start()
 
                     elif status == "terminate":
-                        exit()
+                        logger.info("Terminating controller synthesis")
+                        return satisfying_assignment
 
             #print(len(families))
 

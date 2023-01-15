@@ -37,11 +37,15 @@ class StormPOMDPControl:
     spec_formulas = None            # The specification to be checked
     storm_options = None
     get_result = None
+    use_cutoffs = False
+    unfold_strategy_storm = None
 
     # PAYNT/Storm iteration settings
     iteration_timeout = None
     paynt_timeout = None
     storm_timeout = None
+
+    storm_terminated = False
 
     s_queue = None
 
@@ -62,18 +66,24 @@ class StormPOMDPControl:
     # TODO: discuss Storm options
     def run_storm_analysis(self):
         if self.storm_options == "cutoff":
-            options = self.get_cutoff_options(1000000)
+            options = self.get_cutoff_options(100000)
         elif self.storm_options == "clip2":
             options = self.get_clip2_options()
         elif self.storm_options == "clip4":
             options = self.get_clip4_options()
+        elif self.storm_options == "small":
+            options = self.get_cutoff_options(1000)
+        elif self.storm_options == "refine":
+            options = self.get_refine_options()
+        elif self.storm_options == "overapp":
+            options = self.get_overapp_options()
         else:
             logger.error("Incorrect option setting for Storm was found")
             exit()
 
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
-        #self.paynt_export = [[{5: 8.175484045412889, 10: 5.732044228315713}, {10: 5.732044228315713}, {5: 5.73204428890203, 10: 8.175481487608277}], [{13: 7.113606396312573}], [{9: 4.412965226847773}], [{7: 1.3168956249547028, 8: 2.6548045517763708}, {2: 9.741734546300918, 3: 8.42923360857942, 11: 9.74171998507045, 12: 8.42921914560019}, {2: 9.74171200483799, 3: 8.429232535176421, 7: 6.627522109385762, 8: 5.7088973575096755, 11: 9.74171998507045, 12: 8.42921914560019}], [{}, {1: 10.991735439369018, 14: 10.991718913113731}, {1: 10.991735439369018, 14: 10.99171891311373}], [{0: 7.093672533137764}], [{4: 7.113607668625247}], [{6: 0.0}]]
+        #self.paynt_export = []
         #print(self.paynt_export)
 
         logger.info("starting Storm POMDP analysis")
@@ -99,7 +109,9 @@ class StormPOMDPControl:
 
     def interactive_storm_setup(self):
         global belmc
-        belmc = stormpy.pomdp.pomdp.create_interactive_mc(MarkovChain.environment, self.pomdp, False)
+        #belmc = stormpy.pomdp.pomdp.create_interactive_mc(MarkovChain.environment, self.pomdp, False)
+        options = self.get_interactive_options()
+        belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
     def interactive_storm_start(self, storm_timeout):
         self.storm_thread = Thread(target=self.interactive_run, args=(belmc,))
@@ -129,6 +141,8 @@ class StormPOMDPControl:
         logger.info("starting Storm POMDP analysis")
         result = belmc.check(self.spec_formulas[0], [])   # calls Storm
 
+        self.storm_terminated = True
+
         if result.induced_mc_from_scheduler is not None:
             # debug
             print(result.induced_mc_from_scheduler)
@@ -145,6 +159,10 @@ class StormPOMDPControl:
         logger.info("Storm POMDP analysis completed")
 
     def interactive_control(self, belmc, start, storm_timeout):
+        if self.storm_terminated:
+            logger.info("Storm already terminated.")
+            return
+
         if belmc.get_status() == 4:
             logger.info("Storm terminated by exploring whole belief space.")
             return
@@ -161,6 +179,8 @@ class StormPOMDPControl:
             sleep(1)
 
         sleep(storm_timeout)
+        if self.storm_terminated:
+            return
         logger.info("Pausing Storm")
         belmc.pause_unfolding()
 
@@ -252,12 +272,18 @@ class StormPOMDPControl:
     def get_interactive_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_explicit_cutoff = True
-        options.use_grid_clipping = False
         options.size_threshold_init = 0
         options.skip_heuristic_schedulers = False
         options.interactive_unfolding = True
         options.gap_threshold_init = 0
+        options.refine = False
         options.cut_zero_gap = False
+        if self.storm_options == "clip2":
+            options.use_grid_clipping = True
+            options.clipping_grid_res = 2
+        elif self.storm_options == "clip4":
+            options.use_grid_clipping = True
+            options.clipping_grid_res = 4
         return options
 
     # Over-approximation
@@ -701,7 +727,7 @@ class StormPOMDPControl:
 
         return subfamilies
 
-    def is_memory_needed(self, result_dict):
+    def is_memory_needed(self):
         memory_needed = False
         for obs in range(self.quotient.observations):
             if self.quotient.observation_memory_size[obs] < self.memory_vector[obs]:
@@ -731,10 +757,19 @@ class StormPOMDPControl:
                 else:
                     self.is_storm_better = True
 
-        for obs in range(self.quotient.observations):
-            if obs in self.result_dict_no_cutoffs.keys():
-                self.memory_vector[obs] = len(self.result_dict_no_cutoffs[obs])
-            else:
-                self.memory_vector[obs] = 1
+
+        if self.unfold_strategy_storm in ["storm", "paynt"]:
+            for obs in range(self.quotient.observations):
+                if obs in self.result_dict_no_cutoffs.keys():
+                    self.memory_vector[obs] = len(self.result_dict_no_cutoffs[obs])
+                else:
+                    self.memory_vector[obs] = 1
+        else:
+            for obs in range(self.quotient.observations):
+                if obs in self.result_dict.keys():
+                    self.memory_vector[obs] = len(self.result_dict[obs])
+                else:
+                    self.memory_vector[obs] = 1
+                    
 
 
