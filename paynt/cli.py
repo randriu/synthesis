@@ -89,10 +89,31 @@ def setup_logger(log_path = None):
 @click.option("--fsc-export-result", is_flag=True, default=False,
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
 
-@click.option("--storm-pomdp-analysis", is_flag=True, default=False,
+@click.option("--storm-pomdp", is_flag=True, default=False,
     help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
-@click.option("--storm-parallel", is_flag=True, default=False,
-    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
+@click.option(
+    "--storm-options",
+    default="cutoff",
+    type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp"]),
+    show_default=True,
+    help="run Storm using pre-defined settings and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
+@click.option("--iterative-storm", nargs=3, type=int, show_default=True, default=None,
+    help="runs the iterative PAYNT/Storm integration. Arguments timeout, paynt_timeout, storm_timeout. Can only be used together with --storm-pomdp flag")
+@click.option("--get-storm-result", default=None, type=int,
+    help="runs PAYNT for given amount of seconds and returns Storm result using FSC at cutoff. If time is 0 returns pure Storm result. Can only be used together with --storm-pomdp flag")
+@click.option("--prune-storm", is_flag=True, default=False,
+    help="only explore the main family suggested by Storm in each iteration. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
+@click.option("--use-storm-cutoffs", is_flag=True, default=False,
+    help="if set the storm randomized scheduler cutoffs are used during the prioritization of families. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
+@click.option(
+    "--unfold-strategy-storm",
+    default="storm",
+    type=click.Choice(["storm", "paynt", "cutoff"]),
+    show_default=True,
+    help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
+
+#@click.option("--storm-parallel", is_flag=True, default=False,
+#    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
 
 @click.option(
     "--ce-generator",
@@ -113,7 +134,8 @@ def paynt(
         incomplete_search,
         fsc_synthesis, pomdp_memory_size, aposteriori_unfolding,
         fsc_export_result,
-        storm_pomdp_analysis, storm_parallel,
+        storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
+        use_storm_cutoffs, unfold_strategy_storm,
         ce_generator,
         pomcp,
         profiling
@@ -138,8 +160,15 @@ def paynt(
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
         properties_path, constants, relative_error)
 
-    if storm_pomdp_analysis:
+    if storm_pomdp:
         storm_control = StormPOMDPControl()
+        storm_control.storm_options = storm_options
+        if get_storm_result is not None:
+            storm_control.get_result = get_storm_result
+        if iterative_storm is not None:
+            storm_control.iteration_timeout, storm_control.paynt_timeout, storm_control.storm_timeout = iterative_storm
+        storm_control.use_cutoffs = use_storm_cutoffs
+        storm_control.unfold_strategy_storm = unfold_strategy_storm
     else:
         storm_control = None
 
@@ -171,20 +200,22 @@ def paynt(
     else:
         pass
 
+    if storm_pomdp:
+        if prune_storm:
+            synthesizer.incomplete_exploration = True
+        if unfold_strategy_storm == "paynt":
+            synthesizer.unfold_storm = False
+        elif unfold_strategy_storm == "cutoff":
+            synthesizer.unfold_cutoff = True
 
-
-    if storm_parallel:
-        parallel_main = ParallelControl(synthesizer, storm_control)
-        parallel_main.run()
+    if not profiling:
+        synthesizer.run()
     else:
-        if not profiling:
+        with cProfile.Profile() as pr:
             synthesizer.run()
-        else:
-            with cProfile.Profile() as pr:
-                synthesizer.run()
-            stats = pr.create_stats()
-            print(stats)
-            pstats.Stats(pr).sort_stats('tottime').print_stats(10)
+        stats = pr.create_stats()
+        print(stats)
+        pstats.Stats(pr).sort_stats('tottime').print_stats(10)
 
 
 def main():
