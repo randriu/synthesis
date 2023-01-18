@@ -30,7 +30,7 @@ class StormPOMDPControl:
     result_dict_paynt = {}
     memory_vector = {}
 
-    is_storm_better = True
+    is_storm_better = False
 
     pomdp = None                    # The original POMDP model
     quotient = None
@@ -55,6 +55,7 @@ class StormPOMDPControl:
     def get_storm_result(self):
         self.run_storm_analysis()
         self.parse_results(self.quotient)
+        self.update_data()
 
         #print(self.result_dict)
         #print(self.storm_bounds)
@@ -139,7 +140,7 @@ class StormPOMDPControl:
 
     def interactive_run(self, belmc):
         logger.info("starting Storm POMDP analysis")
-        result = belmc.check(self.spec_formulas[0], [])   # calls Storm
+        result = belmc.check(self.spec_formulas[0], self.paynt_export)   # calls Storm
 
         self.storm_terminated = True
 
@@ -728,6 +729,9 @@ class StormPOMDPControl:
         return subfamilies
 
     def is_memory_needed(self):
+        if len(self.memory_vector) == 0:
+            return False
+
         memory_needed = False
         for obs in range(self.quotient.observations):
             if self.quotient.observation_memory_size[obs] < self.memory_vector[obs]:

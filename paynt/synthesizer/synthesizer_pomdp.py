@@ -117,9 +117,6 @@ class SynthesizerPOMDP:
 
         while True:
         # for x in range(2):
-
-            if self.storm_control.is_storm_better == False:
-                self.storm_control.parse_result(self.quotient)
             
             POMDPQuotientContainer.current_family_index = mem_size
 
@@ -229,6 +226,9 @@ class SynthesizerPOMDP:
 
             time.sleep(paynt_timeout)
             self.interactive_queue.put("timeout")
+
+            while not self.interactive_queue.empty():
+                time.sleep(0.1)
 
             if iteration == 1:
                 self.storm_control.interactive_storm_start(storm_timeout)
