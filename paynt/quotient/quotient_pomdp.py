@@ -163,7 +163,7 @@ class POMDPQuotientContainer(QuotientContainer):
                 observation = obs
                 break
         return(is_action_hole, observation, memory)
-    
+
     def simplify_label(self,label):
         label = re.sub(r"\s+", "", label)
         label = label[1:-1]
@@ -369,6 +369,14 @@ class POMDPQuotientContainer(QuotientContainer):
             action_to_hole_options_new.append(hole_options_new)
         action_to_hole_options = action_to_hole_options_new
 
+        # creating this list to make it work with Paynt-Storm integration
+        self.observation_action_holes = [[] for obs in range(self.observations)]
+        for key,index in action_holes.items():
+            _,prior = key
+            new_index = old_to_new_indices[index]
+            if new_index is not None:
+                self.observation_action_holes[prior].append(new_index)
+
         return all_holes, action_to_hole_options
 
     
@@ -465,9 +473,6 @@ class POMDPQuotientContainer(QuotientContainer):
 
         return inconsistent_differences
 
-
-    def estimate_scheduler_difference_aposteriori(self, mdp, inconsistent_assignments, choice_values, expected_visits):
-        return None
 
     
     
@@ -595,14 +600,14 @@ class POMDPQuotientContainer(QuotientContainer):
         # group results by observation
         policy = []
         for obs in range(self.observations):
-            mem_size = self.pomdp_manager.observation_memory_size[obs]
+            mem_size = self.observation_memory_size[obs]
             mem_info = [ {} for _ in range(mem_size) ]
             policy.append(mem_info)
 
         for dtmc_state in range(dtmc.states):
             value = dtmc_state_value[dtmc_state]
             mdp_state = dtmc.quotient_state_map[dtmc_state]
-            mdp_choice = dtmc.quotient_choice_map[dtmc_state]
+            # mdp_choice = dtmc.quotient_choice_map[dtmc_state]
 
             pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
             memory_node = self.pomdp_manager.state_memory[mdp_state]
@@ -684,19 +689,6 @@ class POMDPQuotientContainer(QuotientContainer):
             choice_labeling.add_label_to_choice(str(labels_list[choice]), choice)
 
         components.choice_labeling = choice_labeling
-
-        #print(choice_labeling)
-
-
-        #print(full_observ_list)
-        #print(observ_list)
-
-        #print(dir(mdp.model))
-        #print(dir(self.pomdp))
-        #print(mdp.model.get_nr_available_actions(10))
-        #exit()
-
-
         components.observability_classes = observ_list
 
         pomdp = stormpy.storage.SparsePomdp(components)
