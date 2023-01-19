@@ -246,13 +246,23 @@ class SynthesizerPOMDP:
 
         self.storm_control.interactive_storm_terminate()
 
-        print("PAYNT results: ")
-        #print(self.storm_control.latest_paynt_result)
-        print(self.storm_control.paynt_bounds)
+    def run_synthesis_timeout(self, timeout):
+        self.interactive_queue = Queue()
+        self.synthesizer.s_queue = self.interactive_queue
+        paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, False))
+        iteration_timeout = time.time() + timeout
+        paynt_thread.start()
 
-        print("Storm results: ")
-        #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
-        print(self.storm_control.storm_bounds)
+        while True:
+            if time.time() > iteration_timeout:
+                break
+
+            time.sleep(1)
+
+        self.interactive_queue.put("pause")
+        self.interactive_queue.put("terminate")
+        self.synthesis_terminate = True
+        paynt_thread.join()
 
 
     # iterative strategy using Storm analysis to enhance the synthesis
@@ -889,10 +899,20 @@ class SynthesizerPOMDP:
                                           iteration_limit=0)
             elif self.storm_control.get_result is not None:
                 #TODO probably strategy_storm with unfold storm False
+                if self.storm_control.get_result:
+                    self.run_synthesis_timeout(self.storm_control.get_result)
                 self.storm_control.run_storm_analysis()
             else:
                 self.storm_control.get_storm_result()
                 self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.unfold_storm)
+
+            print("PAYNT results: ")
+            #print(self.storm_control.latest_paynt_result)
+            print(self.storm_control.paynt_bounds)
+
+            print("Storm results: ")
+            #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
+            print(self.storm_control.storm_bounds)
         else:
             # self.strategy_expected_uai()
             # self.strategy_iterative(unfold_imperfect_only=False)
