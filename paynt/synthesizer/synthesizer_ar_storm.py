@@ -133,8 +133,13 @@ class SynthesizerARStorm(Synthesizer):
 
             if self.s_queue is not None:
                 if not self.s_queue.empty():
-                    self.s_queue.get()
+                    if satisfying_assignment is not None:
+                        self.storm_control.latest_paynt_result = satisfying_assignment
+                        self.storm_control.paynt_export = self.quotient.extract_policy(satisfying_assignment)
+                        self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
+                        self.storm_control.update_data()
                     logger.info("Pausing synthesis")
+                    self.s_queue.get()
                     self.stat.synthesis_time.stop()
                     while self.s_queue.empty():
                         sleep(1)
