@@ -1,0 +1,50 @@
+pomdp
+
+formula goal = x=5;
+
+observable "blue" = x=0 | x=1 | x=4;
+observable "yell" = x=2 | x=3;
+observable "purp" = x=6 | x=7;
+observable "sink" = x=8;
+observable "goal" = goal;
+
+module test
+
+    x : [0..8] init 0;
+
+    [A]   x=0 -> (x'=1);
+    [B]   x=0 -> (x'=2);
+    [C]   x=0 -> 0.5:(x'=1) + 0.5:(x'=3);
+    [D]   x=0 -> 0.5:(x'=6) + 0.5:(x'=7);
+
+    // actions c,d no longer needed
+    [C]   x>0 -> true;
+    [D]   x>0 -> true;
+
+    // yellow states
+    [A]   x=2 -> true;
+    [B]   x=2 -> (x'=3);
+
+    [A]   x=3 -> (x'=2);
+    [B]   x=3 -> (x'=4);
+
+    // blue states (exluding initial)
+    [A]   x=1 -> 0.1:(x'=5) + 0.9:true;
+    [B]   x=1 -> 0.3:(x'=5) + 0.7:true;
+
+    [A]   x=4 -> (x'=5);
+    [B]   x=4 -> true;
+
+    // purple states
+    [A]   x=6 -> (x'=5);
+    [B]   x=6 -> (x'=8);
+    
+    [A]   x=7 -> (x'=8);
+    [B]   x=7 -> (x'=5);
+
+endmodule
+
+
+rewards "steps"
+    true: 1;
+endrewards
