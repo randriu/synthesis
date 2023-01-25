@@ -94,7 +94,7 @@ def setup_logger(log_path = None):
 @click.option(
     "--storm-options",
     default="cutoff",
-    type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp"]),
+    type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp", "2mil", "5mil", "10mil", "20mil", "30mil", "50mil"]),
     show_default=True,
     help="run Storm using pre-defined settings and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
 @click.option("--iterative-storm", nargs=3, type=int, show_default=True, default=None,

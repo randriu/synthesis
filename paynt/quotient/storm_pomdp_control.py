@@ -74,6 +74,18 @@ class StormPOMDPControl:
             options = self.get_clip4_options()
         elif self.storm_options == "small":
             options = self.get_cutoff_options(1000)
+        elif self.storm_options == "2mil":
+            options = self.get_cutoff_options(2000000)
+        elif self.storm_options == "5mil":
+            options = self.get_cutoff_options(5000000)
+        elif self.storm_options == "10mil":
+            options = self.get_cutoff_options(10000000)
+        elif self.storm_options == "20mil":
+            options = self.get_cutoff_options(20000000)
+        elif self.storm_options == "30mil":
+            options = self.get_cutoff_options(30000000)
+        elif self.storm_options == "50mil":
+            options = self.get_cutoff_options(50000000)
         elif self.storm_options == "refine":
             options = self.get_refine_options()
         elif self.storm_options == "overapp":
@@ -137,6 +149,7 @@ class StormPOMDPControl:
 
     def interactive_storm_terminate(self):
         belmc.terminate_unfolding()
+        self.storm_thread.join()
 
     def interactive_run(self, belmc):
         logger.info("starting Storm POMDP analysis")
@@ -160,13 +173,10 @@ class StormPOMDPControl:
         logger.info("Storm POMDP analysis completed")
 
     def interactive_control(self, belmc, start, storm_timeout):
-        if self.storm_terminated:
+        if belmc.has_converged():
             logger.info("Storm already terminated.")
             return
 
-        if belmc.get_status() == 4:
-            logger.info("Storm terminated by exploring whole belief space.")
-            return
         if not start:
             logger.info("Updating FSC values in Storm")
             #explorer = belmc.get_interactive_belief_explorer()
@@ -174,9 +184,6 @@ class StormPOMDPControl:
             belmc.continue_unfolding()
 
         while not belmc.is_exploring():
-            if belmc.get_status() == 4:
-                logger.info("Storm terminated by exploring whole belief space.")
-                return
             sleep(1)
 
         sleep(storm_timeout)
@@ -186,15 +193,12 @@ class StormPOMDPControl:
         belmc.pause_unfolding()
 
         while not belmc.is_result_ready():
-            if belmc.get_status() == 4:
-                logger.info("Storm terminated by exploring whole belief space.")
-                return
             sleep(2)
 
         result = belmc.get_interactive_result()
 
         # debug
-        #print(result.induced_mc_from_scheduler)
+        print(result.induced_mc_from_scheduler)
         print(result.lower_bound)
         print(result.upper_bound)
         #print(result.cutoff_schedulers[1])
@@ -218,7 +222,7 @@ class StormPOMDPControl:
         options.use_grid_clipping = False
         return options
 
-    def get_overapp_options(self, belief_states=100000):
+    def get_overapp_options(self, belief_states=1000000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
         options.use_explicit_cutoff = True
         options.size_threshold_init = belief_states
