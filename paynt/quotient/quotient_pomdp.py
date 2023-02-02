@@ -652,6 +652,59 @@ class POMDPQuotientContainer(QuotientContainer):
         policy = self.collect_policy(dtmc, mc_result)
         return policy
 
+    
+    def policy_size(self, assignment):
+        '''
+        Compute how many natural numbers are needed to encode the mu-FSC under
+        the current memory model mu.
+        '''
+
+        # going through the induced DTMC, too lazy to parse hole names
+        dtmc = self.build_chain(assignment)
+        
+        # size of action function gamma:
+        #   for each memory node, a list of prior-action pairs
+        size_gamma = sum(self.observation_memory_size) # explicit
+        # size_gamma = sum([len(x) for x in prior_observations]) * 2 # sparse
+        
+        if not self.posterior_aware:
+            # size of update function delta of a posterior-unaware FSC:
+            #   for each memory node, a list of prior-update pairs
+            size_delta = sum(self.observation_memory_size) # explicit
+            return size_gamma + size_delta
+        
+        # posterior-aware update selection
+        # for each memory node and for each prior, collect a set of possible posteriors
+        max_mem = max(self.observation_memory_size)
+        memory_prior_posteriors = [[set() for _ in range(self.observations)] for _ in range(max_mem)]
+        for state in range(dtmc.states):
+            mdp_state = dtmc.quotient_state_map[state]
+
+            # get prior
+            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
+            memory_node = self.pomdp_manager.state_memory[mdp_state]
+            prior = self.pomdp.get_observation(pomdp_state)
+            # prior_observations[memory_node].add(prior)
+
+            # get posterior observations
+            for entry in dtmc.model.transition_matrix.get_row(state):
+                successor = entry.column
+                mdp_successor = dtmc.quotient_state_map[successor]
+                pomdp_successor = self.pomdp_manager.state_prototype[mdp_successor]
+                posterior = self.pomdp.get_observation(pomdp_successor)
+                memory_prior_posteriors[memory_node][prior].add(posterior)
+
+        # size of update function delta of a posterior-aware FSC:
+        #   for each memory node and for each possible prior, a list of posterior-action pairs
+        #   assuming sparse representation (not including delimeters)
+        size_delta = 0
+        for n_prior_posteriors in memory_prior_posteriors:
+            for n_z_posteriors in n_prior_posteriors:
+                size_delta += 2 * len(n_z_posteriors)
+
+        return size_gamma + size_delta
+
+    
     # constructs pomdp from the quotient MDP
     def get_family_pomdp(self, mdp):
         no_obs = self.pomdp.nr_observations
