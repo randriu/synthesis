@@ -22,8 +22,8 @@ class POMDPQuotientContainer(QuotientContainer):
     # TODO
     export_optimal_result = False
 
-    # if true, a posteriori unfolding will be applied
-    aposteriori_unfolding = False
+    # if True, posterior-aware unfolding will be applied
+    posterior_aware = False
 
     
     def __init__(self, pomdp, specification):
@@ -122,7 +122,7 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_states[obs] += 1
 
         # initialize POMDP manager
-        if not self.aposteriori_unfolding:
+        if not self.posterior_aware:
             self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
         else:
             self.pomdp_manager = stormpy.synthesis.PomdpManagerAposteriori(self.pomdp)
@@ -397,7 +397,7 @@ class POMDPQuotientContainer(QuotientContainer):
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
         logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
-        if not POMDPQuotientContainer.aposteriori_unfolding:
+        if not POMDPQuotientContainer.posterior_aware:
             all_holes, action_to_hole_options = self.create_coloring()
         else:
             all_holes, action_to_hole_options = self.create_coloring_aposteriori()
@@ -410,7 +410,7 @@ class POMDPQuotientContainer(QuotientContainer):
     
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
 
-        if POMDPQuotientContainer.aposteriori_unfolding:
+        if POMDPQuotientContainer.posterior_aware:
             return super().estimate_scheduler_difference(mdp,inconsistent_assignments,choice_values,expected_visits)
 
         # note: the code below is optimized for a priori unfolding

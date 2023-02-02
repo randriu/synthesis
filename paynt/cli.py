@@ -84,7 +84,7 @@ def setup_logger(log_path = None):
     help="enable incremental synthesis of FSCs for a POMDP")
 @click.option("--pomdp-memory-size", default=1, show_default=True,
     help="implicit memory size for POMDP FSCs")
-@click.option("--aposteriori-unfolding", is_flag=True, default=False,
+@click.option("--posterior-aware", is_flag=True, default=False,
     help="unfold MDP taking posterior observation of into account")
 @click.option("--fsc-export-result", is_flag=True, default=False,
     help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
@@ -132,7 +132,7 @@ def paynt(
         filetype, export,
         method,
         incomplete_search,
-        fsc_synthesis, pomdp_memory_size, aposteriori_unfolding,
+        fsc_synthesis, pomdp_memory_size, posterior_aware,
         fsc_export_result,
         storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
         use_storm_cutoffs, unfold_strategy_storm,
@@ -147,7 +147,7 @@ def paynt(
     SynthesizerCEGIS.conflict_generator_type = ce_generator
     POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
     POMDPQuotientContainer.export_optimal_result = fsc_export_result
-    POMDPQuotientContainer.aposteriori_unfolding = aposteriori_unfolding
+    POMDPQuotientContainer.posterior_aware = posterior_aware
 
     # check paths of input files
     sketch_path = os.path.join(project, sketch)
