@@ -197,7 +197,7 @@ PAYNT takes as an input a sketch -- program description in `PRISM` language cont
 
 A `PRISM` program consists of one or more reactive modules that may interact with each other using synchronisation. A module has a set of (bounded) variables that span its state space. Possible transitions between states of a module are described by a set of guarded commands of the form:
 
-```math
+```
 [action] guard -> prob_1 : update_1 + ... + prob_n : update_n; 
 ```
 
@@ -227,7 +227,7 @@ The strategy which profile to used for the particular occupy is also unknown and
 Finally, the queue capacity Q<sub>max</sub> is also unknown and thus the sketch includes in total 9 holes.
 In the sketch, the definition of the hole takes place outside of any module (typically in the beginning of the program) and must include its data type (int or double) as well as the domain:
 
-```math
+```
 // profiles desired at observation levels
 // 0 - sleep, 1 - idle, 2 - active
 hole int P1 in {0,1,2};
@@ -246,7 +246,7 @@ hole int QMAX in {1,2,3,4,5,6,7,8,9,10};
 
 The following sketch fragment describes the module for the described power manager. The modules implementing other components of the server are omitted here for brevity -- the entire sketch is available in [this file](cav21-benchmark/dpm-demo/sketch.templ).
 
-```math
+```
 module PM
     pm  :  [0..2] init 0; // 0 - sleep, 1 - idle, 2 - active
     [tick0] q <= T1*QMAX -> (pm'=P1);
@@ -265,7 +265,7 @@ The goal is to find the concrete power manager, i.e., the instantiation of the h
 In general, a specification is formalized as a list of temporal logic formulae in the [`PRISM` syntax](https://www.prismmodelchecker.org/manual/PropertySpecification/Introduction).
 Here is a specification available within the benchmark directory [here](cav21-benchmark/dpm-demo/sketch.properties):
 
-```math
+```
 R{"requests_lost"}<= 1 [ F "finished" ]
 R{"power"}min=? [ F "finished" ]
 ```
@@ -273,7 +273,7 @@ R{"power"}min=? [ F "finished" ]
 We can see that the speicification file can additionally contain at most one optimizing property.
 Furthermore, one can specify relative precision for satisfying such criterion (epsilon-optimality), e.g.
 
-```math
+```
 R{"power"}min{0.05}=? [ F "finished" ]
 ```
 
@@ -285,7 +285,7 @@ If the specification also includes an optimizing criterion, PAYNT will find hole
 
 PAYNT produces the following output containing the hole assignment and the quality wrt. the specification of the corresponding program:
 
-```math
+```
 optimal: 9100.064246
 hole assignment: P1=1,P2=2,P3=2,P4=2,T1=0.0,T3=0.8,QMAX=5
 ```
@@ -295,7 +295,7 @@ In addition, the power manager always maintains an active profile unless the req
 This solution guarantees expected number of lost requests to be at most one and has the power consumption of 9,100 units. 
 To double-check that there are no controllers having expected power consumption less than 9100, we can modify the specification file `cav21-benchmark/dpm-demo/sketch.properties` as follows:
 
-```math
+```
 R{"requests_lost"} <= 1 [ F "finished" ]
 R{"power"}<=9100 [ F "finished" ]
 ```
