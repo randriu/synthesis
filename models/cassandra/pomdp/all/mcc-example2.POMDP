@@ -1,0 +1,86 @@
+# Simple web-like example for MCC job talk
+
+# There are two type of consumers that visit your web site.  Your
+# products fall into two categories, roughly along the same lines
+# as your customers.  You have three choices to offer the visitors 
+# your web site:  show them type 1 products, type 2 products or a
+# random sampling of products.  You can view this as which products 
+# to list first, or most prominently, etc.  You can track the products 
+# they click on or show interest in to try to predict what type of 
+# person they are. The risk is that showing the wrong products to 
+# the wrong people, can cause them to leave your site.  The gain is that
+# they may buy one of your products.
+
+values: reward
+discount: 0.75
+
+states: S1 S2 SX SB
+
+actions: AN A1 A2 
+
+observations: O1 O2 OX
+
+######################################################################
+# Transition probabiities
+
+# No matter what we do, we assume that after buying they leave
+T:  * : SB : SX   1.0
+
+# We assume that both customer types are equally likely
+T:  * : SX : S1   0.5
+T:  * : SX : S2   0.5
+
+# Putting up a neutral ad list has a high prob of losing the customer
+T: AN : S1 : S1   0.69
+T: AN : S1 : SB   0.01
+T: AN : S1 : SX   0.3
+
+T: AN : S2 : S2   0.69
+T: AN : S2 : SB   0.01
+T: AN : S2 : SX   0.3
+
+# Putting up the appropriate add increases the likelihood they will
+# buy and also reduces the chance that they will stick around.
+T: A1 : S1 : S1   0.80
+T: A1 : S1 : SB   0.05
+T: A1 : S1 : SX   0.15
+
+T: A2 : S2 : S2   0.75
+T: A2 : S2 : SB   0.1
+T: A2 : S2 : SX   0.15
+
+# Putting up the wrong add is very bad: they will not buy it and are
+# likely to leave your site.
+T: A2 : S1 : S1   0.299
+T: A2 : S1 : SB   0.001
+T: A2 : S1 : SX   0.7
+
+T: A1 : S2 : S2   0.299
+T: A1 : S2 : SB   0.001
+T: A1 : S2 : SX   0.7
+
+######################################################################
+# Observation probabiities
+
+# No matter what, if you have no customer you can see it
+O: * : SX : OX   1.0
+
+# In the buy state you get no indication of their preference
+# and don't care, since you will get a reward and know on the next step
+# that you are in state SX
+O: * : SB : O1  0.5
+O: * : SB : O2  0.5
+
+# The products they show interest in are more likely to be an 
+# indication of the type of person they are
+O: * : S1 : O1  0.85
+O: * : S1 : O2  0.15
+
+O: * : S2 : O1  0.15
+O: * : S2 : O2  0.85
+
+######################################################################
+# Rewards
+
+# The only reward we get is if they buy the product
+R: * : SB : * : *  1.0

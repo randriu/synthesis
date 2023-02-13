@@ -1,0 +1,435 @@
+# This example is used in a journal version of the IP paper.
+
+# The general idea is to model the machining and inspection processes
+# for a titanium aircraft engine bulkhead.  Naturally it is a major
+# simplification.
+
+values: reward
+discount: 0.99999
+
+######################################################################
+# STATES
+#
+# The states consist of a number of components.  First of all there is
+# a distinguishing absorbing state.  The remaining 9 states are
+# comprised of two attributes, each of which takes on 3 possible
+# values. The two attributes, their values and the short-hand used to
+# give the states their mnemonic names are:
+#
+# Machined State
+#   o Slab (SLAB)
+#   o Rough Machined (ROUGH)
+#   o Final Machined (FINAL)
+#
+# Material Quality
+#   o Grade A (A)
+#   o Grade B (B)
+#   o Grade C (C)
+#
+# The material quality refers to both the presence/absence of defects
+# and the tolerances of the machined surfaces.
+#
+states:
+	SLAB-A SLAB-B SLAB-C 
+	ROUGH-A ROUGH-B ROUGH-C 
+	FINAL-A FINAL-B FINAL-C 
+	DONE
+
+######################################################################
+# ACTIONS
+#
+# The actions consist of predominantly two classes.  At each step
+# either a processing and an inspection technique is chosen.  
+#
+# Inspection
+#   o Ultrasonic for subsurface defects (UT)
+#   o Liquid penetrant for surface defects (LP)
+#   o Visual (VISUAL)
+#
+# Processes
+#   o Machine the part (MACHINE)
+#   o Paint/Anodize the part and ship it out for assembly (SHIP)
+#   o Decide that the part is not salvagable or useable (SCRAP)
+
+actions:
+	UT LP VISUAL 
+	MACHINE SHIP SCRAP
+	
+######################################################################
+# OBSERVATIONS
+#
+# The observational information can either come from the processing
+# actions or the inspection actions.  For the processing actions,
+# often one gets some information about whether some spurious event
+# might have caused the part to come under abnormal stresses (e.g.,
+# broken cutter, dropped part).  We break these down into three
+# possible outcomes:
+#
+#   o NORMAL - nothing out of the ordinary happened during processing
+#   o QUESTIONABLE - nothing particularly significant happened, but
+#                    things did not go exactly smoothly
+#   o PROBLEM - there was a definite problem that occured during 
+#               processing the part.
+#
+# For the inspection outcomes there is an outcome for each 
+# possible material quality: GRADE-A, GRADE-B and GRADE-C.
+# Grade A being nearly completely free of defects of any kind
+# while Grade B has minor defects and Grade C has fairly
+# major defects.
+#
+observations:
+	NORMAL QUESTIONABLE PROBLEM 
+	GRADE-A GRADE-B GRADE-C
+
+######################################################################
+# TRANSITIONS
+#
+
+#########################
+# Inspection Actions
+#
+# Inspection does not affect the state of the part (these are all
+# non-destructive tests).
+T: UT
+identity
+
+T: LP
+identity
+
+T: VISUAL
+identity
+
+#########################
+# MACHINE Action
+#
+# The machining process can introduce defects, either through the 
+# machining itself or from handling the part. Thus the part quality 
+# can degrade as a result of machinining.
+# There is also a chance that the machining process could remove
+# a defect, but we ignore this case.
+# Note that machining a finished machined part is a bit odd, but
+# we assume that should it be chosen it can introduce defects
+# from the material handling phase.
+
+T: MACHINE 
+#	SA	SB	SC	RA	RB	RC	FA	FB	FC	DONE
+#------------------------------------------------------
+#SA	
+	0.0	0.0	0.0	0.97	0.02	0.01	0.0	0.0	0.0	0.0
+#SB	
+	0.0	0.0	0.0	0.0	0.99	0.01	0.0	0.0	0.0	0.0
+#SC	
+	0.0	0.0	0.0	0.0	0.0	1.0	0.0	0.0	0.0	0.0
+#RA	
+	0.0	0.0	0.0	0.0	0.0	0.0	0.96	0.02	0.02	0.0
+#RB	
+	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.98	0.02	0.0
+#RC	
+	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	1.0	0.0
+#FA	
+	0.0	0.0	0.0	0.0	0.0	0.0	0.95	0.01	0.04	0.0
+#FB	
+	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.96	0.04	0.0
+#FC	
+	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	1.0	0.0
+#DONE
+	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	1.0
+
+#########################
+# SHIP Action
+# 
+# Shipping means the game is over and we proceed to the absorbing 
+# state.
+T: SHIP : * : DONE 1.0
+
+#########################
+# SCRAP Action
+#
+# Shipping means the game is over and we proceed to the absorbing 
+# state.
+T: SCRAP : * : DONE 1.0
+
+#####################################################################
+# OBSERVATIONS
+#
+#########################
+# UT Action
+#
+# Ultrasonic tests are modelled as never detecting a part to be
+# worse than it is. The predominant problem here is that the 
+# orientation of the defect can often render it imperceivable.
+#
+O: UT
+#	NORMAL	QUEST	PROBLEM	GRADE-A	GRADE-B  GRADE-C
+#--------------------------------------------------------
+#SA	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#SB	
+	0.0		0.0		0.0		0.25		0.75		0.0	
+#SC	
+	0.0		0.0		0.0		0.10		0.15		0.75	
+#RA		
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#RB	
+	0.0		0.0		0.0		0.15		0.85		0.0	
+#RC	
+	0.0		0.0		0.0		0.03		0.07		0.90	
+#FA	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#FB	
+	0.0		0.0		0.0		0.1		0.90		0.0	
+#FC	
+	0.0		0.0		0.0		0.01		0.07		0.92	
+#DONE
+	1.0		0.0		0.0		0.0		0.0		0.0	
+
+#########################
+# LP Action
+#
+# Since this liquid penetrant NDP inspection only is good for
+# surface cracks, it is most effective when the part is in the final
+# machine state.  In the slab or roughed out stages, only severe
+# cracks could be detected, since small cracks may be removed by a
+# final machining phase.
+#
+O: LP
+#	NORMAL	QUEST	PROBLEM	GRADE-A	GRADE-B  GRADE-C
+#--------------------------------------------------------
+#SA	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#SB	
+	0.0		0.0		0.0		0.99		0.01		0.0	
+#SC	
+	0.0		0.0		0.0		0.97		0.02		0.01	
+#RA		
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#RB	
+	0.0		0.0		0.0		0.95		0.05		0.0	
+#RC	
+	0.0		0.0		0.0		0.90		0.05		0.05	
+#FA	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#FB	
+	0.0		0.0		0.0		0.15		0.85		0.0	
+#FC	
+	0.0		0.0		0.0		0.05		0.10		0.85	
+#DONE
+	1.0		0.0		0.0		0.0		0.0		0.0	
+
+#########################
+# VISUAL Action
+#
+# Like the liquid penetrant inspection, this is only good for
+# surface defects and is not nerely as good.  The things you can
+# detect visually are usually of such a drastic nature, that the
+# detectabilktiy of the defect would make it immediately a CLASS-C
+# material.  Thus, a CLASS-B material is not something observed
+# visually. 
+#
+O: VISUAL
+#	NORMAL	QUEST	PROBLEM	GRADE-A	GRADE-B  GRADE-C
+#--------------------------------------------------------
+#SA	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#SB	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#SC	
+	0.0		0.0		0.0		0.8		0.0		0.2	
+#RA		
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#RB	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#RC	
+	0.0		0.0		0.0		0.5		0.0		0.5	
+#FA	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#FB	
+	0.0		0.0		0.0		1.0		0.0		0.0	
+#FC	
+	0.0		0.0		0.0		0.25		0.0		0.75	
+#DONE
+	1.0		0.0		0.0		0.0		0.0		0.0	
+
+#########################
+# MACHINE Action
+#
+# Machining the part in the rough state
+# consists of taking off a lot of material and
+# handling a part which is fairly heavy.  Thus, you would imagine that
+# the rough machining process should have a higher rate of something
+# going wrong.  However, though this is true, the final machined part
+# is much more delicate and the close tolerances makes it much more
+# suspectible to damage.  Therefore there is roughly the same
+# likelihood of something going wrong, though these are usually for
+# slightly different reasons.  We skew the probabilities a bit, since
+# something going wrong can be indicative of the part's quality
+# degrading.  This model is a little too simple and it does not
+# properly capture the coupling between something going wrong in the
+# processing stage (a transition from good to bad) with the actual
+# observation. 
+#
+O: MACHINE 
+#	NORMAL	QUEST	PROBLEM	GRADE-A	GRADE-B  GRADE-C
+#--------------------------------------------------------
+#SA	
+	0.98		0.01		0.01		0.0		0.0		0.0	
+#SB	
+	0.96		0.02		0.02		0.0		0.0		0.0	
+#SC	
+	0.9		0.05		0.05		0.0		0.0		0.0	
+#RA		
+	0.98		0.01		0.01		0.0		0.0		0.0	
+#RB	
+	0.96		0.02		0.02		0.0		0.0		0.0	
+#RC	
+	0.92		0.04		0.04		0.0		0.0		0.0	
+#FA	
+	0.98		0.01		0.01		0.0		0.0		0.0	
+#FB	
+	0.96		0.02		0.02		0.0		0.0		0.0	
+#FC	
+	0.92		0.04		0.04		0.0		0.0		0.0	
+#DONE
+	1.0		0.0		0.0		0.0		0.0		0.0	
+
+#########################
+# SHIP Action
+#
+# The observation we get for the ship action is not important,
+# so we set it to be the same for all states.
+#
+O: SHIP : * : NORMAL 1.0
+
+
+#########################
+# SCRAP Action
+#
+# The observation we get for the scrap action is not important,
+# so we set it to be the same for all states.
+#
+O: SCRAP : * : NORMAL 1.0
+
+######################################################################
+# REWARDS
+#
+# The absorbing state is zero cost, but not specifying gives it this cost.
+
+#########################
+# UT Action
+#
+# An ultrasonic test is fairly expensive. The more machining (and
+# hence surfaces) the longer it takes and the more it costs.
+#
+R: UT : SLAB-A : * : * -50
+R: UT : SLAB-B : * : * -50
+R: UT : SLAB-C : * : * -50
+
+R: UT : ROUGH-A : * : * -200
+R: UT : ROUGH-B : * : * -200
+R: UT : ROUGH-C : * : * -200
+
+R: UT : FINAL-A : * : * -350
+R: UT : FINAL-B : * : * -350
+R: UT : FINAL-C : * : * -350
+
+#########################
+# LP Action
+#
+# The liquid penetrant technique is not as expensive as the ultrasonic
+# technique, but still is not that cheap.  Its price too is a factor
+# of how complex the geometry is, which is directly tied to the amount
+# of machining that has been done on the part.  
+#
+R: LP : SLAB-A : * : * -20
+R: LP : SLAB-B : * : * -20
+R: LP : SLAB-C : * : * -20
+
+R: LP : ROUGH-A : * : * -35
+R: LP : ROUGH-B : * : * -35
+R: LP : ROUGH-C : * : * -35
+
+R: LP : FINAL-A : * : * -55
+R: LP : FINAL-B : * : * -55
+R: LP : FINAL-C : * : * -55
+
+#########################
+# VISUAL Action
+#
+R: VISUAL : SLAB-A : * : * -5
+R: VISUAL : SLAB-B : * : * -5
+R: VISUAL : SLAB-C : * : * -5
+
+R: VISUAL : ROUGH-A : * : * -10
+R: VISUAL : ROUGH-B : * : * -10
+R: VISUAL : ROUGH-C : * : * -10
+
+R: VISUAL : FINAL-A : * : * -15
+R: VISUAL : FINAL-B : * : * -15
+R: VISUAL : FINAL-C : * : * -15
+
+#########################
+# MACHINE Action
+#
+R: MACHINE : SLAB-A : * : * -5000
+R: MACHINE : SLAB-B : * : * -5000
+R: MACHINE : SLAB-C : * : * -5000
+
+R: MACHINE : ROUGH-A : * : * -15000
+R: MACHINE : ROUGH-B : * : * -15000
+R: MACHINE : ROUGH-C : * : * -15000
+
+R: MACHINE : FINAL-A : * : * -15000
+R: MACHINE : FINAL-B : * : * -15000
+R: MACHINE : FINAL-C : * : * -15000
+
+#########################
+# SHIP Action
+#
+# We assume a material cost of $10,000 is factored into the price of
+# the part, so this number reflects the price minus that material
+# cost. 
+
+# A slab of any condition is immediately reckognizable as not
+# acceptable, so this will cost the company the material cost.
+# Although you could argue that they can still machine the slab, so
+# the cost is too much, I would think that the company's credibility
+# would suffer more than this loss for trying to ship unmachined
+# parts. Because this is not something that we
+#
+R: SHIP : SLAB-A : * : * -15000
+R: SHIP : SLAB-B : * : * -15000
+R: SHIP : SLAB-C : * : * -15000
+
+# A rough machined part is no better than a slab to the customer.
+R: SHIP : ROUGH-A : * : * -15000
+R: SHIP : ROUGH-B : * : * -15000
+R: SHIP : ROUGH-C : * : * -15000
+
+# This is the tricky part.  The buyer has no way of knowing what the
+# condition of the part is without inspecting it themselves.  We
+# assume that shipping a sub-standard part is very, very constly to
+# the company.  Either the buyer detects this and the reputation is
+# marred or worse yet, the part fails in service and results in a big
+# scandal and loss of future revenues.  We assume that shipping a
+# class B part is not as bad as shipping a class C part.
+R: SHIP : FINAL-A : * : * 45000
+R: SHIP : FINAL-B : * : * -50000
+R: SHIP : FINAL-C : * : * -100000
+
+#########################
+# SCRAP Action
+#
+# Scapping the part causes you to lose the material costs.  Any extra
+# costs from processing will have already been accounted for.
+#
+R: SCRAP : SLAB-A : * : * -10000
+R: SCRAP : SLAB-B : * : * -10000
+R: SCRAP : SLAB-C : * : * -10000
+
+R: SCRAP : ROUGH-A : * : * -10000
+R: SCRAP : ROUGH-B : * : * -10000
+R: SCRAP : ROUGH-C : * : * -10000
+
+R: SCRAP : FINAL-A : * : * -10000
+R: SCRAP : FINAL-B : * : * -10000
+R: SCRAP : FINAL-C : * : * -10000

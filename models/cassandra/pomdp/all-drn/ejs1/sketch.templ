@@ -1,0 +1,116 @@
+// Exported by storm
+// Original model type: POMDP
+@type: POMDP
+@parameters
+
+@reward_models
+reward 
+@nr_states
+9
+@nr_choices
+33
+@model
+state 0 {2} [0] init
+	action (init) [0]
+		1 : 0.3333333333
+		2 : 0.3333333333
+		3 : 0.3333333333
+state 1 {3} [0]
+	action (Manufacture) [0.9025]
+		4 : 0.01
+		6 : 0.81
+		7 : 0.18
+	action (Examine) [0.6525]
+		4 : 0.0025
+		5 : 0.0075
+		6 : 0.81
+		7 : 0.09
+		8 : 0.09
+	action (Inspect) [-0.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 2 {3} [0]
+	action (Manufacture) [0.475]
+		4 : 0.1
+		7 : 0.9
+	action (Examine) [0.225]
+		4 : 0.025
+		5 : 0.075
+		7 : 0.45
+		8 : 0.45
+	action (Inspect) [-1.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 3 {3} [0]
+	action (Manufacture) [0.25]
+		4 : 1
+	action (Examine) [0]
+		4 : 0.25
+		5 : 0.75
+	action (Inspect) [-2.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 4 {0} [0]
+	action (Manufacture) [0.25]
+		4 : 1
+	action (Examine) [0]
+		4 : 0.25
+		5 : 0.75
+	action (Inspect) [-2.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 5 {1} [0]
+	action (Manufacture) [0.25]
+		4 : 1
+	action (Examine) [0]
+		4 : 0.25
+		5 : 0.75
+	action (Inspect) [-2.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 6 {0} [0]
+	action (Manufacture) [0.9025]
+		4 : 0.01
+		6 : 0.81
+		7 : 0.18
+	action (Examine) [0.6525]
+		4 : 0.0025
+		5 : 0.0075
+		6 : 0.81
+		7 : 0.09
+		8 : 0.09
+	action (Inspect) [-0.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 7 {0} [0]
+	action (Manufacture) [0.475]
+		4 : 0.1
+		7 : 0.9
+	action (Examine) [0.225]
+		4 : 0.025
+		5 : 0.075
+		7 : 0.45
+		8 : 0.45
+	action (Inspect) [-1.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1
+state 8 {1} [0]
+	action (Manufacture) [0.475]
+		4 : 0.1
+		7 : 0.9
+	action (Examine) [0.225]
+		4 : 0.025
+		5 : 0.075
+		7 : 0.45
+		8 : 0.45
+	action (Inspect) [-1.5]
+		6 : 1
+	action (Replace) [-2]
+		6 : 1

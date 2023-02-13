@@ -1,0 +1,77 @@
+# This is a problem proposed by Tom Dean about a robot that can
+# mark its environment.
+
+discount: 0.87
+values: reward
+states: RoboA-TokA-Empty RoboA-TokA-Hold RoboA-TokB-Empty
+	RoboB-TokB-Empty RoboB-TokB-Hold RoboB-TokA-Empty
+	RoboGold-TokA-Empty RoboGold-TokB-Empty RoboGold-Hold
+actions: move-loc pickup-tok drop-tok go-for-gold
+observations: Tok NoTok Gold
+
+##### Transition Probabilities
+##### T : action : start-state : end-state probability
+
+T: move-loc : RoboA-TokA-Empty : RoboB-TokA-Empty  1.0
+T: move-loc : RoboA-TokA-Hold  : RoboB-TokB-Hold   1.0
+T: move-loc : RoboA-TokB-Empty : RoboB-TokB-Empty  1.0
+T: move-loc : RoboB-TokB-Empty : RoboA-TokB-Empty  1.0
+T: move-loc : RoboB-TokB-Hold  : RoboA-TokA-Hold   1.0
+T: move-loc : RoboB-TokA-Empty : RoboA-TokA-Empty  1.0
+
+T: pickup-tok : RoboA-TokA-Empty : RoboA-TokA-Hold  1.0
+T: pickup-tok : RoboA-TokA-Hold  : RoboA-TokA-Hold  1.0
+T: pickup-tok : RoboA-TokB-Empty : RoboA-TokB-Empty 1.0
+T: pickup-tok : RoboB-TokB-Empty : RoboB-TokB-Hold  1.0
+T: pickup-tok : RoboB-TokB-Hold  : RoboB-TokB-Hold  1.0
+T: pickup-tok : RoboB-TokA-Empty : RoboB-TokA-Empty 1.0
+
+T: drop-tok : RoboA-TokA-Empty : RoboA-TokA-Empty 1.0
+T: drop-tok : RoboA-TokA-Hold  : RoboA-TokA-Empty 1.0
+T: drop-tok : RoboA-TokB-Empty : RoboA-TokB-Empty 1.0
+T: drop-tok : RoboB-TokB-Empty : RoboB-TokB-Empty 1.0
+T: drop-tok : RoboB-TokB-Hold  : RoboB-TokB-Empty 1.0
+T: drop-tok : RoboB-TokA-Empty : RoboB-TokA-Empty 1.0
+
+T: go-for-gold : RoboA-TokA-Empty : RoboGold-TokA-Empty  1.0
+T: go-for-gold : RoboA-TokA-Hold  : RoboGold-Hold   1.0
+T: go-for-gold : RoboA-TokB-Empty : RoboGold-TokB-Empty  1.0
+
+T: go-for-gold : RoboB-TokB-Empty : RoboA-TokB-Empty  0.5
+T: go-for-gold : RoboB-TokB-Empty : RoboB-TokB-Empty  0.5
+
+T: go-for-gold : RoboB-TokB-Hold  : RoboA-TokA-Hold   0.5
+T: go-for-gold : RoboB-TokB-Hold  : RoboB-TokB-Hold   0.5
+
+T: go-for-gold : RoboB-TokA-Empty : RoboA-TokA-Empty  0.5
+T: go-for-gold : RoboB-TokA-Empty : RoboB-TokA-Empty  0.5
+
+T : * : RoboGold-TokA-Empty : RoboA-TokA-Empty  0.5
+T : * : RoboGold-TokA-Empty : RoboB-TokA-Empty  0.5
+T : * : RoboGold-TokB-Empty : RoboA-TokB-Empty  0.5
+T : * : RoboGold-TokB-Empty : RoboB-TokB-Empty  0.5
+T : * : RoboGold-Hold       : RoboA-TokA-Hold   0.5
+T : * : RoboGold-Hold       : RoboB-TokB-Hold   0.5
+
+###### Observation Probabilities
+###### O : action : end-state : observation probability
+
+O : * : RoboA-TokA-Empty : Tok    1.0
+O : * : RoboA-TokA-Hold  : Tok    1.0
+O : * : RoboA-TokB-Empty : NoTok  1.0
+O : * : RoboB-TokB-Empty : Tok    1.0
+O : * : RoboB-TokB-Hold  : Tok    1.0
+O : * : RoboB-TokA-Empty : NoTok  1.0
+
+O : * : RoboGold-TokA-Empty : Gold  1.0
+O : * : RoboGold-Hold       : Gold  1.0
+O : * : RoboGold-TokB-Empty : Gold  1.0
+
+##### Rewards
+##### R : action : start-state : end-state : observation reward
+##### Actually get the gold upon moving out of the gold state,
+##### though you actually see the gold as you move into it.
+
+R : * : RoboGold-TokA-Empty : * : * 1.0
+R : * : RoboGold-TokB-Empty : * : * 1.0
+R : * : RoboGold-Hold : * : * 1.0

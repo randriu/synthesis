@@ -1,0 +1,115 @@
+# Simple example based upon the WWW
+
+# Scenario: You have a web site which offers a range of products and
+# you want to tailor the products offered or advertised to the type of
+# person that is visiting your site.  You do not want to interfere
+# with their browsing, so the only clues to their personality are the
+# products they seem to be interested in.
+
+values: reward
+discount: 0.95
+
+states:
+
+S1 # person is type 1
+S2 # person is type 2
+SN # person is somewhere in between the two types
+SX # nobody connected
+
+actions:
+
+A1 # advertise type 1 products
+A2 # advertise type 2 products
+AN # advertise neutral products
+
+observations:
+
+O1 # page selected is type 1
+O2 # page selected is type 2
+ON # page selected is type 3
+OB # person buys a product
+OX # person leaves the site
+
+# Start state
+start include: SX
+
+######################################################################
+# State transitions
+
+# If no one is at the web site, then the next person to visit is
+# equally likely to be of a certain type
+T: * : SX : S1 0.3333333333333
+T: * : SX : S2 0.3333333333333
+T: * : SX : SN 0.3333333333333
+
+# S1: If you advertise products of interest then they are more likely 
+# to stay than if you advertise uninteresting products.
+T: A1 : S1 : S1   0.80
+T: A1 : S1 : SX   0.2
+
+T: A2 : S1 : S1   0.5
+T: A2 : S1 : SX   0.5
+
+T: AN : S1 : S1   0.66666667
+T: AN : S1 : SX   0.33333333
+
+# S2: If you advertise products of interest then they are more likely 
+# to stay than if you advertise uninteresting products.
+T: A1 : S2 : S2   0.5
+T: A1 : S2 : SX   0.5
+
+T: A2 : S2 : S2   0.80
+T: A2 : S2 : SX   0.2
+
+T: AN : S2 : S2   0.66666667
+T: AN : S2 : SX   0.33333333
+
+# SN: 
+T: A1 : SN : SN   0.5
+T: A1 : SN : SX   0.5
+
+T: A2 : SN : SN   0.5
+T: A2 : SN : SX   0.5
+
+T: AN : SN : SN   0.75
+T: AN : SN : SX   0.25
+
+
+######################################################################
+# Observation probabilities
+
+# Deterministic observation of a disconnection
+O: * : SX : OX   1.0
+
+# S1: More likely to look at products in their own interest
+O: * : S1 : O1   0.65
+O: * : S1 : O2   0.1
+O: * : S1 : ON   0.2
+
+# S1: They'll buy a product with some probability, so the longer you
+# keep them at the site, the more chance there is they will buy.
+O: * : S1 : OB   0.05
+
+# S2: More likely to look at products in their own interest
+O: * : S2 : O1   0.1
+O: * : S2 : O2   0.65
+O: * : S2 : ON   0.2
+
+# S1: They'll buy a product with some probability, so the longer you
+# keep them at the site, the more chance there is they will buy.
+O: * : S2 : OB   0.05
+
+# SN: More likely to look at products in their own interest
+O: * : SN : O1   0.2
+O: * : SN : O2   0.2
+O: * : SN : ON   0.55
+
+# SN: They'll buy a product with some probability, so the longer you
+# keep them at the site, the more chance there is they will buy.
+O: * : SN : OB   0.05
+
+######################################################################
+# Rewards
+
+R: * : * : * : OB  1.0
+

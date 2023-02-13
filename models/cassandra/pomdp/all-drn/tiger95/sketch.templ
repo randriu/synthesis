@@ -1,0 +1,121 @@
+// Exported by storm
+// Original model type: POMDP
+@type: POMDP
+@parameters
+
+@reward_models
+reward 
+@nr_states
+8
+@nr_choices
+20
+@model
+state 0 {2} [0] init
+	action (init) [0]
+		1 : 0.5
+		2 : 0.5
+state 1 {3} [0]
+	action (listen) [-1]
+		5 : 0.8075
+		6 : 0.1425
+		7 : 0.05
+	action (open-left) [-100]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+	action (open-right) [10]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+state 2 {3} [0]
+	action (listen) [-1]
+		3 : 0.1425
+		4 : 0.8075
+		7 : 0.05
+	action (open-left) [10]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+	action (open-right) [-100]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+state 3 {0} [0]
+	action (listen) [-1]
+		3 : 0.1425
+		4 : 0.8075
+		7 : 0.05
+	action (open-left) [10]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+	action (open-right) [-100]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+state 4 {1} [0]
+	action (listen) [-1]
+		3 : 0.1425
+		4 : 0.8075
+		7 : 0.05
+	action (open-left) [10]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+	action (open-right) [-100]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+state 5 {0} [0]
+	action (listen) [-1]
+		5 : 0.8075
+		6 : 0.1425
+		7 : 0.05
+	action (open-left) [-100]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+	action (open-right) [10]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+state 6 {1} [0]
+	action (listen) [-1]
+		5 : 0.8075
+		6 : 0.1425
+		7 : 0.05
+	action (open-left) [-100]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+	action (open-right) [10]
+		3 : 0.2375
+		4 : 0.2375
+		5 : 0.2375
+		6 : 0.2375
+		7 : 0.05
+state 7 {4} [0] discount_sink
+	action (discount_sink) [0]
+		7 : 1
