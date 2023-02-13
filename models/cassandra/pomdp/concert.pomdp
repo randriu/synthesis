@@ -1,7 +1,7 @@
 # Inspired by Sondik's infinite-horizon paper
 #
 
-discount: 0.95
+discount: 1
 values: reward
 states: interested bored
 actions: tv radio nothing
