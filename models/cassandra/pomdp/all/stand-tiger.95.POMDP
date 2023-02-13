@@ -1,0 +1,70 @@
+# stand-tiger.POMDP
+
+# This problem is similar to the tiger.aaai.POMDP problem except you
+# start off sitting down and prior to opening a door you must stand up.
+# You can only listen while you are sitting, so once you stand up
+# you will not be able to gain any more information concerning
+# the tiger's whereabouts. Whether you are standing or sitting is
+# completely observable.
+ 
+discount: 0.95
+values: reward
+states: TL-sitting TR-sitting TL-standing TR-standing
+actions: listen open-left open-right stand-up
+observations: tiger-left-sit tiger-right-sit tiger-left-stand tiger-right-stand
+ 
+T: listen
+identity
+ 
+T: open-left
+1.0 0.0 0.0 0.0
+0.0 1.0 0.0 0.0
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+ 
+T: open-right
+1.0 0.0 0.0 0.0
+0.0 1.0 0.0 0.0
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+ 
+T: stand-up
+0.0 0.0 1.0 0.0
+0.0 0.0 0.0 1.0
+0.0 0.0 1.0 0.0
+0.0 0.0 0.0 1.0
+ 
+O: listen
+0.8 0.2 0.0 0.0
+0.2 0.8 0.0 0.0
+0.0 0.0 0.5 0.5
+0.0 0.0 0.5 0.5
+ 
+O: open-left
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+ 
+O: open-right
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+0.5 0.5 0.0 0.0
+ 
+O: stand-up
+0.0 0.0 0.5 0.5
+0.0 0.0 0.5 0.5
+0.0 0.0 0.5 0.5
+0.0 0.0 0.5 0.5
+ 
+R: listen : TL-sitting : * : * -1.0
+R: listen : TR-sitting : * : * -1.0
+
+R: open-left : TL-standing : * : * -100.0
+R: open-left : TR-standing : * : * 30.0
+ 
+R: open-right : TL-standing : * : * 30.0
+R: open-right : TR-standing : * : * -100.0
+ 
+ 

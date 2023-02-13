@@ -1,0 +1,351 @@
+# POMDP file for single target aircraft identification.
+#
+# Automatically generated from the script saci.perl.
+#
+# states = 12
+# actions = 6
+# observations = 5
+
+discount: 0.95
+values: reward
+
+states:
+ friend-0 friend-1 friend-2 friend-3 friend-4 enemy-0 enemy-1 enemy-2 enemy-3 enemy-4 clear destroyed
+
+actions:
+ decl-friend decl-enemy act-0 act-1 pass-0 pass-1 
+
+observations:
+ act-obs-0 act-obs-1 pass-obs-0 pass-obs-1 destroyed-obs
+
+# Clear state transition
+T: * : clear
+0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0909090909090909 0.0
+
+# Destroyed state transition
+T: * : destroyed : destroyed 1.0
+
+#########################
+# Declare friendly action
+
+# If friendly
+T: decl-friend : friend-0 : clear 1.0
+T: decl-friend : friend-1 : clear 1.0
+T: decl-friend : friend-2 : clear 1.0
+T: decl-friend : friend-3 : clear 1.0
+T: decl-friend : friend-4 : clear 1.0
+
+# If enemy
+T: decl-friend : enemy-0 : destroyed 0.9
+T: decl-friend : enemy-0 : clear 0.1
+T: decl-friend : enemy-1 : destroyed 0.9
+T: decl-friend : enemy-1 : clear 0.1
+T: decl-friend : enemy-2 : destroyed 0.9
+T: decl-friend : enemy-2 : clear 0.1
+T: decl-friend : enemy-3 : destroyed 0.9
+T: decl-friend : enemy-3 : clear 0.1
+T: decl-friend : enemy-4 : destroyed 0.9
+T: decl-friend : enemy-4 : clear 0.1
+
+#########################
+# Declare enemy action
+
+# If friendly
+T: decl-enemy : friend-0 : clear 1.0
+T: decl-enemy : friend-1 : clear 1.0
+T: decl-enemy : friend-2 : clear 1.0
+T: decl-enemy : friend-3 : clear 1.0
+T: decl-enemy : friend-4 : clear 1.0
+
+# If enemy
+T: decl-enemy : enemy-0 : destroyed 0.01
+T: decl-enemy : enemy-0 : clear 0.99
+T: decl-enemy : enemy-1 : destroyed 0.01
+T: decl-enemy : enemy-1 : clear 0.99
+T: decl-enemy : enemy-2 : destroyed 0.01
+T: decl-enemy : enemy-2 : clear 0.99
+T: decl-enemy : enemy-3 : destroyed 0.01
+T: decl-enemy : enemy-3 : clear 0.99
+T: decl-enemy : enemy-4 : destroyed 0.01
+T: decl-enemy : enemy-4 : clear 0.99
+
+# act sensor action transitions
+T: act-0 : friend-0 : friend-0 0.04
+T: act-0 : friend-0 : clear 0.96
+T: act-0 : friend-1 : friend-1 0.04
+T: act-0 : friend-1 : clear 0.06
+T: act-0 : friend-1 : friend-0 0.9
+T: act-0 : friend-2 : friend-2 0.04
+T: act-0 : friend-2 : friend-1 0.9
+T: act-0 : friend-2 : friend-0 0.06
+T: act-0 : friend-3 : friend-3 0.04
+T: act-0 : friend-3 : friend-2 0.9
+T: act-0 : friend-3 : friend-1 0.06
+T: act-0 : friend-4 : friend-4 0.04
+T: act-0 : friend-4 : friend-3 0.9
+T: act-0 : friend-4 : friend-2 0.06
+T: act-0 : enemy-0 : destroyed 0.9
+T: act-0 : enemy-0 : enemy-0 0.004
+T: act-0 : enemy-0 : clear 0.096
+T: act-0 : enemy-1 : destroyed 0.6875
+T: act-0 : enemy-1 : enemy-1 0.0125
+T: act-0 : enemy-1 : clear 0.01875
+T: act-0 : enemy-1 : enemy-0 0.28125
+T: act-0 : enemy-2 : destroyed 0.475
+T: act-0 : enemy-2 : enemy-2 0.021
+T: act-0 : enemy-2 : enemy-1 0.4725
+T: act-0 : enemy-2 : enemy-0 0.0315
+T: act-0 : enemy-3 : destroyed 0.2625
+T: act-0 : enemy-3 : enemy-3 0.0295
+T: act-0 : enemy-3 : enemy-2 0.66375
+T: act-0 : enemy-3 : enemy-1 0.04425
+T: act-0 : enemy-4 : destroyed 0.05
+T: act-0 : enemy-4 : enemy-4 0.038
+T: act-0 : enemy-4 : enemy-3 0.855
+T: act-0 : enemy-4 : enemy-2 0.057
+T: act-1 : friend-0 : friend-0 0.04
+T: act-1 : friend-0 : clear 0.96
+T: act-1 : friend-1 : friend-1 0.04
+T: act-1 : friend-1 : clear 0.06
+T: act-1 : friend-1 : friend-0 0.9
+T: act-1 : friend-2 : friend-2 0.04
+T: act-1 : friend-2 : friend-1 0.9
+T: act-1 : friend-2 : friend-0 0.06
+T: act-1 : friend-3 : friend-3 0.04
+T: act-1 : friend-3 : friend-2 0.9
+T: act-1 : friend-3 : friend-1 0.06
+T: act-1 : friend-4 : friend-4 0.04
+T: act-1 : friend-4 : friend-3 0.9
+T: act-1 : friend-4 : friend-2 0.06
+T: act-1 : enemy-0 : destroyed 0.36
+T: act-1 : enemy-0 : enemy-0 0.0256
+T: act-1 : enemy-0 : clear 0.6144
+T: act-1 : enemy-1 : destroyed 0.275
+T: act-1 : enemy-1 : enemy-1 0.029
+T: act-1 : enemy-1 : clear 0.0435
+T: act-1 : enemy-1 : enemy-0 0.6525
+T: act-1 : enemy-2 : destroyed 0.19
+T: act-1 : enemy-2 : enemy-2 0.0324
+T: act-1 : enemy-2 : enemy-1 0.729
+T: act-1 : enemy-2 : enemy-0 0.0486
+T: act-1 : enemy-3 : destroyed 0.105
+T: act-1 : enemy-3 : enemy-3 0.0358
+T: act-1 : enemy-3 : enemy-2 0.8055
+T: act-1 : enemy-3 : enemy-1 0.0537
+T: act-1 : enemy-4 : destroyed 0.02
+T: act-1 : enemy-4 : enemy-4 0.0392
+T: act-1 : enemy-4 : enemy-3 0.882
+T: act-1 : enemy-4 : enemy-2 0.0588
+
+# pass sensor action transitions
+T: pass-0 : friend-0 : friend-0 0.04
+T: pass-0 : friend-0 : clear 0.96
+T: pass-0 : friend-1 : friend-1 0.04
+T: pass-0 : friend-1 : clear 0.06
+T: pass-0 : friend-1 : friend-0 0.9
+T: pass-0 : friend-2 : friend-2 0.04
+T: pass-0 : friend-2 : friend-1 0.9
+T: pass-0 : friend-2 : friend-0 0.06
+T: pass-0 : friend-3 : friend-3 0.04
+T: pass-0 : friend-3 : friend-2 0.9
+T: pass-0 : friend-3 : friend-1 0.06
+T: pass-0 : friend-4 : friend-4 0.04
+T: pass-0 : friend-4 : friend-3 0.9
+T: pass-0 : friend-4 : friend-2 0.06
+T: pass-0 : enemy-0 : destroyed 0.315
+T: pass-0 : enemy-0 : enemy-0 0.0274
+T: pass-0 : enemy-0 : clear 0.6576
+T: pass-0 : enemy-1 : destroyed 0.240625
+T: pass-0 : enemy-1 : enemy-1 0.030375
+T: pass-0 : enemy-1 : clear 0.0455625
+T: pass-0 : enemy-1 : enemy-0 0.6834375
+T: pass-0 : enemy-2 : destroyed 0.16625
+T: pass-0 : enemy-2 : enemy-2 0.03335
+T: pass-0 : enemy-2 : enemy-1 0.750375
+T: pass-0 : enemy-2 : enemy-0 0.050025
+T: pass-0 : enemy-3 : destroyed 0.091875
+T: pass-0 : enemy-3 : enemy-3 0.036325
+T: pass-0 : enemy-3 : enemy-2 0.8173125
+T: pass-0 : enemy-3 : enemy-1 0.0544875
+T: pass-0 : enemy-4 : destroyed 0.0175
+T: pass-0 : enemy-4 : enemy-4 0.0393
+T: pass-0 : enemy-4 : enemy-3 0.88425
+T: pass-0 : enemy-4 : enemy-2 0.05895
+T: pass-1 : friend-0 : friend-0 0.04
+T: pass-1 : friend-0 : clear 0.96
+T: pass-1 : friend-1 : friend-1 0.04
+T: pass-1 : friend-1 : clear 0.06
+T: pass-1 : friend-1 : friend-0 0.9
+T: pass-1 : friend-2 : friend-2 0.04
+T: pass-1 : friend-2 : friend-1 0.9
+T: pass-1 : friend-2 : friend-0 0.06
+T: pass-1 : friend-3 : friend-3 0.04
+T: pass-1 : friend-3 : friend-2 0.9
+T: pass-1 : friend-3 : friend-1 0.06
+T: pass-1 : friend-4 : friend-4 0.04
+T: pass-1 : friend-4 : friend-3 0.9
+T: pass-1 : friend-4 : friend-2 0.06
+T: pass-1 : enemy-0 : destroyed 0.126
+T: pass-1 : enemy-0 : enemy-0 0.03496
+T: pass-1 : enemy-0 : clear 0.83904
+T: pass-1 : enemy-1 : destroyed 0.09625
+T: pass-1 : enemy-1 : enemy-1 0.03615
+T: pass-1 : enemy-1 : clear 0.054225
+T: pass-1 : enemy-1 : enemy-0 0.813375
+T: pass-1 : enemy-2 : destroyed 0.0665
+T: pass-1 : enemy-2 : enemy-2 0.03734
+T: pass-1 : enemy-2 : enemy-1 0.84015
+T: pass-1 : enemy-2 : enemy-0 0.05601
+T: pass-1 : enemy-3 : destroyed 0.03675
+T: pass-1 : enemy-3 : enemy-3 0.03853
+T: pass-1 : enemy-3 : enemy-2 0.866925
+T: pass-1 : enemy-3 : enemy-1 0.057795
+T: pass-1 : enemy-4 : destroyed 0.007
+T: pass-1 : enemy-4 : enemy-4 0.03972
+T: pass-1 : enemy-4 : enemy-3 0.8937
+T: pass-1 : enemy-4 : enemy-2 0.05958
+
+# Declaration action observation probabilities
+O: decl-friend : friend-0
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-friend : friend-1
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-friend : friend-2
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-friend : friend-3
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-friend : friend-4
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-friend : enemy-0
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-friend : enemy-1
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-friend : enemy-2
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-friend : enemy-3
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-friend : enemy-4
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-enemy : friend-0
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-enemy : friend-1
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-enemy : friend-2
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-enemy : friend-3
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-enemy : friend-4
+ 0.0 1.0 0.0 0.0 0.0
+O: decl-enemy : enemy-0
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-enemy : enemy-1
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-enemy : enemy-2
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-enemy : enemy-3
+ 1.0 0.0 0.0 0.0 0.0
+O: decl-enemy : enemy-4
+ 1.0 0.0 0.0 0.0 0.0
+
+# act sensor observation probabilities
+O: act-0 : friend-0
+ 0.05 0.95 0.0 0.0 0.0
+O: act-0 : friend-1
+ 0.12875 0.87125 0.0 0.0 0.0
+O: act-0 : friend-2
+ 0.2075 0.7925 0.0 0.0 0.0
+O: act-0 : friend-3
+ 0.28625 0.71375 0.0 0.0 0.0
+O: act-0 : friend-4
+ 0.365 0.635 0.0 0.0 0.0
+O: act-0 : enemy-0
+ 0.95 0.05 0.0 0.0 0.0
+O: act-0 : enemy-1
+ 0.87125 0.12875 0.0 0.0 0.0
+O: act-0 : enemy-2
+ 0.7925 0.2075 0.0 0.0 0.0
+O: act-0 : enemy-3
+ 0.71375 0.28625 0.0 0.0 0.0
+O: act-0 : enemy-4
+ 0.635 0.365 0.0 0.0 0.0
+O: act-1 : friend-0
+ 0.1 0.9 0.0 0.0 0.0
+O: act-1 : friend-1
+ 0.17 0.83 0.0 0.0 0.0
+O: act-1 : friend-2
+ 0.24 0.76 0.0 0.0 0.0
+O: act-1 : friend-3
+ 0.31 0.69 0.0 0.0 0.0
+O: act-1 : friend-4
+ 0.38 0.62 0.0 0.0 0.0
+O: act-1 : enemy-0
+ 0.9 0.1 0.0 0.0 0.0
+O: act-1 : enemy-1
+ 0.83 0.17 0.0 0.0 0.0
+O: act-1 : enemy-2
+ 0.76 0.24 0.0 0.0 0.0
+O: act-1 : enemy-3
+ 0.69 0.31 0.0 0.0 0.0
+O: act-1 : enemy-4
+ 0.62 0.38 0.0 0.0 0.0
+
+# pass sensor observation probabilities
+O: pass-0 : friend-0
+ 0.0 0.0 0.125 0.875 0.0
+O: pass-0 : friend-1
+ 0.0 0.0 0.2 0.8 0.0
+O: pass-0 : friend-2
+ 0.0 0.0 0.275 0.725 0.0
+O: pass-0 : friend-3
+ 0.0 0.0 0.35 0.65 0.0
+O: pass-0 : friend-4
+ 0.0 0.0 0.425 0.575 0.0
+O: pass-0 : enemy-0
+ 0.0 0.0 0.875 0.125 0.0
+O: pass-0 : enemy-1
+ 0.0 0.0 0.8 0.2 0.0
+O: pass-0 : enemy-2
+ 0.0 0.0 0.725 0.275 0.0
+O: pass-0 : enemy-3
+ 0.0 0.0 0.65 0.35 0.0
+O: pass-0 : enemy-4
+ 0.0 0.0 0.575 0.425 0.0
+O: pass-1 : friend-0
+ 0.0 0.0 0.25 0.75 0.0
+O: pass-1 : friend-1
+ 0.0 0.0 0.3 0.7 0.0
+O: pass-1 : friend-2
+ 0.0 0.0 0.35 0.65 0.0
+O: pass-1 : friend-3
+ 0.0 0.0 0.4 0.6 0.0
+O: pass-1 : friend-4
+ 0.0 0.0 0.45 0.55 0.0
+O: pass-1 : enemy-0
+ 0.0 0.0 0.75 0.25 0.0
+O: pass-1 : enemy-1
+ 0.0 0.0 0.7 0.3 0.0
+O: pass-1 : enemy-2
+ 0.0 0.0 0.65 0.35 0.0
+O: pass-1 : enemy-3
+ 0.0 0.0 0.6 0.4 0.0
+O: pass-1 : enemy-4
+ 0.0 0.0 0.55 0.45 0.0
+
+# Observations for special states
+O: * : clear
+ 0.25 0.25 0.25 0.25 0.0
+O: * : destroyed : destroyed-obs 1.0
+
+# Rewards
+R: decl-enemy : enemy-0 : * : * 5
+R: decl-enemy : enemy-1 : * : * 5
+R: decl-enemy : enemy-2 : * : * 5
+R: decl-enemy : enemy-3 : * : * 5
+R: decl-enemy : enemy-4 : * : * 5
+R: decl-enemy : friend-0 : * : * -5
+R: decl-enemy : friend-1 : * : * -5
+R: decl-enemy : friend-2 : * : * -5
+R: decl-enemy : friend-3 : * : * -5
+R: decl-enemy : friend-4 : * : * -5
+R: * : * : destroyed : * -100
+R: * : destroyed : destroyed : * 0.0

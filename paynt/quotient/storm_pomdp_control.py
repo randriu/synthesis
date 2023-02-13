@@ -30,6 +30,10 @@ class StormPOMDPControl:
     result_dict_paynt = {}
     memory_vector = {}
 
+    # controller sizes
+    belief_controller_size = None
+    paynt_fsc_size = None
+
     is_storm_better = False
 
     pomdp = None                    # The original POMDP model
@@ -73,7 +77,7 @@ class StormPOMDPControl:
         elif self.storm_options == "clip4":
             options = self.get_clip4_options()
         elif self.storm_options == "small":
-            options = self.get_cutoff_options(1000)
+            options = self.get_cutoff_options(100)
         elif self.storm_options == "2mil":
             options = self.get_cutoff_options(2000000)
         elif self.storm_options == "5mil":
@@ -107,6 +111,8 @@ class StormPOMDPControl:
             print(result.induced_mc_from_scheduler)
             print(result.lower_bound)
             print(result.upper_bound)
+            # TODO not important for the paper but it would be nice to have correct FSC here as well
+            print(self.get_belief_controller_size(result, self.paynt_fsc_size))
             exit()
 
         # debug
@@ -118,6 +124,10 @@ class StormPOMDPControl:
         #    print(sc)
 
         self.latest_storm_result = result
+        if self.quotient.specification.optimality.minimizing:
+            self.storm_bounds = self.latest_storm_result.upper_bound
+        else:
+            self.storm_bounds = self.latest_storm_result.lower_bound
 
 
     def interactive_storm_setup(self):
@@ -167,6 +177,10 @@ class StormPOMDPControl:
             #    print(sc)
 
             self.latest_storm_result = result
+            if self.quotient.specification.optimality.minimizing:
+                self.storm_bounds = self.latest_storm_result.upper_bound
+            else:
+                self.storm_bounds = self.latest_storm_result.lower_bound
             self.parse_results(self.quotient)
             self.update_data()
 
@@ -184,6 +198,8 @@ class StormPOMDPControl:
             belmc.continue_unfolding()
 
         while not belmc.is_exploring():
+            if belmc.has_converged():
+                break
             sleep(1)
 
         sleep(storm_timeout)
@@ -206,6 +222,10 @@ class StormPOMDPControl:
         #    print(sc)
 
         self.latest_storm_result = result
+        if self.quotient.specification.optimality.minimizing:
+            self.storm_bounds = self.latest_storm_result.upper_bound
+        else:
+            self.storm_bounds = self.latest_storm_result.lower_bound
         self.parse_results(self.quotient)
         self.update_data()
 
@@ -222,7 +242,7 @@ class StormPOMDPControl:
         options.use_grid_clipping = False
         return options
 
-    def get_overapp_options(self, belief_states=1000000):
+    def get_overapp_options(self, belief_states=20000000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
         options.use_explicit_cutoff = True
         options.size_threshold_init = belief_states
@@ -450,11 +470,6 @@ class StormPOMDPControl:
 
             if len(result_no_cutoffs[obs]) == 0:
                 del result_no_cutoffs[obs]
-
-        if quotient.specification.optimality.minimizing:
-            self.storm_bounds = self.latest_storm_result.upper_bound
-        else:
-            self.storm_bounds = self.latest_storm_result.lower_bound
 
         #logger.info("Result dictionary is based on result from Storm")
         self.result_dict = result    
@@ -778,6 +793,63 @@ class StormPOMDPControl:
                     self.memory_vector[obs] = len(self.result_dict[obs])
                 else:
                     self.memory_vector[obs] = 1
-                    
+    
+    # Computes the size of the controller for belief MC
+    # if it uses FSC cutoffs assignment should be provided
+    # FORMULA: E + 2*T + size(Fc)
+    # E - number of non-frontier states (non cutoff states)
+    # T - number of transitions
+    # Fc - used cut-off schedulers
+    def get_belief_controller_size(self, storm_result, paynt_fsc_size=None):
+
+        belief_mc = storm_result.induced_mc_from_scheduler
+
+        non_frontier_states = 0
+        uses_fsc = False
+        used_randomized_schedulers = []
+
+        fsc_size = 0
+        randomized_schedulers_size = 0
+
+        for state in belief_mc.states:
+            if 'cutoff' not in state.labels:
+                non_frontier_states += 1
+            elif 'finite_mem' in state.labels and not uses_fsc:
+                uses_fsc = True
+            else:
+                for label in state.labels:
+                    if 'sched_' in label:
+                        _, scheduler_index = label.split('_')
+                        if int(scheduler_index) in used_randomized_schedulers:
+                            continue
+                        used_randomized_schedulers.append(int(scheduler_index))
+
+        if uses_fsc:
+            # Compute the size of FSC
+            if paynt_fsc_size:
+                fsc_size = paynt_fsc_size
+
+        for index in used_randomized_schedulers:
+            observation_actions = {x:[] for x in range(self.quotient.observations)}
+            rand_scheduler = storm_result.cutoff_schedulers[index]
+            for state in range(self.quotient.pomdp.nr_states):
+                choice_string = str(rand_scheduler.get_choice(state).get_choice())
+                actions = self.parse_choice_string(choice_string)
+                observation = self.quotient.pomdp.get_observation(state)
+                for action in actions:
+                    if action not in observation_actions[observation]:
+                        observation_actions[observation].append(action)
+            print(observation_actions)
+            randomized_schedulers_size += sum(list([len(support) for support in observation_actions.values()])) * 3
+
+        #debug
+        #print(non_frontier_states)
+        #print(belief_mc.nr_transitions)
+        #print(fsc_size)
+        #print(randomized_schedulers_size)
+
+        result_size = non_frontier_states + belief_mc.nr_transitions + fsc_size + randomized_schedulers_size
+
+        return result_size
 
 

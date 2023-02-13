@@ -197,6 +197,7 @@ class SynthesizerPOMDP:
                 self.storm_control.latest_paynt_result = assignment
                 self.storm_control.paynt_export = self.quotient.extract_policy(assignment)
                 self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
+                self.storm_control.paynt_fsc_size = self.quotient.policy_size(self.storm_control.latest_paynt_result)
 
             self.storm_control.update_data()
 
@@ -234,6 +235,23 @@ class SynthesizerPOMDP:
                 self.storm_control.interactive_storm_start(storm_timeout)
             else:
                 self.storm_control.interactive_storm_resume(storm_timeout)
+
+            # compute sizes of controllers
+            self.storm_control.belief_controller_size = self.storm_control.get_belief_controller_size(self.storm_control.latest_storm_result, self.storm_control.paynt_fsc_size)
+
+            print("\n------------------------------------\n")
+            print("PAYNT results: ")
+            #print(self.storm_control.latest_paynt_result)
+            print(self.storm_control.paynt_bounds)
+            print("controller size: {}".format(self.storm_control.paynt_fsc_size))
+
+            print()
+
+            print("Storm results: ")
+            #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
+            print(self.storm_control.storm_bounds)
+            print("controller size: {}".format(self.storm_control.belief_controller_size))
+            print("\n------------------------------------\n")
 
             if time.time() > iteration_timeout or iteration == iteration_limit:
                 break
@@ -906,13 +924,19 @@ class SynthesizerPOMDP:
                 self.storm_control.get_storm_result()
                 self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.unfold_storm)
 
+            print("\n------------------------------------\n")
             print("PAYNT results: ")
             #print(self.storm_control.latest_paynt_result)
             print(self.storm_control.paynt_bounds)
+            print("controller size: {}".format(self.storm_control.paynt_fsc_size))
+
+            print()
 
             print("Storm results: ")
             #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
             print(self.storm_control.storm_bounds)
+            print("controller size: {}".format(self.storm_control.belief_controller_size))
+            print("\n------------------------------------\n")
         else:
             # self.strategy_expected_uai()
             # self.strategy_iterative(unfold_imperfect_only=False)

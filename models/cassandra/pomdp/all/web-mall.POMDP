@@ -1,0 +1,90 @@
+# Simple two state example that runs through my proposal and thesis.
+# This is a thinly disguised version of the tiger problem, though not
+# as symetric.
+
+values: reward
+discount: 0.95
+
+# There are two types of people that visit our web site
+states: executive teenager
+
+# We can either go for the hard sell of either ties or skates or
+# watch what type of interests they have by the pages they access.
+actions: monitor adv-ties adv-skates
+
+# Our web pages are either golf related items or video game related
+# items.
+observations: golf video
+
+# 7 out of 10 people that visit the web are teens.
+start: 
+0.3 0.7
+
+######################################################################
+# State Transitions
+
+# Monitoring doesn't change who is at the site.  We assume they will
+# stay there as long as we just monitor.
+T: monitor
+identity
+
+# Once we decide to advertise a product, it either sells or it 
+# doesn't, and regardless we are done with this customer and we 
+# get a different customer.  We assume that 7 out of 10 visitors
+# to the web site are teenagers.
+T: adv-ties
+0.3 0.7
+0.3 0.7
+
+T: adv-skates
+0.3 0.7
+0.3 0.7
+
+######################################################################
+# Observation Probabilities
+
+# Assume 7 out of 10 executives look at golf product pages
+O: monitor : executive : golf
+0.7
+
+O: monitor : executive : video
+0.3
+
+# Assumes that only 1 out of 10 teenagers look at the golf web # pages
+O: monitor : teenager : golf 
+0.1
+
+O: monitor : teenager : video
+0.9
+
+O: adv-ties 
+uniform
+
+O: adv-skates
+uniform
+
+######################################################################
+# Immediate Rewards
+
+# Monitoring will cost us nothing but our daily operating costs which
+# we set to be 10 cents per time step
+R: monitor : * : * : * 
+-0.10
+
+# Assume that a tie have a profit of $10 and half of the executives,
+# when given the ad, will buy one.
+R: adv-ties : executive : * : * 
+1.0
+
+# Assume that no teenagers will buy the ties.
+R: adv-ties : teenager : * : * 
+-6.0
+
+# Assume that skates have a profit of $20 and that 1 out of 50
+# executives will buy them.
+R: adv-skates : executive : * : * 
+-4.60
+
+# Assume that 3 out of 10 teens will buy the skates
+R: adv-skates : teenager : * : * 
+2.0
