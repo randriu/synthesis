@@ -10,10 +10,13 @@ logger = logging.getLogger(__name__)
 
 class SimulatedModel:
 
-    def __init__(self, model):
+    def __init__(self, model, reward_name):
 
         # underlying model, can be MDP or POMDP
         self.model = model
+
+        # default reward name
+        self.reward_name = reward_name
 
         # current state for the simulation
         self.current_state = self.initial_state
@@ -47,21 +50,21 @@ class SimulatedModel:
             self.state_is_absorbing.append(absorbing)
 
         # quick-test Storm simulation wrapper
-        logger.debug("constructing Storm wrapper...")
-        self.simulated_model_storm = stormpy.synthesis.SimulatedModel(model)
+        # logger.debug("constructing Storm wrapper...")
+        # self.simulated_model_storm = stormpy.synthesis.SimulatedModel(model)
         
-        state = 10
-        logger.debug(f"sampling random action in state {state}...")
-        action = self.simulated_model_storm.sample_action(state)
-        logger.debug(f"Storm returned action {action}")
+        # state = 10
+        # logger.debug(f"sampling random action in state {state}...")
+        # action = self.simulated_model_storm.sample_action(state)
+        # logger.debug(f"Storm returned action {action}")
         
-        logger.debug(f"sampling effect of the action...")
-        next_state = self.simulated_model_storm.sample_successor(state,action)
-        logger.debug(f"Storm returned action {next_state}")
+        # logger.debug(f"sampling effect of the action...")
+        # next_state = self.simulated_model_storm.sample_successor(state,action)
+        # logger.debug(f"Storm returned action {next_state}")
 
-        logger.debug(f"executing rollout...")
-        rollout_value = self.simulated_model_storm.state_action_rollout(state,action,10,'rew',0.99)
-        logger.debug(f"Storm returned {rollout_value}")
+        # logger.debug(f"executing rollout...")
+        # rollout_value = self.simulated_model_storm.state_action_rollout(state,action,10,'rew',0.99)
+        # logger.debug(f"Storm returned {rollout_value}")
         
         
 
@@ -72,17 +75,21 @@ class SimulatedModel:
     def state_valuation(self, state):
         return json.loads(str(self.model.state_valuations.get_json(state)))
 
+    def finished(self):
+        return self.state_is_absorbing[self.current_state]
+
     @property
     def is_partially_observable(self):
         return self.model.is_partially_observable
     
-    @property
-    def current_observation(self):
+    def state_observation(self, state=None):
+        if state is None:
+            state = self.current_state
         assert self.is_partially_observable
-        return self.model.get_observation(self.current_state)
+        return self.model.get_observation(state)
     
-    def state_action_reward(self, state, action, reward_name):
-        reward_model = self.model.get_reward_model(reward_name)
+    def state_action_reward(self, state, action):
+        reward_model = self.model.get_reward_model(self.reward_name)
         action_index = self.model.get_choice_index(state,action)
         return reward_model.get_state_action_reward(action_index)
 
@@ -106,13 +113,13 @@ class SimulatedModel:
             factor *= discount_factor
         return total_reward
 
-    def state_action_rollout(self, state, action, length, reward_name, discount_factor):
+    def state_action_rollout(self, state, action, length, discount_factor):
         # return self.simulated_model_storm.state_action_rollout(state,action,length,reward_name,discount_factor)
         rewards = []
         for _ in range(length):
             if self.state_is_absorbing[state]:
                 break
-            reward = self.state_action_reward(state,action,reward_name)
+            reward = self.state_action_reward(state,action)
             state = self.sample_successor(state,action)
             action = self.sample_action(state)
             rewards.append(reward)
