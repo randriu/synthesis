@@ -5,7 +5,7 @@
 # POMDP of a learing process with 2 concepts.
 
 values: reward
-discount: 1
+discount: 0.99
 
 states:
 	Visual-0-0
