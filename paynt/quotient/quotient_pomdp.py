@@ -162,7 +162,7 @@ class POMDPQuotientContainer(QuotientContainer):
             if observation_label == self.observation_labels[obs]:
                 observation = obs
                 break
-        return(is_action_hole, observation, memory)
+        return (is_action_hole, observation, memory)
 
     def simplify_label(self,label):
         label = re.sub(r"\s+", "", label)

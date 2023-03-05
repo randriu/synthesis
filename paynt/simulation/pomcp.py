@@ -155,6 +155,8 @@ class POMCP:
             mem = 0
             for _ in range(self.exploration_horizon):
                 action = fsc.suggest_action(mem,obs)
+                print("fsc suggests ", action)
+                print(" state {} has {} actions".format(state, self.quotient.pomdp.get_nr_available_actions(state)))
                 rewards.append(self.simulated_model.state_action_reward(state,action))
                 mem = fsc.suggest_update(mem,obs)
                 state = self.simulated_model.sample_successor(state,action)
@@ -345,7 +347,9 @@ class POMCP:
         if assignment is None:
             logger.debug("no assignment was found")
             return None
-        return FSC.from_hole_assignment(self.quotient, memory_size, assignment)
+        # note: this assignment is for the sub-POMDP, not for the original POMDP
+        # however, since the new sub-POMDP uses a fresh observation, it should be OK
+        return FSC.from_hole_assignment(quotient, memory_size, assignment)
 
     
     def pick_action(self, root, action, fsc_state, current_fsc):
@@ -385,8 +389,7 @@ class POMCP:
                 break
             # print("simulation ", depth)
             root, action, fsc_state, current_fsc = self.pick_action(root, action, fsc_state, current_fsc)
-            reward = self.simulated_model.state_action_reward(self.simulated_model.current_state, action)
-            accumulated_reward += reward
+            accumulated_reward += self.simulated_model.state_action_reward(self.simulated_model.current_state, action)
             self.simulated_model.simulate_action(action)
         return accumulated_reward
     
@@ -400,11 +403,11 @@ class POMCP:
 
         self.discount_factor = 1
         
-        self.simulate_fsc = True
-        self.use_optimal_fsc = True
-        self.use_fsc_to_play = False
+        self.simulate_fsc = False
+        self.use_optimal_fsc = False
+        self.use_fsc_to_play = True
         
-        self.simulation_iterations = 1
+        self.simulation_iterations = 100
         self.simulation_horizon = 100
         
         self.exploration_iterations = 10
@@ -425,6 +428,7 @@ class POMCP:
             self.quotient.set_imperfect_memory_size(memory_size)
             synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(self.quotient)
             assignment = synthesizer.synthesize()
+            logger.info("synthesized solution with value {}".format(self.quotient.specification.optimality.optimum))
             self.optimal_fsc = FSC.from_hole_assignment(self.quotient, memory_size, assignment)
             self.quotient.set_imperfect_memory_size(1)
 
