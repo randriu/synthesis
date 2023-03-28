@@ -127,7 +127,7 @@ class SimulatedModel:
         return self.discounted_reward(rewards, discount_factor)
 
     
-    def reset_simulation(self):
+    def reset(self):
         self.current_state = self.initial_state
 
     def simulate_action(self, action):

@@ -29,14 +29,6 @@ class SynthesizerAR(Synthesizer):
         return can_improve, improving_assignment
 
 
-    def family_value(self, family):
-        ur = family.analysis_result.undecided_result()
-        value = ur.primary.value
-        # we pick family with maximum value
-        if ur.minimizing:
-            value *= -1
-        return value
-    
     def synthesize_assignment(self, family):
 
         self.quotient.discarded = 0
@@ -53,6 +45,9 @@ class SynthesizerAR(Synthesizer):
             can_improve,improving_assignment = self.analyze_family(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
+                if True:
+                # if self.quotient.specification.optimality.optimum < -10:
+                    break
             if can_improve == False:
                 self.explore(family)
                 continue
@@ -64,6 +59,15 @@ class SynthesizerAR(Synthesizer):
         return satisfying_assignment
 
 
+    def family_value(self, family):
+        ur = family.analysis_result.undecided_result()
+        value = ur.primary.value
+        # we pick family with maximum value
+        if ur.minimizing:
+            value *= -1
+        return value
+    
+    
     def synthesize_assignment_experimental(self, family):
 
         self.quotient.discarded = 0
