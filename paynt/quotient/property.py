@@ -62,6 +62,10 @@ class Property:
     def reward(self):
         return self.formula.is_reward_operator
 
+    @property
+    def maximizing(self):
+        return not self.minimizing
+
     @staticmethod
     def above_mc_precision(a, b):
         return abs(a-b) > Property.mc_precision
@@ -342,6 +346,7 @@ class SpecificationResult:
             else:
                 improving_assignment = family.pick_any()
                 return improving_assignment, None, False
+
 
         if cr.feasibility == False:
             return None,None,False
