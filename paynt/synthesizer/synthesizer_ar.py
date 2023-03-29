@@ -45,9 +45,6 @@ class SynthesizerAR(Synthesizer):
             can_improve,improving_assignment = self.analyze_family(family)
             if improving_assignment is not None:
                 satisfying_assignment = improving_assignment
-                if True:
-                # if self.quotient.specification.optimality.optimum < -10:
-                    break
             if can_improve == False:
                 self.explore(family)
                 continue

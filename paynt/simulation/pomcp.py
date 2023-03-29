@@ -24,7 +24,7 @@ class ActionOracleRandom:
     def reset(self):
         pass
     
-    def get_next_action(self, last_action, simulation_step):
+    def get_next_action(self, last_action, current_observation, simulation_step):
         return self.simulated_model.sample_action(self.simulated_model.current_state)
 
 
@@ -73,7 +73,7 @@ class ActionOracleMcts:
     def __init__(self, simulated_model, discount_factor, relevant_horizon):
         
         # exploration parameters
-        self.exploration_iterations = 100
+        self.exploration_iterations = 10
         self.exploration_horizon = relevant_horizon
         self.exploration_constant_ucb = 10000
 
@@ -165,21 +165,19 @@ class ActionOracleMcts:
         return total_reward
 
     
-    def get_next_action(self, last_action, simulation_step):
-
-        current_observation = self.simulated_model.state_observation()
+    
+    def reset_tree(self, last_action, current_observation):
 
         if self.root is None:
             # first call: create belief root corresponding to the initial state
-            self.root = self.create_belief_from_state(self.simulated_model.current_state)
+            self.root = self.create_belief_from_state(self.simulated_model.initial_state)
             self.predict_values_at_belief(self.root,self.exploration_horizon)
         else:
             # check if action node has the belief corresponding to this observation
             action_node = self.root.action_nodes[last_action]
             if current_observation not in action_node.belief_nodes:
                 # cannot re-use the sub-tree: use uniform belief over all states with the given observation
-                logger.info("observation {} never experienced in simulation, restarting with uniform belief... ".\
-                    format(current_observation))
+                # logger.info("observation {} never experienced in simulation, restarting with uniform belief... ".format(current_observation))
                 self.root = self.create_empty_belief(current_observation)
                 for state in range(self.pomdp.nr_states):
                     obs = self.pomdp.observations[state]
@@ -190,37 +188,130 @@ class ActionOracleMcts:
                 # can reuse the sub-tree
                 self.root = action_node.belief_nodes[current_observation]
 
+    def get_next_action(self, last_action, current_observation, simulation_step):
+        self.reset_tree(last_action, current_observation)
         for _ in range(self.exploration_iterations):
             state = self.root.sample()
             self.explore(self.root, state, self.exploration_horizon)
-
         return self.pick_action_value(self.root)
 
         
 
+class FSC:
+
+    def __init__(self, num_nodes, num_observations):
+        # self.num_nodes = num_nodes
+        # self.num_observations = num_observations
+        
+        # gamma: NxZ -> Act
+        self.action_function = [ [None]*num_observations for _ in range(num_nodes) ]
+        # delta: NxZ -> N
+        self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
+
+        self.current_node = 0
+
+    def decide(self, decision_map, node, observation):
+        '''
+        Make decision using decision_map based on the observation and memory
+        node. decision_map is either self.action_function or
+        self.update_function
+        '''
+        decision = decision_map[node][observation]
+        if decision is None:
+            # default to 0 node
+            decision = decision_map[0][observation]
+            if decision is None:
+                # default to first decision
+                decision = 0
+        return decision
+
+    def suggest_action(self, observation, node=None):
+        if node is None:
+            node = self.current_node
+        return self.decide(self.action_function, node, observation)
+
+    def suggest_update(self, observation, node=None):
+        if node is None:
+            node = self.current_node
+        return self.decide(self.update_function, node, observation)
+
+    def update_memory_node(self, observation):
+        self.current_node = self.suggest_update(observation)
+
+
 class ActionOracleSubpomdp(ActionOracleMcts):
 
 
-    def __init__(self, simulated_model, discount_factor, relevant_horizon, reward_name, target_label):
+    def __init__(self, simulated_model, discount_factor, relevant_horizon, specification, reward_name, target_label):
         super().__init__(simulated_model, discount_factor, relevant_horizon)
+        self.specification = specification
         self.subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, reward_name, target_label)
+        self.subpomdp_builder.set_discount_factor(discount_factor)
+        self.fsc = None
 
 
-    def get_next_action(self, last_action, simulation_step):
+    def predict_fsc_at_belief(self, belief_node, fsc):
+        avg_path_reward = 0
+        path_rewards = []
+        for simulation in range(self.exploration_iterations * 10):
+            rewards = []
+            state = belief_node.sample()
+            obs = belief_node.observation
+            mem = fsc.current_node
+            for _ in range(self.exploration_horizon):
+                action = fsc.suggest_action(obs,mem)
+                rewards.append(self.simulated_model.state_action_reward(state,action))
+                mem = fsc.suggest_update(obs,mem)
+                state = self.simulated_model.sample_successor(state,action)
+                obs = self.simulated_model.state_observation(state)
+            path_reward = self.simulated_model.discounted_reward(rewards, self.discount_factor)
+            path_rewards.append(path_reward)
+        return numpy.mean(path_rewards)
+
+
+    def get_next_action(self, last_action, current_observation, simulation_step):
+
+        if self.fsc is not None and self.root is not None:
+            # update FSC state
+            self.fsc.update_memory_node(self.root.observation)
+
+        # move the tree root
+        self.reset_tree(last_action, current_observation)
+
         # run MCTS
-        action = super().get_next_action(last_action, simulation_step)
+        for _ in range(self.exploration_iterations):
+            state = self.root.sample()
+            self.explore(self.root, state, self.exploration_horizon)
+        action_mcts = self.pick_action_value(self.root)
+        value_mcts = self.root.action_nodes[action_mcts].value
+
+        if simulation_step % 10 == 0:
+            # extract sub-POMDP from the tree
+            print("\n\n")
+            # print(f'running synthesis at step {simulation_step} with threshold {value_mcts}')
+            self.fsc = self.synthesize(value_mcts)
         
-        # extract sub-POMDP from the tree
-        if simulation_step % 20 == 0:
-            subpomdp = self.construct_subpomdp()
-            print(subpomdp)
-        return action
+        action_fsc = self.fsc.suggest_action(self.root.observation)
+
+        action = action_mcts
+        value_fsc = self.predict_fsc_at_belief(self.root, self.fsc)
+        actions_differ = "x" if action_mcts != action_fsc else "o"
+        print(f"{actions_differ} MCTS = {value_mcts}, FSC = {value_fsc}", action_mcts, action_fsc)
+        if action_mcts != action_fsc:
+            if value_mcts < value_fsc:
+                print("choosing FSC action over MCTS")
+                action = action_mcts
+            
+
+        return action_mcts
 
 
     def collect_relevant_states(self, initial_belief_node):
 
-        all_visited = False
-        visited_most = True
+        # state_selection_strategy = "all states"
+        state_selection_strategy = "all visited states"
+        # state_selection_strategy = "top % of visited states"
+
         important_percentage = 0.05
 
         # traverse the tree, count how many times each state was visited
@@ -237,12 +328,17 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         # the output set of relevant states
         relevant_states_set = set()
 
-        if all_visited:
+        if state_selection_strategy == "all states":
+            # collect all states
+            for state in range(self.pomdp.nr_states):
+                relevant_states_set.add(state)
+
+        if state_selection_strategy == "all visited states":
             # collect all visited states
             for state in state_visits.keys():
                 relevant_states_set.add(state)
         
-        if visited_most:
+        if state_selection_strategy == "top % of visited states":
             # collect up to x% of the most visited states
             states = list(state_visits.keys())
             states_ordered = sorted(states, key=lambda x : state_visits[x], reverse=True)
@@ -259,16 +355,15 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         for state in initial_belief_node.particles:
             assert state in relevant_states_set   
 
-
         # convert set to bitvector
         relevant_states = stormpy.storage.BitVector(self.pomdp.nr_states,False)
         for state in relevant_states_set:
             relevant_states.set(state)        
         return relevant_states
 
-    def construct_subpomdp(self):
-        initial_distribution = self.root.distribution()
-        relevant_states = self.collect_relevant_states(self.root)
+    def construct_subpomdp(self, root):
+        initial_distribution = root.distribution()
+        relevant_states = self.collect_relevant_states(root)
         self.subpomdp_builder.set_relevant_states(relevant_states)
         frontier_states = self.subpomdp_builder.get_frontier_states()
         state_values = {}
@@ -276,6 +371,79 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             state_values[state] = 0
         subpomdp = self.subpomdp_builder.restrict_pomdp(initial_distribution, state_values)
         return subpomdp
+
+    def synthesize(self, starting_value):
+
+        # looking for FSCs with this many memory nodes
+        memory_size = 2
+
+        # construct the subpomdp with the discount transformation already applied
+        subpomdp = self.construct_subpomdp(self.root)
+
+        num_treasures = 0
+        rm = subpomdp.reward_models[self.simulated_model.reward_name]
+        for state in range(subpomdp.nr_states):
+            row0 = subpomdp.transition_matrix.get_row_group_start(state) 
+            reward = rm.state_action_rewards[row0]
+            if reward > 0:
+                num_treasures += 1
+        print(f"sub-POMDP contains {num_treasures} treasure(s)")
+
+        # print(su.reward_models['rew'].state_action_rewards)
+        # print(subpomdp.initial_states)
+
+        # setting the specification threshold to accelerate the synthesis
+        # self.specification.optimality.update_optimum(starting_value)
+
+        # construct the coloring
+        quotient = POMDPQuotientContainer(subpomdp, self.specification)
+        quotient.set_imperfect_memory_size(memory_size)
+        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
+        
+        # synthesize the FSC
+        assignment = synthesizer.synthesize()
+        if assignment is None:
+            logger.debug("no assignment was found, picking arbitrary assignment")
+            assignment = quotient.design_space.pick_any()
+        else:
+            print("synthesized assignment with value ", self.specification.optimality.optimum)
+
+        
+
+        # note: this assignment is for the sub-POMDP, not for the original POMDP; however, the new sub-POMDP does not
+        # store observation valuations, so the hole names will refer to the index observation; since the sub-POMDP uses
+        # a fresh observation, the indices for old observation should coincide
+        # print(assignment)
+        fsc = FSC(memory_size, subpomdp.nr_observations)
+        for hole in assignment:
+            option = hole.options[0]
+            is_action_hole, observation, node = quotient.decode_hole_name(hole.name)
+            if is_action_hole:
+                fsc.action_function[node][observation] = option
+            else:
+                fsc.update_function[node][observation] = option
+
+        # simulate the choice of the initial state and make the corresponding step in the FSC
+        action = fsc.suggest_action(self.pomdp.nr_observations)
+        assert action == 0
+        fsc.update_memory_node(self.pomdp.nr_observations)
+
+        # fsc is now ready for simulation
+        value_fsc = self.predict_fsc_at_belief(self.root, fsc)
+        print(f"value at current belief: {value_fsc}")
+
+        if abs(value_fsc - self.specification.optimality.optimum) > 1:
+
+            exit()
+
+        # resetting specification threshold for the subsequent syntheses
+        self.specification.reset()
+
+        return fsc
+
+
+
+
 
 
 class POMCP:
@@ -313,9 +481,14 @@ class POMCP:
         accumulated_reward = 0
         discount_factor_to_k = 1
         for simulation_step in range(simulation_horizon):
+
+            if self.simulated_model.state_action_reward(self.simulated_model.current_state,0) > 0:
+                print("*** found the treasure ***")
+
             if self.simulated_model.finished():
+                print("simulation finished in absorbing state ", self.simulated_model.current_state)
                 break
-            action = action_oracle.get_next_action(last_action,simulation_step)
+            action = action_oracle.get_next_action(last_action, self.simulated_model.state_observation(), simulation_step)
             reward = self.simulated_model.state_action_reward(self.simulated_model.current_state, action)
             accumulated_reward += discount_factor_to_k * reward
             discount_factor_to_k *= discount_factor
@@ -326,7 +499,7 @@ class POMCP:
 
     def run(self):
 
-        # random.seed(42)
+        random.seed(12)
 
         # specification parameters
         discount_factor = 0.9
@@ -345,7 +518,7 @@ class POMCP:
         # action picker
         # action_oracle = ActionOracleRandom(self.simulated_model)
         # action_oracle = ActionOracleMcts(self.simulated_model, discount_factor, relevant_horizon)
-        action_oracle = ActionOracleSubpomdp(self.simulated_model, discount_factor, relevant_horizon, self.reward_name, self.target_label)
+        action_oracle = ActionOracleSubpomdp(self.simulated_model, discount_factor, relevant_horizon, self.specification, self.reward_name, self.target_label)
 
         # run simulations
         import progressbar
@@ -364,52 +537,4 @@ class POMCP:
 
         print("{} simulations: mean value = {}".format(simulation_iterations,simulation_value_avg))
 
-
-
-
-
-# class FSC:
-
-#     def __init__(self, num_nodes, num_observations):
-#         # self.num_nodes = num_nodes
-#         # self.num_observations = num_observations
-        
-#         # gamma: NxZ -> Act
-#         self.action_function = [ [None]*num_observations for _ in range(num_nodes) ]
-#         # delta: NxZ -> N
-#         self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
-
-#     @classmethod
-#     def from_hole_assignment(cls, quotient, num_nodes, assignment):
-#         assert not quotient.posterior_aware
-#         fsc = FSC(num_nodes,quotient.pomdp.nr_observations)
-#         for hole in assignment:
-#             option = hole.options[0]
-#             is_action_hole, observation, node = quotient.decode_hole_name(hole.name)
-#             if is_action_hole:
-#                 fsc.action_function[node][observation] = option
-#             else:
-#                 fsc.update_function[node][observation] = option
-#         return fsc
-
-#     def decide(self, decision_map, node, observation):
-#         '''
-#         Make decision using decision_map based on the observation and memory
-#         node. decision_map is either self.action_function or
-#         self.update_function
-#         '''
-#         decision = decision_map[node][observation]
-#         if decision is None:
-#             # default to 0 node
-#             decision = decision_map[0][node]
-#             if decision is None:
-#                 # default to first decision
-#                 decision = 0
-#         return decision
-
-#     def suggest_action(self, node, observation):
-#         return self.decide(self.action_function, node, observation)
-
-#     def suggest_update(self, node, observation):
-#         return self.decide(self.update_function, node, observation)
 
