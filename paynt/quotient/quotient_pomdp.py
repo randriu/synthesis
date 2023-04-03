@@ -66,7 +66,6 @@ class POMDPQuotientContainer(QuotientContainer):
         self.is_action_hole = None
 
         # construct the quotient POMDP
-        self.pomdp = pomdp
         self.pomdp = stormpy.pomdp.make_canonic(pomdp)
         # ^ this also asserts that states with the same observation have the
         # same number and the same order of available actions
