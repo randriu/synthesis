@@ -20,7 +20,6 @@ class Synthesizer:
         pass
     
     def synthesize(self, family = None):
-        
         logger.info("Synthesis initiated.")
         self.stat.start()
 

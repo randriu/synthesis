@@ -3,6 +3,7 @@ import stormpy.synthesis
 import random
 import numpy
 import json
+import math
 
 import logging
 logger = logging.getLogger(__name__)
@@ -14,7 +15,6 @@ class SimulatedModel:
 
         # underlying model, can be MDP or POMDP
         self.model = model
-
         # default reward name
         self.reward_name = reward_name
 
