@@ -24,7 +24,7 @@ action_oracle_type = "fsc"
 
 
 # --- MCTS parameters ---
-exploration_iterations = 10
+exploration_iterations = 20
 exploration_constant_ucb = 10000
 mcts_rollouts = True
 
@@ -34,13 +34,11 @@ only_synthesis = False
 
 fsc_recomputation_frequency = 10
 fsc_rollouts = False
-fsc_use_cache_for_synthesis = True
+fsc_use_cache = True
 memory_size = 2
 
-# state_selection_strategy = "all states"
-state_selection_strategy = "all visited states"
-# state_selection_strategy = "top % of visited states"
-important_percentage = 0.05
+# observation_selection = "all observations"
+observation_selection = "visited observations"
 
 # action_selection = "only MCTS"
 # action_selection = "only FSC"
@@ -364,11 +362,6 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         self.subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, self.pomcp.reward_name, self.pomcp.target_label)
         self.subpomdp_builder.set_discount_factor(self.discount_factor)
         self.fsc = None
-        
-        # for each state of a POMDP and memory node, a value achievable via some FSC
-        self.state_memory_values = []
-        for state in range(self.pomdp.nr_states):
-            self.state_memory_values.append([0 for memory in range(memory_size)])
 
         self.num_decisions = 0
         self.decisions_same = 0
@@ -388,6 +381,92 @@ class ActionOracleSubpomdp(ActionOracleMcts):
                 choice = self.pomdp.get_choice_index(state,offset)
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
                 self.action_labels_at_observation[obs].append(str(labels))
+
+
+    def reset(self):
+        super().reset()
+        self.cache_reset()
+
+    def construct_trivial_policy_values(self):
+        return collections.defaultdict(int)
+    
+    def cache_reset(self):
+        ''' Fill state-memory-action cache with zeroes. '''
+        if not fsc_use_cache:
+            return
+        self.policy_values = []
+        trivial_values = self.construct_trivial_policy_values()
+        self.policy_values.append(trivial_values)
+        
+
+    def cache_update(self, quotient, assignment):
+        ''' Use assignment and the corresponding FSC to update the state-memory-action cache. '''
+        if not fsc_use_cache:
+            return
+        
+        # model check the DTMC induced by this assignment to get state valuations
+        dtmc = quotient.build_chain(assignment)
+        mc_result = dtmc.check_specification(quotient.specification)
+        dtmc_state_values = mc_result.optimality_result.result.get_values()
+
+        policy_values = [self.construct_trivial_policy_values() for memory in range(memory_size)]
+
+        # map states of a DTMC to states of its quotient to states of a sub-POMDP to states of the POMDP
+        for state_dtmc,value in enumerate(dtmc_state_values):
+            if value < 1e-4:
+                continue
+            quotient_state = dtmc.quotient_state_map[state_dtmc]
+            subpomdp_state = quotient.pomdp_manager.state_prototype[quotient_state]
+            pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
+            memory = quotient.pomdp_manager.state_memory[quotient_state]
+            policy_values[memory][pomdp_state] = value
+
+        self.policy_values += policy_values
+        # print(len(self.policy_values))
+
+    def cache_apply(self, quotient):
+        ''' Modify rewards of the frontier states. '''
+        if not fsc_use_cache:
+            return
+
+        # for each frontier observation, pick exactly 1 policy
+        frontier_states = self.subpomdp_builder.frontier_states
+        frontier_map = {}
+        for state in frontier_states:
+            obs = self.pomdp.observations[state]
+            if obs not in frontier_map:
+                frontier_map[obs] = []
+            frontier_map[obs].append(state)
+
+        state_values = {}
+        num_policies = len(self.policy_values)
+        for obs,states in frontier_map.items():
+            assert states
+            best_policy = 0
+            best_score = sum([self.policy_values[0][state] for state in states])
+            for policy in range(1,num_policies):
+                score = sum([self.policy_values[policy][state] for state in states])
+                if score > best_score:
+                    best_policy = policy
+                    best_score = score
+            for state in states:
+                state_values[state] = self.policy_values[best_policy][state]
+
+        tm = quotient.quotient_mdp.transition_matrix
+        state_action_rewards = quotient.quotient_mdp.reward_models[self.simulated_model.reward_name].state_action_rewards
+        for quotient_state in range(quotient.quotient_mdp.nr_states):
+            subpomdp_state = quotient.pomdp_manager.state_prototype[quotient_state]
+            pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
+            if pomdp_state not in frontier_states:
+                continue
+            value = state_values[pomdp_state]
+            if value == 0:
+                continue
+            row = quotient.quotient_mdp.get_choice_index(quotient_state,0)
+            immediate_reward = state_action_rewards[tm.get_row_group_start(quotient_state)]
+            print("{} -> {}".format(immediate_reward,value))
+            for choice in range (tm.get_row_group_start(quotient_state),tm.get_row_group_start(quotient_state+1)):
+                state_action_rewards[choice] = value
 
 
     def predict_fsc_at_belief(self, belief_node, fsc):
@@ -427,7 +506,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
 
         if simulation_step % fsc_recomputation_frequency == 0:
             # extract sub-POMDP from the tree
-            print("\n")
+            # print("\n")
             self.fsc = self.synthesize(value_mcts)
         
         action_fsc = self.fsc.suggest_action(self.root.observation)
@@ -458,129 +537,47 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             return best_action
 
 
-
-    def collect_relevant_states(self, initial_belief_node):
-
-        # traverse the tree, count how many times each state was visited
-        state_visits = collections.defaultdict(int)
-        nodes = [initial_belief_node]
-        while nodes:
-            node = nodes.pop(-1)
-            for state in node.particles:
-                state_visits[state] += 1
-            for action_node in node.action_nodes:
-                for belief_node in action_node.belief_nodes.values():
-                    nodes.append(belief_node)
-
-        # the output set of relevant states
-        relevant_states_set = set()
-
-        if state_selection_strategy == "all states":
-            # collect all states
-            for state in range(self.pomdp.nr_states):
-                relevant_states_set.add(state)
-
-        if state_selection_strategy == "all visited states":
-            # collect all visited states
-            for state in state_visits.keys():
-                relevant_states_set.add(state)
+    def collect_relevant_observations(self, initial_belief_node):
+        ''' Collect observations relevant to the tree starting in the provided node. '''
+        relevant_observations = stormpy.storage.BitVector(self.pomdp.nr_observations,False)
         
-        if state_selection_strategy == "top % of visited states":
-            # collect up to x% of the most visited states
-            states = list(state_visits.keys())
-            states_ordered = sorted(states, key=lambda x : state_visits[x], reverse=True)
+        if observation_selection == "all observations":
+            for obs in range(self.pomdp.nr_observations):
+                relevant_observations.set(obs,True)
 
-            capacity = math.floor(self.pomdp.nr_states * 0.05)
-            # always add initial states
-            for state in initial_belief_node.particles:
-                relevant_states_set.add(state)
-            for state in states:
-                if len(relevant_states_set) >= capacity:
-                    break
-                relevant_states_set.add(state)
+        if observation_selection == "visited observations":
+            # traverse the MC tree
+            nodes = [initial_belief_node]
+            while nodes:
+                node = nodes.pop(-1)
+                relevant_observations.set(node.observation,True)
+                for action_node in node.action_nodes:
+                    for belief_node in action_node.belief_nodes.values():
+                        nodes.append(belief_node)
 
-        for state in initial_belief_node.particles:
-            assert state in relevant_states_set   
+        assert relevant_observations[initial_belief_node.observation]
+        return relevant_observations
 
-        # convert set to bitvector
-        relevant_states = stormpy.storage.BitVector(self.pomdp.nr_states,False)
-        for state in relevant_states_set:
-            relevant_states.set(state)
-        return relevant_states
 
-    def construct_subquotient(self, root, specification):
+
+    def construct_subpomdp_quotient(self, root, specification):
         # construct the subpomdp with the discount transformation already applied
+        relevant_observations = self.collect_relevant_observations(root)
         initial_distribution = root.distribution()
-        relevant_states = self.collect_relevant_states(root)
-        self.subpomdp_builder.set_relevant_states(relevant_states)
-        frontier_states = self.subpomdp_builder.get_frontier_states()
+        self.subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
         subpomdp = self.subpomdp_builder.restrict_pomdp(initial_distribution)
 
-        self.pomcp.maze.print_relevant(relevant_states)
-
-        # for state in frontier_states:
-        #     state_value = 0
-        #     # rollout
-        #     if fsc_rollouts:
-        #         action = self.simulated_model.sample_action(state)
-        #         state_value = self.simulated_model.state_action_rollout(state,action,self.exploration_horizon,self.discount_factor)
-        #     state_values[state] = state_value
+        # show relevant cells
+        # self.pomcp.maze.print_relevant(self.subpomdp_builder.relevant_states)
 
         # unfold the sub-POMDP
         quotient = POMDPQuotientContainer(subpomdp, specification)
         quotient.set_imperfect_memory_size(memory_size)
-
-        # modify rewards for the frontier states of a quotient
-        if fsc_use_cache_for_synthesis:
-            tm = quotient.quotient_mdp.transition_matrix
-            state_action_rewards = quotient.quotient_mdp.reward_models[self.simulated_model.reward_name].state_action_rewards
-            print(state_action_rewards)
-            for quotient_state in range(quotient.quotient_mdp.nr_states):
-                subpomdp_state = quotient.pomdp_manager.state_prototype[quotient_state]
-                memory = quotient.pomdp_manager.state_memory[quotient_state]
-                pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
-                if pomdp_state not in frontier_states:
-                    continue
-                value = self.state_memory_values[pomdp_state][memory]
-                row = quotient.quotient_mdp.get_choice_index(quotient_state,0)
-                for choice in range (tm.get_row_group_start(quotient_state),tm.get_row_group_start(quotient_state+1)):
-                    state_action_rewards[choice] = value
-            print(state_action_rewards)
+        self.cache_apply(quotient)
 
         return quotient
 
-    
-    def analyze_subpomdp(self, root, specification):
-        
-        # construct the sub-POMDP, unfold and color it
-        quotient = self.construct_subquotient(root, specification)
-
-        # synthesize the FSC for this sub-POMDP
-        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
-        assignment = synthesizer.synthesize()
-        if assignment is None:
-            logger.debug("no assignment was found, picking arbitrary assignment")
-            assignment = quotient.design_space.pick_any()
-        else:
-            print("synthesized assignment with value ", specification.optimality.optimum)
-
-        # model check the DTMC induced by this assignment to get state valuations
-        dtmc = quotient.build_chain(assignment)
-        mc_result = dtmc.check_specification(specification)
-        dtmc_state_values = mc_result.optimality_result.result.get_values()
-
-        # map states of a DTMC to states of its quotient to states of a sub-POMDP to states of the POMDP
-        if fsc_use_cache_for_synthesis:
-            for state_dtmc,value in enumerate(dtmc_state_values):
-                quotient_state = dtmc.quotient_state_map[state_dtmc]
-                subpomdp_state = quotient.pomdp_manager.state_prototype[quotient_state]
-                memory = quotient.pomdp_manager.state_memory[quotient_state]
-                pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
-                current_value = self.state_memory_values[pomdp_state][memory]
-                if value > current_value:
-                    self.state_memory_values[pomdp_state][memory] = max(current_value,value)
-                    print("updated ({},{}) to {}".format(pomdp_state,memory,value))
-
+    def assignment_to_fsc(self, quotient, assignment):
         # translate the hole assignment to the FSC
         # note: this assignment is for the sub-POMDP, not for the original POMDP; however, the new sub-POMDP does not
         # store observation valuations, so the hole names will refer to the index observation; since the sub-POMDP uses
@@ -607,6 +604,26 @@ class ActionOracleSubpomdp(ActionOracleMcts):
                 fsc.update_function[node][observation] = option
 
         return fsc
+    
+    def analyze_subpomdp(self, root, specification):
+        
+        # construct the sub-POMDP, unfold and color it
+        quotient = self.construct_subpomdp_quotient(root, specification)
+
+        # synthesize the FSC for this sub-POMDP
+        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
+        assignment = synthesizer.synthesize()
+        if assignment is None:
+            logger.debug("no assignment was found, picking arbitrary assignment")
+            assignment = quotient.design_space.pick_any()
+        else:
+            # print("synthesized assignment with value ", specification.optimality.optimum)
+            pass
+
+        fsc = self.assignment_to_fsc(quotient,assignment)
+        self.cache_update(quotient,assignment)
+
+        return fsc
 
     def synthesize(self, starting_value):
 
@@ -624,7 +641,8 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         # double-check the FSC value
         value_fsc = self.predict_fsc_at_belief(self.root, fsc)
         if abs(value_fsc - self.pomcp.specification.optimality.optimum) > 0.01:
-            print(f"value at current belief: {value_fsc}")
+            # print(f"value at current belief: {value_fsc}")
+            pass
             # exit()
 
         # resetting specification threshold for the subsequent syntheses
@@ -670,13 +688,11 @@ class POMCP:
         ))
 
         if only_synthesis:
-            relevant_states = stormpy.storage.BitVector(self.pomdp.nr_states,False)
-            for state in range(self.pomdp.nr_states):
-                relevant_states.set(state)
             subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, self.reward_name, self.target_label)
             subpomdp_builder.set_discount_factor(discount_factor)
-            subpomdp_builder.set_relevant_states(relevant_states)
+            relevant_observations = stormpy.storage.BitVector(self.pomdp.nr_observations,True)
             initial_distribution = {self.simulated_model.initial_state : 1}
+            subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
             subpomdp = subpomdp_builder.restrict_pomdp(initial_distribution)
             quotient = POMDPQuotientContainer(subpomdp, self.specification)
             quotient.set_imperfect_memory_size(memory_size)
