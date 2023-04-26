@@ -25,6 +25,7 @@ class SynthesizerAR(Synthesizer):
         """
         improving_assignment,improving_value,can_improve = family.analysis_result.improving(family)
         if improving_value is not None:
+            self.stat.new_fsc_found(improving_value, improving_assignment, self.quotient.policy_size(improving_assignment))
             self.quotient.specification.optimality.update_optimum(improving_value)
         return can_improve, improving_assignment
 

@@ -22,6 +22,7 @@ class Statistic:
 
     # parameters
     status_period = 3
+    whole_synthesis_timer = Timer()
     
     def __init__(self, synthesizer):
         
@@ -57,6 +58,10 @@ class Statistic:
         self.acc_size_mdp += size_mdp
         self.print_status()
 
+    def new_fsc_found(self, value, assignment, size):
+        print(f'-----------PAYNT----------- \
+              \nValue = {value} | Time elapsed = {round(self.whole_synthesis_timer.read(),1)}s | FSC size = {size}\nFSC = {assignment}\n', flush=True)
+
     
     def status(self):
         discarded = self.quotient.discarded if self.quotient.discarded is not None else 0
@@ -85,6 +90,8 @@ class Statistic:
     def print_status(self):
         if not self.synthesis_time.read() > self.status_horizon:
             return
+        
+        return
 
         print(self.status(), flush=True)
         self.status_horizon += Statistic.status_period

@@ -3,6 +3,9 @@ import stormpy.synthesis
 import stormpy.pomdp
 
 from ..quotient.models import MarkovChain
+from ..utils.profiler import Timer
+
+from os import makedirs
 
 
 from threading import Thread
@@ -52,6 +55,10 @@ class StormPOMDPControl:
     storm_terminated = False
 
     s_queue = None
+
+    saynt_timer = None
+    export_fsc_storm = None
+    export_fsc_paynt = None
 
     def __init__(self):
         pass
@@ -104,24 +111,42 @@ class StormPOMDPControl:
         #print(self.paynt_export)
 
         logger.info("starting Storm POMDP analysis")
+        storm_timer = Timer()
+        storm_timer.start()
         result = belmc.check(self.spec_formulas[0], self.paynt_export)   # calls Storm
+        storm_timer.stop()
         logger.info("Storm POMDP analysis completed")
 
+        value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
+        size = self.get_belief_controller_size(result, self.paynt_fsc_size)
+
         if self.get_result is not None:
-            print(result.induced_mc_from_scheduler)
-            print(result.lower_bound)
-            print(result.upper_bound)
+            #print(result.induced_mc_from_scheduler)
+            #print(result.lower_bound)
+            #print(result.upper_bound)
             # TODO not important for the paper but it would be nice to have correct FSC here as well
-            print(self.get_belief_controller_size(result, self.paynt_fsc_size))
+            #print(self.get_belief_controller_size(result, self.paynt_fsc_size))
+            
+            if self.storm_options == "overapp":
+                print(f'-----------Storm----------- \
+                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\n', flush=True)
+                print(".....")
+                print(result.upper_bound)
+                print(result.lower_bound)
+            else:
+                print(f'-----------Storm----------- \
+                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
             exit()
 
         # debug
-        print(result.induced_mc_from_scheduler)
-        print(result.lower_bound)
-        print(result.upper_bound)
+        #print(result.induced_mc_from_scheduler)
+        #print(result.lower_bound)
+        #print(result.upper_bound)
         #print(result.cutoff_schedulers[1])
         #for sc in result.cutoff_schedulers:
         #    print(sc)
+        print(f'-----------Storm----------- \
+              \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
 
         self.latest_storm_result = result
         if self.quotient.specification.optimality.minimizing:
@@ -168,13 +193,24 @@ class StormPOMDPControl:
         self.storm_terminated = True
 
         if result.induced_mc_from_scheduler is not None:
+            value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
+            size = self.get_belief_controller_size(result, self.paynt_fsc_size)
             # debug
-            print(result.induced_mc_from_scheduler)
-            print(result.lower_bound)
-            print(result.upper_bound)
+            #print(result.induced_mc_from_scheduler)
+            #print(result.lower_bound)
+            #print(result.upper_bound)
             #print(result.cutoff_schedulers[1])
             #for sc in result.cutoff_schedulers:
             #    print(sc)
+
+            print(f'-----------Storm----------- \
+              \nValue = {value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {size}\n', flush=True)
+            
+            if self.export_fsc_storm is not None:
+                makedirs(self.export_fsc_storm, exist_ok=True)
+                with open(self.export_fsc_storm + "/storm.fsc", "w") as text_file:
+                    print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
+                    text_file.close()
 
             self.latest_storm_result = result
             if self.quotient.specification.optimality.minimizing:
@@ -213,13 +249,24 @@ class StormPOMDPControl:
 
         result = belmc.get_interactive_result()
 
+        value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
+        size = self.get_belief_controller_size(result, self.paynt_fsc_size)
         # debug
-        print(result.induced_mc_from_scheduler)
-        print(result.lower_bound)
-        print(result.upper_bound)
+        #print(result.induced_mc_from_scheduler)
+        #print(result.lower_bound)
+        #print(result.upper_bound)
         #print(result.cutoff_schedulers[1])
         #for sc in result.cutoff_schedulers:
         #    print(sc)
+
+        print(f'-----------Storm----------- \
+              \nValue = {value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {size}\n', flush=True)
+        
+        if self.export_fsc_storm is not None:
+            makedirs(self.export_fsc_storm, exist_ok=True)
+            with open(self.export_fsc_storm + "/storm.fsc", "w") as text_file:
+                print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
+                text_file.close()
 
         self.latest_storm_result = result
         if self.quotient.specification.optimality.minimizing:
