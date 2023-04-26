@@ -85,6 +85,10 @@ class SynthesizerPOMDP:
             self.storm_control.spec_formulas = self.quotient.specification.stormpy_formulae()
             self.synthesis_terminate = False
             self.synthesizer = SynthesizerARStorm
+            if self.storm_control.iteration_timeout is not None:
+                self.saynt_timer = Timer()
+                self.synthesizer.saynt_timer = self.saynt_timer
+                self.storm_control.saynt_timer = self.saynt_timer
 
     def print_stats(self):
         pass
@@ -217,6 +221,7 @@ class SynthesizerPOMDP:
 
         iteration_timeout = time.time() + timeout
 
+        self.saynt_timer.start()
         while True:
             if iteration == 1:
                 paynt_thread.start()
@@ -263,6 +268,8 @@ class SynthesizerPOMDP:
         paynt_thread.join()
 
         self.storm_control.interactive_storm_terminate()
+
+        self.saynt_timer.stop()
 
     def run_synthesis_timeout(self, timeout):
         self.interactive_queue = Queue()

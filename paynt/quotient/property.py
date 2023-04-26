@@ -149,7 +149,7 @@ class OptimalityProperty(Property):
 
     def update_optimum(self, optimum):
         # assert self.improves_optimum(optimum)
-        logger.debug(f"New opt = {optimum}.")
+        #logger.debug(f"New opt = {optimum}.")
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)
