@@ -61,7 +61,7 @@ Options associated with the synthesis of finite-state controllers (FSCs) for a P
 - ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
 - ``--posterior-aware``: enables the synthesis of posterior aware FSCs
 
-SAYNT [6] and Storm associated options:
+SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy are needed):
 - ``--storm-pomdp``: enables the use of Storm features, this flag is necessary for the other options in this section to work
 - ``--iterative-storm INTEGER INTEGER INTEGER``: runs the SAYNT algorithm, the parameters represent overall timeout, paynt timeout, storm timeout respectivelly. The recommended parameters for 15 minute runtime are 900 60 10
 - ``--get-storm-result INTEGER``: runs PAYNT for specified amount of seconds and then runs Storm using the computed FSC at cut-offs
@@ -87,6 +87,7 @@ python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
 python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
 timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
 python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --filetype=drn --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The python environment can be deactivated by runnning
