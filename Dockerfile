@@ -1,52 +1,66 @@
-# base Dockerfile for using PAYNT
-# credit to Matthias Volk (m.volk@utwente.nl) for original stormpy Dockerfile
-
 # the docker image can be built by executing:
 # docker build -t yourusername/paynt .
+# to enable multi-thread compilation, use --build-arg threads=<value>
 
-# to enable multi-core compilation, use --build-arg no_threads=<value>
-
-# since apt-get doesn't work properly in this version,
-# sometimes I'm using "|| true" to make sure the command succeeds 
-
-FROM movesrwth/stormpy:1.7.0
+FROM ubuntu
 MAINTAINER Roman Andriushchenko <iandri@fit.vut.cz>
+ARG threads=1
 
-ARG no_threads=1
+# execute bash when running the container
+ENTRYPOINT ["/bin/bash"]
 
-# main folder
-WORKDIR /opt
+# to prevent texlive from asking our geographical area
+ENV DEBIAN_FRONTEND noninteractive
 
-# remove existing storm & stormpy (TODO: optimize this)
-RUN rm -rf storm
-RUN rm -rf stormpy
-
-# prerequisites
-RUN apt-get update
-RUN apt-get -y install texlive-full || true
+# install dependencies
+RUN apt update
+RUN apt install -y build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+RUN apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
+RUN apt -y install texlive-pictures
 RUN pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build
 
+# main directory
+WORKDIR /synthesis
 
-# download paynt, storm and stormpy
-RUN git clone https://github.com/randriu/synthesis.git paynt
-WORKDIR /opt/paynt
-RUN git clone -b pomdp-api https://github.com/randriu/storm.git storm
-RUN git clone -b pomdp-api https://github.com/randriu/stormpy.git stormpy
+# download everything
+# using --depth 1 to make the download faster and the image smaller
+WORKDIR /synthesis/prerequisites
+RUN git clone --depth 1 --branch master14 https://github.com/ths-rwth/carl carl
+RUN git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
+RUN git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
+WORKDIR /synthesis
+RUN git clone --depth 1 --branch pomdp-api https://github.com/randriu/storm.git storm
+RUN git clone --depth 1 --branch pomdp-api https://github.com/randriu/stormpy.git stormpy
+RUN git clone --depth 1 https://github.com/randriu/synthesis.git paynt
 
-# CAV'23 experiments
-RUN git clone  https://github.com/TheGreatfpmK/CAV23-POMDP-benchmark.git experiments
 
+# build prerequisites
+WORKDIR /synthesis/prerequisites/carl/build
+RUN cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
+RUN make lib_carl --jobs $threads
 
-# build storm
-RUN mkdir -p /opt/paynt/storm/build
-WORKDIR /opt/paynt/storm/build
+WORKDIR /synthesis/prerequisites/pycarl
+RUN python3 setup.py build_ext --jobs $threads develop
+
+#WORKDIR /synthesis/prerequisites/cvc5
+#RUN ./configure.sh --prefix="." --auto-download --python-bindings
+#WORKDIR /synthesis/prerequisites/cvc5/build
+#RUN make --jobs $threads
+#RUN make install
+
+# build storm, set the path
+WORKDIR /synthesis/storm/build
 RUN cmake ..
-RUN make storm-main storm-synthesis storm-dft --jobs $no_threads
+RUN make storm-main storm-synthesis --jobs $threads
+ENV PATH="/synthesis/storm/build/bin:$PATH"
 
 # build stormpy
-WORKDIR /opt/paynt/stormpy
-RUN python3 setup.py build_ext --storm-dir /opt/paynt/storm/build --jobs $no_threads develop
+WORKDIR /synthesis/stormpy
+RUN python3 setup.py build_ext --storm-dir /synthesis/storm/build --jobs $threads develop
 
-# set the starting folder
-WORKDIR /opt/paynt
+# set the initial folder
+WORKDIR /synthesis/paynt
+
+# (CAV'23) download the experiment scripts
+RUN git clone https://github.com/TheGreatfpmK/CAV23-POMDP-benchmark.git experiments
 
