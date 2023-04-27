@@ -162,6 +162,6 @@ synthesis-install() {
     storm-build
     stormpy-build
 
-    paynt-install
+    # paynt-install
 }
 
