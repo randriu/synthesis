@@ -1,10 +1,11 @@
 # the docker image can be built by executing:
-# docker build -t yourusername/paynt .
+# docker build -t <image-name> .
 # to enable multi-thread compilation, use --build-arg threads=<value>
 
 FROM ubuntu
 MAINTAINER Roman Andriushchenko <iandri@fit.vut.cz>
 ARG threads=1
+
 
 # execute bash when running the container
 ENTRYPOINT ["/bin/bash"]
@@ -18,6 +19,7 @@ RUN apt install -y build-essential git automake cmake libboost-all-dev libcln-de
 RUN apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
 RUN apt -y install texlive-pictures
 RUN pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build
+
 
 # main directory
 WORKDIR /synthesis
@@ -42,13 +44,15 @@ RUN make lib_carl --jobs $threads
 WORKDIR /synthesis/prerequisites/pycarl
 RUN python3 setup.py build_ext --jobs $threads develop
 
+# building cvc5 is slow and hybrid is rarely used, so we skip it and use z3 instead
 #WORKDIR /synthesis/prerequisites/cvc5
 #RUN ./configure.sh --prefix="." --auto-download --python-bindings
 #WORKDIR /synthesis/prerequisites/cvc5/build
 #RUN make --jobs $threads
 #RUN make install
 
-# build storm, set the path
+
+# build storm
 WORKDIR /synthesis/storm/build
 RUN cmake ..
 RUN make storm-main storm-synthesis --jobs $threads
@@ -63,4 +67,6 @@ WORKDIR /synthesis/paynt
 
 # (CAV'23) download the experiment scripts
 RUN git clone https://github.com/TheGreatfpmK/CAV23-POMDP-benchmark.git experiments
+# the image can be run as follows to mount the folder containing the experiment output:
+# docker run -v `pwd`/output:/synthesis/paynt/experiments/output --rm -it <image-name>
 
