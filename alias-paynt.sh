@@ -30,9 +30,9 @@ alias envd='deactivate'
 
 storm-dependencies() {
     apt update
-    apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev || true
-    apt -y install texlive-latex-extra || true
-    apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv || true
+    apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
+    # apt -y install texlive-latex-extra
     # update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
 
@@ -47,8 +47,8 @@ prerequisites-download() {
 
 storm-download() {
     cd $SYNTHESIS
-    git clone --branch pomdp-api git@github.com:randriu/storm.git storm
-    git clone --branch pomdp-api git@github.com:randriu/stormpy.git stormpy
+    git clone --branch synthesis git@github.com:randriu/storm.git storm
+    git clone --branch synthesis git@github.com:randriu/stormpy.git stormpy
     cd -
 }
 
