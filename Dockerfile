@@ -1,14 +1,17 @@
 # base Dockerfile for using PAYNT
-# the docker image can be built by executing:
-# $ docker build -t yourusername/paynt .
 # credit to Matthias Volk (m.volk@utwente.nl) for original stormpy Dockerfile
+
+# the docker image can be built by executing:
+# docker build -t yourusername/paynt .
+
+# to enable multi-core compilation, use --build-arg no_threads=<value>
+
+# since apt-get doesn't work properly in this version,
+# sometimes I'm using "|| true" to make sure the command succeeds 
 
 FROM movesrwth/stormpy:1.7.0
 MAINTAINER Roman Andriushchenko <iandri@fit.vut.cz>
 
-# this argument enables multi-core compilation
-# you may set it from the command line using --build-arg no_threads=<value>, e.g.
-# docker build -t may/paynt . --build-arg no_threads=8
 ARG no_threads=1
 
 # main folder
@@ -19,12 +22,12 @@ RUN rm -rf storm
 RUN rm -rf stormpy
 
 # prerequisites
-#RUN apt-get update
-#RUN apt-get -y install texlive; exit 0
+RUN apt-get update
+RUN apt-get -y install texlive-full || true
 RUN pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build
 
 
-# download paynt, storm & stormpy
+# download paynt, storm and stormpy
 RUN git clone https://github.com/randriu/synthesis.git paynt
 WORKDIR /opt/paynt
 RUN git clone -b pomdp-api https://github.com/randriu/storm.git storm
