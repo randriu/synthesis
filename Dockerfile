@@ -65,8 +65,6 @@ RUN python3 setup.py build_ext --storm-dir /synthesis/storm/build --jobs $thread
 # set the initial folder
 WORKDIR /synthesis/paynt
 
-# (CAV'23) download the experiment scripts
+# (CAV'23) download the evaluating scripts
 RUN git clone https://github.com/TheGreatfpmK/CAV23-POMDP-benchmark.git experiments
-# the image can be run as follows to mount the folder containing the experiment output:
-# docker run -v `pwd`/output:/synthesis/paynt/experiments/output --rm -it <image-name>
 
