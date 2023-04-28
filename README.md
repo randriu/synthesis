@@ -10,6 +10,7 @@ Most of the algorithms are described in
 - [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
 - [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
 - [5] Inductive Synthesis of Finite-State Controllers for POMDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, UAI 2022.
+- [6] Search and Explore: Symbiotic Policy Synthesis in POMDPs by Roman Andriushchenko, Alexander Bork, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, Filip Macak, CAV 2023.
 
 
 ## Installation
@@ -58,6 +59,18 @@ Options associated with the synthesis of finite-state controllers (FSCs) for a P
 - ``--filetype [prism|drn|pomdp]``: input file format [default: ``prism``]
 - ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
 - ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
+- ``--posterior-aware``: enables the synthesis of posterior aware FSCs
+
+SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy are needed):
+- ``--storm-pomdp``: enables the use of Storm features, this flag is necessary for the other options in this section to work
+- ``--iterative-storm INTEGER INTEGER INTEGER``: runs the SAYNT algorithm, the parameters represent overall timeout, paynt timeout, storm timeout respectivelly. The recommended parameters for 15 minute runtime are 900 60 10
+- ``--get-storm-result INTEGER``: runs PAYNT for specified amount of seconds and then runs Storm using the computed FSC at cut-offs
+- ``--storm-options [cutoff|clip2|clip4|overapp|5mil|10mil|20mil|refine]``: sets the options for Storm [default: ``cutoff``]
+- ``--prune-storm``: if enabled Storm results are used to prune the family of FSCs
+- ``--unfold-strategy-storm [paynt|storm|cutoff]``: sets how the memory is unfolded [default: ``storm``]
+- ``--use-storm-cutoffs``: if enabled the actions from cut-offs are considered in the prioritization and unfolding
+- ``--export-fsc-paynt PATH``: stores the best found FSC from PAYNT to specified file
+- ``--export-fsc-storm PATH``: stores the best found FSC from Storm to specified file
 
 Other options:
 - ``--help``: shows the help message of the PAYNT and aborts
@@ -73,6 +86,8 @@ python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0
 python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
 python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
 timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
+python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --filetype=drn --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The python environment can be deactivated by runnning
