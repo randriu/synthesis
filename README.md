@@ -105,7 +105,7 @@ Building in the debug mode using the commands above also disables link-time opti
 
 
 
-# PAYNT tutorial (TBD)
+# PAYNT tutorial
 
 For instance, here is a simple PAYNT call:
 
