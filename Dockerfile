@@ -15,9 +15,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # install dependencies
 RUN apt update
-RUN apt install -y build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
-RUN apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
-RUN apt -y install texlive-pictures
+RUN apt install -y build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev   maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv   vim texlive-pictures
 RUN pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build
 
 
