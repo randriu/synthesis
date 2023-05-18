@@ -1,0 +1,332 @@
+######################################################################
+# bridge-repair.POMDP
+#
+# Bridge maintenace problem by Ellis, et al.
+#
+# Assumes that at each time point a repair action is selected (which
+# yields the state transitions) and then an inspection action is
+# taken, which yields the observations.
+# Weirdness of the way I specify the model means I need to
+# cross-product of both action sets.
+
+discount: 0.99999
+values: cost
+
+states: 
+	less-5
+	between-5-15
+	between-15-25
+	more-25
+	failed
+
+actions:
+
+# repair actions
+#	no-repair
+#	clean-paint
+#	paint-strengthen
+#	structural-repair
+
+# inspection actions
+#	no-inspect
+#	visual-inspect
+#	ut-inspect
+
+no-repair-and-no-inspect
+no-repair-and-visual-inspect
+no-repair-and-ut-inspect
+
+clean-paint-and-no-inspect
+clean-paint-and-visual-inspect
+clean-paint-and-ut-inspect
+
+paint-strengthen-and-no-inspect
+paint-strengthen-and-visual-inspect
+paint-strengthen-and-ut-inspect
+
+structural-repair-and-no-inspect
+structural-repair-and-visual-inspect
+structural-repair-and-ut-inspect
+
+observations: 5
+
+######################################################################
+# no-repair transitions
+
+T: no-repair-and-no-inspect
+0.80	0.13	0.02	0.00	0.05
+0.00	0.70	0.17	0.05	0.08
+0.00	0.00	0.75	0.15	0.10
+0.00	0.00	0.00	0.60	0.40
+0.00	0.00	0.00	0.00	1.00
+
+T: no-repair-and-visual-inspect
+0.80	0.13	0.02	0.00	0.05
+0.00	0.70	0.17	0.05	0.08
+0.00	0.00	0.75	0.15	0.10
+0.00	0.00	0.00	0.60	0.40
+0.00	0.00	0.00	0.00	1.00
+
+T: no-repair-and-ut-inspect
+0.80	0.13	0.02	0.00	0.05
+0.00	0.70	0.17	0.05	0.08
+0.00	0.00	0.75	0.15	0.10
+0.00	0.00	0.00	0.60	0.40
+0.00	0.00	0.00	0.00	1.00
+
+######################################################################
+# clean-paint transitions
+
+T: clean-paint-and-no-inspect
+0.80	0.13	0.02	0.00	0.05
+0.00	0.80	0.10	0.02	0.08
+0.00	0.00	0.80	0.10	0.10
+0.00	0.00	0.00	0.60	0.40
+0.00	0.00	0.00	0.00	1.00
+
+T: clean-paint-and-visual-inspect
+0.80	0.13	0.02	0.00	0.05
+0.00	0.80	0.10	0.02	0.08
+0.00	0.00	0.80	0.10	0.10
+0.00	0.00	0.00	0.60	0.40
+0.00	0.00	0.00	0.00	1.00
+
+T: clean-paint-and-ut-inspect
+0.80	0.13	0.02	0.00	0.05
+0.00	0.80	0.10	0.02	0.08
+0.00	0.00	0.80	0.10	0.10
+0.00	0.00	0.00	0.60	0.40
+0.00	0.00	0.00	0.00	1.00
+
+######################################################################
+# paint-strengthen transitions
+
+T: paint-strengthen-and-no-inspect
+0.80	0.13	0.02	0.00	0.05
+0.19	0.65	0.08	0.02	0.06
+0.10	0.20	0.56	0.08	0.06
+0.00	0.10	0.25	0.55	0.10
+0.00	0.00	0.00	0.00	1.00
+
+T: paint-strengthen-and-visual-inspect
+0.80	0.13	0.02	0.00	0.05
+0.19	0.65	0.08	0.02	0.06
+0.10	0.20	0.56	0.08	0.06
+0.00	0.10	0.25	0.55	0.10
+0.00	0.00	0.00	0.00	1.00
+
+T: paint-strengthen-and-ut-inspect
+0.80	0.13	0.02	0.00	0.05
+0.19	0.65	0.08	0.02	0.06
+0.10	0.20	0.56	0.08	0.06
+0.00	0.10	0.25	0.55	0.10
+0.00	0.00	0.00	0.00	1.00
+
+######################################################################
+# structural-repair transitions
+
+T: structural-repair-and-no-inspect
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+
+T: structural-repair-and-visual-inspect
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+
+T: structural-repair-and-ut-inspect
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+0.80	0.13	0.02	0.00	0.05
+
+######################################################################
+# no-inspect observations
+
+O: no-repair-and-no-inspect
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+
+O: clean-paint-and-no-inspect
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+
+O: paint-strengthen-and-no-inspect
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+
+O: structural-repair-and-no-inspect
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+1.00	0.00 0.00	0.00 0.00	
+
+######################################################################
+# visual-inspect observations
+
+O: no-repair-and-visual-inspect
+0.80 0.20	0.00	0.00 0.00	
+0.20	0.60	0.20	0.00 0.00	
+0.05	0.70	0.25	0.00 0.00	
+0.00	0.30	0.70	0.00 0.00	
+0.00 0.00 1.00	0.00 0.00	
+
+O: clean-paint-and-visual-inspect
+0.80 0.20	0.00	0.00 0.00	
+0.20	0.60	0.20	0.00 0.00	
+0.05	0.70	0.25	0.00 0.00	
+0.00	0.30	0.70	0.00 0.00	
+0.00 0.00 1.00	0.00 0.00	
+
+O: paint-strengthen-and-visual-inspect
+0.80 0.20	0.00	0.00 0.00	
+0.20	0.60	0.20	0.00 0.00	
+0.05	0.70	0.25	0.00 0.00	
+0.00	0.30	0.70	0.00 0.00	
+0.00 0.00 1.00	0.00 0.00	
+
+O: structural-repair-and-visual-inspect
+0.80 0.20	0.00	0.00 0.00	
+0.20	0.60	0.20	0.00 0.00	
+0.05	0.70	0.25	0.00 0.00	
+0.00	0.30	0.70	0.00 0.00	
+0.00 0.00 1.00	0.00 0.00	
+
+######################################################################
+# ut-inspect observations
+
+O: no-repair-and-ut-inspect
+0.90 0.10 0.00 0.00 0.00
+0.05 0.90 0.05 0.00 0.00
+0.00 0.05 0.90 0.05 0.00
+0.00 0.00 0.05 0.90 0.05
+0.00 0.00 0.00 0.00 1.00
+
+O: clean-paint-and-ut-inspect
+0.90 0.10 0.00 0.00 0.00
+0.05 0.90 0.05 0.00 0.00
+0.00 0.05 0.90 0.05 0.00
+0.00 0.00 0.05 0.90 0.05
+0.00 0.00 0.00 0.00 1.00
+
+O: paint-strengthen-and-ut-inspect
+0.90 0.10 0.00 0.00 0.00
+0.05 0.90 0.05 0.00 0.00
+0.00 0.05 0.90 0.05 0.00
+0.00 0.00 0.05 0.90 0.05
+0.00 0.00 0.00 0.00 1.00
+
+O: structural-repair-and-ut-inspect
+0.90 0.10 0.00 0.00 0.00
+0.05 0.90 0.05 0.00 0.00
+0.00 0.05 0.90 0.05 0.00
+0.00 0.00 0.05 0.90 0.05
+0.00 0.00 0.00 0.00 1.00
+
+######################################################################
+# inspection rewards
+#
+#R: no-inspect : * : * : * 0
+#R: visual-inspect : * : * : * 4
+#R: ut-inspect : * : * : * 18
+
+######################################################################
+# no-repair rewards
+
+R: no-repair-and-no-inspect : less-5 : * : * 0
+R: no-repair-and-no-inspect : between-5-15 : * : * 0
+R: no-repair-and-no-inspect : between-15-25 : * : * 0
+R: no-repair-and-no-inspect : more-25 : * : * 300
+R: no-repair-and-no-inspect : failed : * : * 2000
+
+R: no-repair-and-visual-inspect : less-5 : * : * 4
+R: no-repair-and-visual-inspect : between-5-15 : * : * 4
+R: no-repair-and-visual-inspect : between-15-25 : * : * 4
+R: no-repair-and-visual-inspect : more-25 : * : * 304
+R: no-repair-and-visual-inspect : failed : * : * 2004
+
+R: no-repair-and-ut-inspect : less-5 : * : * 18
+R: no-repair-and-ut-inspect : between-5-15 : * : * 18
+R: no-repair-and-ut-inspect : between-15-25 : * : * 18
+R: no-repair-and-ut-inspect : more-25 : * : * 318
+R: no-repair-and-ut-inspect : failed : * : * 2018
+
+######################################################################
+# clean-paint rewards
+
+R: clean-paint-and-no-inspect : less-5 : * : * 5
+R: clean-paint-and-no-inspect : between-5-15 : * : * 8
+R: clean-paint-and-no-inspect : between-15-25 : * : * 15
+R: clean-paint-and-no-inspect : more-25 : * : * 320
+R: clean-paint-and-no-inspect : failed : * : * 2050
+
+R: clean-paint-and-visual-inspect : less-5 : * : * 9
+R: clean-paint-and-visual-inspect : between-5-15 : * : * 12
+R: clean-paint-and-visual-inspect : between-15-25 : * : * 19
+R: clean-paint-and-visual-inspect : more-25 : * : * 324
+R: clean-paint-and-visual-inspect : failed : * : * 2054
+
+R: clean-paint-and-ut-inspect : less-5 : * : * 23
+R: clean-paint-and-ut-inspect : between-5-15 : * : * 26
+R: clean-paint-and-ut-inspect : between-15-25 : * : * 33
+R: clean-paint-and-ut-inspect : more-25 : * : * 338
+R: clean-paint-and-ut-inspect : failed : * : * 2068
+
+######################################################################
+# paint-strengthen rewards
+
+R: paint-strengthen-and-no-inspect : less-5 : * : * 25
+R: paint-strengthen-and-no-inspect : between-5-15 : * : * 80
+R: paint-strengthen-and-no-inspect : between-15-25 : * : * 100
+R: paint-strengthen-and-no-inspect : more-25 : * : * 450
+R: paint-strengthen-and-no-inspect : failed : * : * 2500
+
+R: paint-strengthen-and-visual-inspect : less-5 : * : * 29
+R: paint-strengthen-and-visual-inspect : between-5-15 : * : * 84
+R: paint-strengthen-and-visual-inspect : between-15-25 : * : * 104
+R: paint-strengthen-and-visual-inspect : more-25 : * : * 454
+R: paint-strengthen-and-visual-inspect : failed : * : * 2504
+
+R: paint-strengthen-and-ut-inspect : less-5 : * : * 43
+R: paint-strengthen-and-ut-inspect : between-5-15 : * : * 98
+R: paint-strengthen-and-ut-inspect : between-15-25 : * : * 118
+R: paint-strengthen-and-ut-inspect : more-25 : * : * 468
+R: paint-strengthen-and-ut-inspect : failed : * : * 2518
+
+######################################################################
+# structural-repair rewards
+
+R: structural-repair-and-no-inspect : less-5 : * : * 40
+R: structural-repair-and-no-inspect : between-5-15 : * : * 120
+R: structural-repair-and-no-inspect : between-15-25 : * : * 550
+R: structural-repair-and-no-inspect : more-25 : * : * 800
+R: structural-repair-and-no-inspect : failed : * : * 4000
+
+R: structural-repair-and-visual-inspect : less-5 : * : * 44
+R: structural-repair-and-visual-inspect : between-5-15 : * : * 124
+R: structural-repair-and-visual-inspect : between-15-25 : * : * 554
+R: structural-repair-and-visual-inspect : more-25 : * : * 804
+R: structural-repair-and-visual-inspect : failed : * : * 4004
+
+R: structural-repair-and-ut-inspect : less-5 : * : * 58
+R: structural-repair-and-ut-inspect : between-5-15 : * : * 138
+R: structural-repair-and-ut-inspect : between-15-25 : * : * 568
+R: structural-repair-and-ut-inspect : more-25 : * : * 818
+R: structural-repair-and-ut-inspect : failed : * : * 4018
+

@@ -1,0 +1,47 @@
+# This example is from Parr and Russell's paper on the SPOVA RL
+# algorithm from IJCAI'95.
+
+discount: 0.95
+values: reward
+states: I hi-A lo-A C D plus1 minus1
+actions: a b c
+observations: I A C D plus1 minus1
+
+start include: I
+
+T : * : I : hi-A 0.5
+T : * : I : lo-A 0.5
+
+T : a : hi-A : C 1.0
+T : b : hi-A : minus1 1.0
+T : c : hi-A : plus1 1.0
+
+T : a : lo-A : D 1.0
+T : b : lo-A : plus1 1.0
+T : c : lo-A : minus1 1.0
+
+T : a : C : hi-A 1.0
+T : b : C : I 1.0
+T : c : C : I 1.0
+
+T : a : D : lo-A 1.0
+T : b : D : I 1.0
+T : c : D : I 1.0
+
+T : * : plus1 : I 1.0
+
+T : * : minus1 : I 1.0
+
+O : * : I : I 1.0
+O : * : hi-A : A 1.0
+O : * : lo-A : A 1.0
+O : * : C : C 1.0
+O : * : D : D 1.0
+O : * : plus1 : plus1 1.0
+O : * : minus1 : minus1 1.0
+
+# The paper has +1 and -1, but the SPOVA stuff requires 
+# non-negative rewards
+R: * : plus1 : * : * 2.0
+R: * : minus1 : * : * 0.0
+

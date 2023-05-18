@@ -1,6 +1,7 @@
 from stormpy import pomdp
 from .synthesizer import Synthesizer
 from ..quotient.storm_pomdp_control import StormPOMDPControl
+from os import makedirs
 
 from time import sleep
 
@@ -23,6 +24,8 @@ class SynthesizerARStorm(Synthesizer):
 
     storm_control = None
     s_queue = None
+
+    saynt_timer = None
 
     @property
     def method_name(self):
@@ -80,6 +83,16 @@ class SynthesizerARStorm(Synthesizer):
         #print(improving_assignment)
         #print(improving_value, can_improve)
         if improving_value is not None:
+            if self.saynt_timer is not None:
+                print(f'-----------PAYNT----------- \
+                    \nValue = {improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.quotient.policy_size(improving_assignment)}\n', flush=True)
+                if self.storm_control.export_fsc_paynt is not None:
+                    makedirs(self.storm_control.export_fsc_paynt, exist_ok=True)
+                    with open(self.storm_control.export_fsc_paynt + "/paynt.fsc", "w") as text_file:
+                        print(improving_assignment, file=text_file)
+                        text_file.close()
+            else:
+                self.stat.new_fsc_found(improving_value, improving_assignment, self.quotient.policy_size(improving_assignment))
             self.quotient.specification.optimality.update_optimum(improving_value)
         # print(res, can_improve)
         # print(res.optimality_result.primary.result.get_values())
@@ -137,6 +150,7 @@ class SynthesizerARStorm(Synthesizer):
                         self.storm_control.latest_paynt_result = satisfying_assignment
                         self.storm_control.paynt_export = self.quotient.extract_policy(satisfying_assignment)
                         self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
+                        self.storm_control.paynt_fsc_size = self.quotient.policy_size(self.storm_control.latest_paynt_result)
                         self.storm_control.update_data()
                     logger.info("Pausing synthesis")
                     self.s_queue.get()

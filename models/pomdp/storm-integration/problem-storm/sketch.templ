@@ -1,0 +1,25 @@
+pomdp
+
+formula goal = x=3;
+
+observable "in" = x=0;
+observable "o0" = x=1 | x=2;
+observable "goal" = goal;
+
+module test
+
+    x : [0..3] init 0;
+
+    [in]  x=0 -> 0.5: (x'=1) + 0.5: (x'=2);
+
+    [l]   x=1 -> 0.5: (x'=3) + 0.5: (x'=1);
+    [r]   x=1 -> 0.5: (x'=1) + 0.5: (x'=2);
+    [l]   x=2 -> 0.5: (x'=2) + 0.5: (x'=1);
+    [r]   x=2 -> 0.5: (x'=3) + 0.5: (x'=2);       
+
+
+endmodule
+
+rewards "steps"
+    true: 1;
+endrewards

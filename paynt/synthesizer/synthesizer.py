@@ -22,6 +22,8 @@ class Synthesizer:
     def synthesize(self, family = None):
         logger.info("Synthesis initiated.")
         self.stat.start()
+        if not self.stat.whole_synthesis_timer.running:
+            self.stat.whole_synthesis_timer.start()
 
         if family is None:
             family = self.quotient.design_space

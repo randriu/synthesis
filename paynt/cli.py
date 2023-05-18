@@ -112,6 +112,11 @@ def setup_logger(log_path = None):
     show_default=True,
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
 
+@click.option("--export-fsc-storm", type=click.Path(), default=None,
+    help="path to output file for SAYNT belief FSC")
+@click.option("--export-fsc-paynt", type=click.Path(), default=None,
+    help="path to output file for SAYNT inductive FSC")
+
 #@click.option("--storm-parallel", is_flag=True, default=False,
 #    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
 
@@ -138,7 +143,8 @@ def paynt(
         use_storm_cutoffs, unfold_strategy_storm,
         ce_generator,
         pomcp,
-        profiling
+        profiling,
+        export_fsc_storm, export_fsc_paynt
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -169,6 +175,8 @@ def paynt(
             storm_control.iteration_timeout, storm_control.paynt_timeout, storm_control.storm_timeout = iterative_storm
         storm_control.use_cutoffs = use_storm_cutoffs
         storm_control.unfold_strategy_storm = unfold_strategy_storm
+        storm_control.export_fsc_storm = export_fsc_storm
+        storm_control.export_fsc_paynt = export_fsc_paynt
     else:
         storm_control = None
 

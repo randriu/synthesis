@@ -1,0 +1,30 @@
+# Stochastic version of Michael's 1D maze
+
+discount: 0.75
+values: reward
+states: left middle right goal
+actions: w0 e0 
+observations: nothing goal
+
+start: 
+0.333333 0.333333 0.333334 0.0
+
+T: w0
+0.9 0.1 0.0 0.0 
+0.9 0.0 0.0 0.1 
+0.0 0.0 0.1 0.9 
+0.333333 0.333334 0.333333 0.0
+
+T: e0
+0.1 0.9 0.0 0.0 
+0.1 0.0 0.0 0.9 
+0.0 0.0 0.9 0.1 
+0.333334 0.333333 0.333333 0.0
+
+O: * 
+1.0 0.0 
+1.0 0.0 
+1.0 0.0 
+0.0 1.0 
+
+R: * : * : goal : goal 1.0
