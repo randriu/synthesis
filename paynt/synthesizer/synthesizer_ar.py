@@ -40,7 +40,6 @@ class SynthesizerAR(Synthesizer):
         while families:
 
             family = families.pop(-1)
-            family.parent_info = None
 
             self.verify_family(family)
             can_improve,improving_assignment = self.analyze_family(family)
@@ -78,7 +77,6 @@ class SynthesizerAR(Synthesizer):
             for family in families:
                 if family.analysis_result is not None:
                     continue
-                family.parent_info = None
                 self.verify_family(family)
                 _,improving_assignment = self.analyze_family(family)
                 if improving_assignment is not None:

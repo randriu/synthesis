@@ -59,13 +59,17 @@ class MdpColoring:
 
     
     def select_actions(self, family):
-        ''' Select non-default actions relevant in the provided design space. '''
+        '''
+        Select non-default actions relevant in the provided design space.
+        @return  a bitvector of all selected actions
+        '''
 
 
         hole_selected_actions = None
         selected_actions = None
 
         if not self.coloring_is_simple:
+
             if family.parent_info is None:
                 # select from the super-quotient
                 selected_actions = []
