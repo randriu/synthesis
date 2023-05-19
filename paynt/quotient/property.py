@@ -14,8 +14,9 @@ class Property:
     float_precision = 1e-10
     
     ''' Wrapper over a stormpy property. '''
-    def __init__(self, prop):
+    def __init__(self, prop, discount_factor=1):
         self.property = prop
+        self.discount_factor = discount_factor
         rf = prop.raw_formula
 
         # use comparison type to deduce optimizing direction
@@ -99,7 +100,7 @@ class Property:
         logger.info("converting until formula to eventually...")
         formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
-        self.__init__(prop)
+        self.__init__(prop, self.discount_factor)
 
     @property
     def can_be_improved(self):
@@ -112,7 +113,7 @@ class OptimalityProperty(Property):
     Optimality property can remember current optimal value and adapt the
     corresponding threshold wrt epsilon.
     '''
-    def __init__(self, prop, epsilon = None):
+    def __init__(self, prop, discount_factor=1, epsilon=None):
         self.property = prop
         rf = prop.raw_formula
 
@@ -173,7 +174,7 @@ class OptimalityProperty(Property):
         logger.info("converting until formula to eventually...")
         formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
-        self.__init__(prop, self.epsilon)
+        self.__init__(prop, self.discount_factor, self.epsilon)
 
     @property
     def can_be_improved(self):

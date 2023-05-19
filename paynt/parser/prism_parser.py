@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 class PrismParser:
 
     @classmethod
-    def read_prism(cls, sketch_path, constant_str, properties_path, relative_error):
+    def read_prism(cls, sketch_path, properties_path, relative_error, discount_factor):
 
         # parse the program
+        constant_str = ''
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
         expression_parser = stormpy.storage.ExpressionParser(prism.expression_manager)
         expression_parser.set_identifier_mapping(dict())
@@ -28,7 +29,7 @@ class PrismParser:
         # parse constants
         constant_map = None
         if constant_str != '':
-            logger.info(f"assuming constant definitions '{constant_str}' ...")
+            logger.info(f"assuming constant definitions '{constant_str}'...")
             constant_map = PrismParser.map_constants(prism, expression_parser, constant_str)
             prism = prism.define_constants(constant_map)
             prism = prism.substitute_constants()
@@ -41,7 +42,7 @@ class PrismParser:
             prism, hole_expressions, holes = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
 
-        specification = PrismParser.parse_specification(properties_path, relative_error, prism, constant_map)
+        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism, constant_map)
 
         # construct the quotient
         coloring = None
@@ -156,14 +157,12 @@ class PrismParser:
         # substitute trivial holes
         prism = prism.define_constants(trivial_holes_definitions)
         prism = prism.substitute_constants()
-    
-        holes
 
         return prism, hole_expressions, holes
 
  
     @classmethod
-    def parse_specification(cls, properties_path, relative_error, prism = None, constant_map = None):
+    def parse_specification(cls, properties_path, relative_error, discount_factor, prism = None, constant_map = None):
 
         logger.info(f"loading properties from {properties_path} ...")
         lines = ""
@@ -196,9 +195,9 @@ class PrismParser:
                 optimality.raw_formula.substitute(constant_map)
 
         # wrap properties
-        constraints = [Property(p) for p in constraints]
+        constraints = [Property(p,discount_factor) for p in constraints]
         if optimality is not None:
-            optimality = OptimalityProperty(optimality, relative_error)
+            optimality = OptimalityProperty(optimality, discount_factor, relative_error)
         specification = Specification(constraints,optimality)
 
         logger.info(f"found the following specification: {specification}")

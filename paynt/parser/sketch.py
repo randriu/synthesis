@@ -52,7 +52,9 @@ class Sketch:
 
     @classmethod
     def load_sketch(self, sketch_path, filetype, export,
-        properties_path, constant_str, relative_error):
+        properties_path, relative_error, discount_factor):
+
+        assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
 
         explicit_quotient = None
         specification = None
@@ -61,11 +63,31 @@ class Sketch:
         decpomdp_manager = None
 
         logger.info(f"loading sketch from {sketch_path} ...")
-        if filetype == "prism":
-            explicit_quotient, specification, coloring, jani_unfolder = PrismParser.read_prism(sketch_path, constant_str, properties_path, relative_error)
-        elif filetype == "drn":
-            explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
-            specification = PrismParser.parse_specification(properties_path, relative_error)
+        if filetype == "prism" or filetype == "drn":
+            if filetype == "prism":
+                explicit_quotient, specification, coloring, jani_unfolder = PrismParser.read_prism(
+                    sketch_path, properties_path, relative_error, discount_factor)
+            elif filetype == "drn":
+                explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
+                specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
+            
+            assert specification is not None
+            if discount_factor < 1:
+                logger.info("applying discount factor transformation")
+                assert specification.is_single_property and specification.all_properties()[0].reward, \
+                    "non-trivial discount factor can only be used in combination with a single reward property"
+                assert explicit_quotient.is_partially_observable, \
+                    "non-trivial discount factor can only be used for POMDPs (for now...)"
+                prop = specification.all_properties()[0]
+                reward_name = prop.formula.reward_name
+                target_label = str(prop.formula.subformula.subformula)
+                subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(explicit_quotient, reward_name, target_label)
+                subpomdp_builder.set_discount_factor(discount_factor)
+                initial_distribution = {explicit_quotient.initial_states[0] : 1}
+                relevant_observations = stormpy.storage.BitVector(explicit_quotient.nr_observations,True)
+                subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
+                explicit_quotient = subpomdp_builder.restrict_pomdp(initial_distribution)
+                logger.debug('WARNING: discount factor transformation has not been properly tested')
         else: # filetype == "cassandra"
             decpomdp_manager = stormpy.synthesis.parse_decpomdp(sketch_path)
             logger.info("applying discount factor transformation...")
@@ -77,7 +99,6 @@ class Sketch:
                 decpomdp_manager.discount_sink_label)
             specification = paynt.quotient.property.Specification([],optimality)
              
-        assert specification is not None
         MarkovChain.initialize(specification)
         
         make_rewards_action_based(explicit_quotient)

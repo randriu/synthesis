@@ -59,9 +59,10 @@ def setup_logger(log_path = None):
     help="name of the sketch file in the project")
 @click.option("--props", default="sketch.props", show_default=True,
     help="name of the properties file in the project")
-@click.option("--constants", default="", help="constant assignment string")
 @click.option("--relative-error", type=click.FLOAT, default="0", show_default=True,
     help="relative error for optimal synthesis")
+@click.option("--discount-factor", type=click.FLOAT, default="1", show_default=True,
+    help="discount factor")
 
 @click.option("--filetype",
     type=click.Choice(['prism', 'drn', 'cassandra']),
@@ -133,18 +134,18 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt(
-        project, sketch, props, constants, relative_error,
-        filetype, export,
-        method,
-        incomplete_search,
-        fsc_synthesis, pomdp_memory_size, posterior_aware,
-        fsc_export_result,
-        storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
-        use_storm_cutoffs, unfold_strategy_storm,
-        ce_generator,
-        pomcp,
-        profiling,
-        export_fsc_storm, export_fsc_paynt
+    project, sketch, props, relative_error, discount_factor,
+    filetype, export,
+    method,
+    incomplete_search,
+    fsc_synthesis, pomdp_memory_size, posterior_aware,
+    fsc_export_result,
+    storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
+    use_storm_cutoffs, unfold_strategy_storm,
+    ce_generator,
+    pomcp,
+    profiling,
+    export_fsc_storm, export_fsc_paynt
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -164,8 +165,9 @@ def paynt(
         raise ValueError(f"the properties file {properties_path} does not exist")
 
     quotient = Sketch.load_sketch(sketch_path, filetype, export,
-        properties_path, constants, relative_error)
+        properties_path, relative_error, discount_factor)
 
+    storm_control = None
     if storm_pomdp:
         storm_control = StormPOMDPControl()
         storm_control.storm_options = storm_options
@@ -177,8 +179,6 @@ def paynt(
         storm_control.unfold_strategy_storm = unfold_strategy_storm
         storm_control.export_fsc_storm = export_fsc_storm
         storm_control.export_fsc_paynt = export_fsc_paynt
-    else:
-        storm_control = None
 
     if pomcp:
         from paynt.simulation.pomcp import POMCP
