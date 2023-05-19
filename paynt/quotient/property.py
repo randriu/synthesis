@@ -115,6 +115,7 @@ class OptimalityProperty(Property):
     '''
     def __init__(self, prop, discount_factor=1, epsilon=None):
         self.property = prop
+        self.discount_factor = discount_factor
         rf = prop.raw_formula
 
         # use comparison type to deduce optimizing direction
