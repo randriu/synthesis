@@ -13,8 +13,13 @@ import math, numpy
 
 import random
 
+# --- synthesis parameters ---
+only_synthesis = False
+memory_size = 2
+
+
 # --- simulation parameters ---
-simulation_iterations = 100
+num_simulations = 1
 discount_factor = 0.9
 precision = 1e-1
 
@@ -24,18 +29,15 @@ action_oracle_type = "fsc"
 
 
 # --- MCTS parameters ---
-exploration_iterations = 20
+num_explorations = 20
 exploration_constant_ucb = 10000
 mcts_rollouts = True
 
 
 # --- FSC parameters ---
-only_synthesis = False
-
 fsc_recomputation_frequency = 10
 fsc_rollouts = False
 fsc_use_cache = True
-memory_size = 2
 
 # observation_selection = "all observations"
 observation_selection = "visited observations"
@@ -192,7 +194,7 @@ class ActionOracleMcts(ActionOracleRandom):
         super().__init__(pomcp)
         
         # MCTS parameters
-        self.exploration_iterations = exploration_iterations
+        self.num_explorations = num_explorations
         self.exploration_horizon = self.pomcp.effective_horizon
         self.exploration_constant_ucb = exploration_constant_ucb
 
@@ -228,16 +230,12 @@ class ActionOracleMcts(ActionOracleRandom):
         action_evaluations = []
         for action,action_node in enumerate(belief_node.action_nodes):
             value = action_node.value
-            value_ucb = math.sqrt( math.log(belief_node.num_visits) / action_node.num_visits )
-            value_ucb *= self.exploration_constant_ucb
+            value_ucb = self.exploration_constant_ucb * math.sqrt( math.log(belief_node.num_visits) / action_node.num_visits )
             total_value = value + value_ucb
             action_evaluations.append(total_value)
         return self.best_action(action_evaluations)
 
-    def pick_action_execution(self, belief_node):
-        return self.pick_action_value(belief_node)
-
-
+    
     def predict_state_action_value(self, state, action, horizon):
         return self.simulated_model.state_action_rollout(state,action,horizon,self.discount_factor)
 
@@ -305,7 +303,7 @@ class ActionOracleMcts(ActionOracleRandom):
 
     def get_next_action(self, last_action, current_observation, simulation_step):
         self.reset_tree(last_action, current_observation)
-        for _ in range(self.exploration_iterations):
+        for _ in range(self.num_explorations):
             state = self.root.sample()
             self.explore(self.root, state, self.exploration_horizon)
         return self.pick_action_value(self.root)
@@ -356,7 +354,6 @@ class FSC:
 
 class ActionOracleSubpomdp(ActionOracleMcts):
 
-
     def __init__(self, pomcp):
         super().__init__(pomcp)
         self.subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, self.pomcp.reward_name, self.pomcp.target_label)
@@ -365,7 +362,6 @@ class ActionOracleSubpomdp(ActionOracleMcts):
 
         self.num_decisions = 0
         self.decisions_same = 0
-        self.decisions_different = 0
         self.decisions_mcts = 0
         self.decisions_fsc = 0
 
@@ -387,16 +383,14 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         super().reset()
         self.cache_reset()
 
-    def construct_trivial_policy_values(self):
+    def construct_trivial_policy(self):
         return collections.defaultdict(int)
     
     def cache_reset(self):
         ''' Fill state-memory-action cache with zeroes. '''
         if not fsc_use_cache:
             return
-        self.policy_values = []
-        trivial_values = self.construct_trivial_policy_values()
-        self.policy_values.append(trivial_values)
+        self.policy_values = [self.construct_trivial_policy()]
         
 
     def cache_update(self, quotient, assignment):
@@ -408,8 +402,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         dtmc = quotient.build_chain(assignment)
         mc_result = dtmc.check_specification(quotient.specification)
         dtmc_state_values = mc_result.optimality_result.result.get_values()
-
-        policy_values = [self.construct_trivial_policy_values() for memory in range(memory_size)]
+        policy_values = [self.construct_trivial_policy() for memory in range(memory_size)]
 
         # map states of a DTMC to states of its quotient to states of a sub-POMDP to states of the POMDP
         for state_dtmc,value in enumerate(dtmc_state_values):
@@ -420,7 +413,6 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
             memory = quotient.pomdp_manager.state_memory[quotient_state]
             policy_values[memory][pomdp_state] = value
-
         self.policy_values += policy_values
         # print(len(self.policy_values))
 
@@ -472,7 +464,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
     def predict_fsc_at_belief(self, belief_node, fsc):
         avg_path_reward = 0
         path_rewards = []
-        for simulation in range(self.exploration_iterations * 10):
+        for simulation in range(self.num_explorations * 10):
             rewards = []
             state = belief_node.sample()
             obs = belief_node.observation
@@ -488,6 +480,10 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         return numpy.mean(path_rewards)
 
 
+    def resynthesize(self, simulation_step, value_mcts):
+        if simulation_step % fsc_recomputation_frequency == 0:
+            self.fsc = self.synthesize(value_mcts)
+
     def get_next_action(self, last_action, current_observation, simulation_step):
 
         if self.fsc is not None and self.root is not None:
@@ -498,16 +494,14 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         self.reset_tree(last_action, current_observation)
 
         # run MCTS
-        for _ in range(self.exploration_iterations):
+        for _ in range(self.num_explorations):
             state = self.root.sample()
             self.explore(self.root, state, self.exploration_horizon)
         action_mcts = self.pick_action_value(self.root)
         value_mcts = self.root.action_nodes[action_mcts].value
 
-        if simulation_step % fsc_recomputation_frequency == 0:
-            # extract sub-POMDP from the tree
-            # print("\n")
-            self.fsc = self.synthesize(value_mcts)
+        self.resynthesize(simulation_step, value_mcts)
+
         
         action_fsc = self.fsc.suggest_action(self.root.observation)
 
@@ -520,7 +514,6 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         if action_mcts == action_fsc:
             self.decisions_same += 1
         else:
-            self.decisions_different += 1
             if value_mcts > value_fsc:
                 self.decisions_mcts += 1
             else:
@@ -574,6 +567,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         quotient = POMDPQuotientContainer(subpomdp, specification)
         quotient.set_imperfect_memory_size(memory_size)
         self.cache_apply(quotient)
+        exit()
 
         return quotient
 
@@ -748,11 +742,11 @@ class POMCP:
         # run simulations
         simulation_horizon = self.effective_horizon
         import progressbar
-        bar = progressbar.ProgressBar(maxval=simulation_iterations, \
+        bar = progressbar.ProgressBar(maxval=num_simulations, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage(), progressbar.AdaptiveETA()])
         bar.start()
         simulation_values = []
-        for simulation_iteration in range(simulation_iterations):
+        for simulation_iteration in range(num_simulations):
             simulation_value = self.run_simulation(simulation_horizon, action_oracle)
             simulation_values.append(simulation_value)
             bar.update(simulation_iteration)
@@ -761,10 +755,9 @@ class POMCP:
         simulation_value_avg = numpy.mean(simulation_values)
         # simulation_value_std = numpy.std(simulation_values)
 
-        print("{} simulations: mean value = {}".format(simulation_iterations,simulation_value_avg))
+        print("{} simulations: mean value = {}".format(num_simulations,simulation_value_avg))
 
         if isinstance(action_oracle, ActionOracleSubpomdp):
-            print("total ({}) = same ({}) + different ({})".format(action_oracle.num_decisions, action_oracle.decisions_same, action_oracle.decisions_different))
-            print("different ({}) = mcts ({}) + fsc ({})".format(action_oracle.decisions_different, action_oracle.decisions_mcts, action_oracle.decisions_fsc))
+            print("total ({}) = same ({}) + mcts ({}) + fsc ({})".format(action_oracle.num_decisions, action_oracle.decisions_same, action_oracle.decisions_mcts, action_oracle.decisions_fsc))
 
 

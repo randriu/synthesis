@@ -59,6 +59,7 @@ class Statistic:
         self.print_status()
 
     def new_fsc_found(self, value, assignment, size):
+        return
         print(f'-----------PAYNT----------- \
               \nValue = {value} | Time elapsed = {round(self.whole_synthesis_timer.read(),1)}s | FSC size = {size}\nFSC = {assignment}\n', flush=True)
 
