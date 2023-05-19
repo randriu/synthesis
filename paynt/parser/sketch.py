@@ -51,7 +51,7 @@ class Sketch:
 
 
     @classmethod
-    def load_sketch(self, sketch_path, filetype, export,
+    def load_sketch(self, sketch_path, export,
         properties_path, relative_error, discount_factor):
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
@@ -63,14 +63,43 @@ class Sketch:
         decpomdp_manager = None
 
         logger.info(f"loading sketch from {sketch_path} ...")
-        if filetype == "prism" or filetype == "drn":
-            if filetype == "prism":
-                explicit_quotient, specification, coloring, jani_unfolder = PrismParser.read_prism(
-                    sketch_path, properties_path, relative_error, discount_factor)
-            elif filetype == "drn":
+
+        filetype = None
+        try:
+            logger.info(f"assuming sketch in PRISM format...")
+            explicit_quotient, specification, coloring, jani_unfolder = PrismParser.read_prism(
+                        sketch_path, properties_path, relative_error, discount_factor)
+            filetype = "prism"
+        except SyntaxError:
+            pass
+        if filetype is None:
+            try:
+                logger.info(f"assuming sketch in DRN format...")
                 explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
                 specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
-            
+                filetype = "drn"
+            except SyntaxError:
+                pass
+        if filetype is None:
+            try:
+                logger.info(f"assuming sketch in Cassandra format...")
+                decpomdp_manager = stormpy.synthesis.parse_decpomdp(sketch_path)
+                logger.info("applying discount factor transformation...")
+                decpomdp_manager.apply_discount_factor_transformation()
+                explicit_quotient = decpomdp_manager.construct_pomdp()
+                optimality = paynt.quotient.property.construct_reward_property(
+                    decpomdp_manager.reward_model_name,
+                    decpomdp_manager.reward_minimizing,
+                    decpomdp_manager.discount_sink_label)
+                specification = paynt.quotient.property.Specification([],optimality)
+                filetype = "cassandra"
+            except SyntaxError:
+                pass
+
+        assert filetype is not None, "unknow format of input file"
+        logger.info("sketch parsing OK")
+
+        if filetype=="prism" or filetype =="drn":
             assert specification is not None
             if discount_factor < 1:
                 logger.info("applying discount factor transformation")
@@ -88,16 +117,6 @@ class Sketch:
                 subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
                 explicit_quotient = subpomdp_builder.restrict_pomdp(initial_distribution)
                 logger.debug('WARNING: discount factor transformation has not been properly tested')
-        else: # filetype == "cassandra"
-            decpomdp_manager = stormpy.synthesis.parse_decpomdp(sketch_path)
-            logger.info("applying discount factor transformation...")
-            decpomdp_manager.apply_discount_factor_transformation()
-            explicit_quotient = decpomdp_manager.construct_pomdp()
-            optimality = paynt.quotient.property.construct_reward_property(
-                decpomdp_manager.reward_model_name,
-                decpomdp_manager.reward_minimizing,
-                decpomdp_manager.discount_sink_label)
-            specification = paynt.quotient.property.Specification([],optimality)
              
         MarkovChain.initialize(specification)
         

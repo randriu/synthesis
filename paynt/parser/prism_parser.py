@@ -94,7 +94,7 @@ class PrismParser:
             os.remove(tmp_path)
         except:
             os.remove(tmp_path)
-            exit(1)
+            raise SyntaxError
 
         return prism, hole_definitions
 
@@ -164,6 +164,8 @@ class PrismParser:
     @classmethod
     def parse_specification(cls, properties_path, relative_error, discount_factor, prism = None, constant_map = None):
 
+        if not os.path.isfile(properties_path):
+            raise ValueError(f"the properties file {properties_path} does not exist")
         logger.info(f"loading properties from {properties_path} ...")
         lines = ""
         with open(properties_path) as file:

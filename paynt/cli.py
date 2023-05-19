@@ -64,10 +64,6 @@ def setup_logger(log_path = None):
 @click.option("--discount-factor", type=click.FLOAT, default="1", show_default=True,
     help="discount factor")
 
-@click.option("--filetype",
-    type=click.Choice(['prism', 'drn', 'cassandra']),
-    default="prism", show_default=True,
-    help="input file format")
 @click.option("--export",
     type=click.Choice(['drn', 'pomdp']),
     help="export the model to *.drn/*.pomdp and abort")
@@ -135,7 +131,7 @@ def setup_logger(log_path = None):
 
 def paynt(
     project, sketch, props, relative_error, discount_factor,
-    filetype, export,
+    export,
     method,
     incomplete_search,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
@@ -161,11 +157,8 @@ def paynt(
     properties_path = os.path.join(project, props)
     if not os.path.isfile(sketch_path):
         raise ValueError(f"the sketch file {sketch_path} does not exist")
-    if not filetype=="cassandra" and not os.path.isfile(properties_path):
-        raise ValueError(f"the properties file {properties_path} does not exist")
 
-    quotient = Sketch.load_sketch(sketch_path, filetype, export,
-        properties_path, relative_error, discount_factor)
+    quotient = Sketch.load_sketch(sketch_path, export, properties_path, relative_error, discount_factor)
 
     storm_control = None
     if storm_pomdp:
