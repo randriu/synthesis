@@ -251,10 +251,10 @@ class MDP(MarkovChain):
         # LB < UB < OPT
         # this family definitely improves the optimum
         assignment = self.design_space.pick_any()
-        improving_assignment, improving_value = self.quotient_container.double_check_assignment(assignment, prop)
+        improving_assignment, improving_value = self.quotient_container.double_check_assignment(assignment)
         # either LB < T, LB < UB < OPT (can improve) or T < LB < UB < OPT (cannot improve)
         can_improve = primary.sat
-        return MdpOptimalityResult(prop, primary, secondary, improving_assignment, improving_value, can_improve, selection, choice_values, scores)
+        return MdpOptimalityResult(prop, primary, secondary, improving_assignment, improving_value, can_improve, selection, choice_values, expected_visits, scores)
 
 
     def check_specification(self, specification, property_indices = None, short_evaluation = False):
@@ -262,4 +262,8 @@ class MDP(MarkovChain):
         optimality_result = None
         if specification.has_optimality and not (short_evaluation and constraints_result.feasibility == False):
             optimality_result = self.check_optimality(specification.optimality)
+        print("opt-result: ", optimality_result, flush=True)
+        # import random
+        # if random.randint(0,10) == 2:
+        #     exit()
         return SpecificationResult(constraints_result, optimality_result)
