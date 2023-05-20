@@ -40,18 +40,15 @@ def solve_family(args):
 
         res = family.mdp.check_specification(quotient.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
-
-        improving_assignment,improving_value,can_improve = res.improving(family)
-        # print(res, can_improve)
         
         subfamilies = []
-        if can_improve:
+        if family.analysis_result.can_improve:
             subfamilies = quotient.split(family, Synthesizer.incomplete_search)
             # remove parent info since Property is not pickleable
             for subfamily in subfamilies:
                 subfamily.parent_info = None
 
-        return ([family.mdp.states], improving_value, improving_assignment, subfamilies)
+        return ([family.mdp.states], family.analysis_result.improving_value, family.analysis_result.improving_assignment, subfamilies)
 
     except:
         logger.error("Worker sub-process encountered an error.")
@@ -174,13 +171,11 @@ def solve_batch(args):
             res = family.mdp.check_specification(quotient.specification, property_indices = family.property_indices, short_evaluation = True)
             family.analysis_result = res
             mdp_states.append(family.mdp.states)
-
-            improving_assignment,improving_value,can_improve = res.improving(family)
             
-            if can_improve:
+            if family.analysis_result.can_improve:
                 subfamilies += quotient.split(family, Synthesizer.incomplete_search)
 
-            if improving_value is not None:
+            if family.analysis_result.improving_value is not None:
                 break
 
         
@@ -188,7 +183,7 @@ def solve_batch(args):
         for subfamily in subfamilies:
             subfamily.parent_info = None
 
-        return (mdp_states, improving_value, improving_assignment, subfamilies)
+        return (mdp_states, family.analysis_result.improving_value, family.analysis_result.improving_assignment, subfamilies)
 
     except:
         print("meaningful error message")

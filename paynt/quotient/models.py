@@ -263,4 +263,4 @@ class MDP(MarkovChain):
         optimality_result = None
         if specification.has_optimality and not (short_evaluation and constraints_result.feasibility == False):
             optimality_result = self.check_optimality(specification.optimality)
-        return SpecificationResult(constraints_result, optimality_result)
+        return MdpSpecificationResult(constraints_result, optimality_result)

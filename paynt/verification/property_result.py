@@ -2,6 +2,7 @@ import stormpy
 
 from paynt.verification.property import *
 
+
 class PropertyResult:
     def __init__(self, prop, result, value):
         self.result = result
@@ -11,9 +12,6 @@ class PropertyResult:
 
     def __str__(self):
         return str(self.value)
-
-    def reevaluate(self):
-        pass    # left intentionally blank
 
 
 class ConstraintsResult:
@@ -30,7 +28,7 @@ class ConstraintsResult:
     @property
     def all_sat(self):
         for result in self.results:
-            if result is not None and result.sat == False:
+            if result is not None and not result.sat:
                 return False
         return True
 
@@ -42,9 +40,6 @@ class SpecificationResult:
 
     def __str__(self):
         return str(self.constraints_result) + " : " + str(self.optimality_result)
-
-    def reevaluate(self):
-        self.optimality_result.reevaluate()
 
     def accepting_dtmc(self, specification):
         """
@@ -69,35 +64,11 @@ class SpecificationResult:
         return True, self.optimality_result.value
 
 
-    def improving(self, family):
-        ''' Interpret MDP specification result. '''
-
-        cr = self.constraints_result
-        opt = self.optimality_result
-
-        if cr.feasibility == True:
-            # either no constraints or constraints were satisfied
-            if opt is not None:
-                return opt.improving_assignment, opt.improving_value, opt.can_improve
-            else:
-                improving_assignment = family.pick_any()
-                return improving_assignment, None, False
-
-
-        if cr.feasibility == False:
-            return None,None,False
-
-        # constraints undecided: try to push optimality assignment
-        if opt is not None: 
-            can_improve = opt.improving_value is None and opt.can_improve
-            return opt.improving_assignment, opt.improving_value, can_improve
-        else:
-            return None, None, True
-
     def undecided_result(self):
         if self.optimality_result is not None and self.optimality_result.can_improve:
             return self.optimality_result
         return self.constraints_result.results[self.constraints_result.undecided_constraints[0]]
+
             
 
 class MdpPropertyResult:
@@ -124,6 +95,7 @@ class MdpPropertyResult:
         else:
             return "{} - {}".format(seco,prim)
             
+
 class MdpConstraintsResult:
     def __init__(self, results):
         self.results = results
@@ -142,6 +114,7 @@ class MdpConstraintsResult:
     def __str__(self):
         return ",".join([str(result) for result in self.results])
 
+
 class MdpOptimalityResult(MdpPropertyResult):
     def __init__(self,
         prop, primary, secondary,
@@ -157,6 +130,42 @@ class MdpOptimalityResult(MdpPropertyResult):
         self.improving_value = improving_value
         self.can_improve = can_improve
 
-    def reevaluate(self):
-        pass
+class MdpSpecificationResult(SpecificationResult):
+
+    def __init__(self, constraints_result, optimality_result):
+        super().__init__(constraints_result,optimality_result)
+        self.evaluate()
+
+    
+    def evaluate(self):
+        self.improving_assignment = None
+        self.improving_value = None
+        self.can_improve = None
+
+        cr = self.constraints_result
+        opt = self.optimality_result
+
+        if cr.feasibility == True:
+            # either no constraints or constraints were satisfied
+            if opt is not None:
+                self.improving_assignment = opt.improving_assignment
+                self.improving_value = opt.improving_value
+                self.can_improve = opt.can_improve
+            else:
+                self.improving_assignment = family.pick_any()
+                self.can_improve = False
+            return
+
+        if cr.feasibility == False:
+            self.can_improve = False
+            return
+
+        # constraints undecided: try to push optimality assignment
+        if opt is not None: 
+            self.improving_assignment = opt.improving_assignment
+            self.improving_value = opt.improving_value
+            self.can_improve = opt.improving_value is None and opt.can_improve
+        else:
+            self.can_improve = True
+
 

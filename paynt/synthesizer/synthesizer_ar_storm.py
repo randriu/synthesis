@@ -79,21 +79,20 @@ class SynthesizerARStorm(Synthesizer):
         family.analysis_result = res
 
         #print(res)
-        improving_assignment,improving_value,can_improve = res.improving(family)
         #print(improving_assignment)
         #print(improving_value, can_improve)
-        if improving_value is not None:
+        if family.analysis_result.improving_value is not None:
             if self.saynt_timer is not None:
                 print(f'-----------PAYNT----------- \
-                    \nValue = {improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.quotient.policy_size(improving_assignment)}\n', flush=True)
+                    \nValue = {improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.quotient.policy_size(family.analysis_result.improving_assignment)}\n', flush=True)
                 if self.storm_control.export_fsc_paynt is not None:
                     makedirs(self.storm_control.export_fsc_paynt, exist_ok=True)
                     with open(self.storm_control.export_fsc_paynt + "/paynt.fsc", "w") as text_file:
-                        print(improving_assignment, file=text_file)
+                        print(family.analysis_result.improving_assignment, file=text_file)
                         text_file.close()
             else:
-                self.stat.new_fsc_found(improving_value, improving_assignment, self.quotient.policy_size(improving_assignment))
-            self.quotient.specification.optimality.update_optimum(improving_value)
+                self.stat.new_fsc_found(family.analysis_result.improving_value, family.analysis_result.improving_assignment, self.quotient.policy_size(family.analysis_result.improving_assignment))
+            self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
         # print(res, can_improve)
         # print(res.optimality_result.primary.result.get_values())
 

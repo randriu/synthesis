@@ -18,20 +18,19 @@ class SynthesizerAR(Synthesizer):
         family.analysis_result = res
 
     
-    def analyze_family(self, family):
+    def update_optimum(self, family):
         """
         :return (1) family feasibility (True/False/None)
         :return (2) new satisfying assignment (or None)
         """
-        improving_assignment,improving_value,can_improve = family.analysis_result.improving(family)
-        if improving_value is not None:
-            self.stat.new_fsc_found(improving_value, improving_assignment, self.quotient.policy_size(improving_assignment))
-            self.quotient.specification.optimality.update_optimum(improving_value)
-        return can_improve, improving_assignment
+        ia = family.analysis_result.improving_assignment
+        if family.analysis_result.improving_value is not None:
+            self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
+            self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
 
 
     def synthesize_assignment(self, family):
-
+        # return self.synthesize_assignment_experimental(family)
         self.quotient.discarded = 0
 
         satisfying_assignment = None
@@ -42,10 +41,10 @@ class SynthesizerAR(Synthesizer):
             family = families.pop(-1)
 
             self.verify_family(family)
-            can_improve,improving_assignment = self.analyze_family(family)
-            if improving_assignment is not None:
-                satisfying_assignment = improving_assignment
-            if can_improve == False:
+            self.update_optimum(family)
+            if family.analysis_result.improving_assignment is not None:
+                satisfying_assignment = family.analysis_result.improving_assignment
+            if family.analysis_result.can_improve == False:
                 self.explore(family)
                 continue
 
@@ -78,15 +77,15 @@ class SynthesizerAR(Synthesizer):
                 if family.analysis_result is not None:
                     continue
                 self.verify_family(family)
-                _,improving_assignment = self.analyze_family(family)
-                if improving_assignment is not None:
-                    satisfying_assignment = improving_assignment
+                self.update_optimum(family)
+                if family.analysis_result.improving_assignment is not None:
+                    satisfying_assignment = family.analysis_result.improving_assignment
             
             # analyze families once more and keep undecided ones
             undecided_families = []
             for family in families:
-                can_improve,_ = self.analyze_family(family)
-                if can_improve == False:
+                family.analysis_result.evaluate()
+                if family.analysis_result.can_improve == False:
                     self.explore(family)
                 else:
                     undecided_families.append(family)

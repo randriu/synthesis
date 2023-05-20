@@ -90,10 +90,10 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
 
             # analyze the family
             self.verify_family(family)
-            can_improve,improving_assignment = self.analyze_family(family)
-            if improving_assignment is not None:
-                satisfying_assignment = improving_assignment
-            if can_improve == False:
+            self.update_optimum(family)
+            if family.analysis_result.improving_assignment is not None:
+                satisfying_assignment = family.analysis_result.improving_assignment
+            if family.analysis_result.can_improve == False:
                 self.explore(family)
                 continue
 
