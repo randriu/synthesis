@@ -1,6 +1,6 @@
 import stormpy
 
-from ..quotient.property import Property, OptimalityProperty, Specification
+from paynt.verification.property import Property, OptimalityProperty, Specification
 from ..quotient.holes import CombinationColoring
 from ..quotient.models import MarkovChain
 

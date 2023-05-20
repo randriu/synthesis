@@ -1,6 +1,6 @@
 from .storm import ConflictGeneratorStorm
 
-from paynt.quotient.property import OptimalityProperty
+from paynt.verification.property import OptimalityProperty
 
 import logging
 logger = logging.getLogger(__name__)

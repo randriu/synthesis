@@ -1,10 +1,11 @@
 import stormpy
 
 from .jani import JaniUnfolder
-from ..quotient.property import Property, OptimalityProperty, Specification
 from ..quotient.holes import Hole, Holes, DesignSpace
 from ..quotient.models import MarkovChain
 from ..quotient.coloring import MdpColoring
+
+from paynt.verification.property import *
 
 import os
 import re

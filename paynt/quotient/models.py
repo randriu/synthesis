@@ -1,6 +1,7 @@
 import stormpy
 
-from .property import *
+from paynt.verification.property import *
+from paynt.verification.property_result import *
 
 from collections import OrderedDict
 import random
@@ -262,8 +263,4 @@ class MDP(MarkovChain):
         optimality_result = None
         if specification.has_optimality and not (short_evaluation and constraints_result.feasibility == False):
             optimality_result = self.check_optimality(specification.optimality)
-        print("opt-result: ", optimality_result, flush=True)
-        # import random
-        # if random.randint(0,10) == 2:
-        #     exit()
         return SpecificationResult(constraints_result, optimality_result)
