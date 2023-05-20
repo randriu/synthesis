@@ -697,7 +697,7 @@ class POMCP:
 
         # disable synthesis logging
         paynt.quotient.quotient_pomdp.logger.disabled = True
-        paynt.quotient.property.logger.disabled = True
+        paynt.verification.property.logger.disabled = True
         paynt.synthesizer.synthesizer.logger.disabled = True
 
 

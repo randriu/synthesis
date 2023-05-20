@@ -87,11 +87,11 @@ class Sketch:
                 logger.info("applying discount factor transformation...")
                 decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
-                optimality = paynt.quotient.property.construct_reward_property(
+                optimality = paynt.verification.property.construct_reward_property(
                     decpomdp_manager.reward_model_name,
                     decpomdp_manager.reward_minimizing,
                     decpomdp_manager.discount_sink_label)
-                specification = paynt.quotient.property.Specification([],optimality)
+                specification = paynt.verification.property.Specification([],optimality)
                 filetype = "cassandra"
             except SyntaxError:
                 pass
