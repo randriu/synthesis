@@ -14,7 +14,8 @@ class SynthesizerAR(Synthesizer):
     def verify_family(self, family):
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
-        res = family.mdp.check_specification(self.quotient.specification, property_indices = family.property_indices, short_evaluation = True)
+        res = family.mdp.check_specification(
+            self.quotient.specification, property_indices = family.property_indices, short_evaluation = True)
         family.analysis_result = res
 
     
@@ -44,6 +45,7 @@ class SynthesizerAR(Synthesizer):
             self.update_optimum(family)
             if family.analysis_result.improving_assignment is not None:
                 satisfying_assignment = family.analysis_result.improving_assignment
+                if self.stat.synthesis_time.read()>1: print("synthesis timeout"); break
             if family.analysis_result.can_improve == False:
                 self.explore(family)
                 continue

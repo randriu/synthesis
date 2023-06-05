@@ -13,10 +13,6 @@ from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 from .quotient.storm_pomdp_control import StormPOMDPControl
 
-from .utils.storm_parallel import ParallelControl
-# TODO remove?
-from multiprocessing import Manager
-from multiprocessing.managers import BaseManager
 
 import click
 import sys
@@ -176,7 +172,7 @@ def paynt(
     if pomcp:
         from paynt.simulation.pomcp import POMCP
         if not profiling:
-            POMCP(quotient).run()
+            POMCP(quotient).run(discount_factor)
         else:
             with cProfile.Profile() as pr:
                 POMCP(quotient).run()
