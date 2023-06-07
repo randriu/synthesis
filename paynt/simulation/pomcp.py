@@ -19,32 +19,32 @@ memory_size = 2
 
 
 # --- simulation parameters ---
-num_simulations = 1
-discount_factor = 0.9
+num_simulations = 10
+discount_factor = 0.8
 precision = 1e-1
 
 # action_oracle_type = "random"
-# action_oracle_type = "mcts"
-action_oracle_type = "fsc"
+action_oracle_type = "mcts"
+# action_oracle_type = "fsc"
 
 
 # --- MCTS parameters ---
 num_explorations = 20
-exploration_constant_ucb = 10000
-mcts_rollouts = True
+exploration_constant_ucb = 100
 
 
 # --- FSC parameters ---
-fsc_recomputation_frequency = 10
-fsc_rollouts = False
+fsc_recomputation_frequency = 20
 fsc_use_cache = True
+fsc_persistent_cache = True
 
 # observation_selection = "all observations"
 observation_selection = "visited observations"
 
-# action_selection = "only MCTS"
+action_selection = "only MCTS"
 # action_selection = "only FSC"
-action_selection = "MCTS or FSC"
+# action_selection = "MCTS or FSC"
+
 
 
 class Maze:
@@ -235,17 +235,13 @@ class ActionOracleMcts(ActionOracleRandom):
             action_evaluations.append(total_value)
         return self.best_action(action_evaluations)
 
-    
     def predict_state_action_value(self, state, action, horizon):
         return self.simulated_model.state_action_rollout(state,action,horizon,self.discount_factor)
 
     def predict_values_at_belief(self, belief_node, horizon):
         state = belief_node.sample()
         for action,action_node in enumerate(belief_node.action_nodes):
-            # MCTS rollouts
-            value = 0
-            if mcts_rollouts:
-                value = self.simulated_model.state_action_rollout(state,action,horizon,self.discount_factor)
+            value = self.predict_state_action_value(state,action,horizon)
             belief_node.action_nodes[action].visit(value)
     
     def explore(self, belief_node, state, horizon):
@@ -265,8 +261,11 @@ class ActionOracleMcts(ActionOracleRandom):
             # fresh belief
             next_belief_node = self.create_belief_from_state(next_state)
             action_node.belief_nodes[next_observation] = next_belief_node
+            # self.actions_predicted_by_cache = [] # TODO
             self.predict_values_at_belief(next_belief_node, horizon-1)
             next_best_action = self.pick_action_value(next_belief_node)
+            # if next_best_action in self.actions_predicted_by_cache: # TODO
+            #     print("hey")
             future_reward = next_belief_node.action_nodes[next_best_action].value
         else:
             next_belief_node = action_node.belief_nodes[next_observation]
@@ -360,10 +359,29 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         self.subpomdp_builder.set_discount_factor(self.discount_factor)
         self.fsc = None
 
-        self.num_decisions = 0
+        self.policy_values = None
+
+        self.decisions_total = 0
         self.decisions_same = 0
         self.decisions_mcts = 0
         self.decisions_fsc = 0
+
+        self.predict_total = 0
+        self.predict_same_nonzero = 0
+        self.predict_same_zero = 0
+        self.predict_rollout = 0
+        self.predict_cache = 0
+
+        self.predict_root_total = 0
+        self.predict_root_same_nonzero = 0
+        self.predict_root_same_zero = 0
+        self.predict_root_mcts = 0
+        self.predict_root_cache = 0
+
+        self.num_rollouts = 0
+        self.rollout_values = None
+        self.cache_values = None
+        self.max_values = None
 
         # collect labels of actions available at each observation
         self.action_labels_at_observation = [None for obs in range(self.pomdp.nr_observations)]
@@ -390,7 +408,12 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         ''' Fill state-memory-action cache with zeroes. '''
         if not fsc_use_cache:
             return
+        if self.policy_values is not None and fsc_persistent_cache: return
         self.policy_values = [self.construct_trivial_policy()]
+        self.state_action_cache = []
+        for state in range(self.pomdp.nr_states):
+            self.state_action_cache.append([0 for action in range(self.pomdp.get_nr_available_actions(state))])
+
         
 
     def cache_update(self, quotient, assignment):
@@ -409,9 +432,17 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             if value < 1e-4:
                 continue
             quotient_state = dtmc.quotient_state_map[state_dtmc]
+            if quotient_state < 2:
+                # skipping first two states
+                continue
             subpomdp_state = quotient.pomdp_manager.state_prototype[quotient_state]
             pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
             memory = quotient.pomdp_manager.state_memory[quotient_state]
+
+            quotient_choice = dtmc.quotient_choice_map[state_dtmc]
+            action = quotient.pomdp_manager.row_action_option[quotient_choice]
+            self.state_action_cache[pomdp_state][action] = max(self.state_action_cache[pomdp_state][action],value)
+
             policy_values[memory][pomdp_state] = value
         self.policy_values += policy_values
         # print(len(self.policy_values))
@@ -421,7 +452,8 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         if not fsc_use_cache:
             return
 
-        # for each frontier observation, pick exactly 1 policy
+        self.cache_modified = -1
+        # collect frontier observations
         frontier_states = self.subpomdp_builder.frontier_states
         frontier_map = {}
         for state in frontier_states:
@@ -429,37 +461,97 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             if obs not in frontier_map:
                 frontier_map[obs] = []
             frontier_map[obs].append(state)
+        # print("# of frontier states: ", sum([len(x) for x in frontier_map.values()]))
 
+        # for uniquely observable frontier states, pick the best policy value
+        # for other frontier states, pick average
         state_values = {}
-        num_policies = len(self.policy_values)
         for obs,states in frontier_map.items():
-            assert states
-            best_policy = 0
-            best_score = sum([self.policy_values[0][state] for state in states])
-            for policy in range(1,num_policies):
-                score = sum([self.policy_values[policy][state] for state in states])
-                if score > best_score:
-                    best_policy = policy
-                    best_score = score
-            for state in states:
-                state_values[state] = self.policy_values[best_policy][state]
+            if len(states) == 1:
+                # maximum
+                state = states[0]
+                value = max([policy[state] for policy in self.policy_values])
+                state_values[state] = value
+            else:
+                # average
+                # TODO filter policies that do not use current state group
+                relevant_policies = []
+                for policy,policy_values in enumerate(self.policy_values):
+                    if any([state in policy_values for state in states]):
+                        relevant_policies.append(policy)
+                if not relevant_policies:
+                    for state in states:
+                        state_values[state] = 0
+                else:
+                    for state in states:
+                        # value = numpy.mean([policy[state] for policy in self.policy_values])
+                        value = numpy.mean([self.policy_values[policy][state] for policy in relevant_policies])
+                        state_values[state] = value
 
+        # find frontier states in the quotient, transform the reward values
         tm = quotient.quotient_mdp.transition_matrix
-        state_action_rewards = quotient.quotient_mdp.reward_models[self.simulated_model.reward_name].state_action_rewards
-        for quotient_state in range(quotient.quotient_mdp.nr_states):
+        reward_model = quotient.quotient_mdp.get_reward_model(self.simulated_model.reward_name)
+        for quotient_state in range(2,quotient.quotient_mdp.nr_states): # skipping first two fresh states
             subpomdp_state = quotient.pomdp_manager.state_prototype[quotient_state]
             pomdp_state = self.subpomdp_builder.state_sub_to_full[subpomdp_state]
-            if pomdp_state not in frontier_states:
+            if pomdp_state not in state_values:
                 continue
             value = state_values[pomdp_state]
             if value == 0:
                 continue
-            row = quotient.quotient_mdp.get_choice_index(quotient_state,0)
-            immediate_reward = state_action_rewards[tm.get_row_group_start(quotient_state)]
-            print("{} -> {}".format(immediate_reward,value))
-            for choice in range (tm.get_row_group_start(quotient_state),tm.get_row_group_start(quotient_state+1)):
-                state_action_rewards[choice] = value
+            # assign new reward
+            for choice in range(tm.get_row_group_start(quotient_state),tm.get_row_group_end(quotient_state)):
+                old_reward = reward_model.get_state_action_reward(choice)
+                reward_model.set_state_action_reward(choice,value)
+            print("{} : {} -> {}".format(pomdp_state,old_reward,value))
 
+
+    def cache_evaluate_belief(self, belief_node):
+        belief = belief_node.distribution()
+        # max{bTp}
+        policy_value_max = 0
+        for policy in self.policy_values:
+            policy_value = sum([prob*policy[state] for state,prob in belief.items()])
+            policy_value_max = max(policy_value_max, policy_value)
+        return policy_value_max
+
+
+    def predict_state_action_value(self, state, action, horizon):
+        # value = 0
+        rollout_value = self.simulated_model.state_action_rollout(state,action,horizon,self.discount_factor)
+        # cache_value = self.simulated_model.state_action_rollout(state,action,horizon,self.discount_factor)
+        cache_value = self.state_action_cache[state][action]
+        max_value = max(rollout_value,cache_value)
+        
+        if self.rollout_values is None:
+            self.rollout_values = [collections.defaultdict(list) for _ in range(self.pomdp.nr_states)]
+            self.cache_values = [collections.defaultdict(list) for _ in range(self.pomdp.nr_states)]
+            self.max_values = [collections.defaultdict(list) for _ in range(self.pomdp.nr_states)]
+
+        value = rollout_value
+        self.predict_total += 1
+        if rollout_value > cache_value:
+            self.predict_rollout += 1
+        elif rollout_value < cache_value:
+            self.predict_cache += 1
+            value = cache_value
+            # self.actions_predicted_by_cache.append(action) # TODO
+        else:
+            if value == 0:
+                self.predict_same_zero += 1
+            else:
+                self.predict_same_nonzero += 1
+
+        if cache_value > 0:
+            self.num_rollouts += 1
+            self.rollout_values[state][action].append(rollout_value)
+            self.cache_values[state][action].append(cache_value)
+            self.max_values[state][action].append(max_value)
+            # print(rollout_value,cache_value)
+        
+        # return rollout_value
+        # return cache_value
+        return max_value
 
     def predict_fsc_at_belief(self, belief_node, fsc):
         avg_path_reward = 0
@@ -505,11 +597,11 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         
         action_fsc = self.fsc.suggest_action(self.root.observation)
 
-        self.num_decisions += 1
+        self.decisions_total += 1
 
         best_action = action_mcts
         value_fsc = self.predict_fsc_at_belief(self.root, self.fsc)
-        actions_differ = "x" if action_mcts != action_fsc else "o"
+        # actions_differ = "x" if action_mcts != action_fsc else "o"
         # print(f"{actions_differ} MCTS = {value_mcts}, FSC = {value_fsc}", action_mcts, action_fsc)
         if action_mcts == action_fsc:
             self.decisions_same += 1
@@ -520,7 +612,19 @@ class ActionOracleSubpomdp(ActionOracleMcts):
                 self.decisions_fsc += 1
                 best_action = action_fsc
                 # print("choosing FSC action over MCTS")
-            
+        
+        value_cache = self.cache_evaluate_belief(self.root)
+        print("> ", value_mcts, value_cache)
+        self.predict_root_total += 1
+        if value_mcts > value_cache:
+            self.predict_root_mcts += 1
+        elif value_mcts < value_cache:
+            self.predict_root_cache += 1
+        else:
+            if value_mcts == 0:
+                self.predict_root_same_zero += 1
+            else:
+                self.predict_root_same_nonzero += 1
 
         if action_selection == "only MCTS":
             return action_mcts
@@ -560,14 +664,13 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         self.subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
         subpomdp = self.subpomdp_builder.restrict_pomdp(initial_distribution)
 
-        # show relevant cells
-        # self.pomcp.maze.print_relevant(self.subpomdp_builder.relevant_states)
+        self.pomcp.maze.print_relevant(self.subpomdp_builder.relevant_states)
 
-        # unfold the sub-POMDP
+        # construct the quotient, apply the cache, unfold the memory model
         quotient = POMDPQuotientContainer(subpomdp, specification)
         quotient.set_imperfect_memory_size(memory_size)
         self.cache_apply(quotient)
-        exit()
+        # exit()
 
         return quotient
 
@@ -714,6 +817,11 @@ class POMCP:
                 # print("simulation finished in absorbing state ", self.simulated_model.current_state)
                 break
             action = action_oracle.get_next_action(last_action, self.simulated_model.state_observation(), simulation_step)
+            # if isinstance(action_oracle,ActionOracleSubpomdp):
+                # print("in state ", self.simulated_model.current_state)
+                # if self.simulated_model.current_state == 1:
+                #     print(action_oracle.state_action_cache[1])
+                # print("playing ", action_oracle.action_labels_at_observation[self.simulated_model.state_observation()][action])
             reward = self.simulated_model.state_action_reward(self.simulated_model.current_state, action)
             accumulated_reward += discount_factor_to_k * reward
             discount_factor_to_k *= discount_factor
@@ -724,7 +832,9 @@ class POMCP:
 
     
 
-    def run(self):
+    def run(self, df):
+
+        # FIXME: ignore df
 
         # random.seed(6)
 
@@ -749,15 +859,49 @@ class POMCP:
         for simulation_iteration in range(num_simulations):
             simulation_value = self.run_simulation(simulation_horizon, action_oracle)
             simulation_values.append(simulation_value)
+            simulation_value_avg = round(numpy.mean(simulation_values),2)
+            print("current mean: ", simulation_value_avg)
             bar.update(simulation_iteration)
         bar.finish()
 
-        simulation_value_avg = numpy.mean(simulation_values)
-        # simulation_value_std = numpy.std(simulation_values)
+        simulation_value_avg = round(numpy.mean(simulation_values),2)
+        simulation_value_std = round(numpy.std(simulation_values),2)
 
-        print("{} simulations: mean value = {}".format(num_simulations,simulation_value_avg))
+        print("{} simulations: mean value = {} [±{}]".format(num_simulations,simulation_value_avg,simulation_value_std))
 
         if isinstance(action_oracle, ActionOracleSubpomdp):
-            print("total ({}) = same ({}) + mcts ({}) + fsc ({})".format(action_oracle.num_decisions, action_oracle.decisions_same, action_oracle.decisions_mcts, action_oracle.decisions_fsc))
+            print("[choices] total ({}) = same ({}) + mcts ({}) + fsc ({})".format(action_oracle.decisions_total, action_oracle.decisions_same, action_oracle.decisions_mcts, action_oracle.decisions_fsc))
+
+            print("[rollouts] total ({}) = 0 ({}) + same ({}) + rollo ({}) + cache ({})".format(action_oracle.predict_total, action_oracle.predict_same_zero, action_oracle.predict_same_nonzero, action_oracle.predict_rollout, action_oracle.predict_cache))
+            print("[root rollouts] total ({}) = 0 ({}) + same ({}) + mcts ({}) + cache ({})".format(action_oracle.predict_root_total, action_oracle.predict_root_same_zero, action_oracle.predict_root_same_nonzero, action_oracle.predict_root_mcts, action_oracle.predict_root_cache))
+            # print("# of used rollouts: ", action_oracle.num_rollouts)
+
+            # print("avg state-action values:\n")
+            rollout_values = []
+            cache_values = []
+            max_values = []
+            for state in range(self.pomdp.nr_states):
+                for action in range(self.pomdp.get_nr_available_actions(state)):
+                    if len(action_oracle.rollout_values[state][action]) == 0:
+                        continue
+                    r = numpy.mean(action_oracle.rollout_values[state][action])
+                    c = numpy.mean(action_oracle.cache_values[state][action])
+                    m = numpy.mean(action_oracle.max_values[state][action])
+                    if max([r,c,m]) == 0:
+                        continue
+                    r = round(r,1)
+                    c = round(c,1)
+                    m = round(m,1)
+
+                    rollout_values.append(r)
+                    cache_values.append(c)
+                    max_values.append(m)
+
+            # for index,_ in enumerate(rollout_values):
+                # print("{} - {} - {}".format(rollout_values[index], cache_values[index], max_values[index]))
+                # print("{} - {}".format(rollout_values[index], cache_values[index]))
+            # print("rollout : ", rollout_values)
+            # print("cache   : ", cache_values)
+            # print("max     : ", max_values)
 
 
