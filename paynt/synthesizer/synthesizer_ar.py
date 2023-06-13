@@ -45,7 +45,9 @@ class SynthesizerAR(Synthesizer):
             self.update_optimum(family)
             if family.analysis_result.improving_assignment is not None:
                 satisfying_assignment = family.analysis_result.improving_assignment
-                # if self.stat.synthesis_time.read()>1: print("synthesis timeout"); break
+                # if self.stat.synthesis_time.read()>1:
+                    # print("synthesis timeout");
+                    # break
             if family.analysis_result.can_improve == False:
                 self.explore(family)
                 continue

@@ -61,7 +61,7 @@ class Statistic:
     def new_fsc_found(self, value, assignment, size):
         time_elapsed = round(self.whole_synthesis_timer.read(),1)
         # print(f'new opt: {value}')
-        print(f'new opt: {value}, elapsed {time_elapsed}s')
+        # print(f'new opt: {value}, elapsed {time_elapsed}s')
         # print(f'-----------PAYNT----------- \
               # \nValue = {value} | Time elapsed = {time_elapsed}s | FSC size = {size}\nFSC = {assignment}\n', flush=True)
 

@@ -123,8 +123,18 @@ class SimulatedModel:
             state = self.sample_successor(state,action)
             action = self.sample_action(state)
             rewards.append(reward)
-
         return self.discounted_reward(rewards, discount_factor)
+
+    def state_action_rollout_history(self, state, action, length):
+        history = []
+        for _ in range(length):
+            if self.state_is_absorbing[state]:
+                break
+            reward = self.state_action_reward(state,action)
+            history.append( (state,action,reward) )
+            state = self.sample_successor(state,action)
+            action = self.sample_action(state)
+        return history
 
     
     def reset(self):
