@@ -1,5 +1,7 @@
 from .synthesizer import Synthesizer
 
+import paynt
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -26,8 +28,9 @@ class SynthesizerAR(Synthesizer):
         """
         ia = family.analysis_result.improving_assignment
         if family.analysis_result.improving_value is not None:
-            self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
             self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
+            if isinstance(self.quotient, paynt.quotient.quotient_pomdp.POMDPQuotientContainer):
+                self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
 
 
     def synthesize_assignment(self, family):
