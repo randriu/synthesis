@@ -122,7 +122,7 @@ class OptimalityProperty(Property):
     Optimality property can remember current optimal value and adapt the
     corresponding threshold wrt epsilon.
     '''
-    def __init__(self, prop, discount_factor=1, epsilon=None):
+    def __init__(self, prop, discount_factor=1, epsilon=0):
         self.property = prop
         self.discount_factor = discount_factor
         rf = prop.raw_formula
