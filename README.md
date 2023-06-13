@@ -56,7 +56,6 @@ where the most important options are:
 - ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
 
 Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
-- ``--filetype [prism|drn|pomdp]``: input file format [default: ``prism``]
 - ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
 - ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
 - ``--posterior-aware``: enables the synthesis of posterior aware FSCs
@@ -86,7 +85,7 @@ python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0
 python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
 python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
 timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
-python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --filetype=drn --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
 python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
