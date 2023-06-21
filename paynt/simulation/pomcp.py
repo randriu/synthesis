@@ -20,8 +20,8 @@ memory_size = 2
 
 
 # --- simulation parameters ---
-num_simulations = 100
-discount_factor = 0.9
+num_simulations = 10
+discount_factor = 0.95
 precision = 1e-1
 
 # action_oracle_type = "random"
@@ -34,24 +34,26 @@ num_explorations = 20
 exploration_constant_ucb = 100
 use_rollout_cache = True
 use_history_rollouts = True
-persistent_rollout_cache = False
 
 
 # --- FSC parameters ---
-fsc_recomputation_frequency = 5
+fsc_recomputation_frequency = 10
 use_policy_cache = True
-persistent_policy_cache = False
-
-# observation_selection = "all observations"
-observation_selection = "visited observations"
+skip_mcts_between_syntheses = False
 
 # action_selection = "only MCTS"
 action_selection = "only FSC"
 # action_selection = "MCTS or FSC"
 
 
+# observation_selection = "all observations"
+observation_selection = "visited observations"
+
+
 
 class Maze:
+
+    toggle_print = False
     
     def __init__(self, pomdp):
         # get state coordinates, get max coordinates
@@ -113,10 +115,13 @@ class Maze:
         return self.to_string(self.maze)
 
     def print(self):
+        if not Maze.toggle_print:
+            return
         print(self)
         
     def print_relevant(self, relevant_states):
-        return
+        if not Maze.toggle_print:
+            return
         maze = []
         for x in range(self.max_x+1):
             x_column = [self.maze[x][y] for y in range(self.max_y+1)]
@@ -202,6 +207,7 @@ class ActionOracleMcts(ActionOracleRandom):
         self.discount_factor_to_k = None # FIXME
 
         self.rollout_cache = None
+        self.root_restarts = 0
 
         # MCTS parameters
         self.num_explorations = num_explorations
@@ -221,8 +227,6 @@ class ActionOracleMcts(ActionOracleRandom):
     def rollout_cache_reset(self):
         if not use_rollout_cache:
             return
-        if persistent_rollout_cache and self.rollout_cache is not None:
-            return
         self.rollout_cache = []
         for state in range(self.pomdp.nr_states):
             self.rollout_cache.append([(0,0) for action in range(self.pomdp.get_nr_available_actions(state))])
@@ -235,14 +239,17 @@ class ActionOracleMcts(ActionOracleRandom):
         self.rollout_cache[state][action] = (avg_new,num_rollouts+1)
 
     def rollout_cache_update_history(self, history):
-        if not use_rollout_cache:
-            return
         accumulated_reward = 0
         discount_factor_to_k = 1
-        for state,action,reward in reversed(history):
-            accumulated_reward = reward + discount_factor_to_k*accumulated_reward
-            self.rollout_cache_update_value(state,action,accumulated_reward)
-            discount_factor_to_k *= discount_factor
+        if not use_rollout_cache:
+            for _,_,reward in history:
+                accumulated_reward += discount_factor_to_k * reward 
+                discount_factor_to_k *= discount_factor
+        else:
+            for state,action,reward in reversed(history):
+                accumulated_reward = reward + discount_factor_to_k*accumulated_reward
+                self.rollout_cache_update_value(state,action,accumulated_reward)
+                discount_factor_to_k *= discount_factor
         return accumulated_reward
 
     
@@ -346,6 +353,7 @@ class ActionOracleMcts(ActionOracleRandom):
             if current_observation not in action_node.belief_nodes:
                 # cannot re-use the sub-tree: use uniform belief over all states with the given observation
                 # logger.info("observation {} never experienced in simulation, restarting with uniform belief... ".format(current_observation))
+                self.root_restarts += 1
                 self.root = self.create_empty_belief(current_observation)
                 for state in range(self.pomdp.nr_states):
                     obs = self.pomdp.observations[state]
@@ -467,8 +475,6 @@ class ActionOracleSubpomdp(ActionOracleMcts):
     def policy_cache_reset(self):
         ''' Fill state-memory-action cache with zeroes. '''
         if not use_policy_cache:
-            return
-        if persistent_policy_cache and self.policy_values is not None:
             return
         # reserve maps for rollout policies
         max_actions = max([self.pomdp.get_nr_available_actions(state) for state in range(self.pomdp.nr_states)])
@@ -639,11 +645,10 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             path_reward = self.simulated_model.discounted_reward(rewards, self.discount_factor)
             path_rewards.append(path_reward)
         return numpy.mean(path_rewards)
+        
 
-
-    def resynthesize(self, simulation_step, value_mcts):
-        if simulation_step % fsc_recomputation_frequency == 0:
-            self.fsc = self.synthesize(value_mcts)
+    def need_to_resynthesize_fsc(self, simulation_step):
+        return simulation_step % fsc_recomputation_frequency == 0
 
     def get_next_action(self, last_action, current_observation, simulation_step):
 
@@ -654,6 +659,9 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         # move the tree root
         self.reset_tree(last_action, current_observation)
 
+        if action_selection == "only FSC" and not self.need_to_resynthesize_fsc(simulation_step) and skip_mcts_between_syntheses:
+            return self.fsc.suggest_action(self.root.observation)
+
         # run MCTS
         for _ in range(self.num_explorations):
             state = self.root.sample()
@@ -661,9 +669,10 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         action_mcts = self.pick_action_value(self.root)
         value_mcts = self.root.action_nodes[action_mcts].value
 
-        self.resynthesize(simulation_step, value_mcts)
+        # resynthesize FSC
+        if self.need_to_resynthesize_fsc(simulation_step):
+            self.fsc = self.synthesize(value_mcts)
 
-        
         action_fsc = self.fsc.suggest_action(self.root.observation)
 
         self.decisions_total += 1
@@ -944,6 +953,7 @@ class POMCP:
         self.simulation_value_avg = 0
         bar = progressbar.ProgressBar(maxval=num_simulations, \
             widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage(), ' ', progressbar.AdaptiveETA(), ' ', CurrentMean(self)])
+
         bar.start()
         simulation_values = []
         for simulation_iteration in range(num_simulations):
@@ -953,10 +963,12 @@ class POMCP:
             bar.update(simulation_iteration)
         bar.finish()
 
-        simulation_value_avg = round(numpy.mean(simulation_values),2)
-        simulation_value_std = round(numpy.std(simulation_values),2)
+        per_sim = round(bar.seconds_elapsed / num_simulations,1)
+        simulation_value_avg = round(numpy.mean(simulation_values),1)
+        simulation_value_std = round(numpy.std(simulation_values),1)
 
-        print("{} simulations: mean value = {} [±{}]".format(num_simulations,simulation_value_avg,simulation_value_std))
+        print("mean value = {} [±{}]".format(simulation_value_avg,simulation_value_std))
+        print("simulations: {}, 1 sim time: {}s, root restarts: {}".format(num_simulations,per_sim,action_oracle.root_restarts))
 
         if isinstance(action_oracle, ActionOracleSubpomdp):
             print("[choices] total ({}) = same ({}) + mcts ({}) + fsc ({})".format(action_oracle.decisions_total, action_oracle.decisions_same, action_oracle.decisions_mcts, action_oracle.decisions_fsc))
@@ -985,12 +997,5 @@ class POMCP:
                     rollout_values.append(r)
                     cache_values.append(c)
                     max_values.append(m)
-
-            # for index,_ in enumerate(rollout_values):
-                # print("{} - {} - {}".format(rollout_values[index], cache_values[index], max_values[index]))
-                # print("{} - {}".format(rollout_values[index], cache_values[index]))
-            # print("rollout : ", rollout_values)
-            # print("cache   : ", cache_values)
-            # print("max     : ", max_values)
 
 
