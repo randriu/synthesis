@@ -21,7 +21,6 @@ class PrismParser:
     def read_prism(cls, sketch_path, properties_path, relative_error, discount_factor):
 
         # parse the program
-        constant_str = ''
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
         expression_parser = stormpy.storage.ExpressionParser(prism.expression_manager)
         expression_parser.set_identifier_mapping(dict())
@@ -29,11 +28,6 @@ class PrismParser:
 
         # parse constants
         constant_map = None
-        if constant_str != '':
-            logger.info(f"assuming constant definitions '{constant_str}'...")
-            constant_map = PrismParser.map_constants(prism, expression_parser, constant_str)
-            prism = prism.define_constants(constant_map)
-            prism = prism.substitute_constants()
 
         # parse hole definitions
         hole_expressions = None
@@ -43,7 +37,7 @@ class PrismParser:
             prism, hole_expressions, holes = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
 
-        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism, constant_map)
+        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism)
 
         # construct the quotient
         coloring = None
@@ -99,28 +93,6 @@ class PrismParser:
 
         return prism, hole_definitions
 
- 
-    @classmethod
-    def map_constants(cls, prism, expression_parser, constant_str):
-        constant_str = constant_str.replace(" ", "")
-        if constant_str == "":
-            return dict()
-        
-        constant_map = dict()
-        constant_definitions = constant_str.split(",")
-        prism_constants = {c.name:c for c in prism.constants}
-
-        for constant_definition in constant_definitions:
-            key_value = constant_definition.split("=")
-            if len(key_value) != 2:
-                raise ValueError(f"expected key=value pair, got '{constant_definition}'")
-
-            expr = expression_parser.parse(key_value[1])
-            name = key_value[0]
-            constant = prism_constants[name].expression_variable
-            constant_map[constant] = expr
-        return constant_map
-
 
     @classmethod
     def parse_holes(cls, prism, expression_parser, hole_definitions):
@@ -163,7 +135,7 @@ class PrismParser:
 
  
     @classmethod
-    def parse_specification(cls, properties_path, relative_error, discount_factor, prism = None, constant_map = None):
+    def parse_specification(cls, properties_path, relative_error, discount_factor, prism = None):
 
         if not os.path.isfile(properties_path):
             raise ValueError(f"the properties file {properties_path} does not exist")
@@ -189,13 +161,6 @@ class PrismParser:
             else:
                 assert optimality is None, "more than one optimality formula specified"
                 optimality = prop
-
-        # substitute constants in properties
-        if constant_map is not None:
-            for p in constraints:
-                p.raw_formula.substitute(constant_map)
-            if optimality is not None:
-                optimality.raw_formula.substitute(constant_map)
 
         # wrap properties
         constraints = [Property(p,discount_factor) for p in constraints]
