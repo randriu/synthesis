@@ -29,9 +29,9 @@ alias envd='deactivate'
 ### prerequisites ##############################################################
 
 storm-dependencies() {
-    apt update
-    apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
-    apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
+    sudo apt update
+    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
     # apt -y install texlive-latex-extra
     # update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
