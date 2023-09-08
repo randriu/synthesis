@@ -78,7 +78,7 @@ class Sketch:
                 explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
                 specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
                 filetype = "drn"
-            except SyntaxError:
+            except:
                 pass
         if filetype is None:
             try:
