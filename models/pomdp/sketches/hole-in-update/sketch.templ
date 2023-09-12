@@ -1,0 +1,21 @@
+pomdp
+
+hole int A in {-1,1};
+hole int B in {-1,1};
+
+const int xMAX = 10;
+
+module m
+    x : [0..xMAX] init xMAX/2;
+    [a] !done -> 1/2:(x'=x+A) + 1/2:(x'=x+B);
+    [b] !done -> (x'=x-1);
+    [c] !done -> true;
+endmodule
+
+formula bad = x=0;
+formula goal = x=xMAX;
+formula done = bad | goal;
+
+observable "even" = mod(x,2)=0;
+observable "bad" = bad;
+observable "goal" = goal;

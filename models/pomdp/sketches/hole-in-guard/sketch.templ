@@ -1,0 +1,31 @@
+pomdp
+
+// trap positions
+hole int A in {2,6};
+hole int B in {1,7};
+
+const int xMAX = 10;
+
+module m
+    x : [0..xMAX] init xMAX/2;
+    [r] true -> 1/2:(x'=x+1) + 1/2:true;
+    [l] true -> 1/2:(x'=x-1) + 1/2:true;
+endmodule
+
+module trap
+    in_trap : bool init false;
+    [r] x=A | x=B -> (in_trap'=true);
+    [r] !(x=A | x=B) -> true;
+
+    [l] x=A | x=B -> (in_trap'=true);
+    [l] !(x=A | x=B) -> true;
+endmodule
+
+
+formula bad = in_trap;
+formula goal = x=0 | x=xMAX;
+formula done = bad | goal;
+
+observable "even" = mod(x,2)=0;
+observable "bad" = bad;
+observable "goal" = goal;

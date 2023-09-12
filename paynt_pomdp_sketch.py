@@ -9,7 +9,7 @@ import os
 paynt.cli.setup_logger()
 
 # load sketch
-project_path="/home/roman/phd/synthesis/models/pomdp-sketch"
+project_path="models/pomdp/sketches/hole-in-guard"
 project_path = os.path.abspath(project_path)
 sketch_path = os.path.join(project_path, "sketch.templ")
 properties_path = os.path.join(project_path, "sketch.props")
