@@ -15,7 +15,7 @@ class JaniUnfolder():
 
     def __init__(self, prism, hole_expressions, specification, design_space):
 
-        logger.debug("Constructing JANI program...")
+        logger.debug("constructing JANI program...")
         
         # pack properties
         properties = specification.stormpy_properties()
@@ -37,7 +37,6 @@ class JaniUnfolder():
         properties = [Property(p) for p in properties]
         optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
         self.specification = Specification(properties,optimality_property)
-        print(self.specification)
         MarkovChain.initialize(self.specification)
 
         # unfold holes in the program
