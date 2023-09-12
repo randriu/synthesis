@@ -55,6 +55,9 @@ class MdpColoring:
             for hole_index,option in self.action_to_hole_options[action].items():
                 self.hole_option_to_actions[hole_index][option].append(action)
 
+
+    def __str__(self):
+        return str(self.action_to_hole_options)
     
 
     
