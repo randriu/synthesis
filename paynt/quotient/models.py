@@ -44,13 +44,12 @@ class MarkovChain:
     
     @classmethod
     def from_prism(self, prism):
-        if prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]:
-            # TODO why do we disable choice labels here?
-            MarkovChain.builder_options.set_build_choice_labels(True)
-            model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
-            MarkovChain.builder_options.set_build_choice_labels(False)
-        if prism.model_type == stormpy.storage.PrismModelType.MA:
-            model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
+        
+        assert prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]
+        # TODO why do we disable choice labels here?
+        MarkovChain.builder_options.set_build_choice_labels(True)
+        model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
+        MarkovChain.builder_options.set_build_choice_labels(False)
 
         og = model.labeling.get_states("overlap_guards").number_of_set_bits()
         assert og == 0, "PRISM program contains overlapping guards"
