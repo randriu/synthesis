@@ -1,15 +1,16 @@
 import stormpy
 
-from .prism_parser import PrismParser
-from .pomdp_parser import PomdpParser
-from ..quotient.quotient import *
-from ..quotient.quotient_pomdp import POMDPQuotientContainer
-from ..quotient.quotient_decpomdp import DecPomdpQuotientContainer
-
-import paynt
+from paynt.parser.prism_parser import PrismParser
+from paynt.parser.pomdp_parser import PomdpParser
+from paynt.quotient.quotient import *
+from paynt.quotient.quotient_pomdp import POMDPQuotientContainer
+from paynt.quotient.quotient_decpomdp import DecPomdpQuotientContainer
+from paynt.quotient.quotient_pomdp_family import PomdpFamilyQuotientContainer
 
 import logging
 logger = logging.getLogger(__name__)
+
+import os
 
 
 def make_rewards_action_based(model):
@@ -51,8 +52,8 @@ class Sketch:
 
 
     @classmethod
-    def load_sketch(self, sketch_path, export,
-        properties_path, relative_error, discount_factor):
+    def load_sketch(self, sketch_path, properties_path,
+        export=None, relative_error=0, discount_factor=1):
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
 
@@ -62,12 +63,15 @@ class Sketch:
         jani_unfolder = None
         decpomdp_manager = None
 
+        # check path
+        if not os.path.isfile(sketch_path):
+            raise ValueError(f"the sketch file {sketch_path} does not exist")
         logger.info(f"loading sketch from {sketch_path} ...")
 
         filetype = None
         try:
             logger.info(f"assuming sketch in PRISM format...")
-            explicit_quotient, specification, coloring, jani_unfolder = PrismParser.read_prism(
+            explicit_quotient, specification, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
                         sketch_path, properties_path, relative_error, discount_factor)
             filetype = "prism"
         except SyntaxError:
@@ -84,6 +88,8 @@ class Sketch:
             try:
                 logger.info(f"assuming sketch in Cassandra format...")
                 decpomdp_manager = stormpy.synthesis.parse_decpomdp(sketch_path)
+                if decpomdp_manager is None:
+                    raise SyntaxError
                 logger.info("applying discount factor transformation...")
                 decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
@@ -147,7 +153,10 @@ class Sketch:
 
         quotient_container = None
         if jani_unfolder is not None:
-            quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
+            if obs_evaluator is None:
+                quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
+            else:
+                quotient_container = PomdpFamilyQuotientContainer(explicit_quotient, coloring, specification, obs_evaluator)
         else:
             assert explicit_quotient.is_nondeterministic_model
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:

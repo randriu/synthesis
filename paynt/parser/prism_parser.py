@@ -1,4 +1,5 @@
 import stormpy
+import stormpy.synthesis
 
 from .jani import JaniUnfolder
 from ..quotient.holes import Hole, Holes, DesignSpace
@@ -42,19 +43,23 @@ class PrismParser:
         # construct the quotient
         coloring = None
         jani_unfolder = None
-        if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-            # unfold hole options
+        obs_evaluator = None
+        if holes is not None:
+            assert prism.model_type in {stormpy.storage.PrismModelType.DTMC,stormpy.storage.PrismModelType.POMDP},\
+                "hole detected, but the program is neither DTMC nor POMDP"
+            # unfold hole options via Jani
             jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, holes)
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
             coloring = MdpColoring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
-
-        MarkovChain.initialize(specification)
-
-        if prism.model_type != stormpy.storage.PrismModelType.DTMC:
+            MarkovChain.initialize(specification)
+            if prism.model_type == stormpy.storage.PrismModelType.POMDP:
+                obs_evaluator = stormpy.synthesis.ObservationEvaluator(prism, quotient_mdp)
+        else:
+            MarkovChain.initialize(specification)
             quotient_mdp = MarkovChain.from_prism(prism)
 
-        return quotient_mdp, specification, coloring, jani_unfolder
+        return quotient_mdp, specification, coloring, jani_unfolder, obs_evaluator
 
     
     @classmethod
@@ -74,7 +79,7 @@ class PrismParser:
                 hole_name = match.group(2)
                 hole_options = match.group(3).replace(" ", "")
                 hole_definitions[hole_name] = hole_options
-                line = f"const {hole_type} {hole_name};"
+                line = f"const {hole_type} {hole_name};\n"
             sketch_output.append(line)
 
         # store modified sketch to a temporary file

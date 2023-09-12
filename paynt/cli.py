@@ -1,6 +1,7 @@
 from . import version
 
-from .parser.sketch import Sketch
+import paynt.parser.sketch
+
 from .quotient.quotient_pomdp import POMDPQuotientContainer
 
 from .synthesizer.synthesizer import Synthesizer
@@ -125,7 +126,7 @@ def setup_logger(log_path = None):
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
 
-def paynt(
+def paynt_run(
     project, sketch, props, relative_error, discount_factor,
     export,
     method,
@@ -148,26 +149,11 @@ def paynt(
     POMDPQuotientContainer.export_optimal_result = fsc_export_result
     POMDPQuotientContainer.posterior_aware = posterior_aware
 
-    # check paths of input files
+    # join paths of input files
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    if not os.path.isfile(sketch_path):
-        raise ValueError(f"the sketch file {sketch_path} does not exist")
 
-    quotient = Sketch.load_sketch(sketch_path, export, properties_path, relative_error, discount_factor)
-
-    storm_control = None
-    if storm_pomdp:
-        storm_control = StormPOMDPControl()
-        storm_control.storm_options = storm_options
-        if get_storm_result is not None:
-            storm_control.get_result = get_storm_result
-        if iterative_storm is not None:
-            storm_control.iteration_timeout, storm_control.paynt_timeout, storm_control.storm_timeout = iterative_storm
-        storm_control.use_cutoffs = use_storm_cutoffs
-        storm_control.unfold_strategy_storm = unfold_strategy_storm
-        storm_control.export_fsc_storm = export_fsc_storm
-        storm_control.export_fsc_paynt = export_fsc_paynt
+    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor)
 
     if pomcp:
         from paynt.simulation.pomcp import POMCP
@@ -181,6 +167,23 @@ def paynt(
             pstats.Stats(pr).sort_stats('tottime').print_stats(10)
         exit()
         
+    storm_control = None
+    if storm_pomdp:
+        storm_control = StormPOMDPControl()
+        storm_control.storm_options = storm_options
+        if get_storm_result is not None:
+            storm_control.get_result = get_storm_result
+        if iterative_storm is not None:
+            storm_control.iteration_timeout, storm_control.paynt_timeout, storm_control.storm_timeout = iterative_storm
+        storm_control.use_cutoffs = use_storm_cutoffs
+        storm_control.unfold_strategy_storm = unfold_strategy_storm
+        storm_control.export_fsc_storm = export_fsc_storm
+        storm_control.export_fsc_paynt = export_fsc_paynt
+
+    if isinstance(quotient, paynt.quotient.quotient_pomdp_family.PomdpFamilyQuotientContainer):
+        logger.info("nothing to do with the POMDP sketch, aborting...")
+        exit(0)
+
     # choose the synthesis method and run the corresponding synthesizer
     if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
@@ -217,7 +220,7 @@ def paynt(
 
 def main():
     setup_logger()
-    paynt()
+    paynt_run()
 
 
 if __name__ == "__main__":
