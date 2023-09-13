@@ -1,0 +1,66 @@
+pomdp
+
+// grid dimensions
+const int N = 10;
+const int xMIN = 0;
+const int yMIN = 0;
+const int xMAX = N-1;
+const int yMAX = N-1;
+
+// obstacle coordinates
+hole int o1x in {3,4,5};
+hole int o1y in {3,4,5};
+
+hole int o2x in {6,7,8};
+hole int o2y in {6,7,8};
+
+// probability of slipping 2 cells ahead
+const double slip = 0.1;
+
+// stop conditions
+formula goal = start & (x=xMAX & y=yMAX);
+formula done = goal | crash;
+
+// observations
+observable "goal" = goal;
+observable "crash" = crash;
+observable "xl" = x<xMAX/2;
+observable "yl" = y<yMAX/2;
+
+
+module clk
+    start : bool init false;
+
+    [place] !start -> (start'=true);
+    [north] start & !done -> true;
+    [south] start & !done -> true;
+    [east]  start & !done -> true;
+    [west]  start & !done -> true;
+endmodule
+
+
+module agent
+    x : [xMIN..xMAX];
+    y : [yMIN..yMAX];
+
+    [place] true ->  1/4: (x'=o1x-1) & (y'=o1y) + 1/4: (x'=1) & (y'=1) + 1/4: (x'=2) & (y'=1) + 1/4: (x'=1) & (y'=3);
+
+    [west]  true -> (1-slip): (x'=max(x-1,xMIN)) + slip: (x'=max(x-2,xMIN));
+    [east]  true -> (1-slip): (x'=min(x+1,xMAX)) + slip: (x'=min(x+2,xMAX));
+    [south] true -> (1-slip): (y'=min(y+1,yMAX)) + slip: (y'=min(y+2,yMAX));
+    [north] true -> (1-slip): (y'=max(y-1,yMIN)) + slip: (y'=max(y-2,yMIN));
+endmodule
+
+// crash detection is delayed by 1 step to avoid introducing intermediate states
+module crash
+    crash : bool init false;
+    [west]    (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
+    [west]  !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
+    [east]    (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
+    [east]  !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
+    [south]   (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
+    [south] !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
+    [north]   (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
+    [north] !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
+endmodule
+
