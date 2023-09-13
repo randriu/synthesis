@@ -94,7 +94,7 @@ class QuotientContainer:
 
     
     def build_chain(self, family):
-        assert family.size == 1
+        assert family.size == 1, "expecting family of size 1"
 
         _,_,selected_actions_bv = self.coloring.select_actions(family)
         mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)

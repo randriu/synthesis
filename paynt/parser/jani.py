@@ -46,7 +46,7 @@ class JaniUnfolder():
         self.edge_to_color = None
         self.unfold_jani(jani, design_space)
 
-        # construct the coloring
+        # construct the explicit quotient
         quotient_mdp = stormpy.build_sparse_model_with_options(self.jani_unfolded, MarkovChain.builder_options)
 
         # associate each action of a quotient MDP with hole options
