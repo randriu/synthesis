@@ -22,6 +22,7 @@ formula goal = start & (x=xMAX & y=yMAX);
 formula done = goal | crash;
 
 // observations
+observable "start" = start;
 observable "goal" = goal;
 observable "crash" = crash;
 observable "xleft" = x<xMAX/2;
