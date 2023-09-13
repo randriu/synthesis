@@ -89,11 +89,15 @@ class Holes(list):
         for hole_index,hole in enumerate(self):
             hole.assume_options(hole_options[hole_index])
 
+    def assume_options_copy(self, hole_options):
+        ''' Create a copy and assume suboptions for each hole. '''
+        holes_copy = self.copy()
+        holes_copy.assume_options(hole_options)
+        return holes_copy
+
     def pick_any(self):
-        suboptions = [[hole.options[0]] for hole in self]
-        holes = self.copy()
-        holes.assume_options(suboptions)
-        return holes
+        hole_options = [[hole.options[0]] for hole in self]
+        return self.assume_options_copy(hole_options)
 
     def includes(self, hole_assignment):
         '''
