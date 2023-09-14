@@ -152,7 +152,7 @@ class MdpSpecificationResult(SpecificationResult):
                 self.improving_value = opt.improving_value
                 self.can_improve = opt.can_improve
             else:
-                self.improving_assignment = family.pick_any()
+                self.improving_assignment = "any"
                 self.can_improve = False
             return
 
