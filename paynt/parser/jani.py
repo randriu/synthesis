@@ -50,10 +50,19 @@ class JaniUnfolder():
         quotient_mdp = stormpy.build_sparse_model_with_options(self.jani_unfolded, MarkovChain.builder_options)
 
         # associate each action of a quotient MDP with hole options
+        # reconstruct choice labels from choice origins
         # TODO handle conflicting colors
         action_to_hole_options = []
         tm = quotient_mdp.transition_matrix
         for choice in range(quotient_mdp.nr_choices):
+            co = quotient_mdp.choice_origins
+            print(dir(quotient_mdp.choice_origins))
+            i = co.get_choice_info(choice)
+            print(type(i))
+            print(dir(i))
+            print(i)
+            exit()
+
             edges = quotient_mdp.choice_origins.get_edge_index_set(choice)
             hole_options = {}
             for edge in edges:
@@ -101,11 +110,31 @@ class JaniUnfolder():
         jani_program.finalize()
         jani_program.check_valid()
 
-        # collect colors of each edge
+        # collect label and color of each edge
         edge_to_hole_options = {}
         edge_to_color = {}
+        print(jani_program)
+        print(dir(jani_program))
+        print(type(jani_program))
+        exit()
         for aut_index, automaton in enumerate(jani_program.automata):
+            print(dir(automaton))
+            print(str(automaton))
+            print(automaton.name)
+            # exit()
             for edge_index, edge in enumerate(automaton.edges):
+                print(type(edge))
+                print(dir(edge))
+                print(edge.action_index)
+                print(edge.color)
+                print(edge.destinations)
+                print(edge.guard)
+                print(edge.has_silent_action())
+                print(edge.rate)
+                exit()
+                # print(edge.template_edge)
+                te = edge.template_edge
+                print(dir(te))
                 global_index = jani_program.encode_automaton_and_edge_index(aut_index, edge_index)
                 edge_to_color[global_index] = edge.color
 
@@ -118,6 +147,7 @@ class JaniUnfolder():
         self.jani_unfolded = jani_program
         self.edge_to_color = edge_to_color
         self.edge_to_hole_options = edge_to_hole_options
+        exit()
 
     def automaton_has_holes(self, automaton, expression_variables):
         for edge_index, e in enumerate(automaton.edges):
