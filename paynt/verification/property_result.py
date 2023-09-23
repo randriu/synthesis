@@ -16,21 +16,24 @@ class PropertyResult:
 
 class ConstraintsResult:
     '''
-    A list of property results.
+    A list of constraint results.
     Note: some results might be None (not evaluated).
     '''
     def __init__(self, results):
         self.results = results
+        self.undecided_constraints = [i for i,result in enumerate(results) if result is not None and result.sat is None]
+        
+        result_sats = [result.sat for result in results if result is not None]
+        if False in result_sats:
+            self.sat = False
+        elif None in result_sats:
+            self.sat = None
+        else:
+            self.sat = True
+
 
     def __str__(self):
         return ",".join([str(result) for result in self.results])
-
-    @property
-    def all_sat(self):
-        for result in self.results:
-            if result is not None and not result.sat:
-                return False
-        return True
 
 
 class SpecificationResult:
@@ -48,7 +51,7 @@ class SpecificationResult:
             (can be None if no optimality)
         """
 
-        if not self.constraints_result.all_sat:
+        if not self.constraints_result.sat:
             # constraints not sat
             return False, None
 
@@ -72,20 +75,21 @@ class SpecificationResult:
             
 
 class MdpPropertyResult:
-    def __init__(self,
-        prop, primary, secondary, feasibility,
-        primary_selection, primary_choice_values, primary_expected_visits,
-        primary_scores
-    ):
-        self.minimizing = prop.minimizing
-        self.primary = primary
-        self.secondary = secondary
-        self.feasibility = feasibility
+    def __init__(self,prop):
+        self.prop = prop
+        
+        self.primary = None
+        self.secondary = None
+        self.sat = None
 
-        self.primary_selection = primary_selection
-        self.primary_choice_values = primary_choice_values
-        self.primary_expected_visits = primary_expected_visits
-        self.primary_scores = primary_scores
+        self.primary_selection = None
+        self.primary_choice_values = None
+        self.primary_expected_visits = None
+        self.primary_scores = None
+
+    @property
+    def minimizing(self):
+        return self.prop.minimizing
 
     def __str__(self):
         prim = str(self.primary)
@@ -96,23 +100,7 @@ class MdpPropertyResult:
             return "{} - {}".format(seco,prim)
             
 
-class MdpConstraintsResult:
-    def __init__(self, results):
-        self.results = results
-        self.undecided_constraints = [index for index,result in enumerate(results) if result is not None and result.feasibility is None]
 
-        self.feasibility = True
-        for result in results:
-            if result is None:
-                continue
-            if result.feasibility == False:
-                self.feasibility = False
-                break
-            if result.feasibility == None:
-                self.feasibility = None
-
-    def __str__(self):
-        return ",".join([str(result) for result in self.results])
 
 
 class MdpOptimalityResult(MdpPropertyResult):
@@ -122,10 +110,16 @@ class MdpOptimalityResult(MdpPropertyResult):
         primary_selection, primary_choice_values, primary_expected_visits,
         primary_scores
     ):
-        super().__init__(
-            prop, primary, secondary, None,
-            primary_selection, primary_choice_values, primary_expected_visits,
-            primary_scores)
+        super().__init__(prop)
+
+        self.primary = primary
+        self.secondary = secondary
+
+        self.primary_selection = primary_selection
+        self.primary_choice_values = primary_choice_values
+        self.primary_expected_visits = primary_expected_visits
+        self.primary_scores = primary_scores
+
         self.improving_assignment = improving_assignment
         self.improving_value = improving_value
         self.can_improve = can_improve
@@ -145,7 +139,7 @@ class MdpSpecificationResult(SpecificationResult):
         cr = self.constraints_result
         opt = self.optimality_result
 
-        if cr.feasibility == True:
+        if cr.sat == True:
             # either no constraints or constraints were satisfied
             if opt is not None:
                 self.improving_assignment = opt.improving_assignment
@@ -156,7 +150,7 @@ class MdpSpecificationResult(SpecificationResult):
                 self.can_improve = False
             return
 
-        if cr.feasibility == False:
+        if cr.sat == False:
             self.can_improve = False
             return
 

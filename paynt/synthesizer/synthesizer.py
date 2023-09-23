@@ -50,7 +50,7 @@ class Synthesizer:
     
     def run(self):
         # self.quotient.specification.optimality.update_optimum(0.9)
-        self.quotient.design_space.property_indices = self.quotient.specification.all_constraint_indices()
+        self.quotient.design_space.constraint_indices = self.quotient.specification.all_constraint_indices()
         assignment = self.synthesize(self.quotient.design_space)
 
         print("")

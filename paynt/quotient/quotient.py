@@ -418,7 +418,7 @@ class QuotientContainer:
         dtmc = self.build_chain(assignment)
         res = dtmc.check_specification(self.specification)
         # opt_result = dtmc.model_check_property(opt_prop)
-        if res.constraints_result.all_sat and self.specification.optimality.improves_optimum(res.optimality_result.value):
+        if res.constraints_result.sat and self.specification.optimality.improves_optimum(res.optimality_result.value):
             return assignment, res.optimality_result.value
         else:
             return None, None

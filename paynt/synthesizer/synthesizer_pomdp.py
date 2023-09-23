@@ -96,7 +96,7 @@ class SynthesizerPOMDP:
     def synthesize(self, family, print_stats = True):
         self.quotient.discarded = 0
         synthesizer = self.synthesizer(self.quotient)
-        family.property_indices = self.quotient.design_space.property_indices
+        family.constraint_indices = self.quotient.design_space.constraint_indices
         assignment = synthesizer.synthesize(family)
         if print_stats:
             synthesizer.print_stats()

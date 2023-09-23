@@ -147,7 +147,7 @@ class ParentInfo():
     '''
     def __init__(self):
         # list of constraint indices still undecided in this family
-        self.property_indices = None
+        self.constraint_indices = None
         # for each undecided property contains analysis results
         self.analysis_hints = None
 
@@ -184,14 +184,14 @@ class DesignSpace(Holes):
         self.hole_selected_actions = None
         self.selected_actions = None
         self.refinement_depth = 0
-        self.property_indices = None
+        self.constraint_indices = None
 
         self.analysis_result = None
         self.splitter = None
         self.parent_info = parent_info
         if parent_info is not None:
             self.refinement_depth = parent_info.refinement_depth + 1
-            self.property_indices = parent_info.property_indices
+            self.constraint_indices = parent_info.constraint_indices
 
     def copy(self):
         return DesignSpace(super().copy())
@@ -255,7 +255,7 @@ class DesignSpace(Holes):
         pi.refinement_depth = self.refinement_depth
         pi.analysis_hints = self.collect_analysis_hints(specification)
         cr = self.analysis_result.constraints_result
-        pi.property_indices = cr.undecided_constraints if cr is not None else []
+        pi.constraint_indices = cr.undecided_constraints if cr is not None else []
         pi.splitter = self.splitter
         pi.mdp = self.mdp
         return pi

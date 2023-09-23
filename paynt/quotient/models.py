@@ -3,8 +3,8 @@ import stormpy
 from paynt.verification.property import *
 from paynt.verification.property_result import *
 
-from collections import OrderedDict
-import random
+import logging
+logger = logging.getLogger(__name__)
 
 class MarkovChain:
 
@@ -41,25 +41,28 @@ class MarkovChain:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
+    @classmethod
+    def assert_no_overlapping_guards(cls, model):
+        if model.labeling.contains_label("overlap_guards"):
+            assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
     
     @classmethod
-    def from_prism(self, prism):
+    def from_prism(cls, prism):
         
         assert prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]
         # TODO why do we disable choice labels here?
         MarkovChain.builder_options.set_build_choice_labels(True)
         model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
         MarkovChain.builder_options.set_build_choice_labels(False)
-
-        og = model.labeling.get_states("overlap_guards").number_of_set_bits()
-        assert og == 0, "PRISM program contains overlapping guards"
-
+        MarkovChain.assert_no_overlapping_guards(model)
         return model
 
     
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
-        if model.labeling.contains_label("overlap_guards"):
-            assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
+        MarkovChain.assert_no_overlapping_guards(model)
+        if len(model.initial_states) > 1:
+            logger.warning("WARNING: obtained model with multiple initial states")
+        
         self.model = model
         self.quotient_container = quotient_container
         self.quotient_choice_map = quotient_choice_map
@@ -127,40 +130,52 @@ class MarkovChain:
 
         return PropertyResult(prop, result, value)
 
+    
+    def check_constraint(self, constraint):
+        ''' to be overridden '''
+        return None
+
+    def check_optimality(self, optimality):
+        ''' to be overridden '''
+        return None
+
+    def check_constraints(self, constraints, constraint_indices, short_evaluation):
+        results = [None for constraint in constraints]
+        for index in constraint_indices:
+            constraint = constraints[index]
+            result = self.check_constraint(constraint)
+            results[index] = result
+            if short_evaluation and result.sat == False:
+                break
+        return ConstraintsResult(results)
+
+    def check_specification(self, specification, constraint_indices = None, short_evaluation = False):
+        '''
+        Check specification.
+        :param specification containing constraints and optimality
+        :param constraint_indices a selection of property indices to investigate (default: all)
+        :param short_evaluation if set to True, then evaluation terminates as soon as one constraint violated
+        '''
+        if constraint_indices is None:
+            constraint_indices = specification.all_constraint_indices()
+        constraints_result = self.check_constraints(specification.constraints, constraint_indices, short_evaluation)
+        optimality_result = None
+        if specification.has_optimality and not (short_evaluation and constraints_result.sat == False):
+            optimality_result = self.check_optimality(specification.optimality)
+        return constraints_result, optimality_result
+
 
 class DTMC(MarkovChain):
 
-    def check_constraints(self, properties, property_indices = None, short_evaluation = False):
-        '''
-        Check constraints.
-        :param properties a list of all constraints
-        :param property_indices a selection of property indices to investigate
-        :param short_evaluation if set to True, then evaluation terminates as
-          soon as a constraint is not satisfied
-        '''
+    def check_constraint(self, constraint):
+        return self.model_check_property(constraint)
 
-        # implicitly, check all constraints
-        if property_indices is None:
-            property_indices = [index for index,_ in enumerate(properties)]
-        
-        # check selected properties
-        results = [None for prop in properties]
-        for index in property_indices:
-            prop = properties[index]
-            result = self.model_check_property(prop)
-            results[index] = result
-            if short_evaluation and not result.sat:
-                break
+    def check_optimality(self, optimality):
+        return self.model_check_property(optimality)
 
-        return ConstraintsResult(results)
-
-    def check_specification(self, specification, property_indices = None, short_evaluation = False):
-        constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
-        optimality_result = None
-        if specification.has_optimality and not (short_evaluation and not constraints_result.all_sat):
-            optimality_result = self.model_check_property(specification.optimality)
+    def check_specification(self, specification, constraint_indices = None, short_evaluation = False):
+        constraints_result, optimality_result = super().check_specification(specification,constraint_indices,short_evaluation)
         return SpecificationResult(constraints_result, optimality_result)
-
 
 
 class MDP(MarkovChain):
@@ -176,48 +191,32 @@ class MDP(MarkovChain):
         self.quotient_to_restricted_action_map = None
 
 
-    def check_property(self, prop):
+    def check_constraint(self, prop):
+
+        result = MdpPropertyResult(prop)
 
         # check primary direction
-        primary = self.model_check_property(prop, alt = False)
+        result.primary = self.model_check_property(prop, alt = False)
         
         # no need to check secondary direction if primary direction yields UNSAT
-        if not primary.sat:
-            return MdpPropertyResult(prop, primary, None, False, None, None, None, None)
+        if not result.primary.sat:
+            result.sat = False
+            return result
 
         # primary direction is SAT
         # check if the primary scheduler is consistent
-        selection,choice_values,expected_visits,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)    
-        
+        result.primary_selection,result.primary_choice_values,result.primary_expected_visits,result.primay_scores,consistent = \
+            self.quotient_container.scheduler_consistent(self, prop, result.primary.result)
+
         # regardless of whether it is consistent or not, we compute secondary direction to show that all SAT
+        result.secondary = self.model_check_property(prop, alt = True)
+        if self.is_dtmc and result.primary.value != result.secondary.value:
+            logger.warning("WARNING: model is deterministic but min<max")
 
-        # compute secondary direction
-        secondary = self.model_check_property(prop, alt = True)
-        if self.is_dtmc and primary.value != secondary.value:
-            dtmc = self.quotient_container.mdp_to_dtmc(self.model)
-            result = stormpy.model_checking(
-                dtmc, prop.formula, only_initial_states=False,
-                extract_scheduler=(not self.is_dtmc),
-                # extract_scheduler=True,
-                environment=self.environment
-            )
+        if result.secondary.sat:
+            result.sat = True
+        return result
 
-        feasibility = True if secondary.sat else None
-        return MdpPropertyResult(prop, primary, secondary, feasibility, selection, choice_values, expected_visits, scores)
-
-    def check_constraints(self, properties, property_indices = None, short_evaluation = False):
-        if property_indices is None:
-            property_indices = [index for index,_ in enumerate(properties)]
-
-        results = [None for prop in properties]
-        for index in property_indices:
-            prop = properties[index]
-            result = self.check_property(prop)
-            results[index] = result
-            if short_evaluation and result.feasibility == False:
-                break
-
-        return MdpConstraintsResult(results)
 
     def check_optimality(self, prop):
         # check primary direction
@@ -256,10 +255,6 @@ class MDP(MarkovChain):
         can_improve = primary.sat
         return MdpOptimalityResult(prop, primary, secondary, improving_assignment, improving_value, can_improve, selection, choice_values, expected_visits, scores)
 
-
-    def check_specification(self, specification, property_indices = None, short_evaluation = False):
-        constraints_result = self.check_constraints(specification.constraints, property_indices, short_evaluation)
-        optimality_result = None
-        if specification.has_optimality and not (short_evaluation and constraints_result.feasibility == False):
-            optimality_result = self.check_optimality(specification.optimality)
+    def check_specification(self, specification, constraint_indices = None, short_evaluation = False):
+        constraints_result, optimality_result = super().check_specification(specification,constraint_indices,short_evaluation)
         return MdpSpecificationResult(constraints_result, optimality_result)

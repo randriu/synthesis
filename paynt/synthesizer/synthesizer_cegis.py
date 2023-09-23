@@ -64,7 +64,7 @@ class SynthesizerCEGIS(Synthesizer):
             pack such properties as well as their MDP results (if available)
         '''
         conflict_requests = []
-        for index in family.property_indices:
+        for index in family.constraint_indices:
             member_result = mc_result.constraints_result.results[index]
             if member_result.sat:
                 continue
@@ -87,13 +87,13 @@ class SynthesizerCEGIS(Synthesizer):
         :return (2) accepting assignment (or None)
         """
 
-        assert family.property_indices is not None, "analyzed family does not have the relevant properties list"
+        assert family.constraint_indices is not None, "analyzed family does not have the relevant properties list"
         assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
 
         dtmc = self.quotient.build_chain(assignment)
         self.stat.iteration_dtmc(dtmc.states)
         mc_result = dtmc.check_specification(self.quotient.specification,
-            property_indices = family.property_indices, short_evaluation = False)
+            constraint_indices = family.constraint_indices, short_evaluation = False)
 
         # analyze model checking results
         accepting_assignment = None

@@ -38,7 +38,7 @@ def solve_family(args):
         quotient.build(family)
         # self.stat.iteration_mdp(family.mdp.states)
 
-        res = family.mdp.check_specification(quotient.specification, property_indices = family.property_indices, short_evaluation = True)
+        res = family.mdp.check_specification(quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
         family.analysis_result = res
         
         subfamilies = []
@@ -168,7 +168,7 @@ def solve_batch(args):
 
             family = subfamilies.pop(-1)
             quotient.build(family)
-            res = family.mdp.check_specification(quotient.specification, property_indices = family.property_indices, short_evaluation = True)
+            res = family.mdp.check_specification(quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
             family.analysis_result = res
             mdp_states.append(family.mdp.states)
             
