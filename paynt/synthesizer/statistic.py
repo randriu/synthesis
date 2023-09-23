@@ -94,7 +94,7 @@ class Statistic:
         if not self.synthesis_time.read() > self.status_horizon:
             return
         
-        return
+        # return
 
         print(self.status(), flush=True)
         self.status_horizon += Statistic.status_period
