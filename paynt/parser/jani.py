@@ -235,10 +235,7 @@ class JaniUnfolder():
         )
         return new_edge
 
-    def write_jani(self, sketch_path):
-        from . import sketch
-        output_path = sketch.Sketch.substitute_suffix(sketch_path, '.', 'jani')
+    def write_jani(self, output_path):
         logger.debug(f"Writing unfolded program to {output_path}")
         with open(output_path, "w") as f:
             f.write(str(self.jani_unfolded))
-        logger.debug("Write OK, aborting...")
