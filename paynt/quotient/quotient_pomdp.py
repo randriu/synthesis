@@ -26,7 +26,7 @@ class POMDPQuotientContainer(QuotientContainer):
     posterior_aware = False
 
     
-    def __init__(self, pomdp, specification):
+    def __init__(self, pomdp, specification, decpomdp_manager=None):
         super().__init__(specification = specification)
 
         # unfolded POMDP
@@ -78,8 +78,16 @@ class POMDPQuotientContainer(QuotientContainer):
             self.observation_labels = [ov.get_string(obs) for obs in range(self.observations)]
             self.observation_labels = [self.simplify_label(label) for label in self.observation_labels]
         else:
-            self.observation_labels = list(range(self.observations))
-            self.observation_labels = [str(label) for label in self.observation_labels]
+            if decpomdp_manager is None:
+                self.observation_labels = list(range(self.observations))
+                self.observation_labels = [str(label) for label in self.observation_labels]
+            else:
+                # map each 'joint' observation to the agent's observation and use the corresponding label
+                self.observation_labels = []
+                for obs in range(self.observations):
+                    agent_obs = decpomdp_manager.joint_observations[obs][0]
+                    agent_obs_label = decpomdp_manager.agent_observation_labels[0][agent_obs]
+                    self.observation_labels.append(agent_obs_label)
         # logger.debug(f"Observation labels: {self.observation_labels}")
 
         # compute actions available at each observation

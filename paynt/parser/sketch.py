@@ -174,7 +174,7 @@ class Sketch:
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
                 quotient_container = DecPomdpQuotientContainer(decpomdp_manager, specification)
             else:
-                quotient_container = POMDPQuotientContainer(explicit_quotient, specification)
+                quotient_container = POMDPQuotientContainer(explicit_quotient, specification, decpomdp_manager)
         return quotient_container
 
 
