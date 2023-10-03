@@ -15,8 +15,13 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
         self.obs_evaluator = obs_evaluator
         self.design_space = DesignSpace(coloring.holes)
+        self.add_choice_labels()
 
     
+    def add_choice_labels(self):
+        self.quotient_mdp = stormpy.synthesis.add_choice_labels_from_jani(self.quotient_mdp)
+        
+
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
@@ -25,4 +30,5 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
         pomdp = self.obs_evaluator.build_sub_pomdp(mdp,state_map)
         return pomdp
+
 
