@@ -5,7 +5,8 @@ from paynt.parser.pomdp_parser import PomdpParser
 from paynt.quotient.quotient import *
 from paynt.quotient.quotient_pomdp import POMDPQuotientContainer
 from paynt.quotient.quotient_decpomdp import DecPomdpQuotientContainer
-from paynt.quotient.quotient_pomdp_family import PomdpFamilyQuotientContainer
+
+import paynt.quotient.pomdp_family
 
 import logging
 logger = logging.getLogger(__name__)
@@ -61,6 +62,7 @@ class Sketch:
         coloring = None
         jani_unfolder = None
         decpomdp_manager = None
+        obs_evaluator = None
 
         # check path
         if not os.path.isfile(sketch_path):
@@ -166,7 +168,7 @@ class Sketch:
             if obs_evaluator is None:
                 quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
             else:
-                quotient_container = PomdpFamilyQuotientContainer(explicit_quotient, coloring, specification, obs_evaluator)
+                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotientContainer(explicit_quotient, coloring, specification, obs_evaluator)
         else:
             assert explicit_quotient.is_nondeterministic_model
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:

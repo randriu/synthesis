@@ -180,7 +180,7 @@ def paynt_run(
         storm_control.export_fsc_storm = export_fsc_storm
         storm_control.export_fsc_paynt = export_fsc_paynt
 
-    if isinstance(quotient, paynt.quotient.quotient_pomdp_family.PomdpFamilyQuotientContainer):
+    if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotientContainer):
         logger.info("nothing to do with the POMDP sketch, aborting...")
         exit(0)
 
