@@ -28,23 +28,27 @@ class FSC:
         self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
 
     
+    def __str__(self):
+        return json.dumps(self.to_json(), indent=4)
+
     def to_json(self):
         json = {}
         json["num_nodes"] = self.num_nodes
         json["num_observations"] = self.num_observations
         json["__comment_action_function"] = "action function has signature NxZ -> Act"
-        json["__update_action_function"] = "update function has signature NxZ -> N"
+        json["__comment_update_function"] = "update function has signature NxZ -> N"
         json["action_function"] = self.action_function
         json["update_function"] = self.update_function
         return json
 
-    def __str__(self):
-        return json.dumps(self.to_json(), indent=4)
-
-    
     @classmethod
-    def from_json(json):
-        pass
+    def from_json(cls, json):
+        num_nodes = json["num_nodes"]
+        num_observations = json["num_observations"]
+        fsc = FSC(num_nodes,num_observations)
+        fsc.action_function = json["action_function"]
+        fsc.update_function = json["update_function"]
+        return fsc
 
 
     def decide(self, decision_map, node, observation):
@@ -61,10 +65,10 @@ class FSC:
                 decision = 0
         return decision
 
-    def suggest_action(self, observation, node):
+    def suggest_action(self, node, observation):
         return self.decide(self.action_function, node, observation)
 
-    def suggest_update(self, observation, node):
+    def suggest_update(self, node, observation):
         return self.decide(self.update_function, node, observation)
 
 

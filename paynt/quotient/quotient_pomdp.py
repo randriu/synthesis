@@ -88,7 +88,8 @@ class POMDPQuotientContainer(QuotientContainer):
                     agent_obs = decpomdp_manager.joint_observations[obs][0]
                     agent_obs_label = decpomdp_manager.agent_observation_labels[0][agent_obs]
                     self.observation_labels.append(agent_obs_label)
-        # logger.debug(f"Observation labels: {self.observation_labels}")
+        logger.debug(f"Observation labels: {self.observation_labels}")
+        exit()
 
         # compute actions available at each observation
         self.actions_at_observation = [0] * self.observations

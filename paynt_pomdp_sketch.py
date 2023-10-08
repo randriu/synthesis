@@ -6,6 +6,7 @@ import paynt.parser.sketch
 import paynt.quotient.pomdp_family
 
 import os
+import random
 
 def load_sketch(project_path):
     project_path = os.path.abspath(project_path)
@@ -18,14 +19,15 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     print("investigating hole assignment: ", hole_assignment)
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
 
-    # return an arbitrary k-FSC
+    # return a random k-FSC
     actions_at_observation = pomdp_sketch.compute_actions_at_observation(pomdp)
-    k = 2
-    fsc = paynt.quotient.pomdp_family.FSC(k, pomdp.nr_observations)
-    for node in range(k):
+    num_nodes = 2
+    fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp.nr_observations)
+    random.seed(42)
+    for node in range(num_nodes):
         for obs in range(pomdp.nr_observations):
-            fsc.action_function[node][obs] = actions_at_observation[obs]-1
-            fsc.update_function[node][obs] = k-1
+            fsc.action_function[node][obs] = random.randrange(actions_at_observation[obs])
+            fsc.update_function[node][obs] = random.randrange(num_nodes)
     return fsc
 
 
@@ -43,8 +45,6 @@ print("design space size: {} members".format(pomdp_sketch.design_space.size))
 hole_options = [[hole.options[0]] for hole in pomdp_sketch.design_space]
 hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
 
-# investigate this hole assignment
+# investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 print(fsc)
-
-
