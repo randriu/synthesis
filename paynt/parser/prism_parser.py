@@ -25,7 +25,12 @@ class PrismParser:
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
         expression_parser = stormpy.storage.ExpressionParser(prism.expression_manager)
         expression_parser.set_identifier_mapping(dict())
-        logger.debug("PRISM model type: " + str(prism.model_type))
+        prism_model_type = {
+            stormpy.storage.PrismModelType.DTMC:"DTMC",
+            stormpy.storage.PrismModelType.MDP:"MDP",
+            stormpy.storage.PrismModelType.POMDP:"POMDP"
+        }[prism.model_type]
+        logger.debug("PRISM model type: " + prism_model_type)
 
         # parse constants
         constant_map = None
@@ -45,8 +50,7 @@ class PrismParser:
         jani_unfolder = None
         obs_evaluator = None
         if holes is not None:
-            assert prism.model_type in {stormpy.storage.PrismModelType.DTMC,stormpy.storage.PrismModelType.POMDP},\
-                "hole detected, but the program is neither DTMC nor POMDP"
+            assert prism_model_type in ["DTMC","MDP","POMDP"], "hole detected, but the program is neither DTMC nor (PO)MDP"
             # unfold hole options via Jani
             jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, holes)
             specification = jani_unfolder.specification
@@ -59,7 +63,7 @@ class PrismParser:
             MarkovChain.initialize(specification)
             quotient_mdp = MarkovChain.from_prism(prism)
 
-        return quotient_mdp, specification, coloring, jani_unfolder, obs_evaluator
+        return prism, quotient_mdp, specification, coloring, jani_unfolder, obs_evaluator
 
     
     @classmethod
