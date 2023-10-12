@@ -58,6 +58,7 @@ class Sketch:
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
 
+        prism = None
         explicit_quotient = None
         specification = None
         coloring = None
