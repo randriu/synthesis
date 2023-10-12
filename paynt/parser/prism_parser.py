@@ -6,7 +6,7 @@ from ..quotient.holes import Hole, Holes, DesignSpace
 from ..quotient.models import MarkovChain
 from ..quotient.coloring import MdpColoring
 
-from paynt.verification.property import *
+import paynt.verification.property
 
 import os
 import re
@@ -43,7 +43,7 @@ class PrismParser:
             prism, hole_expressions, holes = PrismParser.parse_holes(
                 prism, expression_parser, hole_definitions)
 
-        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism)
+        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism, holes)
 
         # construct the quotient
         coloring = None
@@ -144,38 +144,68 @@ class PrismParser:
 
  
     @classmethod
-    def parse_specification(cls, properties_path, relative_error, discount_factor, prism = None):
+    def parse_property(cls, line, prism=None):
+        '''
+        Parse a line containing a single PCTL property.
+        @return the property or None if no property was detected
+        '''
+        if prism is not None:
+            props = stormpy.parse_properties_for_prism_program(line, prism)
+        else:
+            props = stormpy.parse_properties_without_context(line)
+        if len(props) == 0:
+            return None
+        if len(props)>1:
+            logger.warning("multiple properties detected on one line, dropping all but the first one")
+        return props[0]
 
+    @classmethod
+    def parse_specification(cls, properties_path, relative_error, discount_factor, prism=None, holes=None):
+        '''
+        Expecting one property per line. The line may be terminated with a semicolon.
+        Empty lines or comments are allowed.
+        '''
+        
         if not os.path.isfile(properties_path):
             raise ValueError(f"the properties file {properties_path} does not exist")
         logger.info(f"loading properties from {properties_path} ...")
+
+        mdp_spec = re.compile(r'^\s*(min|max)\s+(.*)$')
+
         lines = ""
         with open(properties_path) as file:
-            for line in file:
-                lines += line + ";"
-        if prism is not None:
-            props = stormpy.parse_properties_for_prism_program(lines, prism)
-        else:
-            props = stormpy.parse_properties_without_context(lines)
+            lines = [line for line in file]
+        
+        properties = []
 
-        # check properties
-        constraints = []
-        optimality = None
-        for prop in props:
+        for line in lines:
+            minmax = None
+            match = mdp_spec.search(line)
+            if match is not None:
+                minmax = match.group(1)
+                line = match.group(2)
+            prop = PrismParser.parse_property(line,prism)
+            if prop is None:
+                continue
+
             rf = prop.raw_formula
             assert rf.has_bound != rf.has_optimality_type, \
                 "optimizing formula contains a bound or a comparison formula does not"
-            if rf.has_bound:
-                constraints.append(prop)
+            if minmax is None:
+                if rf.has_bound:
+                    prop = paynt.verification.property.Property(prop,discount_factor)
+                else:
+                    prop = paynt.verification.property.OptimalityProperty(prop, discount_factor, relative_error)
             else:
-                assert optimality is None, "more than one optimality formula specified"
-                optimality = prop
+                assert not rf.has_bound, "double-optimality objective cannot contain a bound"
+                dminimizing = (minmax=="min")
+                prop = paynt.verification.property.DoubleOptimalityProperty(prop, dminimizing, discount_factor, relative_error)
+            properties.append(prop)
 
-        # wrap properties
-        constraints = [Property(p,discount_factor) for p in constraints]
-        if optimality is not None:
-            optimality = OptimalityProperty(optimality, discount_factor, relative_error)
-        specification = Specification(constraints,optimality)
-
+        specification = paynt.verification.property.Specification(properties)
         logger.info(f"found the following specification: {specification}")
+        if prism is not None and prism.model_type == stormpy.storage.PrismModelType.MDP and holes is not None:
+            assert specification.double_optimality is not None, "expecting double-optimality property"
+        else:
+            assert specification.double_optimality is None, "did not expect double-optimality property"
         return specification

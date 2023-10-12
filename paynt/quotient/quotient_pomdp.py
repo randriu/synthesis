@@ -89,7 +89,6 @@ class POMDPQuotientContainer(QuotientContainer):
                     agent_obs_label = decpomdp_manager.agent_observation_labels[0][agent_obs]
                     self.observation_labels.append(agent_obs_label)
         logger.debug(f"Observation labels: {self.observation_labels}")
-        exit()
 
         # compute actions available at each observation
         self.actions_at_observation = [0] * self.observations
@@ -758,5 +757,4 @@ class POMDPQuotientContainer(QuotientContainer):
         #stormpy.export_to_drn(pomdp, "pomdp-test.out")
         #print(pomdp)
 
-        #exit()
         return pomdp

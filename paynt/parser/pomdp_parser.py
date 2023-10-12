@@ -126,7 +126,7 @@ observations: {}
         with open(property_path, 'w') as f:
             f.write('R{"rew0"}max=? [F "target"]')
         logger.info("Write OK, aborting ...")
-        exit()
+        exit(0)
 
     
     @classmethod
@@ -363,8 +363,6 @@ observations: {}
                 for dst,prob in row.items():
                     model += "\t\t{} : {}\n".format(state_to_index[dst],prob)
 
-        # print(model)
-        # exit()
         return model
 
 

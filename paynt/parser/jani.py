@@ -1,6 +1,6 @@
 import stormpy
 
-from paynt.verification.property import Property, OptimalityProperty, Specification
+import paynt.verification.property
 from ..quotient.holes import CombinationColoring
 from ..quotient.models import MarkovChain
 
@@ -17,26 +17,27 @@ class JaniUnfolder():
 
         logger.debug("constructing JANI program...")
         
-        # pack properties
-        properties = specification.stormpy_properties()
-        
-        # construct jani
-        jani, new_properties = prism.to_jani(properties)
+        # pack properties and translate Prism to Jani
+        properties_old = specification.all_properties()
+        stormpy_properties = [p.property for p in properties_old]
+        jani,properties_new = prism.to_jani(stormpy_properties)
 
-        # unpack properties
-        properties = new_properties
-        opt = None
-        eps = None
-        if specification.has_optimality:
-            properties = new_properties[:-1]
-            opt = new_properties[-1]
-            eps = specification.optimality.epsilon
-
-        # when translating PRISM to JANI, some properties may change their
-        # atoms, so we need to re-wrap all properties
-        properties = [Property(p) for p in properties]
-        optimality_property = OptimalityProperty(opt, eps) if opt is not None else None
-        self.specification = Specification(properties,optimality_property)
+        # upon translation, some properties may change their atoms, so we need to re-wrap all properties
+        properties_unpacked = []
+        for index,prop_old in enumerate(properties_old):
+            prop_new = properties_new[index]
+            discount_factor = prop_old.discount_factor
+            if type(prop_old) == paynt.verification.property.Property:
+                p = paynt.verification.property.Property(prop_new,discount_factor)
+            else:
+                epsilon = prop_old.epsilon
+                if type(prop_old) == paynt.verification.property.OptimalityProperty:
+                    p = paynt.verification.property.OptimalityProperty(prop_new,discount_factor,epsilon)
+                else:
+                    dminimizing = prop_old.dminimizing
+                    p = paynt.verification.property.DoubleOptimalityProperty(prop_new,dminimizing,discount_factor,epsilon)
+            properties_unpacked.append(p)
+        self.specification = paynt.verification.property.Specification(properties_unpacked)
         MarkovChain.initialize(self.specification)
 
         # unfold holes in the program
@@ -55,14 +56,6 @@ class JaniUnfolder():
         action_to_hole_options = []
         tm = quotient_mdp.transition_matrix
         for choice in range(quotient_mdp.nr_choices):
-            # co = quotient_mdp.choice_origins
-            # print(dir(quotient_mdp.choice_origins))
-            # i = co.get_choice_info(choice)
-            # print(type(i))
-            # print(dir(i))
-            # print(i)
-            # exit()
-
             edges = quotient_mdp.choice_origins.get_edge_index_set(choice)
             hole_options = {}
             for edge in edges:
@@ -113,28 +106,8 @@ class JaniUnfolder():
         # collect label and color of each edge
         edge_to_hole_options = {}
         edge_to_color = {}
-        # print(jani_program)
-        # print(dir(jani_program))
-        # print(type(jani_program))
-        # exit()
         for aut_index, automaton in enumerate(jani_program.automata):
-            # print(dir(automaton))
-            # print(str(automaton))
-            # print(automaton.name)
-            # exit()
             for edge_index, edge in enumerate(automaton.edges):
-                # print(type(edge))
-                # print(dir(edge))
-                # print(edge.action_index)
-                # print(edge.color)
-                # print(edge.destinations)
-                # print(edge.guard)
-                # print(edge.has_silent_action())
-                # print(edge.rate)
-                # exit()
-                # print(edge.template_edge)
-                # te = edge.template_edge
-                # print(dir(te))
                 global_index = jani_program.encode_automaton_and_edge_index(aut_index, edge_index)
                 edge_to_color[global_index] = edge.color
 
@@ -147,8 +120,8 @@ class JaniUnfolder():
         self.jani_unfolded = jani_program
         self.edge_to_color = edge_to_color
         self.edge_to_hole_options = edge_to_hole_options
-        # exit()
 
+    
     def automaton_has_holes(self, automaton, expression_variables):
         for edge_index, e in enumerate(automaton.edges):
             if e.guard.contains_variable(expression_variables):
