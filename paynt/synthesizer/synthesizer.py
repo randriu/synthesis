@@ -52,16 +52,18 @@ class Synthesizer:
         # self.quotient.specification.optimality.update_optimum(0.9)
         self.quotient.design_space.constraint_indices = self.quotient.specification.all_constraint_indices()
         assignment = self.synthesize(self.quotient.design_space)
+        if assignment is not None and assignment.size > 1:
+            assignment = assignment.pick_any()
 
         print("")
         if assignment is not None:
             logger.info("Printing synthesized assignment below:")
             logger.info(assignment)
-            dtmc = self.quotient.build_chain(assignment)
-            mc_result = dtmc.check_specification(self.quotient.specification)
-            logger.info("Double-checking specification satisfiability: {}".format(mc_result))
+            chain = self.quotient.build_chain(assignment)
+            result = chain.check_specification(self.quotient.specification)
+            logger.info("Double-checking specification satisfiability: {}".format(result))
             if self.quotient.export_optimal_result:
-                self.quotient.export_result(dtmc, mc_result)
+                self.quotient.export_result(dtmc, result)
         
         self.print_stats()
     

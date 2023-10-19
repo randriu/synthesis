@@ -104,25 +104,12 @@ class MdpPropertyResult:
 
 
 class MdpOptimalityResult(MdpPropertyResult):
-    def __init__(self,
-        prop, primary, secondary,
-        improving_assignment, improving_value, can_improve,
-        primary_selection, primary_choice_values, primary_expected_visits,
-        primary_scores
-    ):
+    def __init__(self, prop):
         super().__init__(prop)
+        self.improving_assignment = None
+        self.improving_value = None
+        self.can_improve = None
 
-        self.primary = primary
-        self.secondary = secondary
-
-        self.primary_selection = primary_selection
-        self.primary_choice_values = primary_choice_values
-        self.primary_expected_visits = primary_expected_visits
-        self.primary_scores = primary_scores
-
-        self.improving_assignment = improving_assignment
-        self.improving_value = improving_value
-        self.can_improve = can_improve
 
 class MdpSpecificationResult(SpecificationResult):
 
@@ -140,14 +127,15 @@ class MdpSpecificationResult(SpecificationResult):
         opt = self.optimality_result
 
         if cr.sat == True:
-            # either no constraints or constraints were satisfied
-            if opt is not None:
+            # all constraints were satisfied
+            if opt is None:
+                self.improving_assignment = "any"
+                self.can_improve = False
+            else:
                 self.improving_assignment = opt.improving_assignment
                 self.improving_value = opt.improving_value
                 self.can_improve = opt.can_improve
-            else:
-                self.improving_assignment = "any"
-                self.can_improve = False
+                
             return
 
         if cr.sat == False:

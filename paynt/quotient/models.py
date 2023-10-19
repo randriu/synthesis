@@ -87,7 +87,7 @@ class MarkovChain:
         return self.model.nr_choices
 
     @property
-    def is_dtmc(self):
+    def is_deterministic(self):
         return self.model.nr_choices == self.model.nr_states
 
     @property
@@ -95,11 +95,11 @@ class MarkovChain:
         return self.model.initial_states[0]
 
     def model_check_formula(self, formula):
-        if not self.is_dtmc:
+        if not self.is_deterministic:
             return stormpy.synthesis.verify_mdp(self.environment,self.model,formula,True)
         return stormpy.model_checking(
             self.model, formula, only_initial_states=False,
-            extract_scheduler=(not self.is_dtmc),
+            extract_scheduler=(not self.is_deterministic),
             environment=self.environment
         )
 
@@ -139,6 +139,10 @@ class MarkovChain:
         ''' to be overridden '''
         return None
 
+    def check_double_optimality(self, optimality):
+        ''' to be overridden '''
+        return self.check_optimality(optimality)
+
     def check_constraints(self, constraints, constraint_indices, short_evaluation):
         results = [None for constraint in constraints]
         for index in constraint_indices:
@@ -161,7 +165,10 @@ class MarkovChain:
         constraints_result = self.check_constraints(specification.constraints, constraint_indices, short_evaluation)
         optimality_result = None
         if specification.has_optimality and not (short_evaluation and constraints_result.sat == False):
-            optimality_result = self.check_optimality(specification.optimality)
+            if not specification.has_double_optimality:
+                optimality_result = self.check_optimality(specification.optimality)
+            else:
+                optimality_result = self.check_double_optimality(specification.optimality)
         return constraints_result, optimality_result
 
 
@@ -180,7 +187,7 @@ class DTMC(MarkovChain):
 
 class MDP(MarkovChain):
 
-    # whether the secondary direction will be explored if primary is not enough
+    # if True, the secondary direction will be explored when primary is not enough
     compute_secondary_direction = False
 
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map, design_space):
@@ -210,7 +217,7 @@ class MDP(MarkovChain):
 
         # regardless of whether it is consistent or not, we compute secondary direction to show that all SAT
         result.secondary = self.model_check_property(prop, alt = True)
-        if self.is_dtmc and result.primary.value != result.secondary.value:
+        if self.is_deterministic and result.primary.value != result.secondary.value:
             logger.warning("WARNING: model is deterministic but min<max")
 
         if result.secondary.sat:
@@ -218,43 +225,50 @@ class MDP(MarkovChain):
         return result
 
 
-    def check_optimality(self, prop):
-        # check primary direction
-        primary = self.model_check_property(prop, alt = False)
 
-        if not primary.improves_optimum:
+    def check_optimality(self, prop):
+        result = MdpOptimalityResult(prop)
+
+        # check primary direction
+        result.primary = self.model_check_property(prop, alt = False)
+        if not result.primary.improves_optimum:
             # OPT <= LB
-            return MdpOptimalityResult(prop, primary, None, None, None, False, None, None, None, None)
+            result.can_improve = False
+            return result
 
         # LB < OPT
         # check if LB is tight
-        selection,choice_values,expected_visits,scores,consistent = self.quotient_container.scheduler_consistent(self, prop, primary.result)
+        result.primary_selection,result.primary_choice_values,result.primary_expected_visits,result.primary_scores,consistent = self.quotient_container.scheduler_consistent(self, prop, result.primary.result)
         if consistent:
             # LB is tight and LB < OPT
-            scheduler_assignment = self.design_space.copy()
-            scheduler_assignment.assume_options(selection)
-            improving_assignment, improving_value = self.quotient_container.double_check_assignment(scheduler_assignment)
-            return MdpOptimalityResult(prop, primary, None, improving_assignment, improving_value, False, selection, choice_values, expected_visits, scores)
+            result.improving_assignment = self.design_space.assume_options_copy(result.primary_selection)
+            result.can_improve = False
+            return result
 
         if not MDP.compute_secondary_direction:
-            return MdpOptimalityResult(prop, primary, None, None, None, True, selection, choice_values, expected_visits, scores)
+            result.can_improve = True
+            return result
 
         # UB might improve the optimum
-        secondary = self.model_check_property(prop, alt = True)
+        result.secondary = self.model_check_property(prop, alt = True)
 
-        if not secondary.improves_optimum:
+        if not result.secondary.improves_optimum:
             # LB < OPT < UB :  T < LB < OPT < UB (can improve) or LB < T < OPT < UB (cannot improve)
-            can_improve = primary.sat
-            return MdpOptimalityResult(prop, primary, secondary, None, None, can_improve, selection, choice_values, expected_visits, scores)
+            result.can_improve = result.primary.sat
+            return result
 
         # LB < UB < OPT
         # this family definitely improves the optimum
-        assignment = self.design_space.pick_any()
-        improving_assignment, improving_value = self.quotient_container.double_check_assignment(assignment)
+        result.improving_assignment = self.design_space.pick_any()
         # either LB < T, LB < UB < OPT (can improve) or T < LB < UB < OPT (cannot improve)
-        can_improve = primary.sat
-        return MdpOptimalityResult(prop, primary, secondary, improving_assignment, improving_value, can_improve, selection, choice_values, expected_visits, scores)
+        result.can_improve = result.primary.sat
+        return result
 
-    def check_specification(self, specification, constraint_indices = None, short_evaluation = False):
+
+
+    def check_specification(self, specification, constraint_indices = None, short_evaluation = False, double_check = True):
         constraints_result, optimality_result = super().check_specification(specification,constraint_indices,short_evaluation)
+        if optimality_result.improving_assignment is not None and double_check:
+            optimality_result.improving_assignment, optimality_result.improving_value = self.quotient_container.double_check_assignment(optimality_result.improving_assignment)
+            print(optimality_result.improving_assignment, optimality_result.improving_value)
         return MdpSpecificationResult(constraints_result, optimality_result)

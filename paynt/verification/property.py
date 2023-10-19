@@ -215,7 +215,6 @@ class Specification:
     def __init__(self, properties):
         self.constraints = []
         self.optimality = None
-        self.double_optimality = None
         
         # sort the properties
         optimalities = []
@@ -231,16 +230,14 @@ class Specification:
         if optimalities:
             self.optimality = optimalities[0]
         if double_optimalities:
-            self.double_optimality = double_optimalities[0]
+            self.optimality = double_optimalities[0]
 
     def __str__(self):
         s = ""
         if self.constraints:
             s += "constraints: " + ",".join([str(c) for c in self.constraints]) + "; "
         if self.optimality is not None:
-            s += "optimality: " + str(self.optimality) + "; "
-        if self.double_optimality is not None:
-            s += "D-optimality: " + str(self.double_optimality) + "; "
+            s += "optimality: " + str(self.optimality)
         return s
 
     def reset(self):
@@ -253,11 +250,11 @@ class Specification:
 
     @property
     def has_double_optimality(self):
-        return self.double_optimality is not None
+        return type(self.optimality) == DoubleOptimalityProperty
 
     @property
     def num_properties(self):
-        return len(self.constraints) + (1 if self.has_optimality else 0) + (1 if self.has_double_optimality else 0)
+        return len(self.constraints) + (1 if self.has_optimality else 0)
 
     @property
     def is_single_property(self):
@@ -270,8 +267,6 @@ class Specification:
         properties = [c for c in self.constraints]
         if self.has_optimality:
             properties += [self.optimality]
-        if self.has_double_optimality:
-            properties += [self.double_optimality]
         return properties
 
     def stormpy_properties(self):

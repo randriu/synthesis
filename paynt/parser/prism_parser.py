@@ -205,7 +205,7 @@ class PrismParser:
         specification = paynt.verification.property.Specification(properties)
         logger.info(f"found the following specification: {specification}")
         if prism is not None and prism.model_type == stormpy.storage.PrismModelType.MDP and holes is not None:
-            assert specification.double_optimality is not None, "expecting double-optimality property"
+            assert specification.has_double_optimality, "expecting double-optimality property"
         else:
-            assert specification.double_optimality is None, "did not expect double-optimality property"
+            assert not specification.has_double_optimality, "did not expect double-optimality property"
         return specification

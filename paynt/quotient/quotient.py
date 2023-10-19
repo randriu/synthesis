@@ -291,7 +291,7 @@ class QuotientContainer:
         :return whether the scheduler is consistent
         '''
         # selection = self.scheduler_selection(mdp, result.scheduler)
-        if mdp.is_dtmc:
+        if mdp.is_deterministic:
             selection = [[mdp.design_space[hole_index].options[0]] for hole_index in mdp.design_space.hole_indices]
             return selection, None, None, None, True
 
@@ -373,7 +373,7 @@ class QuotientContainer:
     def split(self, family, incomplete_search):
 
         mdp = family.mdp
-        assert not mdp.is_dtmc
+        assert not mdp.is_deterministic
 
         # split family wrt last undecided result
         result = family.analysis_result.undecided_result()
@@ -412,9 +412,7 @@ class QuotientContainer:
     def double_check_assignment(self, assignment):
         '''
         Double-check whether this assignment truly improves optimum.
-        :return singleton family if the assignment truly improves optimum
         '''
-        assert assignment.size == 1
         dtmc = self.build_chain(assignment)
         res = dtmc.check_specification(self.specification)
         # opt_result = dtmc.model_check_property(opt_prop)
