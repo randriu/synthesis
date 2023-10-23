@@ -109,7 +109,7 @@ storm-config-debug() {
 
 storm-build() {
     cd $STORM_BLD
-    make storm-main storm-synthesis --jobs 2
+    make storm-main storm-synthesis --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
     cd -
 }
@@ -123,7 +123,7 @@ storm-build-debug() {
 stormpy-build() {
     cd $SYNTHESIS/stormpy
     enva
-    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs 2 develop
+    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     envd
     cd -
