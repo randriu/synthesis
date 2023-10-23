@@ -40,15 +40,15 @@ prerequisites-download() {
     mkdir -p $PREREQUISITES
     cd $PREREQUISITES
     git clone --depth 1 --branch master14 https://github.com/ths-rwth/carl carl
-    git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
+    git clone --depth 1 --branch 2.1.0 https://github.com/moves-rwth/pycarl.git pycarl
     git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
     cd -
 }
 
 storm-download() {
     cd $SYNTHESIS
-    git clone --branch synthesis git@github.com:randriu/storm.git storm
-    git clone --branch synthesis git@github.com:randriu/stormpy.git stormpy
+    git clone --branch synthesis https://github.com/randriu/storm.git storm
+    git clone --branch synthesis https://github.com/randriu/stormpy.git stormpy
     cd -
 }
 
@@ -109,7 +109,7 @@ storm-config-debug() {
 
 storm-build() {
     cd $STORM_BLD
-    make storm-main storm-synthesis --jobs $COMPILE_JOBS
+    make storm-main storm-synthesis --jobs 2
     # make check --jobs $COMPILE_JOBS
     cd -
 }
@@ -123,7 +123,7 @@ storm-build-debug() {
 stormpy-build() {
     cd $SYNTHESIS/stormpy
     enva
-    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
+    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs 2 develop
     # python3 setup.py test
     envd
     cd -
