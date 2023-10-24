@@ -45,26 +45,26 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         else:
             return None, None
 
-    def build_quotient_game(self, mdp, specification):
-        # assuming a single probability objective
-        assert specification.num_properties == 1 and not specification.optimality.reward,\
-            "expecting a single reachability probability optimization"
-        mdp = self.quotient_mdp
-        cl = self.quotient_mdp.choice_labeling
-        tm = self.quotient_mdp.transition_matrix
+    
+    @classmethod
+    def extract_choice_labels(cls, mdp):
+        '''
+        Make sure that for each state of the MDP, either all its rows have no labels or all its rows have exactly one
+        (non necessarily unique) label.
+        Map each row to the index of its label, or -1 if no label.
+        :return a list of choice labels
+        :return for each row, the index of its label, or -1 if the row is not labeled
+        :return for each state, a list of label indices associated with the rows of this state
+        '''
+        assert mdp.has_choice_labeling, "MDP does not have a choice labeling"
+        cl = mdp.choice_labeling
+        tm = mdp.transition_matrix
+        
+        choice_labels = list(cl.get_labels())
+        choice_label_index = [None] * mdp.nr_choices
+        state_to_choice_label_indices = []
 
-        # identify target states
-        state_is_target = [False] * mdp.nr_states
-        target_label = str(specification.optimality.formula.subformula.subformula)
-        for state in range(mdp.nr_states):
-            if target_label in mdp.labeling.get_labels_of_state(state):
-                state_is_target[state] = True
-
-        # make sure that for each state, either  all its rows have no labels or all its rows have exactly one label
-        # map each row to the index of its label, or -1 if no label
-        self.choice_label_index = [None] * mdp.nr_choices
-        self.state_to_choice_label_indices = []
-        label_to_index = {label:index for index,label in enumerate(cl.get_labels())}
+        label_to_index = {label:index for index,label in enumerate(choice_labels)}
         for state in range(mdp.nr_states):
             state_rows_have_no_labels = None
             state_choice_label_indices = set()
@@ -78,14 +78,34 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                 else:
                     assert len(row_labels) == 1, "expected row with exactly one label"
                     row_label_index = label_to_index[list(row_labels)[0]]
-                self.choice_label_index[row] = row_label_index
+                choice_label_index[row] = row_label_index
                 state_choice_label_indices.add(row_label_index)
-            self.state_to_choice_label_indices.append(list(state_choice_label_indices))
+            state_to_choice_label_indices.append(list(state_choice_label_indices))
+
+        return choice_labels,choice_label_index,state_to_choice_label_indices
+
+
+    def build_quotient_game(self, mdp, specification):
+        # assuming a single probability objective
+        assert specification.num_properties == 1 and not specification.optimality.reward,\
+            "expecting a single reachability probability optimization"
+        mdp = self.quotient_mdp
+
+        # identify target states
+        state_is_target = [False] * mdp.nr_states
+        target_label = str(specification.optimality.formula.subformula.subformula)
+        for state in range(mdp.nr_states):
+            if target_label in mdp.labeling.get_labels_of_state(state):
+                state_is_target[state] = True
+
+        self.choice_labels,self.choice_label_index,self.state_to_choice_label_indices = \
+            MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
 
         # build the quotient game
         # player1 chooses the action, player2 chooses the action color
         # player1 states are states of the original MDP
         # player2 states are pairs (state,action)
+        tm = self.quotient_mdp.transition_matrix
         player2_matrix_builder = stormpy.storage.SparseMatrixBuilder(0,0,0,False,True)
         player2_num_rows = 0
         player2_state_pairs = []

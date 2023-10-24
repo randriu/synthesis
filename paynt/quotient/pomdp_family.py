@@ -3,6 +3,7 @@ import stormpy.synthesis
 
 import paynt.quotient.holes
 import paynt.quotient.quotient
+import paynt.quotient.mdp_family
 
 import json
 
@@ -81,11 +82,29 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.obs_evaluator = obs_evaluator
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
         self.quotient_mdp = stormpy.synthesis.add_choice_labels_from_jani(self.quotient_mdp)
-    
+
+        self.choice_labels,self.choice_label_index,self.state_to_choice_label_indices = \
+            paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
+
+        # identify labels available at observations
+        self.observation_to_choice_label_indices = [None] * self.num_observations
+        for state,state_choice_label_indices in enumerate(self.state_to_choice_label_indices):
+            obs = self.state_to_observation[state]
+            if self.observation_to_choice_label_indices[obs] is not None:
+                assert self.observation_to_choice_label_indices[obs] == state_choice_label_indices,\
+                    f"two states in observation class {obs} differ in available actions"
+                continue
+            self.observation_to_choice_label_indices[obs] = state_choice_label_indices
+
+
     @property
     def num_observations(self):
         return self.obs_evaluator.num_obs_classes
 
+    @property
+    def state_to_observation(self):
+        return self.obs_evaluator.state_to_obs_class
+    
     
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
