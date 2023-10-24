@@ -81,7 +81,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
         self.obs_evaluator = obs_evaluator
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
-        self.quotient_mdp = stormpy.synthesis.add_choice_labels_from_jani(self.quotient_mdp)
 
         self.choice_labels,self.choice_label_index,self.state_to_choice_label_indices = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
@@ -112,7 +111,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         
         _,_,selected_actions_bv = self.coloring.select_actions(family)
         mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
-        pomdp = self.obs_evaluator.build_sub_pomdp(mdp,state_map)
+        pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return pomdp
 
     

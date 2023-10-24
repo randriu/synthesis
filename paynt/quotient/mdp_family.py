@@ -15,7 +15,6 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def __init__(self, quotient_mdp, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
-        self.quotient_mdp = stormpy.synthesis.add_choice_labels_from_jani(self.quotient_mdp)
 
         assert self.specification.has_double_optimality, "expecting double-optimality property"
         if self.quotient_game_required:
@@ -49,37 +48,26 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     @classmethod
     def extract_choice_labels(cls, mdp):
         '''
-        Make sure that for each state of the MDP, either all its rows have no labels or all its rows have exactly one
-        (non necessarily unique) label.
-        Map each row to the index of its label, or -1 if no label.
+        :param mdp having a canonic choice labeling (exactly 1 label for each choice)
         :return a list of choice labels
-        :return for each row, the index of its label, or -1 if the row is not labeled
+        :return for each row, the index of its label
         :return for each state, a list of label indices associated with the rows of this state
         '''
         assert mdp.has_choice_labeling, "MDP does not have a choice labeling"
-        cl = mdp.choice_labeling
-        tm = mdp.transition_matrix
         
-        choice_labels = list(cl.get_labels())
+        choice_labels = list(mdp.choice_labeling.get_labels())
+        label_to_index = {label:index for index,label in enumerate(choice_labels)}
+        
         choice_label_index = [None] * mdp.nr_choices
         state_to_choice_label_indices = []
-
-        label_to_index = {label:index for index,label in enumerate(choice_labels)}
+        tm = mdp.transition_matrix
         for state in range(mdp.nr_states):
-            state_rows_have_no_labels = None
             state_choice_label_indices = set()
-            for row in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                row_labels = cl.get_labels_of_choice(row)
-                if state_rows_have_no_labels is None:
-                    state_rows_have_no_labels = len(row_labels)==0
-                if state_rows_have_no_labels:
-                    assert len(row_labels) == 0, "expected unlabeled row"
-                    row_label_index = -1
-                else:
-                    assert len(row_labels) == 1, "expected row with exactly one label"
-                    row_label_index = label_to_index[list(row_labels)[0]]
-                choice_label_index[row] = row_label_index
-                state_choice_label_indices.add(row_label_index)
+            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                label = list(mdp.choice_labeling.get_labels_of_choice(choice))[0]
+                label_index = label_to_index[label]
+                choice_label_index[choice] = label_index
+                state_choice_label_indices.add(label_index)
             state_to_choice_label_indices.append(list(state_choice_label_indices))
 
         return choice_labels,choice_label_index,state_to_choice_label_indices
