@@ -171,7 +171,7 @@ class Sketch:
                 quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
                 quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotientContainer(explicit_quotient, coloring, specification)
-            elif prism.model_type == stormpy.storage.PrismModelType.PODMP:
+            elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotientContainer(explicit_quotient, coloring, specification, obs_evaluator)
         else:
             assert explicit_quotient.is_nondeterministic_model
