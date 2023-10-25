@@ -1,1 +1,1 @@
-Pmax=? [ F goal ];
+P>=0.95 [ F goal ];
