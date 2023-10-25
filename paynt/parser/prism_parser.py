@@ -59,6 +59,7 @@ class PrismParser:
             MarkovChain.initialize(specification)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = stormpy.synthesis.ObservationEvaluator(prism, quotient_mdp)
+            quotient_mdp = stormpy.synthesis.add_choice_labels_from_jani(quotient_mdp)
         else:
             MarkovChain.initialize(specification)
             quotient_mdp = MarkovChain.from_prism(prism)

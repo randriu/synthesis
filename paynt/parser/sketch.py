@@ -170,10 +170,8 @@ class Sketch:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
                 quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                explicit_quotient = stormpy.synthesis.add_choice_labels_from_jani(explicit_quotient)
                 quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotientContainer(explicit_quotient, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
-                explicit_quotient = stormpy.synthesis.add_choice_labels_from_jani(explicit_quotient)
                 quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotientContainer(explicit_quotient, coloring, specification, obs_evaluator)
         else:
             assert explicit_quotient.is_nondeterministic_model
