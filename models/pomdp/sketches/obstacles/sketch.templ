@@ -17,6 +17,10 @@ hole int o2y in {6,7,8};
 // probability of slipping 2 cells ahead
 const double slip = 0.1;
 
+formula at_o1 = (x = o1x & y = o1y);
+formula at_o2 = (x = o2x & y = o2y);
+formula at_obstacle = at_o1 | at_o2;
+
 // stop conditions
 formula goal = start & (x=xMAX & y=yMAX);
 formula done = goal | crash;
@@ -25,8 +29,8 @@ formula done = goal | crash;
 observable "start" = start;
 observable "goal" = goal;
 observable "crash" = crash;
-observable "xleft" = x<xMAX/2;
-observable "yleft" = y<yMAX/2;
+observable "x_small" = x<xMAX/2;
+observable "y_small" = y<yMAX/2;
 
 
 module clk
@@ -55,13 +59,13 @@ endmodule
 // crash detection is delayed by 1 step to avoid introducing intermediate states
 module crash
     crash : bool init false;
-    [west]    (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
-    [west]  !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
-    [east]    (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
-    [east]  !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
-    [south]   (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
-    [south] !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
-    [north]   (x = o1x & y = o1y) | (x = o2x & y = o2y)  -> (crash'=true);
-    [north] !((x = o1x & y = o1y) | (x = o2x & y = o2y)) -> true;
+    [west]   !at_obstacle -> true;
+    [west]    at_obstacle -> (crash'=true);
+    [east]   !at_obstacle -> true;
+    [east]    at_obstacle -> (crash'=true);
+    [north]  !at_obstacle -> true;
+    [north]   at_obstacle -> (crash'=true);
+    [south]  !at_obstacle -> true;
+    [south]   at_obstacle -> (crash'=true);
 endmodule
 
