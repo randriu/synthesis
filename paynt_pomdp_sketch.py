@@ -15,12 +15,12 @@ def load_sketch(project_path):
     pomdp_sketch = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path)
     return pomdp_sketch
 
+
 def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     print("investigating hole assignment: ", hole_assignment)
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
 
     # return a random k-FSC
-    actions_at_observation = pomdp_sketch.compute_actions_at_observation(pomdp)
     num_nodes = 2
     fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp.nr_observations)
     random.seed(42)
@@ -31,6 +31,11 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
             fsc.update_function[node][obs] = random.randrange(num_nodes)
     return fsc
 
+def investigate_fsc(pomdp_sketch, fsc):
+    print(f"investigating FSC with {fsc.num_nodes} nodes")
+    dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
+    assert dtmc_sketch is not None
+    exit()
 
 # enable PAYNT logging
 paynt.cli.setup_logger()
@@ -38,6 +43,7 @@ paynt.cli.setup_logger()
 # load sketch
 project_path="models/pomdp/sketches/obstacles"
 pomdp_sketch = load_sketch(project_path)
+print("specification: ", pomdp_sketch.specification)
 print("design space:\n", pomdp_sketch.design_space)
 print("number of holes: ", pomdp_sketch.design_space.num_holes)
 print("design space size: {} members".format(pomdp_sketch.design_space.size))
@@ -48,4 +54,7 @@ hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
 
 # investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
-print(fsc)
+
+# investigate this FSC and return a hole assignment for which this FSC is violating
+violating_hole_assignment = investigate_fsc(pomdp_sketch, fsc)
+print("violating hole_assignment: " violating_hole_assignment)

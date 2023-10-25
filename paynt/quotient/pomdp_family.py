@@ -82,18 +82,35 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.obs_evaluator = obs_evaluator
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
 
-        self.choice_labels,self.choice_label_index,self.state_to_choice_label_indices = \
+        # a list of choice labels
+        self.choice_labels = None
+        # for each choice, an index of its label in self.choice_labels
+        self.choice_label_index = None
+        # for each observation, a list of actions (indices) available
+        self.observation_to_choice_label_indices = None
+
+        # POMDP manager used for unfolding the memory model into the quotient POMDP
+        self.pomdp_manager = None
+
+        assert not self.specification.has_optimality, \
+            "expecting specification without the optimality objective"
+
+        self.choice_labels,self.choice_label_index,state_to_choice_label_indices = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
 
         # identify labels available at observations
         self.observation_to_choice_label_indices = [None] * self.num_observations
-        for state,state_choice_label_indices in enumerate(self.state_to_choice_label_indices):
+        for state,state_choice_label_indices in enumerate(state_to_choice_label_indices):
             obs = self.state_to_observation[state]
             if self.observation_to_choice_label_indices[obs] is not None:
                 assert self.observation_to_choice_label_indices[obs] == state_choice_label_indices,\
                     f"two states in observation class {obs} differ in available actions"
                 continue
             self.observation_to_choice_label_indices[obs] = state_choice_label_indices
+
+        logger.debug("creating a POMDP manager...")
+        self.pomdp_manager = stormpy.synthesis.PomdpManager(self.quotient_mdp)
+        logger.debug("OK")
 
 
     @property
@@ -114,15 +131,10 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return pomdp
 
-    
-    def compute_actions_at_observation(self, pomdp):
-        ''' For each observation, compute the number of available actions. '''
-        actions_at_observation = [0] * self.num_observations
-        for state in range(pomdp.nr_states):
-            obs = pomdp.observations[state]
-            if actions_at_observation[obs] != 0:
-                continue
-            actions_at_observation[obs] = pomdp.get_nr_available_actions(state)
-        return actions_at_observation
-
-
+    def build_dtmc_sketch(self, fsc):
+        ''' Construct the family of DTMCs representing the execution of the given FSC in different environments. '''
+        
+        # unfold the quotient POMDP using the most general memory model
+        self.pomdp_manager.set_global_memory_size(fsc.num_nodes)
+        logger.debug("POMDP manager reset, correctly, aborting...")
+        exit(0)
