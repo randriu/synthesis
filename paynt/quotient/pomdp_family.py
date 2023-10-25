@@ -136,5 +136,5 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         
         # unfold the quotient POMDP using the most general memory model
         self.pomdp_manager.set_global_memory_size(fsc.num_nodes)
-        logger.debug("POMDP manager reset, correctly, aborting...")
+        logger.debug("POMDP manager was reset correctly, aborting...")
         exit(0)
