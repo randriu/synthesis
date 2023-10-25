@@ -109,7 +109,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             self.observation_to_choice_label_indices[obs] = state_choice_label_indices
 
         logger.debug("creating a POMDP manager...")
-        self.pomdp_manager = stormpy.synthesis.PomdpManager(self.quotient_mdp)
         logger.debug("OK")
 
 
@@ -135,6 +134,5 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         ''' Construct the family of DTMCs representing the execution of the given FSC in different environments. '''
         
         # unfold the quotient POMDP using the most general memory model
-        self.pomdp_manager.set_global_memory_size(fsc.num_nodes)
-        logger.debug("POMDP manager was reset correctly, aborting...")
+        logger.debug("POMDP family manager is not initialized yet, aborting...")
         exit(0)
