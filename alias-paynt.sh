@@ -39,7 +39,6 @@ storm-dependencies() {
 prerequisites-download() {
     mkdir -p $PREREQUISITES
     cd $PREREQUISITES
-    git clone --depth 1 --branch master14 https://github.com/ths-rwth/carl carl
     git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
     git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
     cd -
@@ -59,15 +58,6 @@ python-environment() {
     pip3 install toml
     pip3 install Cython scikit-build
     envd
-}
-
-prerequisites-build-carl() {
-    mkdir -p $PREREQUISITES/carl/build
-    cd $PREREQUISITES/carl/build
-    cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
-    make lib_carl --jobs $COMPILE_JOBS
-    #[TEST] make test
-    cd -
 }
 
 prerequisites-build-pycarl() {
@@ -154,9 +144,8 @@ synthesis-install() {
     storm-download
     python-environment
     
-    prerequisites-build-carl
     prerequisites-build-pycarl
-    prerequisites-build-cvc5
+    # prerequisites-build-cvc5 # building cvc5 is optional
 
     storm-config
     storm-build
