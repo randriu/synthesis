@@ -57,4 +57,4 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 
 # investigate this FSC and return a hole assignment for which this FSC is violating
 violating_hole_assignment = investigate_fsc(pomdp_sketch, fsc)
-print("violating hole_assignment: " violating_hole_assignment)
+print("violating hole_assignment: ", violating_hole_assignment)
