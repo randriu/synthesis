@@ -49,24 +49,6 @@ class SimulatedModel:
                     break
             self.state_is_absorbing.append(absorbing)
 
-        # quick-test Storm simulation wrapper
-        # logger.debug("constructing Storm wrapper...")
-        # self.simulated_model_storm = stormpy.synthesis.SimulatedModel(model)
-        
-        # state = 10
-        # logger.debug(f"sampling random action in state {state}...")
-        # action = self.simulated_model_storm.sample_action(state)
-        # logger.debug(f"Storm returned action {action}")
-        
-        # logger.debug(f"sampling effect of the action...")
-        # next_state = self.simulated_model_storm.sample_successor(state,action)
-        # logger.debug(f"Storm returned action {next_state}")
-
-        # logger.debug(f"executing rollout...")
-        # rollout_value = self.simulated_model_storm.state_action_rollout(state,action,10,'rew',0.99)
-        # logger.debug(f"Storm returned {rollout_value}")
-        
-        
 
     @property
     def initial_state(self):
