@@ -3,7 +3,6 @@ import stormpy.synthesis
 from .synthesizer import Synthesizer
 from ..quotient.smt import SmtSolver
 from .conflict_generator.storm import ConflictGeneratorStorm
-from .conflict_generator.switss import ConflictGeneratorSwitss
 from .conflict_generator.mdp import ConflictGeneratorMdp
 
 import logging
@@ -26,14 +25,11 @@ class SynthesizerCEGIS(Synthesizer):
 
     
     def choose_conflict_generator(self, quotient):
-        if SynthesizerCEGIS.conflict_generator_type == "storm":
-            conflict_generator = ConflictGeneratorStorm(quotient)
-        elif SynthesizerCEGIS.conflict_generator_type == "switss":
-            conflict_generator = ConflictGeneratorSwitss(quotient)
-        elif SynthesizerCEGIS.conflict_generator_type == "mdp":
+        if SynthesizerCEGIS.conflict_generator_type == "mdp":
             conflict_generator = ConflictGeneratorMdp(quotient)
         else:
-            pass # left intentionally blank
+            # default conflict generator
+            conflict_generator = ConflictGeneratorStorm(quotient)
         return conflict_generator
 
     
@@ -86,8 +82,6 @@ class SynthesizerCEGIS(Synthesizer):
         :return (1) list of conflicts to exclude from design space (might be empty)
         :return (2) accepting assignment (or None)
         """
-
-        assert family.constraint_indices is not None, "analyzed family does not have the relevant properties list"
         assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
 
         dtmc = self.quotient.build_chain(assignment)
@@ -116,6 +110,8 @@ class SynthesizerCEGIS(Synthesizer):
 
         # build the quotient, map mdp states to hole indices
         self.quotient.build(family)
+        if family.constraint_indices is None:
+            family.constraint_indices = self.quotient.specification.all_constraint_indices()
 
         simple_holes = [hole_index for hole_index in family.hole_indices if family.mdp.hole_simple[hole_index]]
         logger.info("{}/{} holes are trivial".format(len(simple_holes), family.num_holes))
