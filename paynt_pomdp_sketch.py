@@ -21,20 +21,15 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
 
     # return a random k-FSC
-    num_nodes = 2
+    num_nodes = 3
     fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp.nr_observations)
-    random.seed(42)
+    # random.seed(42)
     for node in range(num_nodes):
         for obs in range(pomdp.nr_observations):
             fsc.action_function[node][obs] = random.choice(pomdp_sketch.observation_to_actions[obs])
             fsc.update_function[node][obs] = random.randrange(num_nodes)
     return fsc
 
-def investigate_fsc(pomdp_sketch, fsc):
-    print(f"investigating FSC with {fsc.num_nodes} nodes")
-    dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc, negate_specification=True)
-    print("DTMC sketch created, aborting...")
-    exit()
 
 
 # enable PAYNT logging
@@ -52,9 +47,11 @@ print("design space size: {} members".format(pomdp_sketch.design_space.size))
 hole_options = [[hole.options[0]] for hole in pomdp_sketch.design_space]
 hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
 
+
 # investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 
 # investigate this FSC and return a hole assignment for which this FSC is violating
-violating_hole_assignment = investigate_fsc(pomdp_sketch, fsc)
-print("violating hole_assignment: ", violating_hole_assignment)
+violating_assignments = pomdp_sketch.investigate_fsc(fsc)
+print("found {} violating assignments, printing below:".format(violating_assignments.size))
+print(violating_assignments)

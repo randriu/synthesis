@@ -6,6 +6,9 @@ import paynt.quotient.quotient
 import paynt.quotient.coloring
 import paynt.quotient.mdp_family
 
+import paynt.synthesizer.synthesizer_onebyone
+import paynt.synthesizer.synthesizer_ar
+
 import json
 
 import logging
@@ -161,4 +164,10 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
         dtmc_sketch = paynt.quotient.quotient.DtmcQuotientContainer(product, product_coloring, product_specification)
         return dtmc_sketch
+
+    def investigate_fsc(self, fsc):
+        sketch = self.build_dtmc_sketch(fsc, negate_specification=True)
+        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(sketch)
+        violating_assignments = synthesizer.synthesize()
+        return violating_assignments
 
