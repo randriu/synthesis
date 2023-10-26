@@ -124,15 +124,17 @@ class Property:
         return False
 
     def negate(self):
+        negated_formula = self.property.raw_formula.clone()
         prop_negated = self.copy()
-        rf = prop_negated.property.raw_formula
-        rf.comparison_type = {
+        negated_formula.comparison_type = {
             stormpy.ComparisonType.LESS:    stormpy.ComparisonType.GEQ,
             stormpy.ComparisonType.LEQ:     stormpy.ComparisonType.GREATER,
             stormpy.ComparisonType.GREATER: stormpy.ComparisonType.LEQ,
             stormpy.ComparisonType.GEQ:     stormpy.ComparisonType.LESS
-        }[rf.comparison_type]
-        return prop_negated
+        }[negated_formula.comparison_type]
+        stormpy_property_negated = stormpy.core.Property(self.property.name, negated_formula)
+        property_negated = Property(stormpy_property_negated,self.discount_factor)
+        return property_negated
 
 
 
