@@ -64,7 +64,7 @@ class Property:
             optimality_type = stormpy.OptimizationDirection.Minimize
         formula_alt.set_optimality_type(optimality_type)
         return formula_alt
-
+    
     def __str__(self):
         return str(self.property.raw_formula)
 
@@ -75,6 +75,14 @@ class Property:
     @property
     def maximizing(self):
         return not self.minimizing
+
+    def property_copy(self):
+        formula_copy = self.property.raw_formula.clone()
+        property_copy = stormpy.core.Property(self.property.name, formula_copy)
+        return property_copy
+
+    def copy(self):
+        return Property(self.property_copy(), self.discount_factor)
 
     @staticmethod
     def above_mc_precision(a, b):
@@ -115,6 +123,17 @@ class Property:
     def can_be_improved(self):
         return False
 
+    def negate(self):
+        prop_negated = self.copy()
+        rf = prop_negated.property.raw_formula
+        rf.comparison_type = {
+            stormpy.ComparisonType.LESS:    stormpy.ComparisonType.GEQ,
+            stormpy.ComparisonType.LEQ:     stormpy.ComparisonType.GREATER,
+            stormpy.ComparisonType.GREATER: stormpy.ComparisonType.LEQ,
+            stormpy.ComparisonType.GEQ:     stormpy.ComparisonType.LESS
+        }[rf.comparison_type]
+        return prop_negated
+
 
 
 class OptimalityProperty(Property):
@@ -148,6 +167,9 @@ class OptimalityProperty(Property):
     def __str__(self):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
         return f"{str(self.property.raw_formula)} {eps}"
+
+    def copy(self):
+        return OptimalityProperty(self.property_copy(), self.discount_factor, self.epsilon)
 
     def reset(self):
         self.optimum = None
@@ -190,6 +212,9 @@ class OptimalityProperty(Property):
     def can_be_improved(self):
         return not( not self.reward and self.minimizing and self.threshold == 0 )
 
+    def negate(self):
+        raise TypeError("negation of optimality properties is not supported")
+
 
 class DoubleOptimalityProperty(OptimalityProperty):
     '''
@@ -208,6 +233,9 @@ class DoubleOptimalityProperty(OptimalityProperty):
             s += "max"
         s += " " + super().__str__()
         return s
+
+    def copy(self):
+        return DoubleOptimalityProperty(self.property_copy(), self.dminimizing, self.discount_factor, self.epsilon)
 
 
 class Specification:
@@ -239,6 +267,10 @@ class Specification:
         if self.optimality is not None:
             s += "optimality: " + str(self.optimality)
         return s
+
+    def copy(self):
+        properties = [p.copy() for p in self.all_properties()]
+        return Specification(properties)
 
     def reset(self):
         if self.optimality is not None:
@@ -294,5 +326,7 @@ class Specification:
     def contains_maximizing_reward_properties(self):
         return any([c.reward and not c.minimizing for c in self.all_properties()])
 
-
+    def negate(self):
+        properties_negated = [p.negate() for p in self.all_properties()]
+        return Specification(properties_negated)
 
