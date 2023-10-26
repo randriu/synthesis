@@ -5,7 +5,7 @@ import stormpy.pomdp
 from .models import MarkovChain,MDP,DTMC
 from .holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
-from .coloring import MdpColoring
+from .coloring import Coloring
 
 import math
 import re
@@ -409,7 +409,7 @@ class POMDPQuotientContainer(QuotientContainer):
         else:
             all_holes, action_to_hole_options = self.create_coloring_aposteriori()
 
-        self.coloring = MdpColoring(self.quotient_mdp, all_holes, action_to_hole_options)
+        self.coloring = Coloring(self.quotient_mdp, all_holes, action_to_hole_options)
         self.design_space = DesignSpace(all_holes)
 
     

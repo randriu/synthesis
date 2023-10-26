@@ -2,10 +2,11 @@ import stormpy
 
 from paynt.parser.prism_parser import PrismParser
 from paynt.parser.pomdp_parser import PomdpParser
-from paynt.quotient.quotient import *
 from paynt.quotient.quotient_pomdp import POMDPQuotientContainer
 from paynt.quotient.quotient_decpomdp import DecPomdpQuotientContainer
 
+import paynt.quotient.models
+import paynt.quotient.quotient
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 
@@ -127,7 +128,7 @@ class Sketch:
                 explicit_quotient = subpomdp_builder.restrict_pomdp(initial_distribution)
                 logger.debug('WARNING: discount factor transformation has not been properly tested')
              
-        MarkovChain.initialize(specification)
+        paynt.quotient.models.MarkovChain.initialize(specification)
         
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
@@ -168,7 +169,7 @@ class Sketch:
     def build_quotient_container(cls, prism, jani_unfolder, explicit_quotient, coloring, specification, obs_evaluator, decpomdp_manager):
         if jani_unfolder is not None:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-                quotient_container = DTMCQuotientContainer(explicit_quotient, coloring, specification)
+                quotient_container = paynt.quotient.quotient.DtmcQuotientContainer(explicit_quotient, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
                 quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotientContainer(explicit_quotient, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:

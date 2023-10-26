@@ -4,7 +4,7 @@ import stormpy.synthesis
 from .jani import JaniUnfolder
 from ..quotient.holes import Hole, Holes, DesignSpace
 from ..quotient.models import MarkovChain
-from ..quotient.coloring import MdpColoring
+from ..quotient.coloring import Coloring
 
 import paynt.verification.property
 
@@ -55,7 +55,7 @@ class PrismParser:
             jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, holes)
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
-            coloring = MdpColoring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
+            coloring = Coloring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
             MarkovChain.initialize(specification)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = stormpy.synthesis.ObservationEvaluator(prism, quotient_mdp)

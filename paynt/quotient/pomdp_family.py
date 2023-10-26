@@ -3,6 +3,7 @@ import stormpy.synthesis
 
 import paynt.quotient.holes
 import paynt.quotient.quotient
+import paynt.quotient.coloring
 import paynt.quotient.mdp_family
 
 import json
@@ -82,34 +83,35 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.obs_evaluator = obs_evaluator
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
 
-        # a list of choice labels
-        self.choice_labels = None
-        # for each choice, an index of its label in self.choice_labels
-        self.choice_label_index = None
+        # a list of action labels
+        self.action_labels = None
+        # for each choice, an index of its label in self.action_labels
+        self.choice_to_action = None
         # for each observation, a list of actions (indices) available
-        self.observation_to_choice_label_indices = None
+        self.observation_to_actions = None
 
         # POMDP manager used for unfolding the memory model into the quotient POMDP
-        self.pomdp_manager = None
+        self.quotient_pomdp_manager = None
 
         assert not self.specification.has_optimality, \
             "expecting specification without the optimality objective"
 
-        self.choice_labels,self.choice_label_index,state_to_choice_label_indices = \
+        self.action_labels,self.choice_to_action,state_to_choice_label_indices = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
+        self.num_actions = len(self.action_labels)
 
         # identify labels available at observations
-        self.observation_to_choice_label_indices = [None] * self.num_observations
+        self.observation_to_actions = [None] * self.num_observations
         for state,state_choice_label_indices in enumerate(state_to_choice_label_indices):
             obs = self.state_to_observation[state]
-            if self.observation_to_choice_label_indices[obs] is not None:
-                assert self.observation_to_choice_label_indices[obs] == state_choice_label_indices,\
+            if self.observation_to_actions[obs] is not None:
+                assert self.observation_to_actions[obs] == state_choice_label_indices,\
                     f"two states in observation class {obs} differ in available actions"
                 continue
-            self.observation_to_choice_label_indices[obs] = state_choice_label_indices
+            self.observation_to_actions[obs] = state_choice_label_indices
 
-        logger.debug("creating a POMDP manager...")
-        logger.debug("OK")
+        self.quotient_pomdp_manager = stormpy.synthesis.QuotientPomdpManager(
+            self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
 
 
     @property
@@ -130,9 +132,33 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return pomdp
 
-    def build_dtmc_sketch(self, fsc):
-        ''' Construct the family of DTMCs representing the execution of the given FSC in different environments. '''
+    def build_dtmc_sketch(self, fsc, negate_specification=False):
+        '''
+        Construct the family of DTMCs representing the execution of the given FSC in different environments.
+        :param negate_specification if True, a negated specification will be associated with the sketch
+        '''
+
+        # create the product
+        self.quotient_pomdp_manager.make_product_with_fsc(fsc.num_nodes, fsc.action_function, fsc.update_function)
+        product = self.quotient_pomdp_manager.product
+        product_choice_to_choice = self.quotient_pomdp_manager.product_choice_to_choice
+
+        # the product inherits the design space
+        product_holes = self.design_space.copy()
         
-        # unfold the quotient POMDP using the most general memory model
-        logger.debug("POMDP family manager is not initialized yet, aborting...")
-        exit(0)
+        # the choices of the product inherit colors of the quotient
+        product_choice_to_hole_options = []
+        for product_choice in range(product.nr_choices):
+            choice = product_choice_to_choice[product_choice]
+            hole_options = self.coloring.action_to_hole_options[choice].copy()
+            product_choice_to_hole_options.append(hole_options)
+        product_coloring = paynt.quotient.coloring.Coloring(product, product_holes, product_choice_to_hole_options)
+        
+        # handle specification
+        product_specification = self.specification.copy()
+        if negate_specification:
+            product_specification = product_specification.negate()
+
+        dtmc_sketch = paynt.quotient.quotient.DtmcQuotientContainer(product, product_coloring, product_specification)
+        return dtmc_sketch
+

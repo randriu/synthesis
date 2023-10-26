@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class MdpColoring:
+class Coloring:
     ''' Labeling of actions of an MDP with hole options. '''
 
     def __init__(self, mdp, holes, action_to_hole_options):

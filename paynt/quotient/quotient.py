@@ -3,7 +3,7 @@ import stormpy.synthesis
 
 from .holes import Hole,Holes,DesignSpace
 from .models import MarkovChain,MDP,DTMC
-from .coloring import MdpColoring
+from .coloring import Coloring
 
 import math
 import itertools
@@ -463,7 +463,7 @@ class QuotientContainer:
 
 
 
-class DTMCQuotientContainer(QuotientContainer):
+class DtmcQuotientContainer(QuotientContainer):
     
     def __init__(self, quotient_mdp, coloring, specification):
         super().__init__(
@@ -471,7 +471,4 @@ class DTMCQuotientContainer(QuotientContainer):
             specification = specification)
 
         self.design_space = DesignSpace(coloring.holes)
-
-        # logger.info(f"sketch has {design_space.num_holes} holes")
-        # logger.info(f"design space size: {design_space.size}")
 

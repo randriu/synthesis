@@ -26,16 +26,16 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     random.seed(42)
     for node in range(num_nodes):
         for obs in range(pomdp.nr_observations):
-            available_actions = pomdp_sketch.observation_to_choice_label_indices[obs]
-            fsc.action_function[node][obs] = random.choice(available_actions)
+            fsc.action_function[node][obs] = random.choice(pomdp_sketch.observation_to_actions[obs])
             fsc.update_function[node][obs] = random.randrange(num_nodes)
     return fsc
 
 def investigate_fsc(pomdp_sketch, fsc):
     print(f"investigating FSC with {fsc.num_nodes} nodes")
-    dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
-    assert dtmc_sketch is not None
+    dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc, negate_specification=True)
+    print("DTMC sketch created, aborting...")
     exit()
+
 
 # enable PAYNT logging
 paynt.cli.setup_logger()
