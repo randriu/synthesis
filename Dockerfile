@@ -25,36 +25,30 @@ WORKDIR /synthesis
 # download everything
 # using --depth 1 to make the download faster and the image smaller
 WORKDIR /synthesis/prerequisites
-RUN git clone --depth 1 --branch master14 https://github.com/ths-rwth/carl carl
 RUN git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
 RUN git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
 WORKDIR /synthesis
-RUN git clone --depth 1 --branch pomdp-api https://github.com/randriu/storm.git storm
-RUN git clone --depth 1 --branch pomdp-api https://github.com/randriu/stormpy.git stormpy
+RUN git clone --depth 1 https://github.com/moves-rwth/storm.git storm
+RUN git clone --depth 1 --branch synthesis https://github.com/randriu/stormpy.git stormpy
 RUN git clone --depth 1 https://github.com/randriu/synthesis.git paynt
-
-
-# build prerequisites
-WORKDIR /synthesis/prerequisites/carl/build
-RUN cmake -DUSE_CLN_NUMBERS=ON -DUSE_GINAC=ON -DTHREAD_SAFE=ON ..
-RUN make lib_carl --jobs $threads
-
-WORKDIR /synthesis/prerequisites/pycarl
-RUN python3 setup.py build_ext --jobs $threads develop
-
-# building cvc5 is slow and hybrid is rarely used, so we skip it and use z3 instead
-#WORKDIR /synthesis/prerequisites/cvc5
-#RUN ./configure.sh --prefix="." --auto-download --python-bindings
-#WORKDIR /synthesis/prerequisites/cvc5/build
-#RUN make --jobs $threads
-#RUN make install
 
 
 # build storm
 WORKDIR /synthesis/storm/build
 RUN cmake ..
-RUN make storm-main storm-synthesis --jobs $threads
+RUN make storm-main storm-pomdp --jobs $threads
 ENV PATH="/synthesis/storm/build/bin:$PATH"
+
+# build pycarl
+WORKDIR /synthesis/prerequisites/pycarl
+RUN python3 setup.py build_ext --jobs $threads develop
+
+# building cvc5 is slow and hybrid is rarely used, so you may skip it and use z3 instead
+#WORKDIR /synthesis/prerequisites/cvc5
+#RUN ./configure.sh --prefix="." --auto-download --python-bindings
+#WORKDIR /synthesis/prerequisites/cvc5/build
+#RUN make --jobs $threads
+#RUN make install
 
 # build stormpy
 WORKDIR /synthesis/stormpy
@@ -62,7 +56,3 @@ RUN python3 setup.py build_ext --storm-dir /synthesis/storm/build --jobs $thread
 
 # set the initial folder
 WORKDIR /synthesis/paynt
-
-# (CAV'23) download the evaluating scripts
-RUN git clone https://github.com/TheGreatfpmK/CAV23-POMDP-benchmark.git experiments
-

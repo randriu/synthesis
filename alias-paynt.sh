@@ -1,32 +1,18 @@
 #!/bin/bash
 # usage: source alias-storm.sh
 
-# compilation parameters
-
 # multi-core compilation
 export COMPILE_JOBS=$(nproc)
 # single-core compilation:
 # export COMPILE_JOBS=1
 
 # environment variables
-
-export SYNTHESIS=`pwd`
-export PREREQUISITES=$SYNTHESIS/prerequisites
-export SYNTHESIS_ENV=$SYNTHESIS/env
-
-export STORM_BLD=$SYNTHESIS/storm/build
-export STORM_BLD_DEBUG=$SYNTHESIS/storm/build_debug
-
-export STORMPY_BLD=$SYNTHESIS/stormpy/build
-
+export PROJECT_ROOT=`pwd`
 
 # environment aliases
-
-alias enva='source $SYNTHESIS_ENV/bin/activate'
+alias enva='source $PROJECT_ROOT/env/bin/activate'
 alias envd='deactivate'
 
-
-### prerequisites ##############################################################
 
 storm-dependencies() {
     sudo apt update
@@ -36,23 +22,21 @@ storm-dependencies() {
     # update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
 
-prerequisites-download() {
-    mkdir -p $PREREQUISITES
-    cd $PREREQUISITES
+download-prerequisites() {
+    mkdir -p $PROJECT_ROOT/prerequisites
+    cd $PROJECT_ROOT/prerequisites
     git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
     git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
     cd -
-}
-
-storm-download() {
-    cd $SYNTHESIS
-    git clone --branch synthesis git@github.com:randriu/storm.git storm
+    cd $PROJECT_ROOT
+    git clone https://github.com/moves-rwth/storm.git storm
+    # git clone --branch stable https://github.com/moves-rwth/storm.git storm
     git clone --branch synthesis git@github.com:randriu/stormpy.git stormpy
     cd -
 }
 
 python-environment() {
-    python3 -m venv $SYNTHESIS_ENV
+    python3 -m venv $PROJECT_ROOT/env
     enva
     pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
     pip3 install toml
@@ -60,8 +44,8 @@ python-environment() {
     envd
 }
 
-prerequisites-build-pycarl() {
-    cd $PREREQUISITES/pycarl
+pycarl-build() {
+    cd $PROJECT_ROOT/prerequisites/pycarl
     enva
     python3 setup.py build_ext --jobs $COMPILE_JOBS develop
     #[TEST] python3 setup.py test
@@ -69,8 +53,8 @@ prerequisites-build-pycarl() {
     cd -
 }
 
-prerequisites-build-cvc5() {
-    cd $PREREQUISITES/cvc5
+cvc5-build() {
+    cd $PROJECT_ROOT/prerequisites/cvc5
     enva
     ./configure.sh --prefix="." --auto-download --python-bindings
     cd build
@@ -80,48 +64,36 @@ prerequisites-build-cvc5() {
     cd -
 }
 
-
-### storm and stormpy ##########################################################
-
 storm-build() {
-    mkdir -p $STORM_BLD
-    cd $STORM_BLD
+    mkdir -p $PROJECT_ROOT/storm/build
+    cd $PROJECT_ROOT/storm/build
     cmake ..
-    make storm-main storm-synthesis --jobs $COMPILE_JOBS
+    make storm-main storm-pomdp --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
     cd -
 }
 
 stormpy-build() {
-    cd $SYNTHESIS/stormpy
+    cd $PROJECT_ROOT/stormpy
     enva
-    python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
-    # python3 setup.py test
-    envd
-    cd -
-}
-
-paynt-install() {
-    cd $SYNTHESIS/paynt
-    enva
-    python3 setup.py install
+    python3 setup.py build_ext --jobs $COMPILE_JOBS develop
+    # python3 setup.py build_ext --storm-dir $PROJECT_ROOT/storm/build --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     envd
     cd -
 }
 
 synthesis-install() {
-    
     storm-dependencies
-    prerequisites-download
-    storm-download
+    download-prerequisites
     python-environment
     
-    prerequisites-build-pycarl
-    # prerequisites-build-cvc5 # building cvc5 is optional
+    # building cvc5 is optional
+    # cvc5-build
 
-    storm-build
+    # optional unless you don't have Storm installed
+    # storm-build
+    
+    pycarl-build
     stormpy-build
-
 }
-
