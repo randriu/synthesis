@@ -83,30 +83,12 @@ prerequisites-build-cvc5() {
 
 ### storm and stormpy ##########################################################
 
-storm-config() {
+storm-build() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD
     cmake ..
-    cd -
-}
-
-storm-config-debug() {
-    mkdir -p $STORM_BLD_DEBUG
-    cd $STORM_BLD_DEBUG
-    cmake .. -DSTORM_DEVELOPER=ON -DSTORM_USE_LTO=OFF
-    cd -
-}
-
-storm-build() {
-    cd $STORM_BLD
-    make storm-main storm-synthesis --jobs $COMPILE_JOBS
+    make storm-main storm-pomdp --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
-    cd -
-}
-
-storm-build-debug() {
-    cd $STORM_BLD_DEBUG
-    make storm-main storm-synthesis --jobs $COMPILE_JOBS
     cd -
 }
 
@@ -114,15 +96,6 @@ stormpy-build() {
     cd $SYNTHESIS/stormpy
     enva
     python3 setup.py build_ext --storm-dir $STORM_BLD --jobs $COMPILE_JOBS develop
-    # python3 setup.py test
-    envd
-    cd -
-}
-
-stormpy-build-debug() {
-    cd $SYNTHESIS/stormpy
-    enva
-    python3 setup.py build_ext --storm-dir $STORM_BLD_DEBUG --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     envd
     cd -
@@ -147,10 +120,8 @@ synthesis-install() {
     prerequisites-build-pycarl
     # prerequisites-build-cvc5 # building cvc5 is optional
 
-    storm-config
     storm-build
     stormpy-build
 
-    # paynt-install
 }
 
