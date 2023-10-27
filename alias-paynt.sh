@@ -92,7 +92,7 @@ synthesis-install() {
     # cvc5-build
 
     # optional unless you don't have Storm installed
-    # storm-build
+    storm-build
     
     pycarl-build
     stormpy-build
