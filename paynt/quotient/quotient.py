@@ -74,6 +74,7 @@ class QuotientContainer:
         # cash restriction information
         family.hole_selected_actions = hole_selected_actions
         family.selected_actions = selected_actions
+        family.selected_actions_bv = selected_actions_bv
 
         # encapsulate MDP
         family.mdp = MDP(model, self, state_map, choice_map, family)

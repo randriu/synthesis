@@ -99,19 +99,19 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         assert not self.specification.has_optimality, \
             "expecting specification without the optimality objective"
 
-        self.action_labels,self.choice_to_action,state_to_choice_label_indices = \
+        self.action_labels,self.choice_to_action,state_to_actions = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
         self.num_actions = len(self.action_labels)
 
         # identify labels available at observations
         self.observation_to_actions = [None] * self.num_observations
-        for state,state_choice_label_indices in enumerate(state_to_choice_label_indices):
+        for state,state_actions in enumerate(state_to_actions):
             obs = self.state_to_observation[state]
             if self.observation_to_actions[obs] is not None:
-                assert self.observation_to_actions[obs] == state_choice_label_indices,\
+                assert self.observation_to_actions[obs] == state_actions,\
                     f"two states in observation class {obs} differ in available actions"
                 continue
-            self.observation_to_actions[obs] = state_choice_label_indices
+            self.observation_to_actions[obs] = state_actions
 
         self.quotient_pomdp_manager = stormpy.synthesis.QuotientPomdpManager(
             self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)

@@ -2,7 +2,10 @@ from . import version
 
 import paynt.parser.sketch
 
-from .quotient.quotient_pomdp import POMDPQuotientContainer
+import paynt.quotient
+import paynt.quotient.quotient_pomdp
+import paynt.quotient.mdp_family
+import paynt.synthesizer.meta_scheduler
 
 from .synthesizer.synthesizer import Synthesizer
 from .synthesizer.synthesizer_onebyone import SynthesizerOneByOne
@@ -145,9 +148,9 @@ def paynt_run(
     # set CLI parameters
     Synthesizer.incomplete_search = incomplete_search
     SynthesizerCEGIS.conflict_generator_type = ce_generator
-    POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
-    POMDPQuotientContainer.export_optimal_result = fsc_export_result
-    POMDPQuotientContainer.posterior_aware = posterior_aware
+    paynt.quotient.quotient_pomdp.POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
+    paynt.quotient.quotient_pomdp.POMDPQuotientContainer.export_optimal_result = fsc_export_result
+    paynt.quotient.quotient_pomdp.POMDPQuotientContainer.posterior_aware = posterior_aware
 
     # join paths of input files
     sketch_path = os.path.join(project, sketch)
@@ -185,8 +188,10 @@ def paynt_run(
         exit(0)
 
     # choose the synthesis method and run the corresponding synthesizer
-    if isinstance(quotient, POMDPQuotientContainer) and fsc_synthesis:
+    if isinstance(quotient, paynt.quotient.quotient_pomdp.POMDPQuotientContainer) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
+    elif isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotientContainer):
+        synthesizer = paynt.synthesizer.meta_scheduler.SynthesizerMetaScheduler(quotient)
     elif method == "onebyone":
         synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":
