@@ -87,7 +87,7 @@ storm-build() {
     mkdir -p $STORM_BLD
     cd $STORM_BLD
     cmake ..
-    make storm-main storm-pomdp --jobs $COMPILE_JOBS
+    make storm-main storm-synthesis --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
     cd -
 }
