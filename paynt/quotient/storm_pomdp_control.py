@@ -245,7 +245,7 @@ class StormPOMDPControl:
         belmc.pause_unfolding()
 
         while not belmc.is_result_ready():
-            sleep(2)
+            sleep(1)
 
         result = belmc.get_interactive_result()
 
@@ -284,21 +284,21 @@ class StormPOMDPControl:
 
     def get_cutoff_options(self, belief_states=100000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = belief_states
         options.use_clipping = False
         return options
 
     def get_overapp_options(self, belief_states=20000000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = belief_states
         options.use_clipping = False
         return options
 
     def get_refine_options(self, step_limit=0):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.size_threshold_factor = 2
         options.use_clipping = False
@@ -311,7 +311,7 @@ class StormPOMDPControl:
 
     def get_clip2_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         #options.size_threshold_factor = 2
         options.use_clipping = True
@@ -325,7 +325,7 @@ class StormPOMDPControl:
 
     def get_clip4_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         #options.size_threshold_factor = 2
         options.use_clipping = True
@@ -339,7 +339,7 @@ class StormPOMDPControl:
 
     def get_interactive_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.skip_heuristic_schedulers = False
         options.interactive_unfolding = True
@@ -358,7 +358,7 @@ class StormPOMDPControl:
     @staticmethod
     def storm_pomdp_analysis(model, formulas):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
-        options.use_state_elimination_cutoff = True
+        options.use_state_elimination_cutoff = False
         options.size_threshold_init = 1000000
         options.use_clipping = False
         options.exploration_time_limit = 60
