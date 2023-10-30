@@ -15,7 +15,7 @@ Most of the algorithms are described in
 
 ## Installation
 
-PAYNT requires the [synthesis fork of Storm](https://github.com/randriu/storm/tree/synthesis) and the corresponding [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
+PAYNT requires [Storm](https://github.com/randriu/storm/tree/synthesis) and the [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
 Upon installing Stormpy within a Python environment, you can activate this environment and call PAYNT, e.g.
 
 ```shell

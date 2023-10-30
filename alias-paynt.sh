@@ -7,12 +7,11 @@ export COMPILE_JOBS=$(nproc)
 # export COMPILE_JOBS=1
 
 # environment variables
-export PROJECT_ROOT=`pwd`
+export PAYNT_ROOT=`pwd`
 
 # environment aliases
-alias enva='source $PROJECT_ROOT/env/bin/activate'
+alias enva='source $PAYNT_ROOT/env/bin/activate'
 alias envd='deactivate'
-
 
 storm-dependencies() {
     sudo apt update
@@ -23,12 +22,12 @@ storm-dependencies() {
 }
 
 download-prerequisites() {
-    mkdir -p $PROJECT_ROOT/prerequisites
-    cd $PROJECT_ROOT/prerequisites
+    mkdir -p $PAYNT_ROOT/prerequisites
+    cd $PAYNT_ROOT/prerequisites
     git clone --depth 1 https://github.com/moves-rwth/pycarl.git pycarl
     git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
     cd -
-    cd $PROJECT_ROOT
+    cd $PAYNT_ROOT
     git clone https://github.com/moves-rwth/storm.git storm
     # git clone --branch stable https://github.com/moves-rwth/storm.git storm
     git clone --branch synthesis git@github.com:randriu/stormpy.git stormpy
@@ -36,16 +35,14 @@ download-prerequisites() {
 }
 
 python-environment() {
-    python3 -m venv $PROJECT_ROOT/env
+    python3 -m venv $PAYNT_ROOT/env
     enva
-    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click
-    pip3 install toml
-    pip3 install Cython scikit-build
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build
     envd
 }
 
 pycarl-build() {
-    cd $PROJECT_ROOT/prerequisites/pycarl
+    cd $PAYNT_ROOT/prerequisites/pycarl
     enva
     python3 setup.py build_ext --jobs $COMPILE_JOBS develop
     #[TEST] python3 setup.py test
@@ -54,7 +51,7 @@ pycarl-build() {
 }
 
 cvc5-build() {
-    cd $PROJECT_ROOT/prerequisites/cvc5
+    cd $PAYNT_ROOT/prerequisites/cvc5
     enva
     ./configure.sh --prefix="." --auto-download --python-bindings
     cd build
@@ -65,8 +62,8 @@ cvc5-build() {
 }
 
 storm-build() {
-    mkdir -p $PROJECT_ROOT/storm/build
-    cd $PROJECT_ROOT/storm/build
+    mkdir -p $PAYNT_ROOT/storm/build
+    cd $PAYNT_ROOT/storm/build
     cmake ..
     make storm-main storm-pomdp --jobs $COMPILE_JOBS
     # make check --jobs $COMPILE_JOBS
@@ -74,10 +71,10 @@ storm-build() {
 }
 
 stormpy-build() {
-    cd $PROJECT_ROOT/stormpy
+    cd $PAYNT_ROOT/stormpy
     enva
     python3 setup.py build_ext --jobs $COMPILE_JOBS develop
-    # python3 setup.py build_ext --storm-dir $PROJECT_ROOT/storm/build --jobs $COMPILE_JOBS develop
+    # python3 setup.py build_ext --storm-dir $PAYNT_ROOT/storm/build --jobs $COMPILE_JOBS develop
     # python3 setup.py test
     envd
     cd -
