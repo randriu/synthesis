@@ -79,12 +79,12 @@ class SynthesizerARStorm(Synthesizer):
         family.analysis_result = res
 
         #print(res)
-        #print(improving_assignment)
-        #print(improving_value, can_improve)
+        #print(family.analysis_result.improving_assignment)
+        #print(family.analysis_result.improving_value, family.analysis_result.can_improve)
         if family.analysis_result.improving_value is not None:
             if self.saynt_timer is not None:
                 print(f'-----------PAYNT----------- \
-                    \nValue = {improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.quotient.policy_size(family.analysis_result.improving_assignment)}\n', flush=True)
+                    \nValue = {family.analysis_result.improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.quotient.policy_size(family.analysis_result.improving_assignment)}\n', flush=True)
                 if self.storm_control.export_fsc_paynt is not None:
                     makedirs(self.storm_control.export_fsc_paynt, exist_ok=True)
                     with open(self.storm_control.export_fsc_paynt + "/paynt.fsc", "w") as text_file:
@@ -93,16 +93,16 @@ class SynthesizerARStorm(Synthesizer):
             else:
                 self.stat.new_fsc_found(family.analysis_result.improving_value, family.analysis_result.improving_assignment, self.quotient.policy_size(family.analysis_result.improving_assignment))
             self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
-        # print(res, can_improve)
+        # print(res, family.analysis_result.can_improve)
         # print(res.optimality_result.primary.result.get_values())
 
         #print(res.optimality_result.primary)
         #print(res.optimality_result.secondary)
 
         #if res.optimality_result.primary.value > 20:
-        #    can_improve = False
+        #    family.analysis_result.can_improve = False
 
-        if self.quotient.specification.optimality.optimum and can_improve and self.storm_pruning:
+        if self.quotient.specification.optimality.optimum and family.analysis_result.can_improve and self.storm_pruning:
 
             family_pomdp = self.quotient.get_family_pomdp(family.mdp)
 
@@ -116,20 +116,18 @@ class SynthesizerARStorm(Synthesizer):
 
             if self.quotient.specification.optimality.minimizing:
                 if self.quotient.specification.optimality.optimum <= storm_res.lower_bound:
-                    can_improve = False
+                    family.analysis_result.can_improve = False
                     #print(self.quotient.specification.optimality.threshold)
                     logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.lower_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
                 #else:
                 #    logger.info(f"Storm result: {storm_res.lower_bound}. Lower bounds: {storm_res.upper_bound}. Quotient MDP value: {res.optimality_result.primary.value}")
             else:
                 if self.quotient.specification.optimality.optimum >= storm_res.upper_bound:
-                    can_improve = False
+                    family.analysis_result.can_improve = False
                     #print(self.quotient.specification.optimality.threshold)
                     logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.upper_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
                 #else:
                 #    logger.info(f"Storm result: {storm_res.upper_bound}. Lower bounds: {storm_res.lower_bound}. Quotient MDP value: {res.optimality_result.primary.value}")
-
-        return can_improve, improving_assignment
 
 
 
@@ -186,11 +184,11 @@ class SynthesizerARStorm(Synthesizer):
             # simulate sequential
             family.parent_info = None
 
-            can_improve,improving_assignment = self.analyze_family_ar(family)
-            if improving_assignment is not None:
-                satisfying_assignment = improving_assignment
+            self.analyze_family_ar(family)
+            if family.analysis_result.improving_assignment is not None:
+                satisfying_assignment = family.analysis_result.improving_assignment
                 #print(satisfying_assignment)
-            if can_improve == False:
+            if family.analysis_result.can_improve == False:
                 self.explore(family)
                 if not families and self.subfamilies_buffer:
                     logger.info("Main family synthesis done")

@@ -153,7 +153,7 @@ class SynthesizerPOMDP:
                             else:
                                 obs_memory_dict[obs] = 1
                         logger.info(f'Increase memory in all imperfect observation')
-                    print(obs_memory_dict)
+                    #print(obs_memory_dict)
                     self.quotient.set_memory_from_dict(obs_memory_dict)
             else:
                 logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
@@ -184,8 +184,8 @@ class SynthesizerPOMDP:
                 subfamilies = []
 
             # debug
-            print(self.storm_control.result_dict, "\n")
-            print(self.storm_control.result_dict_no_cutoffs)
+            #print(self.storm_control.result_dict, "\n")
+            #print(self.storm_control.result_dict_no_cutoffs)
             #print(main_family)
             #print(subfamily_restrictions)
             #print(subfamilies)
@@ -336,7 +336,7 @@ class SynthesizerPOMDP:
                             else:
                                 obs_memory_dict[obs] = 1
                         logger.info(f'Increase memory in all imperfect observation')
-                    print(obs_memory_dict)
+                    #print(obs_memory_dict)
                     self.quotient.set_memory_from_dict(obs_memory_dict)
             else:
                 logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
@@ -367,8 +367,8 @@ class SynthesizerPOMDP:
                 subfamilies = []
 
             # debug
-            print(self.storm_control.result_dict, "\n")
-            print(self.storm_control.result_dict_no_cutoffs)
+            #print(self.storm_control.result_dict, "\n")
+            #print(self.storm_control.result_dict_no_cutoffs)
             #print(main_family)
             #print(subfamilies)
             #print(main_family.size)
