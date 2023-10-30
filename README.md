@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/randriu/storm/tree/synthesis) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/randriu/stormpy/tree/synthesis), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/randriu/stormpy/tree/synthesis), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -15,7 +15,7 @@ Most of the algorithms are described in
 
 ## Installation
 
-PAYNT requires the [synthesis fork of Storm](https://github.com/randriu/storm/tree/synthesis) and the corresponding [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
+PAYNT requires [Storm](https://github.com/moves-rwth/storm) and the [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
 Upon installing Stormpy within a Python environment, you can activate this environment and call PAYNT, e.g.
 
 ```shell
@@ -26,7 +26,7 @@ python3 paynt.py --help
 If you do not have Stormpy installed, you can download this repository, navigate to the root folder and run the installation script described in `alias-paynt.sh`:
 
 ```shell
-git clone git@github.com:randriu/synthesis.git
+git clone https://github.com/randriu/synthesis.git synthesis
 cd synthesis
 source alias-paynt.sh
 synthesis-install
