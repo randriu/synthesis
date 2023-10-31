@@ -712,25 +712,21 @@ class POMDPQuotientContainer(QuotientContainer):
         return size_gamma + size_delta
 
     
-    # constructs pomdp from the quotient MDP
+    # constructs pomdp from the quotient MDP, used for computing POMDP abstraction bounds
     def get_family_pomdp(self, mdp):
         no_obs = self.pomdp.nr_observations
-        #print(mdp.model)
         tm = mdp.model.transition_matrix
         components = stormpy.storage.SparseModelComponents(tm, mdp.model.labeling, mdp.model.reward_models)
 
         full_observ_list = []
-        #full_choice_labels = []
         for state in range(self.pomdp.nr_states):
             obs = self.pomdp.get_observation(state)
             for mem in range(self.observation_memory_size[obs]):
                 full_observ_list.append(obs + mem * no_obs)
-                #full_choice_labels.append(list(range(self.pomdp.get_nr_available_actions(state))))
-                
-        #print(full_choice_labels)
 
         choice_labeling = stormpy.storage.ChoiceLabeling(mdp.choices)
 
+        # assign observations to states
         observ_list = []
         choice_labels = []
         for state in range(mdp.model.nr_states):
@@ -739,12 +735,11 @@ class POMDPQuotientContainer(QuotientContainer):
             actions = [action for action in range(mdp.model.get_nr_available_actions(state))]
             choice_labels.append(actions)
 
-        # LABELING
+        # construct labeling
         labels_list = [item for sublists in choice_labels for item in sublists]
         labels = list(set(labels_list))
         for label in labels:
             choice_labeling.add_label(str(label))
-
         for choice in range(mdp.choices):
             choice_labeling.add_label_to_choice(str(labels_list[choice]), choice)
 
@@ -753,8 +748,5 @@ class POMDPQuotientContainer(QuotientContainer):
 
         pomdp = stormpy.storage.SparsePomdp(components)
         pomdp = stormpy.pomdp.make_canonic(pomdp)
-
-        #stormpy.export_to_drn(pomdp, "pomdp-test.out")
-        #print(pomdp)
 
         return pomdp

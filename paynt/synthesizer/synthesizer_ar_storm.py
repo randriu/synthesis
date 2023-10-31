@@ -8,7 +8,7 @@ from time import sleep
 import logging
 logger = logging.getLogger(__name__)
 
-
+# Abstraction Refinement + Storm splitting
 class SynthesizerARStorm(Synthesizer):
 
     # family exploration order: True = DFS, False = BFS
@@ -31,15 +31,18 @@ class SynthesizerARStorm(Synthesizer):
     def method_name(self):
         return "AR"
 
+    # performs splitting in family according to Storm result
+    # main families contain only those actions that were considered by best found Storm FSC
     def storm_split(self, families):
         subfamilies = []
         main_families = []
 
+        # split each family in the current buffer to main family and corresponding subfamilies
         for family in families:
             if self.storm_control.use_cutoffs:
-                main_p = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict)
+                main_p = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict)
             else:
-                main_p = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
+                main_p = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict_no_cutoffs)
 
             if main_p is None:
                 subfamilies.append(family)
@@ -56,31 +59,24 @@ class SynthesizerARStorm(Synthesizer):
             subfamilies.extend(subfamilies_p)
 
         logger.info(f"State after Storm splitting: Main families - {len(main_families)}, Subfamilies - {len(subfamilies)}")
+
+        # if there are no main families we don't have to prioritize search
         if len(main_families) == 0:
             main_families = subfamilies
             subfamilies = []
+
         return main_families, subfamilies
 
 
 
 
-    def analyze_family_ar(self, family):
-        """
-        :return (1) family feasibility (True/False/None)
-        :return (2) new satisfying assignment (or None)
-        """
-        # logger.debug("analyzing family {}".format(family))
+    def verify_family(self, family):
 
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
-
         res = family.mdp.check_specification(self.quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
-        #print(res.optimality_result.primary)
         family.analysis_result = res
 
-        #print(res)
-        #print(family.analysis_result.improving_assignment)
-        #print(family.analysis_result.improving_value, family.analysis_result.can_improve)
         if family.analysis_result.improving_value is not None:
             if self.saynt_timer is not None:
                 print(f'-----------PAYNT----------- \
@@ -93,47 +89,29 @@ class SynthesizerARStorm(Synthesizer):
             else:
                 self.stat.new_fsc_found(family.analysis_result.improving_value, family.analysis_result.improving_assignment, self.quotient.policy_size(family.analysis_result.improving_assignment))
             self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
-        # print(res, family.analysis_result.can_improve)
-        # print(res.optimality_result.primary.result.get_values())
 
-        #print(res.optimality_result.primary)
-        #print(res.optimality_result.secondary)
-
-        #if res.optimality_result.primary.value > 20:
-        #    family.analysis_result.can_improve = False
-
+        # storm pruning runs Storm POMDP over-approximation analysis and on the sub-POMDP given by a family
+        # this serves as a better abstraction for pruning, however is much more computationally intensive
         if self.quotient.specification.optimality.optimum and family.analysis_result.can_improve and self.storm_pruning:
 
             family_pomdp = self.quotient.get_family_pomdp(family.mdp)
 
-            #print(family_pomdp)
             storm_res = StormPOMDPControl.storm_pomdp_analysis(family_pomdp, self.quotient.specification.stormpy_formulae())
 
-            #print(storm_res.lower_bound)
-            #print(storm_res.upper_bound)
-            #print(storm_res.induced_mc_from_scheduler)
-            #print(storm_res.cutoff_schedulers[0])
-
+            # compare computed bounds to the current optimum to see if the family can be pruned
             if self.quotient.specification.optimality.minimizing:
                 if self.quotient.specification.optimality.optimum <= storm_res.lower_bound:
                     family.analysis_result.can_improve = False
-                    #print(self.quotient.specification.optimality.threshold)
                     logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.lower_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
-                #else:
-                #    logger.info(f"Storm result: {storm_res.lower_bound}. Lower bounds: {storm_res.upper_bound}. Quotient MDP value: {res.optimality_result.primary.value}")
             else:
                 if self.quotient.specification.optimality.optimum >= storm_res.upper_bound:
                     family.analysis_result.can_improve = False
-                    #print(self.quotient.specification.optimality.threshold)
                     logger.info(f"Used Storm result to prune a family with Storm value: {storm_res.upper_bound} compared to current optimum {self.quotient.specification.optimality.optimum}. Quotient MDP value: {res.optimality_result.primary.value}")
-                #else:
-                #    logger.info(f"Storm result: {storm_res.upper_bound}. Lower bounds: {storm_res.lower_bound}. Quotient MDP value: {res.optimality_result.primary.value}")
 
 
 
     def synthesize_assignment(self, family):
 
-        #try:
         self.quotient.discarded = 0
 
         satisfying_assignment = None
@@ -141,7 +119,9 @@ class SynthesizerARStorm(Synthesizer):
 
         while families:
 
+            # check whether PAYNT should be paused
             if self.s_queue is not None:
+                # if the queue is non empty, pause for PAYNT was requested
                 if not self.s_queue.empty():
                     if satisfying_assignment is not None:
                         self.storm_control.latest_paynt_result = satisfying_assignment
@@ -152,18 +132,21 @@ class SynthesizerARStorm(Synthesizer):
                     logger.info("Pausing synthesis")
                     self.s_queue.get()
                     self.stat.synthesis_time.stop()
+                    # check for the signal that PAYNT can be resumed or terminated
                     while self.s_queue.empty():
                         sleep(1)
                     status = self.s_queue.get()
                     if status == "resume":
                         logger.info("Resuming synthesis")
                         if self.storm_control.is_storm_better:
+                            # if the result found by Storm is better and needs more memory end the current synthesis and add memory
                             if self.storm_control.is_memory_needed():
                                 logger.info("Additional memory needed")
                                 return satisfying_assignment
                             else:
                                 logger.info("Applying family split according to Storm results")
                                 families, self.subfamilies_buffer = self.storm_split(families)
+                        # if Storm's result is not better continue with the synthesis normally
                         else:
                             logger.info("PAYNT's value is better. Prioritizing synthesis results")
                         self.stat.synthesis_time.start()
@@ -172,24 +155,21 @@ class SynthesizerARStorm(Synthesizer):
                         logger.info("Terminating controller synthesis")
                         return satisfying_assignment
 
-            #print(len(families))
-
             if SynthesizerARStorm.exploration_order_dfs:
                 family = families.pop(-1)
             else:
                 family = families.pop(0)
 
-            #print(family)
-
             # simulate sequential
             family.parent_info = None
 
-            self.analyze_family_ar(family)
+            self.verify_family(family)
             if family.analysis_result.improving_assignment is not None:
                 satisfying_assignment = family.analysis_result.improving_assignment
-                #print(satisfying_assignment)
+            # family can be pruned
             if family.analysis_result.can_improve == False:
                 self.explore(family)
+                # if there are no more families in the main buffer coninue the exploration in the subfamilies
                 if not families and self.subfamilies_buffer:
                     logger.info("Main family synthesis done")
                     logger.info(f"Subfamilies buffer contains: {len(self.subfamilies_buffer)} families")
@@ -197,16 +177,9 @@ class SynthesizerARStorm(Synthesizer):
                     self.subfamilies_buffer = []
                 continue
 
-            #print("split", family)
             # undecided
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
-        #except:
-        #    if satisfying_assignment:
-        #        extracted_result = self.quotient.extract_policy(satisfying_assignment)
-        #        print(satisfying_assignment)
-        #        print(extracted_result)
-        #    exit()
 
         return satisfying_assignment
 

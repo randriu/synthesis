@@ -84,7 +84,7 @@ class SynthesizerPOMDP:
             self.storm_control.pomdp = self.quotient.pomdp
             self.storm_control.spec_formulas = self.quotient.specification.stormpy_formulae()
             self.synthesis_terminate = False
-            self.synthesizer = SynthesizerARStorm
+            self.synthesizer = SynthesizerARStorm       # SAYNT only works with abstraction refinement
             if self.storm_control.iteration_timeout is not None:
                 self.saynt_timer = Timer()
                 self.synthesizer.saynt_timer = self.saynt_timer
@@ -100,13 +100,12 @@ class SynthesizerPOMDP:
         assignment = synthesizer.synthesize(family)
         if print_stats:
             synthesizer.print_stats()
-        #print(assignment)
         self.total_iters += synthesizer.stat.iterations_mdp
 
         # Print extract list for every iteration optimum
-        if assignment:
-            extracted_result = self.quotient.extract_policy(assignment)
-            #print(extracted_result)
+        # if assignment:
+        #     extracted_result = self.quotient.extract_policy(assignment)
+        #     print(extracted_result)
 
         return assignment
 
@@ -129,16 +128,19 @@ class SynthesizerPOMDP:
                 if mem_size > 1:
                     obs_memory_dict = {}
                     if self.storm_control.is_storm_better:
+                        # Storm's result is better and it needs memory
                         if self.storm_control.is_memory_needed():
                             obs_memory_dict = self.storm_control.memory_vector
                             logger.info(f'Added memory nodes for observation based on Storm data')
                         else:
+                            # consider the cut-off schedulers actions when updating memory
                             if self.unfold_cutoff:
                                 for obs in range(self.quotient.observations):
                                     if obs in self.storm_control.result_dict:
                                         obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
                                     else:
                                         obs_memory_dict[obs] = self.quotient.observation_memory_size[obs]
+                            # only consider the induced DTMC without cut-off states
                             else:
                                 for obs in range(self.quotient.observations):
                                     if obs in self.storm_control.result_dict_no_cutoffs:
@@ -153,7 +155,6 @@ class SynthesizerPOMDP:
                             else:
                                 obs_memory_dict[obs] = 1
                         logger.info(f'Increase memory in all imperfect observation')
-                    #print(obs_memory_dict)
                     self.quotient.set_memory_from_dict(obs_memory_dict)
             else:
                 logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
@@ -164,33 +165,28 @@ class SynthesizerPOMDP:
 
             family = self.quotient.design_space
 
+            # if Storm's result is better, use it to obtain main family that considers only the important actions
             if self.storm_control.is_storm_better:
+                # consider the cut-off schedulers actions
                 if self.storm_control.use_cutoffs:
-                    main_family = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict)
+                    main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict)
                     if self.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict)
+                # only consider the induced DTMC actions without cut-off states
                 else:
-                    main_family = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
+                    main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict_no_cutoffs)
                     if self.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
 
                 subfamilies = self.storm_control.get_subfamilies(subfamily_restrictions, family)
+            # if PAYNT is better continue normally
             else:
                 main_family = family
                 subfamilies = []
-
-            # debug
-            #print(self.storm_control.result_dict, "\n")
-            #print(self.storm_control.result_dict_no_cutoffs)
-            #print(main_family)
-            #print(subfamily_restrictions)
-            #print(subfamilies)
-            #print(main_family.size)
-            #break
 
             self.synthesizer.subfamilies_buffer = subfamilies
             self.synthesizer.unresticted_family = family
@@ -212,6 +208,7 @@ class SynthesizerPOMDP:
             
             #break
 
+    # main SAYNT loop
     def iterative_storm_loop(self, timeout, paynt_timeout, storm_timeout, iteration_limit=0):
         self.interactive_queue = Queue()
         self.synthesizer.s_queue = self.interactive_queue
@@ -246,14 +243,12 @@ class SynthesizerPOMDP:
 
             print("\n------------------------------------\n")
             print("PAYNT results: ")
-            #print(self.storm_control.latest_paynt_result)
             print(self.storm_control.paynt_bounds)
             print("controller size: {}".format(self.storm_control.paynt_fsc_size))
 
             print()
 
             print("Storm results: ")
-            #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
             print(self.storm_control.storm_bounds)
             print("controller size: {}".format(self.storm_control.belief_controller_size))
             print("\n------------------------------------\n")
@@ -271,6 +266,7 @@ class SynthesizerPOMDP:
 
         self.saynt_timer.stop()
 
+    # run PAYNT POMDP synthesis with a given timeout
     def run_synthesis_timeout(self, timeout):
         self.interactive_queue = Queue()
         self.synthesizer.s_queue = self.interactive_queue
@@ -290,7 +286,7 @@ class SynthesizerPOMDP:
         paynt_thread.join()
 
 
-    # iterative strategy using Storm analysis to enhance the synthesis
+    # PAYNT POMDP synthesis that uses pre-computed results from Storm as guide
     def strategy_storm(self, unfold_imperfect_only, unfold_storm=True):
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
@@ -316,12 +312,14 @@ class SynthesizerPOMDP:
                             obs_memory_dict = self.storm_control.memory_vector
                             logger.info(f'Added memory nodes for observation based on Storm data')
                         else:
+                            # consider the cut-off schedulers actions when updating memory
                             if self.unfold_cutoff:
                                 for obs in range(self.quotient.observations):
                                     if obs in self.storm_control.result_dict:
                                         obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
                                     else:
                                         obs_memory_dict[obs] = self.quotient.observation_memory_size[obs]
+                            # only consider the induced DTMC without cut-off states
                             else:
                                 for obs in range(self.quotient.observations):
                                     if obs in self.storm_control.result_dict_no_cutoffs:
@@ -336,7 +334,6 @@ class SynthesizerPOMDP:
                             else:
                                 obs_memory_dict[obs] = 1
                         logger.info(f'Increase memory in all imperfect observation')
-                    #print(obs_memory_dict)
                     self.quotient.set_memory_from_dict(obs_memory_dict)
             else:
                 logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
@@ -347,32 +344,28 @@ class SynthesizerPOMDP:
 
             family = self.quotient.design_space
 
+            # if Storm's result is better, use it to obtain main family that considers only the important actions
             if self.storm_control.is_storm_better:
+                # consider the cut-off schedulers actions
                 if self.storm_control.use_cutoffs:
-                    main_family = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict)
+                    main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict)
                     if self.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict)
+                # only consider the induced DTMC actions without cut-off states
                 else:
-                    main_family = self.storm_control.get_main_restricted_family_new(family, self.storm_control.result_dict_no_cutoffs)
+                    main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict_no_cutoffs)
                     if self.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
 
                 subfamilies = self.storm_control.get_subfamilies(subfamily_restrictions, family)
+            # if PAYNT is better continue normally
             else:
                 main_family = family
                 subfamilies = []
-
-            # debug
-            #print(self.storm_control.result_dict, "\n")
-            #print(self.storm_control.result_dict_no_cutoffs)
-            #print(main_family)
-            #print(subfamilies)
-            #print(main_family.size)
-            #break
 
             self.synthesizer.subfamilies_buffer = subfamilies
             self.synthesizer.unresticted_family = family
@@ -907,43 +900,42 @@ class SynthesizerPOMDP:
                 
 
 
-    def run(self, parallel=False):
+    def run(self):
         # choose the synthesis strategy:
-
         if self.use_storm:
-            logger.info("Storm pomdp option enabled")
+            logger.info("Storm POMDP option enabled")
             logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
                         (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
                         self.storm_control.storm_options, self.incomplete_exploration, (self.unfold_storm, self.unfold_cutoff), self.storm_control.use_cutoffs
             ))
-
+            # start SAYNT
             if self.storm_control.iteration_timeout is not None:
                 self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout, 
                                           paynt_timeout=self.storm_control.paynt_timeout, 
                                           storm_timeout=self.storm_control.storm_timeout, 
                                           iteration_limit=0)
+            # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
             elif self.storm_control.get_result is not None:
-                #TODO probably strategy_storm with unfold storm False
                 if self.storm_control.get_result:
                     self.run_synthesis_timeout(self.storm_control.get_result)
                 self.storm_control.run_storm_analysis()
+            # run Storm and then use the obtained result to enhance PAYNT synthesis
             else:
                 self.storm_control.get_storm_result()
                 self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.unfold_storm)
 
             print("\n------------------------------------\n")
             print("PAYNT results: ")
-            #print(self.storm_control.latest_paynt_result)
             print(self.storm_control.paynt_bounds)
             print("controller size: {}".format(self.storm_control.paynt_fsc_size))
 
             print()
 
             print("Storm results: ")
-            #print(self.storm_control.latest_storm_result.induced_mc_from_scheduler)
             print(self.storm_control.storm_bounds)
             print("controller size: {}".format(self.storm_control.belief_controller_size))
             print("\n------------------------------------\n")
+        # Pure PAYNT POMDP synthesis
         else:
             # self.strategy_expected_uai()
             # self.strategy_iterative(unfold_imperfect_only=False)
