@@ -17,7 +17,6 @@ from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 from .quotient.storm_pomdp_control import StormPOMDPControl
 
-
 import click
 import sys
 import os
@@ -113,9 +112,6 @@ def setup_logger(log_path = None):
     help="path to output file for SAYNT belief FSC")
 @click.option("--export-fsc-paynt", type=click.Path(), default=None,
     help="path to output file for SAYNT inductive FSC")
-
-#@click.option("--storm-parallel", is_flag=True, default=False,
-#    help="run storm analysis in parallel (can only be used together with --storm-pomdp-analysis flag)")
 
 @click.option(
     "--ce-generator",
