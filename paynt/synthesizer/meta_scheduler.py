@@ -1,6 +1,7 @@
-import paynt.synthesizer.synthesizer
-
 import stormpy.synthesis
+
+import paynt.quotient.models
+import paynt.synthesizer.synthesizer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -9,35 +10,13 @@ logger = logging.getLogger(__name__)
 class GameResult:
     def __init__(self):
         self.sat = None
-        self.player1_choices = None
-        self.player2_choices = None
+        self.scheduler_choices = None
+        self.scheduler_selection = None
+        self.scheduler_consistent = None
 
     def __str__(self):
         return str(self.sat)
 
-
-class MetaSchedulerFamilyAnalysisResult:
-
-    def __init__(self):
-        self.primary_secondary_result = None
-        self.primary_primary_result = None
-        self.sat = None
-        self.should_refine = None
-        
-    def evaluate(self):
-        self.sat = None
-        self.should_refine = None
-        if self.primary_secondary_result.sat:
-            self.sat = True
-            self.should_refine = False
-            return
-        if self.primary_primary_result is None:
-            return
-        self.sat = False
-        self.should_refine = self.primary_primary_result.sat
-
-    def __str__(self):
-        return str(self.primary_secondary_result) + " - " + str(self.primary_secondary_result)
 
 
 class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
@@ -50,25 +29,40 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
     def verify_family(self, family, game_solver, prop):
         self.quotient.build(family)
 
-        res = MetaSchedulerFamilyAnalysisResult()
-
-
         # solve primary-secondary direction via a game
         game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
-        res.primary_secondary_result = GameResult()
-        primary_secondary_value = game_solver.player1_state_values[0]
-        res.primary_secondary_result.sat = prop.satisfies_threshold(primary_secondary_value)
-        res.primary_secondary_result.player1_choices = game_solver.player1_choices
-        res.primary_secondary_result.player2_choices = game_solver.player2_choices
-        res.evaluate()
-        if res.sat is not None:
-            # decided
-            return res
+        game_result = GameResult()
+        game_result.sat = prop.satisfies_threshold(game_solver.solution_value)
+        game_result.scheduler_choices = game_solver.solution_choices
 
-        # undecided, solve PP
-        res.primary_primary_result = family.mdp.model_check_property(prop)
-        res.evaluate()
-        return res
+        print("game value: {} ({})".format(game_solver.solution_value,game_result.sat))
+
+        model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_result.scheduler_choices)
+        quotient_choices = [choice_map[choice] for choice in range(model.nr_choices)]
+        quotient_states = [state_map[state] for state in range(model.nr_states)]
+        assert model.nr_states == model.nr_choices
+        dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
+        dtmc_result = dtmc.model_check_property(prop)
+        print("double-checking game value: ", dtmc_result)
+        
+        if game_result.sat:
+            return game_result
+
+        # construct DTMC from the game solution to get reachable choices
+        dtmc,_,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_result.scheduler_choices)
+        quotient_reachable_choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
+        
+        # map reachable choices to hole options and check consistency
+        selection = [set() for hole_index in self.quotient.design_space.hole_indices]
+        for choice in quotient_reachable_choices:
+            choice_options = self.quotient.coloring.action_to_hole_options[choice]
+            for hole_index,option in choice_options.items():
+                selection[hole_index].add(option)
+        selection = [list(options) for options in selection]
+        game_result.scheduler_selection = selection
+        game_result.scheduler_consistent = all([len(options)<=1 for options in selection])
+
+        return game_result
         
 
 
@@ -84,8 +78,16 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
             result = self.verify_family(family,game_solver,prop)
             if result.sat:
                 logger.debug("found scheduler for family of size {}".format(family.size))
-                metascheduler[family] = result.primary_secondary_result.player1_choices
-            if not result.should_refine:
+                # TODO assign policy to family
+                metascheduler = result.scheduler_choices
+                self.explore(family)
+                continue
+
+            # unsat
+            if result.scheduler_consistent:
+                unsatisfiable_family = result.scheduler_selection
+                # unsatisfiable_family = self.quotient.design_space.assume_options_copy(result.scheduler_selection)
+                logger.info("satisfying scheduler cannot be obtained for the following family {}".format(unsatisfiable_family))
                 self.explore(family)
                 continue
 

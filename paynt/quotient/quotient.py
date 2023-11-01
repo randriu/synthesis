@@ -309,7 +309,7 @@ class QuotientContainer:
 
     
     def suboptions_half(self, mdp, splitter):
-        ''' Split options of a splitter into to halves. '''
+        ''' Split options of a splitter into two halves. '''
         options = mdp.design_space[splitter].options
         half = len(options) // 2
         suboptions = [options[:half], options[half:]]
