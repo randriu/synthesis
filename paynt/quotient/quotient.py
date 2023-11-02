@@ -133,7 +133,7 @@ class QuotientContainer:
         return vector_valid
 
     
-    def choice_values(self, mdp, prop, result):
+    def choice_values(self, mdp, prop, state_values):
         '''
         Get choice values after model checking MDP against a property.
         Value of choice c: s -> s' is computed as
@@ -146,43 +146,33 @@ class QuotientContainer:
         '''
 
         # multiply probability with model checking results
-        choice_values = stormpy.synthesis.multiply_with_vector(mdp.model.transition_matrix, result.get_values())
+        choice_values = stormpy.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
         choice_values = QuotientContainer.make_vector_defined(choice_values)
 
         # if the associated reward model has state-action rewards, then these must be added to choice values
         if prop.reward:
             reward_name = prop.formula.reward_name
-            rm = mdp.model.reward_models.get(reward_name)
-            assert not rm.has_transition_rewards and (rm.has_state_rewards != rm.has_state_action_rewards)
-            if rm.has_state_action_rewards:
-                choice_rewards = list(rm.state_action_rewards)
-                assert mdp.choices == len(choice_rewards)
-                for choice in range(mdp.choices):
-                    choice_values[choice] += choice_rewards[choice]
-            else:
-                state_rewards = list(rm.state_rewards)
-                assert mdp.states == len(state_rewards)
-                tm = mdp.model.transition_matrix
-                for state in range(mdp.states):
-                    for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                        choice_values[choice] += state_rewards[state]
+            rm = mdp.reward_models.get(reward_name)
+            assert rm.has_state_action_rewards
+            choice_rewards = list(rm.state_action_rewards)
+            assert mdp.nr_choices == len(choice_rewards)
+            for choice in range(mdp.nr_choices):
+                choice_values[choice] += choice_rewards[choice]
 
         # sanity check
-        for choice in range(mdp.choices):
+        for choice in range(mdp.nr_choices):
             assert not math.isnan(choice_values[choice])
 
         return choice_values
 
 
-    def expected_visits(self, mdp, prop, scheduler):
+    def expected_visits(self, mdp, prop, choices):
         '''
-        Compute expected number of visits in the states of DTMC induced by
-        this scheduler.
+        Compute expected number of visits in the states of DTMC induced by the shoices.
         '''
 
         # extract DTMC induced by this MDP-scheduler
-        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-        sub_mdp,state_map,_ = self.restrict_mdp(mdp.model, choices)
+        sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
         dtmc = QuotientContainer.mdp_to_dtmc(sub_mdp)
 
         # compute visits
@@ -196,7 +186,7 @@ class QuotientContainer:
             dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
 
         # map vector of expected visits onto the state space of the quotient MDP
-        expected_visits = [0] * mdp.states
+        expected_visits = [0] * mdp.nr_states
         for state in range(dtmc.nr_states):
             mdp_state = state_map[state]
             visits = dtmc_visits[state]
@@ -277,8 +267,9 @@ class QuotientContainer:
             return selection,None,None,None
         
         # extract choice values, compute expected visits and estimate scheduler difference
-        choice_values = self.choice_values(mdp, prop, result)
-        expected_visits = self.expected_visits(mdp, prop, result.scheduler)
+        choice_values = self.choice_values(mdp.model, prop, result.get_values())
+        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        expected_visits = self.expected_visits(mdp.model, prop, choices)
         inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values, expected_visits)
 
         return selection,choice_values,expected_visits,inconsistent_differences

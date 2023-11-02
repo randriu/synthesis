@@ -37,6 +37,10 @@ class Statistic:
         self.acc_size_mdp = 0
         self.avg_size_mdp = 0
 
+        self.iterations_game = 0
+        self.acc_size_game = 0
+        self.avg_size_game = 0
+
         self.feasible = None
         self.assignment = None
 
@@ -56,6 +60,11 @@ class Statistic:
     def iteration_mdp(self, size_mdp):
         self.iterations_mdp += 1
         self.acc_size_mdp += size_mdp
+        self.print_status()
+
+    def iteration_game(self, size_game):
+        self.iterations_game += 1
+        self.acc_size_game += size_game
         self.print_status()
 
     def new_fsc_found(self, value, assignment, size):
@@ -81,21 +90,12 @@ class Statistic:
         if spec.has_optimality and spec.optimality.optimum is not None:
             optimum = round(spec.optimality.optimum,3)
         
-        # sat_size = "-"
-        # ds = self.synthesizer.quotient.design_space
-        # if ds.use_cvc:
-        #     sat_size = len(ds.solver.getAssertions())
-        # elif ds.use_python_z3:
-        #     sat_size = len(ds.solver.assertions())
-
         return f"> Progress {percentage_rejected}%, elapsed {time_elapsed} s, iters = {iters}, opt = {optimum}"
 
     def print_status(self):
         if not self.synthesis_time.read() > self.status_horizon:
-            return
-        
+            return        
         # return
-
         print(self.status(), flush=True)
         self.status_horizon += Statistic.status_period
 
@@ -136,6 +136,7 @@ class Statistic:
             family_stats += f"{ar_stats}\n"
         if self.iterations_dtmc > 0:
             family_stats += f"{cegis_stats}\n"
+
 
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimum is None else f"optimal: {round(self.optimum, 6)}"

@@ -170,4 +170,3 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(sketch)
         violating_assignments = synthesizer.synthesize()
         return violating_assignments
-
