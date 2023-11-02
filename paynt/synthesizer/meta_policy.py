@@ -19,11 +19,11 @@ class GameResult:
 
 
 
-class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
+class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
     @property
     def method_name(self):
-        return "Meta-scheduler AR"
+        return "meta-policy AR"
 
     
     def verify_family(self, family, game_solver, prop):
@@ -38,8 +38,6 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
         print("game value: {} ({})".format(game_solver.solution_value,game_result.sat))
 
         model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_result.scheduler_choices)
-        quotient_choices = [choice_map[choice] for choice in range(model.nr_choices)]
-        quotient_states = [state_map[state] for state in range(model.nr_states)]
         assert model.nr_states == model.nr_choices
         dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
         dtmc_result = dtmc.model_check_property(prop)
@@ -48,13 +46,9 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
         if game_result.sat:
             return game_result
 
-        # construct DTMC from the game solution to get reachable choices
-        dtmc,_,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_result.scheduler_choices)
-        quotient_reachable_choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
-        
         # map reachable choices to hole options and check consistency
         selection = [set() for hole_index in self.quotient.design_space.hole_indices]
-        for choice in quotient_reachable_choices:
+        for choice in game_result.scheduler_choices:
             choice_options = self.quotient.coloring.action_to_hole_options[choice]
             for hole_index,option in choice_options.items():
                 selection[hole_index].add(option)
@@ -66,8 +60,8 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
         
 
 
-    def synthesize_metascheduler(self, family):
-        metascheduler = {}
+    def synthesize_metapolicy(self, family):
+        metapolicy = []
 
         prop = self.quotient.specification.constraints[0]
         game_solver = self.quotient.build_game_abstraction_solver(prop)
@@ -77,18 +71,20 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
             family = families.pop(-1)
             result = self.verify_family(family,game_solver,prop)
             if result.sat:
-                logger.debug("found scheduler for family of size {}".format(family.size))
+                logger.debug("found policy for family of size {}".format(family.size))
                 # TODO assign policy to family
-                metascheduler = result.scheduler_choices
+                metapolicy += [(family,result.scheduler_choices)]
                 self.explore(family)
                 continue
 
             # unsat
             if result.scheduler_consistent:
-                unsatisfiable_family = result.scheduler_selection
-                # unsatisfiable_family = self.quotient.design_space.assume_options_copy(result.scheduler_selection)
+                # unsatisfiable_family = result.scheduler_selection
+                unsatisfiable_family = self.quotient.design_space.assume_options_copy(result.scheduler_selection)
                 logger.info("satisfying scheduler cannot be obtained for the following family {}".format(unsatisfiable_family))
                 self.explore(family)
+                if unsatisfiable_family.size > family.size:
+                    logger.info("can reject a larger family than the one that is being explored???")
                 continue
 
             # refine
@@ -96,7 +92,7 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
             subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
             families = families + subfamilies
 
-        return metascheduler
+        return metapolicy
 
     
 
@@ -109,25 +105,25 @@ class SynthesizerMetaScheduler(paynt.synthesizer.synthesizer.Synthesizer):
             family = self.quotient.design_space
         logger.info("synthesis initiated, design space: {}".format(family.size))
         
-        metascheduler = self.synthesize_metascheduler(family)
+        metapolicy = self.synthesize_metapolicy(family)
 
-        self.stat.finished(metascheduler)
-        return metascheduler
+        self.stat.finished(metapolicy)
+        return metapolicy
 
     
     def run(self):
-        ''' Synthesize (meta-)scheduler that satisfies all family members. '''
+        ''' Synthesize meta-policy that satisfies all family members. '''
         self.quotient.design_space.constraint_indices = self.quotient.specification.all_constraint_indices()
 
         spec = self.quotient.specification
         assert not spec.has_optimality and spec.num_properties == 1 and not spec.constraints[0].reward, \
             "expecting a single reachability probability constraint"
 
-        metascheduler = self.synthesize(self.quotient.design_space)
+        metapolicy = self.synthesize(self.quotient.design_space)
 
-        if metascheduler is not None:
-            logger.info("Printing synthesized meta-scheduler below:")
-            logger.info("{}".format(metascheduler))
+        if metapolicy is not None:
+            logger.info("Printing synthesized meta-policy below:")
+            logger.info("{}".format(metapolicy))
         
         self.print_stats()
     

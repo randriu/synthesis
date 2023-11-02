@@ -5,7 +5,7 @@ import paynt.parser.sketch
 import paynt.quotient
 import paynt.quotient.quotient_pomdp
 import paynt.quotient.mdp_family
-import paynt.synthesizer.meta_scheduler
+import paynt.synthesizer.meta_policy
 
 from .synthesizer.synthesizer import Synthesizer
 from .synthesizer.synthesizer_onebyone import SynthesizerOneByOne
@@ -187,7 +187,7 @@ def paynt_run(
     if isinstance(quotient, paynt.quotient.quotient_pomdp.POMDPQuotientContainer) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
     elif isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotientContainer):
-        synthesizer = paynt.synthesizer.meta_scheduler.SynthesizerMetaScheduler(quotient)
+        synthesizer = paynt.synthesizer.meta_policy.SynthesizerMetaPolicy(quotient)
     elif method == "onebyone":
         synthesizer = SynthesizerOneByOne(quotient)
     elif method == "ar":
