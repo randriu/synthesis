@@ -24,6 +24,9 @@ class Hole:
         self.options = options
         self.option_labels = option_labels
 
+    def all_options(self):
+        return list(range(len(self.option_labels)))
+
     @property
     def size(self):
         return len(self.options)
@@ -44,8 +47,10 @@ class Hole:
             return self.name + ": {" + ",".join(labels) + "}"
 
     def assume_options(self, options):
-        assert len(options) > 0
-        self.options = options
+        if len(options) == 0:
+            self.options = self.all_options()
+        else:
+            self.options = options
 
     def copy(self):
         # note that the copy is shallow since after assuming some options
