@@ -6,6 +6,7 @@ from .models import MarkovChain,MDP,DTMC
 from .holes import Hole,Holes,DesignSpace
 from .quotient import QuotientContainer
 from .coloring import Coloring
+from .pomdp_family import FSC
 
 import math
 import re
@@ -750,3 +751,33 @@ class POMDPQuotientContainer(QuotientContainer):
         pomdp = stormpy.pomdp.make_canonic(pomdp)
 
         return pomdp
+    
+
+    # TODO there should be a more efficient way to implement this
+    def evaluate_given_fsc(self, fsc):
+        memory_list = []
+        for ind in range(len(self.observation_labels)):
+            count = 0
+            for x in fsc.action_function:
+                if x[ind] is not None:
+                    count += 1
+            memory_list.append(count)
+
+        self.observation_memory_size = memory_list
+        self.set_manager_memory_vector()
+
+        self.unfold_memory()
+        logger.info("memory unfolded")
+
+        fsc_fam = self.design_space.copy()
+        for obs in range(self.observations):
+            for act_hole, index in zip(self.observation_action_holes[obs], range(len(self.observation_action_holes[obs]))):
+                fsc_fam[act_hole].assume_options([fsc.action_function[index][obs]])
+            for mem_holes, index in zip(self.observation_memory_holes[obs], range(len(self.observation_memory_holes[obs]))):
+                fsc_fam[mem_holes].assume_options([fsc.update_function[index][obs]])
+
+        self.build(fsc_fam)
+        res = fsc_fam.mdp.check_specification(self.specification, short_evaluation=True)
+        fsc_fam.analysis_result = res
+        
+        return fsc_fam.analysis_result.improving_value
