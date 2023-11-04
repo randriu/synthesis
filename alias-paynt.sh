@@ -14,9 +14,17 @@ alias enva='source $PAYNT_ROOT/env/bin/activate'
 alias envd='deactivate'
 
 storm-dependencies() {
-    sudo apt update
-    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
-    sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
+    if [ -f /etc/redhat-release ]; then
+    	echo "RedHat installation. dnf required."
+        sudo dnf update
+        sudo dnf -y install make automake gcc gcc-c++ kernel-devel boost-devel cln-devel
+        sudo dnf -y install gmp-devel ginac-devel glpk-devel hwloc-devel z3 xerces-c-devel eigen3-devel
+        sudo dnf -y install maven libuuid-devel python3-devel libffi-devel openssl-devel python3-pip
+    else
+        sudo apt update
+        sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+        sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
+    fi
     # apt -y install texlive-latex-extra
     # update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 }
@@ -80,6 +88,29 @@ stormpy-build() {
     cd -
 }
 
+download-rl() { # 
+    cd $PAYNT_ROOT/rl_approach
+    pip3 install tensorflow # Potentially long installation.
+    pip3 install tf_agents # It is essential to install tf_agents AFTER tensorflow
+    git clone https://github.com/stevencarrau/safe_RL_POMDPs safe_rl
+    
+    git clone https://github.com/stevencarrau/shield_rl_gridworlds.git shield_gridworlds
+    git clone https://github.com/sjunges/gridworld-by-storm.git gridworlds
+    cd -
+}
+
+setup-rl() {
+    enva
+    cd $PAYNT_ROOT/rl_approach
+    cd shield_gridworlds
+    python3 ./POMDP/setup.py develop
+    cd ..
+    mv $PAYNT_ROOT/rl_approach/safe_rl/cfgs/SwitchShield.json $PAYNT_ROOT/rl_approach/safe_rl/cfgs/SwitchShieldx.json
+    mkdir -p $PAYNT_ROOT/rl_approach/safe_rl/newvideos/NS/SWITCH
+    cd ..
+    envd
+}
+
 synthesis-install() {
     storm-dependencies
     download-prerequisites
@@ -93,4 +124,7 @@ synthesis-install() {
     
     pycarl-build
     stormpy-build
+
+    # download-rl
+    # setup-rl
 }
