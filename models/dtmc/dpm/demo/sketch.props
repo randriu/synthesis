@@ -1,2 +1,2 @@
 R{"lost"} <= 1 [ F "finished" ]
-R{"power"}min{0.0}=? [ F "finished" ]
+R{"power"}min=? [ F "finished" ]
