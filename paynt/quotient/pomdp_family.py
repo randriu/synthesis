@@ -19,7 +19,8 @@ class FSC:
     '''
     Class for encoding an FSC having
     - a fixed number of nodes
-    - deterministic action selection gamma: NxZ -> Act
+    - randomized action selection gamma: NxZ -> Distr(Act)
+        - element of Distr(Act) is a dictionary of pairs (action,probability)
     - deterministic posterior-unaware memory update delta: NxZ -> N
     '''
 
@@ -27,9 +28,7 @@ class FSC:
         self.num_nodes = num_nodes
         self.num_observations = num_observations
         
-        # gamma: NxZ -> Act
         self.action_function = [ [None]*num_observations for _ in range(num_nodes) ]
-        # delta: NxZ -> N
         self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
 
     
@@ -40,7 +39,7 @@ class FSC:
         json = {}
         json["num_nodes"] = self.num_nodes
         json["num_observations"] = self.num_observations
-        json["__comment_action_function"] = "action function has signature NxZ -> Act"
+        json["__comment_action_function"] = "action function has signature NxZ -> Distr(Act)"
         json["__comment_update_function"] = "update function has signature NxZ -> N"
         json["action_function"] = self.action_function
         json["update_function"] = self.update_function
@@ -54,27 +53,6 @@ class FSC:
         fsc.action_function = json["action_function"]
         fsc.update_function = json["update_function"]
         return fsc
-
-
-    def decide(self, decision_map, node, observation):
-        '''
-        Make decision using decision_map based on the given observation and memory node. decision_map is either
-        self.action_function or self.update_function
-        '''
-        decision = decision_map[node][observation]
-        if decision is None:
-            # default to 0 node
-            decision = decision_map[0][observation]
-            if decision is None:
-                # default to first decision
-                decision = 0
-        return decision
-
-    def suggest_action(self, node, observation):
-        return self.decide(self.action_function, node, observation)
-
-    def suggest_update(self, node, observation):
-        return self.decide(self.update_function, node, observation)
 
 
 
@@ -94,14 +72,13 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.observation_to_actions = None
 
         # POMDP manager used for unfolding the memory model into the quotient POMDP
-        self.quotient_pomdp_manager = None
+        self.product_pomdp_fsc = None
 
         assert not self.specification.has_optimality, \
             "expecting specification without the optimality objective"
 
         self.action_labels,self.choice_to_action,state_to_actions = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
-        self.num_actions = len(self.action_labels)
 
         # identify labels available at observations
         self.observation_to_actions = [None] * self.num_observations
@@ -113,9 +90,13 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                 continue
             self.observation_to_actions[obs] = state_actions
 
-        self.quotient_pomdp_manager = stormpy.synthesis.QuotientPomdpManager(
+        self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpFsc(
             self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
 
+
+    @property
+    def num_actions(self):
+        return len(self.action_labels)
 
     @property
     def num_observations(self):
@@ -142,9 +123,10 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         '''
 
         # create the product
-        self.quotient_pomdp_manager.make_product_with_fsc(fsc.num_nodes, fsc.action_function, fsc.update_function)
-        product = self.quotient_pomdp_manager.product
-        product_choice_to_choice = self.quotient_pomdp_manager.product_choice_to_choice
+        self.product_pomdp_fsc.apply_fsc(fsc.num_nodes, fsc.action_function, fsc.update_function)
+        # exit()
+        product = self.product_pomdp_fsc.product
+        product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
 
         # the product inherits the design space
         product_holes = self.design_space.copy()
