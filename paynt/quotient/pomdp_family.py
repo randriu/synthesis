@@ -20,7 +20,7 @@ class FSC:
     Class for encoding an FSC having
     - a fixed number of nodes
     - randomized action selection gamma: NxZ -> Distr(Act)
-        - element of Distr(Act) is a dictionary of pairs (action,probability)
+        - gamma(n,z) is a dictionary of pairs (action,probability)
     - deterministic posterior-unaware memory update delta: NxZ -> N
     '''
 
@@ -53,8 +53,6 @@ class FSC:
         fsc.action_function = json["action_function"]
         fsc.update_function = json["update_function"]
         return fsc
-
-
 
 
 class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
@@ -90,7 +88,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                 continue
             self.observation_to_actions[obs] = state_actions
 
-        self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpFsc(
+        self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpRandomizedFsc(
             self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
 
 
@@ -123,8 +121,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         '''
 
         # create the product
-        self.product_pomdp_fsc.apply_fsc(fsc.num_nodes, fsc.action_function, fsc.update_function)
-        # exit()
+        self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
         product = self.product_pomdp_fsc.product
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
 
@@ -133,9 +130,13 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         
         # the choices of the product inherit colors of the quotient
         product_choice_to_hole_options = []
+        quotient_num_choces = self.quotient_mdp.nr_choices
         for product_choice in range(product.nr_choices):
             choice = product_choice_to_choice[product_choice]
-            hole_options = self.coloring.action_to_hole_options[choice].copy()
+            if choice == quotient_num_choces:
+                hole_options = {}
+            else:
+                hole_options = self.coloring.action_to_hole_options[choice].copy()
             product_choice_to_hole_options.append(hole_options)
         product_coloring = paynt.quotient.coloring.Coloring(product, product_holes, product_choice_to_hole_options)
         

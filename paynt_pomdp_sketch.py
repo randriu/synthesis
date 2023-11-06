@@ -26,14 +26,13 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     # random.seed(42)
     for node in range(num_nodes):
         for obs in range(pomdp.nr_observations):
-            fsc.action_function[node][obs] = random.choice(pomdp_sketch.observation_to_actions[obs])
-
-            # available_actions = pomdp_sketch.observation_to_actions[obs]
-            # num_samples = min(len(available_actions),node+1)
-            # sampled_actions = random.sample(available_actions,num_samples)
-            # prob = 1/num_samples
-            # randomized_action_selection = {action:prob for action in sampled_actions}
-            # fsc.action_function[node][obs] = randomized_action_selection
+            # some random randomized policy
+            available_actions = pomdp_sketch.observation_to_actions[obs]
+            num_samples = min(len(available_actions),node+1)
+            sampled_actions = random.sample(available_actions,num_samples)
+            prob = 1/num_samples
+            randomized_action_selection = {action:prob for action in sampled_actions}
+            fsc.action_function[node][obs] = randomized_action_selection
             
             fsc.update_function[node][obs] = random.randrange(num_nodes)
     return fsc
