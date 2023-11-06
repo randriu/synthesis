@@ -1,4 +1,4 @@
-Pmax{0.0}=? [ F "goal" & c<CMAX ]
+Pmax=? [ F "goal" & c<CMAX ]
 P<=THRESHOLD [F "bad"]
 
 //R{"steps"}<=THRESHOLD [F ("bad" | "goal")]

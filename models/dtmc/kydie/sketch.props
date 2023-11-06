@@ -5,6 +5,6 @@ P>= 0.166666 [F "four"]
 P>= 0.166666 [F "five"]
 P>= 0.166666 [F "six"]
 
-R{"coin_flips"}min{0.0}=? [ F "end" ]
+R{"coin_flips"}min=? [ F "end" ]
 
 
