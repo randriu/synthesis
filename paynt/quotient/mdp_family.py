@@ -12,14 +12,6 @@ logger = logging.getLogger(__name__)
 
 class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
-    def __init__(self, quotient_mdp, coloring, specification):
-        super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
-        self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
-
-        self.action_labels,self.choice_to_action,self.state_to_actions = \
-            MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
-
-    
     @classmethod
     def extract_choice_labels(cls, mdp):
         '''
@@ -46,6 +38,38 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             state_to_actions.append(list(state_choice_label_indices))
 
         return action_labels,choice_to_action,state_to_actions
+
+    def __init__(self, quotient_mdp, coloring, specification):
+        super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
+        self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
+
+        self.action_labels,self.choice_to_action,self.state_to_actions = \
+            MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
+
+
+    @property
+    def num_actions(self):
+        return len(self.action_labels)
+    
+
+    
+    
+
+    def keep_actions(self, state_to_action):
+        invalid_action = self.num_actions
+        
+        tm = self.quotient_mdp.transition_matrix
+        choice_mask = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
+        for state in range(self.quotient_mdp.nr_states):
+            action = state_to_action[state]
+            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                if self.choice_to_action[choice] == action:
+                    choice_mask.set(choice,True)
+        
+        model,state_map,choice_map = self.restrict_quotient(choice_mask)
+        mdp = paynt.quotient.models.MDP(model, self, state_map, choice_map, None)
+        return mdp
+
 
 
     def build_chain(self, family):

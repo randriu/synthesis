@@ -8,15 +8,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class GameResult:
+class MdpFamilyResult:
     def __init__(self):
+        # if True, then all family is sat; if False, then all family is UNSAT; otherwise it is None
         self.sat = None
+        # if not None, then contains a satisfying policy for all MDPs in the family
+        self.satisfying_policy = None
+
         self.scheduler_choices = None
         self.hole_selection = None
-
-    @property
-    def scheduler_consistent(self):
-        return all([len(options)<=1 for options in self.hole_selection])
 
     def __str__(self):
         return str(self.sat)
@@ -29,72 +29,107 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self):
         return "meta-policy AR"
 
-    
+
     def verify_family(self, family, game_solver, prop):
         self.quotient.build(family)
 
         self.stat.iteration_mdp(family.mdp.states)
 
-        # solve primary-secondary direction via a game
-        print("solving...")
-        game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
-        print("solved")
-        game_result = GameResult()
-        game_result.sat = prop.satisfies_threshold(game_solver.solution_value)
-        game_result.scheduler_choices = game_solver.solution_choices
-        print(game_solver.solution_value)
-        print(game_solver.solution_state_values)
-        print(game_solver.solution_choices)
+        mdp_family_result = MdpFamilyResult()
 
+
+        if family.size == 1:
+            primary_primary_result = family.mdp.model_check_property(prop)
+            logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
+            mdp_family_result.sat = primary_primary_result.sat
+            if primary_primary_result.sat:
+                # TODO extract policy
+                mdp_family_result.satisfying_policy = "TODO"
+            return mdp_family_result
+
+
+        # construct and solve the game abstraction
+        logger.debug("solving the game...")
+        game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
+        logger.debug("game solved, value is {}".format(game_solver.solution_value))
+        game_result_sat = prop.satisfies_threshold(game_solver.solution_value)
+        
         if True:
-            model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_result.scheduler_choices)
+            model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_solver.solution_choices)
             dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
             dtmc_result = dtmc.model_check_property(prop)
-            print("double-checking game value: ", game_solver.solution_value, dtmc_result)
-            if abs(dtmc_result.value-game_solver.solution_value) > 0.1:
-                exit()
+            # print("double-checking game value: ", game_solver.solution_value, dtmc_result)
+            if abs(dtmc_result.value-game_solver.solution_value) > 0.01:
+                raise ValueError("game solution is {}, but DTMC model checker yielded {}".format(game_solver.solution_value,dtmc_result.value))
+
+        if game_result_sat:
+            logger.debug("verifying game policy...")
+            mdp_family_result.sat = True
+            # apply player 1 actions to the quotient
+            policy = game_solver.solution_state_to_player1_action
+            policy_result = self.verify_policy(family,prop,policy)
+            if policy_result.sat:
+                # this scheduler is good for all MDPs in the family
+                mdp_family_result.satisfying_policy = policy
+                return mdp_family_result
+        else:
+            logger.debug("solving primary-primary direction...")
+            # solve primary-primary direction for the family
+            primary_primary_result = family.mdp.model_check_property(prop)
+            logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
+            if not primary_primary_result.sat:
+                mdp_family_result.sat = False
+                return mdp_family_result
         
-        if game_result.sat:
-            return game_result
-
-        print(self.quotient.action_labels)
-        print(self.quotient.state_to_actions)
-        # for choice in range(self.quotient.quotient_mdp.nr_choices):
-        #     choice_options = self.quotient.coloring.action_to_hole_options[choice]
-        #     print(choice_options)
-
+        # undecided: prepare to split
+        mdp_family_result.scheduler_choices = game_solver.solution_choices
         # map scheduler choices to hole options and check consistency
         hole_selection = [set() for hole_index in self.quotient.design_space.hole_indices]
-        for choice in game_result.scheduler_choices:
+        for choice in mdp_family_result.scheduler_choices:
             choice_options = self.quotient.coloring.action_to_hole_options[choice]
-            print(choice_options)
-            print(self.quotient.quotient_mdp.transition_matrix.get_row(choice))
             for hole_index,option in choice_options.items():
                 hole_selection[hole_index].add(option)
-        game_result.hole_selection = [list(options) for options in hole_selection]
-        return game_result
+        mdp_family_result.hole_selection = [list(options) for options in hole_selection]
+        return mdp_family_result
+
+
+    def verify_policy(self, family, prop, policy):
+        mdp = self.quotient.keep_actions(policy)
+        return mdp.model_check_property(prop, alt=True)
 
 
 
     def split(self, family, prop, scheduler_choices, state_values, hole_selection):
-        # compute scores for inconsistent holes
-        mdp = self.quotient.quotient_mdp
-        choice_values = self.quotient.choice_values(mdp, prop, state_values)
-        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(hole_selection) if len(options) > 1 }
-        expected_visits = self.quotient.expected_visits(mdp, prop, scheduler_choices)
-        quotient_mdp_wrapped = self.quotient.design_space.mdp
-        scores = self.quotient.estimate_scheduler_difference(quotient_mdp_wrapped, inconsistent_assignments, choice_values, expected_visits)
+        splitter = None
+        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(hole_selection) if len(options) > 1}
+        if len(inconsistent_assignments)==0:
+            for hole_index,hole in enumerate(family):
+                if hole.size > 1:
+                    splitter = hole_index
+                    break
+
+        elif len(inconsistent_assignments)==1:
+            for hole_index in inconsistent_assignments.keys():
+                splitter = hole_index
+        else:
+            # compute scores for inconsistent holes
+            mdp = self.quotient.quotient_mdp
+            choice_values = self.quotient.choice_values(mdp, prop, state_values)
+            expected_visits = self.quotient.expected_visits(mdp, prop, scheduler_choices)
+            quotient_mdp_wrapped = self.quotient.design_space.mdp
+            scores = self.quotient.estimate_scheduler_difference(quotient_mdp_wrapped, inconsistent_assignments, choice_values, expected_visits)
+            splitters = self.quotient.holes_with_max_score(scores)
+            splitter = splitters[0]
         
         # split the hole
-        splitters = self.quotient.holes_with_max_score(scores)
-        splitter = splitters[0]
+        assert splitter is not None
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
             core_suboptions = [[option] for option in used_options]
             other_suboptions = [option for option in family[splitter].options if option not in used_options]
         else:
             assert len(family[splitter].options) > 1
-            options = family.options
+            options = family[splitter].options
             half = len(options) // 2
             core_suboptions = [options[:half], options[half:]]
             other_suboptions = []
@@ -119,6 +154,10 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
 
     def synthesize_metapolicy(self, family):
+
+        members_satisfied = 0
+        members_total = family.size
+        members_verified = 0
         metapolicy = []
 
         prop = self.quotient.specification.constraints[0]
@@ -127,31 +166,39 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
         families = [family]
         while families:
             family = families.pop(-1)
-            print("trying family of size ", family.size)
+            print("investigating family of size ", family.size)
+            if family.size == 1:
+                members_verified += 1
             result = self.verify_family(family,game_solver,prop)
-            if result.sat:
-                logger.debug("found policy for family of size {}".format(family.size))
-                metapolicy += [(family,result.scheduler_choices)]
-                self.explore(family)
-                continue
+            # print(result)
 
-            # unsat
-            if result.scheduler_consistent:
-                unsatisfiable_family = self.quotient.design_space.assume_options_copy(result.hole_selection)
+            if result.sat == False:
+                # unsat
+                # unsatisfiable_family = self.quotient.design_space.assume_options_copy(result.hole_selection)
+                unsatisfiable_family = family
                 logger.info("satisfying scheduler cannot be obtained for the following family {}".format(unsatisfiable_family))
                 self.explore(family)
                 if unsatisfiable_family.size > family.size:
-                    logger.info("can reject a larger family than the one that is being explored???")
+                    logger.info("Can reject a larger family than the one that is being explored???")
+                continue
+
+            if result.satisfying_policy is not None:
+                logger.debug("found policy for family of size {}".format(family.size))
+                members_satisfied += family.size
+                metapolicy += [(family,result.satisfying_policy)]
+                self.explore(family)
                 continue
 
             # refine
             subfamilies = self.split(
                 family, prop, game_solver.solution_choices, game_solver.solution_state_values, result.hole_selection
             )
-            print([f.size for f in subfamilies])
-            # exit()
             families = families + subfamilies
 
+        satisfied_percentage = round(members_satisfied/members_total*100,0)
+        logger.info("all families are explored")
+        logger.info("individual MDPs verified: {}".format(members_verified))
+        logger.info("found satisfying policies for {}/{} family members ({}%)".format(members_satisfied,members_total,satisfied_percentage))
         return metapolicy
 
     
