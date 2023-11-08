@@ -51,51 +51,24 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def num_actions(self):
         return len(self.action_labels)
     
-
     
-    
-
-    def keep_actions(self, state_to_action):
+    def keep_actions(self, family, state_to_action):
         invalid_action = self.num_actions
-        
         tm = self.quotient_mdp.transition_matrix
         choice_mask = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
         for state in range(self.quotient_mdp.nr_states):
             action = state_to_action[state]
             for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                if self.choice_to_action[choice] == action:
+                if family.selected_actions_bv[choice] and self.choice_to_action[choice] == action:
                     choice_mask.set(choice,True)
-        
         model,state_map,choice_map = self.restrict_quotient(choice_mask)
-        mdp = paynt.quotient.models.MDP(model, self, state_map, choice_map, None)
+        mdp = paynt.quotient.models.MDP(model, self, state_map, choice_map, family)
         return mdp
 
-
-
-    def build_chain(self, family):
-        assert not self.quotient_game_required
-        assert family.size == 1, "expecting family of size 1"
-        _,_,selected_actions_bv = self.coloring.select_actions(family)
-        mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
-        return paynt.quotient.models.MDP(mdp,self,state_map,choice_map,family)
-
     
-    def double_check_assignment(self, assignment):
-        '''
-        Double-check whether this assignment truly improves optimum.
-        '''
-        assert not self.quotient_game_required
-        mdp = self.build_chain(assignment)
-        res = mdp.check_specification(self.specification, double_check=False)
-        if res.constraints_result.sat and self.specification.optimality.improves_optimum(res.optimality_result.primary.value):
-            return assignment, res.optimality_result.primary.value
-        else:
-            return None, None
-
     def build_game_abstraction_solver(self, prop):
         target_label = str(prop.formula.subformula.subformula)
         solver = stormpy.synthesis.GameAbstractionSolver(
-            self.quotient_mdp, len(self.action_labels), self.choice_to_action,
-            self.state_to_actions, target_label
+            self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label
         )
         return solver

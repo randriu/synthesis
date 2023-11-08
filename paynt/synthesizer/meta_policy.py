@@ -49,14 +49,14 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
 
         # construct and solve the game abstraction
-        print(family.selected_actions_bv)
         logger.debug("solving the game...")
         game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
         logger.debug("game solved, value is {}".format(game_solver.solution_value))
         game_result_sat = prop.satisfies_threshold(game_solver.solution_value)
         
         if True:
-            model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_solver.solution_choices)
+            model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_solver.solution_reachable_choices)
+            assert(model.nr_states == model.nr_choices)
             dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
             dtmc_result = dtmc.model_check_property(prop)
             # print("double-checking game value: ", game_solver.solution_value, dtmc_result)
@@ -83,11 +83,9 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
                 return mdp_family_result
         
         # undecided: prepare to split
-        scheduler_choices = game_solver.solution_choices
-        print(scheduler_choices)
-        print(family.selected_actions_bv)
+        scheduler_choices = game_solver.solution_reachable_choices
+        ev = self.quotient.expected_visits(self.quotient.quotient_mdp, prop, scheduler_choices)
         for choice in scheduler_choices:
-            print(choice)
             assert choice in family.selected_actions_bv
 
         # map scheduler choices to hole options and check consistency
@@ -108,7 +106,7 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
 
     def verify_policy(self, family, prop, policy):
-        mdp = self.quotient.keep_actions(policy)
+        mdp = self.quotient.keep_actions(family, policy)
         return mdp.model_check_property(prop, alt=True)
 
 
@@ -211,7 +209,7 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
             # refine
             subfamilies = self.split(
-                family, prop, game_solver.solution_choices, game_solver.solution_state_values, result.hole_selection
+                family, prop, game_solver.solution_reachable_choices, game_solver.solution_state_values, result.hole_selection
             )
             families = families + subfamilies
             print([f.size for f in subfamilies])
