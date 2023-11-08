@@ -49,6 +49,7 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
 
         # construct and solve the game abstraction
+        print(family.selected_actions_bv)
         logger.debug("solving the game...")
         game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
         logger.debug("game solved, value is {}".format(game_solver.solution_value))
@@ -82,14 +83,27 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
                 return mdp_family_result
         
         # undecided: prepare to split
-        mdp_family_result.scheduler_choices = game_solver.solution_choices
+        scheduler_choices = game_solver.solution_choices
+        print(scheduler_choices)
+        print(family.selected_actions_bv)
+        for choice in scheduler_choices:
+            print(choice)
+            assert choice in family.selected_actions_bv
+
         # map scheduler choices to hole options and check consistency
         hole_selection = [set() for hole_index in self.quotient.design_space.hole_indices]
-        for choice in mdp_family_result.scheduler_choices:
+        for choice in scheduler_choices:
             choice_options = self.quotient.coloring.action_to_hole_options[choice]
             for hole_index,option in choice_options.items():
                 hole_selection[hole_index].add(option)
-        mdp_family_result.hole_selection = [list(options) for options in hole_selection]
+        hole_selection = [list(options) for options in hole_selection]
+
+        print([hole.options for hole in family])
+        print(hole_selection)
+        for hole_index,options in enumerate(hole_selection):
+            assert all([option in family[hole_index].options for option in options])
+        mdp_family_result.scheduler_choices = scheduler_choices
+        mdp_family_result.hole_selection = hole_selection
         return mdp_family_result
 
 
@@ -101,16 +115,17 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
 
     def split(self, family, prop, scheduler_choices, state_values, hole_selection):
         splitter = None
+        print(hole_selection)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(hole_selection) if len(options) > 1}
         if len(inconsistent_assignments)==0:
             for hole_index,hole in enumerate(family):
                 if hole.size > 1:
                     splitter = hole_index
                     break
-
         elif len(inconsistent_assignments)==1:
             for hole_index in inconsistent_assignments.keys():
                 splitter = hole_index
+                break
         else:
             # compute scores for inconsistent holes
             mdp = self.quotient.quotient_mdp
@@ -123,6 +138,7 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
         
         # split the hole
         assert splitter is not None
+        print(splitter)
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
             core_suboptions = [[option] for option in used_options]
@@ -139,6 +155,7 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
         
+        print(used_options, suboptions)
         # construct corresponding design subspaces
         subfamilies = []
         family.splitter = splitter
@@ -149,6 +166,9 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
             subfamily.assume_hole_options(splitter, suboption)
             subfamilies.append(subfamily)
 
+        print(family, family.size)
+        print([str(f) for f in subfamilies])
+        print([f.size for f in subfamilies])
         return subfamilies
         
 
@@ -194,6 +214,7 @@ class SynthesizerMetaPolicy(paynt.synthesizer.synthesizer.Synthesizer):
                 family, prop, game_solver.solution_choices, game_solver.solution_state_values, result.hole_selection
             )
             families = families + subfamilies
+            print([f.size for f in subfamilies])
 
         satisfied_percentage = round(members_satisfied/members_total*100,0)
         logger.info("all families are explored")
