@@ -1,0 +1,82 @@
+mdp
+
+// grid dimensions
+const int N = 4;
+const int xMIN = 1;
+const int yMIN = 1;
+const int xMAX = N;
+const int yMAX = N;
+
+hole int o1x in {1,2};
+hole int o1y in {1,2};
+
+hole int o2x in {1,2};
+hole int o2y in {3,4};
+
+hole int o3x in {3,4};
+hole int o3y in {1,2};
+
+hole int o4x in {3,4};
+hole int o4y in {3,4};
+
+formula at1 = (x = o1x & y = o1y);
+formula at2 = (x = o2x & y = o2y);
+formula at3 = (x = o3x & y = o3y);
+formula at4 = (x = o4x & y = o4y);
+
+formula near1 = 1<=x & x<=2 & 1<=y & y<=2;
+formula near2 = 1<=x & x<=2 & 3<=y & y<=4;
+formula near3 = 3<=x & x<=4 & 1<=y & y<=2;
+formula near4 = 3<=x & x<=4 & 3<=y & y<=4;
+
+formula crash = crash1 | crash2 | crash3 | crash4;
+
+// stop conditions
+formula goal = (x=xMAX & y=yMAX);
+formula done = goal | crash;
+
+
+module clk
+    clk : [0..4] init 0;
+
+    [east]  clk=0 -> (clk'=1);
+    [west]  clk=0 -> (clk'=1);
+    [north] clk=0 -> (clk'=1);
+    [south] clk=0 -> (clk'=1);
+    
+    [detect1] clk=1 -> (clk'=clk+1);
+    [detect2] clk=2 -> (clk'=clk+1);
+    [detect3] clk=3 -> (clk'=clk+1);
+    [detect4] clk=4 -> (clk'=0);
+endmodule
+
+
+// probability of skidding
+const double slip = 0.2;
+
+module agent
+    x : [xMIN..xMAX] init xMIN;
+    y : [yMIN..yMAX] init yMIN;
+
+    [east]  !done -> 1-slip : (x'=min(x+1,xMAX)) + slip : (x'=min(x+2,xMAX));
+    [west]  !done -> 1-slip : (x'=max(x-1,xMIN)) + slip : (x'=max(x-2,xMIN));
+    [north] !done -> 1-slip : (y'=min(y+1,yMAX)) + slip : (y'=min(y+2,yMAX));
+    [south] !done -> 1-slip : (y'=max(y-1,yMIN)) + slip : (y'=max(y-2,yMIN));
+endmodule
+
+
+// crash detection is delayed by 1 step
+module crash1
+    crash1 : bool init false;
+    [detect1]  near1 -> (crash1'=at1);
+    [detect1] !near1 -> true;
+endmodule
+
+module crash2=crash1[crash1=crash2,detect1=detect2,near1=near2,at1=at2] endmodule
+module crash3=crash1[crash1=crash3,detect1=detect3,near1=near3,at1=at3] endmodule
+module crash4=crash1[crash1=crash4,detect1=detect4,near1=near4,at1=at4] endmodule
+
+
+rewards "steps"
+    clk=0 : 1;
+endrewards
