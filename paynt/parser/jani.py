@@ -1,7 +1,6 @@
 import stormpy
 
 import paynt.verification.property
-from ..quotient.holes import CombinationColoring
 from ..quotient.models import MarkovChain
 
 import itertools
@@ -10,7 +9,30 @@ from collections import defaultdict
 import logging
 logger = logging.getLogger(__name__)
 
-class JaniUnfolder():
+
+class CombinationColoring:
+    '''
+    Dictionary of colors associated with different hole combinations.
+    Note: color 0 is reserved for general hole-free objects.
+    '''
+    def __init__(self):
+        self.coloring = {}
+        self.reverse_coloring = [None]
+
+    @property
+    def num_colors(self):
+        return len(self.coloring)
+
+    def get_or_make_color(self, hole_assignment):
+        new_color = self.num_colors + 1
+        color = self.coloring.get(hole_assignment, new_color)
+        if color == new_color:
+            self.coloring[hole_assignment] = color
+            self.reverse_coloring.append(hole_assignment)
+        return color
+
+
+class JaniUnfolder:
     ''' Unfolder of hole combinations into JANI program. '''
 
     def __init__(self, prism, hole_expressions, specification, design_space):
@@ -86,7 +108,7 @@ class JaniUnfolder():
         for hole_index,hole in enumerate(design_space):
             assert hole.name == open_constants[hole_index].name
 
-        self.combination_coloring = CombinationColoring(design_space)
+        self.combination_coloring = CombinationColoring()
 
         jani_program = stormpy.JaniModel(jani)
         new_automata = dict()

@@ -83,7 +83,7 @@ class Statistic:
         # percentage_rejected = fraction_rejected * 100
         time_elapsed = round(self.synthesis_time.read(),1)
         time_estimate = round(time_estimate,1)
-        iters = (self.iterations_mdp,self.iterations_dtmc)
+        iters = (self.iterations_game,self.iterations_mdp,self.iterations_dtmc)
         avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
         optimum = "-"
         spec = self.quotient.specification
@@ -114,6 +114,7 @@ class Statistic:
 
         self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
         self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
+        self.avg_size_game = safe_division(self.acc_size_game, self.iterations_game)
 
     def get_summary(self):
         spec = self.quotient.specification
@@ -130,8 +131,11 @@ class Statistic:
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_time.time, 2)} s"
 
         family_stats = ""
+        game_stats = f"Game stats: avg MDP size: {round(self.avg_size_game)}, iterations: {self.iterations_game}" 
         ar_stats = f"AR stats: avg MDP size: {round(self.avg_size_mdp)}, iterations: {self.iterations_mdp}" 
         cegis_stats = f"CEGIS stats: avg DTMC size: {round(self.avg_size_dtmc)}, iterations: {self.iterations_dtmc}"
+        if self.iterations_game > 0:
+            family_stats += f"{game_stats}\n"
         if self.iterations_mdp > 0:
             family_stats += f"{ar_stats}\n"
         if self.iterations_dtmc > 0:

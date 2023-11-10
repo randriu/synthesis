@@ -39,6 +39,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
         return action_labels,choice_to_action,state_to_actions
 
+    
     def __init__(self, quotient_mdp, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
@@ -46,10 +47,11 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.action_labels,self.choice_to_action,self.state_to_actions = \
             MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
 
-
+    
     @property
     def num_actions(self):
         return len(self.action_labels)
+    
     
     
     def keep_actions(self, family, state_to_action):
