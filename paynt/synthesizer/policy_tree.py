@@ -27,19 +27,11 @@ class PolicyTreeNode:
     def __init__(self, family):
         self.family = family
 
-        self.family_is_solvable = None
         self.policy = None
         
         self.splitter = None
         self.suboptions = None
         self.child_nodes = None
-
-    def unsolved(self):
-        self.family_is_solvable = False
-
-    def solved(self, policy):
-        self.family_is_solvable = True
-        self.policy = policy
 
     def split(self, splitter, suboptions, subfamilies):
         self.splitter = splitter
@@ -48,6 +40,18 @@ class PolicyTreeNode:
         for subfamily in subfamilies:
             child_node = PolicyTreeNode(subfamily)
             self.child_nodes.append(child_node)
+
+
+    def double_check(self, quotient, prop):
+        assert self.policy is not None
+        if self.policy == False:
+            result = self.family.mdp.model_check_property(prop)
+            assert not result.sat
+        else:
+            mdp = quotient.keep_actions(self.family, self.policy)
+            result = mdp.model_check_property(prop, alt=True)
+            assert result.sat
+
 
 
 class PolicyTree:
@@ -69,19 +73,53 @@ class PolicyTree:
                 node_queue = node_queue + node.child_nodes
         return leaves
 
-    def collect_stats(self):
-        
+    def print_stats(self):
         members_total = self.root.family.size
         members_satisfied = 0
-        members_verified_individually = 0
+        num_leaves_singleton = 0
+        num_policies = 0
         
         leaves = self.collect_leaves()
         for leaf in leaves:
             if leaf.family.size==1:
-                members_verified_individually += 1
-            if leaf.family_is_solvable == True:
+                num_leaves_singleton += 1
+            if leaf.policy is not None and leaf.policy != False:
+                num_policies += 1
                 members_satisfied += leaf.family.size
-        return members_total,members_satisfied,members_verified_individually
+        satisfied_percentage = round(members_satisfied/members_total*100,0)
+        members_unsatisfied = members_total-members_satisfied
+
+        num_leaves = len(leaves)
+        num_leaves_solvable = num_policies
+        num_leaves_unsolvable = num_leaves-num_leaves_solvable
+        leaf_solvable_avg = round(members_satisfied / num_leaves_solvable,1)
+        leaf_unsolvable_avg = round(members_unsatisfied / num_leaves_unsolvable,1)
+
+        print("--------------------")
+        print("Policy tree summary:")
+        print("found {} satisfying policies for {}/{} family members ({}%)".format(
+            num_policies,members_satisfied,members_total,satisfied_percentage))
+        print("number of policy tree leaves: {}".format(num_leaves))
+        print("\t  solvable leaves: {} (avg.size: {})".format(num_leaves_solvable,leaf_solvable_avg))
+        print("\tunsolvable leaves: {} (avg.size: {})".format(num_leaves_unsolvable,leaf_unsolvable_avg))
+        print("\t singleton leaves: {}".format(num_leaves_singleton))
+        print("--------------------")
+
+
+    def print_unsat_families(self):
+        for leaf in self.collect_leaves():
+            if leaf.policy == False:
+                print(leaf.family)
+
+    
+    def double_check_all_families(self, quotient, prop):
+        leaves = self.collect_leaves()
+        logger.info("double-checking {} families...".format(len(leaves)))
+        for leaf in leaves:
+            leaf.double_check(quotient,prop)
+        logger.info("all solutions are OK")
+                
+
 
 
 
@@ -92,6 +130,27 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     @property
     def method_name(self):
         return "AR (policy tree)"
+
+
+    def policy_str(self, policy):
+        s = ""
+        mdp = self.quotient.keep_actions(self.quotient.design_space, policy).model
+        tm = mdp.transition_matrix
+        for state in range(mdp.nr_states):
+            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                print("state={},choice={},color={}".format(state,choice,self.quotient.coloring.action_to_hole_options[choice]))
+                print(mdp.labeling.get_labels_of_state(state))
+                for entry in tm.get_row(choice):
+                    print(entry.column, entry.value())
+        for state in range(self.quotient.quotient_mdp.nr_states):
+            action = policy[state]
+            if action == self.quotient.num_actions:
+                action_label = "(unreachable)"
+            else:
+                action_label = self.quotient.action_labels[policy[state]]
+            s += "state={}, action={}\n".format(state,action_label)
+        return s
+
 
 
     def verify_family(self, family, game_solver, prop):
@@ -213,10 +272,11 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert splitter is not None
         return splitter
     
+    
     def split(self, family, prop, scheduler_choices, state_values, hole_selection):
         
-        # splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
-        splitter = self.choose_splitter_round_robin(family,prop,scheduler_choices,state_values,hole_selection)
+        splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
+        # splitter = self.choose_splitter_round_robin(family,prop,scheduler_choices,state_values,hole_selection)
         # split the hole
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
@@ -264,13 +324,14 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if result.sat == False:
                 # logger.info("satisfying scheduler cannot be obtained for the following family {}".format(family))
                 self.explore(family)
-                policy_tree_node.unsolved()
+                policy_tree_node.policy = False
                 continue
 
             if result.satisfying_policy is not None:
                 # logger.info("found policy for all MDPs in the family")
+                # print(self.policy_str(result.satisfying_policy))
                 self.explore(family)
-                policy_tree_node.solved(result.satisfying_policy)
+                policy_tree_node.policy = result.satisfying_policy
                 continue
 
             # refine
@@ -280,12 +341,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node.split(splitter,suboptions,subfamilies)
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
-        logger.info("all families are explored")
-        members_total,members_satisfied,members_verified_individually = policy_tree.collect_stats()
-        logger.info("individual MDPs verified: {}".format(members_verified_individually))
-        satisfied_percentage = round(members_satisfied/members_total*100,0)
-        logger.info("found satisfying policies for {}/{} family members ({}%)".format(members_satisfied,members_total,satisfied_percentage))
-        return "yes"
+        policy_tree.double_check_all_families(self.quotient, prop)
+        return policy_tree
 
     
 
@@ -295,7 +352,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.stat.start()
         logger.info("synthesis initiated, design space: {}".format(family.size))
         policy_tree = self.synthesize_policy_tree(family)
-        self.stat.finished(policy_tree)
+        self.stat.finished("yes")
         return policy_tree
 
     
@@ -307,6 +364,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert not spec.has_optimality and spec.num_properties == 1 and not spec.constraints[0].reward, \
             "expecting a single reachability probability constraint"
         
-        self.synthesize()
+        policy_tree = self.synthesize()
+        policy_tree.print_stats()
         self.stat.print()
     
