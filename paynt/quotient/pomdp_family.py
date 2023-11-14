@@ -19,14 +19,16 @@ class FSC:
     '''
     Class for encoding an FSC having
     - a fixed number of nodes
-    - randomized action selection gamma: NxZ -> Distr(Act)
-        - gamma(n,z) is a dictionary of pairs (action,probability)
+    - action selection is either:
+        + deterministic: gamma: NxZ -> Act, or
+        + randomized: gamma: NxZ -> Distr(Act), where gamma(n,z) is a dictionary of pairs (action,probability)
     - deterministic posterior-unaware memory update delta: NxZ -> N
     '''
 
-    def __init__(self, num_nodes, num_observations):
+    def __init__(self, num_nodes, num_observations, is_deterministic=False):
         self.num_nodes = num_nodes
         self.num_observations = num_observations
+        self.is_deterministic = is_deterministic
         
         self.action_function = [ [None]*num_observations for _ in range(num_nodes) ]
         self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
@@ -35,11 +37,17 @@ class FSC:
     def __str__(self):
         return json.dumps(self.to_json(), indent=4)
 
+    def action_function_signature(self):
+        if self.is_deterministic:
+            return " NxZ -> Act"
+        else:
+            return " NxZ -> Distr(Act)"
+
     def to_json(self):
         json = {}
         json["num_nodes"] = self.num_nodes
         json["num_observations"] = self.num_observations
-        json["__comment_action_function"] = "action function has signature NxZ -> Distr(Act)"
+        json["__comment_action_function"] = "action function has signature {}".format(self.action_function_signature())
         json["__comment_update_function"] = "update function has signature NxZ -> N"
         json["action_function"] = self.action_function
         json["update_function"] = self.update_function
@@ -88,10 +96,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                 continue
             self.observation_to_actions[obs] = state_actions
 
-        self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpRandomizedFsc(
-            self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
-
-
     @property
     def num_actions(self):
         return len(self.action_labels)
@@ -103,6 +107,14 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     @property
     def state_to_observation(self):
         return self.obs_evaluator.state_to_obs_class
+
+    def initialize_fsc_unfolder(self, fsc_is_deterministic=False):
+        if fsc_is_deterministic:
+            self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpFsc(
+                self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
+        else:
+            self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpRandomizedFsc(
+                self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
     
     
     def build_pomdp(self, family):

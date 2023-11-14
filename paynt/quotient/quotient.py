@@ -457,6 +457,20 @@ class QuotientContainer:
         logger.info("done")
 
 
+    def identify_absorbing_states(self, model):
+        state_is_absorbing = [True] * model.nr_states
+        tm = model.transition_matrix
+        for state in range(model.nr_states):
+            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+                for entry in tm.get_row(choice):
+                    if entry.column != state:
+                        state_is_absorbing[state] = False
+                        break
+                if not state_is_absorbing[state]:
+                    break
+        return state_is_absorbing
+
+
 
 class DtmcQuotientContainer(QuotientContainer):
     
