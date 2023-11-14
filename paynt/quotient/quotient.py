@@ -78,6 +78,7 @@ class QuotientContainer:
         # select actions compatible with the family and restrict the quotient
         hole_selected_actions,selected_actions,selected_actions_bv = self.coloring.select_actions(family)
         family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        family.mdp.design_space = family
 
         # cash restriction information
         family.hole_selected_actions = hole_selected_actions
