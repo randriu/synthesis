@@ -19,6 +19,8 @@ def load_sketch(project_path):
 def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     print("investigating hole assignment: ", hole_assignment)
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
+    state_is_absorbing = pomdp_sketch.identify_absorbing_states(pomdp)
+    print("absorbing states: ", [state for state,absorbing in enumerate(state_is_absorbing) if absorbing])
 
     # return a random k-FSC
     num_nodes = 3
@@ -53,7 +55,6 @@ print("design space size: {} members".format(pomdp_sketch.design_space.size))
 # fix some hole options
 hole_options = [[hole.options[0]] for hole in pomdp_sketch.design_space]
 hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
-
 
 # investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
