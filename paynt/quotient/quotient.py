@@ -2,8 +2,10 @@ import stormpy
 import stormpy.synthesis
 
 from .holes import Hole,Holes,DesignSpace
-from .models import MarkovChain,MDP,DTMC
+from .models import MarkovChain,DTMC
 from .coloring import Coloring
+
+import paynt.quotient.models
 
 import math
 import itertools
@@ -64,22 +66,23 @@ class QuotientContainer:
         return self.restrict_mdp(self.quotient_mdp, selected_actions_bv)        
 
     
+    def build_from_choice_mask(self, choice_mask):
+        mdp,state_map,choice_map = self.restrict_quotient(choice_mask)
+        mdp = paynt.quotient.models.MDP(mdp, self, state_map, choice_map, None)
+        return mdp
+
+    
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
 
         # select actions compatible with the family and restrict the quotient
         hole_selected_actions,selected_actions,selected_actions_bv = self.coloring.select_actions(family)
-        model,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
+        family.mdp = self.build_from_choice_mask(selected_actions_bv)
 
         # cash restriction information
         family.hole_selected_actions = hole_selected_actions
         family.selected_actions = selected_actions
         family.selected_actions_bv = selected_actions_bv
-
-        # encapsulate MDP
-        family.mdp = MDP(model, self, state_map, choice_map, family)
-        # skipping analysis hints for now
-        # family.mdp.analysis_hints = family.translate_analysis_hints()
 
         # prepare to discard designs
         self.discarded = 0

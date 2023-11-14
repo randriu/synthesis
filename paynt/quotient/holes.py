@@ -141,6 +141,10 @@ class Holes(list):
         shallow_copy[hole_index] = subhole
         return shallow_copy
 
+    def join(self, other):
+        pass
+
+
 
 class ParentInfo():
     '''

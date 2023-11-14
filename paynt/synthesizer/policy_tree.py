@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 class MdpFamilyResult:
     def __init__(self):
-        # if True, then all family is sat; if False, then all family is UNSAT; otherwise it is None
-        self.sat = None
-        # if not None, then contains a satisfying policy for all MDPs in the family
-        self.satisfying_policy = None
+        # if None, then family is undediced
+        # if False, then all family is UNSAT
+        # otherwise, then contains a satisfying policy for all MDPs in the family
+        self.policy = None
 
         self.scheduler_choices = None
         self.hole_selection = None
@@ -22,16 +22,71 @@ class MdpFamilyResult:
         return str(self.sat)
 
 
+def merge_policies(policy1, policy2, dont_care_action):
+
+    num_states = len(policy1)
+    # agree_mask = stormpy.storage.BitVector(num_states,False)
+    # for state in range(num_states):
+    #     agree_mask.set(policy1[state] == policy2[state],True)
+
+    policy12 = policy1.copy()
+    policy21 = policy2.copy()
+    for state in range(num_states):
+        a1 = policy1[state]
+        a2 = policy2[state]
+        if a1 == dont_care_action:
+            policy12[state] = a2
+        if a2 == dont_care_action:
+            policy21[state] = a1
+    return policy12,policy21
+
+
+def test_nodes(quotient, prop, node1, node2):
+    dont_care_action = quotient.num_actions
+    policy1 = node1.policy
+    policy2 = node2.policy
+    policy12,policy21 = merge_policies(policy1,policy2, dont_care_action)
+
+    # try policy1 for family2
+    policy,choice_mask = quotient.fix_policy_for_family(node2.family, policy12)
+    mdp = quotient.build_from_choice_mask(choice_mask)
+    policy_result = mdp.model_check_property(prop, alt=True)
+    if policy_result.sat:
+        return policy
+
+    # try policy2 for family1
+    policy,choice_mask = quotient.fix_policy_for_family(node1.family, policy21)
+    mdp = quotient.build_from_choice_mask(choice_mask)
+    policy_result = mdp.model_check_property(prop, alt=True)
+    if policy_result.sat:
+        return policy
+
+    # neither fits
+    return None
+
+
+
 class PolicyTreeNode:
+
+    merged = 0
 
     def __init__(self, family):
         self.family = family
 
+        self.parent = None
         self.policy = None
         
         self.splitter = None
-        self.suboptions = None
-        self.child_nodes = None
+        self.suboptions = []
+        self.child_nodes = []
+
+    @property
+    def is_leaf(self):
+        return len(self.child_nodes) == 0
+    
+    @property
+    def solved(self):
+        return self.policy != False and self.policy is not None
 
     def split(self, splitter, suboptions, subfamilies):
         self.splitter = splitter
@@ -39,7 +94,8 @@ class PolicyTreeNode:
         self.child_nodes = []
         for subfamily in subfamilies:
             child_node = PolicyTreeNode(subfamily)
-            self.child_nodes.append(child_node)
+            child_node.parent = self
+            self.child_nodes.append(child_node)    
 
 
     def double_check(self, quotient, prop):
@@ -48,9 +104,67 @@ class PolicyTreeNode:
             result = self.family.mdp.model_check_property(prop)
             assert not result.sat
         else:
-            mdp = quotient.keep_actions(self.family, self.policy)
+            mdp = quotient.apply_policy_to_family(self.family, self.policy)
             result = mdp.model_check_property(prop, alt=True)
             assert result.sat
+
+
+    def merge_child_nodes(self, quotient, prop):
+        if self.is_leaf:
+            return
+
+        i = 0
+        while i < len(self.child_nodes):
+            child1 = self.child_nodes[i]
+            
+            if child1.policy is None:
+                i += 1
+                continue
+            
+            
+            join_to_i = []
+            if child1.policy == False:
+                # merge all UNSAT children
+                for j in range(i+1,len(self.child_nodes)):
+                    child2 = self.child_nodes[j]
+                    if child2.policy == False:
+                        join_to_i.append(j)
+            else:
+                # collect other childs to merge to i
+                for j in range(i+1,len(self.child_nodes)):
+                    child2 = self.child_nodes[j]
+                    if not child2.solved:
+                        continue
+                    policy = test_nodes(quotient,prop,child1,child2)
+                    if policy is None:
+                        continue
+                    # nodes can be merged
+                    child1.policy = policy
+                    join_to_i.append(j)
+            
+            # merge
+            for j in reversed(join_to_i):
+                PolicyTreeNode.merged += 1
+                self.suboptions[i] += self.suboptions[j]
+                self.suboptions.pop(j)
+                self.child_nodes.pop(j)
+
+            i += 1
+
+        if len(self.child_nodes)>1:
+            return
+        # only 1 child node that can be moved to this node
+        PolicyTreeNode.merged += 1
+        self.policy = self.child_nodes[0].policy
+        self.splitter = None
+        self.suboptions = []
+        self.child_nodes = []
+
+
+
+
+
+
 
 
 
@@ -62,17 +176,59 @@ class PolicyTree:
     def __str__(self):
         pass
 
+    def collect_all(self):
+        node_queue = [self.root]
+        all_nodes = []
+        while node_queue:
+            node = node_queue.pop(0)
+            all_nodes.append(node)
+            node_queue += node.child_nodes
+        return all_nodes
+    
     def collect_leaves(self):
         node_queue = [self.root]
         leaves = []
         while node_queue:
             node = node_queue.pop(0)
-            if node.child_nodes is None:
+            if node.is_leaf:
                 leaves.append(node)
             else:
                 node_queue = node_queue + node.child_nodes
         return leaves
 
+    def collect_solved(self):
+        node_queue = [self.root]
+        solved = []
+        while node_queue:
+            node = node_queue.pop(0)
+            if node.solved:
+                solved.append(node)
+            else:
+                node_queue += node.child_nodes
+        return solved
+
+
+    def double_check_all_families(self, quotient, prop):
+        leaves = self.collect_leaves()
+        logger.info("double-checking {} families...".format(len(leaves)))
+        for leaf in leaves:
+            leaf.double_check(quotient,prop)
+        logger.info("all solutions are OK")
+
+    
+    def count_diversity(self):
+        from collections import defaultdict
+        children_stats = defaultdict(int)
+        for node in self.collect_all():
+            if node.policy is not None:
+                continue
+            with_none = len([node for node in node.child_nodes if node.policy is None])
+            with_policy = len([node for node in node.child_nodes if node.policy is not None])
+            with_false = len([node for node in node.child_nodes if node.policy==False])
+            children_stats[(with_none,with_policy,with_false)] += 1
+        return children_stats
+
+    
     def print_stats(self):
         members_total = self.root.family.size
         members_satisfied = 0
@@ -80,44 +236,75 @@ class PolicyTree:
         num_policies = 0
         
         leaves = self.collect_leaves()
-        for leaf in leaves:
-            if leaf.family.size==1:
+        for node in leaves:
+            if node.family.size==1:
                 num_leaves_singleton += 1
-            if leaf.policy is not None and leaf.policy != False:
+            if node.policy is not None and node.policy != False:
                 num_policies += 1
-                members_satisfied += leaf.family.size
+                members_satisfied += node.family.size
         satisfied_percentage = round(members_satisfied/members_total*100,0)
         members_unsatisfied = members_total-members_satisfied
 
+        num_nodes = len(self.collect_all())
         num_leaves = len(leaves)
         num_leaves_solvable = num_policies
         num_leaves_unsolvable = num_leaves-num_leaves_solvable
-        leaf_solvable_avg = round(members_satisfied / num_leaves_solvable,1)
-        leaf_unsolvable_avg = round(members_unsatisfied / num_leaves_unsolvable,1)
+        if num_leaves_solvable > 0:
+            leaf_solvable_avg = round(members_satisfied / num_leaves_solvable,1)
+        else:
+            leaf_solvable_avg = "NA"
+
+        if num_leaves_unsolvable > 0:
+            leaf_unsolvable_avg = round(members_unsatisfied / num_leaves_unsolvable,1)
+        else:
+            leaf_unsolvable_avg = "NA"
 
         print("--------------------")
         print("Policy tree summary:")
         print("found {} satisfying policies for {}/{} family members ({}%)".format(
             num_policies,members_satisfied,members_total,satisfied_percentage))
-        print("number of policy tree leaves: {}".format(num_leaves))
+        print("policy tree has {} nodes, {} of them are leaves:".format(num_nodes, num_leaves))
         print("\t  solvable leaves: {} (avg.size: {})".format(num_leaves_solvable,leaf_solvable_avg))
         print("\tunsolvable leaves: {} (avg.size: {})".format(num_leaves_unsolvable,leaf_unsolvable_avg))
         print("\t singleton leaves: {}".format(num_leaves_singleton))
+
+        print()
+        print("(X, Y, Z)  -  number of internal nodes having X unresolved, Y satisfied and Z unsatisfied children")
+        for key,number in self.count_diversity().items():
+            print(key, " - ", number)
         print("--------------------")
 
 
-    def print_unsat_families(self):
-        for leaf in self.collect_leaves():
-            if leaf.policy == False:
-                print(leaf.family)
+    
 
     
-    def double_check_all_families(self, quotient, prop):
-        leaves = self.collect_leaves()
-        logger.info("double-checking {} families...".format(len(leaves)))
-        for leaf in leaves:
-            leaf.double_check(quotient,prop)
-        logger.info("all solutions are OK")
+    def postprocess(self, quotient, prop):
+
+        # find two leafs that can be merged
+        logger.info("post-processing the policy tree...")
+
+        # can_be_merged = 0
+        # leaves = self.collect_leaves()
+        # for i,leaf2 in enumerate(leaves):
+        #     if i == 0:
+        #         continue
+        #     leaf1 = leaves[i-1]
+        #     if leaf1.solved and leaf2.solved and leaf1.parent == leaf2.parent:
+        #         result = test_nodes(quotient,prop,leaf1,leaf2)
+        #         if result is not None:
+        #             can_be_merged += 1
+        # print("num leaves: ", len(leaves))
+        # print("can merge: ", can_be_merged)
+
+        PolicyTreeNode.merged = 0
+        all_nodes = self.collect_all()
+        for node in reversed(all_nodes):
+            node.merge_child_nodes(quotient,prop)
+        logger.info("post-processing over, merged {} pairs".format(PolicyTreeNode.merged))
+        
+        
+
+
                 
 
 
@@ -131,114 +318,87 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self):
         return "AR (policy tree)"
 
-
-    def policy_str(self, policy):
-        s = ""
-        mdp = self.quotient.keep_actions(self.quotient.design_space, policy).model
-        tm = mdp.transition_matrix
-        for state in range(mdp.nr_states):
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                print("state={},choice={},color={}".format(state,choice,self.quotient.coloring.action_to_hole_options[choice]))
-                print(mdp.labeling.get_labels_of_state(state))
-                for entry in tm.get_row(choice):
-                    print(entry.column, entry.value())
-        for state in range(self.quotient.quotient_mdp.nr_states):
-            action = policy[state]
-            if action == self.quotient.num_actions:
-                action_label = "(unreachable)"
-            else:
-                action_label = self.quotient.action_labels[policy[state]]
-            s += "state={}, action={}\n".format(state,action_label)
-        return s
-
-
-
-    def verify_family(self, family, game_solver, prop):
+    def verify_family(self, family, game_solver, prop, reference_policy=None):
         self.quotient.build(family)
-
         mdp_family_result = MdpFamilyResult()
 
-        if family.size == 1:
-            self.stat.iteration_mdp(family.mdp.states)
-            primary_primary_result = family.mdp.model_check_property(prop)
-            # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
-            mdp_family_result.sat = primary_primary_result.sat
-            if primary_primary_result.sat:
-                # extract policy
-                # TODO optimize this
-                scheduler = primary_primary_result.result.scheduler
-                choices = scheduler.compute_action_support(family.mdp.model.nondeterministic_choice_indices)
-                # dtmc,_,choice_map = self.quotient.restrict_mdp(family.mdp.model, choices)
-                # choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
-                quotient_choice_mask = stormpy.BitVector(self.quotient.quotient_mdp.nr_choices, False)
-                for choice in choices:
-                    quotient_choice_mask.set(family.mdp.quotient_choice_map[choice],True)
-                policy = [self.quotient.num_actions] * self.quotient.quotient_mdp.nr_states
-                tm = self.quotient.quotient_mdp.transition_matrix
-                for state in range(self.quotient.quotient_mdp.nr_states):
-                    for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                        if quotient_choice_mask[choice]:
-                            policy[state] = self.quotient.choice_to_action[choice]
-                mdp_family_result.satisfying_policy = policy
-            return mdp_family_result
+        reference_policy = None
+        if reference_policy is not None:
+            # check if reference policy works
+            mdp = self.quotient.apply_policy_to_family(family, reference_policy)
+            policy_result = mdp.model_check_property(prop, alt=True)
+            self.stat.iteration_mdp(mdp.states)
+            if policy_result.sat:
+                # this scheduler is good for all MDPs in the family
+                mdp_family_result.policy = reference_policy
+                return mdp_family_result
 
+        if family.size == 1:
+            primary_primary_result = family.mdp.model_check_property(prop)
+            self.stat.iteration_mdp(family.mdp.states)
+            # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
+            if not primary_primary_result.sat:
+                mdp_family_result.policy = False
+                return mdp_family_result
+            # extract satisfying policy
+            scheduler = primary_primary_result.result.scheduler
+            choices = scheduler.compute_action_support(family.mdp.model.nondeterministic_choice_indices)
+            quotient_choice_mask = stormpy.BitVector(self.quotient.quotient_mdp.nr_choices, False)
+            for choice in choices:
+                quotient_choice_mask.set(family.mdp.quotient_choice_map[choice],True)
+            quotient_choice_mask = self.quotient.keep_reachable_choices(quotient_choice_mask)
+            policy = self.quotient.choices_to_policy(quotient_choice_mask)
+            mdp_family_result.policy = policy
+            return mdp_family_result
 
         # construct and solve the game abstraction
         # logger.debug("solving the game...")
-        self.stat.iteration_game(family.mdp.states)
         game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
+        self.stat.iteration_game(family.mdp.states)
         # logger.debug("game solved, value is {}".format(game_solver.solution_value))
         game_result_sat = prop.satisfies_threshold(game_solver.solution_value)
         
-        if True:
+        if False:
             model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_solver.solution_reachable_choices)
             assert(model.nr_states == model.nr_choices)
             dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
             dtmc_result = dtmc.model_check_property(prop)
             # print("double-checking game value: ", game_solver.solution_value, dtmc_result)
-            if abs(dtmc_result.value-game_solver.solution_value) > 0.1:
+            if abs(dtmc_result.value-game_solver.solution_value) > 0.01:
                 logger.error("game solution is {}, but DTMC model checker yielded {}".format(game_solver.solution_value,dtmc_result.value))
 
         if game_result_sat:
             # logger.debug("verifying game policy...")
-            mdp_family_result.sat = True
             # apply player 1 actions to the quotient
             policy = game_solver.solution_state_to_player1_action
-
-            mdp = self.quotient.keep_actions(family, policy)
-            self.stat.iteration_mdp(mdp.states)
+            mdp = self.quotient.apply_policy_to_family(family, policy)
             policy_result = mdp.model_check_property(prop, alt=True)
+            self.stat.iteration_mdp(mdp.states)
             if policy_result.sat:
                 # this scheduler is good for all MDPs in the family
-                mdp_family_result.satisfying_policy = policy
+                mdp_family_result.policy = policy
                 return mdp_family_result
         else:
             # logger.debug("solving primary-primary direction...")
             # solve primary-primary direction for the family
-            self.stat.iteration_mdp(family.mdp.states)
             primary_primary_result = family.mdp.model_check_property(prop)
+            self.stat.iteration_mdp(family.mdp.states)
             # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
             if not primary_primary_result.sat:
-                mdp_family_result.sat = False
+                mdp_family_result.policy = False
                 return mdp_family_result
         
         # undecided: prepare to split
-        scheduler_choices = game_solver.solution_reachable_choices
-        ev = self.quotient.expected_visits(self.quotient.quotient_mdp, prop, scheduler_choices)
-        for choice in scheduler_choices:
-            assert choice in family.selected_actions_bv
-
         # map scheduler choices to hole options and check consistency
-        hole_selection = [set() for hole_index in self.quotient.design_space.hole_indices]
-        for choice in scheduler_choices:
-            choice_options = self.quotient.coloring.action_to_hole_options[choice]
-            for hole_index,option in choice_options.items():
-                hole_selection[hole_index].add(option)
-        hole_selection = [list(options) for options in hole_selection]
-        for hole_index,options in enumerate(hole_selection):
-            assert all([option in family[hole_index].options for option in options])
+        scheduler_choices = game_solver.solution_reachable_choices
+        hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
         mdp_family_result.scheduler_choices = scheduler_choices
         mdp_family_result.hole_selection = hole_selection
+        if True:
+            for choice in scheduler_choices:
+                assert choice in family.selected_actions_bv
+            for hole_index,options in enumerate(hole_selection):
+                assert all([option in family[hole_index].options for option in options])
         return mdp_family_result
 
 
@@ -280,20 +440,20 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # split the hole
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
+            # used_options = used_options[0:1]
             core_suboptions = [[option] for option in used_options]
             other_suboptions = [option for option in family[splitter].options if option not in used_options]
+            if other_suboptions:
+                other_suboptions = [other_suboptions]
+            else:
+                other_suboptions = []
+            suboptions = other_suboptions + core_suboptions # DFS solves core first
         else:
             assert len(family[splitter].options) > 1
             options = family[splitter].options
             half = len(options) // 2
-            core_suboptions = [options[:half], options[half:]]
-            other_suboptions = []
+            suboptions = [options[:half], options[half:]]
 
-        if len(other_suboptions) == 0:
-            suboptions = core_suboptions
-        else:
-            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
-        
         # construct corresponding design subspaces
         subfamilies = []
         family.splitter = splitter
@@ -313,25 +473,27 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         prop = self.quotient.specification.constraints[0]
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         policy_tree = PolicyTree(family)
+        reference_policy = None
+
         
         policy_tree_leaves = [policy_tree.root]
         while policy_tree_leaves:
             policy_tree_node = policy_tree_leaves.pop(-1)
             family = policy_tree_node.family
             # logger.info("investigating family of size {}".format(family.size))
-            result = self.verify_family(family,game_solver,prop)
+            result = self.verify_family(family,game_solver,prop,reference_policy)
+            policy_tree_node.policy = result.policy
 
-            if result.sat == False:
+            if result.policy == False:
                 # logger.info("satisfying scheduler cannot be obtained for the following family {}".format(family))
                 self.explore(family)
-                policy_tree_node.policy = False
                 continue
 
-            if result.satisfying_policy is not None:
+            if result.policy is not None:
                 # logger.info("found policy for all MDPs in the family")
-                # print(self.policy_str(result.satisfying_policy))
+                # print(self.policy_str(result.policy))
+                reference_policy = result.policy
                 self.explore(family)
-                policy_tree_node.policy = result.satisfying_policy
                 continue
 
             # refine
@@ -342,6 +504,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
         policy_tree.double_check_all_families(self.quotient, prop)
+        policy_tree.print_stats()
+        policy_tree.postprocess(self.quotient, prop)
+        policy_tree.print_stats()
         return policy_tree
 
     
@@ -365,6 +530,5 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             "expecting a single reachability probability constraint"
         
         policy_tree = self.synthesize()
-        policy_tree.print_stats()
         self.stat.print()
     
