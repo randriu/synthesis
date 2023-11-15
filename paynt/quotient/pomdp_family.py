@@ -110,8 +110,9 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return self.obs_evaluator.state_to_obs_class
 
     def extract_target_label(self):
+        spec = self.specification
         assert not spec.has_optimality and spec.num_properties == 1, "expecting a single property"
-        prop = self.specification.constraints[0]
+        prop = spec.constraints[0]
         label = str(prop.formula.subformula.subformula)
         return label
 
