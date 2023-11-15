@@ -1,4 +1,5 @@
 import stormpy
+import stormpy.utility
 import stormpy.synthesis
 
 import paynt.quotient.holes
@@ -9,6 +10,8 @@ import paynt.quotient.mdp_family
 import paynt.synthesizer.synthesizer_onebyone
 import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_all
+
+import paynt.synthesizer.conflict_generator.storm
 
 import json
 
@@ -168,25 +171,62 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         dtmc_sketch = paynt.quotient.quotient.DtmcQuotientContainer(product, product_coloring, product_specification)
         return dtmc_sketch
 
-    def investigate_fsc(self, fsc, provide_counterexample=False):
+    
+    def compute_violating_paths(self, dtmc_sketch, violating_families, num_paths):
+        # create a counterexample wrt. 1 violating assignment
+        logger.debug("constructing counterexample...")
+        violating_assignment = violating_families[0].pick_any()
+        dtmc = dtmc_sketch.build_chain(violating_assignment)
+
+        # assuming a single probability reachability property
+        spec = dtmc_sketch.specification
+        assert not spec.has_optimality and spec.num_properties == 1 and not spec.constraints[0].reward, \
+            "expecting a single reachability probability constraint"
+        prop = dtmc_sketch.specification.constraints[0]
+        
+        target_label = self.extract_target_label()
+        target_states = dtmc.model.labeling.get_states(target_label)
+        assert target_states.number_of_set_bits()>0, "TODO handle DTMC in which target is unreachable"
+        
+        if prop.minimizing:
+            shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, target_label)
+        else:
+            phi_states = stormpy.storage.BitVector(dtmc.model.nr_states,True)
+            states0,_ = stormpy.core._compute_prob01states_double(dtmc.model,phi_states,target_states)
+            shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, states0)
+
+        paths = []
+        for k in range(1,num_paths+1):
+            path = shortest_paths_generator.get_path_as_list(k)
+            path.reverse()
+            paths.append(path)
+        return paths
+
+
+    def investigate_fsc(self, fsc, num_violatings_paths=0):
         '''
         In the family of DTMCs obtained upon applying FSC to the quotient, identify DTMCs that violate the specification.
+        :param num_violatings_paths if more than 0, then
+        :return a list of unsatisfying families (empty if all DTMCs are satisfied)
+        :return a list containing at most num_violatings_paths shortest paths violating the specifications,
+            or None if not requested
         '''
-        sketch = self.build_dtmc_sketch(fsc, negate_specification=True)
+        dtmc_sketch = self.build_dtmc_sketch(fsc, negate_specification=True)
 
         find_all = True
         if not find_all:
-            synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(sketch)
+            synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(dtmc_sketch)
+            violating_family = synthesizer.synthesize()
+            if violating_family is None:
+                violating_families = []
+            else:
+                violating_families = [violating_family]
         else:
-            synthesizer = paynt.synthesizer.synthesizer_all.SynthesizerAll(sketch)
-        violating_assignments = synthesizer.synthesize()
-        if violating_assignments is None:
-            violating_assignments = []
+            synthesizer = paynt.synthesizer.synthesizer_all.SynthesizerAll(dtmc_sketch)
+            violating_families = synthesizer.synthesize()
 
-        if not violating_assignments:
-            return violating_assignments
+        if not violating_families or num_violatings_paths == 0:
+            return violating_families, None
 
-        # create a counterexample wrt. 1 violating assignment
-        # TODO
-
-        return violating_assignments
+        violating_paths = self.compute_violating_paths(dtmc_sketch,violating_families,num_violatings_paths)
+        return violating_families, violating_paths
