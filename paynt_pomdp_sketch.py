@@ -65,9 +65,10 @@ hole_options = [[hole.options[0]] for hole in pomdp_sketch.design_space]
 hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
 
 # investigate this hole assignment and return an FSC
-fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_deterministic)
+while True:
+    fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_deterministic)
 
-# investigate this FSC and return a hole assignment for which this FSC is violating
-violating_assignments = pomdp_sketch.investigate_fsc(fsc)
-print("found {} violating assignments, printing below:".format(violating_assignments.size))
-print(violating_assignments)
+    # investigate this FSC and return a hole assignment for which this FSC is violating
+    violating_families = pomdp_sketch.investigate_fsc(fsc)
+    print("found {} violating families, printing below:".format(len(violating_families)))
+    print([str(family) for family in violating_families])

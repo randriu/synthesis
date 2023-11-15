@@ -8,6 +8,7 @@ import paynt.quotient.mdp_family
 
 import paynt.synthesizer.synthesizer_onebyone
 import paynt.synthesizer.synthesizer_ar
+import paynt.synthesizer.synthesizer_all
 
 import json
 
@@ -160,8 +161,25 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         dtmc_sketch = paynt.quotient.quotient.DtmcQuotientContainer(product, product_coloring, product_specification)
         return dtmc_sketch
 
-    def investigate_fsc(self, fsc):
+    def investigate_fsc(self, fsc, provide_counterexample=False):
+        '''
+        In the family of DTMCs obtained upon applying FSC to the quotient, identify DTMCs that violate the specification.
+        '''
         sketch = self.build_dtmc_sketch(fsc, negate_specification=True)
-        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(sketch)
+
+        find_all = True
+        if not find_all:
+            synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(sketch)
+        else:
+            synthesizer = paynt.synthesizer.synthesizer_all.SynthesizerAll(sketch)
         violating_assignments = synthesizer.synthesize()
+        if violating_assignments is None:
+            violating_assignments = []
+
+        if not violating_assignments:
+            return violating_assignments
+
+        # create a counterexample wrt. 1 violating assignment
+        # TODO
+
         return violating_assignments

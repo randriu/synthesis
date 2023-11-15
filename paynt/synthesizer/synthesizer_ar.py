@@ -20,10 +20,6 @@ class SynthesizerAR(Synthesizer):
 
     
     def update_optimum(self, family):
-        """
-        :return (1) family feasibility (True/False/None)
-        :return (2) new satisfying assignment (or None)
-        """
         ia = family.analysis_result.improving_assignment
         if family.analysis_result.improving_value is not None:
             self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
@@ -56,33 +52,7 @@ class SynthesizerAR(Synthesizer):
 
         return satisfying_assignment
 
-    def synthesize_families(self, family):
-        assert not self.quotient.specification.has_optimality
-        self.quotient.discarded = 0
-
-        satisfying_families = []
-        families = [family]
-
-        while families:
-
-            family = families.pop(-1)
-
-            self.verify_family(family)
-            self.update_optimum(family)
-            if family.analysis_result.improving_assignment is not None:
-                satisfying_families.append(family)
-                # print("found shield of size ", family.size)
-            if family.analysis_result.can_improve == False:
-                self.explore(family)
-                continue
-
-            # undecided
-            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
-            families = families + subfamilies
-
-        return satisfying_families
-
-
+    
     def family_value(self, family):
         ur = family.analysis_result.undecided_result()
         value = ur.primary.value
@@ -90,7 +60,6 @@ class SynthesizerAR(Synthesizer):
         if ur.minimizing:
             value *= -1
         return value
-    
     
     def synthesize_assignment_experimental(self, family):
 

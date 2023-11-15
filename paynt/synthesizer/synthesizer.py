@@ -27,11 +27,7 @@ class Synthesizer:
         if family is None:
             family = self.quotient.design_space
         logger.info("synthesis initiated, design space: {}".format(family.size))
-        
         assignment = self.synthesize_assignment(family)
-        # families = self.synthesize_families(family)
-        # assignment = None if not families else families[0].pick_any()
-
         self.stat.finished(assignment)
         return assignment
 
