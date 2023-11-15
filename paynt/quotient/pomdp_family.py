@@ -109,6 +109,12 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def state_to_observation(self):
         return self.obs_evaluator.state_to_obs_class
 
+    def extract_target_label(self):
+        assert not spec.has_optimality and spec.num_properties == 1, "expecting a single property"
+        prop = self.specification.constraints[0]
+        label = str(prop.formula.subformula.subformula)
+        return label
+
     def initialize_fsc_unfolder(self, fsc_is_deterministic=False):
         if fsc_is_deterministic:
             self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpFsc(
