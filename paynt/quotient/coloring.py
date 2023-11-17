@@ -11,8 +11,6 @@ class Coloring:
 
     def __init__(self, mdp, holes, action_to_hole_options):
 
-        # reference to the quotient MDP
-        self.mdp = mdp
         # design space
         self.holes = holes
         # for each choice of the quotient MDP contains a set of hole-option labelings
@@ -28,15 +26,15 @@ class Coloring:
         self.hole_option_to_actions = None
 
         # compute default actions
-        self.default_actions = stormpy.BitVector(self.mdp.nr_choices, False)
-        for choice in range(self.mdp.nr_choices):
+        self.default_actions = stormpy.BitVector(self.num_choices, False)
+        for choice in range(self.num_choices):
             if not self.action_to_hole_options[choice]:
                 self.default_actions.set(choice)
 
         # collect relevant holes in states
-        tm = self.mdp.transition_matrix
+        tm = mdp.transition_matrix
         self.state_to_holes = []
-        for state in range(self.mdp.nr_states):
+        for state in range(mdp.nr_states):
             relevant_holes = set()
             for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
                 relevant_holes.update(set(self.action_to_hole_options[action].keys()))
@@ -44,27 +42,25 @@ class Coloring:
 
         self.coloring_is_simple = all([
             len(self.state_to_holes[state])<=1
-            for state in range(self.mdp.nr_states)
+            for state in range(mdp.nr_states)
         ])
         
         # construct reverse coloring
         self.hole_option_to_actions = [[] for hole in self.holes]
         for hole_index,hole in enumerate(self.holes):
             self.hole_option_to_actions[hole_index] = [[] for option in hole.options]
-        for action in range(self.mdp.nr_choices):
+        for action in range(self.num_choices):
             for hole_index,option in self.action_to_hole_options[action].items():
                 self.hole_option_to_actions[hole_index][option].append(action)
 
-
-    def __str__(self):
-        return str(self.action_to_hole_options)
-    
-
-    
+    @property
+    def num_choices(self):
+        return len(self.action_to_hole_options)
+        
     def select_actions(self, family):
         '''
         Select non-default actions relevant in the provided design space.
-        @return  a bitvector of all selected actions
+        :return a bitvector of all selected actions
         '''
 
 
@@ -76,7 +72,7 @@ class Coloring:
             if family.parent_info is None:
                 # select from the super-quotient
                 selected_actions = []
-                for action in range(self.mdp.nr_choices):
+                for action in range(self.num_choices):
                     if self.default_actions[action]:
                         continue
                     hole_options = self.action_to_hole_options[action]
