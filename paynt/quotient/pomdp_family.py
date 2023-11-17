@@ -208,15 +208,15 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             
             product_state = dtmc.quotient_state_map[dtmc_state]
             state = self.product_pomdp_fsc.product_state_to_state[product_state]
+            obs = self.state_to_observation[state]
             action = self.choice_to_action[choice]
-            trace.append( (state,action) )
+            trace.append( (obs,action) )
 
         # in the last state, we remove the action since it was not actually used
-        trace[-1] = (state,None)
+        trace[-1] = (obs,None)
 
         # sanity check
-        for state,action in trace[:-1]:
-            obs = self.state_to_observation[state]
+        for obs,action in trace[:-1]:
             assert action in self.observation_to_actions[obs], "invalid trace"
 
         return trace
