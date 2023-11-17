@@ -19,15 +19,15 @@ def load_sketch(project_path):
 def investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_deterministic):
     print("investigating hole assignment: ", hole_assignment)
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
-    state_is_absorbing = pomdp_sketch.identify_absorbing_states(pomdp)
+    state_is_absorbing = pomdp_sketch.identify_absorbing_states(pomdp.model)
     print("absorbing states: ", [state for state,absorbing in enumerate(state_is_absorbing) if absorbing])
 
     # return a random k-FSC
     num_nodes = 3
-    fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp.nr_observations, fsc_is_deterministic)
+    fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp.model.nr_observations, fsc_is_deterministic)
     # random.seed(42)
     for node in range(num_nodes):
-        for obs in range(pomdp.nr_observations):
+        for obs in range(pomdp.model.nr_observations):
             # random deterministic FSC
             if fsc.is_deterministic:
                 fsc.action_function[node][obs] = random.choice(pomdp_sketch.observation_to_actions[obs])
@@ -67,9 +67,28 @@ hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
 # investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_deterministic)
 
-# investigate this FSC and obtain a list of families for which this FSC is violating
-# also generate counterexample in the form of a set of violating paths
-num_violatings_paths = 1000
-violating_families,violating_paths = pomdp_sketch.investigate_fsc(fsc, num_violatings_paths)
+# investigate this FSC and obtain a list of families of POMDPs for which this FSC is violating
+# apply FSC to a PODMP sketch, obtaining a DTMC sketch
+# we are negating the specification since we are looking for violating DTMCs
+dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc, negate_specification=True)
+violating_families = paynt.synthesizer.synthesizer_all.SynthesizerAll(dtmc_sketch).synthesize()
+if not violating_families:
+    print("all POMDPs were satisfied")
+    exit()
+
 print("found {} violating families, printing below:".format(len(violating_families)))
 print([str(family) for family in violating_families])
+
+# pick 1 assignment and generate violating traces
+# pick first
+# violating_assignment = violating_families[0].pick_any()
+# pick random assignment from random family
+violating_assignment = random.choice(violating_families).pick_random()
+
+num_violating_traces = 5
+trace_max_length = 11   # length of a trace in a DTMC with unreachable target
+violating_traces = pomdp_sketch.compute_witnessing_traces(dtmc_sketch,violating_assignment,num_violating_traces,trace_max_length)
+print("constructed {} violating traces, printing below:".format(len(violating_traces)))
+for trace in violating_traces:
+    print(trace)
+

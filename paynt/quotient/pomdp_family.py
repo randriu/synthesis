@@ -67,6 +67,34 @@ class FSC:
         return fsc
 
 
+class SubPomdp:
+    '''
+    Simple container for a (sub-)POMDP created from the quotient.
+    '''
+    def __init__(self, model, quotient, quotient_state_map, quotient_choice_map):
+        # the Stormpy POMDP
+        self.model = model
+        # POMDP family quotient from which this POMDP was constructed
+        self.quotient = quotient
+        # for each state of the POMDP, a state in the quotient
+        self.quotient_state_map = quotient_state_map
+        # for each choice of the POMDP, a choice in the quotient
+        self.quotient_choice_map = quotient_choice_map
+
+        # for each state and for each action, a local index of the choice labeled with this action,
+        # or None if action is not available in the state
+        self.state_action_to_local_choice = []
+        tm = model.transition_matrix
+        for state in range(model.nr_states):
+            action_to_local_choice = [None]*quotient.num_actions
+            for local_choice,pomdp_choice in enumerate(range(tm.get_row_group_start(state),tm.get_row_group_start(state))):
+                quotient_choice = quotient_choice_map[pomdp_choice]
+                action = quotient.choice_to_action[quotient_choice]
+                assert action_to_local_choice[action] is None, "duplicate action {} in state {}".format(action,state)
+                action_to_local_choice[action] = state_choice
+            self.state_action_to_local_choice.append(action_to_local_choice)
+
+
 class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
     def __init__(self, quotient_mdp, coloring, specification, obs_evaluator):
@@ -135,14 +163,14 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         _,_,selected_actions_bv = self.coloring.select_actions(family)
         mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
-        return pomdp
+        return SubPomdp(pomdp,self,state_map,choice_map)
 
+    
     def build_dtmc_sketch(self, fsc, negate_specification=False):
         '''
         Construct the family of DTMCs representing the execution of the given FSC in different environments.
         :param negate_specification if True, a negated specification will be associated with the sketch
         '''
-
         # create the product
         self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
         product = self.product_pomdp_fsc.product
@@ -172,11 +200,47 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return dtmc_sketch
 
     
-    def compute_violating_paths(self, dtmc_sketch, violating_families, num_paths):
-        # create a counterexample wrt. 1 violating assignment
-        logger.debug("constructing counterexample...")
-        violating_assignment = violating_families[0].pick_any()
-        dtmc = dtmc_sketch.build_chain(violating_assignment)
+    def translate_path_to_trace(self, dtmc_sketch, dtmc, path):
+        invalid_choice = self.quotient_mdp.nr_choices
+        trace = []
+        for dtmc_state in path:
+            product_state = dtmc.quotient_state_map[dtmc_state]
+            product_choice = dtmc.quotient_choice_map[dtmc_state]
+
+            state = self.product_pomdp_fsc.product_state_to_state[product_state]
+            choice = self.product_pomdp_fsc.product_choice_to_choice[product_choice]
+            if choice == invalid_choice:
+                # randomized FSC: we are in the intermediate states, continue to the next one
+                continue
+            action = self.choice_to_action[choice]
+            trace.append( (state,action) )
+
+        # in the last state, we remove the action since it was not actually used
+        trace[-1] = (state,None)
+
+        # sanity check
+        for state,action in trace[:-1]:
+            obs = self.state_to_observation[state]
+            assert action in self.observation_to_actions[obs], "invalid trace"
+
+        return trace
+
+    
+    
+    def compute_witnessing_traces(self, dtmc_sketch, satisfying_assignment, num_traces, trace_max_length):
+        '''
+        Generate witnessing paths in the DTMC induced by the DTMC sketch and a satisfying assignment.
+        If the set of target states is not reachable, then random traces are simulated
+        :return a list of state-action pairs
+        :note the method assumes that the DTMC sketch is the one that was last constructed using build_dtmc_sketch()
+        '''
+        fsc_is_randomized = isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc)
+        if fsc_is_randomized:
+            # double the trace length to account for intermediate states
+            trace_max_length *= 2
+
+        # logger.debug("constructing witnesses...")
+        dtmc = dtmc_sketch.build_chain(satisfying_assignment)
 
         # assuming a single probability reachability property
         spec = dtmc_sketch.specification
@@ -186,47 +250,36 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         
         target_label = self.extract_target_label()
         target_states = dtmc.model.labeling.get_states(target_label)
-        assert target_states.number_of_set_bits()>0, "TODO handle DTMC in which target is unreachable"
-        
-        if prop.minimizing:
-            shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, target_label)
+
+        traces = []
+        if target_states.number_of_set_bits()==0:
+            # target is not reachable: use Stormpy simulator to obtain some random walk in a DTMC
+            logger.debug("target is not reachable, generating random traces...")
+            simulator = stormpy.core._DiscreteTimeSparseModelSimulatorDouble(dtmc.model)
+            for _ in range(num_traces):
+                simulator.reset_to_initial_state()
+                path = [simulator.get_current_state()]
+                for _ in range(trace_max_length):
+                    success = simulator.random_step()
+                    if not success:
+                        break
+                    path.append(simulator.get_current_state())
+                trace = self.translate_path_to_trace(dtmc_sketch,dtmc,path)
+                traces.append(trace)
         else:
-            phi_states = stormpy.storage.BitVector(dtmc.model.nr_states,True)
-            states0,_ = stormpy.core._compute_prob01states_double(dtmc.model,phi_states,target_states)
-            shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, states0)
-
-        paths = []
-        for k in range(1,num_paths+1):
-            path = shortest_paths_generator.get_path_as_list(k)
-            path.reverse()
-            paths.append(path)
-        return paths
-
-
-    def investigate_fsc(self, fsc, num_violatings_paths=0):
-        '''
-        In the family of DTMCs obtained upon applying FSC to the quotient, identify DTMCs that violate the specification.
-        :param num_violatings_paths if more than 0, then
-        :return a list of unsatisfying families (empty if all DTMCs are satisfied)
-        :return a list containing at most num_violatings_paths shortest paths violating the specifications,
-            or None if not requested
-        '''
-        dtmc_sketch = self.build_dtmc_sketch(fsc, negate_specification=True)
-
-        find_all = True
-        if not find_all:
-            synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(dtmc_sketch)
-            violating_family = synthesizer.synthesize()
-            if violating_family is None:
-                violating_families = []
+            # target is reachable: use KSP
+            logger.debug("target is reachable, computing shortest paths to...")
+            if prop.minimizing:
+                logger.debug("...target states")
+                shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, target_label)
             else:
-                violating_families = [violating_family]
-        else:
-            synthesizer = paynt.synthesizer.synthesizer_all.SynthesizerAll(dtmc_sketch)
-            violating_families = synthesizer.synthesize()
-
-        if not violating_families or num_violatings_paths == 0:
-            return violating_families, None
-
-        violating_paths = self.compute_violating_paths(dtmc_sketch,violating_families,num_violatings_paths)
-        return violating_families, violating_paths
+                logger.debug("...BSCCs from which target states are unreachable...")
+                phi_states = stormpy.storage.BitVector(dtmc.model.nr_states,True)
+                states0,_ = stormpy.core._compute_prob01states_double(dtmc.model,phi_states,target_states)
+                shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, states0)
+            for k in range(1,num_traces+1):
+                path = shortest_paths_generator.get_path_as_list(k)
+                path.reverse()
+                trace = self.translate_path_to_trace(dtmc_sketch,dtmc,path)
+                traces.append(trace)
+        return traces
