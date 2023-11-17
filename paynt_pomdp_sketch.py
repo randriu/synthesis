@@ -4,6 +4,7 @@ import paynt.cli
 import paynt.parser.sketch
 
 import paynt.quotient.pomdp_family
+import paynt.synthesizer.synthesizer_all
 
 import os
 import random

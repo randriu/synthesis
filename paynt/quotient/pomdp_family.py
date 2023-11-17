@@ -7,10 +7,6 @@ import paynt.quotient.quotient
 import paynt.quotient.coloring
 import paynt.quotient.mdp_family
 
-import paynt.synthesizer.synthesizer_onebyone
-import paynt.synthesizer.synthesizer_ar
-import paynt.synthesizer.synthesizer_all
-
 import paynt.synthesizer.conflict_generator.storm
 
 import json
@@ -75,7 +71,7 @@ class SubPomdp:
         # the Stormpy POMDP
         self.model = model
         # POMDP family quotient from which this POMDP was constructed
-        self.quotient = quotient
+        # self.quotient = quotient
         # for each state of the POMDP, a state in the quotient
         self.quotient_state_map = quotient_state_map
         # for each choice of the POMDP, a choice in the quotient
@@ -90,7 +86,7 @@ class SubPomdp:
             for local_choice,pomdp_choice in enumerate(range(tm.get_row_group_start(state),tm.get_row_group_start(state))):
                 quotient_choice = quotient_choice_map[pomdp_choice]
                 action = quotient.choice_to_action[quotient_choice]
-                assert action_to_local_choice[action] is None, "duplicate action {} in state {}".format(action,state)
+                assert action_to_local_choice[action] is None, "duplicate action {} in POMDP state {}".format(action,state)
                 action_to_local_choice[action] = state_choice
             self.state_action_to_local_choice.append(action_to_local_choice)
 
@@ -204,14 +200,14 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         invalid_choice = self.quotient_mdp.nr_choices
         trace = []
         for dtmc_state in path:
-            product_state = dtmc.quotient_state_map[dtmc_state]
             product_choice = dtmc.quotient_choice_map[dtmc_state]
-
-            state = self.product_pomdp_fsc.product_state_to_state[product_state]
             choice = self.product_pomdp_fsc.product_choice_to_choice[product_choice]
             if choice == invalid_choice:
                 # randomized FSC: we are in the intermediate states, continue to the next one
                 continue
+            
+            product_state = dtmc.quotient_state_map[dtmc_state]
+            state = self.product_pomdp_fsc.product_state_to_state[product_state]
             action = self.choice_to_action[choice]
             trace.append( (state,action) )
 
