@@ -3,6 +3,7 @@ import stormpy.synthesis
 from .smt import FamilyEncoding
 
 import math
+import random
 import itertools
 
 import logging
@@ -102,6 +103,10 @@ class Holes(list):
 
     def pick_any(self):
         hole_options = [[hole.options[0]] for hole in self]
+        return self.assume_options_copy(hole_options)
+
+    def pick_random(self):
+        hole_options = [[random.choice(hole.options)] for hole in self]
         return self.assume_options_copy(hole_options)
 
     def includes(self, hole_assignment):
