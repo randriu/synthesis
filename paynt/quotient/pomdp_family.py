@@ -62,6 +62,34 @@ class FSC:
         fsc.update_function = json["update_function"]
         return fsc
 
+    def check_action_function(self, num_observations, observation_to_actions):
+        assert len(self.action_function) == self.num_nodes, "FSC action function is not defined for all memory nodes"
+        for node in range(self.num_nodes):
+            assert len(self.action_function[node]) == num_observations, \
+                "in memory node {}, FSC action function is not defined for all observations".format(node)
+            for obs in range(num_observations):
+                if self.is_deterministic:
+                    action = self.action_function[node][obs]
+                    assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+                else:
+                    for action,_ in self.action_function[node][obs].items():
+                        assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+
+    def check_update_function(self, num_observations):
+        assert len(self.update_function) == self.num_nodes, "FSC update function is not defined for all memory nodes"
+        for node in range(self.num_nodes):
+            assert len(self.update_function[node]) == num_observations, \
+                "in memory node {}, FSC update function is not defined for all observations".format(node)
+            for obs in range(num_observations):
+                update = self.update_function[node][obs]
+                assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
+
+    def check(self, num_observations, observation_to_actions):
+        ''' Check whether fields of FSC have been initialized appropriately. '''
+        assert self.num_nodes > 0, "FSC must have at least 1 node"
+        self.check_action_function(num_observations,observation_to_actions)
+        self.check_update_function(num_observations)
+
 
 class SubPomdp:
     '''
@@ -161,13 +189,14 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return SubPomdp(pomdp,self,state_map,choice_map)
 
-    
+
     def build_dtmc_sketch(self, fsc, negate_specification=False):
         '''
         Construct the family of DTMCs representing the execution of the given FSC in different environments.
         :param negate_specification if True, a negated specification will be associated with the sketch
         '''
         # create the product
+        fsc.check(self.num_observations, self.observation_to_actions)
         self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
         product = self.product_pomdp_fsc.product
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
