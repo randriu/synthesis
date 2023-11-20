@@ -21,8 +21,9 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         :return for each state, a list of actions associated with the rows of this state
         '''
         assert mdp.has_choice_labeling, "MDP does not have a choice labeling"
-        
         action_labels = list(mdp.choice_labeling.get_labels())
+        # sorting because get_labels() is not deterministic
+        action_labels = sorted(action_labels)
         label_to_action = {label:index for index,label in enumerate(action_labels)}
         
         choice_to_action = [None] * mdp.nr_choices
