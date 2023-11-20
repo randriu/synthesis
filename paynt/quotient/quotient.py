@@ -18,7 +18,10 @@ class QuotientContainer:
 
     # if True, export the (labeled) optimal DTMC
     export_optimal_result = False
+    # if True, hole scores in the state will be multiplied with the number of expected visits of this state
+    compute_expected_visits = True
 
+    
     def __init__(self, quotient_mdp = None, coloring = None,
         specification = None):
         
@@ -174,6 +177,8 @@ class QuotientContainer:
         '''
         Compute expected number of visits in the states of DTMC induced by the shoices.
         '''
+        if not QuotientContainer.compute_expected_visits:
+            return None
 
         # extract DTMC induced by this MDP-scheduler
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
@@ -199,7 +204,7 @@ class QuotientContainer:
         return expected_visits
 
 
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
+    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
 
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
@@ -241,7 +246,9 @@ class QuotientContainer:
                 if min_value is None:
                     continue
                 max_value = hole_max[hole_index]
-                difference = (max_value - min_value) * expected_visits[state]
+                difference = (max_value - min_value)
+                if expected_visits is not None:
+                    difference *= expected_visits[state]
                 # assert not math.isnan(difference)
                     
                 hole_difference_sum[hole_index] += difference
