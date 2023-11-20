@@ -54,6 +54,7 @@ fsc_is_deterministic = False
 
 # load sketch
 project_path="models/pomdp/sketches/obstacles"
+# project_path="models/pomdp/sketches/avoid"
 pomdp_sketch = load_sketch(project_path)
 pomdp_sketch.initialize_fsc_unfolder(fsc_is_deterministic)
 print("specification: ", pomdp_sketch.specification)
