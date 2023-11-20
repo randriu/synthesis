@@ -215,7 +215,6 @@ def paynt_run(
         with cProfile.Profile() as pr:
             synthesizer.run()
         stats = pr.create_stats()
-        print(stats)
         pstats.Stats(pr).sort_stats('tottime').print_stats(10)
 
 
