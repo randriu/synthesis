@@ -1,4 +1,5 @@
 from distutils.core import setup
+from setuptools import find_packages
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 import sys
@@ -73,7 +74,7 @@ setup(
     description="PAYNT (Probabilistic progrAm sYNThesizer)",
     long_description=
     "PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs.",
-    packages=["paynt", "paynt.sketch", "paynt.synthesizers"],
+    packages=find_packages(),
     install_requires=['click', 'stormpy', 'z3-solver'],
     extras_require={},
     package_data={
