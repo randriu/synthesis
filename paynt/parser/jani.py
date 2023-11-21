@@ -68,13 +68,15 @@ class JaniUnfolder:
         self.combination_coloring = None
         self.edge_to_color = None
         self.unfold_jani(jani, design_space)
+        logger.debug("constructing the quotient...")
 
         # construct the explicit quotient
         quotient_mdp = stormpy.build_sparse_model_with_options(self.jani_unfolded, MarkovChain.builder_options)
 
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins
-        # TODO handle conflicting colors
+        # handle conflicting colors
+        choice_is_valid = stormpy.storage.BitVector(quotient_mdp.nr_choices,True)
         action_to_hole_options = []
         tm = quotient_mdp.transition_matrix
         for choice in range(quotient_mdp.nr_choices):
@@ -89,10 +91,33 @@ class JaniUnfolder:
                     options.add(option)
                     hole_options[hole_index] = options
 
+            valid_choice = True
             for hole_index,options in hole_options.items():
-                assert len(options) == 1
-            hole_options = {hole_index:list(options)[0] for hole_index,options in hole_options.items()}
-            action_to_hole_options.append(hole_options)
+                if len(options) > 1:
+                    valid_choice = False
+                    break
+            if not valid_choice:
+                choice_is_valid.set(choice,False)
+                action_to_hole_options.append(None)
+            else:
+                hole_options = {hole_index:list(options)[0] for hole_index,options in hole_options.items()}
+                action_to_hole_options.append(hole_options)
+
+
+        num_choices_all = quotient_mdp.nr_choices
+        num_choices_valid = choice_is_valid.number_of_set_bits()
+        if num_choices_valid < num_choices_all:
+            logger.debug("keeping {}/{} choices with non-conflicting hole assignments...".format(num_choices_valid,num_choices_all))
+            keep_unreachable_states = False
+            subsystem_builder_options = stormpy.SubsystemBuilderOptions()
+            subsystem_builder_options.build_action_mapping = True
+            all_states = stormpy.storage.BitVector(quotient_mdp.nr_states, True)
+            submodel_construction = stormpy.construct_submodel(
+                quotient_mdp, all_states, choice_is_valid, keep_unreachable_states, subsystem_builder_options
+            )
+            quotient_mdp = submodel_construction.model
+            choice_map = list(submodel_construction.new_to_old_action_mapping)
+            action_to_hole_options = [action_to_hole_options[choice_map[choice]] for choice in range(quotient_mdp.nr_choices)]
 
         self.quotient_mdp = quotient_mdp
         self.action_to_hole_options = action_to_hole_options

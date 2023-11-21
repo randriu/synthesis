@@ -18,7 +18,10 @@ class QuotientContainer:
 
     # if True, export the (labeled) optimal DTMC
     export_optimal_result = False
+    # if True, hole scores in the state will be multiplied with the number of expected visits of this state
+    compute_expected_visits = True
 
+    
     def __init__(self, quotient_mdp = None, coloring = None,
         specification = None):
         
@@ -174,6 +177,8 @@ class QuotientContainer:
         '''
         Compute expected number of visits in the states of DTMC induced by the shoices.
         '''
+        if not QuotientContainer.compute_expected_visits:
+            return None
 
         # extract DTMC induced by this MDP-scheduler
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
@@ -199,50 +204,52 @@ class QuotientContainer:
         return expected_visits
 
 
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
+    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
 
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
         tm = mdp.model.transition_matrix
+        num_holes = mdp.design_space.num_holes
         
         for state in range(mdp.states):
 
             # for this state, compute for each inconsistent hole the difference in choice values between respective options
-            hole_min = {hole_index: None for hole_index in inconsistent_assignments}
-            hole_max = {hole_index: None for hole_index in inconsistent_assignments}
-
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+            hole_min = [None] * num_holes
+            hole_max = [None] * num_holes
+            
+            for choice in tm.get_rows_for_group(state):
                 
                 choice_global = mdp.quotient_choice_map[choice]
                 if self.coloring.default_actions.get(choice_global):
                     continue
 
                 choice_options = self.coloring.action_to_hole_options[choice_global]
-
-                # collect holes in which this action is inconsistent
-                inconsistent_holes = []
-                for hole_index,option in choice_options.items():
-                    inconsistent_options = inconsistent_assignments.get(hole_index,set())
-                    if option in inconsistent_options:
-                        inconsistent_holes.append(hole_index)
-
                 value = choice_values[choice]
-                for hole_index in inconsistent_holes:
+
+                # update value of each hole in which this action is inconsistent
+                for hole_index,option in choice_options.items():
+                    inconsistent_options = inconsistent_assignments.get(hole_index)
+                    if inconsistent_options is None or option not in inconsistent_options:
+                        continue
                     current_min = hole_min[hole_index]
                     if current_min is None or value < current_min:
                         hole_min[hole_index] = value
                     current_max = hole_max[hole_index]
                     if current_max is None or value > current_max:
                         hole_max[hole_index] = value
+                
 
             # compute the difference
-            for hole_index,min_value in hole_min.items():
+            # for hole_index,min_value in hole_min.items():
+            for hole_index,min_value in enumerate(hole_min):
                 if min_value is None:
                     continue
                 max_value = hole_max[hole_index]
-                difference = (max_value - min_value) * expected_visits[state]
-                assert not math.isnan(difference)
+                difference = (max_value - min_value)
+                if expected_visits is not None:
+                    difference *= expected_visits[state]
+                # assert not math.isnan(difference)
                     
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1

@@ -212,7 +212,7 @@ class MDP(MarkovChain):
 
         # primary direction is SAT
         # check if the primary scheduler is consistent
-        result.primary_selection,result.primary_choice_values,result.primary_expected_visits,result.primay_scores,consistent = \
+        result.primary_selection,result.primary_choice_values,result.primary_expected_visits,result.primary_scores,consistent = \
             self.quotient_container.scheduler_consistent(self, prop, result.primary.result)
 
         # regardless of whether it is consistent or not, we compute secondary direction to show that all SAT

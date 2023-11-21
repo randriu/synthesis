@@ -62,6 +62,34 @@ class FSC:
         fsc.update_function = json["update_function"]
         return fsc
 
+    def check_action_function(self, num_observations, observation_to_actions):
+        assert len(self.action_function) == self.num_nodes, "FSC action function is not defined for all memory nodes"
+        for node in range(self.num_nodes):
+            assert len(self.action_function[node]) == num_observations, \
+                "in memory node {}, FSC action function is not defined for all observations".format(node)
+            for obs in range(num_observations):
+                if self.is_deterministic:
+                    action = self.action_function[node][obs]
+                    assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+                else:
+                    for action,_ in self.action_function[node][obs].items():
+                        assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+
+    def check_update_function(self, num_observations):
+        assert len(self.update_function) == self.num_nodes, "FSC update function is not defined for all memory nodes"
+        for node in range(self.num_nodes):
+            assert len(self.update_function[node]) == num_observations, \
+                "in memory node {}, FSC update function is not defined for all observations".format(node)
+            for obs in range(num_observations):
+                update = self.update_function[node][obs]
+                assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
+
+    def check(self, num_observations, observation_to_actions):
+        ''' Check whether fields of FSC have been initialized appropriately. '''
+        assert self.num_nodes > 0, "FSC must have at least 1 node"
+        self.check_action_function(num_observations,observation_to_actions)
+        self.check_update_function(num_observations)
+
 
 class SubPomdp:
     '''
@@ -83,11 +111,11 @@ class SubPomdp:
         tm = model.transition_matrix
         for state in range(model.nr_states):
             action_to_local_choice = [None]*quotient.num_actions
-            for local_choice,pomdp_choice in enumerate(range(tm.get_row_group_start(state),tm.get_row_group_start(state))):
+            for local_choice,pomdp_choice in enumerate(range(tm.get_row_group_start(state),tm.get_row_group_end(state))):
                 quotient_choice = quotient_choice_map[pomdp_choice]
                 action = quotient.choice_to_action[quotient_choice]
                 assert action_to_local_choice[action] is None, "duplicate action {} in POMDP state {}".format(action,state)
-                action_to_local_choice[action] = state_choice
+                action_to_local_choice[action] = local_choice
             self.state_action_to_local_choice.append(action_to_local_choice)
 
 
@@ -161,13 +189,14 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return SubPomdp(pomdp,self,state_map,choice_map)
 
-    
+
     def build_dtmc_sketch(self, fsc, negate_specification=False):
         '''
         Construct the family of DTMCs representing the execution of the given FSC in different environments.
         :param negate_specification if True, a negated specification will be associated with the sketch
         '''
         # create the product
+        fsc.check(self.num_observations, self.observation_to_actions)
         self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
         product = self.product_pomdp_fsc.product
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
@@ -208,15 +237,15 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             
             product_state = dtmc.quotient_state_map[dtmc_state]
             state = self.product_pomdp_fsc.product_state_to_state[product_state]
+            obs = self.state_to_observation[state]
             action = self.choice_to_action[choice]
-            trace.append( (state,action) )
+            trace.append( (obs,action) )
 
         # in the last state, we remove the action since it was not actually used
-        trace[-1] = (state,None)
+        trace[-1] = (obs,None)
 
         # sanity check
-        for state,action in trace[:-1]:
-            obs = self.state_to_observation[state]
+        for obs,action in trace[:-1]:
             assert action in self.observation_to_actions[obs], "invalid trace"
 
         return trace

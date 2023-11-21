@@ -415,7 +415,7 @@ class POMDPQuotientContainer(QuotientContainer):
     
 
     
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits):
+    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
 
         if POMDPQuotientContainer.posterior_aware:
             return super().estimate_scheduler_difference(mdp,inconsistent_assignments,choice_values,expected_visits)
@@ -451,7 +451,10 @@ class POMDPQuotientContainer(QuotientContainer):
                     continue
                 
                 source_state = choice_to_state[choice_0]
-                source_state_visits = expected_visits[source_state]
+                source_state_visits = 1
+                if expected_visits is not None:
+                    source_state_visits = expected_visits[source_state]
+
                 # assert source_state_visits != 0
                 if source_state_visits == 0:
                     continue

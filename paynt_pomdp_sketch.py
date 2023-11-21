@@ -25,10 +25,9 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_determinis
 
     # return a random k-FSC
     num_nodes = 3
-    fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp.model.nr_observations, fsc_is_deterministic)
-    # random.seed(42)
+    fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp_sketch.num_observations, fsc_is_deterministic)
     for node in range(num_nodes):
-        for obs in range(pomdp.model.nr_observations):
+        for obs in range(pomdp_sketch.num_observations):
             # random deterministic FSC
             if fsc.is_deterministic:
                 fsc.action_function[node][obs] = random.choice(pomdp_sketch.observation_to_actions[obs])
@@ -42,10 +41,12 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_determinis
                 fsc.action_function[node][obs] = randomized_action_selection
             
             fsc.update_function[node][obs] = random.randrange(num_nodes)
+
     return fsc
 
 
 # enable PAYNT logging
+# random.seed(42)
 paynt.cli.setup_logger()
 
 # need to specify beforehand whether FSCs will be deterministic or not
@@ -54,6 +55,7 @@ fsc_is_deterministic = False
 
 # load sketch
 project_path="models/pomdp/sketches/obstacles"
+# project_path="models/pomdp/sketches/avoid"
 pomdp_sketch = load_sketch(project_path)
 pomdp_sketch.initialize_fsc_unfolder(fsc_is_deterministic)
 print("specification: ", pomdp_sketch.specification)
@@ -72,7 +74,8 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_determin
 # apply FSC to a PODMP sketch, obtaining a DTMC sketch
 # we are negating the specification since we are looking for violating DTMCs
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc, negate_specification=True)
-violating_families = paynt.synthesizer.synthesizer_all.SynthesizerAll(dtmc_sketch).synthesize()
+synthesizer = paynt.synthesizer.synthesizer_all.SynthesizerAll(dtmc_sketch)
+violating_families = synthesizer.synthesize()
 if not violating_families:
     print("all POMDPs were satisfied")
     exit()
