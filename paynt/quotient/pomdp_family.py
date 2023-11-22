@@ -33,7 +33,6 @@ class FSC:
         self.action_function = [ [None]*num_observations for _ in range(num_nodes) ]
         self.update_function = [ [None]*num_observations for _ in range(num_nodes) ]
 
-    
     def __str__(self):
         return json.dumps(self.to_json(), indent=4)
 
@@ -62,12 +61,12 @@ class FSC:
         fsc.update_function = json["update_function"]
         return fsc
 
-    def check_action_function(self, num_observations, observation_to_actions):
+    def check_action_function(self, observation_to_actions):
         assert len(self.action_function) == self.num_nodes, "FSC action function is not defined for all memory nodes"
         for node in range(self.num_nodes):
-            assert len(self.action_function[node]) == num_observations, \
+            assert len(self.action_function[node]) == self.num_observations, \
                 "in memory node {}, FSC action function is not defined for all observations".format(node)
-            for obs in range(num_observations):
+            for obs in range(self.num_observations):
                 if self.is_deterministic:
                     action = self.action_function[node][obs]
                     assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
@@ -75,21 +74,40 @@ class FSC:
                     for action,_ in self.action_function[node][obs].items():
                         assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
 
-    def check_update_function(self, num_observations):
+    def check_update_function(self):
         assert len(self.update_function) == self.num_nodes, "FSC update function is not defined for all memory nodes"
         for node in range(self.num_nodes):
-            assert len(self.update_function[node]) == num_observations, \
+            assert len(self.update_function[node]) == self.num_observations, \
                 "in memory node {}, FSC update function is not defined for all observations".format(node)
-            for obs in range(num_observations):
+            for obs in range(self.num_observations):
                 update = self.update_function[node][obs]
                 assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
 
-    def check(self, num_observations, observation_to_actions):
+    def check(self, observation_to_actions):
         ''' Check whether fields of FSC have been initialized appropriately. '''
         assert self.num_nodes > 0, "FSC must have at least 1 node"
-        self.check_action_function(num_observations,observation_to_actions)
-        self.check_update_function(num_observations)
+        self.check_action_function(observation_to_actions)
+        self.check_update_function()
 
+    def fill_trivial_actions(self, observation_to_actions):
+        ''' For each observation with 1 available action, set gamma(n,z) to that action. '''
+        for obs,actions in enumerate(observation_to_actions):
+            if len(actions)>1:
+                continue
+            action = actions[0]
+            if not self.is_deterministic:
+                action = {action:1}
+            for node in range(self.num_nodes):
+                self.action_function[node][obs] = action
+
+    def fill_trivial_updates(self, observation_to_actions):
+        ''' For each observation with 1 available action, set delta(n,z) to n. '''
+        for obs,actions in enumerate(observation_to_actions):
+            if len(actions)>1:
+                continue
+            for node in range(self.num_nodes):
+                self.update_function[node][obs] = node
+        
 
 class SubPomdp:
     '''
@@ -165,7 +183,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def state_to_observation(self):
         return self.obs_evaluator.state_to_obs_class
 
-    @property
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
@@ -201,7 +218,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         :param negate_specification if True, a negated specification will be associated with the sketch
         '''
         # create the product
-        fsc.check(self.num_observations, self.observation_to_actions)
+        fsc.check(self.observation_to_actions)
         self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
         product = self.product_pomdp_fsc.product
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice

@@ -21,11 +21,13 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_determinis
     print("investigating hole assignment: ", hole_assignment)
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
     state_is_absorbing = pomdp_sketch.identify_absorbing_states(pomdp.model)
-    print("absorbing states: ", [state for state,absorbing in enumerate(state_is_absorbing) if absorbing])
+    print("trivial observations: ", [obs for obs in range(pomdp_sketch.num_observations) if pomdp_sketch.observation_is_trivial(obs)])
 
     # return a random k-FSC
     num_nodes = 3
     fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp_sketch.num_observations, fsc_is_deterministic)
+    fsc.fill_trivial_actions(pomdp_sketch.observation_to_actions)
+    # fsc.fill_trivial_updates(pomdp_sketch.observation_to_actions)
     for node in range(num_nodes):
         for obs in range(pomdp_sketch.num_observations):
             # random deterministic FSC
