@@ -206,11 +206,16 @@ class QuotientContainer:
 
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
 
+        num_holes = self.design_space.num_holes
+        inconsistent_assignments_bv = [None] * num_holes
+        for hole_index,assignments in inconsistent_assignments.items():
+            assignments_bv = [option in assignments for option in self.design_space[hole_index].all_options()]
+            inconsistent_assignments_bv[hole_index] = assignments_bv
+
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
         tm = mdp.model.transition_matrix
-        num_holes = mdp.design_space.num_holes
         
         for state in range(mdp.states):
 
@@ -220,17 +225,18 @@ class QuotientContainer:
             
             for choice in tm.get_rows_for_group(state):
                 
+                value = choice_values[choice]
+                if value == 0:
+                    continue
                 choice_global = mdp.quotient_choice_map[choice]
                 if self.coloring.default_actions.get(choice_global):
                     continue
 
+                # update value of each hole in which this choice is inconsistent
                 choice_options = self.coloring.action_to_hole_options[choice_global]
-                value = choice_values[choice]
-
-                # update value of each hole in which this action is inconsistent
                 for hole_index,option in choice_options.items():
-                    inconsistent_options = inconsistent_assignments.get(hole_index)
-                    if inconsistent_options is None or option not in inconsistent_options:
+                    inconsistent_options = inconsistent_assignments_bv[hole_index]
+                    if inconsistent_options is None or not inconsistent_options[option]:
                         continue
                     current_min = hole_min[hole_index]
                     if current_min is None or value < current_min:
@@ -238,18 +244,16 @@ class QuotientContainer:
                     current_max = hole_max[hole_index]
                     if current_max is None or value > current_max:
                         hole_max[hole_index] = value
-                
 
             # compute the difference
-            # for hole_index,min_value in hole_min.items():
-            for hole_index,min_value in enumerate(hole_min):
+            for hole_index in inconsistent_assignments:
+                min_value = hole_min[hole_index]
                 if min_value is None:
                     continue
                 max_value = hole_max[hole_index]
                 difference = (max_value - min_value)
                 if expected_visits is not None:
                     difference *= expected_visits[state]
-                # assert not math.isnan(difference)
                     
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
