@@ -142,7 +142,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.action_labels,self.choice_to_action,state_to_actions = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
 
-        # identify labels available at observations
+        # identify actions available at each observation
         self.observation_to_actions = [None] * self.num_observations
         for state,state_actions in enumerate(state_to_actions):
             obs = self.state_to_observation[state]
@@ -151,6 +151,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                     f"two states in observation class {obs} differ in available actions"
                 continue
             self.observation_to_actions[obs] = state_actions
+
 
     @property
     def num_actions(self):
@@ -163,6 +164,10 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     @property
     def state_to_observation(self):
         return self.obs_evaluator.state_to_obs_class
+
+    @property
+    def observation_is_trivial(self, obs):
+        return len(self.observation_to_actions[obs])==1
 
     def extract_target_label(self):
         spec = self.specification
