@@ -1,1 +1,1 @@
-P>=0.95 [ F goal ];
+R{"penalty"}min=? [ F goal ];
