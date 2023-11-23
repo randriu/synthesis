@@ -154,9 +154,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         # POMDP manager used for unfolding the memory model into the quotient POMDP
         self.product_pomdp_fsc = None
 
-        assert not self.specification.has_optimality, \
-            "expecting specification without the optimality objective"
-
         self.action_labels,self.choice_to_action,state_to_actions = \
             paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
 
@@ -186,18 +183,12 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
-    def extract_target_label(self):
-        spec = self.specification
-        assert not spec.has_optimality and spec.num_properties == 1, "expecting a single property"
-        prop = spec.constraints[0]
-        label = str(prop.formula.subformula.subformula)
-        return label
-
+    
     def initialize_fsc_unfolder(self, fsc_is_deterministic=False):
-        if fsc_is_deterministic:
+        if fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpFsc):
             self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpFsc(
                 self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
-        else:
+        if not fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc):
             self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpRandomizedFsc(
                 self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
     
@@ -212,13 +203,14 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return SubPomdp(pomdp,self,state_map,choice_map)
 
 
-    def build_dtmc_sketch(self, fsc, negate_specification=False):
+    def build_dtmc_sketch(self, fsc):
         '''
         Construct the family of DTMCs representing the execution of the given FSC in different environments.
-        :param negate_specification if True, a negated specification will be associated with the sketch
         '''
+
         # create the product
         fsc.check(self.observation_to_actions)
+        self.initialize_fsc_unfolder(fsc.is_deterministic)
         self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
         product = self.product_pomdp_fsc.product
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
@@ -240,9 +232,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         
         # handle specification
         product_specification = self.specification.copy()
-        if negate_specification:
-            product_specification = product_specification.negate()
-
         dtmc_sketch = paynt.quotient.quotient.DtmcQuotientContainer(product, product_coloring, product_specification)
         return dtmc_sketch
 
@@ -254,7 +243,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             product_choice = dtmc.quotient_choice_map[dtmc_state]
             choice = self.product_pomdp_fsc.product_choice_to_choice[product_choice]
             if choice == invalid_choice:
-                # randomized FSC: we are in the intermediate states, continue to the next one
+                # randomized FSC: we are in the intermediate state, move on to the next one
                 continue
             
             product_state = dtmc.quotient_state_map[dtmc_state]
@@ -291,9 +280,11 @@ class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
         # assuming a single probability reachability property
         spec = dtmc_sketch.specification
-        assert not spec.has_optimality and spec.num_properties == 1 and not spec.constraints[0].reward, \
-            "expecting a single reachability probability constraint"
-        prop = dtmc_sketch.specification.constraints[0]
+        assert spec.num_properties == 1, "expecting a single property"
+        prop = spec.all_properties()[0]
+        if prop.is_reward:
+            logger.warning("WARNING: specification is a reward property, but generated traces \
+                will be based on transition probabilities")
         
         target_label = self.extract_target_label()
         target_states = dtmc.model.labeling.get_states(target_label)

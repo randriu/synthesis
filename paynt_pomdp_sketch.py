@@ -1,10 +1,8 @@
-# using PAYNT for POMDP sketches
+# using Paynt for POMDP sketches
 
 import paynt.cli
 import paynt.parser.sketch
-
 import paynt.quotient.pomdp_family
-import paynt.synthesizer.synthesizer_all
 
 import os
 import random
@@ -14,28 +12,33 @@ def load_sketch(project_path):
     sketch_path = os.path.join(project_path, "sketch.templ")
     properties_path = os.path.join(project_path, "sketch.props")    
     pomdp_sketch = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path)
+
+    target_label = pomdp_sketch.extract_target_label()
+    target_states = pomdp_sketch.quotient_mdp.labeling.get_states(target_label)
+    for state in pomdp_sketch.quotient_mdp.labeling.get_states("deadlock"):
+        assert state in target_states, "have deadlock in a non-target state {}".format(state)
+
     return pomdp_sketch
 
 
-def investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_deterministic):
+def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     print("investigating hole assignment: ", hole_assignment)
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
-    state_is_absorbing = pomdp_sketch.identify_absorbing_states(pomdp.model)
-    print("trivial observations: ", [obs for obs in range(pomdp_sketch.num_observations) if pomdp_sketch.observation_is_trivial(obs)])
 
-    # return a random k-FSC
+    # create a random k-FSC
+    fsc_is_deterministic = True
     num_nodes = 3
     fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp_sketch.num_observations, fsc_is_deterministic)
     fsc.fill_trivial_actions(pomdp_sketch.observation_to_actions)
     # fsc.fill_trivial_updates(pomdp_sketch.observation_to_actions)
     for node in range(num_nodes):
         for obs in range(pomdp_sketch.num_observations):
-            # random deterministic FSC
+            available_actions = pomdp_sketch.observation_to_actions[obs]
             if fsc.is_deterministic:
-                fsc.action_function[node][obs] = random.choice(pomdp_sketch.observation_to_actions[obs])
+                # random deterministic FSC
+                fsc.action_function[node][obs] = random.choice(available_actions)
             else:
                 # random randomized FSC
-                available_actions = pomdp_sketch.observation_to_actions[obs]
                 num_samples = min(len(available_actions),node+1)
                 sampled_actions = random.sample(available_actions,num_samples)
                 prob = 1/num_samples
@@ -47,19 +50,15 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_determinis
     return fsc
 
 
-# enable PAYNT logging
 # random.seed(42)
-paynt.cli.setup_logger()
 
-# need to specify beforehand whether FSCs will be deterministic or not
-# since we initialize the FSC unfolder beforehand
-fsc_is_deterministic = False
+# enable PAYNT logging
+paynt.cli.setup_logger()
 
 # load sketch
 project_path="models/pomdp/sketches/obstacles"
 # project_path="models/pomdp/sketches/avoid"
 pomdp_sketch = load_sketch(project_path)
-pomdp_sketch.initialize_fsc_unfolder(fsc_is_deterministic)
 print("specification: ", pomdp_sketch.specification)
 print("design space:\n", pomdp_sketch.design_space)
 print("number of holes: ", pomdp_sketch.design_space.num_holes)
@@ -70,31 +69,17 @@ hole_options = [[hole.options[0]] for hole in pomdp_sketch.design_space]
 hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
 
 # investigate this hole assignment and return an FSC
-fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment, fsc_is_deterministic)
+fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 
-# investigate this FSC and obtain a list of families of POMDPs for which this FSC is violating
-# apply FSC to a PODMP sketch, obtaining a DTMC sketch
-# we are negating the specification since we are looking for violating DTMCs
-dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc, negate_specification=True)
-synthesizer = paynt.synthesizer.synthesizer_all.SynthesizerAll(dtmc_sketch)
-violating_families = synthesizer.synthesize()
-if not violating_families:
-    print("all POMDPs were satisfied")
-    exit()
+# apply this FSC to a POMDP sketch, obtaining a DTMC sketch
+dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
 
-print("found {} violating families, printing below:".format(len(violating_families)))
-print([str(family) for family in violating_families])
+# to each (sub-family of) environment(s), assign a value corresponding to the minimum specification satisfiability
+# TODO
 
-# pick 1 assignment and generate violating traces
-# pick first
-# violating_assignment = violating_families[0].pick_any()
-# pick random assignment from random family
-violating_assignment = random.choice(violating_families).pick_random()
+# pick the worst environment
+# TODO
+worst_family = pomdp_sketch.design_space.pick_random()
 
-num_violating_traces = 5
-trace_max_length = 11   # length of a trace in a DTMC with unreachable target
-violating_traces = pomdp_sketch.compute_witnessing_traces(dtmc_sketch,violating_assignment,num_violating_traces,trace_max_length)
-print("constructed {} violating traces, printing below:".format(len(violating_traces)))
-for trace in violating_traces:
-    print(trace)
-
+print("printing the worst family below:")
+print(worst_family)
