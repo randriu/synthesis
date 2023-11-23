@@ -136,6 +136,9 @@ class Property:
         property_negated = Property(stormpy_property_negated,self.discount_factor)
         return property_negated
 
+    def get_target_label(self):
+        return str(self.formula.subformula.subformula)
+
 
 
 class OptimalityProperty(Property):
