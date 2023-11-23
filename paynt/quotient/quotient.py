@@ -473,7 +473,7 @@ class QuotientContainer:
         state_is_absorbing = [True] * model.nr_states
         tm = model.transition_matrix
         for state in range(model.nr_states):
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+            for choice in tm.get_rows_for_group(state):
                 for entry in tm.get_row(choice):
                     if entry.column != state:
                         state_is_absorbing[state] = False
@@ -481,6 +481,10 @@ class QuotientContainer:
                 if not state_is_absorbing[state]:
                     break
         return state_is_absorbing
+
+    def extract_target_label(self):
+        assert self.specification.num_properties == 1, "expecting a single property"
+        return self.specification.all_properties()[0].get_target_label()
 
 
 
