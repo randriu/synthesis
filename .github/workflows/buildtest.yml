@@ -1,0 +1,77 @@
+name: Build Test
+# Builds and tests stormpy with different versions of Storm
+# also deploys images to Dockerhub
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    # run weekly
+    - cron: '0 10 * * 3'
+  # needed to trigger the workflow manually
+  workflow_dispatch:
+  pull_request:
+
+env:
+  GIT_URL: "${{ github.server_url }}/${{ github.repository }}.git"
+  BRANCH: "${{ github.ref }}"
+  # GitHub runners currently have two cores
+  NR_JOBS: "2"
+
+jobs:
+  deploytemp:
+    name: Test and Deploy on latest using specific Storm commit (${{ matrix.buildType.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildType:
+          - {name: "Release", imageName : "randriu/paynt", dockerTag: "temp", buildArgs: "BUILD_TYPE=Release", setupArgs: "", stormCommit : "dc7960b8f0222793b591f3d6489e2f6c7da1278f"}
+      fail-fast: false
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v4
+      - name: Build paynt from Dockerfile
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . -f paynt-specific-storm.dockerfile --build-arg storm_sha=${{ matrix.buildType.stormCommit }} --build-arg build_type=${{ matrix.buildType.buildArgs }} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+      - name: Build image for learner
+        run: docker build -t ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }} . -f paynt-learner.dockerfile --build-arg paynt_base=${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
+      - name: Login into docker
+        # Only login if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+        run: echo '${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}' | docker login -u randriu --password-stdin
+      - name: Deploy paynt with specific Storm version
+        # Only deploy if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+        run: docker push ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
+      - name: Deploy paynt with specific Storm version and learner dependencies
+        # Only deploy if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+        run: docker push ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }}
+
+  deploy:
+    name: Deploy on latest (${{ matrix.buildType.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildType:
+          - {name: "Release", imageName : "randriu/paynt", dockerTag: "latest", stormTag: "ci", buildArgs: "BUILD_TYPE=Release", setupArgs: ""}
+      fail-fast: false
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v4
+      - name: Build stormpy from Dockerfile
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg STORM_BASE=movesrwth/storm:${{ matrix.buildType.stormTag }} --build-arg build_type=${{ matrix.buildType.buildArgs }} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+      - name: Build image for learner
+        run: docker build -t ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }} . -f paynt-learner.dockerfile --build-arg paynt_base=${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
+      - name: Login into docker
+        # Only login if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+        run: echo '${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}' | docker login -u randriu --password-stdin
+      - name: Deploy paynt
+        # Only deploy if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+        run: docker push ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
+      - name: Deploy paynt with learner dependencies
+        # Only deploy if using master on original repo (and not for pull requests or forks)
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+        run: docker push ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }}
