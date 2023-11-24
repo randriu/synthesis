@@ -1,4 +1,4 @@
-FROM movesrwth/storm:ci
+FROM movesrwth/storm-basesystem:latest
 
 # Install dependencies
 ######################
@@ -17,8 +17,16 @@ ARG setup_args=""
 ARG setup_args_pycarl=""
 # Number of threads to use for parallel compilation
 ARG no_threads=2
+# Specific storm git commit revision SHA
+ARG storm_sha=dc7960b8f0222793b591f3d6489e2f6c7da1278f
 
-# WORKDIR /opt/
+WORKDIR /opt/
+RUN git clone https://github.com/moves-rwth/storm.git storm
+WORKDIR /opt/storm/build
+RUN git reset --hard $storm_sha
+RUN cmake .. -DCMAKE_BUILD_TYPE=$build_type
+RUN make storm-main storm-pomdp --jobs $no_threads
+ENV PATH="/opt/storm/build/bin:$PATH"
 
 # Obtain carl-parser from public repository
 # RUN git clone https://github.com/moves-rwth/carl-parser.git
@@ -32,6 +40,7 @@ ARG no_threads=2
 
 # # Build carl-parser
 # RUN make carl-parser -j $no_threads
+
 
 # Set-up virtual environment
 ############################
@@ -60,13 +69,17 @@ RUN git clone --depth 1 --branch synthesis https://github.com/randriu/stormpy.gi
 # Build stormpy
 RUN python setup.py build_ext $setup_args -j $no_threads develop
 
-# Paynt  dependencies
-RUN pip install pysmt z3-solver click numpy
+# Additional dependencies
+##########################
+
+RUN pip install -U pip setuptools wheel numpy
+
+# Paynt / extra dependencies
+RUN pip install pysmt z3-solver click
 
 # Build paynt
 #############
 WORKDIR /opt/paynt
-
 COPY . .
 
 RUN pip install -e .
