@@ -13,7 +13,7 @@ def load_sketch(project_path):
     properties_path = os.path.join(project_path, "sketch.props")    
     pomdp_sketch = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path)
 
-    target_label = pomdp_sketch.extract_target_label()
+    target_label = pomdp_sketch.get_property().get_target_label()
     target_states = pomdp_sketch.quotient_mdp.labeling.get_states(target_label)
     for state in pomdp_sketch.quotient_mdp.labeling.get_states("deadlock"):
         assert state in target_states, "have deadlock in a non-target state {}".format(state)

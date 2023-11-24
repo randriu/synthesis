@@ -482,9 +482,9 @@ class QuotientContainer:
                     break
         return state_is_absorbing
 
-    def extract_target_label(self):
+    def get_property(self):
         assert self.specification.num_properties == 1, "expecting a single property"
-        return self.specification.all_properties()[0].get_target_label()
+        return self.specification.all_properties()[0]
 
 
 

@@ -139,6 +139,10 @@ class Property:
     def get_target_label(self):
         return str(self.formula.subformula.subformula)
 
+    def get_reward_name(self):
+        assert self.reward
+        return self.formula.reward_name
+
 
 
 class OptimalityProperty(Property):
