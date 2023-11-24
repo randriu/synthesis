@@ -185,7 +185,7 @@ class QuotientContainer:
         dtmc = QuotientContainer.mdp_to_dtmc(sub_mdp)
 
         # compute visits
-        dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc).get_values()
+        dtmc_visits = stormpy.compute_expected_number_of_visits(MarkovChain.environment, dtmc).get_values()
         dtmc_visits = list(dtmc_visits)
 
         # handle infinity- and zero-visits

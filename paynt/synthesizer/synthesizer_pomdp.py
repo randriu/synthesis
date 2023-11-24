@@ -594,7 +594,7 @@ class SynthesizerPOMDP:
                 # dtmc = self.quotient.build_chain(synthesized_assignment)
 
                 # # compute expected visits for this dtmc
-                # dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
+                # dtmc_visits = stormpy.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
                 # dtmc_visits = list(dtmc_visits)
 
                 # # handle infinity- and zero-visits
@@ -821,7 +821,7 @@ class SynthesizerPOMDP:
                 dtmc = self.quotient.build_chain(synthesized_assignment)
 
                 # compute expected visits for this dtmc
-                dtmc_visits = stormpy.synthesis.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
+                dtmc_visits = stormpy.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
                 dtmc_visits = list(dtmc_visits)
 
                 # handle infinity- and zero-visits

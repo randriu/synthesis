@@ -30,3 +30,6 @@ class SynthesizerOneByOne(Synthesizer):
                 return accepting_assignment
 
         return satisfying_assignment
+
+    def evaluate_all(self, family=None):
+        raise NotImplementedError("One-by-one synthesizer does not support evaluation of all family members")

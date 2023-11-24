@@ -3,6 +3,8 @@
 import paynt.cli
 import paynt.parser.sketch
 import paynt.quotient.pomdp_family
+import paynt.synthesizer.synthesizer_onebyone
+import paynt.synthesizer.synthesizer_ar
 
 import os
 import random
@@ -75,11 +77,12 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
 
 # to each (sub-family of) environment(s), assign a value corresponding to the minimum specification satisfiability
-# TODO
+synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
+family_to_value = synthesizer.evaluate_all()
 
 # pick the worst environment
 # TODO
-worst_family = pomdp_sketch.design_space.pick_random()
+worst_family,worst_value = family_to_value[0]
 
-print("printing the worst family below:")
+print("the worst value has value {}, printing the worst family below:".format(worst_value))
 print(worst_family)

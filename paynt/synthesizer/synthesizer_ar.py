@@ -1,8 +1,9 @@
-from .synthesizer import Synthesizer
+import paynt.synthesizer.synthesizer
 
-import paynt
+import logging
+logger = logging.getLogger(__name__)
 
-class SynthesizerAR(Synthesizer):
+class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
     @property
     def method_name(self):
@@ -47,7 +48,7 @@ class SynthesizerAR(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
             families = families + subfamilies
 
         return satisfying_assignment
@@ -95,10 +96,91 @@ class SynthesizerAR(Synthesizer):
 
             # split family with the best value
             family = undecided_families[0]
-            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
             families = subfamilies + undecided_families[1:]
                 
 
         return satisfying_assignment
 
+    
+    def synthesize_all(self, family=None):
+        self.stat.start()
+        if family is None:
+            family = self.quotient.design_space
+        logger.info("synthesis initiated, design space: {}".format(family.size))
+        assert not self.quotient.specification.has_optimality, "expecting specification with constraints only"
+        self.quotient.discarded = 0
+        
+        satisfying_families = []
+        unsatisfying_families = []
+        families = [family]
+        while families:
+            family = families.pop()
+            self.quotient.build(family)
+            self.stat.iteration_mdp(family.mdp.states)
+            res = family.mdp.check_specification(self.quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
+            family.analysis_result = res
+            if res.improving_assignment == "any":
+                self.explore(family)
+                satisfying_families.append(family)
+                continue
 
+            if res.can_improve == False:
+                self.explore(family)
+                unsatisfying_families.append(family)
+                continue
+
+            # undecided
+            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
+            families = families + subfamilies
+
+        self.stat.finished(satisfying_families)
+        return satisfying_families,unsatisfying_families
+
+
+    def evaluate_family(self, family, prop, precision):
+        self.quotient.build(family)
+        self.stat.iteration_mdp(family.mdp.states)
+
+        # compute minimum first
+        result_primary = family.mdp.model_check_property(prop, alt=prop.maximizing)
+        if prop.reward and math.isinf(result_primary.value):
+            return None,None
+        result_secondary = family.mdp.model_check_property(prop, alt=True)
+        print(result_primary.value)
+        exit()
+    
+    def evaluate_all(self, family=None, precision=0):
+        raise NotImplementedError("AR does not support evaluation of all family members")
+
+        self.stat.start()
+        if family is None:
+            family = self.quotient.design_space
+        logger.info("synthesis initiated, design space: {}".format(family.size))
+        assert self.quotient.specification.has_optimality, "expecting specification without contstraints"
+        self.quotient.discarded = 0
+
+        prop = self.quotient.get_property()
+        family_to_value = []
+
+        families = [family]
+        while families:
+            family = families.pop()
+            res = self.evaluate_family(family,prop,precision)
+            family.analysis_result = res
+            if res.improving_assignment == "any":
+                self.explore(family)
+                satisfying_families.append(family)
+                continue
+
+            if res.can_improve == False:
+                self.explore(family)
+                unsatisfying_families.append(family)
+                continue
+
+            # undecided
+            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
+            families = families + subfamilies
+
+        self.stat.finished(family_to_value)
+        return family_to_value
