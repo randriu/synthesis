@@ -32,7 +32,7 @@ jobs:
       - name: Git clone
         uses: actions/checkout@v4
       - name: Build paynt from Dockerfile
-        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . -f fixed-storm-commit.dockerfile --build-arg storm_sha=${{ matrix.buildType.stormCommit }} --build-arg build_type=${{ matrix.buildType.buildArgs }} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . -f paynt-specific-storm.dockerfile --build-arg storm_sha=${{ matrix.buildType.stormCommit }} --build-arg build_type=${{ matrix.buildType.buildArgs }} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
       - name: Build image for learner
         run: docker build -t ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }} . -f paynt-learner.dockerfile
       - name: Login into docker
