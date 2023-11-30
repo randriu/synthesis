@@ -119,8 +119,6 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         for choice in choice_mask:
             choice_options = self.coloring.action_to_hole_options[choice]
             for hole_index,option in choice_options.items():
-                if hole_index == 0:
-                    print(0, option)
                 hole_selection[hole_index].add(option)
         hole_selection = [list(options) for options in hole_selection]
         return hole_selection

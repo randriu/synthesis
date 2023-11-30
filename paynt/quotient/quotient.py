@@ -253,8 +253,6 @@ class QuotientContainer:
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
 
-        print(inconsistent_assignments)
-        print(hole_states_affected)
         for hole_index in inconsistent_assignments:
             assert hole_states_affected[hole_index] > 0
         
@@ -274,7 +272,6 @@ class QuotientContainer:
         # get qualitative scheduler selection, filter inconsistent assignments
         selection = self.scheduler_selection(mdp, result.scheduler)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
-        print(inconsistent_assignments)
         if len(inconsistent_assignments) == 0:
             return selection,None,None,None
         
