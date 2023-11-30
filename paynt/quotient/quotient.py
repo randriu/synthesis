@@ -144,9 +144,7 @@ class QuotientContainer:
         '''
         Get choice values after model checking MDP against a property.
         Value of choice c: s -> s' is computed as
-        ev(s) * [ rew(c) + P(s,c,s') * mc(s') ], where
-        - ev(s) is the expected number of visits of state s in DTMC induced by
-          the primary scheduler
+        rew(c) + sum_s' [ P(s,c,s') * mc(s') ], where
         - rew(c) is the reward associated with choice (c)
         - P(s,c,s') is the probability of transitioning from s to s' under action c
         - mc(s') is the model checking result in state s'
@@ -215,7 +213,6 @@ class QuotientContainer:
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
-        tm = mdp.model.transition_matrix
         
         for state in range(mdp.states):
 
@@ -223,11 +220,9 @@ class QuotientContainer:
             hole_min = [None] * num_holes
             hole_max = [None] * num_holes
             
-            for choice in tm.get_rows_for_group(state):
+            for choice in mdp.model.transition_matrix.get_rows_for_group(state):
                 
                 value = choice_values[choice]
-                if value == 0:
-                    continue
                 choice_global = mdp.quotient_choice_map[choice]
                 if self.coloring.default_actions.get(choice_global):
                     continue
@@ -258,6 +253,11 @@ class QuotientContainer:
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
 
+        print(inconsistent_assignments)
+        print(hole_states_affected)
+        for hole_index in inconsistent_assignments:
+            assert hole_states_affected[hole_index] > 0
+        
         # aggregate
         inconsistent_differences = {
             hole_index: (hole_difference_sum[hole_index] / hole_states_affected[hole_index])
@@ -270,20 +270,17 @@ class QuotientContainer:
     def scheduler_selection_quantitative(self, mdp, prop, result):
         '''
         Get hole options involved in the scheduler selection.
-        Use numeric values to filter spurious inconsistencies.
         '''
-
-        scheduler = result.scheduler
-
         # get qualitative scheduler selection, filter inconsistent assignments
-        selection = self.scheduler_selection(mdp, scheduler)
+        selection = self.scheduler_selection(mdp, result.scheduler)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
+        print(inconsistent_assignments)
         if len(inconsistent_assignments) == 0:
             return selection,None,None,None
         
         # extract choice values, compute expected visits and estimate scheduler difference
         choice_values = self.choice_values(mdp.model, prop, result.get_values())
-        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         expected_visits = self.expected_visits(mdp.model, prop, choices)
         inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values, expected_visits)
 

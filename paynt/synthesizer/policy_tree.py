@@ -410,6 +410,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     def choose_splitter(self, family, prop, scheduler_choices, state_values, hole_selection):
         splitter = None
+        print(hole_selection)
         inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(hole_selection) if len(options) > 1}
         if len(inconsistent_assignments)==0:
             for hole_index,hole in enumerate(family):
