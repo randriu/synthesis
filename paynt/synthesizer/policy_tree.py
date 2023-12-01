@@ -86,7 +86,7 @@ class PolicyTreeNode:
     
     @property
     def solved(self):
-        return self.policy != False and self.policy is not None
+        return self.policy is not None and self.policy != False 
 
     def split(self, splitter, suboptions, subfamilies):
         self.splitter = splitter
@@ -108,57 +108,72 @@ class PolicyTreeNode:
             result = mdp.model_check_property(prop, alt=True)
             assert result.sat
 
+    
+    def merge_if_single_child(self):
+        if len(self.child_nodes) > 1:
+            return
+        self.policy = self.child_nodes[0].policy
+        self.splitter = None
+        self.suboptions = []
+        self.child_nodes = []
 
-    def merge_child_nodes(self, quotient, prop):
+    def merge_children_indices(self, indices):
+        if len(indices) < 2:
+            return
+        target = indices[0]
+        for j in reversed(indices[1:]):
+            PolicyTreeNode.merged += 1
+            self.suboptions[target] += self.suboptions[j]
+            self.suboptions.pop(j)
+            self.child_nodes.pop(j)
+        self.merge_if_single_child()
+
+    def merge_children_solved(self):
         if self.is_leaf:
             return
+        indices = [i for i,child in enumerate(self.child_nodes) if child.solved]
+        self.merge_children_indices(indices)
+        
+    def merge_children_unsat(self):
+        if self.is_leaf:
+            return
+        indices = [i for i,child in enumerate(self.child_nodes) if child.policy==False]
+        self.merge_children_indices(indices)
 
+
+    def merge_children_compatible(self, quotient, prop):
+        if self.is_leaf:
+            return
         i = 0
         while i < len(self.child_nodes):
             child1 = self.child_nodes[i]
             
-            if child1.policy is None:
+            if not child1.solved:
                 i += 1
                 continue
-            
-            
-            join_to_i = []
-            if child1.policy == False:
-                # merge all UNSAT children
-                for j in range(i+1,len(self.child_nodes)):
-                    child2 = self.child_nodes[j]
-                    if child2.policy == False:
-                        join_to_i.append(j)
-            else:
-                # collect other childs to merge to i
-                for j in range(i+1,len(self.child_nodes)):
-                    child2 = self.child_nodes[j]
-                    if not child2.solved:
-                        continue
-                    policy = test_nodes(quotient,prop,child1,child2)
-                    if policy is None:
-                        continue
-                    # nodes can be merged
-                    child1.policy = policy
-                    join_to_i.append(j)
-            
-            # merge
-            for j in reversed(join_to_i):
-                PolicyTreeNode.merged += 1
-                self.suboptions[i] += self.suboptions[j]
-                self.suboptions.pop(j)
-                self.child_nodes.pop(j)
 
+            join_to_i = [i]
+            # collect other childs to merge to i
+            for j in range(i+1,len(self.child_nodes)):
+                child2 = self.child_nodes[j]
+                if not child2.solved:
+                    continue
+                policy = test_nodes(quotient,prop,child1,child2)
+                if policy is None:
+                    continue
+                # nodes can be merged
+                child1.policy = policy
+                join_to_i.append(j)
+            
+            self.merge_children_indices(join_to_i)
             i += 1
+
 
         if len(self.child_nodes)>1:
             return
         # only 1 child node that can be moved to this node
         PolicyTreeNode.merged += 1
-        self.policy = self.child_nodes[0].policy
-        self.splitter = None
-        self.suboptions = []
-        self.child_nodes = []
+        
 
 
 
@@ -222,10 +237,10 @@ class PolicyTree:
         for node in self.collect_all():
             if node.policy is not None:
                 continue
+            with_policy = len([node for node in node.child_nodes if node.solved])
             with_none = len([node for node in node.child_nodes if node.policy is None])
-            with_policy = len([node for node in node.child_nodes if node.policy is not None])
             with_false = len([node for node in node.child_nodes if node.policy==False])
-            children_stats[(with_none,with_policy,with_false)] += 1
+            children_stats[(with_policy,with_none,with_false)] += 1
         return children_stats
 
     
@@ -269,7 +284,7 @@ class PolicyTree:
         print("\t singleton leaves: {}".format(num_leaves_singleton))
 
         print()
-        print("(X, Y, Z)  -  number of internal nodes having X unresolved, Y satisfied and Z unsatisfied children")
+        print("(X, Y, Z)  -  number of internal nodes having yes/?/no children")
         for key,number in self.count_diversity().items():
             print(key, " - ", number)
         print("--------------------")
@@ -279,30 +294,30 @@ class PolicyTree:
 
     
     def postprocess(self, quotient, prop):
-
-        # find two leafs that can be merged
         logger.info("post-processing the policy tree...")
-
-        # can_be_merged = 0
-        # leaves = self.collect_leaves()
-        # for i,leaf2 in enumerate(leaves):
-        #     if i == 0:
-        #         continue
-        #     leaf1 = leaves[i-1]
-        #     if leaf1.solved and leaf2.solved and leaf1.parent == leaf2.parent:
-        #         result = test_nodes(quotient,prop,leaf1,leaf2)
-        #         if result is not None:
-        #             can_be_merged += 1
-        # print("num leaves: ", len(leaves))
-        # print("can merge: ", can_be_merged)
-
+        logger.info("merging unsat siblings...")
         PolicyTreeNode.merged = 0
         all_nodes = self.collect_all()
         for node in reversed(all_nodes):
-            node.merge_child_nodes(quotient,prop)
-        logger.info("post-processing over, merged {} pairs".format(PolicyTreeNode.merged))
-        
-        
+            node.merge_children_unsat()
+        logger.info("merged {} pairs".format(PolicyTreeNode.merged))
+        # self.print_stats()
+
+        logger.info("merging compatible siblings...")
+        PolicyTreeNode.merged = 0
+        all_nodes = self.collect_all()
+        for node in reversed(all_nodes):
+            node.merge_children_compatible(quotient,prop)
+        logger.info("merged {} pairs".format(PolicyTreeNode.merged))
+        self.print_stats()
+
+        logger.info("merging solved siblings...")
+        PolicyTreeNode.merged = 0
+        all_nodes = self.collect_all()
+        for node in reversed(all_nodes):
+            node.merge_children_solved()
+        logger.info("merged {} pairs".format(PolicyTreeNode.merged))
+        self.print_stats()
 
 
                 
@@ -322,16 +337,17 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
 
-        reference_policy = None
-        if reference_policy is not None:
-            # check if reference policy works
-            mdp = self.quotient.apply_policy_to_family(family, reference_policy)
-            policy_result = mdp.model_check_property(prop, alt=True)
-            self.stat.iteration_mdp(mdp.states)
-            if policy_result.sat:
-                # this scheduler is good for all MDPs in the family
-                mdp_family_result.policy = reference_policy
-                return mdp_family_result
+        # reference_policy = None
+        # if reference_policy is not None:
+        #     # check if reference policy works
+        #     mdp = self.quotient.apply_policy_to_family(family, reference_policy)
+        #     policy_result = mdp.model_check_property(prop, alt=True)
+        #     self.stat.iteration_mdp(mdp.states)
+        #     if policy_result.sat:
+        #         print("reference policy worked!")
+        #         # this scheduler is good for all MDPs in the family
+        #         mdp_family_result.policy = reference_policy
+        #         return mdp_family_result
 
         if family.size == 1:
             primary_primary_result = family.mdp.model_check_property(prop)
@@ -347,8 +363,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             for choice in choices:
                 quotient_choice_mask.set(family.mdp.quotient_choice_map[choice],True)
             quotient_choice_mask = self.quotient.keep_reachable_choices(quotient_choice_mask)
-            policy = self.quotient.choices_to_policy(quotient_choice_mask)
-            mdp_family_result.policy = policy
+            mdp_family_result.policy = self.quotient.choices_to_policy(quotient_choice_mask)
             return mdp_family_result
 
         # construct and solve the game abstraction
@@ -367,8 +382,19 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if abs(dtmc_result.value-game_solver.solution_value) > 0.01:
                 logger.error("game solution is {}, but DTMC model checker yielded {}".format(game_solver.solution_value,dtmc_result.value))
 
+        # if not game_result_sat:
+        #      # apply player 1 actions to the quotient
+        #     policy = game_solver.solution_state_to_player1_action
+        #     mdp = self.quotient.apply_policy_to_family(family, policy)
+        #     policy_result = mdp.model_check_property(prop, alt=True)
+        #     self.stat.iteration_mdp(mdp.states)
+        #     if policy_result.sat:
+        #         # this scheduler is good for all MDPs in the family
+        #         print("game says NO but actually YES")
+        #         mdp_family_result.policy = policy
+        #         return mdp_family_result
+
         if game_result_sat:
-            # logger.debug("verifying game policy...")
             # apply player 1 actions to the quotient
             policy = game_solver.solution_state_to_player1_action
             mdp = self.quotient.apply_policy_to_family(family, policy)
@@ -378,19 +404,26 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 # this scheduler is good for all MDPs in the family
                 mdp_family_result.policy = policy
                 return mdp_family_result
-        else:
-            # logger.debug("solving primary-primary direction...")
-            # solve primary-primary direction for the family
-            primary_primary_result = family.mdp.model_check_property(prop)
-            self.stat.iteration_mdp(family.mdp.states)
-            # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
-            if not primary_primary_result.sat:
-                mdp_family_result.policy = False
-                return mdp_family_result
+            else:
+                assert False, "game YES but nor forall"
         
+        # logger.debug("solving primary-primary direction...")
+        # solve primary-primary direction for the family
+        primary_primary_result = family.mdp.model_check_property(prop)
+        self.stat.iteration_mdp(family.mdp.states)
+        # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
+        if not primary_primary_result.sat:
+            mdp_family_result.policy = False
+            return mdp_family_result
+    
         # undecided: prepare to split
         # map scheduler choices to hole options and check consistency
-        scheduler_choices = game_solver.solution_reachable_choices
+        if True:
+            scheduler_choices = game_solver.solution_reachable_choices
+            scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
+        else:
+            mdp_choices = primary_primary_result.result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+            scheduler_choices = [mdp.quotient_choice_map[choice] for choice in mdp_choices]
         hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
         mdp_family_result.scheduler_choices = scheduler_choices
         mdp_family_result.hole_selection = hole_selection
@@ -463,6 +496,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subfamily = paynt.quotient.holes.DesignSpace(subholes)
             subfamily.assume_hole_options(splitter, suboption)
             subfamilies.append(subfamily)
+        
         return splitter,suboptions,subfamilies
         
 
@@ -475,7 +509,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree = PolicyTree(family)
         reference_policy = None
 
-        
         policy_tree_leaves = [policy_tree.root]
         while policy_tree_leaves:
             policy_tree_node = policy_tree_leaves.pop(-1)
@@ -491,7 +524,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
             if result.policy is not None:
                 # logger.info("found policy for all MDPs in the family")
-                # print(self.policy_str(result.policy))
                 reference_policy = result.policy
                 self.explore(family)
                 continue
@@ -506,7 +538,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree.double_check_all_families(self.quotient, prop)
         policy_tree.print_stats()
         policy_tree.postprocess(self.quotient, prop)
-        policy_tree.print_stats()
         return policy_tree
 
     

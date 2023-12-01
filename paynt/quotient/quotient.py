@@ -249,7 +249,7 @@ class QuotientContainer:
                 difference = (max_value - min_value)
                 if expected_visits is not None:
                     difference *= expected_visits[state]
-                    
+
                 hole_difference_sum[hole_index] += difference
                 hole_states_affected[hole_index] += 1
 
