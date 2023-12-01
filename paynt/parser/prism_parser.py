@@ -127,6 +127,12 @@ class PrismParser:
                 options = [str(o) for o in range(range_start,range_end+1)]
             else:
                 options = hole_options.split(",")
+                if hole_type == "int":
+                    options_numerical = [int(o) for o in options]
+                else:
+                    options_numerical = [float(o) for o in options]
+                hole_min.append(min(options_numerical))
+                hole_max.append(max(options_numerical))
             expressions = [expression_parser.parse(o) for o in options]
             hole_expressions.append(expressions)
 
