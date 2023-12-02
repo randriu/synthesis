@@ -100,7 +100,7 @@ class PolicyTreeNode:
 
     def double_check(self, quotient, prop):
         assert self.policy is not None
-        self.family.build()
+        quotient.build(self.family)
         if self.policy == False:
             result = self.family.mdp.model_check_property(prop)
             assert not result.sat
