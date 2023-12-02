@@ -124,6 +124,7 @@ class PolicyTreeNode:
         for j in reversed(indices[1:]):
             PolicyTreeNode.merged += 1
             self.suboptions[target] += self.suboptions[j]
+            self.child_nodes[target].family[self.splitter].assume_options(self.suboptions[target])
             self.suboptions.pop(j)
             self.child_nodes.pop(j)
         self.merge_if_single_child()
