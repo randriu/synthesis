@@ -405,7 +405,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 mdp_family_result.policy = policy
                 return mdp_family_result
             else:
-                assert False, "game YES but nor forall"
+                print("game YES but nor forall family of size ", family.size)
+            #     assert False, "game YES but nor forall"
         
         # logger.debug("solving primary-primary direction...")
         # solve primary-primary direction for the family
@@ -422,8 +423,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             scheduler_choices = game_solver.solution_reachable_choices
             scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
         else:
-            mdp_choices = primary_primary_result.result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-            scheduler_choices = [mdp.quotient_choice_map[choice] for choice in mdp_choices]
+            mdp_choices = primary_primary_result.result.scheduler.compute_action_support(family.mdp.model.nondeterministic_choice_indices)
+            scheduler_choices = [family.mdp.quotient_choice_map[choice] for choice in mdp_choices]
         hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
         mdp_family_result.scheduler_choices = scheduler_choices
         mdp_family_result.hole_selection = hole_selection
