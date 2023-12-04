@@ -92,7 +92,7 @@ class Statistic:
         time_elapsed = int(self.synthesis_time.read())
         ret_str += f", elapsed {time_elapsed} s"
         time_estimate = int(time_estimate)
-        ret_str += f", estimate {time_estimate} s"
+        ret_str += f", estimated {time_estimate} s"
         time_estimate_hrs = round(time_estimate/3600, 1)
         if time_estimate_hrs > 1:
             ret_str += f" ({time_estimate_hrs} hrs)"

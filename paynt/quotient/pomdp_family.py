@@ -137,40 +137,27 @@ class SubPomdp:
             self.state_action_to_local_choice.append(action_to_local_choice)
 
 
-class PomdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
+class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientContainer):
 
     def __init__(self, quotient_mdp, coloring, specification, obs_evaluator):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
         self.obs_evaluator = obs_evaluator
-        self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
 
-        # a list of action labels
-        self.action_labels = None
-        # for each choice, an index of its label in self.action_labels
-        self.choice_to_action = None
         # for each observation, a list of actions (indices) available
         self.observation_to_actions = None
-
         # POMDP manager used for unfolding the memory model into the quotient POMDP
         self.product_pomdp_fsc = None
 
-        self.action_labels,self.choice_to_action,state_to_actions = \
-            paynt.quotient.mdp_family.MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
-
         # identify actions available at each observation
         self.observation_to_actions = [None] * self.num_observations
-        for state,state_actions in enumerate(state_to_actions):
+        for state,available_actions in enumerate(self.state_to_actions):
             obs = self.state_to_observation[state]
             if self.observation_to_actions[obs] is not None:
-                assert self.observation_to_actions[obs] == state_actions,\
+                assert self.observation_to_actions[obs] == available_actions,\
                     f"two states in observation class {obs} differ in available actions"
                 continue
-            self.observation_to_actions[obs] = state_actions
+            self.observation_to_actions[obs] = available_actions
 
-
-    @property
-    def num_actions(self):
-        return len(self.action_labels)
 
     @property
     def num_observations(self):

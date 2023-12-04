@@ -1,10 +1,9 @@
 import stormpy
 import stormpy.synthesis
 
-import paynt.quotient.holes
-import paynt.quotient.models
 import paynt.quotient.quotient
-import paynt.verification.property_result
+
+import collections
 
 import logging
 logger = logging.getLogger(__name__)
@@ -12,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
-    @classmethod
-    def extract_choice_labels(cls, mdp):
+    @staticmethod
+    def extract_choice_labels(mdp):
         '''
         :param mdp having a canonic choice labeling (exactly 1 label for each choice)
         :return a list of action labels
@@ -27,56 +26,122 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         label_to_action = {label:index for index,label in enumerate(action_labels)}
         
         choice_to_action = [None] * mdp.nr_choices
-        state_to_actions = []
-        tm = mdp.transition_matrix
         for state in range(mdp.nr_states):
-            state_choice_label_indices = set()
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+            for choice in mdp.transition_matrix.get_rows_for_group(state):
                 label = list(mdp.choice_labeling.get_labels_of_choice(choice))[0]
                 action = label_to_action[label]
                 choice_to_action[choice] = action
-                state_choice_label_indices.add(action)
-            state_to_actions.append(list(state_choice_label_indices))
 
-        return action_labels,choice_to_action,state_to_actions
+        return action_labels,choice_to_action
 
-    
-    def __init__(self, quotient_mdp, coloring, specification):
-        super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
-        self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
-
-        self.action_labels,self.choice_to_action,self.state_to_actions = \
-            MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
-
-        self.choice_destinations = self.compute_choice_destinations(self.quotient_mdp)
-        self.state_action_choices = self.compute_state_action_choices(self.quotient_mdp, self.num_actions, self.choice_to_action)
-
-    
-    @property
-    def num_actions(self):
-        return len(self.action_labels)
-
-
-    def compute_state_action_choices(self, mdp, num_actions, choice_to_action):
+    @staticmethod
+    def map_state_action_to_choices(mdp, num_actions, choice_to_action):
         state_action_choices = []
-        tm = mdp.transition_matrix
         for state in range(mdp.nr_states):
             action_choices = [[] for action in range(num_actions)]
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+            for choice in mdp.transition_matrix.get_rows_for_group(state):
                 action = choice_to_action[choice]
                 action_choices[action].append(choice)
             state_action_choices.append(action_choices)
         return state_action_choices
 
-    def compute_choice_destinations(self, mdp):
+    @staticmethod
+    def map_state_to_available_actions(state_action_choices):
+        state_to_actions = []
+        for state,action_choices in enumerate(state_action_choices):
+            available_actions = []
+            for action,choices in enumerate(action_choices):
+                if choices:
+                    available_actions.append(action)
+            state_to_actions.append(available_actions)
+        return state_to_actions
+
+    @staticmethod
+    def compute_choice_destinations(mdp):
         choice_destinations = []
-        tm = mdp.transition_matrix
         for choice in range(mdp.nr_choices):
             destinations = []
-            for entry in tm.get_row(choice):
+            for entry in mdp.transition_matrix.get_row(choice):
                 destinations.append(entry.column)
             choice_destinations.append(destinations)
         return choice_destinations
+
+    @staticmethod
+    def randomize_action_variant(mdp, state_action_choices):
+        '''
+        Given an MDP having multiple variants of actions, create an MDP in which this variant selection is randomized.
+        '''
+
+        components = stormpy.storage.SparseModelComponents()
+        # copy state labeling
+        state_labeling = stormpy.storage.StateLabeling(mdp.nr_states)
+        for label in mdp.labeling.get_labels():
+            state_labeling.add_label(label)
+            state_labeling.set_states(label, mdp.labeling.get_states(label))
+        components.state_labeling = state_labeling
+        
+        # build transition matrix and reward models
+        reward_vectors = {name:[] for name in mdp.reward_models}
+        builder = stormpy.storage.SparseMatrixBuilder(has_custom_row_grouping=True)
+        tm = mdp.transition_matrix
+        num_rows = 0
+        choice_to_action = []
+        for state in range(mdp.nr_states):
+            builder.new_row_group(num_rows)
+            for action,choices in enumerate(state_action_choices[state]):
+                if not choices:
+                    continue
+
+                # new choice
+                choice_to_action.append(action)
+                
+                # handle transition matrix
+                num_choices = len(choices)
+                dst_prob = collections.defaultdict(int)
+                for choice in choices:
+                    for entry in tm.get_row(choice):
+                        dst_prob[entry.column] += entry.value()/num_choices
+
+                for dst,prob in dst_prob.items():
+                    builder.add_next_value(num_rows,dst,prob)
+                num_rows += 1
+
+                # handle reward models
+                for name,reward_model in mdp.reward_models.items():
+                    reward_value = 0
+                    for choice in choices:
+                        reward_value += reward_model.get_state_action_reward(choice)
+                    reward_value /= num_choices
+                    reward_vectors[name].append(reward_value)
+
+        components.transition_matrix = builder.build()
+        components.reward_models = {}
+        for name,state_action_reward in reward_vectors.items():
+            components.reward_models[name] = stormpy.SparseRewardModel(optional_state_action_reward_vector=state_action_reward)
+        model = stormpy.storage.SparseMdp(components)
+
+        return model,choice_to_action
+        
+
+    
+    def __init__(self, quotient_mdp, coloring, specification):
+        super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
+
+        self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
+
+        self.action_labels,self.choice_to_action = MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
+        self.state_action_choices = MdpFamilyQuotientContainer.map_state_action_to_choices(
+            self.quotient_mdp, self.num_actions, self.choice_to_action)
+        self.state_to_actions = MdpFamilyQuotientContainer.map_state_to_available_actions(self.state_action_choices)
+        self.choice_destinations = MdpFamilyQuotientContainer.compute_choice_destinations(self.quotient_mdp)
+        
+        self.randomized_abstraction = MdpFamilyQuotientContainer.randomize_action_variant(
+            self.quotient_mdp, self.state_action_choices)
+
+    
+    @property
+    def num_actions(self):
+        return len(self.action_labels)
 
 
     def keep_reachable_choices(self, choice_mask, mdp=None, choice_destinations=None):
@@ -92,7 +157,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         choice_mask_reachable = stormpy.BitVector(mdp.nr_choices,False)
         while state_queue:
             state = state_queue.pop()
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
+            for choice in mdp.transition_matrix.get_rows_for_group(state):
                 if not choice_mask[choice]:
                     continue
                 choice_mask_reachable.set(choice,True)
@@ -103,16 +168,6 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return choice_mask_reachable
     
     
-    def choices_to_policy(self, choice_mask):
-        policy = [self.num_actions] * self.quotient_mdp.nr_states
-        tm = self.quotient_mdp.transition_matrix
-        for state in range(self.quotient_mdp.nr_states):
-            for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-                if choice_mask[choice]:
-                    assert policy[state] == self.num_actions
-                    policy[state] = self.choice_to_action[choice]
-        return policy
-
     
     def choices_to_hole_selection(self, choice_mask):
         hole_selection = [set() for hole_index in self.design_space.hole_indices]
@@ -122,6 +177,9 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                 hole_selection[hole_index].add(option)
         hole_selection = [list(options) for options in hole_selection]
         return hole_selection
+
+    def empty_policy(self):
+        return [self.num_actions] * self.quotient_mdp.nr_states
 
 
     def fix_policy_for_family(self, family, policy):
@@ -164,10 +222,31 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return self.build_from_choice_mask(choice_mask)
 
 
-    
+    def assert_mdp_is_deterministic(self, mdp, family):
+        if mdp.is_deterministic:
+            return
+        
+        logger.error(f"applied policy to a singleton family {family} and obtained MDP with nondeterminism")
+        for state in range(mdp.model.nr_states):
+
+            choices = mdp.model.transition_matrix.get_rows_for_group(state)
+            if len(choices)>1:
+                quotient_state = mdp.quotient_state_map[state]
+                quotient_choices = [mdp.quotient_choice_map[choice] for choice in choices]
+                state_str = self.quotient_mdp.state_valuations.get_string(quotient_state)
+                state_str = state_str.replace(" ","")
+                state_str = state_str.replace("\t","")
+                actions_str = [self.action_labels[self.choice_to_action[choice]] for choice in quotient_choices]
+                logger.error(f"the following state {state_str} has multiple actions {actions_str}")
+        logger.error("aborting...")
+        exit(1)
+        
+
     def build_game_abstraction_solver(self, prop):
         target_label = str(prop.formula.subformula.subformula)
         solver = stormpy.synthesis.GameAbstractionSolver(
             self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label
         )
         return solver
+
+    
