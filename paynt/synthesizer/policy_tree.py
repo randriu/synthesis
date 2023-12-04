@@ -14,6 +14,7 @@ class MdpFamilyResult:
         # if False, then all family is UNSAT
         # otherwise, then contains a satisfying policy for all MDPs in the family
         self.policy = None
+        self.policy_source = ""
 
         self.scheduler_choices = None
         self.hole_selection = None
@@ -107,7 +108,7 @@ class PolicyTreeNode:
         else:
             mdp = quotient.apply_policy_to_family(self.family, self.policy)
             result = mdp.model_check_property(prop, alt=True)
-            assert result.sat
+            assert result.sat, self.family.size
 
     
     def merge_if_single_child(self):
@@ -175,14 +176,6 @@ class PolicyTreeNode:
             return
         # only 1 child node that can be moved to this node
         PolicyTreeNode.merged += 1
-        
-
-
-
-
-
-
-
 
 
 class PolicyTree:
@@ -237,13 +230,21 @@ class PolicyTree:
         from collections import defaultdict
         children_stats = defaultdict(int)
         for node in self.collect_all():
-            if node.policy is not None:
+            if node.is_leaf:
                 continue
             with_policy = len([node for node in node.child_nodes if node.solved])
             with_none = len([node for node in node.child_nodes if node.policy is None])
             with_false = len([node for node in node.child_nodes if node.policy==False])
             children_stats[(with_policy,with_none,with_false)] += 1
         return children_stats
+
+    def count_policy_sources(self):
+        from collections import defaultdict
+        sources = defaultdict(int)
+        for node in self.collect_leaves():
+            sources[node.policy_source] += 1
+        return sources
+
 
     
     def print_stats(self):
@@ -322,12 +323,6 @@ class PolicyTree:
         self.print_stats()
 
 
-                
-
-
-
-
-
 
 class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
@@ -335,47 +330,51 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self):
         return "AR (policy tree)"
 
-    def verify_family(self, family, game_solver, prop, reference_policy=None):
-        self.quotient.build(family)
-        mdp_family_result = MdpFamilyResult()
-
-        # reference_policy = None
-        # if reference_policy is not None:
-        #     # check if reference policy works
-        #     mdp = self.quotient.apply_policy_to_family(family, reference_policy)
-        #     policy_result = mdp.model_check_property(prop, alt=True)
-        #     self.stat.iteration_mdp(mdp.states)
-        #     if policy_result.sat:
-        #         print("reference policy worked!")
-        #         # this scheduler is good for all MDPs in the family
-        #         mdp_family_result.policy = reference_policy
-        #         return mdp_family_result
-
+    def verify_policy(self, family, prop, policy):
+        mdp = self.quotient.apply_policy_to_family(family, policy)
         if family.size == 1:
-            primary_primary_result = family.mdp.model_check_property(prop)
-            self.stat.iteration_mdp(family.mdp.states)
-            # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
-            if not primary_primary_result.sat:
-                mdp_family_result.policy = False
-                return mdp_family_result
-            # extract satisfying policy
-            scheduler = primary_primary_result.result.scheduler
-            choices = scheduler.compute_action_support(family.mdp.model.nondeterministic_choice_indices)
-            quotient_choice_mask = stormpy.BitVector(self.quotient.quotient_mdp.nr_choices, False)
-            for choice in choices:
-                quotient_choice_mask.set(family.mdp.quotient_choice_map[choice],True)
-            quotient_choice_mask = self.quotient.keep_reachable_choices(quotient_choice_mask)
-            mdp_family_result.policy = self.quotient.choices_to_policy(quotient_choice_mask)
-            return mdp_family_result
+            self.quotient.assert_mdp_is_deterministic(mdp, family)
+        policy_result = mdp.model_check_property(prop, alt=True)
+        self.stat.iteration_mdp(mdp.states)
+        return policy_result.sat
 
+    
+    def solve_singleton(self, family, prop):
+
+        result = family.mdp.model_check_property(prop)
+
+        self.stat.iteration_mdp(family.mdp.states)
+        if not result.sat:
+            return False
+
+        policy = self.quotient.empty_policy()
+        for state in range(family.mdp.states):
+            quotient_state = family.mdp.quotient_state_map[state]
+            
+            state_choice = result.result.scheduler.get_choice(state).get_deterministic_choice()
+            choice = family.mdp.model.nondeterministic_choice_indices[state] + state_choice
+            quotient_choice = family.mdp.quotient_choice_map[choice]
+            action = self.quotient.choice_to_action[quotient_choice]
+
+            policy[quotient_state] = action
+
+        # TODO uncomment this to check policy before double_check()
+        # assert self.verify_policy(family,prop,policy)
+        
+        return policy
+
+
+    def solve_game_abstraction(self, family, prop, game_solver):
         # construct and solve the game abstraction
-        # logger.debug("solving the game...")
+        # logger.debug("solving game abstraction...")
         game_solver.solve(family.selected_actions_bv, prop.maximizing, prop.minimizing)
         self.stat.iteration_game(family.mdp.states)
         # logger.debug("game solved, value is {}".format(game_solver.solution_value))
-        game_result_sat = prop.satisfies_threshold(game_solver.solution_value)
+        policy = game_solver.solution_state_to_player1_action
+        policy_sat = prop.satisfies_threshold(game_solver.solution_value)
         
         if False:
+            # double-check game value
             model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_solver.solution_reachable_choices)
             assert(model.nr_states == model.nr_choices)
             dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
@@ -384,57 +383,115 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if abs(dtmc_result.value-game_solver.solution_value) > 0.01:
                 logger.error("game solution is {}, but DTMC model checker yielded {}".format(game_solver.solution_value,dtmc_result.value))
 
-        # if not game_result_sat:
-        #      # apply player 1 actions to the quotient
-        #     policy = game_solver.solution_state_to_player1_action
-        #     mdp = self.quotient.apply_policy_to_family(family, policy)
-        #     policy_result = mdp.model_check_property(prop, alt=True)
-        #     self.stat.iteration_mdp(mdp.states)
-        #     if policy_result.sat:
-        #         # this scheduler is good for all MDPs in the family
-        #         print("game says NO but actually YES")
-        #         mdp_family_result.policy = policy
-        #         return mdp_family_result
+        return policy, policy_sat
 
-        if game_result_sat:
-            # apply player 1 actions to the quotient
-            policy = game_solver.solution_state_to_player1_action
-            mdp = self.quotient.apply_policy_to_family(family, policy)
-            policy_result = mdp.model_check_property(prop, alt=True)
-            self.stat.iteration_mdp(mdp.states)
-            if policy_result.sat:
-                # this scheduler is good for all MDPs in the family
-                mdp_family_result.policy = policy
-                return mdp_family_result
-            else:
-                print("game YES but nor forall family of size ", family.size)
-            #     assert False, "game YES but nor forall"
+
+
+    def solve_randomized_abstraction(self, family, prop):
+
+        choice_to_action = []
+        for choice in range(family.mdp.choices):
+            action = self.quotient.choice_to_action[family.mdp.quotient_choice_map[choice]]
+            choice_to_action.append(action)
+        state_action_choices = self.quotient.map_state_action_to_choices(family.mdp.model,self.quotient.num_actions,choice_to_action)
+        model,choice_to_action = self.quotient.randomize_action_variant(family.mdp.model, state_action_choices)
+        assert family.mdp.model.nr_states == model.nr_states 
         
-        # logger.debug("solving primary-primary direction...")
+        result = stormpy.synthesis.verify_mdp(paynt.quotient.models.MarkovChain.environment,model,prop.formula,True)
+        self.stat.iteration_mdp(model.nr_states)
+        value = result.at(model.initial_states[0])
+        policy_sat = prop.satisfies_threshold(value)
+
+        # extract policy for the quotient
+        scheduler = result.scheduler
+        policy = self.quotient.empty_policy()
+        for state in range(model.nr_states):
+            state_choice = scheduler.get_choice(state).get_deterministic_choice()
+            choice = model.transition_matrix.get_row_group_start(state) + state_choice
+            action = choice_to_action[choice]
+            quotient_state = family.mdp.quotient_state_map[state]
+            policy[quotient_state] = action
+        
+        return policy,policy_sat
+
+
+
+    def verify_family(self, family, game_solver, prop, reference_policy=None):
+        self.quotient.build(family)
+        mdp_family_result = MdpFamilyResult()
+
+        if False and reference_policy is not None:
+            # try reference policy
+            reference_policy_sat = self.verify_policy(family,prop,reference_policy)
+            if reference_policy_sat:
+                # print("reference policy worked!")
+                mdp_family_result.policy = reference_policy
+                mdp_family_result.policy_source = "singleton"
+                return mdp_family_result
+
+        if family.size == 1:
+            mdp_family_result.policy = self.solve_singleton(family,prop)
+            return mdp_family_result
+
+        if False:
+            randomized_policy,randomized_sat = self.solve_randomized_abstraction(family,prop)
+            if randomized_sat:
+                randomized_policy_sat = self.verify_policy(family,prop,randomized_policy)
+                if randomized_policy_sat:
+                    mdp_family_result.policy = randomized_policy
+                    mdp_family_result.policy_source = "randomized abstraction"
+                    return mdp_family_result
+        
+        if True:
+            # game abstraction
+            game_policy,game_sat = self.solve_game_abstraction(family,prop,game_solver)
+            if game_sat:
+                game_policy_sat = self.verify_policy(family,prop,game_policy)
+                if game_policy_sat:
+                    mdp_family_result.policy = game_policy
+                    mdp_family_result.policy_source = "game abstraction"
+                    return mdp_family_result
+                else:
+                    print("game YES but nor forall family of size ", family.size)
+
+        
+        
         # solve primary-primary direction for the family
+        # logger.debug("solving primary-primary direction...")
         primary_primary_result = family.mdp.model_check_property(prop)
         self.stat.iteration_mdp(family.mdp.states)
         # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
         if not primary_primary_result.sat:
             mdp_family_result.policy = False
             return mdp_family_result
+
     
         # undecided: prepare to split
         # map scheduler choices to hole options and check consistency
-        if True:
+        if False:
+            # optimistic splitting
             scheduler_choices = game_solver.solution_reachable_choices
             scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
         else:
-            mdp_choices = primary_primary_result.result.scheduler.compute_action_support(family.mdp.model.nondeterministic_choice_indices)
-            scheduler_choices = [family.mdp.quotient_choice_map[choice] for choice in mdp_choices]
+            # pessimistic splitting
+            scheduler_choices = stormpy.BitVector(self.quotient.quotient_mdp.nr_choices,False)
+            for state in range(family.mdp.states):                
+                state_choice = primary_primary_result.result.scheduler.get_choice(state).get_deterministic_choice()
+                choice = family.mdp.model.nondeterministic_choice_indices[state] + state_choice
+                quotient_choice = family.mdp.quotient_choice_map[choice]
+                scheduler_choices.set(quotient_choice,True)
+
+        scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
         hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
         mdp_family_result.scheduler_choices = scheduler_choices
         mdp_family_result.hole_selection = hole_selection
-        if True:
+        
+        if False:
             for choice in scheduler_choices:
                 assert choice in family.selected_actions_bv
             for hole_index,options in enumerate(hole_selection):
                 assert all([option in family[hole_index].options for option in options])
+        
         return mdp_family_result
 
 
@@ -509,27 +566,31 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.last_splitter = -1
         prop = self.quotient.specification.constraints[0]
         game_solver = self.quotient.build_game_abstraction_solver(prop)
+        game_solver.enable_profiling(True)
         policy_tree = PolicyTree(family)
-        reference_policy = None
 
+        reference_policy = None
         policy_tree_leaves = [policy_tree.root]
         while policy_tree_leaves:
+            
             policy_tree_node = policy_tree_leaves.pop(-1)
             family = policy_tree_node.family
             # logger.info("investigating family of size {}".format(family.size))
             result = self.verify_family(family,game_solver,prop,reference_policy)
             policy_tree_node.policy = result.policy
+            policy_tree_node.policy_source = result.policy_source
 
             if result.policy == False:
-                # logger.info("satisfying scheduler cannot be obtained for the following family {}".format(family))
+                reference_policy = None
                 self.explore(family)
                 continue
 
             if result.policy is not None:
-                # logger.info("found policy for all MDPs in the family")
                 reference_policy = result.policy
                 self.explore(family)
                 continue
+
+            reference_policy = None
 
             # refine
             splitter,suboptions,subfamilies = self.split(
@@ -538,6 +599,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node.split(splitter,suboptions,subfamilies)
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
+        game_solver.print_profiling()
         policy_tree.double_check_all_families(self.quotient, prop)
         policy_tree.print_stats()
         policy_tree.postprocess(self.quotient, prop)

@@ -29,15 +29,15 @@ class Statistic:
         self.synthesizer = synthesizer
         self.quotient = self.synthesizer.quotient
 
-        self.iterations_dtmc = 0
+        self.iterations_dtmc = None
         self.acc_size_dtmc = 0
         self.avg_size_dtmc = 0
 
-        self.iterations_mdp = 0
+        self.iterations_mdp = None
         self.acc_size_mdp = 0
         self.avg_size_mdp = 0
 
-        self.iterations_game = 0
+        self.iterations_game = None
         self.acc_size_game = 0
         self.avg_size_game = 0
 
@@ -53,16 +53,22 @@ class Statistic:
 
     
     def iteration_dtmc(self, size_dtmc):
+        if self.iterations_dtmc is None:
+            self.iterations_dtmc = 0
         self.iterations_dtmc += 1
         self.acc_size_dtmc += size_dtmc
         self.print_status()
 
     def iteration_mdp(self, size_mdp):
+        if self.iterations_mdp is None:
+            self.iterations_mdp = 0
         self.iterations_mdp += 1
         self.acc_size_mdp += size_mdp
         self.print_status()
 
     def iteration_game(self, size_game):
+        if self.iterations_game is None:
+            self.iterations_game = 0
         self.iterations_game += 1
         self.acc_size_game += size_game
         self.print_status()
@@ -76,21 +82,31 @@ class Statistic:
 
     
     def status(self):
+        ret_str = "> "
         discarded = self.quotient.discarded if self.quotient.discarded is not None else 0
-        fraction_rejected = (self.synthesizer.explored + discarded) / self.quotient.design_space.size
-        time_estimate = safe_division(self.synthesis_time.read(), fraction_rejected)
-        percentage_rejected = int(fraction_rejected * 1000000) / 10000.0
-        # percentage_rejected = fraction_rejected * 100
-        time_elapsed = round(self.synthesis_time.read(),1)
-        time_estimate = round(time_estimate,1)
-        iters = (self.iterations_game,self.iterations_mdp,self.iterations_dtmc)
-        avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
-        optimum = "-"
+        fraction_explored = (self.synthesizer.explored + discarded) / self.quotient.design_space.size
+        time_estimate = safe_division(self.synthesis_time.read(), fraction_explored)
+        percentage_explored = int(fraction_explored * 1000000) / 10000.0
+        ret_str += f"Progress {percentage_explored}%"
+        
+        time_elapsed = int(self.synthesis_time.read())
+        ret_str += f", elapsed {time_elapsed} s"
+        time_estimate = int(time_estimate)
+        ret_str += f", estimated {time_estimate} s"
+        time_estimate_hrs = round(time_estimate/3600, 1)
+        if time_estimate_hrs > 1:
+            ret_str += f" ({time_estimate_hrs} hrs)"
+
+        iters = [self.iterations_game,self.iterations_mdp,self.iterations_dtmc]
+        iters = [str(i) for i in iters if i is not None]
+        ret_str += ", iters = (" + ", ".join(iters) + ")"
+        
         spec = self.quotient.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
             optimum = round(spec.optimality.optimum,3)
-        
-        return f"> Progress {percentage_rejected}%, elapsed {time_elapsed} s, iters = {iters}, opt = {optimum}"
+            ret_str += f", opt = {optimum}"
+        return ret_str
+
 
     def print_status(self):
         if not self.synthesis_time.read() > self.status_horizon:
@@ -112,10 +128,6 @@ class Statistic:
         if self.quotient.specification.has_optimality:
             self.optimum = self.quotient.specification.optimality.optimum
 
-        self.avg_size_dtmc = safe_division(self.acc_size_dtmc, self.iterations_dtmc)
-        self.avg_size_mdp = safe_division(self.acc_size_mdp, self.iterations_mdp)
-        self.avg_size_game = safe_division(self.acc_size_game, self.iterations_game)
-
     def get_summary(self):
         spec = self.quotient.specification
         specification = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(spec.constraints)]) + "\n"
@@ -131,16 +143,20 @@ class Statistic:
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_time.time, 2)} s"
 
         family_stats = ""
-        game_stats = f"Game stats: avg MDP size: {round(self.avg_size_game)}, iterations: {self.iterations_game}" 
-        ar_stats = f"AR stats: avg MDP size: {round(self.avg_size_mdp)}, iterations: {self.iterations_mdp}" 
-        cegis_stats = f"CEGIS stats: avg DTMC size: {round(self.avg_size_dtmc)}, iterations: {self.iterations_dtmc}"
-        if self.iterations_game > 0:
-            family_stats += f"{game_stats}\n"
-        if self.iterations_mdp > 0:
-            family_stats += f"{ar_stats}\n"
-        if self.iterations_dtmc > 0:
-            family_stats += f"{cegis_stats}\n"
+        if self.iterations_game is not None:
+            avg_size = round(safe_division(self.acc_size_game, self.iterations_game))
+            type_stats = f"Game stats: avg MDP size: {avg_size}, iterations: {self.iterations_game}" 
+            family_stats += f"{type_stats}\n"
 
+        if self.iterations_mdp is not None:
+            avg_size = round(safe_division(self.acc_size_mdp, self.iterations_mdp))
+            type_stats = f"AR stats: avg MDP size: {avg_size}, iterations: {self.iterations_mdp}"
+            family_stats += f"{type_stats}\n"
+
+        if self.iterations_dtmc is not None:
+            avg_size = round(safe_division(self.acc_size_mdp, self.iterations_dtmc))
+            type_stats = f"CEGIS stats: avg DTMC size: {avg_size}, iterations: {self.iterations_dtmc}"
+            family_stats += f"{type_stats}\n"
 
         feasible = "yes" if self.feasible else "no"
         result = f"feasible: {feasible}" if self.optimum is None else f"optimal: {round(self.optimum, 6)}"
