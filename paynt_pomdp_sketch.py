@@ -28,7 +28,7 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
     pomdp = pomdp_sketch.build_pomdp(hole_assignment)
 
     # create a random k-FSC
-    fsc_is_deterministic = True
+    fsc_is_deterministic = False
     num_nodes = 3
     fsc = paynt.quotient.pomdp_family.FSC(num_nodes, pomdp_sketch.num_observations, fsc_is_deterministic)
     fsc.fill_trivial_actions(pomdp_sketch.observation_to_actions)
@@ -75,6 +75,7 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 
 # apply this FSC to a POMDP sketch, obtaining a DTMC sketch
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
+# qvalues = pomdp_sketch.compute_qvalues_for_fsc(dtmc_sketch)
 
 # to each (sub-family of) environment(s), assign a value corresponding to the minimum specification satisfiability
 synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)

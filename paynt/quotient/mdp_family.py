@@ -243,7 +243,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         
 
     def build_game_abstraction_solver(self, prop):
-        target_label = str(prop.formula.subformula.subformula)
+        target_label = prop.get_target_label()
         solver = stormpy.synthesis.GameAbstractionSolver(
             self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label
         )
