@@ -624,6 +624,21 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         #print(all_mdp_families[0].mdp.quotient_state_map)
         #print(primary_result.result.scheduler)
 
+
+        action_family_stack = [action_family]
+
+        while action_family_stack:
+
+            current_action_family = action_family_stack.pop(-1)
+
+            for mdp_subfamily in all_mdp_families:
+                self.quotient.build_with_second_coloring(action_coloring, current_action_family, mdp_subfamily)
+
+                primary_result = current_action_family.mdp.model_check_property(prop)
+                print(primary_result)
+
+            exit()
+
         
 
 

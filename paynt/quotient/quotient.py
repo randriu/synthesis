@@ -92,18 +92,30 @@ class QuotientContainer:
         self.discarded = 0
 
 
-    def build_with_coloring(self, family, coloring):
+    def build_with_second_coloring(self, main_coloring, main_family, alt_family):
         ''' Construct the quotient MDP for the family. '''
 
         # select actions compatible with the family and restrict the quotient
-        hole_selected_actions,selected_actions,selected_actions_bv = coloring.select_actions(family)
-        family.mdp = self.build_from_choice_mask(selected_actions_bv)
-        family.mdp.design_space = family
+        alt_hole_selected_actions,alt_selected_actions,alt_selected_actions_bv = self.coloring.select_actions(alt_family)
+        main_hole_selected_actions,main_selected_actions,main_selected_actions_bv = main_coloring.select_actions(main_family)
+
+        # print(alt_hole_selected_actions)
+        # print(main_hole_selected_actions)
+        # print()
+        # print(alt_selected_actions)
+        # print(main_selected_actions)
+        # print()
+        # print(alt_selected_actions_bv)
+        # print(main_selected_actions_bv)
+
+        selected_actions_bv = main_selected_actions_bv.__and__(alt_selected_actions_bv)
+        main_family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        main_family.mdp.design_space = main_family
 
         # cash restriction information
-        family.hole_selected_actions = hole_selected_actions
-        family.selected_actions = selected_actions
-        family.selected_actions_bv = selected_actions_bv
+        main_family.hole_selected_actions = main_hole_selected_actions
+        main_family.selected_actions = main_selected_actions
+        main_family.selected_actions_bv = selected_actions_bv
 
         # prepare to discard designs
         self.discarded = 0
