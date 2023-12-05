@@ -158,7 +158,27 @@ class QuotientContainer:
                 selection[hole_index].add(option)
         selection = [list(options) for options in selection]
 
-        return selection    
+        return selection
+    
+    def scheduler_selection_with_coloring(self, mdp, scheduler, coloring):
+        ''' Get hole options involved in the scheduler selection. '''
+        assert scheduler.memoryless and scheduler.deterministic
+        
+        # construct DTMC that corresponds to this scheduler and filter reachable states/choices
+        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        dtmc,_,choice_map = self.restrict_mdp(mdp.model, choices)
+        choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
+        
+        # map relevant choices to hole options
+        selection = [set() for hole_index in mdp.design_space.hole_indices]
+        for choice in choices:
+            global_choice = mdp.quotient_choice_map[choice]
+            choice_options = coloring.action_to_hole_options[global_choice]
+            for hole_index,option in choice_options.items():
+                selection[hole_index].add(option)
+        selection = [list(options) for options in selection]
+
+        return selection
 
     
     @staticmethod

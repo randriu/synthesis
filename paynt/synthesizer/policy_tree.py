@@ -455,7 +455,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 else:
                     print("game YES but nor forall family of size ", family.size)
 
-        
+
         
         # solve primary-primary direction for the family
         # logger.debug("solving primary-primary direction...")
@@ -596,27 +596,36 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return coloring
     
 
-    def synthesize_policy_for_tree_node(self, family_tree_node, prop):
-        family = family_tree_node.family
-        assert family.mdp is not None
+    def update_scores(self, score_lists, selection):
+        for hole, score_list in score_lists.items():
+            for choice in selection[hole]:
+                if choice not in score_list:
+                    score_list.append(choice)
+        
+    
 
-        all_mdp_families = []
-        action_coloring = self.create_action_coloring(family.mdp.model)
+    def synthesize_policy_for_tree_node(self, family, prop):
+        sat_mdp_families = []
+        action_coloring = self.create_action_coloring(self.quotient.quotient_mdp)
         action_family = paynt.quotient.holes.DesignSpace(action_coloring.holes)
+
+        unsat_mdp_families = []
 
         for hole_assignment in family.all_combinations():
             subfamily = family.copy()
             for hole_index, hole_option in enumerate(hole_assignment):
                 subfamily.assume_hole_options(hole_index, [hole_option])
-            all_mdp_families.append(subfamily)
 
             # TODO check if all MDPs SAT (what to do if not?)
-            # self.quotient.build(subfamily)
-            # primary_result = subfamily.mdp.model_check_property(prop)
-            # self.stat.iteration_mdp(subfamily.mdp.states)
+            self.quotient.build(subfamily)
+            primary_result = subfamily.mdp.model_check_property(prop)
+            self.stat.iteration_mdp(subfamily.mdp.states)
 
-            # if primary_result.sat == False:
-            #     return False
+            if primary_result.sat == False:
+                unsat_mdp_families.append(subfamily)
+                continue
+
+            sat_mdp_families.append(subfamily)
 
         # self.quotient.build(all_mdp_families[0])
         # primary_result = all_mdp_families[0].mdp.model_check_property(prop)
@@ -624,25 +633,69 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         #print(all_mdp_families[0].mdp.quotient_state_map)
         #print(primary_result.result.scheduler)
 
-
+        
         action_family_stack = [action_family]
 
         while action_family_stack:
 
             current_action_family = action_family_stack.pop(-1)
+            current_results = []
 
-            for mdp_subfamily in all_mdp_families:
-                self.quotient.build_with_second_coloring(action_coloring, current_action_family, mdp_subfamily)
+            score_lists = {hole:[] for hole in current_action_family.hole_indices if len(current_action_family[hole].options) > 1}
+
+            for mdp_subfamily in sat_mdp_families:
+                self.quotient.build_with_second_coloring(action_coloring, current_action_family, mdp_subfamily) # maybe copy to new family?
 
                 primary_result = current_action_family.mdp.model_check_property(prop)
-                print(primary_result)
+                self.stat.iteration_mdp(current_action_family.mdp.states)
 
-            exit()
+                if primary_result.sat == False:
+                    current_results.append(False)
+                    break
 
-        
+                current_results.append(primary_result)
+                selection = self.quotient.scheduler_selection_with_coloring(current_action_family.mdp, primary_result.result.scheduler, action_coloring)
+                self.update_scores(score_lists, selection)
 
+                scores = {hole:len(score_list) for hole, score_list in score_lists.items()}
+                
+                splitters = self.quotient.holes_with_max_score(scores)
+                splitter = splitters[0]
 
+                if scores[splitter] > 1:
+                    break
+            else:
+                return True, unsat_mdp_families
 
+            if False in current_results:
+                continue
+
+            used_options = score_lists[splitter]
+            core_suboptions = [[option] for option in used_options]
+            other_suboptions = [option for option in current_action_family[splitter].options if option not in used_options]
+            if other_suboptions:
+                other_suboptions = [other_suboptions]
+            else:
+                other_suboptions = []
+            suboptions = other_suboptions + core_suboptions # DFS solves core first
+
+            subfamilies = []
+            current_action_family.splitter = splitter
+            new_design_space = current_action_family.copy()
+            for suboption in suboptions:
+                subholes = new_design_space.subholes(splitter, suboption)
+                action_subfamily = paynt.quotient.holes.DesignSpace(subholes)
+                action_subfamily.assume_hole_options(splitter, suboption)
+                subfamilies.append(action_subfamily)
+            
+            # for subf in subfamilies:
+            #     print(subf)
+            # print()
+
+            action_family_stack = action_family_stack + subfamilies
+            #print(len(action_family_stack))
+
+        return False, unsat_mdp_families
         
 
 
@@ -654,9 +707,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_solver.enable_profiling(True)
         policy_tree = PolicyTree(family)
 
-        self.quotient.build(policy_tree.root.family)
-        self.synthesize_policy_for_tree_node(policy_tree.root, prop)
-        exit()
+        # self.quotient.build(policy_tree.root.family)
+        # policy_exists, _ = self.synthesize_policy_for_tree_node(policy_tree.root.family, prop)
+        # print(policy_exists)
+        # exit()
 
         reference_policy = None
         policy_tree_leaves = [policy_tree.root]
@@ -668,6 +722,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             result = self.verify_family(family,game_solver,prop,reference_policy)
             policy_tree_node.policy = result.policy
             policy_tree_node.policy_source = result.policy_source
+
+            policy_exists, _ = self.synthesize_policy_for_tree_node(family, prop)
+            print(policy_exists)
 
             if result.policy == False:
                 reference_policy = None
