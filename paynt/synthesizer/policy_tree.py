@@ -1,6 +1,7 @@
 import stormpy.synthesis
 
 import paynt.quotient.holes
+import paynt.quotient.coloring
 import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
@@ -525,7 +526,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert splitter is not None
         return splitter
     
-    
+
     def split(self, family, prop, scheduler_choices, state_values, hole_selection):
         
         splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
@@ -558,6 +559,75 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subfamilies.append(subfamily)
         
         return splitter,suboptions,subfamilies
+
+
+    def create_action_coloring(self, quotient_mdp):
+
+        holes = paynt.quotient.holes.Holes()
+        action_to_hole_options = []
+        for state in quotient_mdp.states:
+
+            state_actions = self.quotient.state_to_actions[int(state)]
+            if len(state_actions) <= 1:
+                for action in range(quotient_mdp.get_nr_available_actions(state)):
+                    action_to_hole_options.append({})
+                continue
+
+            name = f'state_{state}'
+            options = list(range(len(state_actions)))
+            option_labels = [self.quotient.action_labels[action] for action in state_actions]
+            hole = paynt.quotient.holes.Hole(name, options, option_labels)
+            holes.append(hole)
+
+            for action in range(quotient_mdp.get_nr_available_actions(state)):
+                choice = quotient_mdp.get_choice_index(state, action)
+                choice_index = -1
+                for index, action_list in enumerate(list(self.quotient.state_action_choices[int(state)])):
+                    if choice in action_list:
+                        choice_index = index
+                        break
+                assert choice_index != -1
+
+                hole_options = {len(holes)-1: state_actions.index(choice_index)}
+                action_to_hole_options.append(hole_options)
+
+        coloring = paynt.quotient.coloring.Coloring(quotient_mdp, holes, action_to_hole_options)
+
+        return coloring
+    
+
+    def synthesize_policy_for_tree_node(self, family_tree_node, prop):
+        family = family_tree_node.family
+        assert family.mdp is not None
+
+        all_mdp_families = []
+        action_coloring = self.create_action_coloring(family.mdp.model)
+        action_family = paynt.quotient.holes.DesignSpace(action_coloring.holes)
+
+        for hole_assignment in family.all_combinations():
+            subfamily = family.copy()
+            for hole_index, hole_option in enumerate(hole_assignment):
+                subfamily.assume_hole_options(hole_index, [hole_option])
+            all_mdp_families.append(subfamily)
+
+            # TODO check if all MDPs SAT (what to do if not?)
+            # self.quotient.build(subfamily)
+            # primary_result = subfamily.mdp.model_check_property(prop)
+            # self.stat.iteration_mdp(subfamily.mdp.states)
+
+            # if primary_result.sat == False:
+            #     return False
+
+        # self.quotient.build(all_mdp_families[0])
+        # primary_result = all_mdp_families[0].mdp.model_check_property(prop)
+        # self.stat.iteration_mdp(all_mdp_families[0].mdp.states)
+        #print(all_mdp_families[0].mdp.quotient_state_map)
+        #print(primary_result.result.scheduler)
+
+        
+
+
+
         
 
 
@@ -568,6 +638,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         game_solver.enable_profiling(True)
         policy_tree = PolicyTree(family)
+
+        self.quotient.build(policy_tree.root.family)
+        self.synthesize_policy_for_tree_node(policy_tree.root, prop)
+        exit()
 
         reference_policy = None
         policy_tree_leaves = [policy_tree.root]

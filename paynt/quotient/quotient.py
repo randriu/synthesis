@@ -91,6 +91,23 @@ class QuotientContainer:
         # prepare to discard designs
         self.discarded = 0
 
+
+    def build_with_coloring(self, family, coloring):
+        ''' Construct the quotient MDP for the family. '''
+
+        # select actions compatible with the family and restrict the quotient
+        hole_selected_actions,selected_actions,selected_actions_bv = coloring.select_actions(family)
+        family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        family.mdp.design_space = family
+
+        # cash restriction information
+        family.hole_selected_actions = hole_selected_actions
+        family.selected_actions = selected_actions
+        family.selected_actions_bv = selected_actions_bv
+
+        # prepare to discard designs
+        self.discarded = 0
+
     
     @staticmethod
     def mdp_to_dtmc(mdp):
