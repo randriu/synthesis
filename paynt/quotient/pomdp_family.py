@@ -240,12 +240,9 @@ class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientCo
         result = stormpy.model_checking(product, formula, environment=paynt.quotient.models.MarkovChain.environment)
         product_state_to_value = result.get_values()
 
-        invalid_action = self.num_actions
-
-        # prepare the resulting map
-        state_memory_action_to_value = {}
         # map state values to the resulting map
-        # print(len(product_state_to_state_memory_action))
+        state_memory_action_to_value = {}
+        invalid_action = self.num_actions
         for product_state in range(product.nr_states):
             state,memory_action = self.product_pomdp_fsc.product_state_to_state_memory_action[product_state]
             memory,action = memory_action
@@ -280,7 +277,6 @@ class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientCo
             assert action in self.observation_to_actions[obs], "invalid trace"
 
         return trace
-
     
     
     def compute_witnessing_traces(self, dtmc_sketch, satisfying_assignment, num_traces, trace_max_length):
