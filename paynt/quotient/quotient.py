@@ -91,6 +91,28 @@ class QuotientContainer:
         # prepare to discard designs
         self.discarded = 0
 
+
+    def build_with_second_coloring(self, family, main_coloring, main_family):
+        ''' Construct the quotient MDP for the family. '''
+
+        # select actions compatible with the family and restrict the quotient
+        alt_hole_selected_actions,alt_selected_actions,alt_selected_actions_bv = self.coloring.select_actions(family)
+        main_hole_selected_actions,main_selected_actions,main_selected_actions_bv = main_coloring.select_actions(main_family)
+
+        selected_actions_bv = main_selected_actions_bv.__and__(alt_selected_actions_bv)
+        main_family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        main_family.mdp.design_space = main_family
+        family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        family.mdp.design_space = family
+
+        # cash restriction information
+        main_family.hole_selected_actions = main_hole_selected_actions
+        main_family.selected_actions = main_selected_actions
+        main_family.selected_actions_bv = selected_actions_bv
+
+        # prepare to discard designs
+        self.discarded = 0
+
     
     @staticmethod
     def mdp_to_dtmc(mdp):
@@ -129,7 +151,27 @@ class QuotientContainer:
                 selection[hole_index].add(option)
         selection = [list(options) for options in selection]
 
-        return selection    
+        return selection
+    
+    def scheduler_selection_with_coloring(self, mdp, scheduler, coloring):
+        ''' Get hole options involved in the scheduler selection. '''
+        assert scheduler.memoryless and scheduler.deterministic
+        
+        # construct DTMC that corresponds to this scheduler and filter reachable states/choices
+        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        dtmc,_,choice_map = self.restrict_mdp(mdp.model, choices)
+        choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
+        
+        # map relevant choices to hole options
+        selection = [set() for hole_index in mdp.design_space.hole_indices]
+        for choice in choices:
+            global_choice = mdp.quotient_choice_map[choice]
+            choice_options = coloring.action_to_hole_options[global_choice]
+            for hole_index,option in choice_options.items():
+                selection[hole_index].add(option)
+        selection = [list(options) for options in selection]
+
+        return selection
 
     
     @staticmethod
