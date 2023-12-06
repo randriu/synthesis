@@ -137,7 +137,14 @@ class Property:
         return property_negated
 
     def get_target_label(self):
-        return str(self.formula.subformula.subformula)
+        target = self.formula.subformula.subformula
+        if isinstance(target, stormpy.logic.AtomicLabelFormula):
+            target_label = target.label
+        elif isinstance(target, stormpy.logic.AtomicExpressionFormula):
+            target_label = str(target)
+        else:
+            raise ValueError(f"unknown type of target expression {str(target)}, expected atomic label or atomic expression")
+        return target_label
 
     def get_reward_name(self):
         assert self.reward
