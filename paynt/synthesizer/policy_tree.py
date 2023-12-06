@@ -16,8 +16,8 @@ class MdpFamilyResult:
         self.policy = None
         self.policy_source = ""
 
-        self.scheduler_choices = None
         self.hole_selection = None
+        self.splitter = None
 
     def __str__(self):
         return str(self.sat)
@@ -242,6 +242,8 @@ class PolicyTree:
         from collections import defaultdict
         sources = defaultdict(int)
         for node in self.collect_leaves():
+            if not node.solved:
+                continue
             sources[node.policy_source] += 1
         return sources
 
@@ -286,9 +288,14 @@ class PolicyTree:
         print("\tunsolvable leaves: {} (avg.size: {})".format(num_leaves_unsolvable,leaf_unsolvable_avg))
         print("\t singleton leaves: {}".format(num_leaves_singleton))
 
+        # print()
+        # print("(X, Y, Z)  -  number of internal nodes having yes/?/no children")
+        # for key,number in self.count_diversity().items():
+        #     print(key, " - ", number)
+        
         print()
-        print("(X, Y, Z)  -  number of internal nodes having yes/?/no children")
-        for key,number in self.count_diversity().items():
+        print("X  -  number of nodes solved with policy of type X")
+        for key,number in self.count_policy_sources().items():
             print(key, " - ", number)
         print("--------------------")
 
@@ -342,7 +349,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def solve_singleton(self, family, prop):
 
         result = family.mdp.model_check_property(prop)
-
         self.stat.iteration_mdp(family.mdp.states)
         if not result.sat:
             return False
@@ -426,11 +432,12 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if reference_policy_sat:
                 # print("reference policy worked!")
                 mdp_family_result.policy = reference_policy
-                mdp_family_result.policy_source = "singleton"
+                mdp_family_result.policy_source = "reference"
                 return mdp_family_result
 
         if family.size == 1:
             mdp_family_result.policy = self.solve_singleton(family,prop)
+            mdp_family_result.policy_source = "singleton"
             return mdp_family_result
 
         if False:
@@ -466,32 +473,40 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             return mdp_family_result
 
     
-        # undecided: prepare to split
-        # map scheduler choices to hole options and check consistency
+        # undecided: choose scheduler choices to be used for splitting
         if False:
             # optimistic splitting
             scheduler_choices = game_solver.solution_reachable_choices
-            scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
+            state_values = game_solver.solution_state_values
         else:
             # pessimistic splitting
             scheduler_choices = stormpy.BitVector(self.quotient.quotient_mdp.nr_choices,False)
-            for state in range(family.mdp.states):                
+            state_values = [0] * self.quotient.quotient_mdp.nr_states
+            for state in range(family.mdp.states):
+                quotient_state = family.mdp.quotient_state_map[state]
                 state_choice = primary_primary_result.result.scheduler.get_choice(state).get_deterministic_choice()
                 choice = family.mdp.model.nondeterministic_choice_indices[state] + state_choice
                 quotient_choice = family.mdp.quotient_choice_map[choice]
                 scheduler_choices.set(quotient_choice,True)
+                state_values[quotient_state] = primary_primary_result.result.at(state)
 
+        # map reachable scheduler choices to hole options
         scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
         hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
-        mdp_family_result.scheduler_choices = scheduler_choices
-        mdp_family_result.hole_selection = hole_selection
         
         if False:
+            # sanity check
             for choice in scheduler_choices:
                 assert choice in family.selected_actions_bv
             for hole_index,options in enumerate(hole_selection):
                 assert all([option in family[hole_index].options for option in options])
+
+        # pick splitter
+        splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
         
+        # done
+        mdp_family_result.splitter = splitter
+        mdp_family_result.hole_selection = hole_selection
         return mdp_family_result
 
 
@@ -526,10 +541,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return splitter
     
     
-    def split(self, family, prop, scheduler_choices, state_values, hole_selection):
+    def split(self, family, prop, hole_selection, splitter):
         
-        splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
-        # splitter = self.choose_splitter_round_robin(family,prop,scheduler_choices,state_values,hole_selection)
         # split the hole
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
@@ -557,7 +570,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subfamily.assume_hole_options(splitter, suboption)
             subfamilies.append(subfamily)
         
-        return splitter,suboptions,subfamilies
+        return suboptions,subfamilies
         
 
 
@@ -593,10 +606,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             reference_policy = None
 
             # refine
-            splitter,suboptions,subfamilies = self.split(
-                family, prop, game_solver.solution_reachable_choices, game_solver.solution_state_values, result.hole_selection
-            )
-            policy_tree_node.split(splitter,suboptions,subfamilies)
+            suboptions,subfamilies = self.split(family, prop, result.hole_selection, result.splitter)
+            policy_tree_node.split(result.splitter,suboptions,subfamilies)
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
         game_solver.print_profiling()
