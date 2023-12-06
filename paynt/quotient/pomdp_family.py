@@ -241,10 +241,11 @@ class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientCo
         product_state_to_value = result.get_values()
 
         # map state values to the resulting map
+        product_state_to_state_memory_action = self.product_pomdp_fsc.product_state_to_state_memory_action.copy()
         state_memory_action_to_value = {}
         invalid_action = self.num_actions
         for product_state in range(product.nr_states):
-            state,memory_action = self.product_pomdp_fsc.product_state_to_state_memory_action[product_state]
+            state,memory_action = product_state_to_state_memory_action[product_state]
             memory,action = memory_action
             if action == invalid_action:
                 continue
