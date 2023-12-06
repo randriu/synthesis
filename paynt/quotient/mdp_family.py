@@ -66,64 +66,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             choice_destinations.append(destinations)
         return choice_destinations
 
-    @staticmethod
-    def randomize_action_variant(mdp, state_action_choices):
-        '''
-        Given an MDP having multiple variants of actions, create an MDP in which this variant selection is randomized.
-        '''
-
-        components = stormpy.storage.SparseModelComponents()
-        # copy state labeling
-        state_labeling = stormpy.storage.StateLabeling(mdp.nr_states)
-        for label in mdp.labeling.get_labels():
-            state_labeling.add_label(label)
-            state_labeling.set_states(label, mdp.labeling.get_states(label))
-        components.state_labeling = state_labeling
         
-        # build transition matrix and reward models
-        reward_vectors = {name:[] for name in mdp.reward_models}
-        builder = stormpy.storage.SparseMatrixBuilder(has_custom_row_grouping=True)
-        tm = mdp.transition_matrix
-        num_rows = 0
-        choice_to_action = []
-        for state in range(mdp.nr_states):
-            builder.new_row_group(num_rows)
-            for action,choices in enumerate(state_action_choices[state]):
-                if not choices:
-                    continue
-
-                # new choice
-                choice_to_action.append(action)
-                
-                # handle transition matrix
-                num_choices = len(choices)
-                dst_prob = collections.defaultdict(int)
-                for choice in choices:
-                    for entry in tm.get_row(choice):
-                        dst_prob[entry.column] += entry.value()/num_choices
-
-                for dst,prob in dst_prob.items():
-                    builder.add_next_value(num_rows,dst,prob)
-                num_rows += 1
-
-                # handle reward models
-                for name,reward_model in mdp.reward_models.items():
-                    reward_value = 0
-                    for choice in choices:
-                        reward_value += reward_model.get_state_action_reward(choice)
-                    reward_value /= num_choices
-                    reward_vectors[name].append(reward_value)
-
-        components.transition_matrix = builder.build()
-        components.reward_models = {}
-        for name,state_action_reward in reward_vectors.items():
-            components.reward_models[name] = stormpy.SparseRewardModel(optional_state_action_reward_vector=state_action_reward)
-        model = stormpy.storage.SparseMdp(components)
-
-        return model,choice_to_action
-        
-
-    
     def __init__(self, quotient_mdp, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
 
@@ -134,10 +77,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             self.quotient_mdp, self.num_actions, self.choice_to_action)
         self.state_to_actions = MdpFamilyQuotientContainer.map_state_to_available_actions(self.state_action_choices)
         self.choice_destinations = MdpFamilyQuotientContainer.compute_choice_destinations(self.quotient_mdp)
-        
-        self.randomized_abstraction = MdpFamilyQuotientContainer.randomize_action_variant(
-            self.quotient_mdp, self.state_action_choices)
-
+    
     
     @property
     def num_actions(self):
