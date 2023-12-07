@@ -110,10 +110,9 @@ class Statistic:
 
     def print_status(self):
         if not self.synthesis_time.read() > self.status_horizon:
-            return        
-        # return
+            return
         print(self.status(), flush=True)
-        self.status_horizon += Statistic.status_period
+        self.status_horizon = self.synthesis_time.read() + Statistic.status_period
 
 
     def finished(self, assignment):
