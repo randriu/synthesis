@@ -12,6 +12,8 @@ from ..quotient.quotient import QuotientContainer
 from ..quotient.quotient_pomdp import POMDPQuotientContainer
 from ..utils.profiler import Timer
 
+import paynt.verification.property
+
 import math
 from collections import defaultdict
 
@@ -821,7 +823,7 @@ class SynthesizerPOMDP:
                 dtmc = self.quotient.build_chain(synthesized_assignment)
 
                 # compute expected visits for this dtmc
-                dtmc_visits = stormpy.compute_expected_number_of_visits(MarkovChain.environment, dtmc.model).get_values()
+                dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc.model).get_values()
                 dtmc_visits = list(dtmc_visits)
 
                 # handle infinity- and zero-visits

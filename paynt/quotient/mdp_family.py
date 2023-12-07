@@ -121,6 +121,17 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def empty_policy(self):
         return [self.num_actions] * self.quotient_mdp.nr_states
 
+    def scheduler_to_policy(self, scheduler, mdp):            
+        policy = self.empty_policy()
+        for state in range(mdp.model.nr_states):
+            state_choice = scheduler.get_choice(state).get_deterministic_choice()
+            choice = mdp.model.nondeterministic_choice_indices[state] + state_choice
+            quotient_choice = mdp.quotient_choice_map[choice]
+            action = self.choice_to_action[quotient_choice]
+            quotient_state = mdp.quotient_state_map[state]
+            policy[quotient_state] = action
+        return policy
+
 
     def fix_policy_for_family(self, family, policy):
         '''

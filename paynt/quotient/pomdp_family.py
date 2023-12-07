@@ -7,6 +7,7 @@ import paynt.quotient.models
 import paynt.quotient.quotient
 import paynt.quotient.coloring
 import paynt.quotient.mdp_family
+import paynt.verification.property
 
 import json
 
@@ -237,7 +238,7 @@ class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientCo
         # model check
         product = dtmc_sketch.quotient_mdp
         formula = dtmc_sketch.get_property().formula
-        result = stormpy.model_checking(product, formula, environment=paynt.quotient.models.MarkovChain.environment)
+        result = stormpy.model_checking(product, formula, environment=paynt.verification.property.Property.environment)
         product_state_to_value = result.get_values()
 
         # map state values to the resulting map

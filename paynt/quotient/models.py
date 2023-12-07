@@ -10,8 +10,6 @@ class MarkovChain:
 
     # options for the construction of chains
     builder_options = None
-    # model checking environment (method & precision)
-    environment = None
 
     @classmethod
     def initialize(cls, specification):
@@ -23,24 +21,6 @@ class MarkovChain:
         cls.builder_options.set_add_overlapping_guards_label()
         cls.builder_options.set_build_observation_valuations(True)
         # cls.builder_options.set_exploration_checks(True)
-    
-        # model checking environment
-        cls.environment = stormpy.Environment()
-        se = cls.environment.solver_environment
-        
-        stormpy.synthesis.set_precision_native(se.native_solver_environment, Property.mc_precision)
-        stormpy.synthesis.set_precision_minmax(se.minmax_solver_environment, Property.mc_precision)
-
-        se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
-        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
-        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
-
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     @classmethod
     def assert_no_overlapping_guards(cls, model):
@@ -97,11 +77,11 @@ class MarkovChain:
 
     def model_check_formula(self, formula):
         if not self.is_deterministic:
-            return stormpy.synthesis.verify_mdp(self.environment,self.model,formula,True)
+            return stormpy.synthesis.verify_mdp(Property.environment,self.model,formula,True)
         return stormpy.model_checking(
-            self.model, formula, only_initial_states=False,
+            self.model, formula,
             extract_scheduler=(not self.is_deterministic),
-            environment=self.environment
+            environment=Property.environment
         )
 
     def model_check_formula_hint(self, formula, hint):
@@ -109,7 +89,7 @@ class MarkovChain:
         stormpy.synthesis.set_loglevel_off()
         task = stormpy.core.CheckTask(formula, only_initial_states=False)
         task.set_produce_schedulers(produce_schedulers=True)
-        result = stormpy.synthesis.model_check_with_hint(self.model, task, self.environment, hint)
+        result = stormpy.synthesis.model_check_with_hint(self.model, task, Property.environment, hint)
         return result
 
     def model_check_property(self, prop, alt = False):

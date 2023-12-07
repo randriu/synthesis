@@ -9,6 +9,7 @@ import paynt.quotient.models
 import paynt.quotient.quotient
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
+import paynt.verification.property
 
 import logging
 logger = logging.getLogger(__name__)
@@ -129,6 +130,7 @@ class Sketch:
                 logger.debug('WARNING: discount factor transformation has not been properly tested')
              
         paynt.quotient.models.MarkovChain.initialize(specification)
+        paynt.verification.property.Property.initialize()
         
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} actions".format(

@@ -1,4 +1,5 @@
 import stormpy
+import stormpy.synthesis
 
 import math
 import operator
@@ -16,13 +17,41 @@ def construct_reward_property(reward_name, minimizing, target_label):
 
 
 class Property:
-
-    # model checking precision
-    mc_precision = 1e-4
-    # precision for comparing floats
-    float_precision = 1e-10
-    
     ''' Wrapper over a stormpy property. '''
+    
+    # model checking environment (method & precision)
+    environment = None
+    # model checking precision
+    model_checking_precision = 1e-4
+    
+    @classmethod
+    def set_model_checking_precision(cls, precision):
+        cls.model_checking_precision = precision
+        stormpy.synthesis.set_precision_native(cls.environment.solver_environment.native_solver_environment, precision)
+        stormpy.synthesis.set_precision_minmax(cls.environment.solver_environment.minmax_solver_environment, precision)
+
+    @classmethod
+    def initialize(cls):
+        cls.environment = stormpy.Environment()
+        cls.set_model_checking_precision(cls.model_checking_precision)
+
+        se = cls.environment.solver_environment
+        se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
+        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
+
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
+
+    @staticmethod
+    def above_model_checking_precision(a, b):
+        return abs(a-b) > Property.model_checking_precision
+
+    
     def __init__(self, prop, discount_factor=1):
         self.property = prop
         self.discount_factor = discount_factor
@@ -76,37 +105,6 @@ class Property:
     def maximizing(self):
         return not self.minimizing
 
-    def property_copy(self):
-        formula_copy = self.property.raw_formula.clone()
-        property_copy = stormpy.core.Property(self.property.name, formula_copy)
-        return property_copy
-
-    def copy(self):
-        return Property(self.property_copy(), self.discount_factor)
-
-    @staticmethod
-    def above_mc_precision(a, b):
-        return abs(a-b) > Property.mc_precision
-
-    @staticmethod
-    def above_float_precision(a, b):
-        return abs(a-b) > Property.float_precision
-
-    def meets_op(self, a, b):
-        ''' For constraints, we do not want to distinguish between small differences. '''
-        # return not Property.above_float_precision(a,b) or self.op(a,b)
-        return self.op(a,b)
-
-    def meets_threshold(self, value):
-        return self.meets_op(value, self.threshold)
-
-    def result_valid(self, value):
-        return not self.reward or value != math.inf
-
-    def satisfies_threshold(self, value):
-        ''' check if DTMC model checking result satisfies the property '''
-        return self.result_valid(value) and self.meets_threshold(value)
-
     @property
     def is_until(self):
         return self.formula.subformula.is_until_formula
@@ -118,6 +116,20 @@ class Property:
         formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
         self.__init__(prop, self.discount_factor)
+
+    def property_copy(self):
+        formula_copy = self.property.raw_formula.clone()
+        property_copy = stormpy.core.Property(self.property.name, formula_copy)
+        return property_copy
+
+    def copy(self):
+        return Property(self.property_copy(), self.discount_factor)
+
+    def result_valid(self, value):
+        return not self.reward or value != math.inf
+
+    def satisfies_threshold(self, value):
+        return self.result_valid(value) and self.op(value, self.threshold)
 
     @property
     def can_be_improved(self):
@@ -192,7 +204,7 @@ class OptimalityProperty(Property):
 
     def meets_op(self, a, b):
         ''' For optimality objective, we want to accept improvements above model checking precision. '''
-        return b is None or (Property.above_mc_precision(a,b) and self.op(a,b))
+        return b is None or (Property.above_model_checking_precision(a,b) and self.op(a,b))
 
     def satisfies_threshold(self, value):
         return self.result_valid(value) and self.meets_op(value, self.threshold)
@@ -212,9 +224,9 @@ class OptimalityProperty(Property):
     def suboptimal_value(self):
         assert self.optimum is not None
         if self.minimizing:
-            return self.optimum * (1 + self.mc_precision)
+            return self.optimum * (1 + self.model_checking_precision)
         else:
-            return self.optimum * (1 - self.mc_precision)
+            return self.optimum * (1 - self.model_checking_precision)
 
     def transform_until_to_eventually(self):
         if not self.is_until:

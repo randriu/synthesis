@@ -5,6 +5,8 @@ import paynt.quotient.coloring
 import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
+from paynt.verification.property import Property
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -107,9 +109,7 @@ class PolicyTreeNode:
             result = self.family.mdp.model_check_property(prop)
             assert not result.sat
         else:
-            mdp = quotient.apply_policy_to_family(self.family, self.policy)
-            result = mdp.model_check_property(prop, alt=True)
-            assert result.sat, self.family.size
+            SynthesizerPolicyTree.double_check_policy(quotient, self.family, prop, self.policy)
 
     
     def merge_if_single_child(self):
@@ -338,41 +338,42 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     use_game_abstraction = True
     # if True, then the game scheduler will be used for splitting (incompatible with randomized abstraction)
     use_optimistic_splitting = True
-
+    
     @property
     def method_name(self):
         return "AR (policy tree)"
 
+    @staticmethod
+    def double_check_policy(quotient, family, prop, policy):
+        mdp = quotient.apply_policy_to_family(family, policy)
+        if family.size == 1:
+            quotient.assert_mdp_is_deterministic(mdp, family)
+        
+        DOUBLE_CHECK_PRECISION = 1e-8
+        default_precision = Property.model_checking_precision
+        Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)
+        policy_result = mdp.model_check_property(prop, alt=True)
+        Property.set_model_checking_precision(default_precision)
+        if not policy_result.sat:
+            logger.warning("policy should be SAT but (most likely due to model checking precision) has value {}".format(policy_result.value))
+        return
+    
+    
     def verify_policy(self, family, prop, policy):
         mdp = self.quotient.apply_policy_to_family(family, policy)
-        if family.size == 1:
-            self.quotient.assert_mdp_is_deterministic(mdp, family)
         policy_result = mdp.model_check_property(prop, alt=True)
         self.stat.iteration_mdp(mdp.states)
         return policy_result.sat
 
     
     def solve_singleton(self, family, prop):
-
         result = family.mdp.model_check_property(prop)
         self.stat.iteration_mdp(family.mdp.states)
         if not result.sat:
             return False
-
-        policy = self.quotient.empty_policy()
-        for state in range(family.mdp.states):
-            quotient_state = family.mdp.quotient_state_map[state]
-            
-            state_choice = result.result.scheduler.get_choice(state).get_deterministic_choice()
-            choice = family.mdp.model.nondeterministic_choice_indices[state] + state_choice
-            quotient_choice = family.mdp.quotient_choice_map[choice]
-            action = self.quotient.choice_to_action[quotient_choice]
-
-            policy[quotient_state] = action
-
-        # TODO uncomment this to check policy before double_check()
-        # assert self.verify_policy(family,prop,policy)
-        
+        policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
+        # uncomment below to preemptively double-check the policy
+        # SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, policy)
         return policy
 
 
@@ -409,7 +410,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         model,choice_to_action, = stormpy.synthesis.randomize_action_variant(family.mdp.model, state_action_choices)
         assert family.mdp.model.nr_states == model.nr_states 
         
-        result = stormpy.synthesis.verify_mdp(paynt.quotient.models.MarkovChain.environment,model,prop.formula,True)
+        result = stormpy.synthesis.verify_mdp(Property.environment, model, prop.formula, True)
         self.stat.iteration_mdp(model.nr_states)
         value = result.at(model.initial_states[0])
         policy_sat = prop.satisfies_threshold(value)
@@ -613,23 +614,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             for choice in selection[hole]:
                 if choice not in score_list:
                     score_list.append(choice)
-
-
-    def create_policy(self, scheduler, family):
-        choice_to_action = []
-        for choice in range(family.mdp.choices):
-            action = self.quotient.choice_to_action[family.mdp.quotient_choice_map[choice]]
-            choice_to_action.append(action)
-            
-        policy = self.quotient.empty_policy()
-        for state in range(family.mdp.model.nr_states):
-            state_choice = scheduler.get_choice(state).get_deterministic_choice()
-            choice = family.mdp.model.transition_matrix.get_row_group_start(state) + state_choice
-            action = choice_to_action[choice]
-            quotient_state = family.mdp.quotient_state_map[state]
-            policy[quotient_state] = action
-
-        return policy
         
     
     # synthesize one policy for family of MDPs (if such policy exists)
@@ -663,7 +647,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     continue
     
                 sat_mdp_families.append(subfamily)
-                policy = self.create_policy(primary_result.result.scheduler, subfamily)
+                policy = self.quotient.scheduler_to_policy(primary_result.result.scheduler, subfamily.mdp)
                 sat_mdp_policies.append(policy)
             else:
                 sat_mdp_families.append(subfamily)
@@ -705,7 +689,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 # add policy if current mdp doesn't have one yet
                 # TODO maybe this can be done after some number of controllers are consistent?
                 if sat_mdp_policies[index] == None:
-                    policy = self.create_policy(primary_result.result.scheduler, mdp_subfamily)
+                    policy = self.quotient.scheduler_to_policy(primary_result.result.scheduler, mdp_subfamily.mdp)
                     sat_mdp_policies[index] = policy
 
                 current_results.append(primary_result)
@@ -722,7 +706,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     break
             else:
                 for index, (result, family) in enumerate(zip(current_results, sat_mdp_families)):
-                    policy = self.create_policy(result.result.scheduler, family)
+                    policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
                     sat_mdp_policies[index] = policy
                 return True, unsat_mdp_families, sat_mdp_families, sat_mdp_policies
 
@@ -757,7 +741,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             self.quotient.build(sat_mdp_families[mdp_index])
             primary_result = sat_mdp_families[mdp_index].mdp.model_check_property(prop)
             self.stat.iteration_mdp(sat_mdp_families[mdp_index].mdp.states)
-            policy = self.create_policy(primary_result.result.scheduler, sat_mdp_families[mdp_index])
+            policy = self.quotient.scheduler_to_policy(primary_result.result.scheduler, sat_mdp_families[mdp_index].mdp)
             sat_mdp_policies[mdp_index] = policy
 
         return False, unsat_mdp_families, sat_mdp_families, sat_mdp_policies
