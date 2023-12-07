@@ -5,6 +5,7 @@ import paynt.quotient.coloring
 import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
+import paynt.verification.property_result
 from paynt.verification.property import Property
 
 import logging
@@ -347,7 +348,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         if family.size == 1:
             quotient.assert_mdp_is_deterministic(mdp, family)
         
-        DOUBLE_CHECK_PRECISION = 1e-8
+        DOUBLE_CHECK_PRECISION = 1e-6
         default_precision = Property.model_checking_precision
         Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)
         policy_result = mdp.model_check_property(prop, alt=True)
@@ -639,7 +640,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             for index, mdp_subfamily in enumerate(sat_mdp_families):
                 self.quotient.build_with_second_coloring(mdp_subfamily, action_coloring, current_action_family) # maybe copy to new family?
 
-                primary_result = current_action_family.mdp.model_check_property(prop)
+                mc_result = stormpy.model_checking(
+                    current_action_family.mdp.model, prop.formula, extract_scheduler=True, environment=Property.environment)
+                value = mc_result.at(current_action_family.mdp.initial_state)
+                primary_result = paynt.verification.property_result.PropertyResult(prop, mc_result, value)
                 self.stat.iteration_mdp(current_action_family.mdp.states)
 
                 # discard the family as soon as one MDP is unsat
@@ -718,8 +722,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree = PolicyTree(family)
 
         # self.quotient.build(policy_tree.root.family)
-        # policy_exists, _ = self.synthesize_policy_for_tree_node(policy_tree.root.family, prop)
-        # print(policy_exists)
+        # policy_exists,_,_,_ = self.synthesize_policy_for_tree_node(policy_tree.root.family, prop, all_sat=True)
+        # print("Policy exists: ", policy_exists)
+        # self.stat.finished(None)
+        # self.stat.print()
         # exit()
 
         reference_policy = None
