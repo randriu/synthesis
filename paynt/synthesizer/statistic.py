@@ -86,7 +86,7 @@ class Statistic:
         discarded = self.quotient.discarded if self.quotient.discarded is not None else 0
         fraction_explored = (self.synthesizer.explored + discarded) / self.quotient.design_space.size
         time_estimate = safe_division(self.synthesis_time.read(), fraction_explored)
-        percentage_explored = int(fraction_explored * 1000000) / 10000.0
+        percentage_explored = int(fraction_explored * 100000) / 1000.0
         ret_str += f"Progress {percentage_explored}%"
         
         time_elapsed = int(self.synthesis_time.read())
