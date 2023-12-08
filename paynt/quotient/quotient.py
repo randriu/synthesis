@@ -185,25 +185,15 @@ class QuotientContainer:
                 choices.set(choice,True)
         return choices
 
-
-    def choices_to_hole_selection(self, choices, coloring=None):
-        if coloring is None:
-            coloring = self.coloring
-        hole_selection = [set() for hole_index in self.design_space.hole_indices]
-        for choice in choices:
-            choice_options = self.coloring.action_to_hole_options[choice]
-            for hole_index,option in choice_options.items():
-                hole_selection[hole_index].add(option)
-        hole_selection = [list(options) for options in hole_selection]
-        return hole_selection
-
     
     def scheduler_selection(self, mdp, scheduler, coloring=None):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
-        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler, keep_reachable=True)
+        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
         choices = self.state_to_choice_to_choices(state_to_choice)
-        hole_selection = self.choices_to_hole_selection(choices,coloring)
+        if coloring is None:
+            coloring = self.coloring
+        hole_selection = coloring.choices_to_hole_selection(choices)
         return hole_selection
 
     
