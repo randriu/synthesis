@@ -56,7 +56,7 @@ class Coloring:
     @property
     def num_choices(self):
         return len(self.action_to_hole_options)
-        
+
     def select_actions(self, family):
         '''
         Select non-default actions relevant in the provided design space.
@@ -112,3 +112,13 @@ class Coloring:
         selected_actions_bv = stormpy.synthesis.construct_selection(self.default_actions, selected_actions)
         
         return hole_selected_actions,selected_actions,selected_actions_bv
+
+    
+    def choices_to_hole_selection(self, choices):
+        hole_selection = [set() for hole_index in self.holes.hole_indices]
+        for choice in choices:
+            choice_options = self.action_to_hole_options[choice]
+            for hole_index,option in choice_options.items():
+                hole_selection[hole_index].add(option)
+        hole_selection = [list(options) for options in hole_selection]
+        return hole_selection
