@@ -615,7 +615,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         :returns whether all SAT MDPs are solved using a single policy
         :returns a list of UNSAT MDPs
         :returns a list of SAT MDPs
-        :returns to each SAT MDP, a corresponding policy
+        :returns one policy if all SAT MDPs are solved using single policy or list containing a corresponding policy for each SAT MDP
         '''
         sat_mdp_families = []
         sat_mdp_policies = []
@@ -701,10 +701,12 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 if scores[splitter] > 1:
                     break
             else:
+                policy = self.quotient.empty_policy()
                 for index, (result, family) in enumerate(zip(current_results, sat_mdp_families)):
-                    policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
-                    sat_mdp_policies[index] = policy
-                return True, unsat_mdp_families, sat_mdp_families, sat_mdp_policies
+                    mdp_policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
+                    policy = merge_policies([policy, mdp_policy])
+                    assert policy is not None
+                return True, unsat_mdp_families, sat_mdp_families, policy
 
             if False in current_results:
                 continue
