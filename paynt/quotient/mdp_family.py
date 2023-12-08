@@ -62,6 +62,8 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
 
+        # number of distinct actions in the quotient
+        self.num_actions = None
         # a list of action labels
         self.action_labels = None
         # for each choice of the quotient, the executed action
@@ -72,14 +74,10 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.state_to_actions = None
 
         self.action_labels,self.choice_to_action = MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
+        self.num_actions = len(self.action_labels)
         self.state_action_choices = MdpFamilyQuotientContainer.map_state_action_to_choices(
             self.quotient_mdp, self.num_actions, self.choice_to_action)
         self.state_to_actions = MdpFamilyQuotientContainer.map_state_to_available_actions(self.state_action_choices)
-    
-    
-    @property
-    def num_actions(self):
-        return len(self.action_labels)
 
     def empty_policy(self):
         return self.empty_scheduler()

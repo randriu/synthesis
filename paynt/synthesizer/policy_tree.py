@@ -438,11 +438,15 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
 
-        if family.size <= 8 and False:
-            policy_is_unique, unsat_mdps, sat_mdps, sat_policies = self.synthesize_policy_for_family(family, prop)
+        if family.size <= 4 and False:
+            policy_is_unique, unsat_mdps, sat_mdps, sat_policies = self.synthesize_policy_for_family(family, prop, iteration_limit=100)
             if policy_is_unique:
-                policy = merge_policies(sat_policies)
-                assert policy is not None
+                policy = sat_policies
+                mdp_family_result.policy = policy
+                mdp_family_result.policy_source = "policy search"
+                return mdp_family_result
+
+
 
         if False and reference_policy is not None:
             # try reference policy
@@ -763,6 +767,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         reference_policy = None
         policy_tree_leaves = [policy_tree.root]
         while policy_tree_leaves:
+
+            # gi = self.stat.iterations_game
+            # if gi is not None and gi > 500:
+            #     return None
 
             policy_tree_node = policy_tree_leaves.pop(-1)
             family = policy_tree_node.family
