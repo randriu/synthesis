@@ -81,31 +81,6 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     def num_actions(self):
         return len(self.action_labels)
 
-
-    def keep_reachable_choices(self, choice_mask, mdp=None, choice_destinations=None):
-        if mdp is None:
-            mdp = self.quotient_mdp
-        if choice_destinations is None:
-            choice_destinations = self.choice_destinations
-        state_visited = [False]*mdp.nr_states
-        initial_state = list(mdp.initial_states)[0]
-        state_visited[initial_state] = True
-        state_queue = [initial_state]
-        tm = mdp.transition_matrix
-        choice_mask_reachable = stormpy.BitVector(mdp.nr_choices,False)
-        while state_queue:
-            state = state_queue.pop()
-            for choice in mdp.transition_matrix.get_rows_for_group(state):
-                if not choice_mask[choice]:
-                    continue
-                choice_mask_reachable.set(choice,True)
-                for dst in choice_destinations[choice]:
-                    if not state_visited[dst]:
-                        state_visited[dst] = True
-                        state_queue.append(dst)
-        return choice_mask_reachable
-
-    
     def empty_policy(self):
         return self.empty_scheduler()
 

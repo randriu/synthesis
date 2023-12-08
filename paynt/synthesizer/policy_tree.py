@@ -481,18 +481,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     
         # undecided: choose scheduler choices to be used for splitting
         if SynthesizerPolicyTree.use_optimistic_splitting:
-            scheduler_choices = game_solver.solution_reachable_choices
             state_values = game_solver.solution_state_values
-            scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
+            state_to_choice = game_solver.solution_state_to_quotient_choice
+            state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
         else:
             state_to_choice = self.quotient.scheduler_to_state_to_choice(family.mdp, primary_primary_result.result.scheduler)
-            scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
             state_values = [0] * self.quotient.quotient_mdp.nr_states
             for state in range(family.mdp.states):
                 quotient_state = family.mdp.quotient_state_map[state]
                 state_values[quotient_state] = primary_primary_result.result.at(state)
 
         # map reachable scheduler choices to hole options
+        scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
         hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
         
         if False:
