@@ -493,7 +493,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         # map reachable scheduler choices to hole options
         scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
-        hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
+        hole_selection = self.quotient.coloring.choices_to_hole_selection(scheduler_choices)
         
         if False:
             # sanity check
