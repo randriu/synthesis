@@ -364,6 +364,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     # if True, then the game scheduler will be used for splitting (incompatible with randomized abstraction)
     use_optimistic_splitting = True
+    # if True, tree leaves will be double-checked after synthesis
+    double_check_policy_tree_leaves = False
     
     @property
     def method_name(self):
@@ -785,7 +787,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node.split(result.splitter,suboptions,subfamilies)
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
-        policy_tree.double_check(self.quotient, prop)
+        if SynthesizerPolicyTree.double_check_policy_tree_leaves:
+            policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
         policy_tree.postprocess(self.quotient, prop)
         return policy_tree
