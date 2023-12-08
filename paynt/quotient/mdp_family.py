@@ -56,17 +56,6 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             state_to_actions.append(available_actions)
         return state_to_actions
 
-    @staticmethod
-    def compute_choice_destinations(mdp):
-        choice_destinations = []
-        for choice in range(mdp.nr_choices):
-            destinations = []
-            for entry in mdp.transition_matrix.get_row(choice):
-                destinations.append(entry.column)
-            choice_destinations.append(destinations)
-        return choice_destinations
-
-        
     def __init__(self, quotient_mdp, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
 
@@ -80,14 +69,11 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         self.state_action_choices = None
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
-        # for each choice of the quotient, a list of its state-destinations
-        self.choice_destinations = None
 
         self.action_labels,self.choice_to_action = MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
         self.state_action_choices = MdpFamilyQuotientContainer.map_state_action_to_choices(
             self.quotient_mdp, self.num_actions, self.choice_to_action)
         self.state_to_actions = MdpFamilyQuotientContainer.map_state_to_available_actions(self.state_action_choices)
-        self.choice_destinations = MdpFamilyQuotientContainer.compute_choice_destinations(self.quotient_mdp)
     
     
     @property
@@ -120,15 +106,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
     
     
     
-    def choices_to_hole_selection(self, choice_mask):
-        hole_selection = [set() for hole_index in self.design_space.hole_indices]
-        for choice in choice_mask:
-            choice_options = self.coloring.action_to_hole_options[choice]
-            for hole_index,option in choice_options.items():
-                hole_selection[hole_index].add(option)
-        hole_selection = [list(options) for options in hole_selection]
-        return hole_selection
-
+    
     def empty_policy(self):
         return [None] * self.quotient_mdp.nr_states
 

@@ -691,7 +691,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     sat_mdp_policies[index] = policy
 
                 current_results.append(primary_result)
-                selection = self.quotient.scheduler_selection_with_coloring(current_action_family.mdp, primary_result.result.scheduler, self.action_coloring)
+                selection = self.quotient.scheduler_selection(current_action_family.mdp, primary_result.result.scheduler, self.action_coloring)
                 self.update_scores(score_lists, selection)
 
                 scores = {hole:len(score_list) for hole, score_list in score_lists.items()}
