@@ -56,6 +56,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
             state_to_actions.append(available_actions)
         return state_to_actions
 
+    
     def __init__(self, quotient_mdp, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
 
@@ -103,23 +104,18 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                         state_visited[dst] = True
                         state_queue.append(dst)
         return choice_mask_reachable
-    
-    
-    
+
     
     def empty_policy(self):
-        return [None] * self.quotient_mdp.nr_states
+        return self.empty_scheduler()
 
     def scheduler_to_policy(self, scheduler, mdp):            
+        state_to_choice = self.scheduler_to_state_to_choice(mdp,scheduler)
         policy = self.empty_policy()
-        nci = mdp.model.nondeterministic_choice_indices.copy()
-        for state in range(mdp.model.nr_states):
-            state_choice = scheduler.get_choice(state).get_deterministic_choice()
-            choice = nci[state] + state_choice
-            quotient_choice = mdp.quotient_choice_map[choice]
-            action = self.choice_to_action[quotient_choice]
-            quotient_state = mdp.quotient_state_map[state]
-            policy[quotient_state] = action
+        for state in range(self.quotient_mdp.nr_states):
+            choice = state_to_choice[state]
+            if choice is not None:
+                policy[state] = self.choice_to_action[choice]
         return policy
 
 
