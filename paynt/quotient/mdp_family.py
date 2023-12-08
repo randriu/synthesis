@@ -155,8 +155,9 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
     def build_game_abstraction_solver(self, prop):
         target_label = prop.get_target_label()
+        precision = paynt.verification.property.Property.model_checking_precision
         solver = stormpy.synthesis.GameAbstractionSolver(
-            self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label
+            self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label, precision
         )
         return solver
 
