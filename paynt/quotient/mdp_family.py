@@ -72,6 +72,17 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
 
         self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
 
+        # a list of action labels
+        self.action_labels = None
+        # for each choice of the quotient, the executed action
+        self.choice_to_action = None
+        # for each state of the quotient and for each action, a list of choices that execute this action
+        self.state_action_choices = None
+        # for each state of the quotient, a list of available actions
+        self.state_to_actions = None
+        # for each choice of the quotient, a list of its state-destinations
+        self.choice_destinations = None
+
         self.action_labels,self.choice_to_action = MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
         self.state_action_choices = MdpFamilyQuotientContainer.map_state_action_to_choices(
             self.quotient_mdp, self.num_actions, self.choice_to_action)
@@ -119,7 +130,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return hole_selection
 
     def empty_policy(self):
-        return [self.num_actions] * self.quotient_mdp.nr_states
+        return [None] * self.quotient_mdp.nr_states
 
     def scheduler_to_policy(self, scheduler, mdp):            
         policy = self.empty_policy()
@@ -141,10 +152,9 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         :return fixed policy
         :return choice mask from which Q-MDP x policy can be constructed
         '''
-        invalid_action = self.num_actions
         
         choice_mask = stormpy.BitVector(self.quotient_mdp.nr_choices,False)
-        policy_fixed = [invalid_action] * self.quotient_mdp.nr_states
+        policy_fixed = self.empty_policy()
 
         initial_state = list(self.quotient_mdp.initial_states)[0]
         tm = self.quotient_mdp.transition_matrix
@@ -155,7 +165,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         while state_queue:
             state = state_queue.pop()
             action = policy[state]
-            if action == invalid_action:
+            if action is None:
                 action = self.state_to_actions[state][0]
             policy_fixed[state] = action
             for choice in self.state_action_choices[state][action]:
