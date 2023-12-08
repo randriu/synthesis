@@ -481,20 +481,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     
         # undecided: choose scheduler choices to be used for splitting
         if SynthesizerPolicyTree.use_optimistic_splitting:
-            scheduler_choices = game_solver.solution_reachable_choices
             state_values = game_solver.solution_state_values
+            state_to_choice = game_solver.solution_state_to_quotient_choice
+            state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
         else:
-            scheduler_choices = stormpy.BitVector(self.quotient.quotient_mdp.nr_choices,False)
-            choices = primary_primary_result.result.scheduler.compute_action_support(family.mdp.model.nondeterministic_choice_indices)
-            for choice in choices:
-                scheduler_choices.set(family.mdp.quotient_choice_map[choice],True)
+            state_to_choice = self.quotient.scheduler_to_state_to_choice(family.mdp, primary_primary_result.result.scheduler)
             state_values = [0] * self.quotient.quotient_mdp.nr_states
             for state in range(family.mdp.states):
                 quotient_state = family.mdp.quotient_state_map[state]
                 state_values[quotient_state] = primary_primary_result.result.at(state)
 
         # map reachable scheduler choices to hole options
-        scheduler_choices = self.quotient.keep_reachable_choices(scheduler_choices)
+        scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
         hole_selection = self.quotient.choices_to_hole_selection(scheduler_choices)
         
         if False:
@@ -691,7 +689,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     sat_mdp_policies[index] = policy
 
                 current_results.append(primary_result)
-                selection = self.quotient.scheduler_selection_with_coloring(current_action_family.mdp, primary_result.result.scheduler, self.action_coloring)
+                selection = self.quotient.scheduler_selection(current_action_family.mdp, primary_result.result.scheduler, self.action_coloring)
                 self.update_scores(score_lists, selection)
 
                 scores = {hole:len(score_list) for hole, score_list in score_lists.items()}

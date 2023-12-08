@@ -21,6 +21,16 @@ class QuotientContainer:
     # if True, hole scores in the state will be multiplied with the number of expected visits of this state
     compute_expected_visits = True
 
+    @staticmethod
+    def compute_choice_destinations(mdp):
+        choice_destinations = []
+        for choice in range(mdp.nr_choices):
+            destinations = []
+            for entry in mdp.transition_matrix.get_row(choice):
+                destinations.append(entry.column)
+            choice_destinations.append(destinations)
+        return choice_destinations
+
     
     def __init__(self, quotient_mdp = None, coloring = None,
         specification = None):
@@ -35,6 +45,9 @@ class QuotientContainer:
         self.subsystem_builder_options = stormpy.SubsystemBuilderOptions()
         self.subsystem_builder_options.build_state_mapping = True
         self.subsystem_builder_options.build_action_mapping = True
+
+        # for each choice of the quotient, a list of its state-destinations
+        self.choice_destinations = QuotientContainer.compute_choice_destinations(self.quotient_mdp)
 
         # (optional) counter of discarded assignments
         self.discarded = None
@@ -133,45 +146,65 @@ class QuotientContainer:
         return DTMC(dtmc,self,state_map,choice_map)
 
     
-    def scheduler_selection(self, mdp, scheduler):
-        ''' Get hole options involved in the scheduler selection. '''
-        assert scheduler.memoryless and scheduler.deterministic
-        
-        # construct DTMC that corresponds to this scheduler and filter reachable states/choices
-        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-        dtmc,_,choice_map = self.restrict_mdp(mdp.model, choices)
-        choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
-        
-        # map relevant choices to hole options
-        selection = [set() for hole_index in mdp.design_space.hole_indices]
-        for choice in choices:
-            global_choice = mdp.quotient_choice_map[choice]
-            choice_options = self.coloring.action_to_hole_options[global_choice]
-            for hole_index,option in choice_options.items():
-                selection[hole_index].add(option)
-        selection = [list(options) for options in selection]
+    def empty_scheduler(self):
+        return [None] * self.quotient_mdp.nr_states
 
-        return selection
+    def keep_reachable_choices_of_scheduler(self, state_to_choice):
+        state_to_choice_reachable = self.empty_scheduler()
+        state_visited = [False]*self.quotient_mdp.nr_states
+        initial_state = list(self.quotient_mdp.initial_states)[0]
+        state_visited[initial_state] = True
+        state_queue = [initial_state]
+        while state_queue:
+            state = state_queue.pop()
+            choice = state_to_choice[state]
+            state_to_choice_reachable[state] = choice
+            for dst in self.choice_destinations[choice]:
+                if not state_visited[dst]:
+                    state_visited[dst] = True
+                    state_queue.append(dst)
+        return state_to_choice_reachable
+
+    def scheduler_to_state_to_choice(self, mdp, scheduler, keep_reachable_choices=True):
+        assert scheduler.memoryless and scheduler.deterministic
+        state_to_choice = self.empty_scheduler()
+        nci = mdp.model.nondeterministic_choice_indices.copy()
+        for state in range(mdp.model.nr_states):
+            choice = nci[state] + scheduler.get_choice(state).get_deterministic_choice()
+            quotient_choice = mdp.quotient_choice_map[choice]
+            quotient_state = mdp.quotient_state_map[state]
+            state_to_choice[quotient_state] = quotient_choice
+        if keep_reachable_choices:
+            state_to_choice = self.keep_reachable_choices_of_scheduler(state_to_choice)
+        return state_to_choice
+
+    def state_to_choice_to_choices(self, state_to_choice):
+        choices = stormpy.BitVector(self.quotient_mdp.nr_choices,False)
+        for choice in state_to_choice:
+            if choice is not None:
+                choices.set(choice,True)
+        return choices
+
+
+    def choices_to_hole_selection(self, choices, coloring=None):
+        if coloring is None:
+            coloring = self.coloring
+        hole_selection = [set() for hole_index in self.design_space.hole_indices]
+        for choice in choices:
+            choice_options = self.coloring.action_to_hole_options[choice]
+            for hole_index,option in choice_options.items():
+                hole_selection[hole_index].add(option)
+        hole_selection = [list(options) for options in hole_selection]
+        return hole_selection
+
     
-    def scheduler_selection_with_coloring(self, mdp, scheduler, coloring):
+    def scheduler_selection(self, mdp, scheduler, coloring=None):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
-        
-        # construct DTMC that corresponds to this scheduler and filter reachable states/choices
-        choices = scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-        dtmc,_,choice_map = self.restrict_mdp(mdp.model, choices)
-        choices = [ choice_map[state] for state in range(dtmc.nr_states) ]
-        
-        # map relevant choices to hole options
-        selection = [set() for hole_index in mdp.design_space.hole_indices]
-        for choice in choices:
-            global_choice = mdp.quotient_choice_map[choice]
-            choice_options = coloring.action_to_hole_options[global_choice]
-            for hole_index,option in choice_options.items():
-                selection[hole_index].add(option)
-        selection = [list(options) for options in selection]
-
-        return selection
+        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler, keep_reachable=True)
+        choices = self.state_to_choice_to_choices(state_to_choice)
+        hole_selection = self.choices_to_hole_selection(choices,coloring)
+        return hole_selection
 
     
     @staticmethod
