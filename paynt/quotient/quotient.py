@@ -30,6 +30,13 @@ class Quotient:
             choice_destinations.append(destinations)
         return choice_destinations
 
+    @staticmethod
+    def make_vector_defined(vector):
+        vector_noinf = [ value if value != math.inf else 0 for value in vector]
+        default_value = sum(vector_noinf) / len(vector)
+        vector_valid = [ value if value != math.inf else default_value for value in vector]
+        return vector_valid
+
     
     def __init__(self, quotient_mdp = None, family = None, coloring = None, specification = None):
         
@@ -159,12 +166,10 @@ class Quotient:
         return state_to_choice_reachable
 
     def scheduler_to_state_to_choice(self, mdp, scheduler, keep_reachable_choices=True):
-        assert scheduler.memoryless and scheduler.deterministic
+        state_to_quotient_choice = stormpy.synthesis.schedulerToStateToGlobalChoice(scheduler, mdp.model, mdp.quotient_choice_map)
         state_to_choice = self.empty_scheduler()
-        nci = mdp.model.nondeterministic_choice_indices.copy()
         for state in range(mdp.model.nr_states):
-            choice = nci[state] + scheduler.get_choice(state).get_deterministic_choice()
-            quotient_choice = mdp.quotient_choice_map[choice]
+            quotient_choice = state_to_quotient_choice[state]
             quotient_state = mdp.quotient_state_map[state]
             state_to_choice[quotient_state] = quotient_choice
         if keep_reachable_choices:
@@ -189,13 +194,6 @@ class Quotient:
         return hole_selection
 
     
-    @staticmethod
-    def make_vector_defined(vector):
-        vector_noinf = [ value if value != math.inf else 0 for value in vector]
-        default_value = sum(vector_noinf) / len(vector)
-        vector_valid = [ value if value != math.inf else default_value for value in vector]
-        return vector_valid
-
     
     def choice_values(self, mdp, prop, state_values):
         '''
@@ -260,67 +258,12 @@ class Quotient:
 
 
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
-
-        num_holes = self.design_space.num_holes
-        inconsistent_assignments_bv = [None] * num_holes
-        for hole_index,assignments in inconsistent_assignments.items():
-            assignments_bv = [option in assignments for option in range(self.design_space.hole_num_options_total(hole_index))]
-            inconsistent_assignments_bv[hole_index] = assignments_bv
-
-        # for each hole, compute its difference sum and a number of affected states
-        hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
-        hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
-        uncolored_choices = self.coloring.getUncoloredChoices()
-        choice_to_assignment = self.coloring.getChoiceToAssignment()
-        
-        for state in range(mdp.states):
-
-            # for this state, compute for each inconsistent hole the difference in choice values between respective options
-            hole_min = [None] * num_holes
-            hole_max = [None] * num_holes
-            
-            for choice in mdp.model.transition_matrix.get_rows_for_group(state):
-                
-                value = choice_values[choice]
-                choice_global = mdp.quotient_choice_map[choice]
-                if uncolored_choices[choice_global]:
-                    continue
-
-                # update value of each hole in which this choice is inconsistent
-                for hole_index,option in choice_to_assignment[choice_global]:
-                    inconsistent_options = inconsistent_assignments_bv[hole_index]
-                    if inconsistent_options is None or not inconsistent_options[option]:
-                        continue
-                    current_min = hole_min[hole_index]
-                    if current_min is None or value < current_min:
-                        hole_min[hole_index] = value
-                    current_max = hole_max[hole_index]
-                    if current_max is None or value > current_max:
-                        hole_max[hole_index] = value
-
-            # compute the difference
-            for hole_index in inconsistent_assignments:
-                min_value = hole_min[hole_index]
-                if min_value is None:
-                    continue
-                max_value = hole_max[hole_index]
-                difference = (max_value - min_value)
-                if expected_visits is not None:
-                    difference *= expected_visits[state]
-
-                hole_difference_sum[hole_index] += difference
-                hole_states_affected[hole_index] += 1
-
-        for hole_index in inconsistent_assignments:
-            assert hole_states_affected[hole_index] > 0
-        
-        # aggregate
-        inconsistent_differences = {
-            hole_index: (hole_difference_sum[hole_index] / hole_states_affected[hole_index])
-            for hole_index in inconsistent_assignments
-            }
-
-        return inconsistent_differences
+        if expected_visits is None:
+            expected_visits = [1] * mpd.model.nr_states
+        hole_variance = stormpy.synthesis.computeInconsistentHoleVariance(
+            self.design_space.family, mdp.model.nondeterministic_choice_indices, mdp.quotient_choice_map, choice_values,
+            self.coloring, inconsistent_assignments, expected_visits)
+        return hole_variance
 
     
     def scheduler_selection_quantitative(self, mdp, prop, result):
