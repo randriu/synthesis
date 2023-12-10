@@ -3,7 +3,7 @@ from . import version
 import paynt.parser.sketch
 
 import paynt.quotient
-import paynt.quotient.quotient_pomdp
+import paynt.quotient.pomdp
 import paynt.quotient.mdp_family
 import paynt.synthesizer.policy_tree
 
@@ -120,12 +120,10 @@ def setup_logger(log_path = None):
 @click.option(
     "--ce-generator",
     default="storm",
-    type=click.Choice(["storm", "switss", "mdp"]),
+    type=click.Choice(["storm", "mdp"]),
     show_default=True,
     help="counterexample generator",
 )
-@click.option("--pomcp", is_flag=True, default=False,
-    help="run POMCP")
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
 
@@ -139,21 +137,20 @@ def paynt_run(
     fsc_export_result,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
+    export_fsc_storm, export_fsc_paynt,
     ce_generator,
-    pomcp,
-    profiling,
-    export_fsc_storm, export_fsc_paynt
+    profiling
 ):
     logger.info("This is Paynt version {}.".format(version()))
 
     # set CLI parameters
     Synthesizer.incomplete_search = incomplete_search
-    paynt.quotient.quotient.QuotientContainer.compute_expected_visits = not disable_expected_visits
+    paynt.quotient.quotient.Quotient.compute_expected_visits = not disable_expected_visits
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_optimistic_splitting = not split_mdp_family_pessimistically
     SynthesizerCEGIS.conflict_generator_type = ce_generator
-    paynt.quotient.quotient_pomdp.POMDPQuotientContainer.initial_memory_size = pomdp_memory_size
-    paynt.quotient.quotient_pomdp.POMDPQuotientContainer.export_optimal_result = fsc_export_result
-    paynt.quotient.quotient_pomdp.POMDPQuotientContainer.posterior_aware = posterior_aware
+    paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
+    paynt.quotient.pomdp.PomdpQuotient.export_optimal_result = fsc_export_result
+    paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
 
 
     # join paths of input files
@@ -162,18 +159,6 @@ def paynt_run(
 
     quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor)
 
-    if pomcp:
-        from paynt.simulation.pomcp import POMCP
-        if not profiling:
-            POMCP(quotient).run(discount_factor)
-        else:
-            with cProfile.Profile() as pr:
-                POMCP(quotient).run()
-            stats = pr.create_stats()
-            print(stats)
-            pstats.Stats(pr).sort_stats('tottime').print_stats(10)
-        exit()
-        
     storm_control = None
     if storm_pomdp:
         storm_control = StormPOMDPControl()
@@ -187,14 +172,14 @@ def paynt_run(
         storm_control.export_fsc_storm = export_fsc_storm
         storm_control.export_fsc_paynt = export_fsc_paynt
 
-    if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotientContainer):
+    if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
         logger.info("nothing to do with the POMDP sketch, aborting...")
         exit(0)
 
     # choose the synthesis method and run the corresponding synthesizer
-    if isinstance(quotient, paynt.quotient.quotient_pomdp.POMDPQuotientContainer) and fsc_synthesis:
+    if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
         synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
-    elif isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotientContainer):
+    elif isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
         synthesizer = paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
     elif method == "onebyone":
         synthesizer = SynthesizerOneByOne(quotient)
@@ -223,7 +208,7 @@ def paynt_run(
         with cProfile.Profile() as pr:
             synthesizer.run()
         stats = pr.create_stats()
-        pstats.Stats(pr).sort_stats('tottime').print_stats(10)
+        pstats.Stats(pr).sort_stats('tottime').print_stats(20)
 
 
 def main():

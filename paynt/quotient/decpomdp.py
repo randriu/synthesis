@@ -2,17 +2,14 @@ import stormpy
 import stormpy.synthesis
 import stormpy.pomdp
 
-from .models import MarkovChain,MDP,DTMC
-from .holes import Hole,Holes,DesignSpace
-from .quotient import QuotientContainer
-
 import paynt
+import paynt.quotient.quotient
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class DecPomdpQuotientContainer(QuotientContainer):
+class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)

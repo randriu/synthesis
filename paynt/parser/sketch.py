@@ -2,11 +2,12 @@ import stormpy
 
 from paynt.parser.prism_parser import PrismParser
 from paynt.parser.pomdp_parser import PomdpParser
-from paynt.quotient.quotient_pomdp import POMDPQuotientContainer
-from paynt.quotient.quotient_decpomdp import DecPomdpQuotientContainer
 
 import paynt.quotient.models
+
 import paynt.quotient.quotient
+import paynt.quotient.pomdp
+import paynt.quotient.decpomdp
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
@@ -63,6 +64,7 @@ class Sketch:
         prism = None
         explicit_quotient = None
         specification = None
+        family = None
         coloring = None
         jani_unfolder = None
         decpomdp_manager = None
@@ -76,7 +78,7 @@ class Sketch:
         filetype = None
         try:
             logger.info(f"assuming sketch in PRISM format...")
-            prism, explicit_quotient, specification, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
+            prism, explicit_quotient, specification, family, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
                         sketch_path, properties_path, relative_error, discount_factor)
             filetype = "prism"
         except SyntaxError:
@@ -147,7 +149,7 @@ class Sketch:
             logger.info("export OK, aborting...")
             exit(0)
 
-        return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, coloring, specification, obs_evaluator, decpomdp_manager)
+        return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager)
 
     
     @classmethod
@@ -168,20 +170,20 @@ class Sketch:
 
 
     @classmethod
-    def build_quotient_container(cls, prism, jani_unfolder, explicit_quotient, coloring, specification, obs_evaluator, decpomdp_manager):
+    def build_quotient_container(cls, prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager):
         if jani_unfolder is not None:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-                quotient_container = paynt.quotient.quotient.DtmcQuotientContainer(explicit_quotient, coloring, specification)
+                quotient_container = paynt.quotient.quotient.DtmcFamilyQuotient(explicit_quotient, family, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotientContainer(explicit_quotient, coloring, specification)
+                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
-                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotientContainer(explicit_quotient, coloring, specification, obs_evaluator)
+                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
         else:
             assert explicit_quotient.is_nondeterministic_model
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
-                quotient_container = DecPomdpQuotientContainer(decpomdp_manager, specification)
+                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
             else:
-                quotient_container = POMDPQuotientContainer(explicit_quotient, specification, decpomdp_manager)
+                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
         return quotient_container
 
 

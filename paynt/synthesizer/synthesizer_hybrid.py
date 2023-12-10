@@ -1,7 +1,8 @@
 from .synthesizer import Synthesizer
 from .synthesizer_ar import SynthesizerAR
 from .synthesizer_cegis import SynthesizerCEGIS
-from ..quotient.smt import SmtSolver
+
+import paynt.family.smt
 
 from ..utils.profiler import Timer
 
@@ -94,7 +95,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
     def synthesize_assignment(self, family):
 
         self.conflict_generator.initialize()
-        smt_solver = SmtSolver(self.quotient.design_space)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient.design_space)
 
         # AR-CEGIS loop
         satisfying_assignment = None
@@ -129,8 +130,7 @@ class SynthesizerHybrid(SynthesizerAR, SynthesizerCEGIS):
                 scheduler_selection = family.analysis_result.optimality_result.primary_selection
             else:
                 scheduler_selection = family.analysis_result.constraints_result.results[0].primary_selection
-            priority_subfamily = family.copy()
-            priority_subfamily.assume_options(scheduler_selection)
+            priority_subfamily = family.assume_options_copy(scheduler_selection)
 
             # explore family assignments
             family_explored = False

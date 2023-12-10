@@ -1,4 +1,5 @@
 import paynt.synthesizer.synthesizer
+import paynt.quotient.pomdp
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         ia = family.analysis_result.improving_assignment
         if family.analysis_result.improving_value is not None:
             self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
-            if isinstance(self.quotient, paynt.quotient.quotient_pomdp.POMDPQuotientContainer):
+            if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
                 self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
 
 

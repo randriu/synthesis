@@ -24,10 +24,10 @@ class ConflictGeneratorMdp(ConflictGeneratorStorm):
         # generalize simple holes, i.e. starting from the full family, fix each
         # non-simple hole to the option selected by the assignment
         subfamily = family.copy()
-        non_simple_holes = [hole_index for hole_index in subfamily.hole_indices if not family.mdp.hole_simple[hole_index]]
+        non_simple_holes = [hole for hole in range(subfamily.num_holes) if not family.mdp.hole_simple[hole]]
         # percentage = (1 - len(non_simple_holes) / family.num_holes) * 100
-        for hole_index in non_simple_holes:
-            subfamily.assume_hole_options(hole_index,assignment[hole_index].options)
+        for hole in non_simple_holes:
+            subfamily.hole_set_options(hole,assignment.hole_options(hole))
         self.quotient.build(subfamily)
         submdp = subfamily.mdp
 
@@ -42,8 +42,8 @@ class ConflictGeneratorMdp(ConflictGeneratorStorm):
             if isinstance(prop, OptimalityProperty):
                 self.quotient.specification.optimality.update_optimum(primary.value)
             accepting_assignment = family.copy()
-            for hole_index in family.hole_indices:
-                accepting_assignment.assume_hole_options(hole_index,selection[hole_index])
+            for hole in range(family.num_holes):
+                accepting_assignment.hole_set_options(hole,selection[hole])
         conflict = non_simple_holes
         conflicts = [conflict]
 

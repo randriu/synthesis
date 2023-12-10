@@ -478,15 +478,17 @@ class StormPOMDPControl:
 
         result = {x:[] for x in range(quotient.observations)}
         
-        for hole in self.latest_paynt_result:
-            if hole.name.startswith('M'):
+        for hole in range(self.latest_paynt_result.num_holes):
+            name = self.latest_paynt_result.hole_name(hole)
+            if name.startswith('M'):
                 continue
-            name = hole.name.strip('A()')
+            name = name.strip('A()')
             obs = name.split(',')[0]
             observation = self.quotient.observation_labels.index(obs)
 
-            if hole.options[0] not in result[observation]:
-                result[observation].append(hole.options[0])
+            option = self.latest_paynt_result.hole_options(hole)[0]
+            if option not in result[observation]:
+                result[observation].append(option)
 
         observations = list(result.keys())
         for obs in observations:
@@ -509,14 +511,14 @@ class StormPOMDPControl:
             for hole in self.quotient.observation_action_holes[obs]:
 
                 if obs in result_dict.keys():
-                    selected_actions = [action for action in family[hole].options if action in result_dict[obs]]
+                    selected_actions = [action for action in family.hole_options(hole) if action in result_dict[obs]]
                 else:
-                    selected_actions = [family[hole].options[0]]
+                    selected_actions = [family.hole_options(hole)[0]]
 
                 if len(selected_actions) == 0:
                     return None
 
-                restricted_family[hole].assume_options(selected_actions)
+                restricted_family.hole_set_options(hole,selected_actions)
 
         logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
 
@@ -549,9 +551,9 @@ class StormPOMDPControl:
             if len(result_dict[obs]) == self.quotient.actions_at_observation[obs]:
                 continue
 
-            restriction = [action for action in family[hole].options if action in result_dict[obs]]
+            restriction = [action for action in family.hole_options(hole) if action in result_dict[obs]]
 
-            if len(restriction) == len(family[hole].options):
+            if len(restriction) == hole_num_options(hole):
                 continue
 
             subfamilies_restriction.append({"hole": hole, "restriction": restriction})
@@ -566,14 +568,14 @@ class StormPOMDPControl:
         for i in range(len(restrictions)):
             restricted_family = family.copy()
 
-            actions = [action for action in family[restrictions[i]["hole"]].options if action not in restrictions[i]["restriction"]]
+            actions = [action for action in family.hole_options(restrictions[i]["hole"]) if action not in restrictions[i]["restriction"]]
             if len(actions) == 0:
-                actions = [family[restrictions[i]["hole"]].options[0]]
+                actions = [family.hole_options(restrictions[i]["hole"])[0]]
 
-            restricted_family[restrictions[i]['hole']].assume_options(actions)
+            restricted_family.hole_set_options(restrictions[i]['hole'],actions)
 
             for j in range(i):
-                restricted_family[restrictions[j]['hole']].assume_options(restrictions[j]["restriction"])
+                restricted_family.hole_set_options(restrictions[j]['hole'],restrictions[j]["restriction"])
 
             subfamilies.append(restricted_family)
 

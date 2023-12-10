@@ -49,16 +49,23 @@ class MarkovChain:
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
 
-        # identify simple holes
-        design_space = quotient_container.design_space
-        hole_to_states = [0 for hole in design_space]
-        for state in range(self.states):
-            for hole in quotient_container.coloring.state_to_holes[self.quotient_state_map[state]]:
-                hole_to_states[hole] += 1
-        self.hole_simple = [hole_to_states[hole] <= 1 for hole in design_space.hole_indices]
-
+        self.hole_is_simple = None
         self.analysis_hints = None
     
+    @property
+    def hole_simple(self):
+        if self.hole_is_simple is not None:
+            return self.hole_is_simple
+        num_holes = self.quotient_container.design_space.num_holes
+        hole_to_states = [0 for _ in range(num_holes)]
+        for state in range(self.states):
+            quotient_state = self.quotient_state_map[state]
+            for hole in quotient_container.state_to_holes[quotient_state]:
+                hole_to_states[hole] += 1
+        self.hole_is_simple = [hole_to_states[hole] <= 1 for hole in range(num_holes)]
+        return self.hole_is_simple
+
+
     @property
     def states(self):
         return self.model.nr_states
@@ -84,31 +91,11 @@ class MarkovChain:
             environment=Property.environment
         )
 
-    def model_check_formula_hint(self, formula, hint):
-        raise RuntimeError("model checking with hints is not fully supported")
-        stormpy.synthesis.set_loglevel_off()
-        task = stormpy.core.CheckTask(formula, only_initial_states=False)
-        task.set_produce_schedulers(produce_schedulers=True)
-        result = stormpy.synthesis.model_check_with_hint(self.model, task, Property.environment, hint)
-        return result
-
     def model_check_property(self, prop, alt = False):
         direction = "prim" if not alt else "seco"
-        # get hint
-        hint = None
-        if self.analysis_hints is not None:
-            hint_prim,hint_seco = self.analysis_hints[prop]
-            hint = hint_prim if not alt else hint_seco
-            # hint = self.analysis_hints[prop]
-
         formula = prop.formula if not alt else prop.formula_alt
-        if hint is None:
-            result = self.model_check_formula(formula)
-        else:
-            result = self.model_check_formula_hint(formula, hint)
-        
+        result = self.model_check_formula(formula)
         value = result.at(self.initial_state)
-
         return PropertyResult(prop, result, value)
 
     

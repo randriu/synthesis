@@ -2,10 +2,8 @@ import stormpy
 import stormpy.utility
 import stormpy.synthesis
 
-import paynt.quotient.holes
 import paynt.quotient.models
 import paynt.quotient.quotient
-import paynt.quotient.coloring
 import paynt.quotient.mdp_family
 import paynt.verification.property
 
@@ -137,10 +135,10 @@ class SubPomdp:
             self.state_action_to_local_choice.append(action_to_local_choice)
 
 
-class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientContainer):
+class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
-    def __init__(self, quotient_mdp, coloring, specification, obs_evaluator):
-        super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
+    def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
+        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
         self.obs_evaluator = obs_evaluator
 
         # for each observation, a list of actions (indices) available
@@ -184,8 +182,8 @@ class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientCo
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
         
-        _,_,selected_actions_bv = self.coloring.select_actions(family)
-        mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
+        choices = self.coloring.selectCompatibleChoices(family.family)
+        mdp,state_map,choice_map = self.restrict_quotient(choices)
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
         return SubPomdp(pomdp,self,state_map,choice_map)
 
@@ -203,23 +201,24 @@ class PomdpFamilyQuotientContainer(paynt.quotient.mdp_family.MdpFamilyQuotientCo
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
 
         # the product inherits the design space
-        product_holes = self.design_space.copy()
+        product_family = self.design_space.copy()
         
         # the choices of the product inherit colors of the quotient
         product_choice_to_hole_options = []
         quotient_num_choces = self.quotient_mdp.nr_choices
+        choice_to_hole_assignment = self.coloring.getChoiceToAssignment()
         for product_choice in range(product.nr_choices):
             choice = product_choice_to_choice[product_choice]
             if choice == quotient_num_choces:
-                hole_options = {}
+                hole_options = []
             else:
-                hole_options = self.coloring.action_to_hole_options[choice].copy()
+                hole_options = [(hole,option) for hole,option in choice_to_hole_assignment[choice]]
             product_choice_to_hole_options.append(hole_options)
-        product_coloring = paynt.quotient.coloring.Coloring(product, product_holes, product_choice_to_hole_options)
+        product_coloring = stormpy.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, choice_to_hole_options)
         
         # handle specification
         product_specification = self.specification.copy()
-        dtmc_sketch = paynt.quotient.quotient.DtmcQuotientContainer(product, product_coloring, product_specification)
+        dtmc_sketch = paynt.quotient.quotient.DtmcFamilyQuotient(product, product_family, product_coloring, product_specification)
         return dtmc_sketch
 
 

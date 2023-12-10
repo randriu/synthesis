@@ -3,7 +3,7 @@ import stormpy
 import paynt
 from paynt.utils.profiler import Timer
 from paynt.simulation.simulation import SimulatedModel
-from paynt.quotient.quotient_pomdp import POMDPQuotientContainer
+import paynt.quotient.pomdp
 
 import logging
 logger = logging.getLogger(__name__)
@@ -745,7 +745,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         self.pomcp.maze.print_relevant(self.subpomdp_builder.relevant_states)
 
         # construct the quotient, apply the cache, unfold the memory model
-        quotient = POMDPQuotientContainer(subpomdp, specification)
+        quotient = paynt.quotient.pomdp.PomdpQuotient(subpomdp, specification)
         quotient.set_imperfect_memory_size(memory_size)
         self.policy_cache_apply(quotient)
         # exit()
@@ -762,10 +762,10 @@ class ActionOracleSubpomdp(ActionOracleMcts):
         # however, the quotient for the sub-POMDP made it canonic, i.e. rearranged its actions; thus, we need to
         # interpret the assignment using choice labels
         fsc = FSC(memory_size, num_observations_subpomdp)
-        for hole in assignment:
-            option = hole.options[0]
-            option_label = hole.option_labels[option]
-            is_action_hole, observation, node = quotient.decode_hole_name(hole.name)
+        for hole in range(assignment.num_holes):
+            option = assignment.hole_options(hole)[0]
+            option_label = assignment.hole_option_labels(hole)[option]
+            is_action_hole, observation, node = quotient.decode_hole_name(assignment.hole_name(hole))
             if is_action_hole:
                 # find the index of the action that has this option label
                 action_set = False
@@ -870,7 +870,7 @@ class POMCP:
             initial_distribution = {self.simulated_model.initial_state : 1}
             subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
             subpomdp = subpomdp_builder.restrict_pomdp(initial_distribution)
-            quotient = POMDPQuotientContainer(subpomdp, self.specification)
+            quotient = paynt.quotient.pomdp.PomdpQuotient(subpomdp, self.specification)
             quotient.set_imperfect_memory_size(memory_size)
             synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
             assignment = synthesizer.synthesize()
@@ -878,7 +878,7 @@ class POMCP:
             exit()
 
         # disable synthesis logging
-        paynt.quotient.quotient_pomdp.logger.disabled = True
+        paynt.quotient.pomdp.logger.disabled = True
         paynt.verification.property.logger.disabled = True
         paynt.synthesizer.synthesizer.logger.disabled = True
 

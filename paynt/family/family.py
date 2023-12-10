@@ -1,6 +1,6 @@
 import stormpy.synthesis
 
-from .smt import FamilyEncoding
+import paynt.family.smt
 
 import math
 import random
@@ -9,128 +9,96 @@ import itertools
 import logging
 logger = logging.getLogger(__name__)
 
-class Hole:
-    '''
-    Hole with a name, a list of options and corresponding option labels.
-    Options for each hole are simply indices of the corresponding hole
-      assignment, therefore, their order does not matter.
-      # TODO maybe store options as bitmaps?
-    Each hole is identified by its position hole_index in Holes, therefore,
-      this order must be preserved in the refining process.
-    Option labels are not refined when assuming suboptions so that the correct
-      label can be accessed by the value of an option.
-    '''
-    def __init__(self, name, options, option_labels):
-        self.name = name
-        self.options = options
-        self.option_labels = option_labels
 
-    def all_options(self):
-        return list(range(len(self.option_labels)))
+class Family:
 
-    @property
-    def size(self):
-        return len(self.options)
-
-    @property
-    def is_trivial(self):
-        return self.size == 1
-
-    @property
-    def is_unrefined(self):
-        return self.size == len(self.option_labels)
-
-    def __str__(self):
-        labels = [self.option_labels[option] for option in self.options]
-        if self.size == 1:
-            return"{}={}".format(self.name,labels[0]) 
+    def __init__(self, other=None):
+        if other is None:
+            self.family = stormpy.synthesis.Family()
+            self.hole_to_name = []
+            self.hole_to_option_labels = []
         else:
-            return self.name + ": {" + ",".join(labels) + "}"
-
-    def assume_options(self, options):
-        if len(options) == 0:
-            self.options = self.all_options()
-        else:
-            self.options = options
-
-    def copy(self):
-        # note that the copy is shallow since after assuming some options
-        # the corresponding list is replaced
-        return Hole(self.name, self.options, self.option_labels)
-
-
-
-class Holes(list):
-    ''' List of holes. '''
-
-    def __init__(self, *args):
-        super().__init__(*args)
+            self.family = stormpy.synthesis.Family(other.family)
+            self.hole_to_name = other.hole_to_name
+            self.hole_to_option_labels = other.hole_to_option_labels
 
     @property
     def num_holes(self):
-        return len(self)
+        return self.family.numHoles()
 
-    @property
-    def hole_indices(self):
-        return list(range(len(self)))
+    def add_hole(self, name, option_labels):
+        self.hole_to_name.append(name)
+        self.hole_to_option_labels.append(option_labels)
+        self.family.addHole(len(option_labels))
+
+    def hole_name(self, hole):
+        return self.hole_to_name[hole]
+
+    def hole_options(self, hole):
+        return self.family.holeOptions(hole)
+
+    def hole_num_options(self, hole):
+        return self.family.holeNumOptions(hole)
+
+    def hole_num_options_total(self, hole):
+        return self.family.holeNumOptionsTotal(hole)
+
+    def hole_set_options(self, hole, options):
+        assert len(options)>0
+        self.family.holeSetOptions(hole,options)
+        assert self.family.holeNumOptions(hole) == len(options)
 
     @property
     def size(self):
-        ''' Family size. '''
-        return math.prod([hole.size for hole in self])
+        return math.prod([self.family.holeNumOptions(hole) for hole in range(self.num_holes)])
 
     def __str__(self):
-        return ", ".join([str(hole) for hole in self]) 
+        hole_strings = []
+        for hole in range(self.num_holes):
+            name = self.hole_name(hole)
+            options = self.hole_options(hole)
+            labels = [self.hole_to_option_labels[hole][option] for option in options]
+            if len(labels) == 1:
+                hole_str = "{}={}".format(name,labels[0]) 
+            else:
+                hole_str =  name + ": {" + ",".join(labels) + "}"
+            hole_strings.append(hole_str)
+        return ", ".join(hole_strings)
 
     def copy(self):
-        ''' Create a shallow copy of this list of holes. '''
-        return Holes([hole.copy() for hole in self])
-
-    def assume_hole_options(self, hole_index, options):
-        ''' Assume suboptions of a certain hole. '''
-        self[hole_index].assume_options(options)
-
-    def assume_options(self, hole_options):
-        ''' Assume suboptions for each hole. '''
-        for hole_index,hole in enumerate(self):
-            hole.assume_options(hole_options[hole_index])
+        return Family(self)
 
     def assume_options_copy(self, hole_options):
         ''' Create a copy and assume suboptions for each hole. '''
         holes_copy = self.copy()
-        holes_copy.assume_options(hole_options)
+        for hole,options in enumerate(hole_options):
+            holes_copy.hole_set_options(hole,options)
         return holes_copy
 
     def pick_any(self):
-        hole_options = [[hole.options[0]] for hole in self]
+        hole_options = [[self.hole_options(hole)[0]] for hole in range(self.num_holes)]
         return self.assume_options_copy(hole_options)
 
     def pick_random(self):
-        hole_options = [[random.choice(hole.options)] for hole in self]
+        hole_options = [[random.choice(self.hole_options(hole))] for hole in range(self.num_holes)]
         return self.assume_options_copy(hole_options)
-
-    def includes(self, hole_assignment):
-        '''
-        :return True if this family contains hole_assignment
-        '''
-        for hole_index,option in hole_assignment.items():
-            if not option in self[hole_index].options:
-                return False
-        return True
 
     def all_combinations(self):
         '''
-        :return iteratable Cartesian product of hole options
+        :returns iteratable Cartesian product of hole options
         '''
-        return itertools.product(*[hole.options for hole in self])
+        all_options = []
+        for hole in range(self.num_holes):
+            options = self.hole_options(hole)
+            all_options.append(options)
+        return itertools.product(*all_options)
 
     def construct_assignment(self, combination):
         ''' Convert hole option combination to a hole assignment. '''
         combination = list(combination)
         suboptions = [[option] for option in combination]
-        holes = self.copy()
-        holes.assume_options(suboptions)
-        return holes
+        assignment = self.assume_options_copy(suboptions)
+        return assignment
 
     def subholes(self, hole_index, options):
         '''
@@ -139,15 +107,9 @@ class Holes(list):
         :note this is a performance/memory optimization associated with creating
           subfamilies wrt one splitter having restricted options
         '''
-        subhole = self[hole_index].copy()
-        subhole.assume_options(options)
-        
-        shallow_copy = Holes(self)
-        shallow_copy[hole_index] = subhole
+        shallow_copy = self.copy()
+        shallow_copy.hole_set_options(hole_index,options)
         return shallow_copy
-
-    def join(self, other):
-        pass
 
 
 
@@ -168,15 +130,11 @@ class ParentInfo():
         # how many refinements were needed to create this family
         self.refinement_depth = None
 
-        # explicit list of all non-default actions in the MDP
-        self.selected_actions = None
-        # for each hole and for each option explicit list of all non-default actions in the MDP
-        self.hole_selected_actions = None
         # index of a hole used to split the family
         self.splitter = None
 
 
-class DesignSpace(Holes):
+class DesignSpace(Family):
     '''
     List of holes supplied with
     - a list of constraint indices to investigate in this design space
@@ -187,16 +145,14 @@ class DesignSpace(Holes):
     # whether hints will be stored for subsequent MDP model checking
     store_hints = True
     
-    def __init__(self, holes = [], parent_info = None):
-        super().__init__(holes)
+    def __init__(self, family = None, parent_info = None):
+        super().__init__(family)
 
         self.mdp = None
         
         # SMT encoding
         self.encoding = None
 
-        self.hole_selected_actions = None
-        self.selected_actions = None
         self.refinement_depth = 0
         self.constraint_indices = None
 
@@ -264,8 +220,6 @@ class DesignSpace(Holes):
 
     def collect_parent_info(self, specification):
         pi = ParentInfo()
-        pi.hole_selected_actions = self.hole_selected_actions
-        pi.selected_actions = self.selected_actions
         pi.refinement_depth = self.refinement_depth
         pi.analysis_hints = self.collect_analysis_hints(specification)
         cr = self.analysis_result.constraints_result
@@ -276,4 +230,4 @@ class DesignSpace(Holes):
 
     def encode(self, smt_solver):
         if self.encoding is None:
-            self.encoding = FamilyEncoding(smt_solver, self)
+            self.encoding = paynt.family.smt.FamilyEncoding(smt_solver, self)

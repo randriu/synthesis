@@ -1,11 +1,10 @@
 import stormpy
 import stormpy.synthesis
 
-from .holes import Hole,Holes,DesignSpace
-from .models import MarkovChain,DTMC
-from .coloring import Coloring
-
+import paynt.family.family
 import paynt.quotient.models
+
+from .models import MarkovChain,DTMC
 
 import math
 import itertools
@@ -14,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class QuotientContainer:
+class Quotient:
 
     # if True, export the (labeled) optimal DTMC
     export_optimal_result = False
@@ -32,11 +31,11 @@ class QuotientContainer:
         return choice_destinations
 
     
-    def __init__(self, quotient_mdp = None, coloring = None,
-        specification = None):
+    def __init__(self, quotient_mdp = None, family = None, coloring = None, specification = None):
         
         # colored qoutient MDP for the super-family
         self.quotient_mdp = quotient_mdp
+        self.family = family
         self.coloring = coloring
         self.specification = specification
         self.design_space = None
@@ -47,7 +46,12 @@ class QuotientContainer:
         self.subsystem_builder_options.build_action_mapping = True
 
         # for each choice of the quotient, a list of its state-destinations
-        self.choice_destinations = QuotientContainer.compute_choice_destinations(self.quotient_mdp)
+        self.choice_destinations = None
+        if self.quotient_mdp is not None:
+            self.choice_destinations = Quotient.compute_choice_destinations(self.quotient_mdp)
+
+        if coloring is not None:
+            self.state_to_holes = coloring.getStateToHoles().copy()
 
         # (optional) counter of discarded assignments
         self.discarded = None
@@ -57,10 +61,10 @@ class QuotientContainer:
         pass
     
 
-    def restrict_mdp(self, mdp, selected_actions_bv):
+    def restrict_mdp(self, mdp, choices):
         '''
         Restrict the quotient MDP to the selected actions.
-        :param selected_actions_bv a bitvector of selected actions
+        :param choices a bitvector of selected actions
         :return (1) the restricted model
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
@@ -68,7 +72,7 @@ class QuotientContainer:
         keep_unreachable_states = False # TODO investigate this
         all_states = stormpy.BitVector(mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
-            mdp, all_states, selected_actions_bv, keep_unreachable_states, self.subsystem_builder_options
+            mdp, all_states, choices, keep_unreachable_states, self.subsystem_builder_options
         )
         
         model = submodel_construction.model
@@ -78,8 +82,8 @@ class QuotientContainer:
         return model,state_map,choice_map
 
  
-    def restrict_quotient(self, selected_actions_bv):
-        return self.restrict_mdp(self.quotient_mdp, selected_actions_bv)        
+    def restrict_quotient(self, choices):
+        return self.restrict_mdp(self.quotient_mdp, choices)        
 
     
     def build_from_choice_mask(self, choice_mask):
@@ -92,14 +96,10 @@ class QuotientContainer:
         ''' Construct the quotient MDP for the family. '''
 
         # select actions compatible with the family and restrict the quotient
-        hole_selected_actions,selected_actions,selected_actions_bv = self.coloring.select_actions(family)
-        family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        choices = self.coloring.selectCompatibleChoices(family.family)
+        family.selected_choices = choices
+        family.mdp = self.build_from_choice_mask(choices)
         family.mdp.design_space = family
-
-        # cash restriction information
-        family.hole_selected_actions = hole_selected_actions
-        family.selected_actions = selected_actions
-        family.selected_actions_bv = selected_actions_bv
 
         # prepare to discard designs
         self.discarded = 0
@@ -109,19 +109,14 @@ class QuotientContainer:
         ''' Construct the quotient MDP for the family. '''
 
         # select actions compatible with the family and restrict the quotient
-        alt_hole_selected_actions,alt_selected_actions,alt_selected_actions_bv = self.coloring.select_actions(family)
-        main_hole_selected_actions,main_selected_actions,main_selected_actions_bv = main_coloring.select_actions(main_family)
+        choices_alt = self.coloring.selectCompatibleChoices(family.family)
+        choices_main = main_coloring.selectCompatibleChoices(main_family)
 
-        selected_actions_bv = main_selected_actions_bv.__and__(alt_selected_actions_bv)
-        main_family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        choices = choices_main.__and__(choices_alt)
+        main_family.mdp = self.build_from_choice_mask(choices)
         main_family.mdp.design_space = main_family
-        family.mdp = self.build_from_choice_mask(selected_actions_bv)
+        family.mdp = self.build_from_choice_mask(choices)
         family.mdp.design_space = family
-
-        # cash restriction information
-        main_family.hole_selected_actions = main_hole_selected_actions
-        main_family.selected_actions = main_selected_actions
-        main_family.selected_actions_bv = selected_actions_bv
 
         # prepare to discard designs
         self.discarded = 0
@@ -138,11 +133,9 @@ class QuotientContainer:
     
     def build_chain(self, family):
         assert family.size == 1, "expecting family of size 1"
-
-        _,_,selected_actions_bv = self.coloring.select_actions(family)
-        mdp,state_map,choice_map = self.restrict_quotient(selected_actions_bv)
-        dtmc = QuotientContainer.mdp_to_dtmc(mdp)
-
+        choices = self.coloring.selectCompatibleChoices(family.family)
+        mdp,state_map,choice_map = self.restrict_quotient(choices)
+        dtmc = Quotient.mdp_to_dtmc(mdp)
         return DTMC(dtmc,self,state_map,choice_map)
 
     
@@ -192,7 +185,7 @@ class QuotientContainer:
         choices = self.state_to_choice_to_choices(state_to_choice)
         if coloring is None:
             coloring = self.coloring
-        hole_selection = coloring.choices_to_hole_selection(choices)
+        hole_selection = coloring.collectHoleOptions(choices)
         return hole_selection
 
     
@@ -216,7 +209,7 @@ class QuotientContainer:
 
         # multiply probability with model checking results
         choice_values = stormpy.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
-        choice_values = QuotientContainer.make_vector_defined(choice_values)
+        choice_values = Quotient.make_vector_defined(choice_values)
 
         # if the associated reward model has state-action rewards, then these must be added to choice values
         if prop.reward:
@@ -239,12 +232,12 @@ class QuotientContainer:
         '''
         Compute expected number of visits in the states of DTMC induced by the shoices.
         '''
-        if not QuotientContainer.compute_expected_visits:
+        if not Quotient.compute_expected_visits:
             return None
 
         # extract DTMC induced by this MDP-scheduler
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
-        dtmc = QuotientContainer.mdp_to_dtmc(sub_mdp)
+        dtmc = Quotient.mdp_to_dtmc(sub_mdp)
 
         # compute visits
         dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc).get_values()
@@ -252,7 +245,7 @@ class QuotientContainer:
 
         # handle infinity- and zero-visits
         if prop.minimizing:
-            dtmc_visits = QuotientContainer.make_vector_defined(dtmc_visits)
+            dtmc_visits = Quotient.make_vector_defined(dtmc_visits)
         else:
             dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
 
@@ -271,12 +264,14 @@ class QuotientContainer:
         num_holes = self.design_space.num_holes
         inconsistent_assignments_bv = [None] * num_holes
         for hole_index,assignments in inconsistent_assignments.items():
-            assignments_bv = [option in assignments for option in self.design_space[hole_index].all_options()]
+            assignments_bv = [option in assignments for option in range(self.design_space.hole_num_options_total(hole_index))]
             inconsistent_assignments_bv[hole_index] = assignments_bv
 
         # for each hole, compute its difference sum and a number of affected states
         hole_difference_sum = {hole_index: 0 for hole_index in inconsistent_assignments}
         hole_states_affected = {hole_index: 0 for hole_index in inconsistent_assignments}
+        uncolored_choices = self.coloring.getUncoloredChoices()
+        choice_to_assignment = self.coloring.getChoiceToAssignment()
         
         for state in range(mdp.states):
 
@@ -288,12 +283,11 @@ class QuotientContainer:
                 
                 value = choice_values[choice]
                 choice_global = mdp.quotient_choice_map[choice]
-                if self.coloring.default_actions.get(choice_global):
+                if uncolored_choices[choice_global]:
                     continue
 
                 # update value of each hole in which this choice is inconsistent
-                choice_options = self.coloring.action_to_hole_options[choice_global]
-                for hole_index,option in choice_options.items():
+                for hole_index,option in choice_to_assignment[choice_global]:
                     inconsistent_options = inconsistent_assignments_bv[hole_index]
                     if inconsistent_options is None or not inconsistent_options[option]:
                         continue
@@ -357,24 +351,24 @@ class QuotientContainer:
         '''
         # selection = self.scheduler_selection(mdp, result.scheduler)
         if mdp.is_deterministic:
-            selection = [[mdp.design_space[hole_index].options[0]] for hole_index in mdp.design_space.hole_indices]
+            selection = [[mdp.design_space.hole_options(hole)[0]] for hole in range(mdp.design_space.num_holes)]
             return selection, None, None, None, True
 
         selection,choice_values,expected_visits,scores = self.scheduler_selection_quantitative(mdp, prop, result)
         consistent = True
-        for hole_index in mdp.design_space.hole_indices:
-            options = selection[hole_index]
+        for hole in range(mdp.design_space.num_holes):
+            options = selection[hole]
             if len(options) > 1:
                 consistent = False
-            if options == []:
-                selection[hole_index] = [mdp.design_space[hole_index].options[0]]
+            if len(options) == 0:
+                selection[hole] = [mdp.design_space.hole_options(hole)[0]]
 
         return selection,choice_values,expected_visits,scores,consistent
 
     
     def suboptions_half(self, mdp, splitter):
         ''' Split options of a splitter into two halves. '''
-        options = mdp.design_space[splitter].options
+        options = mdp.design_space.hole_options(splitter)
         half = len(options) // 2
         suboptions = [options[:half], options[half:]]
         return suboptions
@@ -384,7 +378,7 @@ class QuotientContainer:
         assert len(used_options) > 1
         suboptions = [[option] for option in used_options]
         index = 0
-        for option in mdp.design_space[splitter].options:
+        for option in mdp.design_space.hole_options(splitter):
             if option in used_options:
                 continue
             suboptions[index].append(option)
@@ -394,7 +388,7 @@ class QuotientContainer:
     def suboptions_enumerate(self, mdp, splitter, used_options):
         assert len(used_options) > 1
         core_suboptions = [[option] for option in used_options]
-        other_suboptions = [option for option in mdp.design_space[splitter].options if option not in used_options]
+        other_suboptions = [option for option in mdp.design_space.hole_options(splitter) if option not in used_options]
         return core_suboptions, other_suboptions
 
     def holes_with_max_score(self, hole_score):
@@ -421,10 +415,10 @@ class QuotientContainer:
 
         # reduce simple holes
         ds_before = reduced_design_space.size
-        for hole_index in reduced_design_space.hole_indices:
-            if mdp.hole_simple[hole_index]:
-                assert len(hole_assignments[hole_index]) == 1
-                reduced_design_space.assume_hole_options(hole_index, hole_assignments[hole_index])
+        for hole in range(reduced_design_space.num_holes):
+            if mdp.hole_simple[hole]:
+                assert len(hole_assignments[hole]) == 1
+                reduced_design_space.hole_set_options(hole, hole_assignments[hole])
         ds_after = reduced_design_space.size
         self.discarded += ds_before - ds_after
 
@@ -446,14 +440,14 @@ class QuotientContainer:
         hole_assignments = result.primary_selection
         scores = result.primary_scores
         if scores is None:
-            scores = {hole:0 for hole in mdp.design_space.hole_indices if len(mdp.design_space[hole].options) > 1}
+            scores = {hole:0 for hole in range(mdp.design_space.num_holes) if mdp.design_space.hole_num_options(hole) > 1}
         
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
         if len(hole_assignments[splitter]) > 1:
             core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
         else:
-            assert len(mdp.design_space[splitter].options) > 1
+            assert mdp.design_space.hole_num_options(splitter) > 1
             core_suboptions = self.suboptions_half(mdp, splitter)
             other_suboptions = []
         # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
@@ -467,8 +461,8 @@ class QuotientContainer:
         parent_info = family.collect_parent_info(self.specification)
         for suboption in suboptions:
             subholes = new_design_space.subholes(splitter, suboption)
-            design_subspace = DesignSpace(subholes, parent_info)
-            design_subspace.assume_hole_options(splitter, suboption)
+            design_subspace = paynt.family.family.DesignSpace(subholes, parent_info)
+            design_subspace.hole_set_options(splitter, suboption)
             design_subspaces.append(design_subspace)
 
         return design_subspaces
@@ -546,12 +540,8 @@ class QuotientContainer:
 
 
 
-class DtmcQuotientContainer(QuotientContainer):
+class DtmcFamilyQuotient(Quotient):
     
-    def __init__(self, quotient_mdp, coloring, specification):
-        super().__init__(
-            quotient_mdp = quotient_mdp, coloring = coloring,
-            specification = specification)
-
-        self.design_space = DesignSpace(coloring.holes)
-
+    def __init__(self, quotient_mdp, family, coloring, specification):
+        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
+        self.design_space = paynt.family.family.DesignSpace(family)

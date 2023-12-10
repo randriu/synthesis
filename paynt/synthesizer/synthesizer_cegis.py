@@ -1,9 +1,9 @@
 import stormpy.synthesis
 
 from .synthesizer import Synthesizer
-from ..quotient.smt import SmtSolver
 from .conflict_generator.storm import ConflictGeneratorStorm
 from .conflict_generator.mdp import ConflictGeneratorMdp
+import paynt.family.smt
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,22 +38,6 @@ class SynthesizerCEGIS(Synthesizer):
         return "CEGIS " + self.conflict_generator.name
 
     
-    # def generalize_conflict(self, assignment, conflict, scheduler_selection):
-
-    #     if not Synthesizer.incomplete_search:
-    #         return conflict
-
-    #     # filter holes set to consistent assignment
-    #     conflict_filtered = []
-    #     for hole in conflict:
-    #         scheduler_options = scheduler_selection[hole]
-    #         # if len(scheduler_options) == 1 and assignment[hole].options[0] == scheduler_options[0]:
-    #         if len(scheduler_options) == 1:
-    #             continue
-    #         conflict_filtered.append(hole)
-
-    #     return conflict_filtered
-
     def collect_conflict_requests(self, family, mc_result):
         '''
         Construct conflict request wrt each unsatisfiable property,
@@ -113,13 +97,13 @@ class SynthesizerCEGIS(Synthesizer):
         if family.constraint_indices is None:
             family.constraint_indices = self.quotient.specification.all_constraint_indices()
 
-        simple_holes = [hole_index for hole_index in family.hole_indices if family.mdp.hole_simple[hole_index]]
-        logger.info("{}/{} holes are trivial".format(len(simple_holes), family.num_holes))
+        simple_holes = [hole for hole in range(family.num_holes) if family.mdp.hole_simple[hole]]
+        # logger.info("{}/{} holes are trivial".format(len(simple_holes), family.num_holes))
         
         self.conflict_generator.initialize()
 
         # use sketch design space as a SAT baseline (TODO why?)
-        smt_solver = SmtSolver(self.quotient.design_space)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient.design_space)
         
         # CEGIS loop
         satisfying_assignment = None

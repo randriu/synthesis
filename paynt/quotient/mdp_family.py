@@ -1,6 +1,7 @@
 import stormpy
 import stormpy.synthesis
 
+import paynt.family.family
 import paynt.quotient.quotient
 
 import collections
@@ -9,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
+class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
 
     @staticmethod
     def extract_choice_labels(mdp):
@@ -57,10 +58,10 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         return state_to_actions
 
     
-    def __init__(self, quotient_mdp, coloring, specification):
-        super().__init__(quotient_mdp = quotient_mdp, coloring = coloring, specification = specification)
+    def __init__(self, quotient_mdp, family, coloring, specification):
+        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
 
-        self.design_space = paynt.quotient.holes.DesignSpace(coloring.holes)
+        self.design_space = paynt.family.family.DesignSpace(self.family)
 
         # number of distinct actions in the quotient
         self.num_actions = None
@@ -73,11 +74,11 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
 
-        self.action_labels,self.choice_to_action = MdpFamilyQuotientContainer.extract_choice_labels(self.quotient_mdp)
+        self.action_labels,self.choice_to_action = MdpFamilyQuotient.extract_choice_labels(self.quotient_mdp)
         self.num_actions = len(self.action_labels)
-        self.state_action_choices = MdpFamilyQuotientContainer.map_state_action_to_choices(
+        self.state_action_choices = MdpFamilyQuotient.map_state_action_to_choices(
             self.quotient_mdp, self.num_actions, self.choice_to_action)
-        self.state_to_actions = MdpFamilyQuotientContainer.map_state_to_available_actions(self.state_action_choices)
+        self.state_to_actions = MdpFamilyQuotient.map_state_to_available_actions(self.state_action_choices)
 
     def empty_policy(self):
         return self.empty_scheduler()
@@ -116,7 +117,7 @@ class MdpFamilyQuotientContainer(paynt.quotient.quotient.QuotientContainer):
                 action = self.state_to_actions[state][0]
             policy_fixed[state] = action
             for choice in self.state_action_choices[state][action]:
-                if not family.selected_actions_bv[choice]:
+                if not family.selected_choices[choice]:
                     continue
                 choice_mask.set(choice,True)
                 for dst in self.choice_destinations[choice]:

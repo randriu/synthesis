@@ -29,9 +29,9 @@ class Graph:
             design_space: list of holes
         """
         self.nodes = {}
-        for hole in design_space:
-            tmp = parse_hole(hole.name)
-            tmp["next"] = list(hole.options)
+        for hole in range(design_space.num_holes):
+            tmp = parse_hole(design_space.hole_name(hole))
+            tmp["next"] = list(design_space.hole_options(hole))
 
             for next in tmp["next"]:
                 if tmp["type"] == "Assignment":

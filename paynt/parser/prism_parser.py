@@ -1,12 +1,12 @@
 import stormpy
 import stormpy.synthesis
 
-from .jani import JaniUnfolder
-from ..quotient.holes import Hole, Holes, DesignSpace
-from ..quotient.models import MarkovChain
-from ..quotient.coloring import Coloring
-
+import paynt.family.family
 import paynt.verification.property
+import paynt.parser.jani
+
+from ..quotient.models import MarkovChain
+
 
 import os
 import re
@@ -37,24 +37,24 @@ class PrismParser:
 
         # parse hole definitions
         hole_expressions = None
-        holes = None
+        family = None
         if len(hole_definitions) > 0:
             logger.info("processing hole definitions...")
-            prism, hole_expressions, holes = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
+            prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
 
-        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism, holes)
+        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism)
 
         # construct the quotient
         coloring = None
         jani_unfolder = None
         obs_evaluator = None
-        if holes is not None:
+        if family is not None:
             assert prism_model_type in ["DTMC","MDP","POMDP"], "hole detected, but the program is neither DTMC nor (PO)MDP"
             # unfold hole options via Jani
-            jani_unfolder = JaniUnfolder(prism, hole_expressions, specification, holes)
+            jani_unfolder = paynt.parser.jani.JaniUnfolder(prism, hole_expressions, specification, family)
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
-            coloring = Coloring(quotient_mdp, holes, jani_unfolder.action_to_hole_options)
+            coloring = stormpy.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_hole_options)
             MarkovChain.initialize(specification)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = stormpy.synthesis.ObservationEvaluator(prism, quotient_mdp)
@@ -63,7 +63,7 @@ class PrismParser:
             MarkovChain.initialize(specification)
             quotient_mdp = MarkovChain.from_prism(prism)
 
-        return prism, quotient_mdp, specification, coloring, jani_unfolder, obs_evaluator
+        return prism, quotient_mdp, specification, family, coloring, jani_unfolder, obs_evaluator
 
     
     @classmethod
@@ -112,7 +112,7 @@ class PrismParser:
     def parse_holes(cls, prism, expression_parser, hole_definitions):
 
         # parse hole definitions
-        holes = Holes()
+        family = paynt.family.family.Family()
         hole_expressions = []
         hole_min = []
         hole_max = []
@@ -136,44 +136,26 @@ class PrismParser:
             expressions = [expression_parser.parse(o) for o in options]
             hole_expressions.append(expressions)
 
-            options = list(range(len(expressions)))
             option_labels = [str(e) for e in expressions]
-            hole = Hole(hole_name, options, option_labels)
-            holes.append(hole)
+            family.add_hole(hole_name, option_labels)
 
         # substitute constants used as min/max values of holes
         hole_range_definitions = {}
-        for hole_index,hole in enumerate(holes): 
-            var_min = prism.get_constant(f"{hole.name}_MIN").expression_variable
-            hole_range_definitions[var_min] = expression_parser.parse(str(hole_min[hole_index]))
-            var_max = prism.get_constant(f"{hole.name}_MAX").expression_variable
-            hole_range_definitions[var_max] = expression_parser.parse(str(hole_max[hole_index]))
+        for hole in range(family.num_holes):
+            hole_name = family.hole_name(hole)
+            var_min = prism.get_constant(f"{hole_name}_MIN").expression_variable
+            hole_range_definitions[var_min] = expression_parser.parse(str(hole_min[hole]))
+            var_max = prism.get_constant(f"{hole_name}_MAX").expression_variable
+            hole_range_definitions[var_max] = expression_parser.parse(str(hole_max[hole]))
         prism = prism.define_constants(hole_range_definitions)
 
         # check that all undefined constants are indeed the holes
-        hole_names = [hole.name for hole in holes]
+        hole_names = [family.hole_name(hole) for hole in range(family.num_holes)]
         for c in prism.constants:
             if not c.defined:
                 assert c.name in hole_names, f"constant {c.name} was not specified"
 
-        # convert single-valued holes to a defined constant
-        trivial_holes_definitions = {}
-        nontrivial_holes = Holes()
-        nontrivial_hole_expressions = []
-        for hole_index,hole in enumerate(holes):
-            if hole.size == 1:
-                trivial_holes_definitions[prism.get_constant(hole.name).expression_variable] = hole_expressions[hole_index][0]
-            else:
-                nontrivial_holes.append(hole)
-                nontrivial_hole_expressions.append(hole_expressions[hole_index])
-        holes = nontrivial_holes
-        hole_expressions = nontrivial_hole_expressions
-
-        # substitute trivial holes
-        prism = prism.define_constants(trivial_holes_definitions)
-        prism = prism.substitute_constants()
-
-        return prism, hole_expressions, holes
+        return prism, hole_expressions, family
 
  
     @classmethod
@@ -193,7 +175,7 @@ class PrismParser:
         return props[0]
 
     @classmethod
-    def parse_specification(cls, properties_path, relative_error, discount_factor, prism=None, holes=None):
+    def parse_specification(cls, properties_path, relative_error, discount_factor, prism=None, family=None):
         '''
         Expecting one property per line. The line may be terminated with a semicolon.
         Empty lines or comments are allowed.

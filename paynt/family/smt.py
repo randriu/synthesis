@@ -27,9 +27,9 @@ class FamilyEncoding():
         self.has_assignments = True
 
         hole_clauses = []
-        for hole_index,hole in enumerate(family):
-            all_clauses = smt_solver.solver_clauses[hole_index]
-            clauses = [all_clauses[option] for option in hole.options]
+        for hole in range(family.num_holes):
+            all_clauses = smt_solver.solver_clauses[hole]
+            clauses = [all_clauses[option] for option in family.hole_options(hole)]
             if len(clauses) == 1:
                 or_clause = clauses[0]
             else:
@@ -82,9 +82,7 @@ class FamilyEncoding():
         else:
             pass            
         
-        assignment = self.family.copy()
-        assignment.assume_options(hole_options)
-
+        assignment = self.family.assume_options_copy(hole_options)
         return assignment
 
         
@@ -119,7 +117,7 @@ class SmtSolver():
         self.solver_clauses = []
         if self.use_python_z3:
             self.solver = z3.Solver()
-            self.solver_vars = [z3.Int(hole_index) for hole_index in family.hole_indices]
+            self.solver_vars = [z3.Int(hole) for hole in range(family.num_holes)]
         elif self.use_cvc:
             self.solver = pycvc5.Solver()
             self.solver.setOption("produce-models", "true")
@@ -130,20 +128,20 @@ class SmtSolver():
             # self.solver.setLogic("QF_UFDT")
             # self.solver.setLogic("QF_UFLIA")
             intSort = self.solver.getIntegerSort()
-            self.solver_vars = [self.solver.mkConst(intSort, str(hole_index)) for hole_index in family.hole_indices]
+            self.solver_vars = [self.solver.mkConst(intSort, str(hole)) for hole in range(family.num_holes)]
         else:
             raise RuntimeError("Need to enable at least one SMT solver.")
 
         # create solver clauses
         self.solver_clauses = []
-        for hole_index,hole in enumerate(family):
-            var = self.solver_vars[hole_index]
-            clauses = [self.create_hole_clause(hole_index,option) for option in hole.options]
+        for hole in range(family.num_holes):
+            var = self.solver_vars[hole]
+            clauses = [self.create_hole_clause(hole,option) for option in family.hole_options(hole)]
             self.solver_clauses.append(clauses)
 
 
-    def create_hole_clause(self, hole_index, option):
-        var = self.solver_vars[hole_index]
+    def create_hole_clause(self, hole, option):
+        var = self.solver_vars[hole]
         if self.use_python_z3:
             return var == option
         elif self.use_cvc:
@@ -200,14 +198,14 @@ class SmtSolver():
 
         pruning_estimate = 1
         counterexample_clauses = []
-        for hole_index,var in enumerate(self.solver_vars):
-            if hole_index in conflict:
-                option = assignment[hole_index].options[0]
-                counterexample_clauses.append(self.solver_clauses[hole_index][option])
+        for hole,var in enumerate(self.solver_vars):
+            if hole in conflict:
+                option = assignment.hole_options(hole)[0]
+                counterexample_clauses.append(self.solver_clauses[hole][option])
             else:
-                if not family[hole_index].is_unrefined:
-                    counterexample_clauses.append(family.encoding.hole_clauses[hole_index])
-                pruning_estimate *= family[hole_index].size
+                if family.hole_num_options(hole) < family.hole_num_options_total(hole):
+                    counterexample_clauses.append(family.encoding.hole_clauses[hole])
+                pruning_estimate *= family.hole_num_options(hole)
 
         if self.use_python_z3:
             if len(counterexample_clauses) == 0:
