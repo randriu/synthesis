@@ -67,8 +67,7 @@ print("number of holes: ", pomdp_sketch.design_space.num_holes)
 print("design space size: {} members".format(pomdp_sketch.design_space.size))
 
 # fix some hole options
-hole_options = [[hole.options[0]] for hole in pomdp_sketch.design_space]
-hole_assignment = pomdp_sketch.design_space.assume_options_copy(hole_options)
+hole_assignment = pomdp_sketch.design_space.pick_any()
 
 # investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)

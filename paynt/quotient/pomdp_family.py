@@ -214,7 +214,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             else:
                 hole_options = [(hole,option) for hole,option in choice_to_hole_assignment[choice]]
             product_choice_to_hole_options.append(hole_options)
-        product_coloring = stormpy.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, choice_to_hole_options)
+        product_coloring = stormpy.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, product_choice_to_hole_options)
         
         # handle specification
         product_specification = self.specification.copy()
