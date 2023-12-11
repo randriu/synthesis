@@ -118,13 +118,33 @@ class PrismParser:
         hole_max = []
         for hole_name,hole_type,hole_options in hole_definitions:
             if ".." in hole_options:
-                assert hole_type == "int", "cannot use range-based definitions for non-integer hole types"
-                options = hole_options.split("..")
-                range_start = int(options[0])
-                range_end = int(options[1])
-                hole_min.append(range_start)
-                hole_max.append(range_end)
-                options = [str(o) for o in range(range_start,range_end+1)]
+                assert hole_type == "int" or hole_type == "double", "cannot use range-based definitions for non-integer of non-double hole types"
+                if hole_type == "double":
+                    assert ":" in hole_options, "using range-based definition for double requires specifying the increment step range_start..range_end:step"
+                    range_start = float(hole_options[0:hole_options.find('..')])
+                    range_end = float(hole_options[hole_options.find('..')+2:hole_options.find(':')].strip())
+                    increment_string = hole_options.split(':')[-1].strip()
+                    increment = float(increment_string)
+                    increment_decimal_precision = len(increment_string.split('.')[-1])
+                    hole_min.append(range_start)
+                    hole_max.append(range_end)
+                    steps = (range_end - range_start) / increment
+                    options = ["{:.{n}f}".format(range_start + x * increment, n=increment_decimal_precision) for x in range(int(round(steps)+1))]
+                    if float(options[-1]) > range_end:
+                        options = options[:-1]
+                else:
+                    if ":" in hole_options:
+                        range_start = int(hole_options[0:hole_options.find('..')])
+                        range_end = int(hole_options[hole_options.find('..')+2:hole_options.find(':')].strip())
+                        increment = int(hole_options.split(':')[-1].strip())
+                    else:
+                        options = hole_options.split("..")
+                        range_start = int(options[0])
+                        range_end = int(options[1])
+                        increment = 1
+                    hole_min.append(range_start)
+                    hole_max.append(range_end)
+                    options = [str(o) for o in range(range_start,range_end+1, increment)]
             else:
                 options = hole_options.split(",")
                 if hole_type == "int":
