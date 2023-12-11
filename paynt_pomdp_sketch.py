@@ -76,13 +76,18 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
 # qvalues = pomdp_sketch.compute_qvalues_for_fsc(dtmc_sketch)
 
-# to each (sub-family of) environment(s), assign a value corresponding to the minimum specification satisfiability
+# to each singleton environment, assign a value corresponding to the specification satisfiability
 synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
-family_to_value = synthesizer.evaluate_all()
+family_to_value = synthesizer.evaluate_all_wrt_property(keep_value_only=True)
 
-# pick the worst environment
-# TODO
-worst_family,worst_value = family_to_value[0]
+# pick the worst family
+import numpy
+values = numpy.array([value for family,value in family_to_value])
+if dtmc_sketch.get_property().minimizing:
+    worst_index = values.argmax()
+else:
+    worst_index = values.argmin()
 
-print("the worst value has value {}, printing the worst family below:".format(worst_value))
+worst_family,worst_value = family_to_value[worst_index]
+print("the worst family has value {}, printing it below:".format(worst_value))
 print(worst_family)

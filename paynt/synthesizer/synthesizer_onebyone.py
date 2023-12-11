@@ -31,5 +31,27 @@ class SynthesizerOneByOne(Synthesizer):
 
         return satisfying_assignment
 
-    def evaluate_all(self, family=None):
-        raise NotImplementedError("One-by-one synthesizer does not support evaluation of all family members")
+    def evaluate_all_wrt_property(self, family=None, prop=None, keep_value_only=False):
+        '''
+        Model check each member of the family wrt the given property.
+        :param family if None, then the design space of the quotient will be used
+        :param prop if None, then the default property of the quotient will be used
+        :param keep_value_only if True, then, instead of property result, only the corresponding value will be
+            associated with the member
+        :returns a list of (family,property result) pairs where family is neceesarily a singleton
+        '''
+        if family is None:
+            family = self.quotient.design_space
+        if prop is None:
+            prop = self.quotient.get_property()
+        assignment_evaluation = []
+        for hole_combination in family.all_combinations():
+            assignment = family.construct_assignment(hole_combination)
+            chain = self.quotient.build_chain(assignment)
+            self.stat.iteration_dtmc(chain.states)
+            evaluation = chain.model_check_property(prop)
+            if keep_value_only:
+                evaluation = evaluation.value
+            assignment_evaluation.append( (assignment,evaluation) )
+            self.explore(assignment)
+        return assignment_evaluation
