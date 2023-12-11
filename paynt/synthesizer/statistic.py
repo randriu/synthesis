@@ -44,6 +44,13 @@ class Statistic:
         self.feasible = None
         self.assignment = None
 
+        # MDP family
+        self.num_mdps_total = None
+        self.num_mdps_sat = None
+        self.num_policies = None
+        self.num_policies_merged = None
+        self.num_policies_yes = None
+
         self.synthesis_time = Timer()
         self.status_horizon = Statistic.status_period
 
@@ -168,7 +175,32 @@ class Statistic:
                 f"{family_stats}\n{result}\n{assignment}" \
                 f"{sep}"
         return summary
-
     
     def print(self):    
         print(self.get_summary())
+
+
+    def print_mdp_family_table_entries(self):
+        table_header = "table header: "
+        table_header += "\t".join(["states","actions","MDPs","SAT MDPs","SAT %","policies","merged","merged/SAT %"])
+        table_header += "\t".join(["yes nodes","time","game iters","MDP iters", "iters/MDPs"])
+        print(table_header)
+        print("table entries: ",end="")
+        print(self.quotient.quotient_mdp.nr_states,end="\t")
+        print(self.quotient.quotient_mdp.nr_choices,end="\t")
+        print(self.num_mdps_total,end="\t")
+        print(self.num_mdps_sat,end="\t")
+        sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,0)
+        print(sat_by_total_percentage,end="\t")
+        print(self.num_policies,end="\t")
+        print(self.num_policies_merged,end="\t")
+        merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
+        print(merged_by_sat_percentage,end="\t")
+        print(self.num_policies_yes,end="\t")
+        synthesis_time = round(self.synthesis_time.time,0)
+        print(synthesis_time,end="\t")
+        print(self.iterations_game,end="\t")
+        print(self.iterations_mdp,end="\t")
+        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total,2)
+        print(iters_by_mdp)
+        print()

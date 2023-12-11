@@ -15,12 +15,17 @@ class MdpFamilyResult:
     def __init__(self):
         # if None, then family is undediced
         # if False, then all family is UNSAT
-        # otherwise, then contains a satisfying policy for all MDPs in the family
+        # otherwise, contains a satisfying policy for all MDPs in the family
         self.policy = None
         self.policy_source = ""
 
         self.hole_selection = None
         self.splitter = None
+
+        # policy search results
+        self.sat_mdps = None
+        self.sat_policies = None
+        self.unsat_mdps = None
 
     def __str__(self):
         return str(self.sat)
@@ -126,7 +131,7 @@ class PolicyTreeNode:
         for subfamily in subfamilies:
             child_node = PolicyTreeNode(subfamily)
             child_node.parent = self
-            self.child_nodes.append(child_node)    
+            self.child_nodes.append(child_node)
 
 
     def double_check(self, quotient, prop):
@@ -331,7 +336,12 @@ class PolicyTree:
     
 
     
-    def postprocess(self, quotient, prop):
+    def postprocess(self, quotient, prop, stat):
+
+        stat.num_mdps_total = quotient.design_space.size
+        stat.num_mdps_sat = sum([n.family.size for n in self.collect_solved()])
+
+        stat.num_policies = len(self.collect_solved())
         logger.info("post-processing the policy tree...")
         logger.info("merging unsat siblings...")
         PolicyTreeNode.merged = 0
@@ -347,6 +357,7 @@ class PolicyTree:
         for node in reversed(all_nodes):
             node.merge_children_compatible(quotient,prop)
         logger.info("merged {} pairs".format(PolicyTreeNode.merged))
+        stat.num_policies_merged = len(self.collect_solved())
         self.print_stats()
 
         logger.info("merging solved siblings...")
@@ -355,6 +366,7 @@ class PolicyTree:
         for node in reversed(all_nodes):
             node.merge_children_solved()
         logger.info("merged {} pairs".format(PolicyTreeNode.merged))
+        stat.num_policies_yes = len(self.collect_solved())
         self.print_stats()
 
 
@@ -364,7 +376,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     # if True, then the game scheduler will be used for splitting (incompatible with randomized abstraction)
     use_optimistic_splitting = True
     # if True, tree leaves will be double-checked after synthesis
-    double_check_policy_tree_leaves = True
+    double_check_policy_tree_leaves = False
     
     @property
     def method_name(self):
@@ -437,7 +449,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
 
-        if family.size <= 4 and False:
+        if family.size <= 8 and False:
             policy_is_unique, unsat_mdps, sat_mdps, sat_policies = self.synthesize_policy_for_family(family, prop, iteration_limit=100)
             if policy_is_unique:
                 policy = sat_policies
@@ -470,7 +482,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 mdp_family_result.policy_source = "game abstraction"
                 return mdp_family_result
             else:
-                print("game YES but nor forall family of size ", family.size)
+                logger.debug(f"game YES but nor forall family of size {family.size}")
         
         if not game_sat or not SynthesizerPolicyTree.use_optimistic_splitting:
             # solve primary-primary direction for the family
@@ -766,7 +778,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         while policy_tree_leaves:
 
             # gi = self.stat.iterations_game
-            # if gi is not None and gi > 500:
+            # if gi is not None and gi > 1000:
             #     return None
 
             policy_tree_node = policy_tree_leaves.pop(-1)
@@ -790,12 +802,15 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             # refine
             suboptions,subfamilies = self.split(family, prop, result.hole_selection, result.splitter)
             policy_tree_node.split(result.splitter,suboptions,subfamilies)
+            if policy_tree_node != policy_tree.root:
+                # discard MDP built for the family to free memory
+                policy_tree_node.family.mdp = None
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
         if SynthesizerPolicyTree.double_check_policy_tree_leaves:
             policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
-        policy_tree.postprocess(self.quotient, prop)
+        policy_tree.postprocess(self.quotient, prop, self.stat)
         return policy_tree
 
     
@@ -820,4 +835,5 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         
         policy_tree = self.synthesize()
         self.stat.print()
+        # self.stat.print_mdp_family_table_entries()
     
