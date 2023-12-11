@@ -1,4 +1,0 @@
-//min Pmin=? [F goal]
-//max Pmax=? [F goal];
-//min Pmax=? [F goal];
-P>=0.95 [F goal]
