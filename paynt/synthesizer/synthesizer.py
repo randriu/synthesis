@@ -1,4 +1,4 @@
-from .statistic import Statistic
+import paynt.synthesizer.statistic
 
 import logging
 logger = logging.getLogger(__name__)
@@ -8,10 +8,44 @@ class Synthesizer:
 
     # if True, some subfamilies can be discarded and some holes can be generalized
     incomplete_search = False
+
+    @staticmethod
+    def choose_synthesizer(quotient, method, fsc_synthesis, storm_control):
+
+        # hiding imports here to avoid mutual top-level imports
+        import paynt.quotient.pomdp
+        import paynt.quotient.mdp_family
+        import paynt.synthesizer.synthesizer_onebyone
+        import paynt.synthesizer.synthesizer_ar
+        import paynt.synthesizer.synthesizer_cegis
+        import paynt.synthesizer.synthesizer_hybrid
+        import paynt.synthesizer.synthesizer_multicore_ar
+        import paynt.synthesizer.synthesizer_pomdp
+        import paynt.synthesizer.policy_tree
+
+        if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
+            logger.info("nothing to do with the POMDP sketch, aborting...")
+            exit(0)
+        if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
+            return paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(quotient, method, storm_control)
+        if isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
+            return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
+        if method == "onebyone":
+            return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
+        if method == "ar":
+            return paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
+        if method == "cegis":
+            return paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS(quotient)
+        if method == "hybrid":
+            return paynt.synthesizer.synthesizer_hybrid.SynthesizerHybrid(quotient)
+        if method == "ar_multicore":
+            return paynt.synthesizer.synthesizer_multicore_ar.SynthesizerMultiCoreAR(quotient)
+        raise ValueError("invalid method name")
+    
     
     def __init__(self, quotient):
         self.quotient = quotient
-        self.stat = Statistic(self)
+        self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
     
     @property

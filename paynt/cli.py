@@ -4,18 +4,10 @@ import paynt.parser.sketch
 
 import paynt.quotient
 import paynt.quotient.pomdp
-import paynt.quotient.mdp_family
-import paynt.synthesizer.policy_tree
+import paynt.quotient.storm_pomdp_control
 
-from .synthesizer.synthesizer import Synthesizer
-from .synthesizer.synthesizer_onebyone import SynthesizerOneByOne
-from .synthesizer.synthesizer_ar import SynthesizerAR
-from .synthesizer.synthesizer_cegis import SynthesizerCEGIS
-from .synthesizer.synthesizer_hybrid import SynthesizerHybrid
-from .synthesizer.synthesizer_pomdp import SynthesizerPOMDP
-from .synthesizer.synthesizer_multicore_ar import SynthesizerMultiCoreAR
-
-from .quotient.storm_pomdp_control import StormPOMDPControl
+import paynt.synthesizer.synthesizer
+import paynt.synthesizer.synthesizer_cegis
 
 import click
 import sys
@@ -141,9 +133,9 @@ def paynt_run(
     logger.info("This is Paynt version {}.".format(version()))
 
     # set CLI parameters
-    Synthesizer.incomplete_search = incomplete_search
+    paynt.synthesizer.synthesizer.Synthesizer.incomplete_search = incomplete_search
     paynt.quotient.quotient.Quotient.compute_expected_visits = not disable_expected_visits
-    SynthesizerCEGIS.conflict_generator_type = ce_generator
+    paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
     paynt.quotient.pomdp.PomdpQuotient.export_optimal_result = fsc_export_result
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
@@ -157,7 +149,7 @@ def paynt_run(
 
     storm_control = None
     if storm_pomdp:
-        storm_control = StormPOMDPControl()
+        storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.storm_options = storm_options
         if get_storm_result is not None:
             storm_control.get_result = get_storm_result
@@ -168,27 +160,8 @@ def paynt_run(
         storm_control.export_fsc_storm = export_fsc_storm
         storm_control.export_fsc_paynt = export_fsc_paynt
 
-    if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
-        logger.info("nothing to do with the POMDP sketch, aborting...")
-        exit(0)
-
     # choose the synthesis method and run the corresponding synthesizer
-    if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
-        synthesizer = SynthesizerPOMDP(quotient, method, storm_control)
-    elif isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
-        synthesizer = paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
-    elif method == "onebyone":
-        synthesizer = SynthesizerOneByOne(quotient)
-    elif method == "ar":
-        synthesizer = SynthesizerAR(quotient)
-    elif method == "cegis":
-        synthesizer = SynthesizerCEGIS(quotient)
-    elif method == "hybrid":
-        synthesizer = SynthesizerHybrid(quotient)
-    elif method == "ar_multicore":
-        synthesizer = SynthesizerMultiCoreAR(quotient)
-    else:
-        pass
+    synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
 
     if storm_pomdp:
         if prune_storm:

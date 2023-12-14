@@ -738,7 +738,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         prop = self.quotient.get_property()
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         policy_tree = PolicyTree(family)
-        self.create_action_coloring()
+        # self.create_action_coloring()
 
         if False:
             self.quotient.build(policy_tree.root.family)

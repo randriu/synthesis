@@ -1,10 +1,10 @@
-from .synthesizer import Synthesizer
+import paynt.synthesizer.synthesizer
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class SynthesizerOneByOne(Synthesizer):
+class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
     
     @property
     def method_name(self):
