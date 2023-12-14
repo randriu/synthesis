@@ -353,7 +353,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             "Unfolding POMDP using the following memory allocation vector: {} ..."
             .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        self.choice_destinations = paynt.quotient.quotient.Quotient.compute_choice_destinations(self.quotient_mdp)
+        self.choice_destinations = stormpy.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         if not PomdpQuotient.posterior_aware:

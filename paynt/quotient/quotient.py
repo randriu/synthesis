@@ -21,16 +21,6 @@ class Quotient:
     compute_expected_visits = True
 
     @staticmethod
-    def compute_choice_destinations(mdp):
-        choice_destinations = []
-        for choice in range(mdp.nr_choices):
-            destinations = []
-            for entry in mdp.transition_matrix.get_row(choice):
-                destinations.append(entry.column)
-            choice_destinations.append(destinations)
-        return choice_destinations
-
-    @staticmethod
     def make_vector_defined(vector):
         vector_noinf = [ value if value != math.inf else 0 for value in vector]
         default_value = sum(vector_noinf) / len(vector)
@@ -54,8 +44,8 @@ class Quotient:
 
         # for each choice of the quotient, a list of its state-destinations
         self.choice_destinations = None
-        if self.quotient_mdp is not None:
-            self.choice_destinations = Quotient.compute_choice_destinations(self.quotient_mdp)
+        if self.quotient_mdp is not None
+            self.choice_destinations = stormpy.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
         if coloring is not None:
             self.state_to_holes = coloring.getStateToHoles().copy()
