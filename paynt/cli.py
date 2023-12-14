@@ -77,8 +77,6 @@ def setup_logger(log_path = None):
     help="use incomplete search during synthesis")
 @click.option("--disable-expected-visits", is_flag=True, default=False,
     help="do not compute expected visits for the splitting heuristic")
-@click.option("--split-mdp-family-pessimistically", is_flag=True, default=False,
-    help="when solving families of MDPs, split undecided families without using game solution")
 
 @click.option("--fsc-synthesis", is_flag=True, default=False,
     help="enable incremental synthesis of FSCs for a POMDP")
@@ -132,7 +130,6 @@ def paynt_run(
     export,
     method,
     incomplete_search, disable_expected_visits,
-    split_mdp_family_pessimistically,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
     fsc_export_result,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
@@ -146,7 +143,6 @@ def paynt_run(
     # set CLI parameters
     Synthesizer.incomplete_search = incomplete_search
     paynt.quotient.quotient.Quotient.compute_expected_visits = not disable_expected_visits
-    paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_optimistic_splitting = not split_mdp_family_pessimistically
     SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
     paynt.quotient.pomdp.PomdpQuotient.export_optimal_result = fsc_export_result

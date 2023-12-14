@@ -92,46 +92,29 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                 policy[state] = self.choice_to_action[choice]
         return policy
 
+    
+    def fix_and_apply_policy_to_family(self, family, policy):
+        '''
+        Apply policy to the quotient MDP for the given family. Every undefined action in a policy is set to an arbitrary
+        one. Upon constructing the MDP, reset unused actions in a policy to None.
+        :returns fixed policy
+        :returns the resulting MDP
+        '''
+        policy = [action if action is not None else self.state_to_actions[state][0] for state,action in enumerate(policy)]
+        policy_choices = []
+        for state,action in enumerate(policy):
+            policy_choices += self.state_action_choices[state][action]
+        choices = stormpy.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
 
-    def fix_policy_for_family(self, family, policy):
-        '''
-        Apply policy to the quotient MDP for the given family. If a state is reached for which policy does not define
-        an action, pick an arbitrary one.
-        :return fixed policy
-        :return choice mask from which Q-MDP x policy can be constructed
-        '''
-        
-        choice_mask = stormpy.BitVector(self.quotient_mdp.nr_choices,False)
+        # build MDP and keep only reachable states in policy
+        mdp = self.build_from_choice_mask(choices)
         policy_fixed = self.empty_policy()
+        for state in mdp.quotient_state_map:
+            policy_fixed[state] = policy[state]
 
-        initial_state = list(self.quotient_mdp.initial_states)[0]
-        tm = self.quotient_mdp.transition_matrix
-        
-        state_visited = stormpy.BitVector(self.quotient_mdp.nr_states,False)
-        state_visited.set(initial_state,True)
-        state_queue = [initial_state]
-        while state_queue:
-            state = state_queue.pop()
-            action = policy[state]
-            if action is None:
-                action = self.state_to_actions[state][0]
-            policy_fixed[state] = action
-            for choice in self.state_action_choices[state][action]:
-                if not family.selected_choices[choice]:
-                    continue
-                choice_mask.set(choice,True)
-                for dst in self.choice_destinations[choice]:
-                    if not state_visited[dst]:
-                        state_visited.set(dst,True)
-                        state_queue.append(dst)
-        return policy_fixed,choice_mask
+        return policy_fixed,mdp
 
     
-    def apply_policy_to_family(self, family, policy):
-        _,choice_mask = self.fix_policy_for_family(family,policy)
-        return self.build_from_choice_mask(choice_mask)
-
-
     def assert_mdp_is_deterministic(self, mdp, family):
         if mdp.is_deterministic:
             return

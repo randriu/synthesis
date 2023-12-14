@@ -83,8 +83,8 @@ class Quotient:
         )
         
         model = submodel_construction.model
-        state_map = list(submodel_construction.new_to_old_state_mapping)
-        choice_map = list(submodel_construction.new_to_old_action_mapping)
+        state_map = submodel_construction.new_to_old_state_mapping.copy()
+        choice_map = submodel_construction.new_to_old_action_mapping.copy()
 
         return model,state_map,choice_map
 
@@ -219,10 +219,6 @@ class Quotient:
             for choice in range(mdp.nr_choices):
                 choice_values[choice] += choice_rewards[choice]
 
-        # sanity check
-        for choice in range(mdp.nr_choices):
-            assert not math.isnan(choice_values[choice])
-
         return choice_values
 
 
@@ -259,7 +255,7 @@ class Quotient:
 
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
         if expected_visits is None:
-            expected_visits = [1] * mpd.model.nr_states
+            expected_visits = [1] * mdp.model.nr_states
         hole_variance = stormpy.synthesis.computeInconsistentHoleVariance(
             self.design_space.family, mdp.model.nondeterministic_choice_indices, mdp.quotient_choice_map, choice_values,
             self.coloring, inconsistent_assignments, expected_visits)

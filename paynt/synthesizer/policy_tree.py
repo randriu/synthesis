@@ -84,15 +84,13 @@ def test_nodes(quotient, prop, node1, node2):
     policy12,policy21 = merge_policies_exclusively(policy1,policy2)
 
     # try policy1 for family2
-    policy,choice_mask = quotient.fix_policy_for_family(node2.family, policy12)
-    mdp = quotient.build_from_choice_mask(choice_mask)
+    policy,mdp = quotient.fix_and_apply_policy_to_family(node2.family, policy12)
     policy_result = mdp.model_check_property(prop, alt=True)
     if policy_result.sat:
         return policy
 
     # try policy2 for family1
-    policy,choice_mask = quotient.fix_policy_for_family(node1.family, policy21)
-    mdp = quotient.build_from_choice_mask(choice_mask)
+    policy,mdp = quotient.fix_and_apply_policy_to_family(node1.family, policy21)
     policy_result = mdp.model_check_property(prop, alt=True)
     if policy_result.sat:
         return policy
@@ -373,8 +371,6 @@ class PolicyTree:
 
 class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
-    # if True, then the game scheduler will be used for splitting (incompatible with randomized abstraction)
-    use_optimistic_splitting = True
     # if True, tree leaves will be double-checked after synthesis
     double_check_policy_tree_leaves = False
     
@@ -384,7 +380,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     @staticmethod
     def double_check_policy(quotient, family, prop, policy):
-        mdp = quotient.apply_policy_to_family(family, policy)
+        _,mdp = quotient.fix_and_apply_policy_to_family(family, policy)
         if family.size == 1:
             quotient.assert_mdp_is_deterministic(mdp, family)
         
@@ -399,7 +395,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     
     
     def verify_policy(self, family, prop, policy):
-        mdp = self.quotient.apply_policy_to_family(family, policy)
+        _,mdp = self.quotient.fix_and_apply_policy_to_family(family, policy)
         policy_result = mdp.model_check_property(prop, alt=True)
         self.stat.iteration_mdp(mdp.states)
         return policy_result.sat
@@ -422,29 +418,39 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # logger.debug("solving game abstraction...")
         game_solver.solve(family.selected_choices, prop.maximizing, prop.minimizing)
         self.stat.iteration_game(family.mdp.states)
-        # logger.debug("game solved, value is {}".format(game_solver.solution_value))
+        game_value = game_solver.solution_value
+        game_sat = prop.satisfies_threshold(game_value)
+        # logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action
         # fix irrelevant choices
-        policy = self.quotient.empty_policy()
+        game_policy_fixed = self.quotient.empty_policy()
         for state,action in enumerate(game_policy):
             if action < self.quotient.num_actions:
-                policy[state] = action
-        policy_sat = prop.satisfies_threshold(game_solver.solution_value)
-        
-        if False:
-            # double-check game value
-            model,state_map,choice_map = self.quotient.restrict_mdp(self.quotient.quotient_mdp, game_solver.solution_reachable_choices)
-            assert(model.nr_states == model.nr_choices)
-            dtmc = paynt.quotient.models.DTMC(model, self.quotient, state_map, choice_map)
-            dtmc_result = dtmc.model_check_property(prop)
-            # print("double-checking game value: ", game_solver.solution_value, dtmc_result)
-            if abs(dtmc_result.value-game_solver.solution_value) > 0.01:
-                logger.error("game solution is {}, but DTMC model checker yielded {}".format(game_solver.solution_value,dtmc_result.value))
+                game_policy_fixed[state] = action
+        game_policy = game_policy_fixed
+        return game_policy,game_value,game_sat
 
-        return policy, policy_sat
+    def parse_game_scheduler(self, game_solver):
+        state_values = game_solver.solution_state_values
+        state_to_choice = game_solver.solution_state_to_quotient_choice
+        # uncomment this to use only reachable choices of the game scheduler
+        # state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
+        scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
+        hole_selection = self.quotient.coloring.collectHoleOptions(scheduler_choices)
+        return scheduler_choices,state_values,hole_selection
+
+    def parse_mdp_scheduler(self, family, mdp_result):
+        state_to_choice = self.quotient.scheduler_to_state_to_choice(family.mdp, mdp_result.result.scheduler)
+        scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
+        state_values = [0] * self.quotient.quotient_mdp.nr_states
+        for state in range(family.mdp.states):
+            quotient_state = family.mdp.quotient_state_map[state]
+            state_values[quotient_state] = mdp_result.result.at(state)
+        hole_selection = self.quotient.coloring.collectHoleOptions(scheduler_choices)
+        return scheduler_choices,state_values,hole_selection
 
     
-    def verify_family(self, family, game_solver, prop, reference_policy=None):
+    def verify_family(self, family, game_solver, prop):
         # logger.info("investigating family of size {}".format(family.size))
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
@@ -457,24 +463,14 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 mdp_family_result.policy_source = "policy search"
                 return mdp_family_result
 
-
-
-        if False and reference_policy is not None:
-            # try reference policy
-            reference_policy_sat = self.verify_policy(family,prop,reference_policy)
-            if reference_policy_sat:
-                # print("reference policy worked!")
-                mdp_family_result.policy = reference_policy
-                mdp_family_result.policy_source = "reference"
-                return mdp_family_result
-
+        
         if family.size == 1:
             mdp_family_result.policy = self.solve_singleton(family,prop)
             mdp_family_result.policy_source = "singleton"
             return mdp_family_result
 
         
-        game_policy,game_sat = self.solve_game_abstraction(family,prop,game_solver)
+        game_policy,game_value,game_sat = self.solve_game_abstraction(family,prop,game_solver)
         if game_sat:
             game_policy_sat = self.verify_policy(family,prop,game_policy)
             if game_policy_sat:
@@ -484,75 +480,53 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             else:
                 logger.debug(f"game YES but nor forall family of size {family.size}")
         
-        if not game_sat or not SynthesizerPolicyTree.use_optimistic_splitting:
-            # solve primary-primary direction for the family
-            # logger.debug("solving primary-primary direction...")
-            primary_primary_result = family.mdp.model_check_property(prop)
+        mdp_result = None
+        if not game_sat:
+            # solve primary direction for the MDP abstraction
+            mdp_result = family.mdp.model_check_property(prop)
+            mdp_value = mdp_result.value
             self.stat.iteration_mdp(family.mdp.states)
-            # logger.debug("primary-primary direction solved, value is {}".format(primary_primary_result.value))
-            if not primary_primary_result.sat:
+            # logger.debug("primary-primary direction solved, value is {}".format(mdp_value))
+            if not mdp_result.sat:
                 mdp_family_result.policy = False
                 return mdp_family_result
-    
+        
         # undecided: choose scheduler choices to be used for splitting
-        if SynthesizerPolicyTree.use_optimistic_splitting:
-            state_values = game_solver.solution_state_values
-            state_to_choice = game_solver.solution_state_to_quotient_choice
-            state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
-        else:
-            state_to_choice = self.quotient.scheduler_to_state_to_choice(family.mdp, primary_primary_result.result.scheduler)
-            state_values = [0] * self.quotient.quotient_mdp.nr_states
-            for state in range(family.mdp.states):
-                quotient_state = family.mdp.quotient_state_map[state]
-                state_values[quotient_state] = primary_primary_result.result.at(state)
+        scheduler_choices,state_values,hole_selection = self.parse_game_scheduler(game_solver)
+        # scheduler_choices,state_values,hole_selection = self.parse_mdp_scheduler(family, mdp_result)
 
-        # map reachable scheduler choices to hole options
-        scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
-        hole_selection = self.quotient.coloring.collectHoleOptions(scheduler_choices)
-        
-        if False:
-            # sanity check
-            for choice in scheduler_choices:
-                assert choice in family.selected_choices
-            for hole,options in enumerate(hole_selection):
-                assert all([option in family.hole_options(hole) for option in options])
-
-        # pick splitter
         splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
-        
-        # done
         mdp_family_result.splitter = splitter
         mdp_family_result.hole_selection = hole_selection
         return mdp_family_result
-
-
+    
     def choose_splitter(self, family, prop, scheduler_choices, state_values, hole_selection):
-        splitter = None
         inconsistent_assignments = {hole:options for hole,options in enumerate(hole_selection) if len(options) > 1}
         if len(inconsistent_assignments)==0:
+            # pick any hole with multiple options
             for hole in range(family.num_holes):
                 if family.hole_num_options(hole) > 1:
-                    splitter = hole
-                    break
-        elif len(inconsistent_assignments)==1:
+                    return hole
+        if len(inconsistent_assignments)==1:
             for hole in inconsistent_assignments.keys():
-                splitter = hole
-                break
-        else:
-            # compute scores for inconsistent holes
-            mdp = self.quotient.quotient_mdp
-            choice_values = self.quotient.choice_values(mdp, prop, state_values)
-            expected_visits = None
-            if self.quotient.compute_expected_visits:
-                expected_visits = self.quotient.expected_visits(mdp, prop, scheduler_choices)
-            quotient_mdp_wrapped = self.quotient.design_space.mdp
-            scores = self.quotient.estimate_scheduler_difference(quotient_mdp_wrapped, inconsistent_assignments, choice_values, expected_visits)
-            splitters = self.quotient.holes_with_max_score(scores)
-            splitter = splitters[0]
-        assert splitter is not None
+                return hole
+        
+        # compute scores for inconsistent holes
+        scores = self.compute_scores(prop, scheduler_choices, state_values, inconsistent_assignments)
+        splitters = self.quotient.holes_with_max_score(scores)
+        splitter = splitters[0]
         return splitter
     
-    
+    def compute_scores(self, prop, scheduler_choices, state_values, inconsistent_assignments):
+        mdp = self.quotient.quotient_mdp
+        choice_values = self.quotient.choice_values(mdp, prop, state_values)
+        expected_visits = None
+        if self.quotient.compute_expected_visits:
+            expected_visits = self.quotient.expected_visits(mdp, prop, scheduler_choices)
+        quotient_mdp_wrapped = self.quotient.design_space.mdp
+        scores = self.quotient.estimate_scheduler_difference(quotient_mdp_wrapped, inconsistent_assignments, choice_values, expected_visits)
+        return scores
+
     def split(self, family, prop, hole_selection, splitter):
         
         # split the hole
@@ -581,7 +555,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subfamily = paynt.family.family.DesignSpace(subholes)
             subfamily.hole_set_options(splitter, suboption)
             subfamilies.append(subfamily)
-        
         return suboptions,subfamilies
 
 
@@ -773,7 +746,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             print("Policy exists: ", policy_exists)
             return None
 
-        reference_policy = None
         policy_tree_leaves = [policy_tree.root]
         while policy_tree_leaves:
 
@@ -783,28 +755,21 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
             policy_tree_node = policy_tree_leaves.pop(-1)
             family = policy_tree_node.family
-            result = self.verify_family(family,game_solver,prop,reference_policy)
+            result = self.verify_family(family,game_solver,prop)
             policy_tree_node.policy = result.policy
             policy_tree_node.policy_source = result.policy_source
 
-            if result.policy == False:
-                reference_policy = None
-                self.explore(family)
-                continue
-
             if result.policy is not None:
-                reference_policy = result.policy
                 self.explore(family)
+                if policy_tree_node != policy_tree.root:
+                    family.mdp = None   # memory optimization
                 continue
-
-            reference_policy = None
 
             # refine
             suboptions,subfamilies = self.split(family, prop, result.hole_selection, result.splitter)
-            policy_tree_node.split(result.splitter,suboptions,subfamilies)
             if policy_tree_node != policy_tree.root:
-                # discard MDP built for the family to free memory
-                policy_tree_node.family.mdp = None
+                    family.mdp = None   # memory optimization
+            policy_tree_node.split(result.splitter,suboptions,subfamilies)
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
         if SynthesizerPolicyTree.double_check_policy_tree_leaves:
@@ -836,4 +801,3 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree = self.synthesize()
         self.stat.print()
         # self.stat.print_mdp_family_table_entries()
-    

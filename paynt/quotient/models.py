@@ -29,18 +29,17 @@ class MarkovChain:
     
     @classmethod
     def from_prism(cls, prism):
-        
         assert prism.model_type in [stormpy.storage.PrismModelType.MDP, stormpy.storage.PrismModelType.POMDP]
         # TODO why do we disable choice labels here?
         MarkovChain.builder_options.set_build_choice_labels(True)
         model = stormpy.build_sparse_model_with_options(prism, MarkovChain.builder_options)
         MarkovChain.builder_options.set_build_choice_labels(False)
-        MarkovChain.assert_no_overlapping_guards(model)
+        # MarkovChain.assert_no_overlapping_guards(model)
         return model
 
     
     def __init__(self, model, quotient_container, quotient_state_map, quotient_choice_map):
-        MarkovChain.assert_no_overlapping_guards(model)
+        # MarkovChain.assert_no_overlapping_guards(model)
         if len(model.initial_states) > 1:
             logger.warning("WARNING: obtained model with multiple initial states")
         

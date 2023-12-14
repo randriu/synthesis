@@ -181,17 +181,22 @@ class Statistic:
 
 
     def print_mdp_family_table_entries(self):
-        table_header = "table header: "
-        table_header += "\t".join(["states","actions","MDPs","SAT MDPs","SAT %","policies","merged","merged/SAT %"])
-        table_header += "\t".join(["yes nodes","time","game iters","MDP iters", "iters/MDPs"])
-        print(table_header)
-        print("table entries: ",end="")
+        model_info = "model info:\t"
+        model_info += "\t".join(["states","actions","MDPs","SAT MDPs","SAT %",])
+        print(model_info)
+        print("\t\t",end="")
         print(self.quotient.quotient_mdp.nr_states,end="\t")
         print(self.quotient.quotient_mdp.nr_choices,end="\t")
         print(self.num_mdps_total,end="\t")
         print(self.num_mdps_sat,end="\t")
         sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,0)
-        print(sat_by_total_percentage,end="\t")
+        print(sat_by_total_percentage)
+        
+
+        synt_stats_header = "synt info:\t"
+        synt_stats_header += "\t".join(["policies","merged","merged/SAT %","yes nodes","time","game iters","MDP iters", "iters/MDPs"])
+        print(synt_stats_header)
+        print("\t\t",end="")
         print(self.num_policies,end="\t")
         print(self.num_policies_merged,end="\t")
         merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
