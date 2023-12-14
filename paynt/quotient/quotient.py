@@ -44,7 +44,7 @@ class Quotient:
 
         # for each choice of the quotient, a list of its state-destinations
         self.choice_destinations = None
-        if self.quotient_mdp is not None
+        if self.quotient_mdp is not None:
             self.choice_destinations = stormpy.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
         if coloring is not None:
