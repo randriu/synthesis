@@ -59,7 +59,7 @@ class MarkovChain:
         hole_to_states = [0 for _ in range(num_holes)]
         for state in range(self.states):
             quotient_state = self.quotient_state_map[state]
-            for hole in quotient_container.state_to_holes[quotient_state]:
+            for hole in self.quotient_container.state_to_holes[quotient_state]:
                 hole_to_states[hole] += 1
         self.hole_is_simple = [hole_to_states[hole] <= 1 for hole in range(num_holes)]
         return self.hole_is_simple

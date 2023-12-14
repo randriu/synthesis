@@ -4,6 +4,10 @@ import paynt.family.family
 import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
+from .conflict_generator.storm import ConflictGeneratorStorm
+from .conflict_generator.mdp import ConflictGeneratorMdp
+import paynt.family.smt
+
 import paynt.verification.property_result
 from paynt.verification.property import Property
 
@@ -731,6 +735,85 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             sat_mdp_policies[mdp_index] = policy
 
         return False, unsat_mdp_families, sat_mdp_families, sat_mdp_policies
+    
+
+    def synthesize_policy_for_family_linear(self, family, prop):
+        '''
+        Synthesize policies for mdps in family in linear time with respect to family size
+        :returns a list of UNSAT MDPs
+        :returns a list of SAT MDPs
+        :returns list of policies for SAT MDPs
+        :returns list that maps each SAT MDP to its policy 
+        '''
+        sat_mdp_families = []
+        sat_mdp_policies = []
+        sat_mdp_to_policy_map = []
+        unsat_mdp_families = []
+
+        mdp_families = []
+
+        for hole_assignment in family.all_combinations():
+            subfamily = family.copy()
+            for hole_index, hole_option in enumerate(hole_assignment):
+                subfamily.hole_set_options(hole_index, [hole_option])
+            mdp_families.append(subfamily)
+
+        for family in mdp_families:
+            self.quotient.build(family)
+
+            result = family.mdp.model_check_property(prop)
+            self.stat.iteration_mdp(family.mdp.states)
+            if not result.sat:
+                unsat_mdp_families.append(family)
+            
+            policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
+
+            for index, sat_policy in enumerate(sat_mdp_policies):
+                merged_policy = merge_policies([sat_policy, policy])
+                if merged_policy is None:
+                    continue
+                else:                 
+                    sat_mdp_policies[index] = merged_policy
+                    sat_mdp_families.append(family)
+                    sat_mdp_to_policy_map.append(index)
+                    break
+            else:
+                sat_mdp_families.append(family)
+                sat_mdp_to_policy_map.append(len(sat_mdp_policies))
+                sat_mdp_policies.append(policy)
+
+        return unsat_mdp_families, sat_mdp_families, sat_mdp_policies, sat_mdp_to_policy_map
+    
+
+    def synthesize_policy_for_family_using_ceg(self, family, prop):
+        
+        self.quotient.build(family)
+        conflict_generator = ConflictGeneratorStorm(self.quotient)
+        conflict_generator.initialize()
+
+        smt_solver = paynt.family.smt.SmtSolver(family)
+
+        mdp_subfamily = smt_solver.pick_assignment(family)
+
+        while mdp_subfamily is not None:
+
+            self.quotient.build(mdp_subfamily)
+
+            result = mdp_subfamily.mdp.model_check_property(prop)
+            self.stat.iteration_mdp(mdp_subfamily.mdp.states)
+
+            if result.sat == False:
+                # Potential for MDP CEs here
+                pruned = smt_solver.exclude_conflicts(family, mdp_subfamily, [list(range(family.num_holes))])
+                self.explored += pruned
+            elif result.sat == True:
+                policy = self.quotient.scheduler_to_policy(result.result.scheduler, mdp_subfamily.mdp)
+                policy_fixed, dtmc_family_quotient_mdp = self.quotient.fix_and_apply_policy_to_family(mdp_subfamily, policy)
+                
+            else:
+                assert False, "result for MDP model checking is not SAT nor UNSAT"
+
+            mdp_subfamily = smt_solver.pick_assignment(family)
         
 
 
@@ -738,7 +821,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         prop = self.quotient.get_property()
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         policy_tree = PolicyTree(family)
-        # self.create_action_coloring()
+        self.create_action_coloring()
+
+        self.synthesize_policy_for_family_using_ceg(policy_tree.root.family, prop)
+        exit()
+
+
+        unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
+        print(f'unSAT: {len(unsat)}')
+        print(f'SAT: {len(sat)}')
+        print(f'policies: {len(policies)}')
+        print(self.stat.iterations_mdp)
+        exit()
 
         if False:
             self.quotient.build(policy_tree.root.family)

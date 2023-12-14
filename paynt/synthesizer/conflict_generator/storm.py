@@ -16,10 +16,18 @@ class ConflictGeneratorStorm():
 
     def initialize(self):
         quotient_relevant_holes = self.quotient.coloring.getStateToHoles()
+        # TODO this is not a nice solution, it would be nice to remake the Storm code to work with bitvectors
+        state_to_holes = []
+        for hole in quotient_relevant_holes:
+            holes = set()
+            for i in range(hole.size()):
+                if hole.get(i):
+                    holes.add(i)
+            state_to_holes.append(holes)
         formulae = self.quotient.specification.stormpy_formulae()
         self.counterexample_generator = stormpy.synthesis.CounterexampleGenerator(
             self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
-            quotient_relevant_holes, formulae)
+            state_to_holes, formulae)
 
 
     def construct_conflicts(self, family, assignment, dtmc, conflict_requests, accepting_assignment):

@@ -107,7 +107,7 @@ class Quotient:
 
         # select actions compatible with the family and restrict the quotient
         choices_alt = self.coloring.selectCompatibleChoices(family.family)
-        choices_main = main_coloring.selectCompatibleChoices(main_family)
+        choices_main = main_coloring.selectCompatibleChoices(main_family.family)
 
         choices = choices_main.__and__(choices_alt)
         main_family.mdp = self.build_from_choice_mask(choices)
