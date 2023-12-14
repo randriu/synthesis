@@ -5,9 +5,9 @@ mdp
 //const double detect1=0.5; // probability virus detected by firewall of high/low node
 //const double detect2=0.8; // probability virus detected by firewall of barrier node
 
-hole double infect in {0.0..1.0:0.005};
-hole double detect1 in {0.0..0.5 : 0.005};
-hole double detect2 in {0.5..1.0 : 0.005};
+hole double infect in {0.5..1.0:   0.1};
+hole double detect1 in {0.0..0.5 : 0.1};
+hole double detect2 in {0.5..1.0 : 0.1};
 
 // low nodes (those above the ceil(N/2) row)
 
@@ -27,52 +27,25 @@ const double detect31=detect1;
 const double detect32=detect1;
 const double detect33=detect1;
 
+hole double fail_rate in {0.0..1.0:0.05};
 
+//hole double node22_recovery in {0.0..1.0:0.1};
 
+// node1 that cannot be infected
+hole int node1x in {1..2};
+hole int node1y in {2..3};
 
-const int X33_23 = 1;
-const int X22_21 = 1;
-
-const int X2333_32 = 1;
-const int X2333_13 = 0;
-const int X2333_22 = 2;
-
-const int X3233_23 = 0;
-const int X3233_31 = 1;
-const int X3233_22 = 2;
-
-const int X132333_32 = 0;
-const int X132333_12 = 2;
-const int X132333_22 = 1;
-
-const int X313233_23 = 0;
-const int X313233_21 = 2;
-const int X313233_22 = 1;
-
-const int X233233_31 = 0;
-const int X233233_13 = 1;
-const int X233233_22 = 2;
-
-const int X23313233_13 = 2;
-const int X23313233_21 = 1;
-const int X23313233_22 = 0;
-
-const int X13233233_12 = 0;
-const int X13233233_31 = 2;
-const int X13233233_22 = 1;
-
-const int X1323313233_12 = 0;
-const int X1323313233_21 = 2;
-const int X1323313233_22 = 1;
+// node2 that cannot be infected
+hole int node2x in {2..3};
+hole int node2y in {1..2};
 
 
 module strategy
     step : [0..2] init 0;
-    l :  [0..1] init 0;
 
     // Alternate between horizontal and vertical attack. Unclear how to start.
-    [attack23_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 & l=X33_23 -> (step'=1) & (l'=1-l);
-    [attack32_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 & l=1-X33_23 -> (step'=1) & (l'=1-l);
+    [attack23_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 -> (step'=1);
+    [attack32_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 -> (step'=1);
 
     // This part is clear. We just attack target if possible.
     [attack11_21] step=0 & s21 = 2 -> (step'=1);
@@ -85,56 +58,55 @@ module strategy
 
 
     // This part is also rather clear, we just have to decide whether we attack horizontal or vertical. No need to attack a non-neighbour.
-    [attack21_22] step=0 & s22 = 2 & l=X22_21 -> (step'=1) & (l'=1-l);
-    [attack12_22] step=0 & s22 = 2 & l=1-X22_21 -> (step'=1) & (l'=1-l);
+    [attack21_22] step=0 & s22 = 2 -> (step'=1);
+    [attack12_22] step=0 & s22 = 2 -> (step'=1);
 
     // s33 and s23
-    [attack32_33] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 & l=X2333_32 -> (step'=1) & (l'=1-l);
-    [attack13_23] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 & l=X2333_13 -> (step'=1) & (l'=1-l);
-    [attack22_23] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 & l=X2333_22 -> (step'=1) & (l'=1-l);
+    [attack32_33] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 -> (step'=1);
+    [attack13_23] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 -> (step'=1);
+    [attack22_23] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 -> (step'=1);
 
     // s33 and s32
-    [attack23_33] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 & l=X3233_23 -> (step'=1) & (l'=1-l);
-    [attack31_32] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 & l=X3233_31 -> (step'=1) & (l'=1-l);
-    [attack22_32] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 & l=X3233_22 -> (step'=1) & (l'=1-l);
+    [attack23_33] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 -> (step'=1);
+    [attack31_32] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 -> (step'=1);
+    [attack22_32] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 -> (step'=1);
 
     // s33 and s23 and s13
-    [attack32_33] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 & l=X132333_32 -> (step'=1) & (l'=1-l);
-    [attack12_13] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 & l=X132333_12 -> (step'=1) & (l'=1-l);
-    [attack22_23] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 & l=X132333_22 -> (step'=1) & (l'=1-l);
+    [attack32_33] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 -> (step'=1);
+    [attack12_13] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 -> (step'=1);
+    [attack22_23] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 -> (step'=1);
 
     // s33 and s32 and s31
-    [attack23_33] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 & l=X313233_23 -> (step'=1) & (l'=1-l);
-    [attack21_31] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 & l=X313233_21 -> (step'=1) & (l'=1-l);
-    [attack22_32] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 & l=X313233_22 -> (step'=1) & (l'=1-l);
+    [attack23_33] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 -> (step'=1);
+    [attack21_31] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 -> (step'=1);
+    [attack22_32] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 -> (step'=1);
 
 
     // s33 and s32 and s23
-    [attack31_32] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 & l=X233233_31 -> (step'=1) & (l'=1-l);
-    [attack13_23] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 & l=X233233_13 -> (step'=1) & (l'=1-l);
-    [attack22_32] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 & l=X233233_22 -> (step'=1) & (l'=1-l);
+    [attack31_32] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack13_23] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack22_32] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
 
 
     // s33 and s32 and s31 and s23
-    [attack13_23] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 & l=X23313233_13 -> (step'=1) & (l'=1-l);
-    [attack21_31] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 & l=X23313233_21 -> (step'=1) & (l'=1-l);
-    [attack22_23] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 & l=X23313233_22 -> (step'=1) & (l'=1-l);
+    [attack13_23] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 -> (step'=1);
+    [attack21_31] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 -> (step'=1);
+    [attack22_23] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 -> (step'=1);
 
 
     // s33 and s32 and s13 and s23
-    [attack12_13] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 & l=X13233233_12 -> (step'=1) & (l'=1-l);
-    [attack31_32] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 & l=X13233233_31 -> (step'=1) & (l'=1-l);
-    [attack22_23] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 & l=X13233233_22 -> (step'=1) & (l'=1-l);
+    [attack12_13] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack31_32] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack22_23] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
 
     // s33 and s32 and s31 and s23 and s13
-    [attack12_13] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 & l=X1323313233_12 -> (step'=1) & (l'=1-l);
-    [attack21_31] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 & l=X1323313233_21 -> (step'=1) & (l'=1-l);
-    [attack22_23] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 & l=X1323313233_22 -> (step'=1) & (l'=1-l);
+    [attack12_13] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 -> (step'=1);
+    [attack21_31] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 -> (step'=1);
+    [attack22_23] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 -> (step'=1);
 
 
-    [eval] (step=1) -> (step'=2);
-    [report] step=2 & (s11=4 | s12 = 4 | s13 = 4 | s21 = 4 | s22 = 4 | s23 = 4 | s31 = 4 | s32 = 4 | s33 = 4) ->  (step'=0) & (l'=0);
-    [report] step=2 & !(s11=4 | s12 = 4 | s13 = 4 | s21 = 4 | s22 = 4 | s23 = 4 | s31 = 4 | s32 = 4 | s33 = 4) -> (step'=0);
+    [eval]   step=1 -> (step'=2);
+    [report] step=2 -> (step'=0);
 
     [] s11 = 2 -> true;
 endmodule
@@ -257,6 +229,33 @@ module n33
 	// if the node is infected, then it tries to attack its neighbouring nodes
 	[attack32_33] (s33=2) -> true;
 	[attack23_33] (s33=2) -> true;
+
+endmodule
+
+
+module infect_fail
+
+	fail : bool init false;
+
+	[eval] !fail & (node1x = 1) & (node1y = 2) & (s12 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node1x = 1) & (node1y = 2) & (s12 <= 1) -> true;
+	[eval] !fail & (node1x = 2) & (node1y = 2) & (s22 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node1x = 2) & (node1y = 2) & (s22 <= 1) -> true;
+	[eval] !fail & (node1x = 1) & (node1y = 3) & (s13 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node1x = 1) & (node1y = 3) & (s13 <= 1) -> true;
+	[eval] !fail & (node1x = 2) & (node1y = 3) & (s23 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node1x = 2) & (node1y = 3) & (s23 <= 1) -> true;
+
+	[eval] !fail & (node2x = 2) & (node2y = 1) & (s21 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node2x = 2) & (node2y = 1) & (s21 <= 1) -> true;
+	[eval] !fail & (node2x = 2) & (node2y = 2) & (s22 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node2x = 2) & (node2y = 2) & (s22 <= 1) -> true;
+	[eval] !fail & (node2x = 3) & (node2y = 1) & (s31 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node2x = 3) & (node2y = 1) & (s31 <= 1) -> true;
+	[eval] !fail & (node2x = 3) & (node2y = 2) & (s32 > 1)  -> fail_rate: (fail'=true) + (1-fail_rate): true;
+	[eval] !fail & (node2x = 3) & (node2y = 2) & (s32 <= 1) -> true;
+
+	[] fail -> true;
 
 endmodule
 
