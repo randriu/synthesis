@@ -1,4 +1,7 @@
-from ..utils.profiler import Timer
+import stormpy
+import stormpy.storage
+
+import paynt.utils.profiler
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,7 +25,7 @@ class Statistic:
 
     # parameters
     status_period = 3
-    whole_synthesis_timer = Timer()
+    whole_synthesis_timer = paynt.utils.profiler.Timer()
     
     def __init__(self, synthesizer):
         
@@ -51,7 +54,7 @@ class Statistic:
         self.num_policies_merged = None
         self.num_policies_yes = None
 
-        self.synthesis_time = Timer()
+        self.synthesis_time = paynt.utils.profiler.Timer()
         self.status_horizon = Statistic.status_period
 
 
@@ -59,6 +62,17 @@ class Statistic:
         self.synthesis_time.start()
 
     
+    def iteration(self, model):
+        ''' Identify the type of the model and count corresponding iteration. '''
+        if isinstance(model, paynt.quotient.models.MarkovChain):
+            model = model.model
+        if type(model) == stormpy.storage.SparseDtmc:
+            self.iteration_dtmc(model.nr_states)
+        elif type(model) == stormpy.storage.SparseMdp:
+            self.iteration_mdp(model.nr_states)
+        else:
+            logger.debug(f"unknown model type {type(model)}")
+
     def iteration_dtmc(self, size_dtmc):
         if self.iterations_dtmc is None:
             self.iterations_dtmc = 0

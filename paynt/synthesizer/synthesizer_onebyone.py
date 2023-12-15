@@ -16,9 +16,9 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
         for hole_combination in family.all_combinations():
             
             assignment = family.construct_assignment(hole_combination)
-            chain = self.quotient.build_chain(assignment)
-            self.stat.iteration_dtmc(chain.states)
-            result = chain.check_specification(self.quotient.specification, short_evaluation = True)
+            model = self.quotient.build_chain(assignment)
+            self.stat.iteration(model)
+            result = model.check_specification(self.quotient.specification, short_evaluation = True)
             self.explore(assignment)
 
             accepting,improving_value = result.accepting_dtmc(self.quotient.specification)
@@ -38,7 +38,7 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
         :param prop if None, then the default property of the quotient will be used
         :param keep_value_only if True, then, instead of property result, only the corresponding value will be
             associated with the member
-        :returns a list of (family,property result) pairs where family is neceesarily a singleton
+        :returns a list of (family,property result) pairs where family is necessarily a singleton
         '''
         if family is None:
             family = self.quotient.design_space
@@ -47,9 +47,9 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
         assignment_evaluation = []
         for hole_combination in family.all_combinations():
             assignment = family.construct_assignment(hole_combination)
-            chain = self.quotient.build_chain(assignment)
-            self.stat.iteration_dtmc(chain.states)
-            evaluation = chain.model_check_property(prop)
+            model = self.quotient.build_chain(assignment)
+            self.stat.iteration(model)
+            evaluation = model.model_check_property(prop)
             if keep_value_only:
                 evaluation = evaluation.value
             assignment_evaluation.append( (assignment,evaluation) )
