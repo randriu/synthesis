@@ -437,10 +437,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def parse_game_scheduler(self, game_solver):
         state_values = game_solver.solution_state_values
         state_to_choice = game_solver.solution_state_to_quotient_choice.copy()
-        # fix unset choices
-        for state,choice in enumerate(state_to_choice):
-            if choice == self.quotient.quotient_mdp.nr_choices:
-                state_to_choice[state] = None
         # uncomment this to use only reachable choices of the game scheduler
         # state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
         scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)

@@ -130,6 +130,11 @@ def paynt_run(
     ce_generator,
     profiling
 ):
+    profiler = None
+    if profiling:
+        profiler = cProfile.Profile()
+        profiler.enable()
+
     logger.info("This is Paynt version {}.".format(version()))
 
     # set CLI parameters
@@ -140,44 +145,24 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.export_optimal_result = fsc_export_result
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
 
-
-    # join paths of input files
-    sketch_path = os.path.join(project, sketch)
-    properties_path = os.path.join(project, props)
-
-    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor)
-
     storm_control = None
     if storm_pomdp:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
-        storm_control.storm_options = storm_options
-        if get_storm_result is not None:
-            storm_control.get_result = get_storm_result
-        if iterative_storm is not None:
-            storm_control.iteration_timeout, storm_control.paynt_timeout, storm_control.storm_timeout = iterative_storm
-        storm_control.use_cutoffs = use_storm_cutoffs
-        storm_control.unfold_strategy_storm = unfold_strategy_storm
-        storm_control.export_fsc_storm = export_fsc_storm
-        storm_control.export_fsc_paynt = export_fsc_paynt
+        storm_control.set_options(
+            storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
+            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+        )
 
-    # choose the synthesis method and run the corresponding synthesizer
+    sketch_path = os.path.join(project, sketch)
+    properties_path = os.path.join(project, props)
+    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor)
     synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
+    synthesizer.run()
 
-    if storm_pomdp:
-        if prune_storm:
-            synthesizer.incomplete_exploration = True
-        if unfold_strategy_storm == "paynt":
-            synthesizer.unfold_storm = False
-        elif unfold_strategy_storm == "cutoff":
-            synthesizer.unfold_cutoff = True
-
-    if not profiling:
-        synthesizer.run()
-    else:
-        with cProfile.Profile() as pr:
-            synthesizer.run()
-        stats = pr.create_stats()
-        pstats.Stats(pr).sort_stats('tottime').print_stats(20)
+    if profiling:
+        profiler.disable()
+        stats = profiler.create_stats()
+        pstats.Stats(profiler).sort_stats('tottime').print_stats(20)
 
 
 def main():

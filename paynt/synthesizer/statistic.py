@@ -1,7 +1,8 @@
-import stormpy
 import stormpy.storage
 
 import paynt.utils.profiler
+
+import math
 
 import logging
 logger = logging.getLogger(__name__)
@@ -114,9 +115,18 @@ class Statistic:
         ret_str += f", elapsed {time_elapsed} s"
         time_estimate = int(time_estimate)
         ret_str += f", estimated {time_estimate} s"
-        time_estimate_hrs = round(time_estimate/3600, 1)
-        if time_estimate_hrs > 1:
-            ret_str += f" ({time_estimate_hrs} hrs)"
+        time_estimate_hours = math.floor(time_estimate/3600)
+        time_estimate_days = math.floor(time_estimate_hours/24)
+        time_estimate_years = math.floor(time_estimate_days/365)
+        if time_estimate_years > 0:
+            s_ending = "s" if time_estimate_years > 1 else ""
+            ret_str += f" ({time_estimate_years} year{s_ending})"
+        elif time_estimate_days > 1:
+            s_ending = "s" if time_estimate_days > 1 else ""
+            ret_str += f" ({time_estimate_days} day{s_ending})"
+        elif time_estimate_hours > 1:
+            s_ending = "s" if time_estimate_hours > 1 else ""
+            ret_str += f" ({time_estimate_hours} hour{s_ending})"
 
         iters = [self.iterations_game,self.iterations_mdp,self.iterations_dtmc]
         iters = [str(i) for i in iters if i is not None]

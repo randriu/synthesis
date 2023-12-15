@@ -61,6 +61,31 @@ class StormPOMDPControl:
     def __init__(self):
         pass
 
+    def set_options(self,
+        storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
+        unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+    ):
+        self.storm_options = storm_options
+        if get_storm_result is not None:
+            self.get_result = get_storm_result
+        if iterative_storm is not None:
+            self.iteration_timeout, self.paynt_timeout, self.storm_timeout = iterative_storm
+        self.use_cutoffs = use_storm_cutoffs
+        self.unfold_strategy_storm = unfold_strategy_storm
+        self.export_fsc_storm = export_fsc_storm
+        self.export_fsc_paynt = export_fsc_paynt
+
+        self.incomplete_exploration = False
+        if prune_storm:
+            self.incomplete_exploration = True
+
+        self.unfold_storm = True
+        self.unfold_cutoff = False
+        if unfold_strategy_storm == "paynt":
+            self.unfold_storm = False
+        elif unfold_strategy_storm == "cutoff":
+            self.unfold_cutoff = True
+
     def get_storm_result(self):
         self.run_storm_analysis()
         self.parse_results(self.quotient)

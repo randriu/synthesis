@@ -167,9 +167,10 @@ class Quotient:
         return state_to_choice
 
     def state_to_choice_to_choices(self, state_to_choice):
-        choices = stormpy.BitVector(self.quotient_mdp.nr_choices,False)
+        num_choices = self.quotient_mdp.nr_choices
+        choices = stormpy.BitVector(num_choices,False)
         for choice in state_to_choice:
-            if choice is not None:
+            if choice is not None and choice < num_choices:
                 choices.set(choice,True)
         return choices
     
