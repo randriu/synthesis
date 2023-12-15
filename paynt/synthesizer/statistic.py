@@ -223,7 +223,9 @@ class Statistic:
         print("\t\t",end="")
         print(self.num_policies,end="\t")
         print(self.num_policies_merged,end="\t")
-        merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
+        merged_by_sat_percentage = "N/A"
+        if self.num_mdps_sat > 0:
+            merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
         print(merged_by_sat_percentage,end="\t")
         print(self.num_policies_yes,end="\t")
         synthesis_time = round(self.synthesis_time.time,0)
