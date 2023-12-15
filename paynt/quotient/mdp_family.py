@@ -16,22 +16,22 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     def extract_choice_labels(mdp):
         '''
         :param mdp having a canonic choice labeling (exactly 1 label for each choice)
-        :return a list of action labels
-        :return for each row, its action
-        :return for each state, a list of actions associated with the rows of this state
+        :returns a list of action labels
+        :returns for each choice, the corresponding action
         '''
         assert mdp.has_choice_labeling, "MDP does not have a choice labeling"
         action_labels = list(mdp.choice_labeling.get_labels())
-        # sorting because get_labels() is not deterministic
+        # sorting because get_labels() is not deterministic when passing through pybind
         action_labels = sorted(action_labels)
         label_to_action = {label:index for index,label in enumerate(action_labels)}
         
+        logger.debug("associating choices with action labels...")
+        labeling = mdp.choice_labeling
         choice_to_action = [None] * mdp.nr_choices
-        for state in range(mdp.nr_states):
-            for choice in mdp.transition_matrix.get_rows_for_group(state):
-                label = list(mdp.choice_labeling.get_labels_of_choice(choice))[0]
-                action = label_to_action[label]
-                choice_to_action[choice] = action
+        for choice in range(mdp.nr_choices):
+            label = list(labeling.get_labels_of_choice(choice))[0]
+            action = label_to_action[label]
+            choice_to_action[choice] = action
 
         return action_labels,choice_to_action
 

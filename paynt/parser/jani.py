@@ -35,35 +35,7 @@ class CombinationColoring:
 class JaniUnfolder:
     ''' Unfolder of hole combinations into JANI program. '''
 
-    def choice_origins_to_colors(self, quotient_mdp):
-        choice_is_valid = stormpy.storage.BitVector(quotient_mdp.nr_choices,True)
-        choice_to_hole_options = []
-        for choice in range(quotient_mdp.nr_choices):
-            edges = quotient_mdp.choice_origins.get_edge_index_set(choice)
-            hole_options = {}
-            for edge in edges:
-                combination = self.edge_to_hole_options.get(edge, None)
-                if combination is None:
-                    continue
-                for hole_index,option in combination.items():
-                    options = hole_options.get(hole_index,set())
-                    options.add(option)
-                    hole_options[hole_index] = options
-
-            valid_choice = True
-            for hole_index,options in hole_options.items():
-                if len(options) > 1:
-                    valid_choice = False
-                    break
-            if not valid_choice:
-                choice_is_valid.set(choice,False)
-                choice_to_hole_options.append(None)
-            else:
-                hole_options = [(hole_index,list(options)[0]) for hole_index,options in hole_options.items()]
-                choice_to_hole_options.append(hole_options)
-        return choice_is_valid,choice_to_hole_options
-
-    def __init__(self, prism, hole_expressions, specification, holes):
+    def __init__(self, prism, hole_expressions, specification, family):
 
         logger.debug("constructing JANI program...")
         
@@ -94,8 +66,7 @@ class JaniUnfolder:
         self.hole_expressions = hole_expressions
         self.jani_unfolded = None
         self.combination_coloring = None
-        self.edge_to_color = None
-        self.unfold_jani(jani, holes)
+        self.unfold_jani(jani, family)
         logger.debug("constructing the quotient...")
 
         # construct the explicit quotient
@@ -103,8 +74,10 @@ class JaniUnfolder:
 
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins
-        choice_is_valid,choice_to_hole_options = self.choice_origins_to_colors(quotient_mdp)
-
+        logger.debug("associating choices of the quotient with hole assignments...")
+        choice_is_valid,choice_to_hole_options = stormpy.synthesis.janeMapChoicesToHoleAssignments(
+            quotient_mdp,family.family,self.edge_to_hole_options
+        )
 
         # handle conflicting colors
         num_choices_all = quotient_mdp.nr_choices
@@ -156,20 +129,17 @@ class JaniUnfolder:
 
         # collect label and color of each edge
         edge_to_hole_options = {}
-        edge_to_color = {}
         for aut_index, automaton in enumerate(jani_program.automata):
             for edge_index, edge in enumerate(automaton.edges):
                 global_index = jani_program.encode_automaton_and_edge_index(aut_index, edge_index)
-                edge_to_color[global_index] = edge.color
 
                 if edge.color == 0:
                     continue
                 options = self.combination_coloring.reverse_coloring[edge.color]
-                options = {hole_index:option for hole_index,option in enumerate(options) if option is not None}
+                options = [(hole_index,option) for hole_index,option in enumerate(options) if option is not None]
                 edge_to_hole_options[global_index] = options
 
         self.jani_unfolded = jani_program
-        self.edge_to_color = edge_to_color
         self.edge_to_hole_options = edge_to_hole_options
 
     
