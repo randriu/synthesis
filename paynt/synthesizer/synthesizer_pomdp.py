@@ -79,8 +79,6 @@ class SynthesizerPOMDP:
 
         if storm_control is not None:
             self.use_storm = True
-            self.unfold_storm = True
-            self.unfold_cutoff = False
             self.storm_control = storm_control
             self.storm_control.quotient = self.quotient
             self.storm_control.pomdp = self.quotient.pomdp
@@ -136,7 +134,7 @@ class SynthesizerPOMDP:
                             logger.info(f'Added memory nodes for observation based on Storm data')
                         else:
                             # consider the cut-off schedulers actions when updating memory
-                            if self.unfold_cutoff:
+                            if self.storm_control.unfold_cutoff:
                                 for obs in range(self.quotient.observations):
                                     if obs in self.storm_control.result_dict:
                                         obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
@@ -172,14 +170,14 @@ class SynthesizerPOMDP:
                 # consider the cut-off schedulers actions
                 if self.storm_control.use_cutoffs:
                     main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict)
-                    if self.incomplete_exploration == True:
+                    if self.storm_control.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict)
                 # only consider the induced DTMC actions without cut-off states
                 else:
                     main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict_no_cutoffs)
-                    if self.incomplete_exploration == True:
+                    if self.storm_control.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
@@ -216,7 +214,7 @@ class SynthesizerPOMDP:
         self.synthesizer.s_queue = self.interactive_queue
         self.storm_control.interactive_storm_setup()
         iteration = 1
-        paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, self.unfold_storm))
+        paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, self.storm_control.unfold_storm))
 
         iteration_timeout = time.time() + timeout
 
@@ -315,7 +313,7 @@ class SynthesizerPOMDP:
                             logger.info(f'Added memory nodes for observation based on Storm data')
                         else:
                             # consider the cut-off schedulers actions when updating memory
-                            if self.unfold_cutoff:
+                            if self.storm_control.unfold_cutoff:
                                 for obs in range(self.quotient.observations):
                                     if obs in self.storm_control.result_dict:
                                         obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
@@ -351,14 +349,14 @@ class SynthesizerPOMDP:
                 # consider the cut-off schedulers actions
                 if self.storm_control.use_cutoffs:
                     main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict)
-                    if self.incomplete_exploration == True:
+                    if self.storm_control.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict)
                 # only consider the induced DTMC actions without cut-off states
                 else:
                     main_family = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict_no_cutoffs)
-                    if self.incomplete_exploration == True:
+                    if self.storm_control.incomplete_exploration == True:
                         subfamily_restrictions = []
                     else:
                         subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
@@ -635,7 +633,7 @@ class SynthesizerPOMDP:
             logger.info("Storm POMDP option enabled")
             logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
                         (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
-                        self.storm_control.storm_options, self.incomplete_exploration, (self.unfold_storm, self.unfold_cutoff), self.storm_control.use_cutoffs
+                        self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs
             ))
             # start SAYNT
             if self.storm_control.iteration_timeout is not None:
@@ -651,7 +649,7 @@ class SynthesizerPOMDP:
             # run Storm and then use the obtained result to enhance PAYNT synthesis
             else:
                 self.storm_control.get_storm_result()
-                self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.unfold_storm)
+                self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.storm_control.unfold_storm)
 
             print("\n------------------------------------\n")
             print("PAYNT results: ")

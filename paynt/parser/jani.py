@@ -35,6 +35,34 @@ class CombinationColoring:
 class JaniUnfolder:
     ''' Unfolder of hole combinations into JANI program. '''
 
+    def choice_origins_to_colors(self, quotient_mdp):
+        choice_is_valid = stormpy.storage.BitVector(quotient_mdp.nr_choices,True)
+        choice_to_hole_options = []
+        for choice in range(quotient_mdp.nr_choices):
+            edges = quotient_mdp.choice_origins.get_edge_index_set(choice)
+            hole_options = {}
+            for edge in edges:
+                combination = self.edge_to_hole_options.get(edge, None)
+                if combination is None:
+                    continue
+                for hole_index,option in combination.items():
+                    options = hole_options.get(hole_index,set())
+                    options.add(option)
+                    hole_options[hole_index] = options
+
+            valid_choice = True
+            for hole_index,options in hole_options.items():
+                if len(options) > 1:
+                    valid_choice = False
+                    break
+            if not valid_choice:
+                choice_is_valid.set(choice,False)
+                choice_to_hole_options.append(None)
+            else:
+                hole_options = [(hole_index,list(options)[0]) for hole_index,options in hole_options.items()]
+                choice_to_hole_options.append(hole_options)
+        return choice_is_valid,choice_to_hole_options
+
     def __init__(self, prism, hole_expressions, specification, holes):
 
         logger.debug("constructing JANI program...")
@@ -42,12 +70,12 @@ class JaniUnfolder:
         # pack properties and translate Prism to Jani
         properties_old = specification.all_properties()
         stormpy_properties = [p.property for p in properties_old]
-        jani,properties_new = prism.to_jani(stormpy_properties)
+        jani,properties = prism.to_jani(stormpy_properties)
 
         # upon translation, some properties may change their atoms, so we need to re-wrap all properties
         properties_unpacked = []
         for index,prop_old in enumerate(properties_old):
-            prop_new = properties_new[index]
+            prop_new = properties[index]
             discount_factor = prop_old.discount_factor
             if type(prop_old) == paynt.verification.property.Property:
                 p = paynt.verification.property.Property(prop_new,discount_factor)
@@ -75,35 +103,10 @@ class JaniUnfolder:
 
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins
+        choice_is_valid,choice_to_hole_options = self.choice_origins_to_colors(quotient_mdp)
+
+
         # handle conflicting colors
-        choice_is_valid = stormpy.storage.BitVector(quotient_mdp.nr_choices,True)
-        choice_to_hole_options = []
-        tm = quotient_mdp.transition_matrix
-        for choice in range(quotient_mdp.nr_choices):
-            edges = quotient_mdp.choice_origins.get_edge_index_set(choice)
-            hole_options = {}
-            for edge in edges:
-                combination = self.edge_to_hole_options.get(edge, None)
-                if combination is None:
-                    continue
-                for hole_index,option in combination.items():
-                    options = hole_options.get(hole_index,set())
-                    options.add(option)
-                    hole_options[hole_index] = options
-
-            valid_choice = True
-            for hole_index,options in hole_options.items():
-                if len(options) > 1:
-                    valid_choice = False
-                    break
-            if not valid_choice:
-                choice_is_valid.set(choice,False)
-                choice_to_hole_options.append(None)
-            else:
-                hole_options = [(hole_index,list(options)[0]) for hole_index,options in hole_options.items()]
-                choice_to_hole_options.append(hole_options)
-
-
         num_choices_all = quotient_mdp.nr_choices
         num_choices_valid = choice_is_valid.number_of_set_bits()
         if num_choices_valid < num_choices_all:
