@@ -89,8 +89,8 @@ class Synthesizer:
         if assignment is not None:
             logger.info("Printing synthesized assignment below:")
             logger.info(assignment)
-            chain = self.quotient.build_chain(assignment)
-            result = chain.check_specification(self.quotient.specification)
+            model = self.quotient.build_chain(assignment)
+            result = model.check_specification(self.quotient.specification)
             logger.info("Double-checking specification satisfiability: {}".format(result))
             if self.quotient.export_optimal_result:
                 self.quotient.export_result(dtmc, result)

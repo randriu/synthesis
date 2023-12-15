@@ -397,13 +397,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def verify_policy(self, family, prop, policy):
         _,mdp = self.quotient.fix_and_apply_policy_to_family(family, policy)
         policy_result = mdp.model_check_property(prop, alt=True)
-        self.stat.iteration_mdp(mdp.states)
+        self.stat.iteration(mdp)
         return policy_result.sat
 
     
     def solve_singleton(self, family, prop):
         result = family.mdp.model_check_property(prop)
-        self.stat.iteration_mdp(family.mdp.states)
+        self.stat.iteration(family.mdp)
         if not result.sat:
             return False
         policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
@@ -485,7 +485,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             # solve primary direction for the MDP abstraction
             mdp_result = family.mdp.model_check_property(prop)
             mdp_value = mdp_result.value
-            self.stat.iteration_mdp(family.mdp.states)
+            self.stat.iteration(family.mdp)
             # logger.debug("primary-primary direction solved, value is {}".format(mdp_value))
             if not mdp_result.sat:
                 mdp_family_result.policy = False
@@ -528,7 +528,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return scores
 
     def split(self, family, prop, hole_selection, splitter):
-        
         # split the hole
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
@@ -619,7 +618,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 self.quotient.build(subfamily)
                 primary_result = subfamily.mdp.model_check_property(prop)
                 assert primary_result.result.has_scheduler
-                self.stat.iteration_mdp(subfamily.mdp.states)
+                self.stat.iteration(subfamily.mdp)
     
                 if primary_result.sat == False:
                     unsat_mdp_families.append(subfamily)
@@ -662,7 +661,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     current_action_family.mdp.model, prop.formula, extract_scheduler=True, environment=Property.environment)
                 value = mc_result.at(current_action_family.mdp.initial_state)
                 primary_result = paynt.verification.property_result.PropertyResult(prop, mc_result, value)
-                self.stat.iteration_mdp(current_action_family.mdp.states)
+                self.stat.iteration(current_action_family.mdp)
 
                 # discard the family as soon as one MDP is unsat
                 if primary_result.sat == False:
@@ -726,7 +725,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             self.quotient.build(sat_mdp_families[mdp_index])
             primary_result = sat_mdp_families[mdp_index].mdp.model_check_property(prop)
             assert primary_result.result.has_scheduler
-            self.stat.iteration_mdp(sat_mdp_families[mdp_index].mdp.states)
+            self.stat.iteration(sat_mdp_families[mdp_index].mdp)
             policy = self.quotient.scheduler_to_policy(primary_result.result.scheduler, sat_mdp_families[mdp_index].mdp)
             sat_mdp_policies[mdp_index] = policy
 
