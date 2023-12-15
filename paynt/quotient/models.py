@@ -82,12 +82,8 @@ class MarkovChain:
         return self.model.initial_states[0]
 
     def model_check_formula(self, formula):
-        if not self.is_deterministic:
-            return stormpy.synthesis.verify_mdp(Property.environment,self.model,formula,True)
         return stormpy.model_checking(
-            self.model, formula,
-            extract_scheduler=(not self.is_deterministic),
-            environment=Property.environment
+            self.model, formula, extract_scheduler=True, environment=Property.environment
         )
 
     def model_check_property(self, prop, alt = False):
