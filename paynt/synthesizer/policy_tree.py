@@ -833,6 +833,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 # Potential for MDP CEs here
                 pruned = smt_solver.exclude_conflicts(family, mdp_subfamily, [list(range(family.num_holes))])
                 self.explored += pruned
+                mdp_subfamily.mdp = None
                 unsat_mdp_families.append(mdp_subfamily)
             elif result.sat == True:
                 policy = self.quotient.scheduler_to_policy(result.result.scheduler, mdp_subfamily.mdp)
@@ -849,7 +850,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 conflict_generator.initialize()
                 mdp_subfamily.constraint_indices = family.constraint_indices
                 requests = [(0, quotient_container.specification.all_properties()[0], result.result, None)]
-                dtmc = quotient_container.build_chain(mdp_subfamily)
+                dtmc = quotient_container.build_assignment(mdp_subfamily)
                 conflicts, _ = conflict_generator.construct_conflicts(family, mdp_subfamily, dtmc, requests, None)
                 pruned = smt_solver.exclude_conflicts(family, mdp_subfamily, conflicts)
                 self.explored += pruned
@@ -859,8 +860,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     if hole_index in conflicts[0]:
                         sat_family.hole_set_options(hole_index, mdp_subfamily.hole_options(hole_index))  
 
+                sat_family.mdp = None
                 sat_mdp_families.append(sat_family)
-                sat_mdp_to_policy_map.append(len(sat_mdp_policies))              
+                sat_mdp_to_policy_map.append(len(sat_mdp_policies))
                 sat_mdp_policies.append(policy_fixed)
             else:
                 assert False, "result for MDP model checking is not SAT nor UNSAT"
@@ -878,20 +880,23 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         policy_tree = PolicyTree(family)
-        self.create_action_coloring()
-
 
         ### POLICY SEARCH TESTING
-        # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
+        #self.create_action_coloring()
+
+        # choose policy search method
+        unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
         # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_using_ceg(policy_tree.root.family, prop)
 
-        # print(f'unSAT: {len(unsat)}')
-        # print(f'SAT: {len(sat)}')
-        # print(f'policies: {len(policies)}')
-        # print(self.stat.iterations_mdp)
+        print(f'unSAT MDPs: {len(unsat)}')
+        print(f'unSAT families: {sum([s.size for s in unsat])}')
+        print(f'SAT MDPs: {sum([s.size for s in sat])}')
+        print(f'SAT families: {len(sat)}')
+        print(f'policies: {len(policies)}')
+        print(self.stat.iterations_mdp)
 
-        # self.double_check_policy_synthesis(unsat, sat, policies, policy_map, prop)
-        # exit()
+        self.double_check_policy_synthesis(unsat, sat, policies, policy_map, prop)
+        exit()
         ###
 
         if False:
