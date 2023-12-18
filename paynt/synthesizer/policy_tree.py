@@ -887,13 +887,17 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # choose policy search method
         unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
         # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_using_ceg(policy_tree.root.family, prop)
+        
+        self.stat.synthesis_timer.stop()
 
-        print(f'unSAT MDPs: {len(unsat)}')
-        print(f'unSAT families: {sum([s.size for s in unsat])}')
-        print(f'SAT MDPs: {sum([s.size for s in sat])}')
-        print(f'SAT families: {len(sat)}')
-        print(f'policies: {len(policies)}')
-        print(self.stat.iterations_mdp)
+        unsat_mdps_count = sum([s.size for s in unsat])
+        sat_mdps_count = sum([s.size for s in sat])
+
+        print(f'unSAT MDPs: {unsat_mdps_count}\tunSAT families: {len(unsat)}\tavg. unSAT family size: {round(unsat_mdps_count/len(unsat),2) if len(unsat) != 0 else "N/A"}')
+        print(f'SAT MDPs: {sat_mdps_count}\tSAT families: {len(sat)}\tavg. SAT family size: {round(sat_mdps_count/len(sat),2) if len(sat) != 0 else "N/A"}')
+        print(f'policies: {len(policies)}\tpolicy per SAT MDP: {round(len(policies)/sat_mdps_count,2) if sat_mdps_count != 0 else "N/A"}')
+        print(f'iterations: {self.stat.iterations_mdp}')
+        print(f'time: {round(self.stat.synthesis_timer.time,2)}s')
 
         self.double_check_policy_synthesis(unsat, sat, policies, policy_map, prop)
         exit()
