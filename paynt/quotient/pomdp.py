@@ -18,10 +18,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     # implicit size for POMDP unfolding
     initial_memory_size = 1
-
-    # TODO
-    export_optimal_result = False
-
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
 
@@ -68,7 +64,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # ^ this also asserts that states with the same observation have the
         # same number and the same order of available actions
 
-        logger.info(f"Constructed POMDP having {self.observations} observations.")
+        logger.info(f"constructed POMDP having {self.observations} observations.")
         
         # extract observation labels
         if self.pomdp.has_observation_valuations():
@@ -350,11 +346,11 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.is_action_hole = None
         
         logger.debug(
-            "Unfolding POMDP using the following memory allocation vector: {} ..."
+            "unfolding POMDP using the following memory allocation vector: {} ..."
             .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
         self.choice_destinations = stormpy.synthesis.computeChoiceDestinations(self.quotient_mdp)
-        logger.debug(f"Constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
+        logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         if not PomdpQuotient.posterior_aware:
             family, choice_to_hole_options = self.create_coloring()
@@ -619,7 +615,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             print(output_json, file=f)
 
     def extract_policy(self, assignment):
-        dtmc = self.build_chain(assignment)
+        dtmc = self.build_assignment(assignment)
         mc_result = dtmc.check_specification(self.specification)
         policy = self.collect_policy(dtmc, mc_result)
         return policy
@@ -632,7 +628,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         '''
 
         # going through the induced DTMC, too lazy to parse hole names
-        dtmc = self.build_chain(assignment)
+        dtmc = self.build_assignment(assignment)
         
         # size of action function gamma:
         #   for each memory node, a list of prior-action pairs

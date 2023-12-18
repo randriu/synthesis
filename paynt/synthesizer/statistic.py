@@ -14,7 +14,7 @@ def safe_division(dividend, divisor):
     """Safe division of dividend by operand
     :param number dividend: upper operand of the division
     :param number divisor: lower operand of the division, may be zero
-    :return: safe value after division of approximated zero
+    :returns safe value after division of approximated zero
     """
     try:
         return dividend / divisor
@@ -25,8 +25,8 @@ class Statistic:
     """General computation stats."""
 
     # parameters
-    status_period = 3
-    whole_synthesis_timer = paynt.utils.profiler.Timer()
+    status_period_seconds = 3
+    synthesis_timer_total = paynt.utils.profiler.Timer()
     
     def __init__(self, synthesizer):
         
@@ -45,8 +45,8 @@ class Statistic:
         self.acc_size_game = 0
         self.avg_size_game = 0
 
-        self.feasible = None
-        self.assignment = None
+        self.synthesized_assignment = None
+        self.job_type = None
 
         # MDP family
         self.num_mdps_total = None
@@ -55,13 +55,16 @@ class Statistic:
         self.num_policies_merged = None
         self.num_policies_yes = None
 
-        self.synthesis_time = paynt.utils.profiler.Timer()
-        self.status_horizon = Statistic.status_period
+        self.family_size = None
+        self.synthesis_timer = paynt.utils.profiler.Timer()
+        self.status_horizon = Statistic.status_period_seconds
 
 
-    def start(self):
-        self.synthesis_time.start()
-
+    def start(self, family):
+        self.family_size = family.size
+        self.synthesis_timer.start()
+        if not self.synthesis_timer_total.running:
+            self.synthesis_timer_total.start()
     
     def iteration(self, model):
         ''' Identify the type of the model and count corresponding iteration. '''
@@ -96,7 +99,7 @@ class Statistic:
         self.print_status()
 
     def new_fsc_found(self, value, assignment, size):
-        time_elapsed = round(self.whole_synthesis_timer.read(),1)
+        time_elapsed = round(self.synthesis_timer_total.read(),1)
         # print(f'new opt: {value}')
         # print(f'new opt: {value}, elapsed {time_elapsed}s')
         # print(f'-----------PAYNT----------- \
@@ -106,12 +109,12 @@ class Statistic:
     def status(self):
         ret_str = "> "
         discarded = self.quotient.discarded if self.quotient.discarded is not None else 0
-        fraction_explored = (self.synthesizer.explored + discarded) / self.quotient.design_space.size
-        time_estimate = safe_division(self.synthesis_time.read(), fraction_explored)
+        fraction_explored = (self.synthesizer.explored + discarded) / self.family_size
+        time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
         ret_str += f"Progress {percentage_explored}%"
         
-        time_elapsed = int(self.synthesis_time.read())
+        time_elapsed = int(self.synthesis_timer.read())
         ret_str += f", elapsed {time_elapsed} s"
         time_estimate = int(time_estimate)
         ret_str += f", estimated {time_estimate} s"
@@ -128,9 +131,14 @@ class Statistic:
             s_ending = "s" if time_estimate_hours > 1 else ""
             ret_str += f" ({time_estimate_hours} hour{s_ending})"
 
-        iters = [self.iterations_game,self.iterations_mdp,self.iterations_dtmc]
-        iters = [str(i) for i in iters if i is not None]
-        ret_str += ", iters = (" + ", ".join(iters) + ")"
+        iters = []
+        if self.iterations_game is not None:
+            iters += [f"game: {self.iterations_game}"]
+        if self.iterations_mdp is not None:
+            iters += [f"MDP: {self.iterations_mdp}"]
+        if self.iterations_dtmc is not None:
+            iters += [f"DTMC: {self.iterations_dtmc}"]
+        ret_str += ", iters = {" + ", ".join(iters) + "}"
         
         spec = self.quotient.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
@@ -140,63 +148,89 @@ class Statistic:
 
 
     def print_status(self):
-        if not self.synthesis_time.read() > self.status_horizon:
+        if not self.synthesis_timer.read() > self.status_horizon:
             return
         print(self.status(), flush=True)
-        self.status_horizon = self.synthesis_time.read() + Statistic.status_period
+        self.status_horizon = self.synthesis_timer.read() + Statistic.status_period_seconds
 
 
-    def finished(self, assignment):
+    def finished_synthesis(self, assignment):
+        self.job_type = "synthesis"
+        self.synthesis_timer.stop()
+        self.synthesized_assignment = assignment
 
-        self.synthesis_time.stop()
-        self.feasible = False
-        self.assignment = None
-        if assignment is not None:
-            self.feasible = True
-            self.assignment = str(assignment)
-        self.optimum = None
-        if self.quotient.specification.has_optimality:
-            self.optimum = self.quotient.specification.optimality.optimum
+    def finished_evaluation(self, family_to_evaluation):
+        self.job_type = "evaluation"
+        self.synthesis_timer.stop()
+        self.family_to_evaluation = family_to_evaluation
+        
 
-    def get_summary(self):
+    def get_summary_specification(self):
         spec = self.quotient.specification
-        specification = "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(spec.constraints)]) + "\n"
-        specification += f"optimality objective: {str(spec.optimality)}\n" if spec.has_optimality else ""
+        specification = ""
+        if len(spec.constraints) > 0:
+            specification += "\n".join([f"constraint {i + 1}: {str(f)}" for i,f in enumerate(spec.constraints)]) + "\n"
+        if spec.has_optimality:
+            specification += f"optimality objective: {str(spec.optimality)}\n"
+        return specification
 
-        fraction_explored = int((self.synthesizer.explored / self.quotient.design_space.size) * 100)
-        explored = f"explored: {fraction_explored} %"
-
-        super_quotient_states = self.quotient.quotient_mdp.nr_states
-        super_quotient_actions = self.quotient.quotient_mdp.nr_choices
-
-        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size}, super quotient: {super_quotient_states} states / {super_quotient_actions} actions"
-        timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_time.time, 2)} s"
-
-        family_stats = ""
+    def get_summary_iterations(self):
+        iterations = ""
         if self.iterations_game is not None:
             avg_size = round(safe_division(self.acc_size_game, self.iterations_game))
             type_stats = f"Game stats: avg MDP size: {avg_size}, iterations: {self.iterations_game}" 
-            family_stats += f"{type_stats}\n"
+            iterations += f"{type_stats}\n"
 
         if self.iterations_mdp is not None:
             avg_size = round(safe_division(self.acc_size_mdp, self.iterations_mdp))
-            type_stats = f"AR stats: avg MDP size: {avg_size}, iterations: {self.iterations_mdp}"
-            family_stats += f"{type_stats}\n"
+            type_stats = f"MDP stats: avg MDP size: {avg_size}, iterations: {self.iterations_mdp}"
+            iterations += f"{type_stats}\n"
 
         if self.iterations_dtmc is not None:
-            avg_size = round(safe_division(self.acc_size_mdp, self.iterations_dtmc))
-            type_stats = f"CEGIS stats: avg DTMC size: {avg_size}, iterations: {self.iterations_dtmc}"
-            family_stats += f"{type_stats}\n"
+            avg_size = round(safe_division(self.acc_size_dtmc, self.iterations_dtmc))
+            type_stats = f"DTMC stats: avg DTMC size: {avg_size}, iterations: {self.iterations_dtmc}"
+            iterations += f"{type_stats}\n"
+        return iterations
 
-        feasible = "yes" if self.feasible else "no"
-        result = f"feasible: {feasible}" if self.optimum is None else f"optimal: {round(self.optimum, 6)}"
-        # assignment = f"hole assignment: {str(self.assignment)}\n" if self.assignment else ""
-        assignment = ""
+    def get_summary_synthesis(self):
+        spec = self.quotient.specification
+        if spec.has_optimality and spec.optimality.optimum is not None:
+            optimum = round(spec.optimality.optimum, 6)
+            return f"optimum: {optimum}"
+        else:
+            feasible = "yes" if self.synthesized_assignment is not None else "no"
+            return f"feasible: {feasible}"
+
+    def get_summary_evaluation(self):
+        members_sat = sum( [family.size for family,evaluation in self.family_to_evaluation if evaluation.sat ])
+        members_total = self.quotient.design_space.size
+        members_sat_percentage = int(round(members_sat/members_total*100,0))
+        return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
+
+    
+    def get_summary(self):
+        specification = self.get_summary_specification()
+
+        fraction_explored = int((self.synthesizer.explored / self.family_size) * 100)
+        explored = f"explored: {fraction_explored} %"
+
+        quotient_states = self.quotient.quotient_mdp.nr_states
+        quotient_actions = self.quotient.quotient_mdp.nr_choices
+        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size}, quotient: {quotient_states} states / {quotient_actions} actions"
+        timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
+
+        iterations = self.get_summary_iterations()
+        
+        if self.job_type == "synthesis":
+            result = self.get_summary_synthesis()
+        else:
+            result = self.get_summary_evaluation()
 
         sep = "--------------------\n"
-        summary = f"{sep}Synthesis summary\n" \
+        summary = f"{sep}"\
+                f"Synthesis summary:\n" \
                 f"{specification}\n{timing}\n{design_space}\n{explored}\n" \
-                f"{family_stats}\n{result}\n{assignment}" \
+                f"{iterations}\n{result}\n"\
                 f"{sep}"
         return summary
     
@@ -228,8 +262,8 @@ class Statistic:
             merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
         print(merged_by_sat_percentage,end="\t")
         print(self.num_policies_yes,end="\t")
-        synthesis_time = round(self.synthesis_time.time,0)
-        print(synthesis_time,end="\t")
+        synthesis_timer = round(self.synthesis_timer.time,0)
+        print(synthesis_timer,end="\t")
         print(self.iterations_game,end="\t")
         print(self.iterations_mdp,end="\t")
         iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total,2)

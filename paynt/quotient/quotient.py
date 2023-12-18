@@ -15,8 +15,6 @@ logger = logging.getLogger(__name__)
 
 class Quotient:
 
-    # if True, export the (labeled) optimal DTMC
-    export_optimal_result = False
     # if True, hole scores in the state will be multiplied with the number of expected visits of this state
     compute_expected_visits = True
 
@@ -127,14 +125,12 @@ class Quotient:
         dtmc = stormpy.storage.SparseDtmc(components)
         return dtmc
 
-    
-    def build_chain(self, family):
+    def build_assignment(self, family):
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         dtmc = Quotient.mdp_to_dtmc(mdp)
         return DTMC(dtmc,self,state_map,choice_map)
-
     
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states
@@ -402,7 +398,7 @@ class Quotient:
         '''
         Double-check whether this assignment truly improves optimum.
         '''
-        dtmc = self.build_chain(assignment)
+        dtmc = self.build_assignment(assignment)
         res = dtmc.check_specification(self.specification)
         # opt_result = dtmc.model_check_property(opt_prop)
         if res.constraints_result.sat and self.specification.optimality.improves_optimum(res.optimality_result.value):

@@ -3,20 +3,19 @@ import paynt.synthesizer.synthesizer
 import logging
 logger = logging.getLogger(__name__)
 
-
 class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
     
     @property
     def method_name(self):
         return "1-by-1"
 
-    def synthesize_assignment(self, family):
+    def synthesize_one(self, family):
         
         satisfying_assignment = None
         for hole_combination in family.all_combinations():
             
             assignment = family.construct_assignment(hole_combination)
-            model = self.quotient.build_chain(assignment)
+            model = self.quotient.build_assignment(assignment)
             self.stat.iteration(model)
             result = model.check_specification(self.quotient.specification, short_evaluation = True)
             self.explore(assignment)
@@ -31,27 +30,13 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
 
         return satisfying_assignment
 
-    def evaluate_all_wrt_property(self, family=None, prop=None, keep_value_only=False):
-        '''
-        Model check each member of the family wrt the given property.
-        :param family if None, then the design space of the quotient will be used
-        :param prop if None, then the default property of the quotient will be used
-        :param keep_value_only if True, then, instead of property result, only the corresponding value will be
-            associated with the member
-        :returns a list of (family,property result) pairs where family is necessarily a singleton
-        '''
-        if family is None:
-            family = self.quotient.design_space
-        if prop is None:
-            prop = self.quotient.get_property()
-        assignment_evaluation = []
+    def evaluate_all(self, family, prop):
+        family_to_evaluation = []
         for hole_combination in family.all_combinations():
             assignment = family.construct_assignment(hole_combination)
-            model = self.quotient.build_chain(assignment)
+            model = self.quotient.build_assignment(assignment)
             self.stat.iteration(model)
             evaluation = model.model_check_property(prop)
-            if keep_value_only:
-                evaluation = evaluation.value
-            assignment_evaluation.append( (assignment,evaluation) )
+            family_to_evaluation.append( (assignment,evaluation) )
             self.explore(assignment)
-        return assignment_evaluation
+        return family_to_evaluation

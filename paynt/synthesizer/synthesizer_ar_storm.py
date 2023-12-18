@@ -110,7 +110,7 @@ class SynthesizerARStorm(Synthesizer):
 
 
 
-    def synthesize_assignment(self, family):
+    def synthesize_one(self, family):
 
         self.quotient.discarded = 0
 

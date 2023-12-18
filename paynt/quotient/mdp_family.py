@@ -143,4 +143,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         )
         return solver
 
+    def build_assignment(self, family):
+        assert family.size == 1, "expecting family of size 1"
+        self.build(family)
+        return family.mdp
     

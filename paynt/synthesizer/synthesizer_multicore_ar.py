@@ -58,7 +58,11 @@ def solve_family(args):
 
 class SynthesizerMultiCoreAR(SynthesizerAR):
 
-    def synthesize_assignment(self, family):
+    @property
+    def method_name(self):
+        return "AR (concurrent)"
+
+    def synthesize_one(self, family):
 
         self.quotient.discarded = 0
 
@@ -134,10 +138,7 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
         # pstats.Stats(profile).sort_stats('tottime').print_stats(10)
 
         return satisfying_assignment
-    
-    @property
-    def method_name(self):
-        return "AR (concurrent)"
+
 
 
 def solve_batch(args):

@@ -358,14 +358,14 @@ class PolicyTree:
         stat.num_policies_merged = len(self.collect_solved())
         self.print_stats()
 
-        logger.info("merging solved siblings...")
-        PolicyTreeNode.merged = 0
-        all_nodes = self.collect_all()
-        for node in reversed(all_nodes):
-            node.merge_children_solved()
-        logger.info("merged {} pairs".format(PolicyTreeNode.merged))
-        stat.num_policies_yes = len(self.collect_solved())
-        self.print_stats()
+        # logger.info("merging solved siblings...")
+        # PolicyTreeNode.merged = 0
+        # all_nodes = self.collect_all()
+        # for node in reversed(all_nodes):
+        #     node.merge_children_solved()
+        # logger.info("merged {} pairs".format(PolicyTreeNode.merged))
+        # stat.num_policies_yes = len(self.collect_solved())
+        # self.print_stats()
 
 
 
@@ -728,8 +728,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         
 
 
-    def synthesize_policy_tree(self, family):
-        prop = self.quotient.get_property()
+    def evaluate_all(self, family, prop):
+        assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         policy_tree = PolicyTree(family)
         # self.create_action_coloring()
@@ -762,7 +762,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             # refine
             suboptions,subfamilies = self.split(family, prop, result.hole_selection, result.splitter)
             if policy_tree_node != policy_tree.root:
-                    family.mdp = None   # memory optimization
+                family.mdp = None   # memory optimization
             policy_tree_node.split(result.splitter,suboptions,subfamilies)
             policy_tree_leaves = policy_tree_leaves + policy_tree_node.child_nodes
 
@@ -770,28 +770,12 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
         policy_tree.postprocess(self.quotient, prop, self.stat)
-        return policy_tree
 
-    
-
-    def synthesize(self, family = None):
-        if family is None:
-            family = self.quotient.design_space
-        self.stat.start()
-        logger.info("synthesis initiated, design space: {}".format(family.size))
-        policy_tree = self.synthesize_policy_tree(family)
-        self.stat.finished("yes")
-        return policy_tree
-
-    
-    def run(self):
-        ''' Synthesize meta-policy that satisfies all family members. '''
-        self.quotient.design_space.constraint_indices = self.quotient.specification.all_constraint_indices()
-
-        spec = self.quotient.specification
-        assert not spec.has_optimality and spec.num_properties == 1 and not spec.constraints[0].reward, \
-            "expecting a single reachability probability constraint"
+        # convert policy tree to family evaluation
+        class FamilyEvaluation:
+            def __init__(self, policy):
+                self.policy = policy
+                self.sat = policy is not None and policy != False
+        family_to_evaluation = [ (node.family,FamilyEvaluation(node.policy)) for node in policy_tree.collect_leaves() ]
         
-        policy_tree = self.synthesize()
-        self.stat.print()
-        # self.stat.print_mdp_family_table_entries()
+        return family_to_evaluation

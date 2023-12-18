@@ -489,7 +489,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
             return
         
         # model check the DTMC induced by this assignment to get state valuations
-        dtmc = quotient.build_chain(assignment)
+        dtmc = quotient.build_assignment(assignment)
         mc_result = dtmc.check_specification(quotient.specification)
         dtmc_state_values = mc_result.optimality_result.result.get_values()
         policy_values = [self.construct_trivial_policy() for memory in range(memory_size)]
@@ -923,9 +923,7 @@ class POMCP:
 
     
 
-    def run(self, df):
-
-        # FIXME: ignore df
+    def run(self, optimum_threshold=None):
 
         # random.seed(6)
 

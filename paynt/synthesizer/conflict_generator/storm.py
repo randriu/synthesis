@@ -15,11 +15,16 @@ class ConflictGeneratorStorm():
         return "(Storm)"
 
     def initialize(self):
-        quotient_relevant_holes = self.quotient.coloring.getStateToHoles()
+        state_to_holes_bv = self.quotient.coloring.getStateToHoles().copy()
+        state_to_holes = []
+        for state,holes_bv in enumerate(state_to_holes_bv):
+            holes = set([hole for hole in holes_bv])
+            state_to_holes.append(holes)
+
         formulae = self.quotient.specification.stormpy_formulae()
         self.counterexample_generator = stormpy.synthesis.CounterexampleGenerator(
             self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
-            quotient_relevant_holes, formulae)
+            state_to_holes, formulae)
 
 
     def construct_conflicts(self, family, assignment, dtmc, conflict_requests, accepting_assignment):

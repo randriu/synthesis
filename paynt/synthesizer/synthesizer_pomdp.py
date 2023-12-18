@@ -90,16 +90,11 @@ class SynthesizerPOMDP:
                 self.synthesizer.saynt_timer = self.saynt_timer
                 self.storm_control.saynt_timer = self.saynt_timer
 
-    def print_stats(self):
-        pass
-    
-    def synthesize(self, family, print_stats = True):
+    def synthesize(self, family, print_stats=True):
         self.quotient.discarded = 0
         synthesizer = self.synthesizer(self.quotient)
         family.constraint_indices = self.quotient.design_space.constraint_indices
-        assignment = synthesizer.synthesize(family)
-        if print_stats:
-            synthesizer.print_stats()
+        assignment = synthesizer.synthesize(family, print_stats=print_stats)
         self.total_iters += synthesizer.stat.iterations_mdp
 
         # Print extract list for every iteration optimum
@@ -545,7 +540,7 @@ class SynthesizerPOMDP:
                     quotient_state_improvement[mdp.quotient_state_map[state]] = state_improvement[state]
 
                 # extract DTMC corresponding to the synthesized solution
-                dtmc = self.quotient.build_chain(synthesized_assignment)
+                dtmc = self.quotient.build_assignment(synthesized_assignment)
 
                 # compute expected visits for this dtmc
                 dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc.model).get_values()
@@ -627,7 +622,7 @@ class SynthesizerPOMDP:
                 
 
 
-    def run(self):
+    def run(self, optimum_threshold=None):
         # choose the synthesis strategy:
         if self.use_storm:
             logger.info("Storm POMDP option enabled")

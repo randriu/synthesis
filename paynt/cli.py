@@ -54,6 +54,8 @@ def setup_logger(log_path = None):
     help="relative error for optimal synthesis")
 @click.option("--discount-factor", type=click.FLOAT, default="1", show_default=True,
     help="discount factor")
+@click.option("--optimum-threshold", type=click.FLOAT,
+    help="known optimum bound")
 
 @click.option("--export",
     type=click.Choice(['jani', 'drn', 'pomdp']),
@@ -76,8 +78,6 @@ def setup_logger(log_path = None):
     help="implicit memory size for POMDP FSCs")
 @click.option("--posterior-aware", is_flag=True, default=False,
     help="unfold MDP taking posterior observation of into account")
-@click.option("--fsc-export-result", is_flag=True, default=False,
-    help="export the input POMDP as well as the (labeled) optimal DTMC into a .drn format")
 
 @click.option("--storm-pomdp", is_flag=True, default=False,
     help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
@@ -118,12 +118,11 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, discount_factor,
+    project, sketch, props, relative_error, discount_factor, optimum_threshold,
     export,
     method,
     incomplete_search, disable_expected_visits,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
-    fsc_export_result,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt,
@@ -142,7 +141,6 @@ def paynt_run(
     paynt.quotient.quotient.Quotient.compute_expected_visits = not disable_expected_visits
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
-    paynt.quotient.pomdp.PomdpQuotient.export_optimal_result = fsc_export_result
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
 
     storm_control = None
@@ -157,7 +155,7 @@ def paynt_run(
     properties_path = os.path.join(project, props)
     quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor)
     synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
-    synthesizer.run()
+    synthesizer.run(optimum_threshold)
 
     if profiling:
         profiler.disable()

@@ -68,7 +68,7 @@ class SynthesizerCEGIS(Synthesizer):
         """
         assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
 
-        dtmc = self.quotient.build_chain(assignment)
+        dtmc = self.quotient.build_assignment(assignment)
         self.stat.iteration_dtmc(dtmc.states)
         mc_result = dtmc.check_specification(self.quotient.specification,
             constraint_indices = family.constraint_indices, short_evaluation = False)
@@ -90,7 +90,7 @@ class SynthesizerCEGIS(Synthesizer):
         return conflicts, accepting_assignment
 
 
-    def synthesize_assignment(self, family):
+    def synthesize_one(self, family):
 
         # build the quotient, map mdp states to hole indices
         self.quotient.build(family)

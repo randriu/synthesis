@@ -107,10 +107,10 @@ class SmtSolver():
 
         # choose solver
         if "pycvc5" in sys.modules:
-            logger.debug("Using CVC5 for SMT solving.")
+            logger.debug("using CVC5 for SMT solving.")
             self.use_cvc = True
         else:
-            logger.debug("Using Python Z3 for SMT solving.")
+            logger.debug("using Python Z3 for SMT solving.")
             self.use_python_z3 = True
 
         # create solver, solver variables

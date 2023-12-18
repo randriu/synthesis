@@ -29,7 +29,10 @@ class Synthesizer:
         if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
             return paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(quotient, method, storm_control)
         if isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
-            return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
+            if method == "onebyone":
+                return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
+            else:
+                return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
         if method == "onebyone":
             return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
         if method == "ar":
@@ -53,49 +56,73 @@ class Synthesizer:
         ''' to be overridden '''
         pass
     
-    def synthesize(self, family = None):
-        self.stat.start()
-        if not self.stat.whole_synthesis_timer.running:
-            self.stat.whole_synthesis_timer.start()
-
-        if family is None:
-            family = self.quotient.design_space
-        logger.info("synthesis initiated, design space: {}".format(family.size))
-        assignment = self.synthesize_assignment(family)
-        self.stat.finished(assignment)
-        return assignment
-
-    
-    def synthesize_assignment(self,family):
-        pass
-
-    def synthesize_families(self,family):
-        pass
-    
     def explore(self, family):
         self.explored += family.size
 
-    def print_stats(self):
-        self.stat.print()
+
+    def evaluate_all(self, family, prop):
+        ''' to be overridden '''
+        pass
+
+    def evaluate(self, family=None, prop=None, print_stats=True):
+        '''
+        Evaluate each member of the family wrt the given property.
+        :param family if None, then the design space of the quotient will be used
+        :param prop if None, then the default property of the quotient will be used
+            (assuming single-property specification)
+        :returns a list of (family,evaluation) pairs, where evaluation is either
+        '''
+        if family is None:
+            family = self.quotient.design_space
+        if prop is None:
+            prop = self.quotient.get_property()
+
+        logger.info("evaluation initiated, design space: {}".format(family.size))
+        self.stat.start(family)
+        family_to_evaluation = self.evaluate_all(family, prop)
+        self.stat.finished_evaluation(family_to_evaluation)
+        logger.info("evaluation finished")
+
+        if print_stats:
+            self.stat.print()
+        return family_to_evaluation
+
     
-    def run(self):
-        # self.quotient.specification.optimality.update_optimum(0.9)
-        self.quotient.design_space.constraint_indices = self.quotient.specification.all_constraint_indices()
-        assignment = self.synthesize(self.quotient.design_space)
+    def synthesize_one(self, family):
+        ''' to be overridden '''
+        pass
+
+    def synthesize(self, family=None, optimum_threshold=None, print_stats=True):
+        if family is None:
+            family = self.quotient.design_space
+        family.constraint_indices = self.quotient.specification.all_constraint_indices()
+        
+        if optimum_threshold is not None:
+            self.quotient.specification.optimality.update_optimum(optimum_threshold)
+            logger.debug(f"optimality threshold set to {optimum_threshold}")
+        
+        logger.info("synthesis initiated, design space: {}".format(family.size))
+        self.stat.start(family)
+        assignment = self.synthesize_one(family)
         if assignment is not None and assignment.size > 1:
             assignment = assignment.pick_any()
+        self.stat.finished_synthesis(assignment)
+        logger.info("synthesis finished")
 
-        print("")
         if assignment is not None:
-            logger.info("Printing synthesized assignment below:")
+            logger.info("printing synthesized assignment below:")
             logger.info(assignment)
-            model = self.quotient.build_chain(assignment)
-            result = model.check_specification(self.quotient.specification)
-            logger.info("Double-checking specification satisfiability: {}".format(result))
-            if self.quotient.export_optimal_result:
-                self.quotient.export_result(dtmc, result)
+            model = self.quotient.build_assignment(assignment)
+            mc_result = model.check_specification(self.quotient.specification)
+            logger.info(f"double-checking specification satisfiability: {mc_result}")
         
-        self.print_stats()
-    
-    
+        if print_stats:
+            self.stat.print()
+        return assignment
 
+    
+    def run(self, optimum_threshold=None):
+        if isinstance(self.quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
+            self.evaluate()
+        else:
+            self.synthesize(optimum_threshold=optimum_threshold)

@@ -78,7 +78,8 @@ dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
 
 # to each singleton environment, assign a value corresponding to the specification satisfiability
 synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
-family_to_value = synthesizer.evaluate_all_wrt_property(keep_value_only=True)
+family_to_evaluation = synthesizer.evaluate(print_stats=False)
+family_to_value = [ (family,evaluation.value) for family,evaluation in family_to_evaluation ]
 
 # pick the worst family
 import numpy

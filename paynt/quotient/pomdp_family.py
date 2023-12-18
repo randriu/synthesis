@@ -293,7 +293,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             trace_max_length *= 2
 
         # logger.debug("constructing witnesses...")
-        dtmc = dtmc_sketch.build_chain(satisfying_assignment)
+        dtmc = dtmc_sketch.build_assignment(satisfying_assignment)
 
         # assuming a single probability reachability property
         spec = dtmc_sketch.specification
