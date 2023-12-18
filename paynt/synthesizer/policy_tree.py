@@ -740,11 +740,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             self.quotient.build(unsat_family)
             result = unsat_family.mdp.model_check_property(prop)
             assert not result.sat, "double check fail"
+            unsat_family.mdp = None
 
         for sat_index, sat_family in enumerate(sat_mdp_families):
             self.quotient.build(sat_family)
             sat_policy = sat_mdp_policies[sat_mdp_to_policy_map[sat_index]]
             SynthesizerPolicyTree.double_check_policy(self.quotient, sat_family, prop, sat_policy)
+            sat_family.mdp = None
 
 
     def synthesize_policy_for_family_linear(self, family, prop):
@@ -775,9 +777,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             self.stat.iteration_mdp(family.mdp.states)
             self.explore(family)
             if not result.sat:
+                family.mdp = None
                 unsat_mdp_families.append(family)
+                continue
             
             policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
+
+            family.mdp = None
 
             for index, sat_policy in enumerate(sat_mdp_policies):
                 merged_policy = merge_policies([sat_policy, policy])
@@ -794,6 +800,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 sat_mdp_policies.append(policy)
 
         return unsat_mdp_families, sat_mdp_families, sat_mdp_policies, sat_mdp_to_policy_map
+
     
     def synthesize_policy_for_family_using_ceg(self, family, prop):
         '''
@@ -873,16 +880,19 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree = PolicyTree(family)
         self.create_action_coloring()
 
-        unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
+
+        ### POLICY SEARCH TESTING
+        # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
         # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_using_ceg(policy_tree.root.family, prop)
 
-        print(f'unSAT: {len(unsat)}')
-        print(f'SAT: {len(sat)}')
-        print(f'policies: {len(policies)}')
-        print(self.stat.iterations_mdp)
+        # print(f'unSAT: {len(unsat)}')
+        # print(f'SAT: {len(sat)}')
+        # print(f'policies: {len(policies)}')
+        # print(self.stat.iterations_mdp)
 
-        self.double_check_policy_synthesis(unsat, sat, policies, policy_map, prop)
-        exit()
+        # self.double_check_policy_synthesis(unsat, sat, policies, policy_map, prop)
+        # exit()
+        ###
 
         if False:
             self.quotient.build(policy_tree.root.family)
