@@ -148,8 +148,9 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         # identify actions available at each observation
         self.observation_to_actions = [None] * self.num_observations
+        state_to_observation = self.state_to_observation
         for state,available_actions in enumerate(self.state_to_actions):
-            obs = self.state_to_observation[state]
+            obs = state_to_observation[state]
             if self.observation_to_actions[obs] is not None:
                 assert self.observation_to_actions[obs] == available_actions,\
                     f"two states in observation class {obs} differ in available actions"

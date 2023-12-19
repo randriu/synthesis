@@ -30,13 +30,21 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
 
         return satisfying_assignment
 
-    def evaluate_all(self, family, prop):
+    def evaluate_all(self, family, prop, keep_value_only=False):
+
         family_to_evaluation = []
         for hole_combination in family.all_combinations():
             assignment = family.construct_assignment(hole_combination)
             model = self.quotient.build_assignment(assignment)
             self.stat.iteration(model)
-            evaluation = model.model_check_property(prop)
+            result = model.model_check_property(prop)
+            if keep_value_only:
+                evaluation = result.value
+            else:
+                policy = None
+                if result.sat:
+                    policy = self.quotient.scheduler_to_policy(result.result.scheduler, model)
+                evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(result.value, result.sat, policy)
             family_to_evaluation.append( (assignment,evaluation) )
             self.explore(assignment)
         return family_to_evaluation

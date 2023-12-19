@@ -1,15 +1,15 @@
 import stormpy.synthesis
 
-from .synthesizer import Synthesizer
-from .conflict_generator.storm import ConflictGeneratorStorm
-from .conflict_generator.mdp import ConflictGeneratorMdp
+import paynt.synthesizer.synthesizer
+import paynt.synthesizer.conflict_generator.dtmc
+import paynt.synthesizer.conflict_generator.mdp
 import paynt.family.smt
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-class SynthesizerCEGIS(Synthesizer):
+class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
 
     # CLI argument selecting conflict generator
     conflict_generator_type = None
@@ -26,10 +26,10 @@ class SynthesizerCEGIS(Synthesizer):
     
     def choose_conflict_generator(self, quotient):
         if SynthesizerCEGIS.conflict_generator_type == "mdp":
-            conflict_generator = ConflictGeneratorMdp(quotient)
+            conflict_generator = paynt.synthesizer.conflict_generator.mdp.ConflictGeneratorMdp(quotient)
         else:
             # default conflict generator
-            conflict_generator = ConflictGeneratorStorm(quotient)
+            conflict_generator = paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc(quotient)
         return conflict_generator
 
     
@@ -50,13 +50,13 @@ class SynthesizerCEGIS(Synthesizer):
                 continue
             prop = self.quotient.specification.constraints[index]
             family_result = family.analysis_result.constraints_result.results[index] if family.analysis_result is not None else None
-            conflict_requests.append( (index,prop,member_result,family_result) )
+            conflict_requests.append( (index,prop,family_result) )
         if self.quotient.specification.has_optimality:
             member_result = mc_result.optimality_result
             index = len(self.quotient.specification.constraints)
             prop = self.quotient.specification.optimality
             family_result = family.analysis_result.optimality_result if family.analysis_result is not None else None
-            conflict_requests.append( (index,prop,member_result,family_result) )
+            conflict_requests.append( (index,prop,family_result) )
 
         return conflict_requests
 
@@ -84,8 +84,7 @@ class SynthesizerCEGIS(Synthesizer):
             return [], accepting_assignment
 
         conflict_requests = self.collect_conflict_requests(family, mc_result)
-        conflicts, accepting_assignment = self.conflict_generator.construct_conflicts(
-            family, assignment, dtmc, conflict_requests, accepting_assignment)
+        conflicts = self.conflict_generator.construct_conflicts(family, assignment, dtmc, conflict_requests)
 
         return conflicts, accepting_assignment
 

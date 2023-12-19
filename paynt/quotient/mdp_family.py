@@ -3,8 +3,10 @@ import stormpy.synthesis
 
 import paynt.family.family
 import paynt.quotient.quotient
+import paynt.quotient.models
 
 import collections
+import json
 
 import logging
 logger = logging.getLogger(__name__)
@@ -83,7 +85,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     def empty_policy(self):
         return self.empty_scheduler()
 
-    def scheduler_to_policy(self, scheduler, mdp):            
+    def scheduler_to_policy(self, scheduler, mdp):
         state_to_choice = self.scheduler_to_state_to_choice(mdp,scheduler)
         policy = self.empty_policy()
         for state in range(self.quotient_mdp.nr_states):
@@ -91,6 +93,32 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             if choice is not None:
                 policy[state] = self.choice_to_action[choice]
         return policy
+
+    def policy_to_json(self, policy):
+        '''Create a json representation for a policy. '''
+        sv = self.quotient_mdp.state_valuations
+        state_valuation_to_action = []
+        for state,action in enumerate(policy):
+            if action is None:
+                continue
+            # get action label
+            action = self.action_labels[action]
+            if action == "empty_label":
+                continue
+
+            # get state valuation
+            valuation_jani = json.loads(str(sv.get_json(state)))
+            valuation = {}
+            for variable,value in valuation_jani.items():
+                if "_loc_prism2jani_" in variable:
+                    continue
+                valuation[variable] = value
+
+            state_valuation_to_action.append( (valuation,action) )
+        string = json.dumps(state_valuation_to_action, indent=2)
+        return string
+
+
 
     
     def fix_and_apply_policy_to_family(self, family, policy):
@@ -145,6 +173,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
 
     def build_assignment(self, family):
         assert family.size == 1, "expecting family of size 1"
-        self.build(family)
-        return family.mdp
-    
+        choices = self.coloring.selectCompatibleChoices(family.family)
+        model,state_map,choice_map = self.restrict_quotient(choices)
+        mdp = paynt.quotient.models.MDP(model,self,state_map,choice_map,family)
+        return mdp

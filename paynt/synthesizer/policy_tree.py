@@ -4,8 +4,8 @@ import paynt.family.family
 import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
-from .conflict_generator.storm import ConflictGeneratorStorm
-from .conflict_generator.mdp import ConflictGeneratorMdp
+import paynt.synthesizer.conflict_generator.dtmc
+import paynt.synthesizer.conflict_generator.mdp
 import paynt.family.smt
 
 import paynt.verification.property_result
@@ -329,11 +329,11 @@ class PolicyTree:
         # for key,number in self.count_diversity().items():
         #     print(key, " - ", number)
         
-        print()
-        print("X  -  number of nodes solved with policy of type X")
-        for key,number in self.count_policy_sources().items():
-            print(key, " - ", number)
-        print("--------------------")
+        # print()
+        # print("X  -  number of nodes solved with policy of type X")
+        # for key,number in self.count_policy_sources().items():
+        #     print(key, " - ", number)
+        # print("--------------------")
 
 
     
@@ -827,14 +827,14 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             self.quotient.build(mdp_subfamily)
 
             result = mdp_subfamily.mdp.model_check_property(prop)
-            self.stat.iteration_mdp(mdp_subfamily.mdp.states)
+            self.stat.iteration(mdp_subfamily.mdp)
 
-            if result.sat == False:
+            if not result.sat:
                 # Potential for MDP CEs here
                 pruned = smt_solver.exclude_conflicts(family, mdp_subfamily, [list(range(family.num_holes))])
                 self.explored += pruned
                 unsat_mdp_families.append(mdp_subfamily)
-            elif result.sat == True:
+            else:
                 policy = self.quotient.scheduler_to_policy(result.result.scheduler, mdp_subfamily.mdp)
                 policy_fixed, policy_quotient_mdp = self.quotient.fix_and_apply_policy_to_family(family, policy)
                 quotient_assignment = self.quotient.coloring.getChoiceToAssignment()
@@ -845,12 +845,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
                 coloring = stormpy.synthesis.Coloring(family.family, policy_quotient_mdp.model.nondeterministic_choice_indices, choice_to_hole_options)
                 quotient_container = paynt.quotient.quotient.DtmcFamilyQuotient(policy_quotient_mdp.model, family, coloring, self.quotient.specification.negate())
-                conflict_generator = ConflictGeneratorStorm(quotient_container)
+                conflict_generator = paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc(quotient_container)
+                # conflict_generator = paynt.synthesizer.conflict_generator.mdp.ConflictGeneratorMdp(quotient_container)
                 conflict_generator.initialize()
                 mdp_subfamily.constraint_indices = family.constraint_indices
-                requests = [(0, quotient_container.specification.all_properties()[0], result.result, None)]
-                dtmc = quotient_container.build_chain(mdp_subfamily)
-                conflicts, _ = conflict_generator.construct_conflicts(family, mdp_subfamily, dtmc, requests, None)
+                requests = [(0, quotient_container.specification.all_properties()[0], None)]
+                model = quotient_container.build_assignment(mdp_subfamily)
+
+                # choices = coloring.selectCompatibleChoices(mdp_subfamily.family)
+                # model,state_map,choice_map = quotient_container.restrict_quotient(choices)
+                # model = paynt.quotient.models.MDP(model,quotient_container,state_map,choice_map,mdp_subfamily)
+
+                conflicts = conflict_generator.construct_conflicts(family, mdp_subfamily, model, requests)
                 pruned = smt_solver.exclude_conflicts(family, mdp_subfamily, conflicts)
                 self.explored += pruned
 
@@ -862,8 +868,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 sat_mdp_families.append(sat_family)
                 sat_mdp_to_policy_map.append(len(sat_mdp_policies))              
                 sat_mdp_policies.append(policy_fixed)
-            else:
-                assert False, "result for MDP model checking is not SAT nor UNSAT"
 
             mdp_subfamily = smt_solver.pick_assignment(family)
 
@@ -874,7 +878,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         
 
 
-    def evaluate_all(self, family, prop):
+    def evaluate_all(self, family, prop, keep_value_only=False):
         assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         policy_tree = PolicyTree(family)
@@ -932,10 +936,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree.postprocess(self.quotient, prop, self.stat)
 
         # convert policy tree to family evaluation
-        class FamilyEvaluation:
-            def __init__(self, policy):
-                self.policy = policy
-                self.sat = policy is not None and policy != False
-        family_to_evaluation = [ (node.family,FamilyEvaluation(node.policy)) for node in policy_tree.collect_leaves() ]
-        
+        family_to_evaluation = []
+        for node in policy_tree.collect_leaves():
+            evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(None,node.solved,policy=node.policy)
+            family_to_evaluation.append( (node.family,evaluation) )
         return family_to_evaluation

@@ -8,6 +8,7 @@ import paynt.synthesizer.synthesizer_ar
 
 import os
 import random
+import cProfile, pstats
 
 def load_sketch(project_path):
     project_path = os.path.abspath(project_path)
@@ -51,6 +52,8 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
 
     return fsc
 
+profiler = cProfile.Profile()
+profiler.enable()
 
 # random.seed(42)
 
@@ -58,8 +61,8 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
 paynt.cli.setup_logger()
 
 # load sketch
-project_path="models/pomdp/sketches/obstacles"
-# project_path="models/pomdp/sketches/avoid"
+# project_path="models/pomdp/sketches/obstacles"
+project_path="models/pomdp/sketches/avoid"
 pomdp_sketch = load_sketch(project_path)
 print("specification: ", pomdp_sketch.specification)
 print("design space:\n", pomdp_sketch.design_space)
@@ -74,21 +77,24 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 
 # apply this FSC to a POMDP sketch, obtaining a DTMC sketch
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
-# qvalues = pomdp_sketch.compute_qvalues_for_fsc(dtmc_sketch)
+qvalues = pomdp_sketch.compute_qvalues_for_fsc(dtmc_sketch)
 
-# to each singleton environment, assign a value corresponding to the specification satisfiability
-synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
-family_to_evaluation = synthesizer.evaluate(print_stats=False)
-family_to_value = [ (family,evaluation.value) for family,evaluation in family_to_evaluation ]
+# # to each singleton environment, assign a value corresponding to the specification satisfiability
+# synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
+# family_to_value = synthesizer.evaluate(keep_value_only=True, print_stats=False)
 
-# pick the worst family
-import numpy
-values = numpy.array([value for family,value in family_to_value])
-if dtmc_sketch.get_property().minimizing:
-    worst_index = values.argmax()
-else:
-    worst_index = values.argmin()
+# # pick the worst family
+# import numpy
+# values = numpy.array([value for family,value in family_to_value])
+# if dtmc_sketch.get_property().minimizing:
+#     worst_index = values.argmax()
+# else:
+#     worst_index = values.argmin()
 
-worst_family,worst_value = family_to_value[worst_index]
-print("the worst family has value {}, printing it below:".format(worst_value))
-print(worst_family)
+# worst_family,worst_value = family_to_value[worst_index]
+# print("the worst family has value {}, printing it below:".format(worst_value))
+# print(worst_family)
+
+profiler.disable()
+stats = profiler.create_stats()
+pstats.Stats(profiler).sort_stats('tottime').print_stats(20)
