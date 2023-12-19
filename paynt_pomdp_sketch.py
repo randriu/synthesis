@@ -52,8 +52,11 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
 
     return fsc
 
-profiler = cProfile.Profile()
-profiler.enable()
+profiling = False
+
+if profiling:
+    profiler = cProfile.Profile()
+    profiler.enable()
 
 # random.seed(42)
 
@@ -79,22 +82,23 @@ fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
 qvalues = pomdp_sketch.compute_qvalues_for_fsc(dtmc_sketch)
 
-# # to each singleton environment, assign a value corresponding to the specification satisfiability
-# synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
-# family_to_value = synthesizer.evaluate(keep_value_only=True, print_stats=False)
+# to each singleton environment, assign a value corresponding to the specification satisfiability
+synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
+family_to_value = synthesizer.evaluate(keep_value_only=True, print_stats=False)
 
-# # pick the worst family
-# import numpy
-# values = numpy.array([value for family,value in family_to_value])
-# if dtmc_sketch.get_property().minimizing:
-#     worst_index = values.argmax()
-# else:
-#     worst_index = values.argmin()
+# pick the worst family
+import numpy
+values = numpy.array([value for family,value in family_to_value])
+if dtmc_sketch.get_property().minimizing:
+    worst_index = values.argmax()
+else:
+    worst_index = values.argmin()
 
-# worst_family,worst_value = family_to_value[worst_index]
-# print("the worst family has value {}, printing it below:".format(worst_value))
-# print(worst_family)
+worst_family,worst_value = family_to_value[worst_index]
+print("the worst family has value {}, printing it below:".format(worst_value))
+print(worst_family)
 
-profiler.disable()
-stats = profiler.create_stats()
-pstats.Stats(profiler).sort_stats('tottime').print_stats(20)
+if profiling:
+    profiler.disable()
+    stats = profiler.create_stats()
+    pstats.Stats(profiler).sort_stats('tottime').print_stats(20)
