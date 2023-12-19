@@ -255,38 +255,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             state_memory_action_to_value[(state,memory,action)] = value
         return state_memory_action_to_value
 
-    def compute_qvalues_for_fsc(self, dtmc_sketch):
-        '''
-        Given a quotient MDP obtained after applying FSC to a family of POMDPs, compute for each state s, (reachable)
-        memory node n, and action a, the Q-value Q((s,n),a).
-        :note it is assumed that a randomized FSC was used
-        :note it is assumed the provided DTMC sketch is the one obtained after the last unfolding, i.e. no other DTMC
-            sketch was constructed afterwards
-        :return a dictionary mapping (s,n,a) to Q((s,n),a)
-        '''
-        assert isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc), \
-            "to compute Q-values, unfolder for randomized FSC must have been used"
 
-        # model check
-        product = dtmc_sketch.quotient_mdp
-        formula = dtmc_sketch.get_property().formula
-        result = stormpy.model_checking(product, formula, environment=paynt.verification.property.Property.environment)
-        product_state_to_value = result.get_values()
-
-        # map state values to the resulting map
-        product_state_to_state_memory_action = self.product_pomdp_fsc.product_state_to_state_memory_action.copy()
-        state_memory_action_to_value = {}
-        invalid_action = self.num_actions
-        for product_state in range(product.nr_states):
-            state,memory_action = product_state_to_state_memory_action[product_state]
-            memory,action = memory_action
-            if action == invalid_action:
-                continue
-            value = product_state_to_value[product_state]
-            state_memory_action_to_value[(state,memory,action)] = value
-        return state_memory_action_to_value
-
-    
     def translate_path_to_trace(self, dtmc_sketch, dtmc, path):
         invalid_choice = self.quotient_mdp.nr_choices
         trace = []
