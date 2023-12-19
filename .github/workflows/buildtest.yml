@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         buildType:
-          - {name: "Release", imageName : "randriu/paynt", dockerTag: "temp", buildArgs: "BUILD_TYPE=Release", setupArgs: "", stormCommit : "dc7960b8f0222793b591f3d6489e2f6c7da1278f"}
+          - {name: "Release", imageName : "randriu/paynt", dockerTag: "temp", buildArgs: "BUILD_TYPE=Release", setupArgs: "", stormCommit : "de718be210dc6bef4b4e4507436a46786b812145"}
       fail-fast: false
     steps:
       - name: Git clone

@@ -223,6 +223,38 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return dtmc_sketch
 
 
+    def compute_qvalues_for_product_submdp(self, product_submdp : paynt.quotient.models.MDP):
+        '''
+        Given an MDP obtained after applying FSC to a family of POMDPs, compute for each state s, (reachable)
+        memory node n, and action a, the Q-value Q((s,n),a).
+        :note it is assumed that a randomized FSC was used
+        :note it is assumed the provided DTMC sketch is the one obtained after the last unfolding, i.e. no other DTMC
+            sketch was constructed afterwards
+        :return a dictionary mapping (s,n,a) to Q((s,n),a)
+        '''
+        assert isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc), \
+            "to compute Q-values, unfolder for randomized FSC must have been used"
+
+        # model check
+        prop = self.get_property()
+        result = product_submdp.model_check_property(prop)
+        product_state_sub_to_value = result.result.get_values()
+
+        # map states of a sub-MDP to the states of the quotient-MDP to the state-memory pairs of the quotient POMDP
+        # map states values to the resulting map
+        product_state_to_state_memory_action = self.product_pomdp_fsc.product_state_to_state_memory_action.copy()
+        state_memory_action_to_value = {}
+        invalid_action = self.num_actions
+        for product_state_sub in range(product_submdp.model.nr_states):
+            product_state = product_submdp.quotient_state_map[product_state_sub]
+            state,memory_action = product_state_to_state_memory_action[product_state]
+            memory,action = memory_action
+            if action == invalid_action:
+                continue
+            value = product_state_sub_to_value[product_state_sub]
+            state_memory_action_to_value[(state,memory,action)] = value
+        return state_memory_action_to_value
+
     def compute_qvalues_for_fsc(self, dtmc_sketch):
         '''
         Given a quotient MDP obtained after applying FSC to a family of POMDPs, compute for each state s, (reachable)
