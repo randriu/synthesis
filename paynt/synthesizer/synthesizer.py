@@ -4,6 +4,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class FamilyEvaluation:
+    '''Result associated with a family after its evaluation. '''
+    def __init__(self, value, sat, policy):
+        self.value = value
+        self.sat = sat
+        self.policy = policy
+
+
 class Synthesizer:
 
     # if True, some subfamilies can be discarded and some holes can be generalized
@@ -60,17 +68,19 @@ class Synthesizer:
         self.explored += family.size
 
 
-    def evaluate_all(self, family, prop):
+    def evaluate_all(self, family, prop, keep_value_only=False):
         ''' to be overridden '''
         pass
 
-    def evaluate(self, family=None, prop=None, print_stats=True):
+    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True):
         '''
         Evaluate each member of the family wrt the given property.
         :param family if None, then the design space of the quotient will be used
         :param prop if None, then the default property of the quotient will be used
             (assuming single-property specification)
-        :returns a list of (family,evaluation) pairs, where evaluation is either
+        :param keep_value_only if True, only value will be associated with the family
+        :param print_stats if True, synthesis statistic will be printed
+        :returns a list of (family,evaluation) pairs
         '''
         if family is None:
             family = self.quotient.design_space
@@ -79,7 +89,7 @@ class Synthesizer:
 
         logger.info("evaluation initiated, design space: {}".format(family.size))
         self.stat.start(family)
-        family_to_evaluation = self.evaluate_all(family, prop)
+        family_to_evaluation = self.evaluate_all(family, prop, keep_value_only)
         self.stat.finished_evaluation(family_to_evaluation)
         logger.info("evaluation finished")
 
@@ -92,7 +102,14 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def synthesize(self, family=None, optimum_threshold=None, print_stats=True):
+    def synthesize(self, family=None, optimum_threshold=None, return_all=False, print_stats=True):
+        '''
+        :param family family of assignment to search in
+        :param optimum_threshold known value of the optimum value
+        :param return_all if True and the synthesis returns a family, all assignments will be returned instead of an
+            arbitrary one
+        :param print_stats if True, synthesis stats will be printed upon completion
+        '''
         if family is None:
             family = self.quotient.design_space
         family.constraint_indices = self.quotient.specification.all_constraint_indices()
@@ -104,14 +121,13 @@ class Synthesizer:
         logger.info("synthesis initiated, design space: {}".format(family.size))
         self.stat.start(family)
         assignment = self.synthesize_one(family)
-        if assignment is not None and assignment.size > 1:
+        if assignment is not None and assignment.size > 1 and not return_all:
             assignment = assignment.pick_any()
         self.stat.finished_synthesis(assignment)
-        logger.info("synthesis finished")
+        logger.info("synthesis finished, printing synthesized assignment below:")
+        logger.info(assignment)
 
-        if assignment is not None:
-            logger.info("printing synthesized assignment below:")
-            logger.info(assignment)
+        if assignment is not None and assignment.size == 1:
             model = self.quotient.build_assignment(assignment)
             mc_result = model.check_specification(self.quotient.specification)
             logger.info(f"double-checking specification satisfiability: {mc_result}")

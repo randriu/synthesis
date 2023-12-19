@@ -75,7 +75,7 @@ class JaniUnfolder:
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins
         logger.debug("associating choices of the quotient with hole assignments...")
-        choice_is_valid,choice_to_hole_options = stormpy.synthesis.janeMapChoicesToHoleAssignments(
+        choice_is_valid,choice_to_hole_options = stormpy.synthesis.janiMapChoicesToHoleAssignments(
             quotient_mdp,family.family,self.edge_to_hole_options
         )
 

@@ -4,8 +4,6 @@ import stormpy.synthesis
 import paynt.family.family
 import paynt.quotient.models
 
-from .models import MarkovChain,DTMC
-
 import math
 import itertools
 
@@ -49,7 +47,8 @@ class Quotient:
             self.state_to_holes = coloring.getStateToHoles().copy()
 
         # (optional) counter of discarded assignments
-        self.discarded = None
+        self.discarded = 0
+
 
     def export_result(self, dtmc):
         ''' to be overridden '''
@@ -89,15 +88,11 @@ class Quotient:
     
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
-
         # select actions compatible with the family and restrict the quotient
         choices = self.coloring.selectCompatibleChoices(family.family)
         family.selected_choices = choices
         family.mdp = self.build_from_choice_mask(choices)
         family.mdp.design_space = family
-
-        # prepare to discard designs
-        self.discarded = 0
 
 
     def build_with_second_coloring(self, family, main_coloring, main_family):
@@ -113,9 +108,6 @@ class Quotient:
         family.mdp = self.build_from_choice_mask(choices)
         family.mdp.design_space = family
 
-        # prepare to discard designs
-        self.discarded = 0
-
     
     @staticmethod
     def mdp_to_dtmc(mdp):
@@ -130,7 +122,7 @@ class Quotient:
         choices = self.coloring.selectCompatibleChoices(family.family)
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         dtmc = Quotient.mdp_to_dtmc(mdp)
-        return DTMC(dtmc,self,state_map,choice_map)
+        return paynt.quotient.models.DTMC(dtmc,self,state_map,choice_map)
     
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states

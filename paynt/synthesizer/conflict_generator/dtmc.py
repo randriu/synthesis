@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ConflictGeneratorStorm():
+class ConflictGeneratorDtmc():
 
     def __init__(self, quotient):
         self.quotient = quotient
@@ -12,7 +12,7 @@ class ConflictGeneratorStorm():
 
     @property
     def name(self):
-        return "(Storm)"
+        return "(DTMC)"
 
     def initialize(self):
         state_to_holes_bv = self.quotient.coloring.getStateToHoles().copy()
@@ -26,13 +26,16 @@ class ConflictGeneratorStorm():
             state_to_holes, formulae)
 
 
-    def construct_conflicts(self, family, assignment, dtmc, conflict_requests, accepting_assignment):
+    def prepare_model(self, model):
+        self.counterexample_generator.prepare_dtmc(model.model, model.quotient_state_map)
+
+    def construct_conflicts(self, family, assignment, dtmc, conflict_requests):
         
-        self.counterexample_generator.prepare_dtmc(dtmc.model, dtmc.quotient_state_map)
+        self.prepare_model(dtmc)
         
         conflicts = []
         for request in conflict_requests:
-            index,prop,_,family_result = request
+            index,prop,family_result = request
 
             threshold = prop.threshold
 
@@ -44,4 +47,4 @@ class ConflictGeneratorStorm():
             conflict = self.counterexample_generator.construct_conflict(index, threshold, bounds, family.mdp.quotient_state_map)
             conflicts.append(conflict)
         
-        return conflicts, accepting_assignment
+        return conflicts
