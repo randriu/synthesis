@@ -52,20 +52,56 @@ def investigate_hole_assignment(pomdp_sketch, hole_assignment):
 
     return fsc
 
+def compute_qvalues(pomdp_sketch, dtmc_sketch):
+    print()
+    subfamily = dtmc_sketch.design_space
+    dtmc_sketch.build(subfamily)
+    print("computing Q-values...")
+    qvalues = pomdp_sketch.compute_qvalues_for_product_submdp(subfamily.mdp)
+    print("Q-values computed")
+
+def evaluate_all(dtmc_sketch):
+    ''' To each singleton environment, assign a value corresponding to the specification satisfiability. '''
+    print()
+    synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
+    family_to_value = synthesizer.evaluate(keep_value_only=True)
+
+    # pick the worst family
+    import numpy
+    values = numpy.array([value for family,value in family_to_value])
+    if dtmc_sketch.get_property().minimizing:
+        worst_index = values.argmax()
+    else:
+        worst_index = values.argmin()
+
+    worst_family,worst_value = family_to_value[worst_index]
+    print("the worst family has value {}, printing the family below:".format(worst_value))
+    print(worst_family)
+
+def synthesize_worst(dtmc_sketch):
+    '''Identify assignment with the worst specification satisfiability.'''
+    print()
+    dtmc_sketch.specification = dtmc_sketch.specification.negate()
+    dtmc_sketch.specification.optimality.epsilon = 0.05
+    synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(dtmc_sketch)
+    worst_assignment = synthesizer.synthesize(return_all=True)
+
+
 profiling = False
 
 if profiling:
     profiler = cProfile.Profile()
     profiler.enable()
 
-# random.seed(42)
+
+# random.seed(11)
 
 # enable PAYNT logging
 paynt.cli.setup_logger()
 
 # load sketch
-# project_path="models/pomdp/sketches/obstacles"
-project_path="models/pomdp/sketches/avoid"
+project_path="models/pomdp/sketches/obstacles"
+# project_path="models/pomdp/sketches/avoid"
 pomdp_sketch = load_sketch(project_path)
 print("specification: ", pomdp_sketch.specification)
 print("design space:\n", pomdp_sketch.design_space)
@@ -77,33 +113,13 @@ hole_assignment = pomdp_sketch.design_space.pick_any()
 
 # investigate this hole assignment and return an FSC
 fsc = investigate_hole_assignment(pomdp_sketch, hole_assignment)
+
+# apply this FSC to a POMDP sketch, obtaining a DTMC sketch
 dtmc_sketch = pomdp_sketch.build_dtmc_sketch(fsc)
 
-## Q-values computation
-if False:
-    # apply this FSC to a POMDP sketch, obtaining a DTMC sketch
-    subfamily = dtmc_sketch.design_space
-    dtmc_sketch.build(subfamily)
-    qvalues = pomdp_sketch.compute_qvalues_for_product_submdp(subfamily.mdp)
-
-
-## evaluation
-if False:
-    # to each singleton environment, assign a value corresponding to the specification satisfiability
-    synthesizer = paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(dtmc_sketch)
-    family_to_value = synthesizer.evaluate(keep_value_only=True, print_stats=False)
-
-    # pick the worst family
-    import numpy
-    values = numpy.array([value for family,value in family_to_value])
-    if dtmc_sketch.get_property().minimizing:
-        worst_index = values.argmax()
-    else:
-        worst_index = values.argmin()
-
-    worst_family,worst_value = family_to_value[worst_index]
-    print("the worst family has value {}, printing it below:".format(worst_value))
-    print(worst_family)
+# compute_qvalues(pomdp_sketch, dtmc_sketch)
+# evaluate_all(dtmc_sketch)
+# synthesize_worst(dtmc_sketch)
 
 if profiling:
     profiler.disable()

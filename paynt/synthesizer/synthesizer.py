@@ -102,7 +102,14 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def synthesize(self, family=None, optimum_threshold=None, print_stats=True):
+    def synthesize(self, family=None, optimum_threshold=None, return_all=False, print_stats=True):
+        '''
+        :param family family of assignment to search in
+        :param optimum_threshold known value of the optimum value
+        :param return_all if True and the synthesis returns a family, all assignments will be returned instead of an
+            arbitrary one
+        :param print_stats if True, synthesis stats will be printed upon completion
+        '''
         if family is None:
             family = self.quotient.design_space
         family.constraint_indices = self.quotient.specification.all_constraint_indices()
@@ -114,14 +121,13 @@ class Synthesizer:
         logger.info("synthesis initiated, design space: {}".format(family.size))
         self.stat.start(family)
         assignment = self.synthesize_one(family)
-        if assignment is not None and assignment.size > 1:
+        if assignment is not None and assignment.size > 1 and not return_all:
             assignment = assignment.pick_any()
         self.stat.finished_synthesis(assignment)
-        logger.info("synthesis finished")
+        logger.info("synthesis finished, printing synthesized assignment below:")
+        logger.info(assignment)
 
-        if assignment is not None:
-            logger.info("printing synthesized assignment below:")
-            logger.info(assignment)
+        if assignment is not None and assignment.size == 1:
             model = self.quotient.build_assignment(assignment)
             mc_result = model.check_specification(self.quotient.specification)
             logger.info(f"double-checking specification satisfiability: {mc_result}")

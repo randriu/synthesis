@@ -137,7 +137,6 @@ class Property:
 
     def negate(self):
         negated_formula = self.property.raw_formula.clone()
-        prop_negated = self.copy()
         negated_formula.comparison_type = {
             stormpy.ComparisonType.LESS:    stormpy.ComparisonType.GEQ,
             stormpy.ComparisonType.LEQ:     stormpy.ComparisonType.GREATER,
@@ -241,7 +240,15 @@ class OptimalityProperty(Property):
         return not( not self.reward and self.minimizing and self.threshold == 0 )
 
     def negate(self):
-        raise TypeError("negation of optimality properties is not supported")
+        negated_formula = self.property.raw_formula.clone()
+        negate_optimality_type = {
+            stormpy.OptimizationDirection.Minimize:    stormpy.OptimizationDirection.Maximize,
+            stormpy.OptimizationDirection.Maximize:    stormpy.OptimizationDirection.Minimize
+        }[negated_formula.optimality_type]
+        negated_formula.set_optimality_type(negate_optimality_type)
+        stormpy_property_negated = stormpy.core.Property(self.property.name, negated_formula)
+        property_negated = OptimalityProperty(stormpy_property_negated,self.discount_factor,self.epsilon)
+        return property_negated
 
 
 class DoubleOptimalityProperty(OptimalityProperty):

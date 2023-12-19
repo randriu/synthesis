@@ -203,7 +203,7 @@ class Statistic:
             return f"feasible: {feasible}"
 
     def get_summary_evaluation(self):
-        if not type(self.family_to_evaluation[0] == paynt.synthesizer.synthesizer.FamilyEvaluation):
+        if not type(self.family_to_evaluation[0]) == paynt.synthesizer.synthesizer.FamilyEvaluation:
             return ""
         members_sat = sum( [family.size for family,evaluation in self.family_to_evaluation if evaluation.sat ])
         members_total = self.quotient.design_space.size
