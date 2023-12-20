@@ -143,6 +143,21 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             policy_fixed[state] = policy[state]
 
         return policy_fixed,mdp
+    
+
+    def apply_policy_to_family(self, family, policy):
+        policy_choices = []
+        for state,action in enumerate(policy):
+            if action is None:
+                for choice in self.state_action_choices[state]:
+                    policy_choices += choice
+            else:
+                policy_choices += self.state_action_choices[state][action]
+        choices = stormpy.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
+
+        mdp = self.build_from_choice_mask(choices)
+
+        return mdp
 
     
     def assert_mdp_is_deterministic(self, mdp, family):
