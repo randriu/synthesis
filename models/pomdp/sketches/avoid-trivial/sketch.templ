@@ -37,7 +37,7 @@ endmodule
 const double slip = 0.0;
 module agent
     x : [xMIN..xMAX] init xMIN;
-    y : [yMIN..yMAX] init yMIN;
+    y : [yMIN..yMAX] init yMAX;
 
     [left]  true -> (1-slip): (x'=max(x-1,xMIN)) + slip: true;
     [right] true -> (1-slip): (x'=min(x+1,xMAX)) + slip: true;
