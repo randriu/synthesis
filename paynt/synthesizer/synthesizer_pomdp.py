@@ -622,7 +622,7 @@ class SynthesizerPOMDP:
                 
 
 
-    def run(self, optimum_threshold=None):
+    def run(self, optimum_threshold=None, export_evaluation=None):
         # choose the synthesis strategy:
         if self.use_storm:
             logger.info("Storm POMDP option enabled")

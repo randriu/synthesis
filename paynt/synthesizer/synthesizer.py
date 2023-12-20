@@ -6,7 +6,8 @@ logger = logging.getLogger(__name__)
 
 class FamilyEvaluation:
     '''Result associated with a family after its evaluation. '''
-    def __init__(self, value, sat, policy):
+    def __init__(self, family, value, sat, policy):
+        self.family = family
         self.value = value
         self.sat = sat
         self.policy = policy
@@ -72,7 +73,11 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True):
+    def export_evaluation_result(self, evaluations, export_filename_base):
+        ''' to be overridden '''
+        pass
+
+    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True, export_filename_base=None):
         '''
         Evaluate each member of the family wrt the given property.
         :param family if None, then the design space of the quotient will be used
@@ -80,6 +85,7 @@ class Synthesizer:
             (assuming single-property specification)
         :param keep_value_only if True, only value will be associated with the family
         :param print_stats if True, synthesis statistic will be printed
+        :param export_filename_base base filename used to export the evaluation results
         :returns a list of (family,evaluation) pairs
         '''
         if family is None:
@@ -89,13 +95,17 @@ class Synthesizer:
 
         logger.info("evaluation initiated, design space: {}".format(family.size))
         self.stat.start(family)
-        family_to_evaluation = self.evaluate_all(family, prop, keep_value_only)
-        self.stat.finished_evaluation(family_to_evaluation)
+        evaluations = self.evaluate_all(family, prop, keep_value_only)
+        self.stat.finished_evaluation(evaluations)
         logger.info("evaluation finished")
+
+        if export_filename_base is not None:
+            self.export_evaluation_result(evaluations, export_filename_base)
 
         if print_stats:
             self.stat.print()
-        return family_to_evaluation
+        
+        return evaluations
 
     
     def synthesize_one(self, family):
@@ -137,8 +147,8 @@ class Synthesizer:
         return assignment
 
     
-    def run(self, optimum_threshold=None):
+    def run(self, optimum_threshold=None, export_evaluation=None):
         if isinstance(self.quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
-            self.evaluate()
+            self.evaluate(export_filename_base=export_evaluation)
         else:
             self.synthesize(optimum_threshold=optimum_threshold)

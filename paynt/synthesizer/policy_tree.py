@@ -4,16 +4,22 @@ import paynt.family.family
 import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
-import paynt.synthesizer.conflict_generator.dtmc
-import paynt.synthesizer.conflict_generator.mdp
-import paynt.family.smt
-
+import paynt.quotient.quotient
 import paynt.verification.property_result
 from paynt.verification.property import Property
-import paynt.quotient.quotient
+
+import paynt.family.smt
+import paynt.synthesizer.conflict_generator.dtmc
+import paynt.synthesizer.conflict_generator.mdp
+
 
 import logging
 logger = logging.getLogger(__name__)
+
+# disable logging when importing graphviz to suppress warnings
+logging.disable(logging.CRITICAL)
+import graphviz
+logging.disable(logging.NOTSET)
 
 
 class MdpFamilyResult:
@@ -119,6 +125,8 @@ class PolicyTreeNode:
         self.suboptions = []
         self.child_nodes = []
 
+        self.policy_number = None
+
     @property
     def is_leaf(self):
         return len(self.child_nodes) == 0
@@ -212,6 +220,50 @@ class PolicyTreeNode:
             return
         # only 1 child node that can be moved to this node
         PolicyTreeNode.merged += 1
+
+    def assign_policy_number(self, num_policies):
+        if self.is_leaf:
+            if self.solved:
+                self.policy_number = num_policies
+                num_policies += 1
+            return num_policies
+        for child in self.child_nodes:
+            num_policies = child.assign_policy_number(num_policies)
+        return num_policies
+
+    def extract_policies(self, quotient):
+        if self.solved:
+            return { f"p{self.policy_number}" : quotient.policy_to_state_valuation_actions(self.policy) }
+        policies = {}
+        for child in self.child_nodes:
+            policies.update(child.extract_policies(quotient))
+        return policies
+
+    @property
+    def node_id(self):
+        return str(self.family).replace(' ','').replace(':','=')
+
+    def add_nodes_to_graphviz_tree(self, graphviz_tree):
+        node_label = ""
+        if self.policy is not None:
+            if self.policy is False:
+                node_label = "X"
+            else:
+                # node_label = "✓"
+                node_label = f"p{self.policy_number}"
+        graphviz_tree.node(self.node_id, label=node_label, shape="ellipse", width="0.15", height="0.15")
+        for child in self.child_nodes:
+            child.add_nodes_to_graphviz_tree(graphviz_tree)
+
+    def add_edges_to_graphviz_tree(self, graphviz_tree):
+        if self.splitter is None:
+            return
+        splitter_name = self.family.hole_name(self.splitter)
+        for index,child in enumerate(self.child_nodes):
+            edge_label = self.family.hole_options_to_string(self.splitter,self.suboptions[index])
+            graphviz_tree.edge(self.node_id,child.node_id,label=edge_label)
+            child.add_edges_to_graphviz_tree(graphviz_tree)
+
 
 
 class PolicyTree:
@@ -335,9 +387,6 @@ class PolicyTree:
         #     print(key, " - ", number)
         # print("--------------------")
 
-
-    
-
     
     def postprocess(self, quotient, prop, stat):
 
@@ -371,6 +420,20 @@ class PolicyTree:
         # logger.info("merged {} pairs".format(PolicyTreeNode.merged))
         # stat.num_policies_yes = len(self.collect_solved())
         # self.print_stats()
+
+    def extract_policies(self, quotient):
+        self.root.assign_policy_number(0)
+        policies = self.root.extract_policies(quotient)
+        return policies
+
+    def extract_policy_tree(self, quotient):
+        logging.getLogger("graphviz").setLevel(logging.WARNING)
+        logging.getLogger("graphviz.sources").setLevel(logging.ERROR)
+        graphviz_tree = graphviz.Digraph(comment="policy_tree")
+        self.root.add_nodes_to_graphviz_tree(graphviz_tree)
+        self.root.add_edges_to_graphviz_tree(graphviz_tree)
+        return graphviz_tree
+
 
 
 
@@ -934,10 +997,30 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
         policy_tree.postprocess(self.quotient, prop, self.stat)
+        self.policy_tree = policy_tree
 
         # convert policy tree to family evaluation
-        family_to_evaluation = []
+        evaluations = []
         for node in policy_tree.collect_leaves():
-            evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(None,node.solved,policy=node.policy)
-            family_to_evaluation.append( (node.family,evaluation) )
-        return family_to_evaluation
+            evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(node.family,None,node.solved,policy=node.policy)
+            evaluations.append(evaluation)
+        return evaluations
+
+    def export_evaluation_result(self, evaluations, export_filename_base):
+        import json
+        policies = self.policy_tree.extract_policies(self.quotient)
+        policies_string = json.dumps(policies, indent=2)
+        policies_filename = export_filename_base + ".json"
+        with open(policies_filename, 'w') as file:
+            file.write(policies_string)
+        logger.info(f"exported policies to {policies_filename}")
+
+        tree = self.policy_tree.extract_policy_tree(self.quotient)
+        tree_filename = export_filename_base + ".dot"
+        with open(tree_filename, 'w') as file:
+            file.write(tree.source)
+        logger.info(f"exported policy tree to {tree_filename}")
+
+        tree_visualization_filename = export_filename_base + ".png"
+        tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
+        logger.info(f"exported policy tree visualization to {tree_visualization_filename}")

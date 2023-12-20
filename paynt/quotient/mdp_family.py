@@ -94,12 +94,17 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                 policy[state] = self.choice_to_action[choice]
         return policy
 
-    def policy_to_json(self, policy):
-        '''Create a json representation for a policy. '''
+    def policy_to_state_valuation_actions(self, policy):
+        '''
+        Create a representation for a policy that associated action labels with state valuations. States with only
+        one available action are omitted.
+        '''
         sv = self.quotient_mdp.state_valuations
         state_valuation_to_action = []
         for state,action in enumerate(policy):
             if action is None:
+                continue
+            if len(self.state_to_actions[state])==1:
                 continue
             # get action label
             action = self.action_labels[action]
@@ -115,10 +120,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                 valuation[variable] = value
 
             state_valuation_to_action.append( (valuation,action) )
-        string = json.dumps(state_valuation_to_action, indent=2)
-        return string
-
-
+        return state_valuation_to_action
 
     
     def fix_and_apply_policy_to_family(self, family, policy):

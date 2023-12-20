@@ -160,10 +160,10 @@ class Statistic:
         self.synthesis_timer.stop()
         self.synthesized_assignment = assignment
 
-    def finished_evaluation(self, family_to_evaluation):
+    def finished_evaluation(self, evaluations):
         self.job_type = "evaluation"
         self.synthesis_timer.stop()
-        self.family_to_evaluation = family_to_evaluation
+        self.evaluations = evaluations
         
 
     def get_summary_specification(self):
@@ -203,9 +203,9 @@ class Statistic:
             return f"feasible: {feasible}"
 
     def get_summary_evaluation(self):
-        if not type(self.family_to_evaluation[0]) == paynt.synthesizer.synthesizer.FamilyEvaluation:
+        if not isinstance(self.evaluations[0], paynt.synthesizer.synthesizer.FamilyEvaluation):
             return ""
-        members_sat = sum( [family.size for family,evaluation in self.family_to_evaluation if evaluation.sat ])
+        members_sat = sum( [evaluation.family.size for evaluation in self.evaluations if evaluation.sat ])
         members_total = self.quotient.design_space.size
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
@@ -238,7 +238,7 @@ class Statistic:
         return summary
     
     def print(self):    
-        print(self.get_summary())
+        print(self.get_summary(),end="")
 
 
     def print_mdp_family_table_entries(self):

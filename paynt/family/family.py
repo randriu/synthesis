@@ -52,16 +52,19 @@ class Family:
     def size(self):
         return math.prod([self.family.holeNumOptions(hole) for hole in range(self.num_holes)])
 
+    def hole_options_to_string(self, hole, options):
+        name = self.hole_name(hole)
+        labels = [self.hole_to_option_labels[hole][option] for option in options]
+        if len(labels) == 1:
+            return f"{name}={labels[0]}"
+        else:
+            return name + ": {" + ",".join(labels) + "}"
+
     def __str__(self):
         hole_strings = []
         for hole in range(self.num_holes):
-            name = self.hole_name(hole)
             options = self.hole_options(hole)
-            labels = [self.hole_to_option_labels[hole][option] for option in options]
-            if len(labels) == 1:
-                hole_str = "{}={}".format(name,labels[0]) 
-            else:
-                hole_str =  name + ": {" + ",".join(labels) + "}"
+            hole_str = self.hole_options_to_string(hole,options)
             hole_strings.append(hole_str)
         return ", ".join(hole_strings)
 

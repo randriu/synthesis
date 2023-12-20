@@ -75,7 +75,8 @@ RUN python setup.py build_ext $setup_args -j $no_threads develop
 RUN pip install -U pip setuptools wheel numpy
 
 # Paynt / extra dependencies
-RUN pip install pysmt z3-solver click
+RUN apt-get install -y graphviz
+RUN pip install click z3-solver pysmt graphviz
 
 # Build paynt
 #############

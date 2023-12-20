@@ -32,7 +32,7 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
 
     def evaluate_all(self, family, prop, keep_value_only=False):
 
-        family_to_evaluation = []
+        evaluations = []
         for hole_combination in family.all_combinations():
             assignment = family.construct_assignment(hole_combination)
             model = self.quotient.build_assignment(assignment)
@@ -44,7 +44,24 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
                 policy = None
                 if result.sat:
                     policy = self.quotient.scheduler_to_policy(result.result.scheduler, model)
-                evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(result.value, result.sat, policy)
-            family_to_evaluation.append( (assignment,evaluation) )
+                evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(assignment, result.value, result.sat, policy)
+            evaluations.append(evaluation)
             self.explore(assignment)
-        return family_to_evaluation
+        return evaluations
+
+    def export_evaluation_result(self, evaluations, export_filename_base):
+        import json
+        family_to_evaluation_parsed = []
+        for evaluation in evaluations:
+            family = evaluation.family
+            policy = evaluation.policy
+            if policy is None:
+                policy = "UNSAT"
+            else:
+                policy = self.quotient.policy_to_state_valuation_actions(policy)
+            family_to_evaluation_parsed.append( (str(family),policy) )
+        policies_string = json.dumps(family_to_evaluation_parsed, indent=2)
+        policies_filename = export_filename_base + ".json"
+        with open(policies_filename, 'w') as file:
+            file.write(policies_string)
+        logger.info(f"exported satisfied members and correponding policies to {policies_filename}")

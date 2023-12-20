@@ -15,7 +15,7 @@ alias envd='deactivate'
 
 storm-dependencies() {
     sudo apt update
-    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+    sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev graphviz
     sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
     # apt -y install texlive-latex-extra
     # update-alternatives --install /usr/bin/python python /usr/bin/python3 10
@@ -37,7 +37,7 @@ download-prerequisites() {
 python-environment() {
     python3 -m venv $PAYNT_ROOT/env
     enva
-    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build
+    pip3 install pytest pytest-runner pytest-cov numpy scipy pysmt z3-solver click toml Cython scikit-build graphviz
     envd
 }
 
