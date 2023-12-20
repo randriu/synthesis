@@ -1039,10 +1039,20 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def export_evaluation_result(self, evaluations, export_filename_base):
         import json
         policies = self.policy_tree.extract_policies(self.quotient)
-        policies_string = json.dumps(policies, indent=2)
+        policies_string = "{\n"
+        for index,key_value in enumerate(policies.items()):
+            policy_id,policy = key_value
+            if index > 0:
+                policies_string += ",\n"
+            policy_json = self.quotient.policy_to_json(policy, indent= "  ")
+
+            policies_string += f'"{policy_id}" : {policy_json}'
+        policies_string += "}\n"
+
         policies_filename = export_filename_base + ".json"
         with open(policies_filename, 'w') as file:
             file.write(policies_string)
+
         logger.info(f"exported policies to {policies_filename}")
 
         tree = self.policy_tree.extract_policy_tree(self.quotient)

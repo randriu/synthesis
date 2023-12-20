@@ -120,7 +120,31 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                 valuation[variable] = value
 
             state_valuation_to_action.append( (valuation,action) )
+
+        # omit variables that are assigned to the same value
+        default_valuation,_ = state_valuation_to_action[0]
+        irrelevant_variables = set(default_valuation)
+        for valuation,_ in state_valuation_to_action[1:]:
+            for variable in list(irrelevant_variables):
+                if valuation[variable] != default_valuation[variable]:
+                    irrelevant_variables.remove(variable)
+        state_valuation_to_action = [
+            ({variable:value for variable,value in valuation.items() if variable not in irrelevant_variables},action)
+            for valuation,action in state_valuation_to_action
+        ]
         return state_valuation_to_action
+
+    def policy_to_json(self, state_valuation_to_action, indent=""):
+        import json
+        json_string = "[\n"
+        for index,valuation_action in enumerate(state_valuation_to_action):
+            valuation,action = valuation_action
+            if index > 0:
+                json_string += ",\n"
+            json_string += indent + json.dumps(valuation_action)
+        json_string += "\n" + indent + "]"
+        return json_string
+
 
     
     def fix_and_apply_policy_to_family(self, family, policy):
