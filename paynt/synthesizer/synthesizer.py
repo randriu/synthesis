@@ -129,6 +129,7 @@ class Synthesizer:
             logger.debug(f"optimality threshold set to {optimum_threshold}")
         
         logger.info("synthesis initiated, design space: {}".format(family.size))
+        self.quotient.discarded = 0
         self.stat.start(family)
         assignment = self.synthesize_one(family)
         if assignment is not None and assignment.size > 1 and not return_all:

@@ -1,54 +1,64 @@
-from .statistic import Statistic
-from .synthesizer import Synthesizer
-from .synthesizer_ar import SynthesizerAR
+from paynt.synthesizer.synthesizer import Synthesizer
+from paynt.synthesizer.synthesizer_ar import SynthesizerAR
 
-import multiprocessing as mp
 import os
 import time
+import multiprocessing
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-# global variable containing the quotient
-# when a process is spawned (forked), it will inherit this quotient from the parent
-quotient = None
-
 import cProfile, pstats
-profile = None
+
+# global variables
+# when a new process is spawned (forked), it will inherit these variables from the parent
+quotient = None
+profiler = None
+
+# helper functions for family serialization
+def family_to_hole_options(family):
+    return [family.hole_options(hole) for hole in range(family.num_holes)]
+
+def hole_options_to_family(hole_options):
+    family = quotient.design_space.copy()
+    for hole,options in enumerate(hole_options):
+        family.hole_set_options(hole,options)
+    return family
 
 
 def solve_family(args):
     '''
     Build the quotient, analyze it and, if necessary, split into subfamilies.
     '''
-
     try:
 
-        family, optimum = args
+        if args is None:
+            pstats.Stats(profiler).sort_stats('tottime').print_stats(10)
 
-        if family is None:
-            pstats.Stats(profile).sort_stats('tottime').print_stats(50)
-            return
+        hole_options, optimum = args
+        # re-construct the family
+        family = hole_options_to_family(hole_options)
 
         # synchronize optimum
         if optimum is not None:
             quotient.specification.optimality.optimum = optimum
 
         quotient.build(family)
-        # self.stat.iteration_mdp(family.mdp.states)
 
         res = family.mdp.check_specification(quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
         family.analysis_result = res
+        improving_value = res.improving_value
+        improving_assignment = res.improving_assignment
+        if improving_assignment is not None:
+            improving_assignment = family_to_hole_options(improving_assignment)
         
         subfamilies = []
-        if family.analysis_result.can_improve:
+        if res.can_improve:
             subfamilies = quotient.split(family, Synthesizer.incomplete_search)
-            # remove parent info since Property is not pickleable
-            for subfamily in subfamilies:
-                subfamily.parent_info = None
+            subfamilies = [ family_to_hole_options(family) for family in subfamilies ]
 
-        return ([family.mdp.states], family.analysis_result.improving_value, family.analysis_result.improving_assignment, subfamilies)
+        return (family.mdp.states, improving_value, improving_assignment, subfamilies)
 
     except:
         logger.error("Worker sub-process encountered an error.")
@@ -64,23 +74,21 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
 
     def synthesize_one(self, family):
 
-        self.quotient.discarded = 0
-
         satisfying_assignment = None
         families = [family]
 
-        start_time = time.perf_counter()
-
         global quotient
         quotient = self.quotient
-        global profile
-        profile = cProfile.Profile()
-        # profile.enable()
+        profiling = False
+        if profiling:
+            global profiler
+            profiler = cProfile.Profile()
+            profiler.enable()
 
         # create a pool of processes
         # by default, os.cpu_count() processes will be spawned
-        with mp.Pool(
-            # processes = 1
+        with multiprocessing.Pool(
+            # processes=1
         ) as pool:
             
             while families:
@@ -97,7 +105,8 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
                 input_families = families[-split:]
                 input_families_size = sum([family.size for family in input_families])
                 remaining_families = families[:-split]
-
+                input_families = [family_to_hole_options(family) for family in input_families]
+                
                 inputs = zip(input_families, [optimum] * len(input_families))
 
                 results = pool.map(solve_family, inputs)
@@ -110,16 +119,16 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
                     if r is None:
                         logger.error("Worker sub-process encountered an error.")
                         exit()
-                    mdp_states, improving_value, improving_assignment, subfamilies = r
-                        
-                    for entry in mdp_states:
-                        self.stat.iteration_mdp(entry)
+                    mdp_states, improving_value, improving_assignment, subfamilies_hole_options = r
+                    self.stat.iteration_mdp(mdp_states)
 
                     if improving_value is not None:
                         if self.quotient.specification.optimality.improves_optimum(improving_value):
                             self.quotient.specification.optimality.update_optimum(improving_value)
+                            improving_assignment = hole_options_to_family(improving_assignment)
                             satisfying_assignment = improving_assignment
-                    
+
+                    subfamilies = [hole_options_to_family(hole_options) for hole_options in subfamilies_hole_options]
                     new_families += subfamilies
 
                 new_families_size = sum([family.size for family in new_families])
@@ -127,65 +136,9 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
 
                 families = remaining_families + new_families
 
-            # pool.apply(solve_family, ((None,None),))
+            if profiling:
+                pool.apply(solve_family, (None,))
 
-
-        finish_time = time.perf_counter()
-        total_time = round(finish_time-start_time, 3)
-        
-        logger.info("Synthesis finished in {} s (real time).".format(total_time))
-
-        # pstats.Stats(profile).sort_stats('tottime').print_stats(10)
-
+        if profiling:
+            pstats.Stats(profiler).sort_stats('tottime').print_stats(10)
         return satisfying_assignment
-
-
-
-def solve_batch(args):
-    '''
-    When an undecidable family is encountered, the subfamilies are processed
-    up to a limit specified below.
-    '''
-
-    try:
-
-        family, optimum = args
-
-        # synchronize optimum
-        if optimum is not None:
-            quotient.specification.optimality.optimum = optimum
-
-        mdp_states = []
-        improving_value = None
-        improving_assignment = None
-        subfamilies = [family]
-
-        # analyze the batch
-        limit = 1
-        for x in range(limit):
-
-            if not subfamilies:
-                break
-
-            family = subfamilies.pop(-1)
-            quotient.build(family)
-            res = family.mdp.check_specification(quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
-            family.analysis_result = res
-            mdp_states.append(family.mdp.states)
-            
-            if family.analysis_result.can_improve:
-                subfamilies += quotient.split(family, Synthesizer.incomplete_search)
-
-            if family.analysis_result.improving_value is not None:
-                break
-
-        
-        # remove parent info since Property is not pickleable
-        for subfamily in subfamilies:
-            subfamily.parent_info = None
-
-        return (mdp_states, family.analysis_result.improving_value, family.analysis_result.improving_assignment, subfamilies)
-
-    except:
-        print("meaningful error message")
-        return None

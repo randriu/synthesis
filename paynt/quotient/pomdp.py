@@ -373,27 +373,25 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     
 
     
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):
 
         if PomdpQuotient.posterior_aware:
-            return super().estimate_scheduler_difference(mdp,inconsistent_assignments,choice_values,expected_visits)
+            return super().estimate_scheduler_difference(mdp,quotient_choice_map,inconsistent_assignments,choice_values,expected_visits)
 
-        # note: the code below is optimized for a priori unfolding
+        # note: the code below is optimized for posterior-unaware unfolding
 
-        # create inverse map
+        # create inverse quotient-choice-to-mdp-choice map
         # TODO optimize this for multiple properties
-        if mdp.quotient_to_restricted_action_map is None:
-            quotient_to_restricted_action_map = [None] * self.quotient_mdp.nr_choices
-            for action in range(mdp.choices):
-                quotient_to_restricted_action_map[mdp.quotient_choice_map[action]] = action
+        quotient_to_restricted_action_map = [None] * self.quotient_mdp.nr_choices
+        for choice in range(mdp.nr_choices):
+            quotient_to_restricted_action_map[quotient_choice_map[choice]] = choice
 
         # map choices to their origin states
         choice_to_state = []
-        tm = mdp.model.transition_matrix
-        for state in range(mdp.model.nr_states):
+        tm = mdp.transition_matrix
+        for state in range(mdp.nr_states):
             for choice in tm.get_rows_for_group(state):
                 choice_to_state.append(state)
-
 
         # for each hole, compute its difference sum and a number of affected states
         inconsistent_differences = {}

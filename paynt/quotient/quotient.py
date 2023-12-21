@@ -232,34 +232,15 @@ class Quotient:
         return expected_visits
 
 
-    def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):
         if expected_visits is None:
-            expected_visits = [1] * mdp.model.nr_states
+            expected_visits = [1] * mdp.nr_states
         hole_variance = payntbind.synthesis.computeInconsistentHoleVariance(
-            self.design_space.family, mdp.model.nondeterministic_choice_indices, mdp.quotient_choice_map, choice_values,
+            self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
             self.coloring, inconsistent_assignments, expected_visits)
         return hole_variance
 
     
-    def scheduler_selection_quantitative(self, mdp, prop, result):
-        '''
-        Get hole options involved in the scheduler selection.
-        '''
-        # get qualitative scheduler selection, filter inconsistent assignments
-        selection = self.scheduler_selection(mdp, result.scheduler)
-        inconsistent_assignments = {hole_index:options for hole_index,options in enumerate(selection) if len(options) > 1 }
-        if len(inconsistent_assignments) == 0:
-            return selection,None,None,None
-        
-        # extract choice values, compute expected visits and estimate scheduler difference
-        choice_values = self.choice_values(mdp.model, prop, result.get_values())
-        choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-        expected_visits = self.expected_visits(mdp.model, prop, choices)
-        inconsistent_differences = self.estimate_scheduler_difference(mdp, inconsistent_assignments, choice_values, expected_visits)
-
-        return selection,choice_values,expected_visits,inconsistent_differences
-        
-
     def scheduler_consistent(self, mdp, prop, result):
         '''
         Get hole assignment induced by this scheduler and fill undefined
@@ -272,16 +253,26 @@ class Quotient:
             selection = [[mdp.design_space.hole_options(hole)[0]] for hole in range(mdp.design_space.num_holes)]
             return selection, None, None, None, True
 
-        selection,choice_values,expected_visits,scores = self.scheduler_selection_quantitative(mdp, prop, result)
-        consistent = True
-        for hole in range(mdp.design_space.num_holes):
-            options = selection[hole]
-            if len(options) > 1:
-                consistent = False
+        # get qualitative scheduler selection, filter inconsistent assignments
+        selection = self.scheduler_selection(mdp, result.scheduler)
+        inconsistent_assignments = {hole:options for hole,options in enumerate(selection) if len(options) > 1 }
+        scheduler_is_consistent = len(inconsistent_assignments) == 0
+        choice_values = None
+        expected_visits = None
+        inconsistent_differences = None
+        if not scheduler_is_consistent:
+            # extract choice values, compute expected visits and estimate scheduler difference
+            choice_values = self.choice_values(mdp.model, prop, result.get_values())
+            choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+            expected_visits = self.expected_visits(mdp.model, prop, choices)
+            inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+
+        for hole,options in enumerate(selection):
             if len(options) == 0:
+                # TODO why is this necessary?
                 selection[hole] = [mdp.design_space.hole_options(hole)[0]]
 
-        return selection,choice_values,expected_visits,scores,consistent
+        return selection, choice_values, expected_visits, inconsistent_differences, scheduler_is_consistent
 
     
     def suboptions_half(self, mdp, splitter):

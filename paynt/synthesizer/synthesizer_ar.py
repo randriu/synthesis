@@ -31,7 +31,6 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
     def synthesize_one(self, family):
         # return self.synthesize_one_experimental(family)
-        self.quotient.discarded = 0
 
         satisfying_assignment = None
         families = [family]
