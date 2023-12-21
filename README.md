@@ -22,8 +22,7 @@ git clone https://github.com/randriu/synthesis.git synthesis
 cd synthesis
 ```
 
-PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm
-If you have Stormpy installed (e.g. within a Python environment), PAYNT and its dependencies can be installed by
+PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy). If you have Stormpy installed (e.g. within a Python environment), PAYNT and its dependencies can be installed by
 
 ```shell
 sudo apt install -y graphviz
