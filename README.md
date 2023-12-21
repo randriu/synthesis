@@ -22,7 +22,7 @@ git clone https://github.com/randriu/synthesis.git synthesis
 cd synthesis
 ```
 
-PAYNT requires [Storm](https://github.com/moves-rwth/storm) and the [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm
+PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm
 If you have Stormpy installed (e.g. within a Python environment), PAYNT and its dependencies can be installed by
 
 ```shell
@@ -35,7 +35,7 @@ cd ..
 python3 paynt.py --help
 ```
 
-If you do not have Stormpy installed, you can run the installation script `install.sh` to install Storm, Stormpy and other required dependencies. Complete compilation might take up to an hour. The python environment will be available in `prerequisistes/venv`:
+If you do not have Stormpy installed, you can run the installation script `install.sh` to install Storm, Stormpy and other required dependencies. Complete compilation might take up to an hour. The Python environment will be available in `prerequisistes/venv`:
 
 ```shell
 ./install.sh
@@ -106,7 +106,7 @@ python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --fsc-synthesis
 python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
-The python environment can be deactivated by runnning
+The Python environment can be deactivated by runnning
 ```sh
 deactivate
 ```
@@ -127,7 +127,7 @@ Finally, the last argument specifies the selected synthesis method: `hybrid`.
 
 ## Getting started with PAYNT 
 
-Having the tool installed, you can quickly test it by navigating to the tool folder, activating the python environment and asking PAYNT to evaluate a simple synthesis problem:
+Having the tool installed, you can quickly test it by navigating to the tool folder, activating the Python environment and asking PAYNT to evaluate a simple synthesis problem:
 
 ```sh
 cd /home/cav21/synthesis
