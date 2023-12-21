@@ -1,4 +1,5 @@
 import stormpy
+import payntbind
 
 import paynt
 from paynt.utils.profiler import Timer
@@ -422,7 +423,7 @@ class ActionOracleSubpomdp(ActionOracleMcts):
 
         self.last_synthesized = None # FIXME
 
-        self.subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, self.pomcp.reward_name, self.pomcp.target_label)
+        self.subpomdp_builder = payntbind.synthesis.SubPomdpBuilder(self.pomdp, self.pomcp.reward_name, self.pomcp.target_label)
         self.subpomdp_builder.set_discount_factor(self.discount_factor)
         self.fsc = None
 
@@ -864,7 +865,7 @@ class POMCP:
         ))
 
         if only_synthesis:
-            subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(self.pomdp, self.reward_name, self.target_label)
+            subpomdp_builder = payntbind.synthesis.SubPomdpBuilder(self.pomdp, self.reward_name, self.target_label)
             subpomdp_builder.set_discount_factor(discount_factor)
             relevant_observations = stormpy.storage.BitVector(self.pomdp.nr_observations,True)
             initial_distribution = {self.simulated_model.initial_state : 1}

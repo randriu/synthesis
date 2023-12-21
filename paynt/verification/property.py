@@ -1,5 +1,5 @@
 import stormpy
-import stormpy.synthesis
+import payntbind
 
 import math
 import operator
@@ -27,8 +27,8 @@ class Property:
     @classmethod
     def set_model_checking_precision(cls, precision):
         cls.model_checking_precision = precision
-        stormpy.synthesis.set_precision_native(cls.environment.solver_environment.native_solver_environment, precision)
-        stormpy.synthesis.set_precision_minmax(cls.environment.solver_environment.minmax_solver_environment, precision)
+        payntbind.synthesis.set_precision_native(cls.environment.solver_environment.native_solver_environment, precision)
+        payntbind.synthesis.set_precision_minmax(cls.environment.solver_environment.minmax_solver_environment, precision)
 
     @classmethod
     def initialize(cls):
@@ -113,7 +113,7 @@ class Property:
         if not self.is_until:
             return
         logger.info("converting until formula to eventually...")
-        formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
+        formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
         self.__init__(prop, self.discount_factor)
 
@@ -231,7 +231,7 @@ class OptimalityProperty(Property):
         if not self.is_until:
             return
         logger.info("converting until formula to eventually...")
-        formula = stormpy.synthesis.transform_until_to_eventually(self.property.raw_formula)
+        formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
         self.__init__(prop, self.discount_factor, self.epsilon)
 

@@ -1,6 +1,6 @@
 import stormpy
-import stormpy.synthesis
 import stormpy.pomdp
+import payntbind
 
 from ..quotient.models import MarkovChain
 from ..utils.profiler import Timer

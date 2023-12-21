@@ -1,4 +1,5 @@
-import stormpy.synthesis
+import stormpy
+import payntbind
 
 import paynt.family.family
 import paynt.verification.property
@@ -53,11 +54,11 @@ class PrismParser:
             jani_unfolder = paynt.parser.jani.JaniUnfolder(prism, hole_expressions, specification, family)
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
-            coloring = stormpy.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_hole_options)
+            coloring = payntbind.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_hole_options)
             MarkovChain.initialize(specification)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
-                obs_evaluator = stormpy.synthesis.ObservationEvaluator(prism, quotient_mdp)
-            quotient_mdp = stormpy.synthesis.addChoiceLabelsFromJani(quotient_mdp)
+                obs_evaluator = payntbind.synthesis.ObservationEvaluator(prism, quotient_mdp)
+            quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJani(quotient_mdp)
         else:
             MarkovChain.initialize(specification)
             quotient_mdp = MarkovChain.from_prism(prism)

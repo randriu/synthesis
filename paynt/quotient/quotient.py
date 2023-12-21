@@ -1,5 +1,5 @@
 import stormpy
-import stormpy.synthesis
+import payntbind
 
 import paynt.family.family
 import paynt.quotient.models
@@ -41,7 +41,7 @@ class Quotient:
         # for each choice of the quotient, a list of its state-destinations
         self.choice_destinations = None
         if self.quotient_mdp is not None:
-            self.choice_destinations = stormpy.synthesis.computeChoiceDestinations(self.quotient_mdp)
+            self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
         if coloring is not None:
             self.state_to_holes = coloring.getStateToHoles().copy()
@@ -144,7 +144,7 @@ class Quotient:
         return state_to_choice_reachable
 
     def scheduler_to_state_to_choice(self, mdp, scheduler, keep_reachable_choices=True):
-        state_to_quotient_choice = stormpy.synthesis.schedulerToStateToGlobalChoice(scheduler, mdp.model, mdp.quotient_choice_map)
+        state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, mdp.model, mdp.quotient_choice_map)
         state_to_choice = self.empty_scheduler()
         for state in range(mdp.model.nr_states):
             quotient_choice = state_to_quotient_choice[state]
@@ -185,7 +185,7 @@ class Quotient:
         '''
 
         # multiply probability with model checking results
-        choice_values = stormpy.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
+        choice_values = payntbind.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
         choice_values = Quotient.make_vector_defined(choice_values)
 
         # if the associated reward model has state-action rewards, then these must be added to choice values
@@ -235,7 +235,7 @@ class Quotient:
     def estimate_scheduler_difference(self, mdp, inconsistent_assignments, choice_values, expected_visits=None):
         if expected_visits is None:
             expected_visits = [1] * mdp.model.nr_states
-        hole_variance = stormpy.synthesis.computeInconsistentHoleVariance(
+        hole_variance = payntbind.synthesis.computeInconsistentHoleVariance(
             self.design_space.family, mdp.model.nondeterministic_choice_indices, mdp.quotient_choice_map, choice_values,
             self.coloring, inconsistent_assignments, expected_visits)
         return hole_variance

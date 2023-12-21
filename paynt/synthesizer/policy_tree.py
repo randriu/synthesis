@@ -1,4 +1,5 @@
-import stormpy.synthesis
+import stormpy
+import payntbind
 
 import paynt.family.family
 import paynt.quotient.models
@@ -647,7 +648,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 for choice in self.quotient.state_action_choices[state][action]:
                     choice_to_hole_options[choice] = color
 
-        coloring = stormpy.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
+        coloring = payntbind.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
         self.action_coloring_family = family
         self.action_coloring = coloring
         return
@@ -927,7 +928,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     quotient_choice = policy_quotient_mdp.quotient_choice_map[choice]
                     choice_to_hole_options.append(quotient_assignment[quotient_choice])
 
-                coloring = stormpy.synthesis.Coloring(family.family, policy_quotient_mdp.model.nondeterministic_choice_indices, choice_to_hole_options)
+                coloring = payntbind.synthesis.Coloring(family.family, policy_quotient_mdp.model.nondeterministic_choice_indices, choice_to_hole_options)
                 quotient_container = paynt.quotient.quotient.DtmcFamilyQuotient(policy_quotient_mdp.model, family, coloring, self.quotient.specification.negate())
                 conflict_generator = paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc(quotient_container) # DTMC CE
                 # conflict_generator = paynt.synthesizer.conflict_generator.mdp.ConflictGeneratorMdp(quotient_container) # MDP SAT CE

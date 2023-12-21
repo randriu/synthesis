@@ -1,6 +1,5 @@
 import stormpy
-import stormpy.utility
-import stormpy.synthesis
+import payntbind
 
 import paynt.quotient.models
 import paynt.quotient.quotient
@@ -171,11 +170,11 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
     
     def initialize_fsc_unfolder(self, fsc_is_deterministic=False):
-        if fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpFsc):
-            self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpFsc(
+        if fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, payntbind.synthesis.ProductPomdpFsc):
+            self.product_pomdp_fsc = payntbind.synthesis.ProductPomdpFsc(
                 self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
-        if not fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc):
-            self.product_pomdp_fsc = stormpy.synthesis.ProductPomdpRandomizedFsc(
+        if not fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, payntbind.synthesis.ProductPomdpRandomizedFsc):
+            self.product_pomdp_fsc = payntbind.synthesis.ProductPomdpRandomizedFsc(
                 self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
     
     
@@ -215,7 +214,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             else:
                 hole_options = [(hole,option) for hole,option in choice_to_hole_assignment[choice]]
             product_choice_to_hole_options.append(hole_options)
-        product_coloring = stormpy.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, product_choice_to_hole_options)
+        product_coloring = payntbind.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, product_choice_to_hole_options)
         
         # handle specification
         product_specification = self.specification.copy()
@@ -232,7 +231,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             sketch was constructed afterwards
         :return a dictionary mapping (s,n,a) to Q((s,n),a)
         '''
-        assert isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc), \
+        assert isinstance(self.product_pomdp_fsc, payntbind.synthesis.ProductPomdpRandomizedFsc), \
             "to compute Q-values, unfolder for randomized FSC must have been used"
 
         # model check
@@ -289,7 +288,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         :return a list of state-action pairs
         :note the method assumes that the DTMC sketch is the one that was last constructed using build_dtmc_sketch()
         '''
-        fsc_is_randomized = isinstance(self.product_pomdp_fsc, stormpy.synthesis.ProductPomdpRandomizedFsc)
+        fsc_is_randomized = isinstance(self.product_pomdp_fsc, payntbind.synthesis.ProductPomdpRandomizedFsc)
         if fsc_is_randomized:
             # double the trace length to account for intermediate states
             trace_max_length *= 2

@@ -1,4 +1,4 @@
-import stormpy.synthesis
+import payntbind.synthesis
 
 import paynt.family.smt
 
@@ -14,11 +14,11 @@ class Family:
 
     def __init__(self, other=None):
         if other is None:
-            self.family = stormpy.synthesis.Family()
+            self.family = payntbind.synthesis.Family()
             self.hole_to_name = []
             self.hole_to_option_labels = []
         else:
-            self.family = stormpy.synthesis.Family(other.family)
+            self.family = payntbind.synthesis.Family(other.family)
             self.hole_to_name = other.hole_to_name
             self.hole_to_option_labels = other.hole_to_option_labels
 

@@ -1,7 +1,5 @@
-import stormpy.synthesis
-
-import z3
 import sys
+import z3
 
 # import pycvc5 if installed
 import importlib

@@ -1,5 +1,5 @@
 import stormpy
-import stormpy.synthesis
+import payntbind
 
 import paynt.family.family
 import paynt.quotient.quotient
@@ -158,7 +158,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         policy_choices = []
         for state,action in enumerate(policy):
             policy_choices += self.state_action_choices[state][action]
-        choices = stormpy.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
+        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
 
         # build MDP and keep only reachable states in policy
         mdp = self.build_from_choice_mask(choices)
@@ -177,7 +177,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                     policy_choices += choice
             else:
                 policy_choices += self.state_action_choices[state][action]
-        choices = stormpy.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
+        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
 
         mdp = self.build_from_choice_mask(choices)
 
@@ -207,7 +207,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     def build_game_abstraction_solver(self, prop):
         target_label = prop.get_target_label()
         precision = paynt.verification.property.Property.model_checking_precision
-        solver = stormpy.synthesis.GameAbstractionSolver(
+        solver = payntbind.synthesis.GameAbstractionSolver(
             self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label, precision
         )
         return solver

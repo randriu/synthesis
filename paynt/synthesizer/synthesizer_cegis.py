@@ -1,5 +1,3 @@
-import stormpy.synthesis
-
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.conflict_generator.dtmc
 import paynt.synthesizer.conflict_generator.mdp

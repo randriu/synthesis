@@ -1,4 +1,4 @@
-import stormpy.synthesis
+import payntbind
 
 import paynt.synthesizer.conflict_generator.dtmc
 import paynt.verification.property
@@ -16,7 +16,7 @@ class ConflictGeneratorMdp(paynt.synthesizer.conflict_generator.dtmc.ConflictGen
             holes = set([hole for hole in holes_bv])
             state_to_holes.append(holes)
         formulae = self.quotient.specification.stormpy_formulae()
-        self.counterexample_generator = stormpy.synthesis.CounterexampleGeneratorMdp(
+        self.counterexample_generator = payntbind.synthesis.CounterexampleGeneratorMdp(
             self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
             state_to_holes, formulae)
 

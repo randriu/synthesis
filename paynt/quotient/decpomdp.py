@@ -1,6 +1,5 @@
 import stormpy
-import stormpy.synthesis
-import stormpy.pomdp
+import payntbind
 
 import paynt
 import paynt.quotient.quotient

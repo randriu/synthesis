@@ -1,4 +1,5 @@
 import stormpy
+import payntbind
 
 from paynt.parser.prism_parser import PrismParser
 from paynt.parser.pomdp_parser import PomdpParser
@@ -26,9 +27,6 @@ def substitute_suffix(string, delimiter, replacer):
     return output_string
 
 def make_rewards_action_based(model):
-
-    import stormpy
-
     tm = model.transition_matrix
     for name,reward_model in model.reward_models.items():
         assert not reward_model.has_transition_rewards, "Paynt does not support transition rewards"
@@ -94,7 +92,7 @@ class Sketch:
         if filetype is None:
             try:
                 logger.info(f"assuming sketch in Cassandra format...")
-                decpomdp_manager = stormpy.synthesis.parse_decpomdp(sketch_path)
+                decpomdp_manager = payntbind.synthesis.parse_decpomdp(sketch_path)
                 if decpomdp_manager is None:
                     raise SyntaxError
                 logger.info("applying discount factor transformation...")
@@ -123,7 +121,7 @@ class Sketch:
                 prop = specification.all_properties()[0]
                 reward_name = prop.formula.reward_name
                 target_label = str(prop.formula.subformula.subformula)
-                subpomdp_builder = stormpy.synthesis.SubPomdpBuilder(explicit_quotient, reward_name, target_label)
+                subpomdp_builder = payntbind.synthesis.SubPomdpBuilder(explicit_quotient, reward_name, target_label)
                 subpomdp_builder.set_discount_factor(discount_factor)
                 initial_distribution = {explicit_quotient.initial_states[0] : 1}
                 relevant_observations = stormpy.storage.BitVector(explicit_quotient.nr_observations,True)

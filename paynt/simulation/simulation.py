@@ -1,5 +1,3 @@
-import stormpy.synthesis
-
 import random
 import numpy
 import json

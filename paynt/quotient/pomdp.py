@@ -1,6 +1,6 @@
 import stormpy
-import stormpy.synthesis
 import stormpy.pomdp
+import payntbind
 
 import paynt.family.family
 import paynt.quotient.quotient
@@ -112,9 +112,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # initialize POMDP manager
         if not self.posterior_aware:
-            self.pomdp_manager = stormpy.synthesis.PomdpManager(self.pomdp)
+            self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp)
         else:
-            self.pomdp_manager = stormpy.synthesis.PomdpManagerAposteriori(self.pomdp)
+            self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
 
         # do initial unfolding
         self.set_imperfect_memory_size(PomdpQuotient.initial_memory_size)
@@ -349,7 +349,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             "unfolding POMDP using the following memory allocation vector: {} ..."
             .format(self.observation_memory_size))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        self.choice_destinations = stormpy.synthesis.computeChoiceDestinations(self.quotient_mdp)
+        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         if not PomdpQuotient.posterior_aware:
@@ -357,7 +357,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         else:
             family, choice_to_hole_options = self.create_coloring_aposteriori()
 
-        self.coloring = stormpy.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
+        self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
         self.state_to_holes = self.coloring.getStateToHoles().copy()
 
         # to each hole-option pair a list of actions colored by this combination
