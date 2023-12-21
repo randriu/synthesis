@@ -7,21 +7,20 @@ COMPILE_JOBS=$(nproc)
 
 # environment variables
 PAYNT_ROOT=`pwd`
+PREREQUISITES=${PAYNT_ROOT}/prerequisites # modify this to install prerequisites outside of Paynt
 
-# storm-dependencies
-sudo apt update
-sudo apt -y install build-essential git automake cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev graphviz
-sudo apt -y install maven uuid-dev python3-dev libffi-dev libssl-dev python3-pip python3-venv
-# apt -y install texlive-latex-extra
-# update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+# storm and stormpy dependencies
+sudo apt update -qq
+sudo apt install -y build-essential git cmake libboost-all-dev libcln-dev libgmp-dev libginac-dev automake libglpk-dev libhwloc-dev libz3-dev libxerces-c-dev libeigen3-dev
+sudo apt install -y maven uuid-dev python3-dev python3-venv python3-pip
 
 # prerequisites
-mkdir -p ${PAYNT_ROOT}/prerequisites
+mkdir -p ${PREREQUISITES}
 
 # build cvc5 (optional)
-# cd ${PAYNT_ROOT}/prerequisites
+# cd ${PREREQUISITES}
 # git clone --depth 1 --branch cvc5-1.0.0 https://github.com/cvc5/cvc5.git cvc5
-# cd ${PAYNT_ROOT}/prerequisites/cvc5
+# cd ${PREREQUISITES}/cvc5
 # source ${PAYNT_ROOT}/env/bin/activate
 # ./configure.sh --prefix="." --auto-download --python-bindings
 # cd build
@@ -30,42 +29,43 @@ mkdir -p ${PAYNT_ROOT}/prerequisites
 # deactivate
 
 # build storm
-cd ${PAYNT_ROOT}/prerequisites
+cd ${PREREQUISITES}
 git clone https://github.com/moves-rwth/storm.git storm
 # git clone --branch stable https://github.com/moves-rwth/storm.git storm
-mkdir -p ${PAYNT_ROOT}/storm/build
-cd ${PAYNT_ROOT}/storm/build
+mkdir -p ${PREREQUISITES}/storm/build
+cd ${PREREQUISITES}/storm/build
 cmake ..
 make storm-main storm-pomdp --jobs ${COMPILE_JOBS}
 # make check --jobs ${COMPILE_JOBS}
 
-# setup python environment
-python3 -m venv ${PAYNT_ROOT}/env
-source ${PAYNT_ROOT}/env/bin/activate
-pip3 install pytest pytest-runner pytest-cov numpy scipy toml Cython scikit-build
+# setup and activate python environment
+python3 -m venv ${PREREQUISITES}/venv
+source ${PREREQUISITES}/venv/bin/activate
+pip3 install wheel
 
 # build pycarl
-cd ${PAYNT_ROOT}/prerequisites
+cd ${PREREQUISITES}
 git clone https://github.com/moves-rwth/pycarl.git pycarl
-cd ${PAYNT_ROOT}/prerequisites/pycarl
-python3 setup.py build_ext --jobs ${COMPILE_JOBS} develop
+cd ${PREREQUISITES}/pycarl
+python3 setup.py develop
 #[TEST] python3 setup.py test
 
 # build stormpy
-cd ${PAYNT_ROOT}/prerequisites
+cd ${PREREQUISITES}
 git clone https://github.com/moves-rwth/stormpy.git stormpy
 # git clone --branch stable https://github.com/moves-rwth/stormpy.git stormpy
-cd ${PAYNT_ROOT}/prerequisites/stormpy
-python3 setup.py build_ext --jobs ${COMPILE_JOBS} develop
-# python3 setup.py build_ext --storm-dir ${PAYNT_ROOT}/prerequisites/storm/build --jobs ${COMPILE_JOBS} develop
+cd ${PREREQUISITES}/stormpy
+python3 setup.py develop
 # python3 setup.py test
 
-# build paynt
-pip3 install click z3-solver graphviz
+# paynt dependencies
 sudo apt -y install graphviz
+pip3 install click z3-solver graphviz
+
+# build payntbind
 cd ${PAYNT_ROOT}/payntbind
-python3 setup.py build_ext --jobs ${COMPILE_JOBS} develop
+python3 setup.py develop
+cd ${PAYNT_ROOT}
 
 # done
-cd ${PAYNT_ROOT}
 deactivate

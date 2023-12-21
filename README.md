@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/randriu/stormpy/tree/synthesis), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -15,24 +15,41 @@ Most of the algorithms are described in
 
 ## Installation
 
-PAYNT requires [Storm](https://github.com/moves-rwth/storm) and the [synthesis fork of Stormpy](https://github.com/randriu/stormpy/tree/synthesis).
-Upon installing Stormpy within a Python environment, you can activate this environment and call PAYNT, e.g.
-
-```shell
-source env/bin/activate
-python3 paynt.py --help
-```
-
-If you do not have Stormpy installed, you can download this repository, navigate to the root folder and run the installation script described in `alias-paynt.sh`:
+To download PAYNT, use
 
 ```shell
 git clone https://github.com/randriu/synthesis.git synthesis
 cd synthesis
-source alias-paynt.sh
-synthesis-install
 ```
 
-The script will automatically install dependencies and compile all the prerequisites necessary to run PAYNT. Complete compilation might take a couple of hours. To accelerate compilation, the install script makes use of multiple cores. Such multi-core compilation is quite memory-intensive: as a rule of thumb, we recommend allocating at least 2 GB RAM per core. For instance, for a machine with 4 CPU cores and at least 8 GB of RAM, the compilation should take around 30 minutes. Any errors you encounter during the compilation are most likely caused by the lack of memory. In such a case, you can modify variable `COMPILE_JOBS` in `alias-paynt.sh` to match your preferences; setting the variable to 1 corresponds to the single-core compilation.
+PAYNT requires [Storm](https://github.com/moves-rwth/storm) and the [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm
+If you have Stormpy installed (e.g. within a Python environment), PAYNT and its dependencies can be installed by
+
+```shell
+sudo apt install -y graphviz
+source ${VIRTUAL_ENV}/bin/activate
+pip3 install click z3-solver graphviz
+cd payntbind
+python3 setup.py develop
+cd ..
+python3 paynt.py --help
+```
+
+If you do not have Stormpy installed, you can run the installation script `install.sh` to install Storm, Stormpy and other required dependencies. Complete compilation might take up to an hour. The python environment will be available in `prerequisistes/venv`:
+
+```shell
+./install.sh
+source prerequisistes/venv/bin/activate
+python3 paynt.py --help
+```
+
+PAYNT is also available as a docker image:
+
+```shell
+docker pull randriu/paynt
+docker run --rm -it randriu/paynt
+python3 paynt.py --help
+```
 
 
 ## Running PAYNT
@@ -40,7 +57,7 @@ The script will automatically install dependencies and compile all the prerequis
 Upon enabling the Python environment, e.g.
 
 ```shell
-source env/bin/activate
+source ${VIRTUAL_ENV}/bin/activate
 ```
 
 PAYNT can be executed using the command in the following form:
@@ -93,30 +110,6 @@ The python environment can be deactivated by runnning
 ```sh
 deactivate
 ```
-
-
-### Developer notes
-
-The script `alias-paynt.sh` contains useful macros for (re-)compiling Storm/Stormpy. Once loaded from the root folder:
-```shell
-source alias-paynt.sh
-```
-a number of command-line macros become available. Command `synthesis-install` showcases the basic commands in the step-by-step installation of PAYNT.
-
-In the development process, if the source code of Storm has been modified, but not its header files, it needs to be re-built (`storm-build`). If the header files were also modified, the re-configuration as well as Stormpy recompilation are necessary:
-```shell
-storm-config
-storm-build
-stormpy-build
-```
-
-If you need to frequently modify the Storm source code, it might be a good idea to develop it in the debug mode:
-```shell
-storm-config-debug
-storm-build-debug
-```
-Building in the debug mode using the commands above also disables link-time optimizations, accelerating compilation. The script uses different folders for the release (`storm/build`) and the debug (`storm/build_debug`) versions of Storm.
-
 
 
 # PAYNT tutorial
