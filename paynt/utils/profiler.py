@@ -9,7 +9,6 @@ class Timer:
 
     @staticmethod
     def timestamp():
-        #return time.process_time()  # cpu time
         return time.perf_counter()
 
     def reset(self):

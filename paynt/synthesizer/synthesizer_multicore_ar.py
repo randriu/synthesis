@@ -35,6 +35,7 @@ def solve_family(args):
 
         if args is None:
             pstats.Stats(profiler).sort_stats('tottime').print_stats(10)
+            return
 
         hole_options, optimum = args
         # re-construct the family
@@ -70,7 +71,7 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
 
     @property
     def method_name(self):
-        return "AR (concurrent)"
+        return "AR (multicore)"
 
     def synthesize_one(self, family):
 

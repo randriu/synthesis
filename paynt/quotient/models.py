@@ -47,10 +47,9 @@ class MarkovChain:
         self.quotient_container = quotient_container
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
-
         self.hole_is_simple = None
-        self.analysis_hints = None
-    
+
+
     @property
     def hole_simple(self):
         if self.hole_is_simple is not None:
@@ -86,8 +85,7 @@ class MarkovChain:
             self.model, formula, extract_scheduler=True, environment=Property.environment
         )
 
-    def model_check_property(self, prop, alt = False):
-        direction = "prim" if not alt else "seco"
+    def model_check_property(self, prop, alt=False):
         formula = prop.formula if not alt else prop.formula_alt
         result = self.model_check_formula(formula)
         value = result.at(self.initial_state)
@@ -108,6 +106,8 @@ class MarkovChain:
 
     def check_constraints(self, constraints, constraint_indices, short_evaluation):
         results = [None for constraint in constraints]
+        if constraint_indices is None:
+            constraint_indices = range(len(constraints))
         for index in constraint_indices:
             constraint = constraints[index]
             result = self.check_constraint(constraint)
@@ -116,15 +116,13 @@ class MarkovChain:
                 break
         return ConstraintsResult(results)
 
-    def check_specification(self, specification, constraint_indices = None, short_evaluation = False):
+    def check_specification(self, specification, constraint_indices=None, short_evaluation=False):
         '''
         Check specification.
         :param specification containing constraints and optimality
         :param constraint_indices a selection of property indices to investigate (default: all)
         :param short_evaluation if set to True, then evaluation terminates as soon as one constraint violated
         '''
-        if constraint_indices is None:
-            constraint_indices = specification.all_constraint_indices()
         constraints_result = self.check_constraints(specification.constraints, constraint_indices, short_evaluation)
         optimality_result = None
         if specification.has_optimality and not (short_evaluation and constraints_result.sat == False):
@@ -143,7 +141,7 @@ class DTMC(MarkovChain):
     def check_optimality(self, optimality):
         return self.model_check_property(optimality)
 
-    def check_specification(self, specification, constraint_indices = None, short_evaluation = False):
+    def check_specification(self, specification, constraint_indices=None, short_evaluation=False):
         constraints_result, optimality_result = super().check_specification(specification,constraint_indices,short_evaluation)
         return SpecificationResult(constraints_result, optimality_result)
 

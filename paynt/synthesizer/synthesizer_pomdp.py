@@ -91,17 +91,10 @@ class SynthesizerPOMDP:
                 self.storm_control.saynt_timer = self.saynt_timer
 
     def synthesize(self, family, print_stats=True):
-        self.quotient.discarded = 0
         synthesizer = self.synthesizer(self.quotient)
         family.constraint_indices = self.quotient.design_space.constraint_indices
         assignment = synthesizer.synthesize(family, print_stats=print_stats)
         self.total_iters += synthesizer.stat.iterations_mdp
-
-        # Print extract list for every iteration optimum
-        # if assignment:
-        #     extracted_result = self.quotient.extract_policy(assignment)
-        #     print(extracted_result)
-
         return assignment
 
     # iterative strategy using Storm analysis to enhance the synthesis

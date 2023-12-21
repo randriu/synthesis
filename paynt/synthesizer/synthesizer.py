@@ -122,7 +122,8 @@ class Synthesizer:
         '''
         if family is None:
             family = self.quotient.design_space
-        family.constraint_indices = self.quotient.specification.all_constraint_indices()
+        if family.constraint_indices is None:
+            family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
         
         if optimum_threshold is not None:
             self.quotient.specification.optimality.update_optimum(optimum_threshold)

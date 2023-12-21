@@ -327,9 +327,6 @@ class Specification:
     def is_single_property(self):
         return self.num_properties == 1
 
-    def all_constraint_indices(self):
-        return [i for i,_ in enumerate(self.constraints)]
-
     def all_properties(self):
         properties = [c for c in self.constraints]
         if self.has_optimality:

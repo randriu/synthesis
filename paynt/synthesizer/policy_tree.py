@@ -590,8 +590,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         expected_visits = None
         if self.quotient.compute_expected_visits:
             expected_visits = self.quotient.expected_visits(mdp, prop, scheduler_choices)
-        quotient_choice_map = [choice for choice in self.quotient.quotient_mdp.nr_choices]
-        scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, choice_values, expected_visits)
+        quotient_choice_map = [choice for choice in range(self.quotient.quotient_mdp.nr_choices)]
+        scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
         return scores
 
     def split(self, family, prop, hole_selection, splitter):

@@ -91,12 +91,6 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
 
         # build the quotient, map mdp states to hole indices
         self.quotient.build(family)
-        if family.constraint_indices is None:
-            family.constraint_indices = self.quotient.specification.all_constraint_indices()
-
-        simple_holes = [hole for hole in range(family.num_holes) if family.mdp.hole_simple[hole]]
-        # logger.info("{}/{} holes are trivial".format(len(simple_holes), family.num_holes))
-        
         self.conflict_generator.initialize()
 
         # use sketch design space as a SAT baseline (TODO why?)
