@@ -19,4 +19,7 @@ WORKDIR /opt/paynt/payntbind
 RUN python setup.py build_ext $setup_args -j $no_threads develop
 
 # install paynt
+WORKDIR /opt/paynt
 RUN pip install -e .
+
+# TODO tests
