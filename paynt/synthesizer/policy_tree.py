@@ -960,6 +960,40 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         return unsat_mdp_families, sat_mdp_families, sat_mdp_policies, sat_mdp_to_policy_map
     
+
+    def policy_search_ceg(self, family, prop):
+
+        action_family = paynt.family.family.DesignSpace(self.action_coloring_family)
+        smt_solver = paynt.family.smt.SmtSolver(action_family)
+
+        mdp_subfamilies = []
+
+        # create MDP subfamilies
+        for hole_assignment in family.all_combinations():
+            subfamily = family.copy()
+            for hole_index, hole_option in enumerate(hole_assignment):
+                subfamily.hole_set_options(hole_index, [hole_option])
+            mdp_subfamilies.append(subfamily)
+
+        policy_family = smt_solver.pick_assignment(action_family)
+
+        while policy_family is not None:
+
+            self.quotient.build_with_second_coloring(family, self.action_coloring, policy_family) # maybe copy to new family?
+
+            primary_result = policy_family.mdp.model_check_property(prop)
+            self.stat.iteration(policy_family.mdp)
+
+            print(primary_result)
+
+            exit()
+            
+
+
+            policy_family = smt_solver.pick_assignment(family)
+        
+
+    
     #### POLICY SEARCH SECTION END ####
     ###################################
         
@@ -971,7 +1005,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree = PolicyTree(family)
 
         ### POLICY SEARCH TESTING
-        #self.create_action_coloring()
+        self.create_action_coloring()
+
+        self.policy_search_ceg(policy_tree.root.family, prop)
 
         # choose policy search method
         # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
