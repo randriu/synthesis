@@ -224,12 +224,11 @@ namespace storm {
                 components.transitionMatrix = this->constructTransitionMatrix();
                 // TODO remove unreachable states
                 components.stateLabeling = this->constructStateLabeling();
-                for (auto const& reward_model : pomdp.getRewardModels()) {
+                for (auto const& reward_model : this->pomdp.getRewardModels()) {
                     auto constructed = this->constructRewardModel(reward_model.second);
                     components.rewardModels.emplace(reward_model.first, constructed);
                 }
                 this->mdp = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
-
                 this->buildDesignSpaceSpurious();
 
                 return this->mdp;
@@ -287,7 +286,11 @@ namespace storm {
                 std::optional<std::vector<ValueType>> state_rewards, action_rewards;
                 STORM_LOG_THROW(!reward_model.hasStateRewards(), storm::exceptions::NotSupportedException, "state rewards are currently not supported.");
                 STORM_LOG_THROW(!reward_model.hasTransitionRewards(), storm::exceptions::NotSupportedException, "transition rewards are currently not supported.");
-                
+                if(not reward_model.hasStateActionRewards()) {
+                    STORM_LOG_WARN("Reward model exists but has no state-action value vector associated with it.");
+                    return storm::models::sparse::StandardRewardModel<ValueType>(std::move(state_rewards), std::move(action_rewards));
+                }
+
                 action_rewards = std::vector<ValueType>();
                 for(uint64_t row = 0; row < this->num_rows; row++) {
                     auto prototype = this->row_prototype[row];
