@@ -976,21 +976,69 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             mdp_subfamilies.append(subfamily)
 
         policy_family = smt_solver.pick_assignment(action_family)
+        pruned_overall = 0
+        counter = 0
 
         while policy_family is not None:
+            counter += 1
 
             self.quotient.build_with_second_coloring(family, self.action_coloring, policy_family) # maybe copy to new family?
 
-            primary_result = policy_family.mdp.model_check_property(prop)
-            self.stat.iteration(policy_family.mdp)
+            # primary_result = policy_family.mdp.model_check_property(prop)
+            # self.stat.iteration(policy_family.mdp)
 
-            print(primary_result)
+            # if not primary_result.sat:
+            #     print("unsat")
 
-            exit()
+            for mdp_subfamily in mdp_subfamilies:
+
+                self.quotient.build_with_second_coloring(mdp_subfamily, self.action_coloring, policy_family)
+                self.quotient.build_with_second_coloring(mdp_subfamily, self.action_coloring, action_family)
+
+                dtmc = self.quotient.mdp_to_dtmc(policy_family.mdp.model)
+                policy_dtmc = paynt.quotient.models.DTMC(dtmc,self.quotient,policy_family.mdp.quotient_state_map,policy_family.mdp.quotient_choice_map)
+
+                dtmc_result = policy_dtmc.model_check_property(prop)
+                self.stat.iteration(policy_dtmc)
+
+                if not dtmc_result.sat:
+                    self.quotient.build(mdp_subfamily)
+                    action_quotient_assignment = self.action_coloring.getChoiceToAssignment()
+                    choice_to_hole_options = []
+                    for choice in range(mdp_subfamily.mdp.choices):
+                        quotient_choice = mdp_subfamily.mdp.quotient_choice_map[choice]
+                        choice_to_hole_options.append(action_quotient_assignment[quotient_choice])
+
+                    coloring = payntbind.synthesis.Coloring(action_family.family, mdp_subfamily.mdp.model.nondeterministic_choice_indices, choice_to_hole_options)
+                    quotient_container = paynt.quotient.quotient.DtmcFamilyQuotient(mdp_subfamily.mdp.model, action_family, coloring, self.quotient.specification)
+
+                    conflict_generator = paynt.synthesizer.conflict_generator.dtmc.ConflictGeneratorDtmc(quotient_container)
+                    conflict_generator.initialize()
+                    requests = [(0, quotient_container.specification.all_properties()[0], None)]
+
+                    # dtmc = self.quotient.mdp_to_dtmc(policy_family.mdp)
+                    # policy_dtmc = paynt.quotient.models.DTMC(dtmc,self.quotient,policy_family.mdp.state_map,policy_family.mdp.choice_map)
+
+                    model = quotient_container.build_assignment(policy_family)
+
+                    conflicts = conflict_generator.construct_conflicts(action_family, policy_family, model, requests)
+                    pruned = smt_solver.exclude_conflicts(action_family, policy_family, conflicts)
+                    pruned_overall += pruned
+                    # print(conflicts)
+                    # print(pruned)
+
+                    break
+            else:
+                policy = self.quotient.scheduler_to_policy(dtmc_result.result.scheduler, mdp_subfamily.mdp)
+                return policy
             
+            if counter % 100 == 0:
+                print(f'{round(pruned_overall/action_family.size*100,2)}%')
+
+            policy_family = smt_solver.pick_assignment(action_family)
 
 
-            policy_family = smt_solver.pick_assignment(family)
+        return False
         
 
     
@@ -1005,9 +1053,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_tree = PolicyTree(family)
 
         ### POLICY SEARCH TESTING
-        self.create_action_coloring()
-
-        self.policy_search_ceg(policy_tree.root.family, prop)
+        # self.create_action_coloring()
+        # policy = self.policy_search_ceg(policy_tree.root.family, prop)
+        # print(policy)
 
         # choose policy search method
         # unsat, sat, policies, policy_map = self.synthesize_policy_for_family_linear(policy_tree.root.family, prop)
