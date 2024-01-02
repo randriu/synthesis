@@ -22,7 +22,7 @@ hole int P3 in {0,1,2};
 hole int P4 in {0,1,2};
 
 // queue size
-hole int QMAX in {1..10};
+hole int QMAX in {10};
 
 // observation level thresholds
 hole double T1 in {0.0,0.1,0.2,0.3,0.4};
@@ -30,8 +30,8 @@ hole double T2 in {0.5};
 hole double T3 in {0.6,0.7,0.8,0.9};
 
 // switching probabilities
-hole double WP1 in {0.5..0.9:0.1};
-hole double WP2 in {0.5..0.9:0.1};
+hole double WP1 in {0.9,0.8,0.7};
+hole double WP2 in {0.7,0.6,0.5};
 
 // ----- modules ---------------------------------------------------------------
 

@@ -22,7 +22,7 @@ hole int P3 in {0,1,2};
 hole int P4 in {0,1,2};
 
 // queue size
-hole int QMAX in {1..10};
+hole int QMAX in {10};
 
 // observation level thresholds
 hole double T1 in {0.0,0.1,0.2,0.3,0.4};
@@ -30,8 +30,8 @@ hole double T2 in {0.5};
 hole double T3 in {0.6,0.7,0.8,0.9};
 
 // switching probabilities
-hole double WP1 in {0.5..0.9:0.1};
-hole double WP2 in {0.5..0.9:0.1};
+hole double WP1 in {0.5..0.9:0.05};
+hole double WP2 in {0.5..0.9:0.05};
 
 // ----- modules ---------------------------------------------------------------
 
@@ -106,18 +106,19 @@ endmodule
 
 
 // service request queue
+const int MAX_LOST = 10;
 
 module SRQ
     q : [0..10000] init q_init;
-    lost : [0..1] init 0;
+    lost : [0..MAX_LOST] init 0;
 
     [tick00] sr=1 & q < QMAX -> (q'=q+1); // request
     [tick01] sr=1 & q < QMAX -> (q'=q+1); // request
     [tick02] sr=1 & q < QMAX -> (q'=q+1); // request
 
-    [tick00] sr=1 & q = QMAX -> (lost'=1); // request lost
-    [tick01] sr=1 & q = QMAX -> (lost'=1); // request lost
-    [tick02] sr=1 & q = QMAX -> (lost'=1); // request lost
+    [tick00] sr=1 & q = QMAX -> (lost'=min(lost+1,MAX_LOST)); // request lost
+    [tick01] sr=1 & q = QMAX -> (lost'=min(lost+1,MAX_LOST)); // request lost
+    [tick02] sr=1 & q = QMAX -> (lost'=min(lost+1,MAX_LOST)); // request lost
 
     [tick00] sr!=1 -> true;
     [tick01] sr!=1 -> true;
@@ -134,9 +135,9 @@ endmodule
 module BAT
     bat : [0..2] init 1; // 0 empty, 1 - operational, 2 - failed
     [tick1] bat=0 -> true;
-    [tick1] bat=1 & sp!=2 -> 0.05 : (bat'=0) + 0.95 : true;
-    [tick1] bat=1 & sp=2 -> 0.05 : (bat'=0) + 0.05 : (bat'=2) + 0.9 : true;
+    [tick1] bat=1 & sp!=2 -> 0.01 : (bat'=0) + 0.99 : true;
+    [tick1] bat=1 & sp=2 -> 0.01 : (bat'=0) + 0.01 : (bat'=2) + 0.98 : true;
     [tick1] bat=2 -> true;
 endmodule
 
-label "goal" = (bat = 0 & lost = 0);
+label "goal" = (bat = 0 & lost < MAX_LOST);
