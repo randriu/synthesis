@@ -1,22 +1,25 @@
 mdp
 
 // operator parameters
-const double p=0.5; // probability of increasing workload due to other uncertain tasks
+//const double p=0.5; // probability of increasing workload due to other uncertain tasks
 //const double accu_load1=0.5; // accuracy at the low workload level (real numbers between 0 and 1)
 //const double accu_load2=0.9; // accuracy at the high workload level (real numbers between 0 and 1)
 //const double fd=0.5; // accuracy discount due to fatigue (real numbers between 0 and 1)
 //const int COUNTER; // fatigue threshold (integers, e.g, 10)
-const double risky2=0.5; // at w2: probability of choosing a risky route
-const double risky6=0.5; // at w6: probability of choosing a risky route
+//const double risky2=0.5; // at w2: probability of choosing a risky route
+//const double risky6=0.5; // at w6: probability of choosing a risky route
 
 global stop : bool init false; // done visiting all waypoints
 formula roz = (r=roz_r_1) | (w=3&a=1) | (w=3&a=2) | (w=5&a=2); // restricted operating zones
 
-hole int COUNTER in {1..20};
-hole double fd in {0.1..0.9:0.2};
+hole int COUNTER in {1..10};
+hole double fd in {0.1..0.9:0.1};
 hole double accu_load1 in {0.7..1.0:0.1};
 hole double accu_load2 in {0.1..0.4:0.1};
-//hole double p in {0.1..0.5:0.1};
+hole double p in {0.1..0.5:0.1};
+
+hole double risky2 in {0.4..0.6:0.05};
+hole double risky6 in {0.4..0.6:0.05};
 
 hole int roz_r_1 in {1..9};
 
