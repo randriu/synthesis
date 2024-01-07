@@ -172,9 +172,8 @@ class Sketch:
             hole_expressions = None
             family = None
             if len(hole_definitions) > 0:
-                print(prism)
                 logger.info("processing hole definitions...")
-                prism, hole_expressions, _ = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
+                prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
 
             specification = PrismParser.parse_specification(properties_path, 0, 1, prism)
 
@@ -188,7 +187,7 @@ class Sketch:
                 var_options = [stormpy.Expression.Eq(var.expression_variable.get_expression(), expression_manager.create_integer(val)) for val in var_values]
                 prism.update_initial_states_expression(stormpy.Expression.And(prism.initial_states_expression, stormpy.Expression.Disjunction(var_options)))
 
-            # TODO this is not a nice solution
+            # TODO investigate why we have to print and load the prism program again for all in one construction to work
             tmp_path = sketch_path + str(uuid.uuid4())
             with open(tmp_path, 'w') as f:
                 print(prism, end="", file=f)
@@ -203,7 +202,7 @@ class Sketch:
             logger.error(f"all in one approach supports only input in PRISM format!")
             raise e
         
-        return prism, specification
+        return prism, specification, family
     
     @classmethod
     def export(cls, export, sketch_path, jani_unfolder, explicit_quotient):

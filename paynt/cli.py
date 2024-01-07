@@ -165,8 +165,9 @@ def paynt_run(
         synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer  (quotient, method, fsc_synthesis, storm_control)
         synthesizer.run(optimum_threshold, export_evaluation)
     else:
-        all_in_one_program, specification = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
-        all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one)
+        all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
+        all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, family)
+        all_in_one_analysis.run()
     if profiling:
         profiler.disable()
         stats = profiler.create_stats()
