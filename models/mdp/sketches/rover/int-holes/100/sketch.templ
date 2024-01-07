@@ -85,12 +85,11 @@ module battery
 endmodule
  
 
-const int V = 100;
 module value_counting_module
-	val : [0..V] init 0;
-	[task_done] low_value_task -> (val'=min(V,val + (success ? value_low : 0)));
-	[task_done] medium_value_task -> (val'=min(V,val + (success ? value_medium : 0)));
-	[task_done] high_value_task -> (val'=min(V,val + (success ? value_high : 0)));
+	val : [0..100] init 0;
+	[task_done] low_value_task -> (val'=min(100,val + (success ? value_low : 0)));
+	[task_done] medium_value_task -> (val'=min(100,val + (success ? value_medium : 0)));
+	[task_done] high_value_task -> (val'=min(100,val + (success ? value_high : 0)));
 endmodule
 
 //rewards "time"
@@ -109,5 +108,5 @@ endmodule
 //endrewards
 
 
-label "goal" = val = V;
+label "goal" = val = 100;
 

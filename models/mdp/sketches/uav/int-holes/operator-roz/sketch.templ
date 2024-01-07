@@ -2,9 +2,9 @@ mdp
 
 // operator parameters
 const double p=0.5; // probability of increasing workload due to other uncertain tasks
-//const double accu_load1=0.5; // accuracy at the low workload level (real numbers between 0 and 1)
-//const double accu_load2=0.9; // accuracy at the high workload level (real numbers between 0 and 1)
-//const double fd=0.5; // accuracy discount due to fatigue (real numbers between 0 and 1)
+//const double accu_load1_hole*0.1=0.5; // accuracy at the low workload level (real numbers between 0 and 1)
+//const double accu_load2_hole*0.1=0.9; // accuracy at the high workload level (real numbers between 0 and 1)
+//const double fd_hole*0.1=0.5; // accuracy discount due to fatigue (real numbers between 0 and 1)
 //const int COUNTER; // fatigue threshold (integers, e.g, 10)
 const double risky2=0.5; // at w2: probability of choosing a risky route
 const double risky6=0.5; // at w6: probability of choosing a risky route
@@ -17,9 +17,6 @@ hole int fd_hole in {1..9 : 2};
 hole int accu_load1_hole in {7..10};
 hole int accu_load2_hole in {1..4};
 
-const double fd = fd_hole*0.1;
-const double accu_load1 = accu_load1_hole*0.1;
-const double accu_load2 = accu_load2_hole*0.1;
 //hole double p in {0.1..0.5:0.1};
 
 hole int roz_r_1 in {1..9};
@@ -35,13 +32,13 @@ module operator
 	// image processing, the workload may increase due to other unknown tasks
 	[image] !stop & t=0 & s=0 -> (1-p):(t'=1) & (s'=0) + p:(t'=2) & (s'=0);
 	// not fatigue, workload level 1
-	[process] !stop & t=1 & s=0 & k<=COUNTER -> accu_load1:(s'=1)&(k'=k+1) + (1-accu_load1):(s'=2)&(k'=k+1);
+	[process] !stop & t=1 & s=0 & k<=COUNTER -> accu_load1_hole*0.1:(s'=1)&(k'=k+1) + (1-accu_load1_hole*0.1):(s'=2)&(k'=k+1);
 	// fatigue, workload level 1
-	[process] !stop & t=1 & s=0 & k>COUNTER -> accu_load1*fd:(s'=1) + (1-accu_load1*fd):(s'=2);
+	[process] !stop & t=1 & s=0 & k>COUNTER -> accu_load1_hole*0.1*fd_hole*0.1:(s'=1) + (1-accu_load1_hole*0.1*fd_hole*0.1):(s'=2);
 	// not fatigue, workload level 2
-	[process] !stop & t=2 & s=0 & k<=COUNTER -> accu_load2:(s'=1)&(k'=k+1) + (1-accu_load2):(s'=2)&(k'=k+1);
+	[process] !stop & t=2 & s=0 & k<=COUNTER -> accu_load2_hole*0.1:(s'=1)&(k'=k+1) + (1-accu_load2_hole*0.1):(s'=2)&(k'=k+1);
 	// fatigue, workload level 2
-	[process] !stop & t=2 & s=0 & k>COUNTER -> accu_load2*fd:(s'=1) + (1-accu_load2*fd):(s'=2);
+	[process] !stop & t=2 & s=0 & k>COUNTER -> accu_load2_hole*0.1*fd_hole*0.1:(s'=1) + (1-accu_load2_hole*0.1*fd_hole*0.1):(s'=2);
 
 	// image analysis is bad, UAV need to wait at the waypoint and take another image
 	[wait] !stop & s=2 -> (t'=0) & (s'=0); 

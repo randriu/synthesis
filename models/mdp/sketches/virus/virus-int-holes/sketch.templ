@@ -9,23 +9,6 @@ hole int infect in {5..10};
 hole int detect1 in {0..5};
 hole int detect2 in {5..10};
 
-// low nodes (those above the ceil(N/2) row)
-
-const double detect11=detect1*0.1;
-const double detect12=detect1*0.1;
-const double detect13=detect1*0.1;
-
-// barrier nodes (those in the ceil(N/2) row)
-
-const double detect21=detect2*0.1;
-const double detect22=detect2*0.1;
-const double detect23=detect2*0.1;
-
-// high nodes (those below the ceil(N/2) row)
-
-const double detect31=detect1*0.1;
-const double detect32=detect1*0.1;
-const double detect33=detect1*0.1;
 
 hole int fail_rate in {0..100:5};
 
@@ -123,8 +106,8 @@ module n11
     // 4 - infection taking place right now.
 
 	// firewall attacked (from an infected neighbour)
-	[attack11_21] (s11=0) ->  detect11 : true + (1-detect11) : (s11'=1);
-	[attack11_12] (s11=0) ->  detect11 : true + (1-detect11) : (s11'=1);
+	[attack11_21] (s11=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s11'=1);
+	[attack11_12] (s11=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s11'=1);
 	// if the firewall has been breached tries to infect the node
 	[eval] (s11=1) -> infect*0.1 : (s11'=4) + (1-infect*0.1) : (s11'=3);
 	// restore save mode
@@ -148,9 +131,9 @@ module n21
 	// 2 - node infected
 
 	// firewall attacked (from an infected neighbour)
-	[attack21_31] (s21=0) -> detect21 : true + (1-detect21) : (s21'=1);
-	[attack21_22] (s21=0) -> detect21 : true + (1-detect21) : (s21'=1);
-	[attack21_11] (s21=0) -> detect21 : true + (1-detect21) : (s21'=1);
+	[attack21_31] (s21=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s21'=1);
+	[attack21_22] (s21=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s21'=1);
+	[attack21_11] (s21=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s21'=1);
 	// if the firewall has been breached tries to infect the node
 	[eval] (s21=1) -> infect*0.1 : (s21'=4) + (1-infect*0.1) : (s21'=3);
 	// restore save mode
@@ -167,10 +150,10 @@ module n21
 
 endmodule
 
-module n31=n11[s11=s31,detect11=detect31,attack21_11=attack21_31,attack12_11=attack32_31,attack11_21=attack31_21,attack11_12=attack31_32] endmodule
+module n31=n11[s11=s31,attack21_11=attack21_31,attack12_11=attack32_31,attack11_21=attack31_21,attack11_12=attack31_32] endmodule
 
 // second column
-module n12=n21[s21=s12,detect21=detect12,attack31_21=attack13_12,attack22_21=attack22_12,attack11_21=attack11_12,attack21_31=attack12_13,attack21_22=attack12_22,attack21_11=attack12_11] endmodule
+module n12=n21[s21=s12,detect2=detect1,attack31_21=attack13_12,attack22_21=attack22_12,attack11_21=attack11_12,attack21_31=attack12_13,attack21_22=attack12_22,attack21_11=attack12_11] endmodule
 
 module n22
 
@@ -180,10 +163,10 @@ module n22
 	// 2 - node infected
 
 	// firewall attacked (from an infected neighbour)
-	[attack22_32] (s22=0) -> detect22 : true + (1-detect22) : (s22'=1);
-	[attack22_23] (s22=0) -> detect22 : true + (1-detect22) : (s22'=1);
-	[attack22_12] (s22=0) -> detect22 : true + (1-detect22) : (s22'=1);
-	[attack22_21] (s22=0) -> detect22 : true + (1-detect22) : (s22'=1);
+	[attack22_32] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	[attack22_23] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	[attack22_12] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	[attack22_21] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
 	// if the firewall has been breached tries to infect the node
 	[eval] (s22=1) -> infect*0.1 : (s22'=4) + (1-infect*0.1) : (s22'=3);
 	// restore save mode
@@ -200,13 +183,13 @@ module n22
 
 endmodule
 
-module n32=n21[s21=s32,detect21=detect32,attack31_21=attack33_32,attack22_21=attack22_32,attack11_21=attack31_32,attack21_31=attack32_33,attack21_22=attack32_22,attack21_11=attack32_31] endmodule
+module n32=n21[s21=s32,detect2=detect1,attack31_21=attack33_32,attack22_21=attack22_32,attack11_21=attack31_32,attack21_31=attack32_33,attack21_22=attack32_22,attack21_11=attack32_31] endmodule
 
 // columns 3..N-1
 
 // column N
-module n13=n11[s11=s13,detect11=detect13,attack21_11=attack23_13,attack12_11=attack12_13,attack11_21=attack13_23,attack11_12=attack13_12] endmodule
-module n23=n21[s21=s23,detect21=detect23,attack31_21=attack33_23,attack22_21=attack22_23,attack11_21=attack13_23,attack21_31=attack23_33,attack21_22=attack23_22,attack21_11=attack23_13] endmodule
+module n13=n11[s11=s13,attack21_11=attack23_13,attack12_11=attack12_13,attack11_21=attack13_23,attack11_12=attack13_12] endmodule
+module n23=n21[s21=s23,attack31_21=attack33_23,attack22_21=attack22_23,attack11_21=attack13_23,attack21_31=attack23_33,attack21_22=attack23_22,attack21_11=attack23_13] endmodule
 
 module n33
 
@@ -216,8 +199,8 @@ module n33
 	// 2 - node infected
 
 	// firewall attacked (from an infected neighbour)
-	[attack33_32] (s33=0) ->  detect33 : true + (1-detect33) : (s33'=1);
-	[attack33_23] (s33=0) ->  detect33 : true + (1-detect33) : (s33'=1);
+	[attack33_32] (s33=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s33'=1);
+	[attack33_23] (s33=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s33'=1);
 	// if the firewall has been breached tries to infect the node
 	[eval] (s33=1) -> infect*0.1 : (s33'=4) + (1-infect*0.1) : (s33'=3);
 	// restore save mode
