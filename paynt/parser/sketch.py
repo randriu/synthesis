@@ -180,6 +180,7 @@ class Sketch:
             prism = prism.replace_variable_initialization_by_init_expression()
             expression_manager = prism.expression_manager
             for index, hole in enumerate(hole_definitions):
+                # TODO add support for double holes
                 assert hole[1] == 'int', "all in one approach only works with integer holes"
                 var = prism.get_constant(hole[0])
                 var_values = [x.evaluate_as_int() for x in hole_expressions[index]]
