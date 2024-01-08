@@ -102,8 +102,25 @@ namespace synthesis {
         // set memory size to all observations
         void setGlobalMemorySize(uint64_t memory_size);
 
+        // for each state contains its prototype state (reverse of prototype_duplicates)
+        std::vector<uint64_t> state_prototype;
+        // for each state contains its memory index
+        std::vector<uint64_t> state_memory;
+
+        /** Number of states of quotient mdp. */
+        uint_fast64_t num_quotient_states;
+
 
     private:
+
+        /**
+         * Build the state space:
+         * - compute total number of states (@num_states)
+         * - associate prototype states with their duplicates (@prototype_duplicates)
+         * - for each state, remember its prototype (@state_prototype)
+         * - for each state, remember its memory (@state_memory)
+         */ 
+        void buildStateSpace();
 
         /** Madp to Storm state map. */
         std::map<MadpState, uint_fast64_t> madp_to_storm_states;
@@ -133,6 +150,9 @@ namespace synthesis {
         storm::storage::SparseMatrix<double> constructTransitionMatrix();
         storm::models::sparse::StandardRewardModel<double> constructRewardModel();
         std::vector<uint32_t> constructObservabilityClasses();
+
+        // for each prototype state contains a list of its duplicates (including itself)
+        std::vector<std::vector<uint64_t>> prototype_duplicates;
 
         
 

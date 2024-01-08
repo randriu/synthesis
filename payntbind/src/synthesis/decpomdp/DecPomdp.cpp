@@ -222,6 +222,7 @@ namespace synthesis {
 
 
         this->observation_memory_size.resize(this->joint_observations.size(), 1);
+        this->prototype_duplicates.resize(this->num_states());
     }
 
     uint_fast64_t DecPomdp::num_rows() {
@@ -449,10 +450,28 @@ namespace synthesis {
         }
 
     void DecPomdp::setGlobalMemorySize(uint64_t memory_size) {
-            for(uint64_t obs = 0; obs < this->pomdp.getNrObservations(); obs++) {
+            for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
                 this->observation_memory_size[obs] = memory_size;
             }
         }
+
+    void DecPomdp::buildStateSpace() {
+        this->num_quotient_states = 0;
+        this->state_prototype.clear();
+        this->state_memory.clear();
+        for(uint64_t prototype = 0; prototype < this->num_states(); prototype++) {
+            auto obs = this->state_joint_observation[prototype];
+            auto memory_size = this->observation_memory_size[obs];
+            this->prototype_duplicates[prototype].clear();
+            this->prototype_duplicates[prototype].reserve(memory_size);
+            for(uint64_t memory = 0; memory < memory_size; memory++) {
+                this->prototype_duplicates[prototype].push_back(this->num_quotient_states);
+                this->state_prototype.push_back(prototype);
+                this->state_memory.push_back(memory);
+                this->num_quotient_states++;
+            }
+        }
+    }
 
 
 }
