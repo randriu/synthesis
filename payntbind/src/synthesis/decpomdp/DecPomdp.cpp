@@ -219,6 +219,9 @@ namespace synthesis {
                 this->row_reward[storm_state] = std::move(rewards);
             }
         }
+
+
+        this->observation_memory_size.resize(this->joint_observations.size(), 1);
     }
 
     uint_fast64_t DecPomdp::num_rows() {
@@ -327,6 +330,15 @@ namespace synthesis {
     }
 
 
+    std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
+        storm::storage::sparse::ModelComponents<double> components;
+        components.stateLabeling = this->constructStateLabeling();
+        components.choiceLabeling = this->constructChoiceLabeling();
+        components.transitionMatrix = this->constructTransitionMatrix();
+        components.rewardModels.emplace(this->reward_model_name, this->constructRewardModel());
+        return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
+    }
+
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructMdp() { 
         storm::storage::sparse::ModelComponents<double> components;
         components.stateLabeling = this->constructStateLabeling();
@@ -431,6 +443,16 @@ namespace synthesis {
         }
         this->discounted = true;
     }
+
+    void DecPomdp::setObservationMemorySize(uint64_t obs, uint64_t memory_size) {
+            this->observation_memory_size[obs] = memory_size;
+        }
+
+    void DecPomdp::setGlobalMemorySize(uint64_t memory_size) {
+            for(uint64_t obs = 0; obs < this->pomdp.getNrObservations(); obs++) {
+                this->observation_memory_size[obs] = memory_size;
+            }
+        }
 
 
 }

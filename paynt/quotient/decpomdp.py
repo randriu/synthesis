@@ -18,11 +18,11 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         logger.info(f"dec-POMDP has {self.decpomdp_manager.num_agents} agents")
 
-        self.quotient = self.decpomdp_manager.construct_mdp()
+        self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         print("MDP has {} states".format(self.quotient.nr_states))
         print("transitions from state 1: ", self.quotient.transition_matrix.get_row(1))
 
-        logger.debug("nothing to do, aborting...")
+        logger.debug("nothing to do, aborting.....")
         exit()
         
 

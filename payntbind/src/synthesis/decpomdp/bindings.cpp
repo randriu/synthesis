@@ -6,6 +6,7 @@ void bindings_decpomdp(py::module& m) {
 
     py::class_<synthesis::DecPomdp>(m, "DecPomdp", "dec-POMDP")
         // .def(py::init<std::string const&>(), "constructor.", py::arg("filename"));
+        .def("construct_quotient_mdp", &synthesis::DecPomdp::constructQuotientMdp)
         .def("construct_mdp", &synthesis::DecPomdp::constructMdp)
         .def("construct_pomdp", &synthesis::DecPomdp::constructPomdp)
         .def_property_readonly("num_agents", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_agents;})

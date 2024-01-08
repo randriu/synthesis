@@ -68,6 +68,8 @@ namespace synthesis {
 
         /** Retrieve the underlying MDP. */
         std::shared_ptr<storm::models::sparse::Mdp<double>> constructMdp();
+       
+        std::shared_ptr<storm::models::sparse::Mdp<double>> constructQuotientMdp();
         /** Retrieve the underlying POMDP. */
         std::shared_ptr<storm::models::sparse::Pomdp<double>> constructPomdp();
 
@@ -91,6 +93,15 @@ namespace synthesis {
         uint_fast64_t discount_sink_state;
         /** Label associated with the sink. */
         std::string discount_sink_label = "discount_sink";
+
+        // for each observation contains the number of allocated memory states (initially 1)
+        std::vector<uint64_t> observation_memory_size;
+
+        // set memory size to a selected observation
+        void setObservationMemorySize(uint64_t obs, uint64_t memory_size);
+        // set memory size to all observations
+        void setGlobalMemorySize(uint64_t memory_size);
+
 
     private:
 
