@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # multi-core compilation
-COMPILE_JOBS=$(nproc)
+#COMPILE_JOBS=$(nproc)
 # single-core compilation:
-# export COMPILE_JOBS=1
+export COMPILE_JOBS=1
 
 # environment variables
 PAYNT_ROOT=`pwd`
