@@ -99,6 +99,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         Create a representation for a policy that associated action labels with state valuations. States with only
         one available action are omitted.
         '''
+        policy,_ = policy
         sv = self.quotient_mdp.state_valuations
         state_valuation_to_action = []
         for state,action in enumerate(policy):
@@ -166,6 +167,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         for state in mdp.quotient_state_map:
             policy_fixed[state] = policy[state]
 
+        mask = [state for state,action in enumerate(policy_fixed) if action is not None]
+        policy_fixed = (policy_fixed,mask)
         return policy_fixed,mdp
     
 
