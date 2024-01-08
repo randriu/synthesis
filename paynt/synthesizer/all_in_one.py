@@ -22,6 +22,7 @@ class AllInOne:
 
         build_timer.start()
         if self.approach == 'bdd':
+            stormpy.set_settings(["--sylvan:maxmem", "16000"]) # set memory usage by the symbolic approach
             self.model = stormpy.build_symbolic_model(all_in_one_program)
             self.filter = stormpy.create_filter_initial_states_symbolic(self.model)
         elif self.approach == 'sparse':
