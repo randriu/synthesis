@@ -567,23 +567,17 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         
         game_policy,game_value,game_sat = self.solve_game_abstraction(family,prop,game_solver)
         if game_sat:
-            game_policy_sat = self.verify_policy(family,prop,game_policy)
-            if game_policy_sat:
-                mdp_family_result.policy = game_policy
-                return mdp_family_result
-            else:
-                logger.debug(f"game YES but nor forall family of size {family.size}")
-        
-        mdp_result = None
-        if not game_sat:
-            # solve primary direction for the MDP abstraction
-            mdp_result = family.mdp.model_check_property(prop)
-            mdp_value = mdp_result.value
-            self.stat.iteration(family.mdp)
-            # logger.debug("primary-primary direction solved, value is {}".format(mdp_value))
-            if not mdp_result.sat:
-                mdp_family_result.policy = False
-                return mdp_family_result
+            mdp_family_result.policy = game_policy
+            return mdp_family_result
+
+        # solve primary direction for the MDP abstraction
+        mdp_result = family.mdp.model_check_property(prop)
+        mdp_value = mdp_result.value
+        self.stat.iteration(family.mdp)
+        # logger.debug("primary-primary direction solved, value is {}".format(mdp_value))
+        if not mdp_result.sat:
+            mdp_family_result.policy = False
+            return mdp_family_result
         
         # undecided: choose scheduler choices to be used for splitting
         scheduler_choices,state_values,hole_selection = self.parse_game_scheduler(game_solver)
