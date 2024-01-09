@@ -333,6 +333,7 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
+        this->countSuccessors();
 
         return this->constructMdp();
     }
@@ -422,6 +423,7 @@ namespace synthesis {
     
     void DecPomdp::applyDiscountFactorTransformation() {
 
+
         if(this->discounted || this->discount_factor == 1) {
             return;
         }
@@ -471,4 +473,46 @@ namespace synthesis {
     }
 
 
+    void DecPomdp::countSuccessors() {
+
+        this->prototype_row_index.resize(num_rows(),0);
+        uint64_t row_index = 0;
+
+        auto num_observations = this->num_joint_observations();
+        this->observation_successors.resize(num_observations); 
+
+        std::vector<std::set<uint64_t>> observation_successor_sets;
+        observation_successor_sets.resize(num_observations);
+
+        for(uint64_t state = 0; state < this->num_states(); state++) {
+            auto observ = this->state_joint_observation[state];
+            for(auto row: this->transition_matrix[state]) {
+                for(auto entry: row) {
+                    auto dst = entry.first;
+                    double transition_prob = entry.second;
+                    if(transition_prob == 0) {
+                        continue;
+                    }
+                    observation_successor_sets[observ].insert(dst);
+                    
+
+                }
+                // std::cout << "B2: max_successor_memory_size[observation]: " << max_successor_memory_size[observation]<< std::endl;
+                this->prototype_row_index[row_index] = state;
+                row_index++;
+
+            }
+        
+        }
+
+        
+        for(uint64_t obs = 0; obs < num_observations; obs++) {
+            this->observation_successors[obs] = std::vector<uint64_t>(
+                observation_successor_sets[obs].begin(),
+                observation_successor_sets[obs].end()
+                );
+            
+        }
+        std::cout << "this->observation_successors " << this->observation_successors << std::endl;
+    }
 }

@@ -44,6 +44,9 @@ namespace synthesis {
         std::vector<uint_fast64_t> state_joint_observation;
         /** For each state (row group), a mapping of a row to its reward. */
         std::vector<std::vector<double>> row_reward;
+        // for each row of a POMDP contains its index in its row group
+        std::vector<uint64_t> prototype_row_index;
+
         
         
         
@@ -72,6 +75,8 @@ namespace synthesis {
         std::shared_ptr<storm::models::sparse::Mdp<double>> constructQuotientMdp();
         /** Retrieve the underlying POMDP. */
         std::shared_ptr<storm::models::sparse::Pomdp<double>> constructPomdp();
+        /** count succesors for every observation and get prototype row index for every row index */
+        void countSuccessors();
 
         /** If true, the rewards are interpreted as costs. */
         bool reward_minimizing;
@@ -109,6 +114,9 @@ namespace synthesis {
 
         /** Number of states of quotient mdp. */
         uint_fast64_t num_quotient_states;
+
+        // for each observation, a list of successor observations
+        std::vector<std::vector<uint64_t>> observation_successors;
 
 
     private:
