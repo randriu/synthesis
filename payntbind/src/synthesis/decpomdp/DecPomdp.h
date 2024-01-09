@@ -168,6 +168,14 @@ namespace synthesis {
         // for each prototype state contains a list of its duplicates (including itself)
         std::vector<std::vector<uint64_t>> prototype_duplicates;
 
+        // row groups of the resulting transition matrix
+        std::vector<uint64_t> row_groups;
+        // for each row contains index of the prototype row
+        std::vector<uint64_t> row_prototype;
+        // for each row contains a memory update associated with it 
+        std::vector<uint64_t> row_memory;
+        //number of rows of the quotient mdp
+        uint_fast64_t num_quotient_rows;
         
 
         

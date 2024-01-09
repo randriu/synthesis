@@ -541,40 +541,40 @@ namespace synthesis {
                 }
                 // std::cout << "max_mem_size " << max_mem_size << std::endl;
                 this->max_successor_memory_size[obs] = max_mem_size;
-                std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
+                // std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
             }
 
-            // this->row_groups.resize(this->num_states_mdp + 1);
-            // this->row_prototype.clear();
-            // this->row_memory.clear();
+            this->row_groups.resize(this->num_quotient_states);
+            this->row_prototype.clear();
+            this->row_memory.clear();
 
-            // uint64_t prototype_row = 0;
+            uint64_t prototype_row = 0;
             
-            // // // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
-            // for(uint64_t state = 0; state < this->num_states_mdp; state++) {
-            //     // std::cout << "1 " << std::endl;
-            //     this->row_groups[state] = this->row_prototype.size();
-            //     auto prototype_state = this->state_prototype[state];
-            //     auto observation = this->state_joint_observation[prototype_state];
-            //     // std::cout << "state> " << state << std::endl;
-            //     // std::cout << "observation> " << observation << std::endl;
-            //     // std::cout << "this->row_joint_action[prototype_state]" << this->row_joint_action[prototype_state] << std::endl;
+            // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
+            for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+                // std::cout << "1 " << std::endl;
+                this->row_groups[state] = this->row_prototype.size();
+                auto prototype_state = this->state_prototype[state];
+                auto observation = this->state_joint_observation[prototype_state];
+                // std::cout << "state> " << state << std::endl;
+                // std::cout << "observation> " << observation << std::endl;
+                // std::cout << "this->row_joint_action[prototype_state]" << this->row_joint_action[prototype_state] << std::endl;
 
-            //     for(auto joint_action_index: this->row_joint_action[prototype_state]) {
-            //         // std::cout << "max_successor_memory_size[observation] " << max_successor_memory_size[observation] << std::endl;
-            //         // std::cout << "2 " << std::endl;
-            //         for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
-            //             // std::cout << "3 " << std::endl;
-            //             this->row_prototype.push_back(prototype_row);
-            //             // std::cout << "4 " << std::endl;
-            //             this->row_memory.push_back(dst_mem);
-            //             // std::cout << "5 " << std::endl;
-            //         }
-            //         prototype_row++;
-            //     }
-            // }
-            // std::cout << "this->row_groups " << this->row_groups<< std::endl;
-            // this->num_rows_mdp = this->row_prototype.size();
+                for(auto joint_action_index: this->row_joint_action[prototype_state]) {
+                    // std::cout << "max_successor_memory_size[observation] " << max_successor_memory_size[observation] << std::endl;
+                    // std::cout << "2 " << std::endl;
+                    for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
+                        // std::cout << "3 " << std::endl;
+                        this->row_prototype.push_back(prototype_row);
+                        // std::cout << "4 " << std::endl;
+                        this->row_memory.push_back(dst_mem);
+                        // std::cout << "5 " << std::endl;
+                    }
+                    prototype_row++;
+                }
+            }
+            // std::cout << "this->row_memory " << this->row_memory<< std::endl;
+            this->num_quotient_rows = this->row_prototype.size();
            
         }
 
