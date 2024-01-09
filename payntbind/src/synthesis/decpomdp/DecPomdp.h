@@ -118,6 +118,11 @@ namespace synthesis {
         // for each observation, a list of successor observations
         std::vector<std::vector<uint64_t>> observation_successors;
 
+        // for each observation contains the maximum memory size of a destination
+        // across all rows of a prototype state having this observation
+        std::vector<uint64_t> max_successor_memory_size;
+            
+
 
     private:
 
@@ -129,6 +134,7 @@ namespace synthesis {
          * - for each state, remember its memory (@state_memory)
          */ 
         void buildStateSpace();
+        void buildTransitionMatrixSpurious();
 
         /** Madp to Storm state map. */
         std::map<MadpState, uint_fast64_t> madp_to_storm_states;

@@ -332,7 +332,8 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
-        // this->countSuccessors();
+        this->countSuccessors();
+        this->buildTransitionMatrixSpurious();
         std::cout << "this->discounted  "<< this->discounted    << std::endl;
         std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
         std::cout << "this->discount_sink_state "<< this->discount_sink_state   << std::endl;
@@ -454,6 +455,11 @@ namespace synthesis {
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
                 this->observation_memory_size[obs] = memory_size;
             }
+            if (this->discounted && this->discount_factor != 1 )
+            {
+                auto obs = this->state_joint_observation[this->discount_sink_state];
+                this->observation_memory_size[obs] = 1;
+            }
         }
 
     void DecPomdp::buildStateSpace() {
@@ -516,4 +522,60 @@ namespace synthesis {
             
         }
     }
+
+    void DecPomdp::buildTransitionMatrixSpurious() {
+            this->max_successor_memory_size.resize(this->num_joint_observations());
+            // for each observation, define the maximum successor memory size
+            // this will define the number of copies we need to make of each row
+            // std::cout << "this->num_joint_observations() " << this->num_joint_observations() << std::endl;
+            for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
+                // std::cout << "obs " << obs << std::endl;
+                uint64_t max_mem_size = 0; //TODO there was 0
+                for(auto dst_state: this->observation_successors[obs]) {
+                    auto dst_obs = this->state_joint_observation[dst_state];
+                    // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
+                    // std::cout << "dst_obs " << dst_obs << std::endl;
+                    if(max_mem_size < this->observation_memory_size[dst_obs]) {
+                        max_mem_size = this->observation_memory_size[dst_obs];
+                    }
+                }
+                // std::cout << "max_mem_size " << max_mem_size << std::endl;
+                this->max_successor_memory_size[obs] = max_mem_size;
+                std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
+            }
+
+            // this->row_groups.resize(this->num_states_mdp + 1);
+            // this->row_prototype.clear();
+            // this->row_memory.clear();
+
+            // uint64_t prototype_row = 0;
+            
+            // // // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
+            // for(uint64_t state = 0; state < this->num_states_mdp; state++) {
+            //     // std::cout << "1 " << std::endl;
+            //     this->row_groups[state] = this->row_prototype.size();
+            //     auto prototype_state = this->state_prototype[state];
+            //     auto observation = this->state_joint_observation[prototype_state];
+            //     // std::cout << "state> " << state << std::endl;
+            //     // std::cout << "observation> " << observation << std::endl;
+            //     // std::cout << "this->row_joint_action[prototype_state]" << this->row_joint_action[prototype_state] << std::endl;
+
+            //     for(auto joint_action_index: this->row_joint_action[prototype_state]) {
+            //         // std::cout << "max_successor_memory_size[observation] " << max_successor_memory_size[observation] << std::endl;
+            //         // std::cout << "2 " << std::endl;
+            //         for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
+            //             // std::cout << "3 " << std::endl;
+            //             this->row_prototype.push_back(prototype_row);
+            //             // std::cout << "4 " << std::endl;
+            //             this->row_memory.push_back(dst_mem);
+            //             // std::cout << "5 " << std::endl;
+            //         }
+            //         prototype_row++;
+            //     }
+            // }
+            // std::cout << "this->row_groups " << this->row_groups<< std::endl;
+            // this->num_rows_mdp = this->row_prototype.size();
+           
+        }
+
 }
