@@ -250,6 +250,22 @@ namespace synthesis {
         return labeling;
     }
 
+    storm::models::sparse::StateLabeling DecPomdp::constructQuotientStateLabeling() {
+        storm::models::sparse::StateLabeling labeling(this->num_quotient_states);
+
+        storm::storage::BitVector init_flags(this->num_quotient_states, false);
+        init_flags.set(this->prototype_duplicates[this->initial_state][0] );
+        labeling.addLabel("init", std::move(init_flags));
+
+        if(this->discounted) {
+            storm::storage::BitVector discount_sink_flags(this->num_quotient_states, false);
+            discount_sink_flags.set(this->prototype_duplicates[this->discount_sink_state][0]);
+            labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
+        }
+        
+        return labeling;
+    }
+
     storm::models::sparse::ChoiceLabeling DecPomdp::constructChoiceLabeling() {
         uint_fast64_t num_rows = this->num_rows();
         
@@ -334,9 +350,9 @@ namespace synthesis {
         this->buildStateSpace();
         this->countSuccessors();
         this->buildTransitionMatrixSpurious();
-        std::cout << "this->discounted  "<< this->discounted    << std::endl;
-        std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
-        std::cout << "this->discount_sink_state "<< this->discount_sink_state   << std::endl;
+
+        storm::storage::sparse::ModelComponents<double> components;
+        components.stateLabeling = this->constructQuotientStateLabeling();
 
         return this->constructMdp();
     }

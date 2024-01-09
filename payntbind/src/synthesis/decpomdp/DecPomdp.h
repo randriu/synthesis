@@ -165,6 +165,8 @@ namespace synthesis {
         storm::models::sparse::StandardRewardModel<double> constructRewardModel();
         std::vector<uint32_t> constructObservabilityClasses();
 
+        storm::models::sparse::StateLabeling constructQuotientStateLabeling();
+
         // for each prototype state contains a list of its duplicates (including itself)
         std::vector<std::vector<uint64_t>> prototype_duplicates;
 
