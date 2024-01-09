@@ -220,8 +220,8 @@ namespace synthesis {
             }
         }
 
-        this->observation_memory_size.resize(this->joint_observations.size(), 1);
-        this->prototype_duplicates.resize(this->num_states());
+        this->observation_memory_size.resize(this->joint_observations.size() + 1, 1); //TODO +1 is for sink state
+        this->prototype_duplicates.resize(this->num_states() + 1); //TODO +1 is for sink state
     }
 
     uint_fast64_t DecPomdp::num_rows() {
@@ -332,7 +332,9 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
-        this->countSuccessors();
+        // this->countSuccessors();
+        std::cout << "this->discounted  "<< this->discounted    << std::endl;
+        std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
         std::cout << "this->discount_sink_state "<< this->discount_sink_state   << std::endl;
 
         return this->constructMdp();
@@ -422,8 +424,8 @@ namespace synthesis {
 
     
     void DecPomdp::applyDiscountFactorTransformation() {
-        std::cout << "this->discounted  "<< this->discounted    << std::endl;
-        std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
+        // std::cout << "this->discounted  "<< this->discounted    << std::endl;
+        // std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
 
         if(this->discounted || this->discount_factor == 1) {
             return;
@@ -513,6 +515,5 @@ namespace synthesis {
                 );
             
         }
-        std::cout << "this->observation_successors " << this->observation_successors << std::endl;
     }
 }
