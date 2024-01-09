@@ -13,6 +13,8 @@ import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
 
+import uuid
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -148,7 +150,60 @@ class Sketch:
             exit(0)
 
         return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager)
+    
 
+    @classmethod
+    def load_sketch_as_all_in_one(cls, sketch_path, properties_path):
+        if not os.path.isfile(sketch_path):
+            raise ValueError(f"the sketch file {sketch_path} does not exist")
+        logger.info(f"loading sketch from {sketch_path} ...")
+        logger.info(f"all in one approach so assuming input in PRISM format...")
+        try:
+            prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
+            expression_parser = stormpy.storage.ExpressionParser(prism.expression_manager)
+            expression_parser.set_identifier_mapping(dict())
+            prism_model_type = {
+                stormpy.storage.PrismModelType.DTMC:"DTMC",
+                stormpy.storage.PrismModelType.MDP:"MDP",
+                stormpy.storage.PrismModelType.POMDP:"POMDP"
+            }[prism.model_type]
+            logger.debug("PRISM model type: " + prism_model_type)
+
+            hole_expressions = None
+            family = None
+            if len(hole_definitions) > 0:
+                logger.info("processing hole definitions...")
+                prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
+
+            specification = PrismParser.parse_specification(properties_path, 0, 1, prism)
+
+            prism = prism.replace_variable_initialization_by_init_expression()
+            expression_manager = prism.expression_manager
+            for index, hole in enumerate(hole_definitions):
+                # TODO add support for double holes
+                assert hole[1] == 'int', "all in one approach only works with integer holes"
+                var = prism.get_constant(hole[0])
+                var_values = [x.evaluate_as_int() for x in hole_expressions[index]]
+                prism = prism.replace_constant_by_variable(var, expression_manager.create_integer(min(var_values)), expression_manager.create_integer(max(var_values)))
+                var_options = [stormpy.Expression.Eq(var.expression_variable.get_expression(), expression_manager.create_integer(val)) for val in var_values]
+                prism.update_initial_states_expression(stormpy.Expression.And(prism.initial_states_expression, stormpy.Expression.Disjunction(var_options)))
+
+            # TODO investigate why we have to print and load the prism program again for all in one construction to work
+            tmp_path = sketch_path + str(uuid.uuid4())
+            with open(tmp_path, 'w') as f:
+                print(prism, end="", file=f)
+            try:
+                prism = stormpy.parse_prism_program(tmp_path, prism_compat=True)
+                os.remove(tmp_path)
+            except:
+                os.remove(tmp_path)
+                raise SyntaxError
+
+        except SyntaxError as e:
+            logger.error(f"all in one approach supports only input in PRISM format!")
+            raise e
+        
+        return prism, specification, family
     
     @classmethod
     def export(cls, export, sketch_path, jani_unfolder, explicit_quotient):

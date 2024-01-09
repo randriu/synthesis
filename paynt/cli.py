@@ -8,6 +8,7 @@ import paynt.quotient.storm_pomdp_control
 
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
+import paynt.synthesizer.all_in_one
 
 import click
 import sys
@@ -110,6 +111,12 @@ def setup_logger(log_path = None):
     help="base filename to output evaluation result")
 
 @click.option(
+    "--all-in-one", type=click.Choice(["sparse", "bdd"]), default=None,
+    show_default=True,
+    help="all in one MDP approach",
+)
+
+@click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
     help="counterexample generator",
 )
@@ -125,6 +132,7 @@ def paynt_run(
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
+    all_in_one,
     ce_generator,
     profiling
 ):
@@ -152,10 +160,14 @@ def paynt_run(
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor)
-    synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
-    synthesizer.run(optimum_threshold, export_evaluation)
-
+    if all_in_one is None:
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path,  properties_path, export, relative_error, discount_factor)
+        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer  (quotient, method, fsc_synthesis, storm_control)
+        synthesizer.run(optimum_threshold, export_evaluation)
+    else:
+        all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
+        all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, family)
+        all_in_one_analysis.run()
     if profiling:
         profiler.disable()
         stats = profiler.create_stats()

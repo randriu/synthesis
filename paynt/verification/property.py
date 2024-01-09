@@ -160,6 +160,21 @@ class Property:
     def get_reward_name(self):
         assert self.reward
         return self.formula.reward_name
+    
+    def transform_to_optimality_formula(self, prism):
+        direction = "min" if self.minimizing else "max"
+        if self.reward:
+            if isinstance(self.formula.subformula.subformula, stormpy.logic.AtomicLabelFormula):
+                formula_str = f"R{{\"{self.get_reward_name()}\"}}{direction}=? [F \"{self.get_target_label()}\"]"
+            else:
+                formula_str = f"R{{\"{self.get_reward_name()}\"}}{direction}=? [F {self.get_target_label()}]"
+        else:
+            if isinstance(self.formula.subformula.subformula, stormpy.logic.AtomicLabelFormula):
+                formula_str = f"P{direction}=? [F \"{self.get_target_label()}\"]"
+            else:
+                formula_str = f"P{direction}=? [F {self.get_target_label()}]"
+        formula = stormpy.parse_properties_for_prism_program(formula_str, prism)[0]
+        return formula
 
 
 
