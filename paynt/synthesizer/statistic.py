@@ -52,9 +52,10 @@ class Statistic:
         # MDP family
         self.num_mdps_total = None
         self.num_mdps_sat = None
+        self.num_tree_nodes = None
+        self.num_tree_nodes_merged = None
         self.num_policies = None
         self.num_policies_merged = None
-        self.num_policies_yes = None
 
         self.family_size = None
         self.synthesis_timer = paynt.utils.profiler.Timer()
@@ -239,36 +240,39 @@ class Statistic:
     
     def print(self):    
         print(self.get_summary(),end="")
+        # self.print_mdp_family_table_entries()
 
 
     def print_mdp_family_table_entries(self):
         model_info = "model info:\t"
-        model_info += "\t".join(["states","actions","MDPs","SAT MDPs","SAT %",])
+        model_info += "\t".join(["states","choices","MDPs","states*MDPs","SAT MDPs","SAT %",])
         print(model_info)
         print("\t\t",end="")
         print(self.quotient.quotient_mdp.nr_states,end="\t")
         print(self.quotient.quotient_mdp.nr_choices,end="\t")
         print(self.num_mdps_total,end="\t")
+        print(self.quotient.quotient_mdp.nr_states*self.num_mdps_total,end="\t")
         print(self.num_mdps_sat,end="\t")
         sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,0)
         print(sat_by_total_percentage)
         
 
         synt_stats_header = "synt info:\t"
-        synt_stats_header += "\t".join(["policies","merged","merged/SAT %","yes nodes","time","game iters","MDP iters", "iters/MDPs"])
+        synt_stats_header += "\t".join(["time","nodes","nodes (merged)","policies","policies (merged)","policies(merged) / SAT %","game iters","MDP iters", "iters/MDPs"])
         print(synt_stats_header)
         print("\t\t",end="")
+        synthesis_timer = int(self.synthesis_timer.time)
+        print(synthesis_timer,end="\t")
+        print(self.num_nodes,end="\t")
+        print(self.num_nodes_merged,end="\t")
         print(self.num_policies,end="\t")
         print(self.num_policies_merged,end="\t")
         merged_by_sat_percentage = "N/A"
         if self.num_mdps_sat > 0:
             merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
         print(merged_by_sat_percentage,end="\t")
-        print(self.num_policies_yes,end="\t")
-        synthesis_timer = round(self.synthesis_timer.time,0)
-        print(synthesis_timer,end="\t")
         print(self.iterations_game,end="\t")
         print(self.iterations_mdp,end="\t")
-        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total,2)
+        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total,1)
         print(iters_by_mdp)
         print()
