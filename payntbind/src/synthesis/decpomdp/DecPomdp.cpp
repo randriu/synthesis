@@ -332,12 +332,9 @@ namespace synthesis {
 
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
-        storm::storage::sparse::ModelComponents<double> components;
-        components.stateLabeling = this->constructStateLabeling();
-        components.choiceLabeling = this->constructChoiceLabeling();
-        components.transitionMatrix = this->constructTransitionMatrix();
-        components.rewardModels.emplace(this->reward_model_name, this->constructRewardModel());
-        return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
+        this->buildStateSpace();
+
+        return this->constructMdp();
     }
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructMdp() { 

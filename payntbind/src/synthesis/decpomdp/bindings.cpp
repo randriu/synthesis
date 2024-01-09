@@ -9,6 +9,8 @@ void bindings_decpomdp(py::module& m) {
         .def("construct_quotient_mdp", &synthesis::DecPomdp::constructQuotientMdp)
         .def("construct_mdp", &synthesis::DecPomdp::constructMdp)
         .def("construct_pomdp", &synthesis::DecPomdp::constructPomdp)
+        .def("set_global_memory_size", &synthesis::DecPomdp::setGlobalMemorySize, py::arg("memory_size"))
+        .def_property_readonly("observation_memory_size", [](synthesis::DecPomdp& decpomdp) {return decpomdp.observation_memory_size;})
         .def_property_readonly("num_agents", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_agents;})
         .def_property_readonly("joint_observations", [](synthesis::DecPomdp& decpomdp) {return decpomdp.joint_observations;})
         .def_property_readonly("agent_observation_labels", [](synthesis::DecPomdp& decpomdp) {return decpomdp.agent_observation_labels;})
