@@ -112,8 +112,8 @@ namespace synthesis {
 
 
     DecPomdp::DecPomdp(DecPOMDPDiscrete *model) {
-        
         // agents
+        
         this->num_agents = model->GetNrAgents();
         this->discount_factor = model->GetDiscount();
         this->reward_minimizing = model->GetRewardType() == COST;
@@ -219,7 +219,6 @@ namespace synthesis {
                 this->row_reward[storm_state] = std::move(rewards);
             }
         }
-
 
         this->observation_memory_size.resize(this->joint_observations.size(), 1);
         this->prototype_duplicates.resize(this->num_states());
@@ -334,6 +333,7 @@ namespace synthesis {
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
         this->countSuccessors();
+        std::cout << "this->discount_sink_state "<< this->discount_sink_state   << std::endl;
 
         return this->constructMdp();
     }
@@ -422,12 +422,12 @@ namespace synthesis {
 
     
     void DecPomdp::applyDiscountFactorTransformation() {
-
+        std::cout << "this->discounted  "<< this->discounted    << std::endl;
+        std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
 
         if(this->discounted || this->discount_factor == 1) {
             return;
         }
-
         this->discount_sink_state = this->freshSink(this->discount_sink_label);
         for(uint_fast64_t state = 0; state < this->num_states(); state++) {
             if(state == this->initial_state || state == this->discount_sink_state) {
