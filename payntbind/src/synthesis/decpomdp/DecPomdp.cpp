@@ -501,6 +501,7 @@ namespace synthesis {
 
         this->prototype_row_index.resize(num_rows(),0);
         uint64_t row_index = 0;
+        uint64_t group_index = 0;
 
         auto num_observations = this->num_joint_observations();
         this->observation_successors.resize(num_observations); 
@@ -522,13 +523,15 @@ namespace synthesis {
 
                 }
                 // std::cout << "B2: max_successor_memory_size[observation]: " << max_successor_memory_size[observation]<< std::endl;
-                this->prototype_row_index[row_index] = state;
+                this->prototype_row_index[row_index] = group_index;
+                group_index++;
                 row_index++;
 
             }
+            group_index = 0;
         
         }
-
+        std::cout << "this->prototype_row_index[row_index] " << this->prototype_row_index << std::endl;
         
         for(uint64_t obs = 0; obs < num_observations; obs++) {
             this->observation_successors[obs] = std::vector<uint64_t>(
