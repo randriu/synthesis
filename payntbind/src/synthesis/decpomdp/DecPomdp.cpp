@@ -293,8 +293,8 @@ namespace synthesis {
                 current_row++;
             }
         }
-        std::cout << "row_label o " << row_label<< std::endl;
-        std::cout << "all_labels o" << all_labels<< std::endl;
+        // std::cout << "row_label o " << row_label<< std::endl;
+        // std::cout << "all_labels o" << all_labels<< std::endl;
         for(auto label: all_labels) {
             storm::storage::BitVector flags(num_rows, false);
             labeling.addLabel(label, flags);
@@ -307,51 +307,51 @@ namespace synthesis {
     }
 
     storm::models::sparse::ChoiceLabeling DecPomdp::constructQuotientChoiceLabeling() {
-        uint_fast64_t num_rows = this->num_quotient_rows;
-        // std::cout << "this->row_joint_action " << this->row_joint_action<< std::endl;
-        // std::cout << "num_rows " << num_rows<< std::endl;
-        // std::cout << "num_rows() " << this->num_rows() << std::endl;
+        // uint_fast64_t num_rows = this->num_quotient_rows;
+        // // std::cout << "this->row_joint_action " << this->row_joint_action<< std::endl;
+        // // std::cout << "num_rows " << num_rows<< std::endl;
+        // // std::cout << "num_rows() " << this->num_rows() << std::endl;
 
-        storm::models::sparse::ChoiceLabeling labeling(num_rows);
-        uint_fast64_t current_row = 0;
-        uint_fast64_t state = 0;
-        std::vector<std::string> row_label(num_rows);
-        std::set<std::string> all_labels;
-        for(auto row_group: this->row_joint_action) {
-            for(auto joint_action_index: row_group) {
-                auto observation = this->state_joint_observation[state];
-                for(uint64_t mem = 0; mem < max_successor_memory_size[observation]; mem++) {
-                    std::ostringstream sb;
-                    sb << "(";
-                    auto joint_action = this->joint_actions[joint_action_index];
-                    for(uint32_t agent = 0; agent < this->num_agents; agent++) {
-                        auto agent_action = joint_action[agent];
-                        auto agent_action_label = this->agent_action_labels[agent][agent_action];
-                        sb << agent_action_label;
-                        sb << ",";
-                    }
-                    sb << mem;
-                    sb << ")";
-                    std::string label = sb.str();
-                    all_labels.insert(label);
-                    row_label[current_row] = label;
-                    // std::cout << "current_row " << current_row<< std::endl;
-                    current_row++;
-                }
+        // storm::models::sparse::ChoiceLabeling labeling(num_rows);
+        // uint_fast64_t current_row = 0;
+        // uint_fast64_t state = 0;
+        // std::vector<std::string> row_label(num_rows);
+        // std::set<std::string> all_labels;
+        // for(auto row_group: this->row_joint_action) {
+        //     for(auto joint_action_index: row_group) {
+        //         auto observation = this->state_joint_observation[state];
+        //         for(uint64_t mem = 0; mem < max_successor_memory_size[observation]; mem++) {
+        //             std::ostringstream sb;
+        //             sb << "(";
+        //             auto joint_action = this->joint_actions[joint_action_index];
+        //             for(uint32_t agent = 0; agent < this->num_agents; agent++) {
+        //                 auto agent_action = joint_action[agent];
+        //                 auto agent_action_label = this->agent_action_labels[agent][agent_action];
+        //                 sb << agent_action_label;
+        //                 sb << ",";
+        //             }
+        //             sb << mem;
+        //             sb << ")";
+        //             std::string label = sb.str();
+        //             all_labels.insert(label);
+        //             row_label[current_row] = label;
+        //             // std::cout << "current_row " << current_row<< std::endl;
+        //             current_row++;
+        //         }
 
-            }
-            state++;
-        }
-        // std::cout << "all_labels " << all_labels<< std::endl;
-        for(auto label: all_labels) {
-            storm::storage::BitVector flags(num_rows, false);
-            labeling.addLabel(label, flags);
-        }
-        std::cout << "row_label " << row_label<< std::endl;
-        for(uint64_t row = 0; row < num_rows; row++) {
-            labeling.addLabelToChoice(row_label[row], row);
-        }
-        std::cout << "all_labels " << all_labels<< std::endl;
+        //     }
+        //     state++;
+        // }
+        // // std::cout << "all_labels " << all_labels<< std::endl;
+        // for(auto label: all_labels) {
+        //     storm::storage::BitVector flags(num_rows, false);
+        //     labeling.addLabel(label, flags);
+        // }
+        // // std::cout << "row_label " << row_label<< std::endl;
+        // for(uint64_t row = 0; row < num_rows; row++) {
+        //     labeling.addLabelToChoice(row_label[row], row);
+        // }
+        // // std::cout << "all_labels " << all_labels<< std::endl;
         return this->constructChoiceLabeling() ;
     }
 
@@ -583,7 +583,7 @@ namespace synthesis {
             group_index = 0;
         
         }
-        std::cout << "this->prototype_row_index[row_index] " << this->prototype_row_index << std::endl;
+        // std::cout << "this->prototype_row_index[row_index] " << this->prototype_row_index << std::endl;
         
         for(uint64_t obs = 0; obs < num_observations; obs++) {
             this->observation_successors[obs] = std::vector<uint64_t>(
@@ -614,7 +614,7 @@ namespace synthesis {
                 this->max_successor_memory_size[obs] = max_mem_size;
                 // std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
             }
-            std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
+            // std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
             this->row_groups.resize(this->num_quotient_states);
             this->row_prototype.clear();
             this->row_memory.clear();
@@ -622,9 +622,11 @@ namespace synthesis {
             uint64_t prototype_row = 0;
             
             // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
-            for(uint64_t state = 0; state < this->num_states(); state++) {
-                auto observ = this->state_joint_observation[state];
-                for(auto row: this->transition_matrix[state]) {
+            for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+                this->row_groups[state] = this->row_prototype.size();
+                auto prototype_state = this->state_prototype[state];
+                auto observ = this->state_joint_observation[prototype_state];
+                for(auto row: this->transition_matrix[prototype_state]) {
                     // std::cout << "max_successor_memory_size[observation] " << max_successor_memory_size[observation] << std::endl;
                     // std::cout << "2 " << std::endl;
                     for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observ]; dst_mem++) {
