@@ -167,6 +167,7 @@ namespace synthesis {
 
         storm::models::sparse::StateLabeling constructQuotientStateLabeling();
         storm::models::sparse::ChoiceLabeling constructQuotientChoiceLabeling();
+        storm::storage::SparseMatrix<double> constructQuotientTransitionMatrix();
 
         // for each prototype state contains a list of its duplicates (including itself)
         std::vector<std::vector<uint64_t>> prototype_duplicates;

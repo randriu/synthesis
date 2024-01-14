@@ -346,64 +346,19 @@ namespace synthesis {
                 row_counter++;
             }
         }
-        std::cout << "all_labels " << all_labels<< std::endl;
+        // std::cout << "all_labels " << all_labels<< std::endl;
         for(auto label: all_labels) {
             storm::storage::BitVector flags(num_rows, false);
             labeling.addLabel(label, flags);
         }
-        std::cout << "row_label " << row_label<< std::endl;
+        // std::cout << "row_label " << row_label<< std::endl;
         for(uint64_t row = 0; row < num_rows; row++) {
             labeling.addLabelToChoice(row_label[row], row);
         }
         // std::cout << "all_labels " << all_labels<< std::endl;
-        return this->constructChoiceLabeling() ;
+        return labeling ;
     }
 
-   // uint_fast64_t num_rows = this->num_quotient_rows;
-        
-   //      storm::models::sparse::ChoiceLabeling labeling(num_rows);
-   //      uint_fast64_t current_row = 0;
-   //      uint_fast64_t row_counter = 0;
-   //      std::vector<std::string> row_label(num_rows);
-   //      std::set<std::string> all_labels;
-   //      uint_fast64_t joint_action_index = 0;
-   //      for(uint64_t state = 0; state < this->num_quotient_states; state++) {
-   //          this->row_groups[state] = this->row_prototype.size();
-   //          auto prototype_state = this->state_prototype[state];
-   //          auto observ = this->state_joint_observation[prototype_state];
-   //          auto group_joint_actions = this->row_joint_action[prototype_state];
-   //          row_counter = 0;
-   //          for(auto row: this->transition_matrix[prototype_state]) {
-   //              joint_action_index = group_joint_actions[row_counter];
-   //              std::ostringstream sb;
-   //              sb << "(";
-   //              auto joint_action = this->joint_actions[joint_action_index];
-   //              for(uint32_t agent = 0; agent < this->num_agents; agent++) {
-   //                  auto agent_action = joint_action[agent];
-   //                  auto agent_action_label = this->agent_action_labels[agent][agent_action];
-   //                  sb << agent_action_label;
-   //                  if(agent < this->num_agents-1) {
-   //                      sb << ",";
-   //                  }
-   //              }
-   //              sb << ")";
-   //              std::string label = sb.str();
-   //              all_labels.insert(label);
-   //              row_label[current_row] = label;
-   //              current_row++;
-   //          }
-   //      }
-   //      // std::cout << "row_label o " << row_label<< std::endl;
-   //      // std::cout << "all_labels o" << all_labels<< std::endl;
-   //      for(auto label: all_labels) {
-   //          storm::storage::BitVector flags(num_rows, false);
-   //          labeling.addLabel(label, flags);
-   //      }
-   //      for(uint64_t row = 0; row < num_rows; row++) {
-   //          labeling.addLabelToChoice(row_label[row], row);
-   //      }
-
-   //      return labeling;
     storm::storage::SparseMatrix<double> DecPomdp::constructTransitionMatrix() {
         
 
@@ -421,6 +376,35 @@ namespace synthesis {
             }
         }
         return builder.build();
+    }
+
+    storm::storage::SparseMatrix<double> DecPomdp::constructQuotientTransitionMatrix() {
+        
+        storm::storage::SparseMatrixBuilder<double> builder2(
+                this->num_quotient_rows, this->num_quotient_states, 0, true, true, this->num_quotient_states
+        );
+        uint64_t row_index = 0;
+        for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+            auto prototype_state = this->state_prototype[state];
+            auto observation = this->state_joint_observation[prototype_state];
+            // std::cout << "this->row_groups[state] " << this->row_groups[state]<< std::endl;
+            builder2.newRowGroup(this->row_groups[state]);
+            for(auto row: this->transition_matrix[prototype_state]) {
+                for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
+                    for(auto entry: row) {
+                        auto dst = this->prototype_duplicates[entry.first][dst_mem];
+                        // std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second<< std::endl;
+                        builder2.addNextValue(row_index, dst, entry.second);
+                        
+                    }
+                    row_index++;
+                }
+                // std::cout << "B2: max_successor_memory_size[observation]: " << max_successor_memory_size[observation]<< std::endl;
+                
+            }
+        
+        }
+        return this->constructTransitionMatrix();
     }
 
     storm::models::sparse::StandardRewardModel<double> DecPomdp::constructRewardModel() {
@@ -454,6 +438,7 @@ namespace synthesis {
         storm::storage::sparse::ModelComponents<double> components;
         components.stateLabeling = this->constructQuotientStateLabeling();
         components.choiceLabeling = this->constructQuotientChoiceLabeling();
+        components.transitionMatrix = this->constructQuotientTransitionMatrix();
 
         return this->constructMdp();
     }
