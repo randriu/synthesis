@@ -392,7 +392,13 @@ namespace synthesis {
             for(auto row: this->transition_matrix[prototype_state]) {
                 for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
                     for(auto entry: row) {
+
                         auto dst = this->prototype_duplicates[entry.first][dst_mem];
+                        if (entry.first == this->discount_sink_state)
+                        {
+                           dst = this->prototype_duplicates[entry.first][0];
+                        }
+
                         // std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second<< std::endl;
                         builder2.addNextValue(row_index, dst, entry.second);
                         
@@ -404,7 +410,8 @@ namespace synthesis {
             }
         
         }
-        return this->constructTransitionMatrix();
+        return builder2.build();
+        // return this->constructTransitionMatrix();
     }
 
     storm::models::sparse::StandardRewardModel<double> DecPomdp::constructRewardModel() {
@@ -414,6 +421,26 @@ namespace synthesis {
             for(uint64_t row = 0; row < this->transition_matrix[state].size(); row++) {
                 auto reward = this->row_reward[state][row];
                 action_rewards.push_back(reward);
+            }
+        } 
+        return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
+    }
+
+    storm::models::sparse::StandardRewardModel<double> DecPomdp::constructQuotientRewardModel() {
+        std::optional<std::vector<double>> state_rewards;
+        std::vector<double> action_rewards;
+        uint64_t row_index = 0;
+        for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+            auto prototype_state = this->state_prototype[state];
+            auto observation = this->state_joint_observation[prototype_state];
+            row_index = 0;
+            for(auto row: this->transition_matrix[prototype_state]) {
+                for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
+                auto reward = this->row_reward[prototype_state][row_index];
+                action_rewards.push_back(reward);
+                
+                }
+                row_index++;
             }
         } 
         return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
@@ -439,6 +466,8 @@ namespace synthesis {
         components.stateLabeling = this->constructQuotientStateLabeling();
         components.choiceLabeling = this->constructQuotientChoiceLabeling();
         components.transitionMatrix = this->constructQuotientTransitionMatrix();
+        // std::cout << "this->row_reward " << this->row_reward<< std::endl;
+        components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
 
         return this->constructMdp();
     }
