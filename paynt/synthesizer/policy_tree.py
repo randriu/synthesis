@@ -472,6 +472,8 @@ class MdpFamilyResult:
         # if False, then all family members are UNSAT
         # otherwise, contains a satisfying policy for all MDPs in the family
         self.policy = None
+
+        self.game_policy = None
         self.hole_selection = None
         self.splitter = None
 
@@ -534,7 +536,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if action < self.quotient.num_actions:
                 game_policy_fixed[state] = action
         game_policy = game_policy_fixed
-        return game_policy,game_value,game_sat
+        return game_policy,game_sat
 
     def parse_game_scheduler(self, game_solver):
         state_values = game_solver.solution_state_values
@@ -565,7 +567,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             mdp_family_result.policy = self.solve_singleton(family,prop)
             return mdp_family_result
         
-        game_policy,game_value,game_sat = self.solve_game_abstraction(family,prop,game_solver)
+        if family.candidate_policy is None:
+            game_policy,game_sat = self.solve_game_abstraction(family,prop,game_solver)
+        else:
+            game_policy = family.candidate_policy
+            game_sat = False
+
+        mdp_family_result.game_policy = game_policy
         if game_sat:
             mdp_family_result.policy = game_policy
             return mdp_family_result
@@ -578,7 +586,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         if not mdp_result.sat:
             mdp_family_result.policy = False
             return mdp_family_result
-        
+
         # undecided: choose scheduler choices to be used for splitting
         scheduler_choices,state_values,hole_selection = self.parse_game_scheduler(game_solver)
         # scheduler_choices,state_values,hole_selection = self.parse_mdp_scheduler(family, mdp_result)
@@ -615,7 +623,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
         return scores
 
-    def split(self, family, prop, hole_selection, splitter):
+    def split(self, family, prop, hole_selection, splitter, policy):
         # split the hole
         used_options = hole_selection[splitter]
         if len(used_options) > 1:
@@ -633,6 +641,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             half = len(options) // 2
             suboptions = [options[:half], options[half:]]
 
+
         # construct corresponding design subspaces
         subfamilies = []
         family.splitter = splitter
@@ -641,13 +650,26 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subholes = new_design_space.subholes(splitter, suboption)
             subfamily = paynt.family.family.DesignSpace(subholes)
             subfamily.hole_set_options(splitter, suboption)
+            subfamily.candidate_policy = None
             subfamilies.append(subfamily)
+
+        policy_consistent = all([len(options) <= 1 for options in hole_selection])
+        if policy_consistent:
+            # associate the branch of the split that contains hole selection with the policy
+            assert len(used_options) == 1
+            option = used_options[0]
+            for subfamily in subfamilies:
+                if option in subfamily.hole_options(splitter):
+                    subfamily.candidate_policy = policy
+                    break
+
         return suboptions,subfamilies
 
     
     def evaluate_all(self, family, prop, keep_value_only=False):
         assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.quotient.build_game_abstraction_solver(prop)
+        family.candidate_policy = None
         policy_tree = PolicyTree(family)
 
         undecided_leaves = [policy_tree.root]
@@ -660,6 +682,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node = undecided_leaves.pop(-1)
             family = policy_tree_node.family
             result = self.verify_family(family,game_solver,prop)
+            family.candidate_policy = None
+
             if result.policy is not None:
                 self.explore(family)
                 if policy_tree_node != policy_tree.root:
@@ -672,7 +696,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 continue
 
             # refine
-            suboptions,subfamilies = self.split(family, prop, result.hole_selection, result.splitter)
+            suboptions,subfamilies = self.split(family, prop, result.hole_selection, result.splitter, result.game_policy)
             if policy_tree_node != policy_tree.root:
                 family.mdp = None
             policy_tree_node.split(result.splitter,suboptions,subfamilies)
