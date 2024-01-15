@@ -682,6 +682,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node = undecided_leaves.pop(-1)
             family = policy_tree_node.family
             result = self.verify_family(family,game_solver,prop)
+            family.candidate_policy = None
 
             if result.policy is not None:
                 self.explore(family)
