@@ -735,19 +735,19 @@ namespace synthesis {
             this->row_action_option.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->action_holes[agent].resize(this->num_rows()); 
+               this->row_action_hole[agent].resize(this->num_rows()); 
             }
             this->row_memory_hole.clear();
             this->row_memory_hole.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->action_holes[agent].resize(this->num_rows()); 
+               this->row_action_hole[agent].resize(this->num_rows()); 
             }
             this->row_memory_option.clear();
             this->row_memory_option.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->action_holes[agent].resize(this->num_rows()); 
+               this->row_memory_hole[agent].resize(this->num_rows()); 
             }
             // // std::cout << "Hello from PomdpManager<ValueType>::resetDesignSpace()" << std::endl;
 
@@ -763,7 +763,36 @@ namespace synthesis {
             //     this->observation_actions[observation] = this->row_joint_action[state].size();
             // }
             // // std::cout << "this->observation_actions: " << this->observation_actions << std::endl;
-            
+            this->nr_agent_actions_at_observation.clear();
+            this->nr_agent_actions_at_observation.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->nr_agent_actions_at_observation[agent].resize(this->agent_observation_labels[agent].size(),0); 
+            }
+
+            for (int agent = 0; agent < this->num_agents; agent++){
+               for (int state = 0; state < this->num_states(); state++){
+                    auto joint_observation = this->state_joint_observation[state];
+                    auto obs = this->joint_observations[joint_observation][agent];
+                    if (this->nr_agent_actions_at_observation[agent][obs] != 0)
+                     {
+                        continue;
+                     } 
+                     auto actions = this->row_joint_action[state];
+                     std::set<uint_fast64_t> set_of_actions;
+                     for (auto action : actions)
+                     {
+                         set_of_actions.insert(this->joint_actions[action][agent]);
+                     }
+                    std::vector<uint_fast64_t> vec_of_actions;
+                    vec_of_actions.assign( set_of_actions.begin(), set_of_actions.end() );
+
+                     this->nr_agent_actions_at_observation[agent][obs] = vec_of_actions.size();
+               }
+                
+            }
+            std::cout << "this->nr_agent_actions_at_observation cpp" << this->nr_agent_actions_at_observation << std::endl;
+    
                         
 
         }

@@ -128,6 +128,7 @@ namespace synthesis {
         std::vector<std::vector<std::vector<uint64_t>>> action_holes;
         // for each observation, a list of memory holes
         std::vector<std::vector<std::vector<uint64_t>>>  memory_holes;
+        
         // for each hole, its size
         std::vector<uint64_t> hole_options;
 
@@ -203,7 +204,7 @@ namespace synthesis {
         //number of rows of the quotient mdp
         uint_fast64_t num_quotient_rows;
         
-
+        std::vector<std::vector<uint_fast64_t>> nr_agent_actions_at_observation;
         
     };
 
