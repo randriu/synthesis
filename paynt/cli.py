@@ -6,9 +6,10 @@ import paynt.quotient
 import paynt.quotient.pomdp
 import paynt.quotient.storm_pomdp_control
 
+import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
-import paynt.synthesizer.all_in_one
+import paynt.synthesizer.policy_tree
 
 import click
 import sys
@@ -95,7 +96,7 @@ def setup_logger(log_path = None):
 @click.option("--prune-storm", is_flag=True, default=False,
     help="only explore the main family suggested by Storm in each iteration. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
 @click.option("--use-storm-cutoffs", is_flag=True, default=False,
-    help="if set the storm randomized scheduler cutoffs are used during the prioritization of families. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
+    help="use storm randomized scheduler cutoffs are used during the prioritization of families. Can only be used together with --storm-pomdp flag. Can only be used together with --storm-pomdp flag")
 @click.option(
     "--unfold-strategy-storm",
     default="storm",
@@ -111,10 +112,14 @@ def setup_logger(log_path = None):
     help="base filename to output evaluation result")
 
 @click.option(
-    "--all-in-one", type=click.Choice(["sparse", "bdd"]), default=None,
-    show_default=True,
+    "--all-in-one", type=click.Choice(["sparse", "bdd"]), default=None, show_default=True,
     help="all in one MDP approach",
 )
+
+@click.option("--mdp-split-wrt-mdp", is_flag=True, default=False,
+    help="# if set, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used")
+@click.option("--mdp-discard-unreachable-actions", is_flag=True, default=False,
+    help="# if set, unreachable choices will be discarded from game abstraction scheduler")
 
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
@@ -133,6 +138,7 @@ def paynt_run(
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
+    mdp_split_wrt_mdp, mdp_discard_unreachable_actions,
     ce_generator,
     profiling
 ):
@@ -149,6 +155,9 @@ def paynt_run(
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
+
+    paynt.synthesizer.policy_tree.SynthesizerPolicyTree.split_wrt_mdp_scheduler = mdp_split_wrt_mdp
+    paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_actions_in_game_scheduler = mdp_discard_unreachable_actions
 
     storm_control = None
     if storm_pomdp:
