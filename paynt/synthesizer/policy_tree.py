@@ -8,6 +8,7 @@ import paynt.synthesizer.synthesizer
 import paynt.quotient.quotient
 import paynt.verification.property_result
 from paynt.verification.property import Property
+import paynt.utils.profiler
 
 import paynt.family.smt
 import paynt.synthesizer.conflict_generator.dtmc
@@ -406,9 +407,8 @@ class PolicyTree:
     
     def postprocess(self, quotient, prop):
 
-        import paynt.utils.profiler
-        postprocessing_time = paynt.utils.profiler.Timer()
-        postprocessing_time.start()
+        postprocessing_timer = paynt.utils.profiler.Timer()
+        postprocessing_timer.start()
         logger.info("post-processing the policy tree...")
 
         logger.info("merging SAT siblings solved by non-exclusively compatible policies...")
@@ -445,9 +445,10 @@ class PolicyTree:
         nodes_removed = nodes_before - self.root.num_nodes()
         logger.info("removed {} nodes".format(nodes_removed))
 
-        postprocessing_time.stop()
-        time = int(postprocessing_time.read())
+        postprocessing_timer.stop()
+        time = int(postprocessing_timer.read())
         logger.debug(f"postprocessing took {time} s")
+        return time
 
     
     def extract_policies(self, quotient):
@@ -527,7 +528,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_solver.solve(family.selected_choices, prop.maximizing, prop.minimizing)
         self.stat.iteration_game(family.mdp.states)
         game_value = game_solver.solution_value
-        game_sat = prop.satisfies_threshold(game_value)
+        game_sat = prop.satisfies_threshold_within_precision(game_value)
         # logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action
         # fix irrelevant choices
@@ -599,7 +600,12 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def choose_splitter(self, family, prop, scheduler_choices, state_values, hole_selection):
         inconsistent_assignments = {hole:options for hole,options in enumerate(hole_selection) if len(options) > 1}
         if len(inconsistent_assignments)==0:
+            # # pick any hole with multiple options involved in the hole selection
+            for hole,options in enumerate(hole_selection):
+                if family.hole_num_options(hole) > 1 and len(options) > 0:
+                    return hole
             # pick any hole with multiple options
+            logger.debug("picking an arbitrary hole...")
             for hole in range(family.num_holes):
                 if family.hole_num_options(hole) > 1:
                     return hole
@@ -656,12 +662,15 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policy_consistent = all([len(options) <= 1 for options in hole_selection])
         if policy_consistent:
             # associate the branch of the split that contains hole selection with the policy
-            assert len(used_options) == 1
-            option = used_options[0]
-            for subfamily in subfamilies:
-                if option in subfamily.hole_options(splitter):
-                    subfamily.candidate_policy = policy
-                    break
+            if len(used_options) != 1:
+                logger.warning(f"splitting wrt. hole that has {len(used_options)} options within the scheduler" +
+                    "(expected 1); most likely caused by model checking precision")
+            else:
+                option = used_options[0]
+                for subfamily in subfamilies:
+                    if option in subfamily.hole_options(splitter):
+                        subfamily.candidate_policy = policy
+                        break
 
         return suboptions,subfamilies
 
@@ -709,10 +718,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.stat.num_mdps_total = self.quotient.design_space.size
         self.stat.num_mdps_sat = sum([n.family.size for n in policy_tree.collect_sat()])
         self.stat.num_nodes = len(policy_tree.collect_all())
+        self.stat.num_leaves = len(policy_tree.collect_leaves())
         self.stat.num_policies = len(policy_tree.policies)
-        policy_tree.postprocess(self.quotient, prop)
+        postprocessing_time = policy_tree.postprocess(self.quotient, prop)
         policy_tree.print_stats()
+        self.stat.postprocessing_time = postprocessing_time
         self.stat.num_nodes_merged = len(policy_tree.collect_all())
+        self.stat.num_leaves_merged = len(policy_tree.collect_leaves())
         self.stat.num_policies_merged = len(policy_tree.policies)
         self.policy_tree = policy_tree
 

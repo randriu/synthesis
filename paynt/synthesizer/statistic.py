@@ -114,7 +114,7 @@ class Statistic:
         fraction_explored = (self.synthesizer.explored + discarded) / self.family_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
-        ret_str += f"Progress {percentage_explored}%"
+        ret_str += f"progress {percentage_explored}%"
         
         time_elapsed = int(self.synthesis_timer.read())
         ret_str += f", elapsed {time_elapsed} s"
@@ -253,26 +253,40 @@ class Statistic:
         print(self.num_mdps_total,end=" ")
         print(self.quotient.quotient_mdp.nr_states*self.num_mdps_total,end=" ")
         print(self.num_mdps_sat,end=" ")
-        sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,1)
+        sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,2)
         print(sat_by_total_percentage)
-        
 
-        synt_stats_header = "synt info:\t"
-        synt_stats_header += "\t".join(["time","nodes","nodes (merged)","policies","policies (merged)","policies(merged) / SAT %","game iters","MDP iters", "iters/MDPs"])
+
+        headers = [
+            "time","nodes","nodes (merged)","leaves","leaves (merged)","leaves (merged) / MDPs %",
+            "policies","policies (merged)","policies (merged) / SAT %","pp time","pp time %",
+            "game iters","MDP iters","iters/MDPs %"]
+        synt_stats_header = "synthesis info:\t" + "\t".join(headers)
         print(synt_stats_header)
+
         # print("\t\t",end="")
-        synthesis_timer = int(self.synthesis_timer.time)
-        print(synthesis_timer,end=" ")
+        synthesis_time = int(self.synthesis_timer.time)
+        print(synthesis_time,end=" ")
         print(self.num_nodes,end=" ")
         print(self.num_nodes_merged,end=" ")
+        
+        print(self.num_leaves,end=" ")
+        print(self.num_leaves_merged,end=" ")
+        leaves_by_mdps = round(self.num_leaves_merged/self.num_mdps_total*100,2)
+        print(leaves_by_mdps,end=" ")
+
         print(self.num_policies,end=" ")
         print(self.num_policies_merged,end=" ")
-        merged_by_sat_percentage = "N/A"
+        policies_by_sat = "N/A"
         if self.num_mdps_sat > 0:
-            merged_by_sat_percentage = round(self.num_policies_merged/self.num_mdps_sat*100,1)
-        print(merged_by_sat_percentage,end=" ")
+            policies_by_sat = round(self.num_policies_merged/self.num_mdps_sat*100,2)
+        print(policies_by_sat,end=" ")
+        print(self.postprocessing_time,end=" ")
+        postprocessing_time_percentage = round(self.postprocessing_time/synthesis_time*100,2)
+        print(postprocessing_time_percentage,end=" ")
+
         print(self.iterations_game,end=" ")
         print(self.iterations_mdp,end=" ")
-        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total,1)
+        iters_by_mdp = round((self.iterations_game+self.iterations_mdp)/self.num_mdps_total*100,2)
         print(iters_by_mdp)
         print()

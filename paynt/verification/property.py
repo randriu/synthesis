@@ -69,6 +69,10 @@ class Property:
 
         # set threshold
         self.threshold = rf.threshold_expr.evaluate_as_double()
+        if self.minimizing:
+            self.threshold_plus_precision = self.threshold + Property.model_checking_precision
+        else:
+            self.threshold_plus_precision = self.threshold - Property.model_checking_precision
 
         # construct quantitative formula (without bound) for explicit model checking
         # set optimality type
@@ -130,6 +134,9 @@ class Property:
 
     def satisfies_threshold(self, value):
         return self.result_valid(value) and self.op(value, self.threshold)
+
+    def satisfies_threshold_within_precision(self, value):
+        return self.result_valid(value) and self.op(value, self.threshold_plus_precision)
 
     @property
     def can_be_improved(self):
