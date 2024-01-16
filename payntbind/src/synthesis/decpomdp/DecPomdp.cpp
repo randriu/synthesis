@@ -469,7 +469,7 @@ namespace synthesis {
         // std::cout << "this->row_reward " << this->row_reward<< std::endl;
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
 
-        return this->constructMdp();
+        return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructMdp() { 
@@ -702,7 +702,7 @@ namespace synthesis {
                 prototype_row++;
                 }
             }
-            std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
+            // std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
             this->num_quotient_rows = this->row_prototype.size();
            
         }
