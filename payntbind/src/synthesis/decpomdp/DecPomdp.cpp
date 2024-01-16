@@ -791,7 +791,7 @@ namespace synthesis {
                }
                 
             }
-            std::cout << "this->nr_agent_actions_at_observation cpp" << this->nr_agent_actions_at_observation << std::endl;
+            // std::cout << "this->nr_agent_actions_at_observation cpp" << this->nr_agent_actions_at_observation << std::endl;
     
                         
 
@@ -803,26 +803,26 @@ namespace synthesis {
             // for each (z,n) create an action and a memory hole (if necessary)
             // store hole range
             // ? inverse mapping ?
-            // for (int agent = 0; agent < this->num_agents; agent++) {
-            //     for(uint64_t obs = 0; obs < this->agent_observation_labels[agent].size(); obs++) {
-            //         if(AGENT_OBSERVATION_ACTIONS[OBS] > 1) {
-            //             for(uint64_t mem = 0; mem <  std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) {
-            //                 this->action_holes[agent][obs].push_back(this->num_holes);
-            //                 this->hole_options.push_back(NUMBER OF agent actions on this observation); //TODO number of agent actions on this observation
-            //                 // std::cout << "created A(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->observation_actions[obs] << std::endl;
-            //                 this->num_holes++;
-            //             }
-            //         }
-            //         if(this->max_successor_memory_size[obs] > 1) {
-            //             for(uint64_t mem = 0; mem < std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) {
-            //                 this->memory_holes[agent][obs].push_back(this->num_holes);
-            //                 this->hole_options.push_back(std::pow(this->max_successor_memory_size[obs], 1.0 / this->num_agents));
-            //                 // std::cout << "created N(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->max_successor_memory_size[obs] << std::endl;
-            //                 this->num_holes++;
-            //             }
-            //         }
-            //     }
-            // }
+            for (int agent = 0; agent < this->num_agents; agent++) {
+                for(uint64_t obs = 0; obs < this->agent_observation_labels[agent].size(); obs++) {
+                    if(this->nr_agent_actions_at_observation[agent][obs] > 1) {
+                        for(uint64_t mem = 0; mem <  std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) {
+                            this->action_holes[agent][obs].push_back(this->num_holes);
+                            this->hole_options.push_back(this->nr_agent_actions_at_observation[agent][obs]);
+                            // std::cout << "created A(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->observation_actions[obs] << std::endl;
+                            this->num_holes++;
+                        }
+                    }
+                    if(this->max_successor_memory_size[obs] > 1) {
+                        for(uint64_t mem = 0; mem < std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) {
+                            this->memory_holes[agent][obs].push_back(this->num_holes);
+                            this->hole_options.push_back(std::pow(this->max_successor_memory_size[obs], 1.0 / this->num_agents));
+                            // std::cout << "created N(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->max_successor_memory_size[obs] << std::endl;
+                            this->num_holes++;
+                        }
+                    }
+                }
+            }
 
             // // map each row to some action (memory) hole (if applicable) and its value
             // for(uint64_t state = 0; state < this->num_states; state++) {
