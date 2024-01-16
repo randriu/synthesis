@@ -482,6 +482,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     # if True, tree leaves will be double-checked after synthesis
     double_check_policy_tree_leaves = False
+    # if True, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used
+    split_wrt_mdp_scheduler = False
+    # if True, unreachable choices will be discarded from game abstraction scheduler
+    discard_unreachable_actions_in_game_scheduler = False
     
     @property
     def method_name(self):
@@ -543,7 +547,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         state_values = game_solver.solution_state_values
         state_to_choice = game_solver.solution_state_to_quotient_choice.copy()
         # uncomment this to use only reachable choices of the game scheduler
-        # state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
+        if SynthesizerPolicyTree.discard_unreachable_actions_in_game_scheduler:
+            state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
         scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
         hole_selection = self.quotient.coloring.collectHoleOptions(scheduler_choices)
         return scheduler_choices,state_values,hole_selection
@@ -589,8 +594,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             return mdp_family_result
 
         # undecided: choose scheduler choices to be used for splitting
-        scheduler_choices,state_values,hole_selection = self.parse_game_scheduler(game_solver)
-        # scheduler_choices,state_values,hole_selection = self.parse_mdp_scheduler(family, mdp_result)
+        if not SynthesizerPolicyTree.split_wrt_mdp_scheduler:
+            scheduler_choices,state_values,hole_selection = self.parse_game_scheduler(game_solver)
+        else:
+            scheduler_choices,state_values,hole_selection = self.parse_mdp_scheduler(family, mdp_result)
 
         splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
         mdp_family_result.splitter = splitter
@@ -605,7 +612,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 if family.hole_num_options(hole) > 1 and len(options) > 0:
                     return hole
             # pick any hole with multiple options
-            logger.debug("picking an arbitrary hole...")
+            # logger.debug("picking an arbitrary hole...")
             for hole in range(family.num_holes):
                 if family.hole_num_options(hole) > 1:
                     return hole
@@ -629,6 +636,21 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
         return scores
 
+    def assign_candidate_policy(self, subfamilies, hole_selection, splitter, policy):
+        policy_consistent = all([len(options) <= 1 for options in hole_selection])
+        if not policy_consistent:
+            return
+        # associate the branch of the split that contains hole selection with the policy
+        used_options = hole_selection[splitter]
+        if len(used_options) != 1:
+            # not sure what to do in this case
+            return
+        option = used_options[0]
+        for subfamily in subfamilies:
+            if option in subfamily.hole_options(splitter):
+                subfamily.candidate_policy = policy
+                return
+
     def split(self, family, prop, hole_selection, splitter, policy):
         # split the hole
         used_options = hole_selection[splitter]
@@ -647,7 +669,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             half = len(options) // 2
             suboptions = [options[:half], options[half:]]
 
-
         # construct corresponding design subspaces
         subfamilies = []
         family.splitter = splitter
@@ -659,18 +680,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subfamily.candidate_policy = None
             subfamilies.append(subfamily)
 
-        policy_consistent = all([len(options) <= 1 for options in hole_selection])
-        if policy_consistent:
-            # associate the branch of the split that contains hole selection with the policy
-            if len(used_options) != 1:
-                logger.warning(f"splitting wrt. hole that has {len(used_options)} options within the scheduler" +
-                    "(expected 1); most likely caused by model checking precision")
-            else:
-                option = used_options[0]
-                for subfamily in subfamilies:
-                    if option in subfamily.hole_options(splitter):
-                        subfamily.candidate_policy = policy
-                        break
+        if not SynthesizerPolicyTree.split_wrt_mdp_scheduler and not SynthesizerPolicyTree.discard_unreachable_actions_in_game_scheduler:
+            self.assign_candidate_policy(subfamilies, hole_selection, splitter, policy)
 
         return suboptions,subfamilies
 
