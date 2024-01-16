@@ -468,7 +468,8 @@ namespace synthesis {
         components.transitionMatrix = this->constructQuotientTransitionMatrix();
         // std::cout << "this->row_reward " << this->row_reward<< std::endl;
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
-
+        this->resetDesignSpace();
+        this->buildDesignSpaceSpurious(); 
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
@@ -705,6 +706,124 @@ namespace synthesis {
             // std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
             this->num_quotient_rows = this->row_prototype.size();
            
+        }
+
+    void DecPomdp::resetDesignSpace() {
+            auto num_observations = this->num_joint_observations();
+            this->num_holes = 0;
+            this->action_holes.clear();
+            this->action_holes.resize(this->num_agents); 
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->action_holes[agent].resize(this->agent_num_observations(agent)); 
+            }
+            this->memory_holes.clear();
+            this->memory_holes.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->memory_holes[agent].resize(this->agent_num_observations(agent)); 
+            }
+            this->hole_options.clear();
+
+            this->row_action_hole.clear();
+            this->row_action_hole.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->action_holes[agent].resize(this->num_rows()); 
+            }
+            this->row_action_option.clear();
+            this->row_action_option.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->action_holes[agent].resize(this->num_rows()); 
+            }
+            this->row_memory_hole.clear();
+            this->row_memory_hole.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->action_holes[agent].resize(this->num_rows()); 
+            }
+            this->row_memory_option.clear();
+            this->row_memory_option.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->action_holes[agent].resize(this->num_rows()); 
+            }
+            // // std::cout << "Hello from PomdpManager<ValueType>::resetDesignSpace()" << std::endl;
+
+            // this->observation_actions.resize(this->num_joint_observations(),0);
+
+            // // TODO MEM: change states to prototype states
+            // for(uint64_t state = 0; state < this->num_states(); state++) {
+            //     auto observation = this->state_joint_observation[state];
+                
+            //     if(this->observation_actions[observation] != 0) {
+            //         continue;
+            //     }
+            //     this->observation_actions[observation] = this->row_joint_action[state].size();
+            // }
+            // // std::cout << "this->observation_actions: " << this->observation_actions << std::endl;
+            
+                        
+
+        }
+
+    void DecPomdp::buildDesignSpaceSpurious() {
+            this->resetDesignSpace();
+            
+            // for each (z,n) create an action and a memory hole (if necessary)
+            // store hole range
+            // ? inverse mapping ?
+            // for (int agent = 0; agent < this->num_agents; agent++) {
+            //     for(uint64_t obs = 0; obs < this->agent_observation_labels[agent].size(); obs++) {
+            //         if(AGENT_OBSERVATION_ACTIONS[OBS] > 1) {
+            //             for(uint64_t mem = 0; mem <  std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) {
+            //                 this->action_holes[agent][obs].push_back(this->num_holes);
+            //                 this->hole_options.push_back(NUMBER OF agent actions on this observation); //TODO number of agent actions on this observation
+            //                 // std::cout << "created A(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->observation_actions[obs] << std::endl;
+            //                 this->num_holes++;
+            //             }
+            //         }
+            //         if(this->max_successor_memory_size[obs] > 1) {
+            //             for(uint64_t mem = 0; mem < std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) {
+            //                 this->memory_holes[agent][obs].push_back(this->num_holes);
+            //                 this->hole_options.push_back(std::pow(this->max_successor_memory_size[obs], 1.0 / this->num_agents));
+            //                 // std::cout << "created N(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->max_successor_memory_size[obs] << std::endl;
+            //                 this->num_holes++;
+            //             }
+            //         }
+            //     }
+            // }
+
+            // // map each row to some action (memory) hole (if applicable) and its value
+            // for(uint64_t state = 0; state < this->num_states; state++) {
+            //     auto prototype = this->state_prototype[state];
+            //     auto obs = this->pomdp.getObservation(prototype);
+            //     auto mem = this->state_memory[state];
+            //     for (uint64_t row = this->row_groups[state]; row < this->row_groups[state+1]; row++) {
+            //         auto prototype_row = this->row_prototype[row];
+            //         auto row_index = this->prototype_row_index[prototype_row];
+            //         auto row_mem = this->row_memory[row];
+            //         if(this->observation_actions[obs] > 1) {
+            //             // there is an action hole that corresponds to this state
+            //             auto action_hole = this->action_holes[obs][mem];
+            //             this->row_action_hole[row] = action_hole;
+            //             this->row_action_option[row] = row_index;
+            //         } else {
+            //             // no corresponding action hole
+            //             this->row_action_hole[row] = this->num_holes;
+            //         }
+            //         if(this->max_successor_memory_size[obs] > 1) {
+            //             // there is a memory hole that corresponds to this state
+            //             auto memory_hole = this->memory_holes[obs][mem];
+            //             this->row_memory_hole[row] = memory_hole;
+            //             this->row_memory_option[row] = row_mem;
+            //         } else {
+            //             this->row_memory_hole[row] = this->num_holes;
+            //         }
+            //         // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
+            //     }   
+            // }
         }
 
 }

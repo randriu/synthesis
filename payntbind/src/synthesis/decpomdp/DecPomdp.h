@@ -121,6 +121,24 @@ namespace synthesis {
         // for each observation contains the maximum memory size of a destination
         // across all rows of a prototype state having this observation
         std::vector<uint64_t> max_successor_memory_size;
+
+        // total number of holes
+        uint64_t num_holes;
+        // for each observation, a list of action holes
+        std::vector<std::vector<std::vector<uint64_t>>> action_holes;
+        // for each observation, a list of memory holes
+        std::vector<std::vector<std::vector<uint64_t>>>  memory_holes;
+        // for each hole, its size
+        std::vector<uint64_t> hole_options;
+
+        // for each row, the corresponding action hole
+        std::vector<std::vector<uint64_t>> row_action_hole;
+        // for each row, the corresponding option of the action hole
+        std::vector<std::vector<uint64_t>> row_action_option;
+        // for each row, the corresponding memory hole
+        std::vector<std::vector<uint64_t>> row_memory_hole;
+        // for each row, the corresponding option of the memory hole
+        std::vector<std::vector<uint64_t>> row_memory_option;
             
 
 
@@ -169,6 +187,9 @@ namespace synthesis {
         storm::models::sparse::ChoiceLabeling constructQuotientChoiceLabeling();
         storm::storage::SparseMatrix<double> constructQuotientTransitionMatrix();
         storm::models::sparse::StandardRewardModel<double> constructQuotientRewardModel();
+
+        void resetDesignSpace();
+        void buildDesignSpaceSpurious(); 
 
         // for each prototype state contains a list of its duplicates (including itself)
         std::vector<std::vector<uint64_t>> prototype_duplicates;
