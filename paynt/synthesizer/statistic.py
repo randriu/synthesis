@@ -256,7 +256,6 @@ class Statistic:
         sat_by_total_percentage = round(self.num_mdps_sat/self.num_mdps_total*100,2)
         print(sat_by_total_percentage)
 
-
         headers = [
             "time","nodes","nodes (merged)","leaves","leaves (merged)","leaves (merged) / MDPs %",
             "policies","policies (merged)","policies (merged) / SAT %","pp time","pp time %",
