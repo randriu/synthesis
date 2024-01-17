@@ -647,7 +647,9 @@ namespace synthesis {
             group_index = 0;
         
         }
-        // std::cout << "this->prototype_row_index[row_index] " << this->prototype_row_index << std::endl;
+        std::cout << "this->num_rows() " << this->prototype_row_index << std::endl;
+
+        std::cout << "this->prototype_row_index " << this->num_rows()  << std::endl;
         
         for(uint64_t obs = 0; obs < num_observations; obs++) {
             this->observation_successors[obs] = std::vector<uint64_t>(
@@ -684,6 +686,7 @@ namespace synthesis {
             this->row_memory.clear();
 
             uint64_t prototype_row = 0;
+            uint64_t old_prototype_state = this->num_states();
             
             // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
             for(uint64_t state = 0; state < this->num_quotient_states; state++) {
@@ -700,10 +703,16 @@ namespace synthesis {
                         this->row_memory.push_back(dst_mem);
                         // std::cout << "5 " << std::endl;
                     }
-                prototype_row++;
+                    if (prototype_state != old_prototype_state)
+                    {
+                        prototype_row++;
+                    }
+
+
                 }
+                old_prototype_state = prototype_state;
             }
-            // std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
+            std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
             this->num_quotient_rows = this->row_prototype.size();
            
         }
@@ -729,25 +738,25 @@ namespace synthesis {
             this->row_action_hole.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->action_holes[agent].resize(this->num_rows()); 
+               this->row_action_hole[agent].resize(this->num_quotient_rows); 
             }
             this->row_action_option.clear();
             this->row_action_option.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->row_action_hole[agent].resize(this->num_rows()); 
+               this->row_action_option[agent].resize(this->num_quotient_rows); 
             }
             this->row_memory_hole.clear();
             this->row_memory_hole.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->row_action_hole[agent].resize(this->num_rows()); 
+               this->row_memory_hole[agent].resize(this->num_quotient_rows); 
             }
             this->row_memory_option.clear();
             this->row_memory_option.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->row_memory_hole[agent].resize(this->num_rows()); 
+               this->row_memory_option[agent].resize(this->num_quotient_rows); 
             }
             // // std::cout << "Hello from PomdpManager<ValueType>::resetDesignSpace()" << std::endl;
 
@@ -823,36 +832,51 @@ namespace synthesis {
                     }
                 }
             }
+            std::cout << "action_holes" << action_holes << std::endl;
 
+
+
+            uint64_t row = 0;
             // // map each row to some action (memory) hole (if applicable) and its value
-            // for(uint64_t state = 0; state < this->num_states; state++) {
-            //     auto prototype = this->state_prototype[state];
-            //     auto obs = this->pomdp.getObservation(prototype);
-            //     auto mem = this->state_memory[state];
-            //     for (uint64_t row = this->row_groups[state]; row < this->row_groups[state+1]; row++) {
-            //         auto prototype_row = this->row_prototype[row];
-            //         auto row_index = this->prototype_row_index[prototype_row];
-            //         auto row_mem = this->row_memory[row];
-            //         if(this->observation_actions[obs] > 1) {
-            //             // there is an action hole that corresponds to this state
-            //             auto action_hole = this->action_holes[obs][mem];
-            //             this->row_action_hole[row] = action_hole;
-            //             this->row_action_option[row] = row_index;
-            //         } else {
-            //             // no corresponding action hole
-            //             this->row_action_hole[row] = this->num_holes;
-            //         }
-            //         if(this->max_successor_memory_size[obs] > 1) {
-            //             // there is a memory hole that corresponds to this state
-            //             auto memory_hole = this->memory_holes[obs][mem];
-            //             this->row_memory_hole[row] = memory_hole;
-            //             this->row_memory_option[row] = row_mem;
-            //         } else {
-            //             this->row_memory_hole[row] = this->num_holes;
-            //         }
-            //         // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
-            //     }   
-            // }
+            for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+                auto prototype = this->state_prototype[state];
+                auto obs = this->state_joint_observation[state];
+                auto mem = this->state_memory[state];
+                for(auto matrix_row: this->transition_matrix[prototype]) {
+                    for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[obs]; dst_mem++) {
+                        auto prototype_row = this->row_prototype[row];
+                        // std::cout <<  "prototype_row " << prototype_row << std::endl;
+                        auto row_index = this->prototype_row_index[prototype_row]; //TODO check it
+                        // std::cout <<  "row_index " << row_index << std::endl;
+                        auto row_mem = this->row_memory[row];
+                        for (int agent = 0; agent < this->num_agents; agent++) {
+                            if(this->nr_agent_actions_at_observation[agent][obs] > 1)  {
+                                // there is an action hole that corresponds to this state
+                                // auto action_hole = this->action_holes[agent][0][mem];
+
+                                 // std::cout << "action_hole " << action_hole << std::endl;
+                                // this->row_action_hole[agent][row] = action_hole;
+                                // this->row_action_option[agent][row] = row_index;
+                            } 
+                            // else {
+            //                     // no corresponding action hole
+            //                     this->row_action_hole[agent][row] = this->num_holes;
+            //                 }
+            //                 if(this->max_successor_memory_size[obs] > 1) {
+            //                     // there is a memory hole that corresponds to this state
+            //                     auto memory_hole = this->memory_holes[agent][obs][mem];
+            //                     this->row_memory_hole[agent][row] = memory_hole;
+            //                     this->row_memory_option[agent][row] = row_mem;
+            //                 } else {
+            //                     this->row_memory_hole[agent][row] = this->num_holes;
+            //                 }
+            //             // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
+                        }
+                        row++;
+                    }
+
+                }   
+            }
         }
 
 }
