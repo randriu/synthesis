@@ -127,7 +127,7 @@ class Quotient:
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states
 
-    def keep_reachable_choices_of_scheduler(self, state_to_choice):
+    def discard_unreachable_choices(self, state_to_choice):
         state_to_choice_reachable = self.empty_scheduler()
         state_visited = [False]*self.quotient_mdp.nr_states
         initial_state = list(self.quotient_mdp.initial_states)[0]
@@ -143,15 +143,15 @@ class Quotient:
                     state_queue.append(dst)
         return state_to_choice_reachable
 
-    def scheduler_to_state_to_choice(self, mdp, scheduler, keep_reachable_choices=True):
+    def scheduler_to_state_to_choice(self, mdp, scheduler, discard_unreachable_choices=True):
         state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, mdp.model, mdp.quotient_choice_map)
         state_to_choice = self.empty_scheduler()
         for state in range(mdp.model.nr_states):
             quotient_choice = state_to_quotient_choice[state]
             quotient_state = mdp.quotient_state_map[state]
             state_to_choice[quotient_state] = quotient_choice
-        if keep_reachable_choices:
-            state_to_choice = self.keep_reachable_choices_of_scheduler(state_to_choice)
+        if discard_unreachable_choices:
+            state_to_choice = self.discard_unreachable_choices(state_to_choice)
         return state_to_choice
 
     def state_to_choice_to_choices(self, state_to_choice):
