@@ -485,7 +485,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     # if True, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used
     split_wrt_mdp_scheduler = False
     # if True, unreachable choices will be discarded from the splitting scheduler
-    discard_unreachable_actions = False
+    discard_unreachable_choices = False
     # if True, randomized abstraction guess-and-verify will be used instead of game abstraction
     use_randomized_abstraction = False
     
@@ -572,31 +572,31 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         # apply policy and check if it is SAT for all MDPs in the family
         policy_sat = self.verify_policy(family, prop, policy)
-
         return policy,policy_sat
 
-    def state_to_choice_to_scheduler(self, state_to_choice):
-        # uncomment this to use only reachable choices of the game scheduler
-        if SynthesizerPolicyTree.discard_unreachable_actions:
-            state_to_choice = self.quotient.keep_reachable_choices_of_scheduler(state_to_choice)
+    def state_to_choice_to_hole_selection(self, state_to_choice):
+        if SynthesizerPolicyTree.discard_unreachable_choices:
+            state_to_choice = self.quotient.discard_unreachable_choices(state_to_choice)
         scheduler_choices = self.quotient.state_to_choice_to_choices(state_to_choice)
         hole_selection = self.quotient.coloring.collectHoleOptions(scheduler_choices)
         return scheduler_choices,hole_selection
 
     def parse_game_scheduler(self, game_solver):
-        state_values = game_solver.solution_state_values
         state_to_choice = game_solver.solution_state_to_quotient_choice.copy()
-        scheduler_choices,hole_selection = self.state_to_choice_to_scheduler(state_to_choice)
-        return scheduler_choices,state_values,hole_selection
+        scheduler_choices,hole_selection = self.state_to_choice_to_hole_selection(state_to_choice)
+        state_values = game_solver.solution_state_values
+        return scheduler_choices,hole_selection,state_values
 
     def parse_mdp_scheduler(self, family, mdp_result):
-        state_to_choice = self.quotient.scheduler_to_state_to_choice(family.mdp, mdp_result.result.scheduler)
-        scheduler_choices,hole_selection = self.state_to_choice_to_scheduler(state_to_choice)
+        state_to_choice = self.quotient.scheduler_to_state_to_choice(
+            family.mdp, mdp_result.result.scheduler, discard_unreachable_choices=False
+        )
+        scheduler_choices,hole_selection = self.state_to_choice_to_hole_selection(state_to_choice)
         state_values = [0] * self.quotient.quotient_mdp.nr_states
         for state in range(family.mdp.states):
             quotient_state = family.mdp.quotient_state_map[state]
             state_values[quotient_state] = mdp_result.result.at(state)
-        return scheduler_choices,state_values,hole_selection
+        return scheduler_choices,hole_selection,state_values
 
     
     def verify_family(self, family, game_solver, prop):
@@ -638,9 +638,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         # undecided: choose scheduler choices to be used for splitting
         if not (SynthesizerPolicyTree.use_randomized_abstraction or SynthesizerPolicyTree.split_wrt_mdp_scheduler):
-            scheduler_choices,state_values,hole_selection = self.parse_game_scheduler(game_solver)
+            scheduler_choices,hole_selection,state_values = self.parse_game_scheduler(game_solver)
         else:
-            scheduler_choices,state_values,hole_selection = self.parse_mdp_scheduler(family, mdp_result)
+            scheduler_choices,hole_selection,state_values = self.parse_mdp_scheduler(family, mdp_result)
 
         splitter = self.choose_splitter(family,prop,scheduler_choices,state_values,hole_selection)
         mdp_family_result.splitter = splitter
@@ -723,7 +723,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             subfamily.candidate_policy = None
             subfamilies.append(subfamily)
 
-        if not (SynthesizerPolicyTree.use_randomized_abstraction or SynthesizerPolicyTree.split_wrt_mdp_scheduler) and not SynthesizerPolicyTree.discard_unreachable_actions:
+        if not (SynthesizerPolicyTree.use_randomized_abstraction or SynthesizerPolicyTree.split_wrt_mdp_scheduler) and not SynthesizerPolicyTree.discard_unreachable_choices:
             self.assign_candidate_policy(subfamilies, hole_selection, splitter, policy)
 
         return suboptions,subfamilies
