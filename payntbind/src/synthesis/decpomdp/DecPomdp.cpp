@@ -836,51 +836,55 @@ namespace synthesis {
                     }
                 }
             }
-            std::cout << "action_holes" << action_holes << std::endl;
+            std::cout << "this->memory_holes" << this->memory_holes << std::endl;
+            // std::cout << "action_holes" << action_holes << std::endl;
+            // std::cout << "this->row_prototype.size()" << this->row_prototype.size() << std::endl;
 
 
 
-            // uint64_t row = 0;
-            // // // map each row to some action (memory) hole (if applicable) and its value
-            // for(uint64_t state = 0; state < this->num_quotient_states; state++) {
-            //     auto prototype = this->state_prototype[state];
-            //     auto obs = this->state_joint_observation[state];
-            //     auto mem = this->state_memory[state];
-            //     for(auto matrix_row: this->transition_matrix[prototype]) {
-            //         for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[obs]; dst_mem++) {
-            //             auto prototype_row = this->row_prototype[row];
-            //             std::cout <<  "prototype_row " << prototype_row << std::endl;
-            //             auto row_index = this->prototype_row_index[prototype_row]; //TODO check it
-            //             std::cout <<  "row_index " << row_index << std::endl;
-            //             auto row_mem = this->row_memory[row];
-            //             for (int agent = 0; agent < this->num_agents; agent++) {
-            //                 if(this->nr_agent_actions_at_observation[agent][obs] > 1)  {
-            //                     // there is an action hole that corresponds to this state
-            //                     // auto action_hole = this->action_holes[agent][0][mem];
+            uint64_t row = 0;
+            // // map each row to some action (memory) hole (if applicable) and its value
+            for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+                auto prototype = this->state_prototype[state];
+                auto obs = this->state_joint_observation[prototype];
+                auto mem = this->state_memory[state];
+                for(auto matrix_row: this->transition_matrix[prototype]) {
+                    for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[obs]; dst_mem++) {
+                        auto prototype_row = this->row_prototype[row];
+                        // std::cout <<  "prototype_row " << std::endl;
+                        // std::cout <<  "row " << row << std::endl;
+                        auto row_index = this->prototype_row_index[prototype_row]; //TODO check it
+                        // std::cout <<  "row_index " << row_index << std::endl;
+                        auto row_mem = this->row_memory[row];
+                        for (int agent = 0; agent < this->num_agents; agent++) {
+                            if(this->nr_agent_actions_at_observation[agent][obs] > 1)  {
+                                // there is an action hole that corresponds to this state
+                                auto action_hole = this->action_holes[agent][0][mem];
 
-            //                     //  std::cout << "action_hole " << action_hole << std::endl;
-            //                     // this->row_action_hole[agent][row] = action_hole;
-            //                     // this->row_action_option[agent][row] = row_index;
-            //                 } 
-            //                 // else {
-            // //                     // no corresponding action hole
-            // //                     this->row_action_hole[agent][row] = this->num_holes;
-            // //                 }
-            // //                 if(this->max_successor_memory_size[obs] > 1) {
-            // //                     // there is a memory hole that corresponds to this state
-            // //                     auto memory_hole = this->memory_holes[agent][obs][mem];
-            // //                     this->row_memory_hole[agent][row] = memory_hole;
-            // //                     this->row_memory_option[agent][row] = row_mem;
-            // //                 } else {
-            // //                     this->row_memory_hole[agent][row] = this->num_holes;
-            // //                 }
-            // //             // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
-            //             }
-            //             row++;
-            //         }
+                                //  std::cout << "action_hole " << action_hole << std::endl;
+                                this->row_action_hole[agent][row] = action_hole;
+                                this->row_action_option[agent][row] = row_index;
+                            } 
+                            else {
+                                // no corresponding action hole
+                                this->row_action_hole[agent][row] = this->num_holes;
+                            }
+                            if(this->max_successor_memory_size[obs] > 1) {
+                                // there is a memory hole that corresponds to this state
+                                // auto memory_hole = this->memory_holes[agent][obs][mem];
+                                // std::cout << "memory_hole " << memory_hole << std::endl;
+                                // this->row_memory_hole[agent][row] = memory_hole;
+                                // this->row_memory_option[agent][row] = row_mem;
+                            } else {
+                                // this->row_memory_hole[agent][row] = this->num_holes;
+                            }
+            //             // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
+                        }
+                        row++;
+                    }
 
-            //     }   
-            // }
+                }   
+            }
         }
 
 }
