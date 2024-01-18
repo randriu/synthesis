@@ -647,9 +647,9 @@ namespace synthesis {
             group_index = 0;
         
         }
-        std::cout << "this->num_rows() " << this->prototype_row_index << std::endl;
+        // std::cout << "this->num_rows() " << this->prototype_row_index << std::endl;
 
-        std::cout << "this->prototype_row_index " << this->num_rows()  << std::endl;
+        // std::cout << "this->prototype_row_index " << this->num_rows()  << std::endl;
         
         for(uint64_t obs = 0; obs < num_observations; obs++) {
             this->observation_successors[obs] = std::vector<uint64_t>(
@@ -716,7 +716,7 @@ namespace synthesis {
                 }
                 old_prototype_state = prototype_state;
             }
-            std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
+            // std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
             this->num_quotient_rows = this->row_prototype.size();
            
         }
@@ -896,10 +896,10 @@ namespace synthesis {
                 }
             }
 
-            std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
-            std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; //OK
-            std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; // snad ok :D
-            std::cout << "this->row_action_option " << this->row_action_option << std::endl; //OK
+            // std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
+            // std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; 
+            // std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; 
+            // std::cout << "this->row_action_option " << this->row_action_option << std::endl; 
 
         }
 
