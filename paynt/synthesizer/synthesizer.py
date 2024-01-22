@@ -112,10 +112,11 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def synthesize(self, family=None, optimum_threshold=None, return_all=False, print_stats=True):
+    def synthesize(self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True):
         '''
         :param family family of assignment to search in
-        :param optimum_threshold known value of the optimum value
+        :param optimum_threshold known bound on the optimum value
+        :param keep_optimum if True, the optimality specification will not be reset upon finish
         :param return_all if True and the synthesis returns a family, all assignments will be returned instead of an
             arbitrary one
         :param print_stats if True, synthesis stats will be printed upon completion
@@ -143,9 +144,13 @@ class Synthesizer:
             model = self.quotient.build_assignment(assignment)
             mc_result = model.check_specification(self.quotient.specification)
             logger.info(f"double-checking specification satisfiability: {mc_result}")
-        
+
         if print_stats:
             self.stat.print()
+
+        if not keep_optimum:
+            self.quotient.specification.reset()
+
         return assignment
 
     

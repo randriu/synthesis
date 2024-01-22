@@ -93,7 +93,7 @@ class SynthesizerPOMDP:
     def synthesize(self, family, print_stats=True):
         synthesizer = self.synthesizer(self.quotient)
         family.constraint_indices = self.quotient.design_space.constraint_indices
-        assignment = synthesizer.synthesize(family, print_stats=print_stats)
+        assignment = synthesizer.synthesize(family, keep_optimum=True, print_stats=print_stats)
         self.total_iters += synthesizer.stat.iterations_mdp
         return assignment
 

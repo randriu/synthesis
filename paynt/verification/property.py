@@ -199,11 +199,9 @@ class OptimalityProperty(Property):
         if rf.optimality_type == stormpy.OptimizationDirection.Minimize:
             self.minimizing = True
             self.op = operator.lt
-            self.threshold = math.inf
         else:
             self.minimizing = False
             self.op = operator.gt
-            self.threshold = -math.inf
 
         # construct quantitative formula (without bound) for explicit model checking
         self.formula = rf.clone()
@@ -212,6 +210,9 @@ class OptimalityProperty(Property):
         # additional optimality stuff
         self.optimum = None
         self.epsilon = epsilon
+
+        self.reset()
+
 
     def __str__(self):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
@@ -222,6 +223,10 @@ class OptimalityProperty(Property):
 
     def reset(self):
         self.optimum = None
+        if self.minimizing:
+            self.threshold = math.inf
+        else:
+            self.threshold = -math.inf
 
     def meets_op(self, a, b):
         ''' For optimality objective, we want to accept improvements above model checking precision. '''
@@ -235,7 +240,6 @@ class OptimalityProperty(Property):
 
     def update_optimum(self, optimum):
         # assert self.improves_optimum(optimum)
-        #logger.debug(f"New opt = {optimum}.")
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)
