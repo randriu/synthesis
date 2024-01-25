@@ -115,6 +115,9 @@ namespace synthesis {
         /** Number of states of quotient mdp. */
         uint_fast64_t num_quotient_states;
 
+        //number of rows of the quotient mdp
+        uint_fast64_t num_quotient_rows;
+
         // for each observation, a list of successor observations
         std::vector<std::vector<uint64_t>> observation_successors;
 
@@ -201,8 +204,7 @@ namespace synthesis {
         std::vector<uint64_t> row_prototype;
         // for each row contains a memory update associated with it 
         std::vector<uint64_t> row_memory;
-        //number of rows of the quotient mdp
-        uint_fast64_t num_quotient_rows;
+        
         
         std::vector<std::vector<uint_fast64_t>> nr_agent_actions_at_observation;
         

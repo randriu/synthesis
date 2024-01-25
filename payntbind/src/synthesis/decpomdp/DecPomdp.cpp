@@ -884,7 +884,7 @@ namespace synthesis {
                                 // there is a memory hole that corresponds to this state
                                 auto memory_hole = this->memory_holes[agent][obs][mem];
                                 this->row_memory_hole[agent][row] = memory_hole;
-                                this->row_memory_option[agent][row] = row_mem;
+                                this->row_memory_option[agent][row] = mem;
                             } else {
                                 this->row_memory_hole[agent][row] = this->num_holes;
                             }

@@ -12,6 +12,7 @@ void bindings_decpomdp(py::module& m) {
         .def("set_global_memory_size", &synthesis::DecPomdp::setGlobalMemorySize, py::arg("memory_size"))
         .def_property_readonly("observation_memory_size", [](synthesis::DecPomdp& decpomdp) {return decpomdp.observation_memory_size;})
         .def_property_readonly("num_agents", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_agents;})
+        .def_property_readonly("num_quotient_rows", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_quotient_rows;})
         .def_property_readonly("joint_observations", [](synthesis::DecPomdp& decpomdp) {return decpomdp.joint_observations;})
         .def_property_readonly("agent_observation_labels", [](synthesis::DecPomdp& decpomdp) {return decpomdp.agent_observation_labels;})
         
@@ -26,6 +27,14 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("state_joint_observation", [](synthesis::DecPomdp& decpomdp) {return decpomdp.state_joint_observation;},"state_joint_observation")
         .def_property_readonly("joint_actions", [](synthesis::DecPomdp& decpomdp) {return decpomdp.joint_actions;})
         .def_property_readonly("agent_action_labels", [](synthesis::DecPomdp& decpomdp) {return decpomdp.agent_action_labels;})
+        .def_property_readonly("max_successor_memory_size", [](synthesis::DecPomdp& decpomdp) {return decpomdp.max_successor_memory_size;})
+
+        .def_property_readonly("row_action_hole", [](synthesis::DecPomdp& decpomdp) {return decpomdp.row_action_hole;})
+        .def_property_readonly("row_action_option", [](synthesis::DecPomdp& decpomdp) {return decpomdp.row_action_option;})
+        .def_property_readonly("row_memory_hole", [](synthesis::DecPomdp& decpomdp) {return decpomdp.row_memory_hole;})
+        .def_property_readonly("row_memory_option", [](synthesis::DecPomdp& decpomdp) {return decpomdp.row_memory_option;})
+        .def_property_readonly("num_holes", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_holes;})
+
 
 
         //new
@@ -41,8 +50,6 @@ void bindings_decpomdp(py::module& m) {
         // .def("apply_discount_factor_transformation", &storm::synthesis::DecPomdp::applyDiscountFactorTransformation)
         // .def_property_readonly("discount_sink_label", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.discount_sink_label;})
 
-        // .def_property_readonly("row_action_hole", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_action_hole;})
-        // .def_property_readonly("row_action_option", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_action_option;})
         // .def_property_readonly("num_holes", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.num_holes;})
 
         // .def_property_readonly("row_prototype", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_prototype;})
@@ -59,7 +66,6 @@ void bindings_decpomdp(py::module& m) {
         // .def_property_readonly("row_reward", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_reward;}, "for each row group, a list of row rewards")
         // .def_property_readonly("row_joint_action", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_joint_action;}, "row_joint_action")
         // .def_property_readonly("agent_observation_labels", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.agent_observation_labels;})
-        // .def_property_readonly("max_successor_memory_size", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.max_successor_memory_size;})
         ;
 
 
