@@ -235,12 +235,14 @@ class PolicyTreeNode:
     def add_nodes_to_graphviz_tree(self, graphviz_tree):
         node_label = ""
         if self.sat is False:
-            node_label = "X"
+            node_label = "∅"
+            # node_label = "X"
         elif self.sat is True:
             # node_label = "✓"
             node_label = f"p{self.policy_index}"
         graphviz_tree.node(self.node_id, label=node_label, shape="ellipse", width="0.15", height="0.15")
-        for child in self.child_nodes:
+        # enumerating in reverse to print policies in ascending order, from left to right
+        for child in reversed(self.child_nodes):
             child.add_nodes_to_graphviz_tree(graphviz_tree)
 
     def add_edges_to_graphviz_tree(self, graphviz_tree):
