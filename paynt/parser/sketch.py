@@ -46,7 +46,7 @@ def make_rewards_action_based(model):
             for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
                 action_reward[action] += state_reward
 
-        model.remove_reward_model(name)
+        payntbind.synthesis.remove_reward_model(model,name)
         new_reward_model = stormpy.storage.SparseRewardModel(optional_state_action_reward_vector=action_reward)
         model.add_reward_model(name, new_reward_model)
 

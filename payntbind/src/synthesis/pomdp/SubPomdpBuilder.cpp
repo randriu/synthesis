@@ -9,7 +9,6 @@
 #include <stack>
 
 namespace synthesis {
-
     
     SubPomdpBuilder::SubPomdpBuilder(
         storm::models::sparse::Pomdp<double> const& pomdp,

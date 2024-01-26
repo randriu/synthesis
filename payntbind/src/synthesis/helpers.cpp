@@ -12,6 +12,7 @@
 #include <storm/environment/solver/NativeSolverEnvironment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
 #include <storm/storage/SparseMatrix.h>
+#include <storm/models/sparse/Model.h>
 
 namespace synthesis {
 
@@ -36,6 +37,11 @@ std::shared_ptr<storm::logic::Formula> transformUntilToEventually(
     return modified_formula;
 }
 
+template<typename ValueType>
+void removeRewardModel(storm::models::sparse::Model<ValueType> & model, std::string const& reward_name) {
+    model.removeRewardModel(reward_name);
+}
+
 }
 
 
@@ -51,6 +57,7 @@ void define_helpers(py::module& m) {
     });
 
     m.def("transform_until_to_eventually", &synthesis::transformUntilToEventually<double>, py::arg("formula"));
+    m.def("remove_reward_model", &synthesis::removeRewardModel<double>, py::arg("model"), py::arg("reward_name"));
 
     m.def("multiply_with_vector", [] (storm::storage::SparseMatrix<double> matrix,std::vector<double> vector) {
         std::vector<double> result(matrix.getRowCount());
