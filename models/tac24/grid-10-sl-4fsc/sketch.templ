@@ -1,0 +1,70 @@
+
+
+// 4x4 grid
+// from Littman, Cassandra and Kaelbling
+// Learning policies for partially observable environments: Scaling up  
+// Technical Report CS, Brown University
+
+dtmc
+
+const int Xmax=10;
+const int Ymax=10;
+const int Xgoal=Xmax/2;
+const int Ygoal=Ymax/2;
+const double sl=0.1;
+
+//
+// 4-FSC
+//
+// holes
+hole int M_0_1 in {0,1,2,3};
+hole int M_1_1 in {0,1,2,3};
+hole int M_2_1 in {0,1,2,3};
+hole int M_3_1 in {0,1,2,3};
+hole int P_0_1 in {1,2,3,4};
+hole int P_1_1 in {1,2,3,4};
+hole int P_2_1 in {1,2,3,4};
+hole int P_3_1 in {1,2,3,4};
+
+module strategy
+	pick : [0..4] init 0;
+	mem : [0..3] init 0;
+	[p] placed = 1 & pick = 0 & mem = 0 -> (mem'=M_0_1) & (pick'=P_0_1);
+	[p] placed = 1 & pick = 0 & mem = 1 -> (mem'=M_1_1) & (pick'=P_1_1);
+	[p] placed = 1 & pick = 0 & mem = 2 -> (mem'=M_2_1) & (pick'=P_2_1);
+	[p] placed = 1 & pick = 0 & mem = 3 -> (mem'=M_3_1) & (pick'=P_3_1);
+	[north] pick=1 -> (pick'=0);
+	[east] pick=2 -> (pick'=0);
+	[south] pick=3 -> (pick'=0);
+	[west] pick=4 -> (pick'=0);
+endmodule
+
+
+
+module grid
+	
+	x : [0..Xmax]; // x coordinate
+	y : [0..Ymax]; // y coordinate
+	placed : [0..1] init 0;
+
+		
+	// initially randomly placed within the grid (not at the target)
+	[] placed = 0 -> 1/4 : (x'=0) & (y'=0) & (placed'=1)
+			+ 1/4 : (x'=Xmax) & (y'=0) & (placed'=1)
+			+ 1/4 : (x'=Xmax) & (y'=Ymax) & (placed'=1)
+			+ 1/4 : (x'=0) & (y'=Ymax) & (placed'=1);
+			
+	// move around the grid
+	[east]  placed=1 -> sl: true + (1-sl): (x'=min(x+1,Xmax));
+	[west]  placed=1 -> sl: true + (1-sl): (x'=max(x-1,0));
+	[north] placed=1 -> sl: true + (1-sl): (y'=min(y+1,Ymax));
+	[south] placed=1 -> sl: true + (1-sl): (y'=max(y-1,0));
+	
+endmodule
+
+// reward structure for number of steps to reach the target
+rewards "steps"
+    placed = 1 & pick != 0  : 1;
+endrewards
+
+label "goal" = (x=Xgoal & y=Ygoal);

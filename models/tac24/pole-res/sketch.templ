@@ -1,0 +1,166 @@
+dtmc
+
+const int CMAX = 0;
+//const double THRESHOLD;
+
+module initialiseN
+    NN : [0..100] init 0;
+    NS : [0..100] init 0;
+    NW : [0..100] init 0;
+    NE : [0..100] init 0;
+    [start] true -> 0.8: (NN'=90) & (NS'=2) & (NW'=6) & (NE'=2) + 0.2: (NN'=70) & (NS'=4) & (NW'=16) & (NE'=10);
+endmodule
+
+module initialiseS
+    SN : [0..100] init 0;
+    SS : [0..100] init 0;
+    SW : [0..100] init 0;
+    SE : [0..100] init 0;
+    [start] true -> 0.8: (SS'=80) & (SN'=10) & (SW'=6) & (SE'=4) + 0.2: (SS'=60) & (SN'=10) & (SW'=16) & (SE'=14);
+endmodule
+
+module initialiseW
+    WN : [0..100] init 0;
+    WS : [0..100] init 0;
+    WW : [0..100] init 0;
+    WE : [0..100] init 0;
+    [start] true -> 0.9: (WW'=90) & (WS'=2) & (WN'=4) & (WE'=4) + 0.1: (WW'=80) & (WS'=7) & (WN'=7) & (WE'=6);
+endmodule
+
+module initialiseE
+    EN : [0..100] init 0;
+    ES : [0..100] init 0;
+    EW : [0..100] init 0;
+    EE : [0..100] init 0;
+    [start] true -> 0.2: (EE'=80) & (ES'=10) & (EW'=6) & (EN'=4) + 0.05: (EE'=60) & (ES'=10) & (EW'=16) & (EN'=14) + 0.75: (EE'=90) & (ES'=2) & (EW'=4) & (EN'=4);
+endmodule
+
+module initialiseA
+    ANOT : [0..100] init 0;
+    ANW : [0..100] init 0;
+    ASW : [0..100] init 0;
+    ANE : [0..100] init 0;
+    ASE : [0..100] init 0;
+    [start] true -> 0.8: (ANOT'=20) & (ANW'=20) & (ASW'=20) & (ANE'=20) & (ASE'=20)
+         + 0.2: (ANOT'=25) & (ANW'=25) & (ASW'=25) & (ANE'=0) & (ASE'=25);
+endmodule
+
+
+module arbiter
+    phase : [0..3] init 0;
+    [start] phase = 0 -> (phase'=1);
+    [steer] phase = 1 -> (phase'=2);
+    [lost] phase = 1 -> (phase'=1);
+    [north] phase = 2 -> (phase'=3);
+    [south] phase = 2 -> (phase'=3);
+    [east] phase = 2 -> (phase'=3);
+    [west] phase = 2 -> (phase'=3);
+    [extern] phase = 3 -> (phase'=1);
+
+endmodule
+
+const int MAXQ = 6;
+const int MAXX = MAXQ;
+const int MAXY = MAXQ;
+formula dead = (x = 0 | y = 0 | x = MAXX | y = MAXY);
+
+
+hole int M11 in {2,4};
+hole int M12 in {2,4};
+hole int M13 in {2};
+hole int M14 in {2,3};
+hole int M15 in {2,3};
+
+hole int M21 in {2,4};
+hole int M22 in {2,4};
+hole int M23 in {2,3,4};
+hole int M24 in {2,3};
+hole int M25 in {2,3};
+
+hole int M31 in {4};
+hole int M32 in {1,2,4};
+hole int M33 in {1,2,3,4};
+hole int M34 in {1,2,3};
+hole int M35 in {3};
+
+hole int M41 in {4};
+hole int M42 in {1,4};
+hole int M43 in {1,3,4};
+hole int M44 in {1,3};
+hole int M45 in {3};
+
+hole int M51 in {1,4};
+hole int M52 in {1};
+hole int M53 in {1};
+hole int M54 in {1};
+hole int M55 in {1,3};
+
+
+
+module strategy
+    act : [0..4] init 0;
+
+    [lost]  dead -> true;
+
+    [steer] act=0 & x = 1 & y = 1 -> (act' = M11);
+    [steer] act=0 & x = 1 & y = 2 -> (act' = M12);
+    [steer] act=0 & x = 1 & y = 3 -> (act' = M13);
+    [steer] act=0 & x = 1 & y = 4 -> (act' = M14);
+    [steer] act=0 & x = 1 & y = 5 -> (act' = M15);
+
+    [steer] act=0 & x = 2 & y = 1 -> (act' = M21);
+    [steer] act=0 & x = 2 & y = 2 -> (act' = M22);
+    [steer] act=0 & x = 2 & y = 3 -> (act' = M23);
+    [steer] act=0 & x = 2 & y = 4 -> (act' = M24);
+    [steer] act=0 & x = 2 & y = 5 -> (act' = M25);
+
+    [steer] act=0 & x = 3 & y = 1 -> (act' = M31);
+    [steer] act=0 & x = 3 & y = 2 -> (act' = M32);
+    [steer] act=0 & x = 3 & y = 3 -> (act' = M33);
+    [steer] act=0 & x = 3 & y = 4 -> (act' = M34);
+    [steer] act=0 & x = 3 & y = 5 -> (act' = M35);
+
+    [steer] act=0 & x = 4 & y = 1 -> (act' = M41);
+    [steer] act=0 & x = 4 & y = 2 -> (act' = M42);
+    [steer] act=0 & x = 4 & y = 3 -> (act' = M43);
+    [steer] act=0 & x = 4 & y = 4 -> (act' = M44);
+    [steer] act=0 & x = 4 & y = 5 -> (act' = M45);
+
+    [steer] act=0 & x = 5 & y = 1 -> (act' = M51);
+    [steer] act=0 & x = 5 & y = 2 -> (act' = M52);
+    [steer] act=0 & x = 5 & y = 3 -> (act' = M53);
+    [steer] act=0 & x = 5 & y = 4 -> (act' = M54);
+    [steer] act=0 & x = 5 & y = 5 -> (act' = M55);
+
+    [north] act = 1 -> (act'=0);
+    [south] act = 2 -> (act'=0);
+    [west] act = 3 -> (act'=0);
+    [east] act = 4 -> (act'=0);
+endmodule
+
+module controller
+    x : [0..MAXX] init MAXX/2;
+    y : [0..MAXY] init MAXY/2;
+
+    [north] true -> NN/100: (x'=max(0, x-1)) + NS/100: (x'=min(MAXX,x+1)) + NW/100: (y'=max(0,y-1)) + NE/100: (y'=min(MAXY,y+1));
+    [south] true -> SN/100: (x'=max(0, x-1)) + SS/100: (x'=min(MAXX,x+1)) + SW/100: (y'=max(0,y-1)) + SE/100: (y'=min(MAXY,y+1));
+    [west] true -> WN/100: (x'=max(0, x-1)) + WS/100: (x'=min(MAXX,x+1)) + WW/100: (y'=max(0,y-1)) + WE/100: (y'=min(MAXY,y+1));
+    [east] true -> EN/100: (x'=max(0, x-1)) + ES/100: (x'=min(MAXX,x+1)) + EW/100: (y'=max(0,y-1)) + EE/100: (y'=min(MAXY,y+1));
+
+    [extern] true -> ANOT/100: (x'=x) & (y'=y)
+                   + ANW/100: (x'=max(0, x-1)) & (y'=max(0,y-1))
+                   + ASW/100: (x'=min(MAXX, x+1)) & (y'=max(0,y-1))
+                   + ANE/100: (x'=max(0, x-1)) & (y'=min(MAXY,y+1))
+                   + ASE/100: (x'=min(MAXX, x+1)) & (y'=min(MAXY,y+1));
+
+endmodule
+
+module round_counter
+    count: [0..CMAX] init 0;
+    [steer] true -> 1: (count'=min(count+1,CMAX));
+endmodule
+
+rewards "rounds"
+    [steer] true : 1;
+endrewards
+
