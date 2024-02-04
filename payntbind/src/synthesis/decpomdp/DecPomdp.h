@@ -207,6 +207,7 @@ namespace synthesis {
         
         
         std::vector<std::vector<uint_fast64_t>> nr_agent_actions_at_observation;
+        std::vector<std::vector<uint_fast64_t>> agent_prototype_row_index;
         
     };
 

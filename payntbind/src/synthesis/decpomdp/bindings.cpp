@@ -34,6 +34,7 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("row_memory_hole", [](synthesis::DecPomdp& decpomdp) {return decpomdp.row_memory_hole;})
         .def_property_readonly("row_memory_option", [](synthesis::DecPomdp& decpomdp) {return decpomdp.row_memory_option;})
         .def_property_readonly("num_holes", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_holes;})
+        .def_property_readonly("transition_matrix", [](synthesis::DecPomdp& decpomdp) {return decpomdp.transition_matrix;}, "transition matrix")
 
 
 
@@ -62,7 +63,7 @@ void bindings_decpomdp(py::module& m) {
 //unused:
         // .def("num_rows", &storm::synthesis::DecPomdp::num_rows)
         // .def_property_readonly("num_states", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.num_states();}, "number of states")
-        // .def_property_readonly("transition_matrix", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.transition_matrix;}, "transition matrix")
+        
         // .def_property_readonly("row_reward", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_reward;}, "for each row group, a list of row rewards")
         // .def_property_readonly("row_joint_action", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.row_joint_action;}, "row_joint_action")
         // .def_property_readonly("agent_observation_labels", [](storm::synthesis::DecPomdp& decpomdp) {return decpomdp.agent_observation_labels;})

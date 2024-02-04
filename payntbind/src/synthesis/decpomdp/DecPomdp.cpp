@@ -780,7 +780,7 @@ namespace synthesis {
             this->nr_agent_actions_at_observation.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
             {
-               this->nr_agent_actions_at_observation[agent].resize(this->agent_observation_labels[agent].size(),0); 
+                this->nr_agent_actions_at_observation[agent].resize(this->agent_observation_labels[agent].size()); 
             }
 
             for (int agent = 0; agent < this->num_agents; agent++){
@@ -805,6 +805,48 @@ namespace synthesis {
                 
             }
             // std::cout << "this->nr_agent_actions_at_observation cpp" << this->nr_agent_actions_at_observation << std::endl;
+
+            this->agent_prototype_row_index.clear();
+            this->agent_prototype_row_index.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+               this->agent_prototype_row_index[agent].resize(this->num_rows() ,0); 
+            }
+
+            uint64_t row_index = 0;
+            std::vector<uint_fast64_t> agent_actions_indexes;
+            std::vector<uint_fast64_t>::iterator it;
+            uint_fast64_t counter = 0;
+
+            for (int agent = 0; agent < this->num_agents; agent++){
+                row_index = 0;
+                // agent_actions_indexes.clear();
+                for(uint64_t state = 0; state < this->num_states(); state++) {
+                    agent_actions_indexes.clear();
+                    counter = 0;
+                    for(auto row: this->row_joint_action[state]) {
+                        // std::cout << "this->joint_actions[row][agent] " << this->joint_actions[row][agent]<< std::endl;
+                        // std::cout << "agent_actions_indexes" << agent_actions_indexes<< std::endl;
+                        // std::cout << "this->joint_actions[row][agent]" << this->joint_actions[row][agent]<< std::endl;
+
+                        it = std::find(agent_actions_indexes.begin(), agent_actions_indexes.end(), this->joint_actions[row][agent]);
+                        if (it != agent_actions_indexes.end()) 
+                        {
+                            this->agent_prototype_row_index[agent][row_index] = it - agent_actions_indexes.begin();
+                        }
+                        else{
+                            agent_actions_indexes.push_back( this->joint_actions[row][agent]);
+                            this->agent_prototype_row_index[agent][row_index] = counter;
+                            counter++;
+                        }
+
+                        row_index++;
+
+                    }
+                
+                }
+            }
+            // std::cout << " this->agent_prototype_row_index " <<  this->agent_prototype_row_index << std::endl;
     
                         
 
@@ -862,7 +904,7 @@ namespace synthesis {
                     for(auto matrix_row: this->transition_matrix[prototype]) {
                         for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[joint_observation]; dst_mem++) {
                             auto prototype_row = this->row_prototype[row];
-                            auto row_index = this->prototype_row_index[prototype_row];
+                            auto row_index = this->agent_prototype_row_index[agent][prototype_row];
                             // std::cout << "prototype_row" << prototype_row << std::endl;
                             // std::cout << "row_index" << row_index << std::endl;
                             auto row_mem = this->row_memory[row];
@@ -875,7 +917,7 @@ namespace synthesis {
                                                              
                                 // std::cout << "action_hole " << action_hole << std::endl;
                                 this->row_action_hole[agent][row] = action_hole;
-                                this->row_action_option[agent][row] = row_index;
+                                this->row_action_option[agent][row] = row_index; // must be index of agent action option, not joint option 
                             } else {
                                 // no corresponding action hole
                                 this->row_action_hole[agent][row] = this->num_holes;
