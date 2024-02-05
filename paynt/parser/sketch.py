@@ -57,7 +57,7 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, discount_factor=1):
+        export=None, relative_error=0, discount_factor=1, precision=1e-4):
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
 
@@ -69,6 +69,8 @@ class Sketch:
         jani_unfolder = None
         decpomdp_manager = None
         obs_evaluator = None
+
+        paynt.verification.property.Property.model_checking_precision = precision
 
         # check path
         if not os.path.isfile(sketch_path):

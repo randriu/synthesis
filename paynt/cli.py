@@ -58,6 +58,8 @@ def setup_logger(log_path = None):
     help="discount factor")
 @click.option("--optimum-threshold", type=click.FLOAT,
     help="known optimum bound")
+@click.option("--precision", type=click.FLOAT, default=1e-4,
+    help="model checking precision")
 
 @click.option("--export",
     type=click.Choice(['jani', 'drn', 'pomdp']),
@@ -133,7 +135,7 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, discount_factor, optimum_threshold,
+    project, sketch, props, relative_error, discount_factor, optimum_threshold, precision,
     export,
     method,
     incomplete_search, disable_expected_visits,
@@ -175,8 +177,8 @@ def paynt_run(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
     if all_in_one is None:
-        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path,  properties_path, export, relative_error, discount_factor)
-        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer  (quotient, method, fsc_synthesis, storm_control)
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path,  properties_path, export, relative_error, discount_factor, precision)
+        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
         synthesizer.run(optimum_threshold, export_evaluation)
     else:
         all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
