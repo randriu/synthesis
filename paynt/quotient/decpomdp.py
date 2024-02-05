@@ -13,7 +13,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        self.initial_memory_size = 1; #TODO Must take this from paynt
+        self.initial_memory_size = 2; #TODO Must take this from paynt
 
         assert decpomdp_manager.num_agents > 1
 
@@ -29,8 +29,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         print("self.joint_actions",self.joint_actions)
 
 
-        # self.transition_matrix = decpomdp_manager.transition_matrix
-        # print("self.transition_matrix",self.transition_matrix[4])
+        self.transition_matrix = decpomdp_manager.transition_matrix
+        print("self.transition_matrix",self.transition_matrix)
 
         self.nr_agents = decpomdp_manager.num_agents
         # # print("self.nr_agents",self.nr_agents)
@@ -152,7 +152,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        # print("transitions from state 1: ", self.quotient.transition_matrix.get_row(1))
+        print("transitions from state 1: ", self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         
@@ -215,7 +215,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.hole_option_to_actions[hole][option].append(choice)
 
         self.design_space = paynt.family.family.DesignSpace(family)
-        print("self.design_space ",self.design_space )
+        # print("self.design_space ",self.design_space )
 
     def create_coloring(self):
 
@@ -269,7 +269,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 if h != pm.num_holes:
                     hole_options.append( (h,pm.row_memory_option[agent][action]) )
                 choice_to_hole_options.append(hole_options)
-        logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
+        # logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
         # logger.info(f"pm.row_action_hole is: {pm.row_action_hole}")
 
         return all_holes, choice_to_hole_options

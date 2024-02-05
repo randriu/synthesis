@@ -1,6 +1,5 @@
 # This is a Dec-POMDP (.dpomdp) file for the Dec-Tiger problem.
-# For more detailed documentation, see test.dpomdp in the parser subdirectory 
-# (src/parser).
+# For more detailed documentation, see example.dpomdp
 
 # Allright, here we go!
 #
@@ -12,12 +11,12 @@
 #   agents: agent1_name, name-of-agent2, ... 
 agents: 2 
 #   discount: %f 
-discount: 0.7 
+discount: 0.5 
 #.0
 #   values: [ reward, cost ] 
 values: reward
 #   states: [ %d, <list of states> ] 
-states: s_small s_large     
+states: state     
 #
 #Examples of this are:
 #   start: 0.3 0.1 0.0 0.2 0.5
@@ -39,8 +38,8 @@ uniform
 #   ...
 #   [ %d, <list of actions> ] 
 actions: 
-observe attack
-observe attack
+action1 action2
+action1 action2
 #the (number/list of) observations for each of the agents on a separate line
 #   observations: 
 #   [ %d, <list of observations> ]
@@ -48,8 +47,8 @@ observe attack
 #   ...
 #   [ %d, <list of observations> ]
 observations: 
-o_small o_large
-o_small o_large
+observation1
+observation1 observation2
 #Transition probabilities
 #   T: <a1 a2...an> : <start-state> : <end-state> : %f
 #or
@@ -66,8 +65,10 @@ o_small o_large
 #   [ identity, uniform ]
 T: * :
 uniform
-T: observe observe :
-identity 
+#T:open-right open-right :
+#uniform
+#T: listen listen :
+#identity 
 #Observation probabilities
 #    O: <a1 a2...an> : <end-state> : <o1 o2 ... om> : %f
 #or
@@ -81,14 +82,14 @@ identity
 #    %f %f ... %f	    P(jo_1|ja,s_k') ... P(jo_x|ja,s_k') 
 O: * :
 uniform
-O: observe observe : s_small : o_small o_small : 0.7225
-O: observe observe : s_small : o_small o_large : 0.1275
-O: observe observe : s_small : o_large o_small : 0.1275
-O: observe observe : s_small : o_large o_large : 0.0225
-O: observe observe : s_large : o_large o_large : 0.7225
-O: observe observe : s_large : o_small o_large : 0.1275
-O: observe observe : s_large : o_large o_small : 0.1275
-O: observe observe : s_large : o_small o_small : 0.0225
+O: action1 action1 : state : observation1 observation1 : 0.9
+O: action1 action1 : state : observation1 observation2 : 0.1
+O: action1 action2 : state : observation1 observation1 : 0.3
+O: action1 action2 : state : observation1 observation2 : 0.7
+#O: listen listen : tiger-right : hear-right hear-right : 0.7225
+#O: listen listen : tiger-right : hear-left hear-right : 0.1275
+#O: listen listen : tiger-right : hear-right hear-left : 0.1275
+#O: listen listen : tiger-right : hear-left hear-left : 0.0225
 #The rewards
 #or
 #    R: <a1 a2...an> : <start-state> : <end-state> :
@@ -102,8 +103,20 @@ O: observe observe : s_large : o_small o_small : 0.0225
 #
 #Typical problems only use R(s,ja) which is specified by:
 #   R: <a1 a2...an> : <start-state> : * : * : %f
-R: observe observe: * : * : * : -1
-R: attack attack : s_small : * : * : +5
-R: attack attack : s_large : * : * : -20
-R: attack observe: * : * : * : -10
-R: observe attack: * : * : * : -10
+R: * *: * : * : * : -2
+#R: open-left open-left : tiger-left : * : * : -50
+#R: open-right open-right : tiger-right : * : * : -50
+#R: open-left open-left : tiger-right : * : * : +20
+#R: open-right open-right : tiger-left : * : * : 20
+#R: open-left open-right: tiger-left : * : * : -100
+#R: open-left open-right: tiger-right : * : * : -100
+#R: open-right open-left: tiger-left : * : * : -100
+#R: open-right open-left: tiger-right : * : * : -100
+#R: open-left listen: tiger-left : * : * : -101
+#R: listen open-right: tiger-right : * : * : -101
+#R: listen open-left: tiger-left : * : * : -101
+#R: open-right listen: tiger-right : * : * : -101
+#R: listen open-right: tiger-left : * : * : 9
+#R: listen open-left: tiger-right : * : * : 9
+#R: open-right listen: tiger-left : * : * : 9
+#R: open-left listen: tiger-right : * : * : 9

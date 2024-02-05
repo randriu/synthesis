@@ -355,7 +355,7 @@ namespace synthesis {
         for(uint64_t row = 0; row < num_rows; row++) {
             labeling.addLabelToChoice(row_label[row], row);
         }
-        // std::cout << "all_labels " << all_labels<< std::endl;
+        // std::cout << "labeling " << labeling<< std::endl;
         return labeling ;
     }
 
@@ -390,6 +390,7 @@ namespace synthesis {
             // std::cout << "this->row_groups[state] " << this->row_groups[state]<< std::endl;
             builder2.newRowGroup(this->row_groups[state]);
             for(auto row: this->transition_matrix[prototype_state]) {
+                std::cout << "B1: row: " << std::endl;
                 for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
                     for(auto entry: row) {
 
@@ -399,7 +400,7 @@ namespace synthesis {
                            dst = this->prototype_duplicates[entry.first][0];
                         }
 
-                        // std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second<< std::endl;
+                        std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second << " mem " << dst_mem << std::endl;
                         builder2.addNextValue(row_index, dst, entry.second);
                         
                     }

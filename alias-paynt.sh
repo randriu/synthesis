@@ -30,3 +30,8 @@ source prerequisites/venv/bin/activate
 python3 paynt.py --project models/cassandra/decpomdp/ --sketch 2generals.dpomdp
 )'
 
+alias runb='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch basic.dpomdp
+)'
+
