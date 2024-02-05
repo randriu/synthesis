@@ -310,7 +310,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         all_holes = paynt.family.family.Family()
         old_to_new_indices = [None] * len(holes)
         for index,name_labels in enumerate(holes):
-            if hole is None:
+            if name_labels is None:
                 continue
             old_to_new_indices[index] = all_holes.num_holes
             name,option_labels = name_labels

@@ -578,7 +578,7 @@ class StormPOMDPControl:
 
             restriction = [action for action in family.hole_options(hole) if action in result_dict[obs]]
 
-            if len(restriction) == hole_num_options(hole):
+            if len(restriction) == family.hole_num_options(hole):
                 continue
 
             subfamilies_restriction.append({"hole": hole, "restriction": restriction})
