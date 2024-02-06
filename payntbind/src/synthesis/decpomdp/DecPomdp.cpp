@@ -939,8 +939,8 @@ namespace synthesis {
                 }
             }
 
-            // std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
-            // std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; 
+            std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
+            std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; 
             // std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; 
             // std::cout << "this->row_action_option " << this->row_action_option << std::endl; 
 

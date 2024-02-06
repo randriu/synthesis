@@ -120,6 +120,8 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.set_imperfect_memory_size(PomdpQuotient.initial_memory_size)
         # self.set_global_memory_size(PomdpQuotient.initial_memory_size)
 
+        # print("transitions: ", self.quotient_mdp.transition_matrix)
+
     
     @property
     def observations(self):
@@ -274,7 +276,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             if h != pm.num_holes:
                 hole_options.append( (h,pm.row_memory_option[action]) )
             choice_to_hole_options.append(hole_options)
-
+        print("choice_to_hole_options",choice_to_hole_options)
         return all_holes, choice_to_hole_options
 
     def create_coloring_aposteriori(self):
