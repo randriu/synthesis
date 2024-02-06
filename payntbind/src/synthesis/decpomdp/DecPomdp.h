@@ -75,10 +75,16 @@ namespace synthesis {
         bool reward_minimizing;
         /** Label associated with the reward model. */
         std::string reward_model_name = "reward";
+        /** Label associated with the constraint reward model. */
+        std::string constraint_reward_model_name = "constraint";
 
         double discount_factor;
 
         void applyDiscountFactorTransformation();
+
+        void set_constraint_bound(double bound) {
+            this->constraint_bound = bound;
+        };
 
         /** Label for the state that simulates initial distribution. */
         std::string init_label = "init";
@@ -98,6 +104,9 @@ namespace synthesis {
         std::map<MadpState, uint_fast64_t> madp_to_storm_states;
         /** Storm to Madp state map. */
         std::vector<MadpState> storm_to_madp_states;
+
+        // bound for creating CPOMDP
+        double constraint_bound = std::numeric_limits<double>::infinity();
 
         void collectActions(DecPOMDPDiscrete *model);
         void collectObservations(DecPOMDPDiscrete *model);
@@ -121,6 +130,7 @@ namespace synthesis {
         storm::models::sparse::ChoiceLabeling constructChoiceLabeling();
         storm::storage::SparseMatrix<double> constructTransitionMatrix();
         storm::models::sparse::StandardRewardModel<double> constructRewardModel();
+        storm::models::sparse::StandardRewardModel<double> constructConstraintRewardModel();
         std::vector<uint32_t> constructObservabilityClasses();
 
         
