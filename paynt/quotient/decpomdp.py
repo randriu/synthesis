@@ -269,7 +269,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 h = pm.row_memory_hole[agent][action]
                 if h != pm.num_holes:
                     hole_options.append( (h,pm.row_memory_option[agent][action]) )
-                choice_to_hole_options.append(hole_options)
+            choice_to_hole_options.append(hole_options)
         # logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
         # logger.info(f"pm.row_action_hole is: {pm.row_action_hole}")
         print("all_holes",all_holes)
