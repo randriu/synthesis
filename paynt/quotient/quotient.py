@@ -115,14 +115,14 @@ class Quotient:
         tm.make_row_grouping_trivial()
         components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
         print("components.transition_matrix",tm)
-        print("components.reward_models",components.reward_models )
-        print("components.state_labeling",components.state_labeling )
-        print("components.choice_labeling",components.choice_labeling )
-        print("components.state_valuations",components.state_valuations )
-        print("components.choice_origins",components.choice_origins )
-        print("components.observability_classes",components.observability_classes )
+        # print("components.reward_models",components.reward_models )
+        # print("components.state_labeling",components.state_labeling )
+        # print("components.choice_labeling",components.choice_labeling )
+        # print("components.state_valuations",components.state_valuations )
+        # print("components.choice_origins",components.choice_origins )
+        # print("components.observability_classes",components.observability_classes )
         dtmc = stormpy.storage.SparseDtmc(components)
-        print("components.markovian_states",components.markovian_states )
+        # print("components.markovian_states",components.markovian_states )
         return dtmc
 
     def build_assignment(self, family):

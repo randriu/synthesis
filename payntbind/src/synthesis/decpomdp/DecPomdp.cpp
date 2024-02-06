@@ -257,7 +257,7 @@ namespace synthesis {
         init_flags.set(this->prototype_duplicates[this->initial_state][0] );
         labeling.addLabel("init", std::move(init_flags));
 
-        if(this->discounted) {
+        if(this->discounted || this->discount_factor == 1) {
             storm::storage::BitVector discount_sink_flags(this->num_quotient_states, false);
             discount_sink_flags.set(this->prototype_duplicates[this->discount_sink_state][0]);
             labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
@@ -390,7 +390,7 @@ namespace synthesis {
             // std::cout << "this->row_groups[state] " << this->row_groups[state]<< std::endl;
             builder2.newRowGroup(this->row_groups[state]);
             for(auto row: this->transition_matrix[prototype_state]) {
-                std::cout << "B1: row: " << std::endl;
+                // std::cout << "B1: row: " << std::endl;
                 for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
                     for(auto entry: row) {
 
@@ -400,7 +400,7 @@ namespace synthesis {
                            dst = this->prototype_duplicates[entry.first][0];
                         }
 
-                        std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second << " mem " << dst_mem << std::endl;
+                        // std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second << " mem " << dst_mem << std::endl;
                         builder2.addNextValue(row_index, dst, entry.second);
                         
                     }

@@ -13,7 +13,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        self.initial_memory_size = 2; #TODO Must take this from paynt
+        self.initial_memory_size = 1; #TODO Must take this from paynt
 
         assert decpomdp_manager.num_agents > 1
 
@@ -271,5 +271,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 choice_to_hole_options.append(hole_options)
         # logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
         # logger.info(f"pm.row_action_hole is: {pm.row_action_hole}")
+        print(all_holes)
+        print(choice_to_hole_options)
 
         return all_holes, choice_to_hole_options
