@@ -177,9 +177,9 @@ class SynthesizerPOMDP:
                 subfamilies = []
 
             self.synthesizer.subfamilies_buffer = subfamilies
-            self.synthesizer.unresticted_family = family
+            self.synthesizer.main_family = main_family
 
-            assignment = self.synthesize(main_family)
+            assignment = self.synthesize(family)
 
             if assignment is not None:
                 self.storm_control.latest_paynt_result = assignment
@@ -287,7 +287,7 @@ class SynthesizerPOMDP:
         # for x in range(2):
 
             if self.storm_control.is_storm_better == False:
-                self.storm_control.parse_result(self.quotient)
+                self.storm_control.parse_results(self.quotient)
             
             paynt.quotient.pomdp.PomdpQuotient.current_family_index = mem_size
 
@@ -356,9 +356,9 @@ class SynthesizerPOMDP:
                 subfamilies = []
 
             self.synthesizer.subfamilies_buffer = subfamilies
-            self.synthesizer.unresticted_family = family
+            self.synthesizer.main_family = main_family
 
-            assignment = self.synthesize(main_family)
+            assignment = self.synthesize(family)
 
             if assignment is not None:
                 self.storm_control.latest_paynt_result = assignment

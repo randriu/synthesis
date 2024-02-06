@@ -17,7 +17,7 @@ class SynthesizerARStorm(Synthesizer):
     # buffer containing subfamilies to be checked after the main restricted family
     subfamilies_buffer = None
 
-    unresticted_family = None
+    main_family = None
 
     # if True, Storm over-approximation will be run to help with family pruning
     storm_pruning = False
@@ -115,6 +115,10 @@ class SynthesizerARStorm(Synthesizer):
         self.quotient.discarded = 0
 
         satisfying_assignment = None
+        
+        if self.main_family is not None:
+            family = self.main_family
+
         families = [family]
 
         while families:
