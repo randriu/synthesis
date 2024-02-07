@@ -911,26 +911,31 @@ namespace synthesis {
             uint64_t old_state = 0;
             uint64_t row_group = 0;
 
-            // map each row to some action (memory) hole (if applicable) and its value
+
+             // map each row to some action (memory) hole (if applicable) and its value
             for(uint64_t state = 0; state < this->num_quotient_states; state++) {
                 auto prototype = this->state_prototype[state];
                 auto joint_observation = this->state_joint_observation[prototype];
-                for(auto matrix_row: this->transition_matrix[prototype]) {
-                    for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[joint_observation]; dst_mem++) {
-                        auto prototype_row = this->row_prototype[row];
-                        
-                        // std::cout << "prototype_row" << prototype_row << std::endl;
-                        // std::cout << "row_index" << row_index << std::endl;
-                        auto unprocessed_mem = this->row_memory[row];
-                        for (int agent = 0; agent < this->num_agents; agent++) {
+                auto unprocessed_mem = this->state_memory[state]; 
+                for (int agent = 0; agent < this->num_agents; agent++) {
+                    if (state != old_state)
+                    {
+                        row_group = row;
+                        old_state = state;
+                    }
+                    row = row_group;
+                    auto obs = this->joint_observations[joint_observation][agent];
+                    uint64_t mem_index = (uint64_t)std::pow(std::pow(this->observation_memory_size[joint_observation], 1.0 / this->num_agents), this->num_agents - 1 - agent);
+                    auto mem = unprocessed_mem /  mem_index; //TODO work only with same memory for each agent
+                    // std::cout << "agent " << agent << "mem_index " << mem_index << "unprocessed_mem " << unprocessed_mem << "mem " << mem << std::endl;
+                    unprocessed_mem = (uint64_t)unprocessed_mem %  mem_index;
+                    for(auto matrix_row: this->transition_matrix[prototype]) {
+                        for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[joint_observation]; dst_mem++) {
+                            auto prototype_row = this->row_prototype[row];
                             auto row_index = this->agent_prototype_row_index[agent][prototype_row];
-                            auto obs = this->joint_observations[joint_observation][agent];
-
-                            uint64_t mem_index = (uint64_t)std::pow(std::pow(this->observation_memory_size[joint_observation], 1.0 / this->num_agents), this->num_agents - 1 - agent);
-                            auto mem = unprocessed_mem /  mem_index; //TODO work only with same memory for each agent
-                            // std::cout << "agent " << agent << "mem_index " << mem_index << "unprocessed_mem " << unprocessed_mem << "mem " << mem << std::endl;
-                            unprocessed_mem = (uint64_t)unprocessed_mem %  mem_index;
-
+                            // std::cout << "prototype_row" << prototype_row << std::endl;
+                            // std::cout << "row_index" << row_index << std::endl;
+                            auto row_mem = this->row_memory[row];
                             if(this->nr_agent_actions_at_observation[agent][obs] > 1) {
                                 // there is an action hole that corresponds to this state
                                 // std::cout << "agent" << agent << std::endl;
@@ -953,6 +958,35 @@ namespace synthesis {
                             } else {
                                 this->row_memory_hole[agent][row] = this->num_holes;
                             }
+                            row++;
+                        }
+                        // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
+                    } 
+                    
+                }
+            }
+            
+            
+
+
+            // fill max_successor_memory_size
+            row = 0;
+            for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+                auto prototype = this->state_prototype[state];
+                auto joint_observation = this->state_joint_observation[prototype];
+                for(auto matrix_row: this->transition_matrix[prototype]) {
+                    for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[joint_observation]; dst_mem++) {
+                        auto unprocessed_mem = this->row_memory[row];
+                        for (int agent = 0; agent < this->num_agents; agent++) {
+
+                            uint64_t mem_index = (uint64_t)std::pow(std::pow(this->observation_memory_size[joint_observation], 1.0 / this->num_agents), this->num_agents - 1 - agent);
+                            auto mem = unprocessed_mem /  mem_index; //TODO work only with same memory for each agent
+                            // std::cout << "agent " << agent << "mem_index " << mem_index << "unprocessed_mem " << unprocessed_mem << "mem " << mem << std::endl;
+                            unprocessed_mem = (uint64_t)unprocessed_mem %  mem_index;
+
+                            if(this->max_successor_memory_size[joint_observation] > 1) {
+                                this->row_memory_option[agent][row] = mem;
+                            } 
                         }
                         row++;
                     }
@@ -965,6 +999,7 @@ namespace synthesis {
             // std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; 
             // std::cout << "this->row_action_option " << this->row_action_option << std::endl; 
 
-        }
+        
+    }
 
 }

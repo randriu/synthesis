@@ -276,7 +276,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             if h != pm.num_holes:
                 hole_options.append( (h,pm.row_memory_option[action]) )
             choice_to_hole_options.append(hole_options)
-        print("choice_to_hole_options",choice_to_hole_options)
+        # print("choice_to_hole_options",choice_to_hole_options)
         return all_holes, choice_to_hole_options
 
     def create_coloring_aposteriori(self):

@@ -13,7 +13,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        self.initial_memory_size = 1; #TODO Must take this from paynt
+        self.initial_memory_size = 2; #TODO Must take this from paynt
 
         assert decpomdp_manager.num_agents > 1
 
@@ -139,15 +139,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
 
 
-
-
-
-
-
-
-
-
-
         # logger.info(f"dec-POMDP has {self.decpomdp_manager.num_agents} agents")
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
@@ -210,8 +201,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             self.hole_option_to_actions[hole] = [[] for option in family.hole_options(hole)]
         for choice in range(self.quotient_mdp.nr_choices):
             for hole,option in choice_to_hole_options[choice]:
-                print("option",option)
-                print("hole",hole)
+                # print("option",option)
+                # print("hole",hole)
                 self.hole_option_to_actions[hole][option].append(choice)
 
         self.design_space = paynt.family.family.DesignSpace(family)
