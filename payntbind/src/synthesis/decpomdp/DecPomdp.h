@@ -143,6 +143,10 @@ namespace synthesis {
         std::vector<std::vector<uint64_t>> row_memory_hole;
         // for each row, the corresponding option of the memory hole
         std::vector<std::vector<uint64_t>> row_memory_option;
+
+        // for each agent observation contains the maximum memory size of a destination
+        // across all rows of a prototype state having this observation
+        std::vector<std::vector<uint64_t>> agent_max_successor_memory_size;
             
 
 

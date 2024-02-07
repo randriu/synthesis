@@ -682,6 +682,40 @@ namespace synthesis {
                 // std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
             }
             // std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
+
+
+            //collect max succesor memory for each agent
+
+            this->agent_max_successor_memory_size.clear();
+            this->agent_max_successor_memory_size.resize(this->num_agents);
+            for (int agent = 0; agent < this->num_agents; agent++)
+            {
+                this->agent_max_successor_memory_size[agent].resize(this->agent_observation_labels[agent].size()); 
+            }
+
+            for(uint64_t joint_obs = 0; joint_obs < this->num_joint_observations(); joint_obs++) { //TODO can be optimalize
+                for (int agent = 0; agent < this->num_agents; agent++){
+                    uint64_t obs = this->joint_observations[joint_obs][agent];
+                
+                    // std::cout << "obs " << obs << std::endl;
+                    uint64_t max_mem_size = 0; //TODO there was 0
+                    for(auto dst_state: this->observation_successors[joint_obs]) {
+                        auto dst_obs = this->state_joint_observation[dst_state];
+                        // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
+                        // std::cout << "dst_obs " << dst_obs << std::endl;
+                        if(max_mem_size < this->observation_memory_size[dst_obs]) {
+                            max_mem_size = this->observation_memory_size[dst_obs];
+                        }
+                    }
+                    // std::cout << "max_mem_size " << max_mem_size << std::endl;
+                    this->agent_max_successor_memory_size[agent][obs] = max_mem_size;
+                }
+                
+            }
+            std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
+
+
+
             this->row_groups.resize(this->num_quotient_states);
             this->row_prototype.clear();
             this->row_memory.clear();
@@ -763,20 +797,9 @@ namespace synthesis {
             {
                this->row_memory_option[agent].resize(this->num_quotient_rows); 
             }
-            // // std::cout << "Hello from PomdpManager<ValueType>::resetDesignSpace()" << std::endl;
+            
 
-            // this->observation_actions.resize(this->num_joint_observations(),0);
-
-            // // TODO MEM: change states to prototype states
-            // for(uint64_t state = 0; state < this->num_states(); state++) {
-            //     auto observation = this->state_joint_observation[state];
-                
-            //     if(this->observation_actions[observation] != 0) {
-            //         continue;
-            //     }
-            //     this->observation_actions[observation] = this->row_joint_action[state].size();
-            // }
-            // // std::cout << "this->observation_actions: " << this->observation_actions << std::endl;
+            //count number of actions at observation for each agent
             this->nr_agent_actions_at_observation.clear();
             this->nr_agent_actions_at_observation.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
@@ -807,6 +830,7 @@ namespace synthesis {
             }
             // std::cout << "this->nr_agent_actions_at_observation cpp" << this->nr_agent_actions_at_observation << std::endl;
 
+            // find index of option for each agent action
             this->agent_prototype_row_index.clear();
             this->agent_prototype_row_index.resize(this->num_agents);
             for (int agent = 0; agent < this->num_agents; agent++)
@@ -848,6 +872,8 @@ namespace synthesis {
                 }
             }
             // std::cout << " this->agent_prototype_row_index " <<  this->agent_prototype_row_index << std::endl;
+
+            
     
                         
 

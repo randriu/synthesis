@@ -20,24 +20,24 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.decpomdp_manager = decpomdp_manager
 
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        # # print("self.agent_observation_labels",self.agent_observation_labels)
+        print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
-        print("self.agent_action_labels",self.agent_action_labels)
+        # print("self.agent_action_labels",self.agent_action_labels)
 
         self.joint_actions = decpomdp_manager.joint_actions
-        print("self.joint_actions",self.joint_actions)
+        # print("self.joint_actions",self.joint_actions)
 
 
         self.transition_matrix = decpomdp_manager.transition_matrix
-        print("self.transition_matrix",self.transition_matrix)
+        # print("self.transition_matrix",self.transition_matrix)
 
         self.nr_agents = decpomdp_manager.num_agents
         # # print("self.nr_agents",self.nr_agents)
 
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-        # print("self.joint_observations",self.joint_observations)
+        print("self.joint_observations",self.joint_observations)
 
         self.row_joint_action = decpomdp_manager.row_joint_action
         # print("self.row_joint_action",self.row_joint_action)
@@ -154,7 +154,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("MDP has {} states".format(self.quotient.nr_states))
         print("transition matrix: ", self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
-        # exit()
+        exit()
         
 
         
@@ -210,8 +210,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             self.hole_option_to_actions[hole] = [[] for option in family.hole_options(hole)]
         for choice in range(self.quotient_mdp.nr_choices):
             for hole,option in choice_to_hole_options[choice]:
-                # print("option",option)
-                # print("hole",hole)
+                print("option",option)
+                print("hole",hole)
                 self.hole_option_to_actions[hole][option].append(choice)
 
         self.design_space = paynt.family.family.DesignSpace(family)
@@ -272,6 +272,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             choice_to_hole_options.append(hole_options)
         # logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
         # logger.info(f"pm.row_action_hole is: {pm.row_action_hole}")
+        print("pm.num_holes",pm.num_holes)
         print("all_holes",all_holes)
         print("choice_to_hole_options",choice_to_hole_options)
 
