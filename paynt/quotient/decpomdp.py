@@ -13,31 +13,31 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        self.initial_memory_size = 2; #TODO Must take this from paynt
+        self.initial_memory_size = 1; #TODO Must take this from paynt
 
         assert decpomdp_manager.num_agents > 1
 
         self.decpomdp_manager = decpomdp_manager
 
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        # # print("self.agent_observation_labels",self.agent_observation_labels)
+        print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
-        print("self.agent_action_labels",self.agent_action_labels)
+        # print("self.agent_action_labels",self.agent_action_labels)
 
         self.joint_actions = decpomdp_manager.joint_actions
-        print("self.joint_actions",self.joint_actions)
+        # print("self.joint_actions",self.joint_actions)
 
 
         self.transition_matrix = decpomdp_manager.transition_matrix
-        print("self.transition_matrix",self.transition_matrix)
+        # print("self.transition_matrix",self.transition_matrix)
 
         self.nr_agents = decpomdp_manager.num_agents
         # # print("self.nr_agents",self.nr_agents)
 
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-        # print("self.joint_observations",self.joint_observations)
+        print("self.joint_observations",self.joint_observations)
 
         self.row_joint_action = decpomdp_manager.row_joint_action
         # print("self.row_joint_action",self.row_joint_action)
@@ -210,8 +210,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             self.hole_option_to_actions[hole] = [[] for option in family.hole_options(hole)]
         for choice in range(self.quotient_mdp.nr_choices):
             for hole,option in choice_to_hole_options[choice]:
-                # print("option",option)
-                # print("hole",hole)
+                print("option",option)
+                print("hole",hole)
                 self.hole_option_to_actions[hole][option].append(choice)
 
         self.design_space = paynt.family.family.DesignSpace(family)
@@ -246,8 +246,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
                 # memory holes
                 hole_indices = []
-                num_updates = pow(pm.max_successor_memory_size[obs], 1 / self.nr_agents)
-                if num_updates > 1:
+                num_updates = pow(pm.agent_max_successor_memory_size[agent][obs], 1 / self.nr_agents)
+                if pm.agent_max_successor_memory_size[agent][obs] > 1:
                     option_labels = [str(x) for x in range(int(num_updates))]
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         name = self.create_hole_name(agent,obs,mem,False)
@@ -269,9 +269,10 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 h = pm.row_memory_hole[agent][action]
                 if h != pm.num_holes:
                     hole_options.append( (h,pm.row_memory_option[agent][action]) )
-                choice_to_hole_options.append(hole_options)
+            choice_to_hole_options.append(hole_options)
         # logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
         # logger.info(f"pm.row_action_hole is: {pm.row_action_hole}")
+        print("pm.num_holes",pm.num_holes)
         print("all_holes",all_holes)
         print("choice_to_hole_options",choice_to_hole_options)
 
