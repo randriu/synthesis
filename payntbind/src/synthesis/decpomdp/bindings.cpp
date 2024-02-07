@@ -36,6 +36,8 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("num_holes", [](synthesis::DecPomdp& decpomdp) {return decpomdp.num_holes;})
         .def_property_readonly("transition_matrix", [](synthesis::DecPomdp& decpomdp) {return decpomdp.transition_matrix;}, "transition matrix")
 
+        .def_property_readonly("agent_max_successor_memory_size", [](synthesis::DecPomdp& decpomdp) {return decpomdp.agent_max_successor_memory_size;})
+
 
 
         //new

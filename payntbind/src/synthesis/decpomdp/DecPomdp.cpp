@@ -895,10 +895,10 @@ namespace synthesis {
                             this->num_holes++;
                         }
                     }
-                    if(this->max_successor_memory_size[obs] > 1) {
+                    if(this->agent_max_successor_memory_size[agent][obs] > 1) {
                         for(uint64_t mem = 0; mem < std::pow(this->observation_memory_size[obs], 1.0 / this->num_agents); mem++) { //TODO obs must be joint observation
                             this->memory_holes[agent][obs].push_back(this->num_holes);
-                            this->hole_options.push_back(std::pow(this->max_successor_memory_size[obs], 1.0 / this->num_agents));
+                            this->hole_options.push_back(std::pow(this->agent_max_successor_memory_size[agent][obs] , 1.0 / this->num_agents));
                             // std::cout << "created N(" << obs << "," << mem << ") = " << this->num_holes << " in {} of size " << this->max_successor_memory_size[obs] << std::endl;
                             this->num_holes++;
                         }
