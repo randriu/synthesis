@@ -13,7 +13,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     
     def verify_family(self, family):
         self.quotient.build(family)
-        print(family)
+        # print(family)
         self.stat.iteration_mdp(family.mdp.states)
         res = family.mdp.check_specification(
             self.quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)

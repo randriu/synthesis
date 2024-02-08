@@ -136,9 +136,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.set_imperfect_memory_size(self.initial_memory_size)
 
 
-
-
-
         # logger.info(f"dec-POMDP has {self.decpomdp_manager.num_agents} agents")
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
@@ -246,6 +243,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                         all_holes.add_hole(name,option_labels)
                         self.is_action_hole.append(False)
                     self.observation_memory_holes.append(hole_indices)
+                
 
 
         # create the coloring

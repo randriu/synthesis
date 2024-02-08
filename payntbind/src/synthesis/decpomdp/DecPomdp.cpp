@@ -949,6 +949,7 @@ namespace synthesis {
                             } else {
                                 // no corresponding action hole
                                 this->row_action_hole[agent][row] = this->num_holes;
+                                // std::cout << "a joint_observation " << joint_observation << std::endl;
                             }
                             if(this->max_successor_memory_size[joint_observation] > 1) {
                                 // there is a memory hole that corresponds to this state
@@ -957,6 +958,7 @@ namespace synthesis {
                                 this->row_memory_option[agent][row] = mem;
                             } else {
                                 this->row_memory_hole[agent][row] = this->num_holes;
+                                // std::cout << "state " << state << std::endl;
                             }
                             row++;
                         }
@@ -999,6 +1001,8 @@ namespace synthesis {
             // std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; 
             // std::cout << "this->row_action_option " << this->row_action_option << std::endl; 
 
+
+            std::cout << "this->discount_sink_state " << this->discount_sink_state << std::endl; 
         
     }
 
