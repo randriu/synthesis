@@ -341,6 +341,8 @@ class Quotient:
 
     def split(self, family, incomplete_search):
 
+        self.check_scheduler_inheritance(family)
+
         mdp = family.mdp
         assert not mdp.is_deterministic
 
@@ -447,6 +449,74 @@ class Quotient:
     def get_property(self):
         assert self.specification.num_properties == 1, "expecting a single property"
         return self.specification.all_properties()[0]
+
+
+    def check_scheduler_inheritance(self, family):
+        '''
+        @note: prototype snippet, will be removed
+        '''
+        if family.parent_info is None:
+            # super-family
+            self.perc_affected_sum = 0
+            self.perc_affected_entries = 0
+            return
+
+        # which choices were removed in the child family
+        choice_diff = set(family.parent_info.selected_choices).difference(set(family.selected_choices))
+        # print(choice_diff)
+
+        # get parent's scheduler for optimality
+        parent_mdp = family.parent_info.mdp
+        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
+        assert not parent_result.scheduler.partial
+        
+        # get info from parent's scheduler
+        parent_state_choice = [None for state in range(self.quotient_mdp.nr_states)]
+        for state in range(parent_mdp.states):
+            qstate = parent_mdp.quotient_state_map[state]
+            sched_choice = parent_result.scheduler.get_choice(state).get_deterministic_choice()
+            choice = parent_mdp.model.get_choice_index(state,sched_choice)
+            qchoice = parent_mdp.quotient_choice_map[choice]
+            parent_state_choice[qstate] = qchoice
+        # print(parent_state_choice)
+
+        # mark states in the sub-sub-MDP affected by the removal
+        state_affected = [False for state in range(family.mdp.states)]
+        for state in range(family.mdp.states):
+            qstate = family.mdp.quotient_state_map[state]
+            if parent_state_choice[qstate] in choice_diff:
+                state_affected[state] = True
+
+        # for each state, a list of its predecessors
+        predecessors = [set() for s in range(family.mdp.states)]
+        tm = family.mdp.model.transition_matrix
+        for s in range(family.mdp.states):
+            for choice in range(tm.get_row_group_start(s),tm.get_row_group_end(s)):
+                for entry in tm.get_row(choice):
+                    predecessors[entry.column].add(s)
+
+        # find all states from which affected states are reachable
+        state_queue = [s for s in range(family.mdp.states) if state_affected[s]]
+        # print(tm)
+        while state_queue:
+            state = state_queue.pop()
+            for pred in predecessors[state]:
+                if not state_affected[pred]:
+                    state_queue.append(pred)
+                    state_affected[pred] = True
+
+        # print("affected", state_affected[self.monitored_state])
+        # print("parent has ", parent_result.at(self.monitored_state))
+
+        num_affected = len([x for x in state_affected if x])
+        perc_affected = round(num_affected / family.mdp.states  * 100)
+        self.perc_affected_sum += perc_affected
+        self.perc_affected_entries += 1
+        print("% affected states average: ", self.perc_affected_sum/self.perc_affected_entries)
+
+        # print(dir(parent_scheduler.get_))
+        # print(family.parent_info.mdp.model.nr_states, model.nr_states)
+        # exit()
 
 
 

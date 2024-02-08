@@ -229,6 +229,9 @@ class DesignSpace(Family):
         pi.constraint_indices = cr.undecided_constraints if cr is not None else []
         pi.splitter = self.splitter
         pi.mdp = self.mdp
+        #+
+        pi.selected_choices = self.selected_choices
+        pi.analysis_result = self.analysis_result
         return pi
 
     def encode(self, smt_solver):
