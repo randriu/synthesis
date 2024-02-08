@@ -667,11 +667,12 @@ namespace synthesis {
             // this will define the number of copies we need to make of each row
             // std::cout << "this->num_joint_observations() " << this->num_joint_observations() << std::endl;
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
+                // std::cout << "this->joint_observations[obs][0] " << this->joint_observations[obs][1]  << std::endl;
                 // std::cout << "obs " << obs << std::endl;
                 uint64_t max_mem_size = 0; //TODO there was 0
                 for(auto dst_state: this->observation_successors[obs]) {
                     auto dst_obs = this->state_joint_observation[dst_state];
-                    // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
+                    // std::cout << "this->joint_observations[dst_obs][0] " << this->joint_observations[dst_obs][1]  << std::endl;
                     // std::cout << "dst_obs " << dst_obs << std::endl;
                     if(max_mem_size < this->observation_memory_size[dst_obs]) {
                         max_mem_size = this->observation_memory_size[dst_obs];
@@ -712,7 +713,7 @@ namespace synthesis {
                 }
                 
             }
-            std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
+            // std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
 
 
 
@@ -971,7 +972,7 @@ namespace synthesis {
             
 
 
-            // fill max_successor_memory_size
+            // fill row_memory_option
             row = 0;
             for(uint64_t state = 0; state < this->num_quotient_states; state++) {
                 auto prototype = this->state_prototype[state];

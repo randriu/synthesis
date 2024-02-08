@@ -13,7 +13,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        self.initial_memory_size = 2; #TODO Must take this from paynt
+        self.initial_memory_size = 3; #TODO Must take this from paynt
 
         assert decpomdp_manager.num_agents > 1
 
@@ -140,7 +140,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        print("transition matrix: ", self.quotient_mdp.transition_matrix)
+        # print("transition matrix: ", self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         
@@ -230,6 +230,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                         name = self.create_hole_name(agent,obs,mem,True)
                         all_holes.add_hole(name,option_labels)
                         self.is_action_hole.append(True)
+                    print("a self.agent_observation_labels[agent][obs]",self.agent_observation_labels[agent][obs])
                 self.observation_action_holes.append(hole_indices)
 
                 # memory holes
@@ -242,8 +243,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                         hole_indices.append(all_holes.num_holes)
                         all_holes.add_hole(name,option_labels)
                         self.is_action_hole.append(False)
-                    self.observation_memory_holes.append(hole_indices)
-                
+                self.observation_memory_holes.append(hole_indices)
+
 
 
         # create the coloring
