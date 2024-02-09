@@ -13,7 +13,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        self.initial_memory_size = 3; #TODO Must take this from paynt
+        # self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
+        self.initial_memory_size = 1;
 
         assert decpomdp_manager.num_agents > 1
 
@@ -140,7 +141,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        # print("transition matrix: ", self.quotient_mdp.transition_matrix)
+        print("transition matrix: ", self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         

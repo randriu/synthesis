@@ -37,7 +37,11 @@ python3 paynt.py --project models/cassandra/decpomdp/ --sketch basic.dpomdp
 
 alias rund='(
 source prerequisites/venv/bin/activate
-python3 paynt.py --project models/cassandra/decpomdp/ --sketch dectiger.dpomdp
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch dectiger.dpomdp --profiling
+)'
+alias rung='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch gridsmall.dpomdp
 )'
 alias runpomdp='(
 source prerequisites/venv/bin/activate
