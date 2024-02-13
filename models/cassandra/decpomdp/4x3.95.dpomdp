@@ -1,0 +1,29 @@
+agents: 2 
+discount: 0.95
+values: reward
+states: s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10
+observations: 
+left right neither both good bad 
+o1
+start:
+0.111111 0.111111 0.111111 0.0 0.111111 0.111111 0.0 0.111112 0.111111 0.111111 0.111111
+actions:
+n s e w 
+a1
+O: * :
+uniform
+T: * :
+uniform
+R: * : s0 : * : * -0.04
+R: * : s1 : * : * -0.04
+R: * : s2 : * : * -0.04
+R: * : s3 : * : * 1.0
+R: * : s4 : * : * -0.04
+R: * : s5 : * : * -0.04
+R: * : s6 : * : * -1.0
+R: * : s7 : * : * -0.04
+R: * : s8 : * : * -0.04
+R: * : s9 : * : * -0.04
+R: * : s10 : * : * -0.04
+
+

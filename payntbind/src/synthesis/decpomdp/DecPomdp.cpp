@@ -593,6 +593,8 @@ namespace synthesis {
                 auto obs = this->state_joint_observation[this->discount_sink_state];
                 this->observation_memory_size[obs] = 1;
             }
+            // auto obs = this->state_joint_observation[this->initial_state];
+            // this->observation_memory_size[obs] = 1;
         }
 
     void DecPomdp::buildStateSpace() {

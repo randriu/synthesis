@@ -32,16 +32,40 @@ python3 paynt.py --project models/cassandra/decpomdp/ --sketch 2generals.dpomdp
 
 alias runb='(
 source prerequisites/venv/bin/activate
-python3 paynt.py --project models/cassandra/decpomdp/ --sketch basic.dpomdp
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch basic.dpomdp --pomdp-memory-size 2
 )'
 
 alias rund='(
 source prerequisites/venv/bin/activate
-python3 paynt.py --project models/cassandra/decpomdp/ --sketch dectiger.dpomdp --profiling
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch dectiger.dpomdp --profiling --pomdp-memory-size 2
 )'
 alias rung='(
 source prerequisites/venv/bin/activate
-python3 paynt.py --project models/cassandra/decpomdp/ --sketch gridsmall.dpomdp
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch gridsmall.dpomdp --pomdp-memory-size 2
+)'
+
+alias run43='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch 4x3.95.dpomdp --pomdp-memory-size 2
+)'
+
+alias runt95='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch tiger.95.dpomdp --pomdp-memory-size 1
+)'
+alias runt95p='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/pomdp/ --sketch tiger.95.pomdp --pomdp-memory-size 1
+)'
+
+alias runparr='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch parr95.95.dpomdp --pomdp-memory-size 1
+)'
+
+alias runparrp='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/pomdp/ --sketch parr95.95.pomdp --pomdp-memory-size 1
 )'
 alias runpomdp='(
 source prerequisites/venv/bin/activate

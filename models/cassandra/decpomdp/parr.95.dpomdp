@@ -1,0 +1,12 @@
+# This is a Dec-POMDP (.dpomdp) file for the Dec-Tiger problem.
+# For more detailed documentation, see example.dpomdp
+# Allright, here we go!
+#
+#The agents. 
+#----------
+#Either 1) the number of agents: 
+#   agents: %d
+#or 2) a list of agent identifiers, e.g.:
+#   agents: agent1_name, name-of-agent2, ... 
+agents: 2 
+

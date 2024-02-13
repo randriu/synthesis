@@ -13,8 +13,9 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
-        # self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
-        self.initial_memory_size = 1;
+        self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
+        # self.initial_memory_size = 1;
+        print("self.initial_memory_size",self.initial_memory_size)
 
         assert decpomdp_manager.num_agents > 1
 
