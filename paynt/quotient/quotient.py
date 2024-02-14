@@ -113,6 +113,7 @@ class Quotient:
     def mdp_to_dtmc(mdp):
         tm = mdp.transition_matrix
         tm.make_row_grouping_trivial()
+        assert tm.nr_columns == tm.nr_rows, "expected transition matrix without non-trivial row groups"
         components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
         dtmc = stormpy.storage.SparseDtmc(components)
         return dtmc
