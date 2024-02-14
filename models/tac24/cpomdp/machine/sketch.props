@@ -1,2 +1,0 @@
-R[exp]{"reward"}max=? [F "discount_sink"]
-R[exp]{"constraint"}<=9 [F "discount_sink"]

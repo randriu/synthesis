@@ -26,7 +26,8 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         if family.analysis_result.improving_value is not None:
             self.quotient.specification.optimality.update_optimum(family.analysis_result.improving_value)
             # print values for constraints, TODO discuss some nice way of doing this naturally
-            if True:
+            if False:
+                print(ia)
                 model = self.quotient.build_assignment(ia)
                 mc_result = model.check_specification(self.quotient.specification)
                 print(mc_result)

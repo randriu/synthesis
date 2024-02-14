@@ -322,7 +322,8 @@ namespace synthesis {
         for(uint64_t state = 0; state < this->num_states(); state++) {
             for(uint64_t row = 0; row < this->transition_matrix[state].size(); row++) {
                 auto reward = this->row_reward[state][row];
-                if (reward < this->constraint_bound) {
+                // no matter what the bound is there should not be any cost in the initial state or the discount state
+                if (reward < this->constraint_bound && (state != this->initial_state && state != this->discount_sink_state)) {
                     action_rewards.push_back(1);
                 } else {
                     action_rewards.push_back(0);
