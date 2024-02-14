@@ -326,22 +326,29 @@ class ParserPOMDPFormat_Spirit  :
             AddStartState (ParserPOMDPFormat_Spirit* po){_m_po = po;}
             void operator()(iterator_t str, iterator_t end) const
             {
-                if(_m_po->_m_lp_type != STRING)
+                // code here changed by Filip Macak to allow for start include/exclude to work with state indeces
+                if(_m_po->_m_lp_type == UINT)
                 {
-                    std::stringstream ss; ss << "SetStartState::operator()(iterator_t str, iterator_t end) - expected a string as last parsed type! (at"<<str.get_position() <<")"<<std::endl;
+                    _m_po->_m_startStateListSI.push_back(_m_po->_m_lp_uint);
+                }
+                else if(_m_po->_m_lp_type != STRING)
+                {
+                    std::stringstream ss; ss << "SetStartState::operator()(iterator_t str, iterator_t end) - expected a string or uint as last parsed type! (at"<<str.get_position() <<")"<<std::endl;
                     throw E(ss);
                 }
-                try
-                {
-                    Index sI = _m_po->GetPOMDPDiscrete()->GetStateIndexByName(
-                            _m_po->_m_lp_string);
-                    _m_po->_m_startStateListSI.push_back(sI);
-                }
-                catch(E e)
-                {
-                    std::stringstream ss; ss << e.SoftPrint() << "(at"<<
-                        str.get_position() <<")"<<std::endl;
-                    throw E(ss);
+                else {
+                    try
+                    {
+                        Index sI = _m_po->GetPOMDPDiscrete()->GetStateIndexByName(
+                                _m_po->_m_lp_string);
+                        _m_po->_m_startStateListSI.push_back(sI);
+                    }
+                    catch(E e)
+                    {
+                        std::stringstream ss; ss << e.SoftPrint() << "(at"<<
+                            str.get_position() <<")"<<std::endl;
+                        throw E(ss);
+                    }
                 }
             };
             void operator()(const unsigned int& i) const
