@@ -57,7 +57,7 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, discount_factor=1, precision=1e-4):
+        export=None, relative_error=0, discount_factor=1, precision=1e-4, constraint_bound=None):
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
 
@@ -97,16 +97,21 @@ class Sketch:
             try:
                 logger.info(f"assuming sketch in Cassandra format...")
                 decpomdp_manager = payntbind.synthesis.parse_decpomdp(sketch_path)
+                if constraint_bound is not None:
+                    decpomdp_manager.set_constraint(constraint_bound)
                 if decpomdp_manager is None:
                     raise SyntaxError
                 logger.info("applying discount factor transformation...")
                 decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
-                optimality = paynt.verification.property.construct_reward_property(
-                    decpomdp_manager.reward_model_name,
-                    decpomdp_manager.reward_minimizing,
-                    decpomdp_manager.discount_sink_label)
-                specification = paynt.verification.property.Specification([optimality])
+                if constraint_bound is not None:
+                    specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
+                else:
+                    optimality = paynt.verification.property.construct_reward_property(
+                        decpomdp_manager.reward_model_name,
+                        decpomdp_manager.reward_minimizing,
+                        decpomdp_manager.discount_sink_label)
+                    specification = paynt.verification.property.Specification([optimality])
                 filetype = "cassandra"
             except SyntaxError:
                 pass
