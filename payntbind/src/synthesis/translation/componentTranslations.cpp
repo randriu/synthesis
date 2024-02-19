@@ -118,7 +118,6 @@ namespace synthesis {
         std::vector<uint64_t> const& original_to_translated_choice,
         uint64_t state
     ) {
-        builder.newRowGroup(builder.getLastRow());
         for(auto const& choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
             synthesis::translateTransitionMatrixRow(
                 model, builder, original_to_translated_state, original_to_translated_choice, choice
