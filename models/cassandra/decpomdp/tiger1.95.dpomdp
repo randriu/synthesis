@@ -9,14 +9,14 @@
 #   agents: %d
 #or 2) a list of agent identifiers, e.g.:
 #   agents: agent1_name, name-of-agent2, ... 
-agents: 2 
+agents: 1 
 #   discount: %f 
-discount: 0.9
+discount: 0.95
 #.0
 #   values: [ reward, cost ] 
 values: reward
 #   states: [ %d, <list of states> ] 
-states: state     
+states: tiger-left tiger-right      
 #
 #Examples of this are:
 #   start: 0.3 0.1 0.0 0.2 0.5
@@ -37,18 +37,14 @@ uniform
 #   [ %d, <list of actions> ] 
 #   ...
 #   [ %d, <list of actions> ] 
-actions: 
-action1 action2
-action1 action2
+actions: listen open-left open-right
 #the (number/list of) observations for each of the agents on a separate line
 #   observations: 
 #   [ %d, <list of observations> ]
 #   [ %d, <list of observations> ]
 #   ...
 #   [ %d, <list of observations> ]
-observations: 
-observation1
-observation1 observation2
+observations: tiger-left tiger-right
 #Transition probabilities
 #   T: <a1 a2...an> : <start-state> : <end-state> : %f
 #or
@@ -80,12 +76,12 @@ uniform
 #    %f %f ... %f	    ... 
 #    ...		    ...
 #    %f %f ... %f	    P(jo_1|ja,s_k') ... P(jo_x|ja,s_k') 
-O: * :
+O: * : 
 uniform
-O: action1 action1 : state : observation1 observation1 : 0.9
-O: action1 action1 : state : observation1 observation2 : 0.1
-O: action1 action2 : state : observation1 observation1 : 0.3
-O: action1 action2 : state : observation1 observation2 : 0.7
+O: listen : tiger-left : tiger-left : 0.85
+O: listen : tiger-left : tiger-right : 0.15
+O: listen : tiger-right : tiger-left : 0.15
+O: listen : tiger-right : tiger-right : 0.85
 #O: listen listen : tiger-right : hear-right hear-right : 0.7225
 #O: listen listen : tiger-right : hear-left hear-right : 0.1275
 #O: listen listen : tiger-right : hear-right hear-left : 0.1275
@@ -103,12 +99,11 @@ O: action1 action2 : state : observation1 observation2 : 0.7
 #
 #Typical problems only use R(s,ja) which is specified by:
 #   R: <a1 a2...an> : <start-state> : * : * : %f
-R: * *: * : * : * : -2
-R: action1 action2: * : * : * : 1
-#R: open-left open-left : tiger-left : * : * : -50
-#R: open-right open-right : tiger-right : * : * : -50
-#R: open-left open-left : tiger-right : * : * : +20
-#R: open-right open-right : tiger-left : * : * : 20
+R: * : * : * : * : -1
+R: open-left : tiger-left : * : * : -100
+R: open-right : tiger-right : * : * : -100
+R: open-left : tiger-right : * : * : +10
+R: open-right : tiger-left : * : * : 10
 #R: open-left open-right: tiger-left : * : * : -100
 #R: open-left open-right: tiger-right : * : * : -100
 #R: open-right open-left: tiger-left : * : * : -100

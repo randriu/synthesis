@@ -27,7 +27,7 @@ cd ..
 
 alias runp='(
 source prerequisites/venv/bin/activate
-python3 paynt.py --project models/cassandra/decpomdp/ --sketch 2generals.dpomdp 
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch 2generals.dpomdp --pomdp-memory-size 2
 )'
 
 alias runb='(
@@ -49,9 +49,14 @@ source prerequisites/venv/bin/activate
 python3 paynt.py --project models/cassandra/decpomdp/ --sketch 4x3.95.dpomdp --pomdp-memory-size 2
 )'
 
+
 alias runt95='(
 source prerequisites/venv/bin/activate
 python3 paynt.py --project models/cassandra/decpomdp/ --sketch tiger.95.dpomdp --pomdp-memory-size 1
+)'
+alias runt951='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch tiger1.95.dpomdp --pomdp-memory-size 1
 )'
 alias runt95p='(
 source prerequisites/venv/bin/activate

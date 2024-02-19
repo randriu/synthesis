@@ -257,7 +257,7 @@ namespace synthesis {
         init_flags.set(this->prototype_duplicates[this->initial_state][0] );
         labeling.addLabel("init", std::move(init_flags));
 
-        if(this->discounted || this->discount_factor == 1) {
+        if(this->discounted ) {
             storm::storage::BitVector discount_sink_flags(this->num_quotient_states, false);
             discount_sink_flags.set(this->prototype_duplicates[this->discount_sink_state][0]);
             labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
@@ -444,6 +444,7 @@ namespace synthesis {
                 row_index++;
             }
         } 
+        std::cout << "action_rewards " << action_rewards<< std::endl;
         return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
     }
 
