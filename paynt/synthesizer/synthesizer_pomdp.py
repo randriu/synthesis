@@ -90,11 +90,12 @@ class SynthesizerPOMDP:
                 self.synthesizer.saynt_timer = self.saynt_timer
                 self.storm_control.saynt_timer = self.saynt_timer
 
-    def synthesize(self, family, print_stats=True):
+    def synthesize(self, family, print_stats=False):
         synthesizer = self.synthesizer(self.quotient)
         family.constraint_indices = self.quotient.design_space.constraint_indices
         assignment = synthesizer.synthesize(family, keep_optimum=True, print_stats=print_stats)
-        self.total_iters += synthesizer.stat.iterations_mdp
+        if synthesizer.stat.iterations_mdp is not None:
+            self.total_iters += synthesizer.stat.iterations_mdp
         return assignment
 
     # iterative strategy using Storm analysis to enhance the synthesis
@@ -373,7 +374,7 @@ class SynthesizerPOMDP:
             #break
 
 
-    def strategy_iterative(self, unfold_imperfect_only):
+    def strategy_iterative(self, unfold_imperfect_only, max_memory=None):
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
@@ -396,6 +397,9 @@ class SynthesizerPOMDP:
             # if opt_old == opt and opt is not None:
             #     break
             mem_size += 1
+
+            if max_memory is not None and mem_size > max_memory:
+                break
 
             #break
     

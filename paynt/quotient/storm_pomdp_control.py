@@ -234,6 +234,7 @@ class StormPOMDPControl:
         # Update cut-off FSC values provided by PAYNT
         if not start:
             logger.info("Updating FSC values in Storm")
+            print(f"Current FSC values: {self.paynt_export}")
             self.belief_explorer.set_fsc_values(self.paynt_export)
             belmc.continue_unfolding()
 
