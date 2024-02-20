@@ -1,0 +1,305 @@
+2024-02-20 11:55:08,637 - cli.py - This is Paynt version 0.1.0.
+2024-02-20 11:55:08,637 - sketch.py - loading sketch from models/pomdp/storm-integration/refuel-08/sketch.templ ...
+2024-02-20 11:55:08,637 - sketch.py - assuming sketch in PRISM format...
+2024-02-20 11:55:08,640 - prism_parser.py - PRISM model type: POMDP
+2024-02-20 11:55:08,640 - prism_parser.py - loading properties from models/pomdp/storm-integration/refuel-08/sketch.props ...
+2024-02-20 11:55:08,640 - prism_parser.py - found the following specification: optimality: Pmax=? ["notbad" U "goal"] 
+2024-02-20 11:55:08,656 - sketch.py - sketch parsing OK
+2024-02-20 11:55:08,657 - sketch.py - constructed explicit quotient having 470 states and 1431 actions
+2024-02-20 11:55:08,657 - property.py - converting until formula to eventually...
+2024-02-20 11:55:08,657 - sketch.py - found the following specification optimality: Pmax=? [F "goal"] 
+2024-02-20 11:55:08,657 - pomdp.py - constructed POMDP having 66 observations.
+2024-02-20 11:55:08,661 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-20 11:55:08,662 - pomdp.py - constructed quotient MDP having 470 states and 1431 actions.
+2024-02-20 11:55:08,694 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-02-20 11:55:08,695 - synthesizer_pomdp.py - Storm settings: iterative - (450, 120, 5), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False
+2024-02-20 11:55:08,695 - synthesizer.py - synthesis initiated, design space: 65810851921133568
+2024-02-20 11:55:08,695 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = 0.0 | Time elapsed = 0.0s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.00509302505780954 | Time elapsed = 0.0s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.0066123322700887225 | Time elapsed = 0.0s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.007232140613122893 | Time elapsed = 0.0s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.018613590454177948 | Time elapsed = 0.1s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.02208123987131633 | Time elapsed = 0.1s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.02589229571424291 | Time elapsed = 0.3s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.026118024018920077 | Time elapsed = 2.9s | FSC size = 132
+
+> progress 0.02%, elapsed 3 s, estimated 14306 s (3 hours), iters = {MDP: 4684}, opt = 0.026
+-----------PAYNT-----------                     
+Value = 0.0435012934354416 | Time elapsed = 4.1s | FSC size = 132
+
+> progress 0.062%, elapsed 6 s, estimated 9553 s (2 hours), iters = {MDP: 9243}, opt = 0.044
+-----------PAYNT-----------                     
+Value = 0.05199921999467997 | Time elapsed = 7.4s | FSC size = 132
+
+> progress 0.116%, elapsed 9 s, estimated 7724 s (2 hours), iters = {MDP: 13788}, opt = 0.052
+> progress 0.169%, elapsed 12 s, estimated 7070 s, iters = {MDP: 18181}, opt = 0.052
+> progress 0.265%, elapsed 15 s, estimated 5643 s, iters = {MDP: 22569}, opt = 0.052
+-----------PAYNT-----------                     
+Value = 0.0659826695672917 | Time elapsed = 17.8s | FSC size = 132
+
+> progress 0.347%, elapsed 18 s, estimated 5176 s, iters = {MDP: 27173}, opt = 0.066
+-----------PAYNT-----------                     
+Value = 0.08266180617575997 | Time elapsed = 18.9s | FSC size = 132
+
+> progress 0.477%, elapsed 21 s, estimated 4399 s, iters = {MDP: 31452}, opt = 0.083
+-----------PAYNT-----------                     
+Value = 0.09691987683792132 | Time elapsed = 23.3s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.12316094020203465 | Time elapsed = 23.7s | FSC size = 132
+
+> progress 0.767%, elapsed 24 s, estimated 3128 s, iters = {MDP: 35478}, opt = 0.123
+> progress 1.058%, elapsed 27 s, estimated 2551 s, iters = {MDP: 39635}, opt = 0.123
+> progress 1.428%, elapsed 30 s, estimated 2100 s, iters = {MDP: 43838}, opt = 0.123
+> progress 2.239%, elapsed 33 s, estimated 1473 s, iters = {MDP: 47378}, opt = 0.123
+> progress 2.923%, elapsed 36 s, estimated 1231 s, iters = {MDP: 51472}, opt = 0.123
+> progress 3.359%, elapsed 39 s, estimated 1161 s, iters = {MDP: 55177}, opt = 0.123
+> progress 4.213%, elapsed 42 s, estimated 996 s, iters = {MDP: 58995}, opt = 0.123
+> progress 5.043%, elapsed 45 s, estimated 892 s, iters = {MDP: 61902}, opt = 0.123
+> progress 5.255%, elapsed 48 s, estimated 913 s, iters = {MDP: 65262}, opt = 0.123
+> progress 5.802%, elapsed 51 s, estimated 879 s, iters = {MDP: 68352}, opt = 0.123
+> progress 7.04%, elapsed 54 s, estimated 767 s, iters = {MDP: 71713}, opt = 0.123
+-----------PAYNT-----------                     
+Value = 0.1382788821137466 | Time elapsed = 56.5s | FSC size = 132
+
+-----------PAYNT-----------                     
+Value = 0.17045915586570098 | Time elapsed = 56.5s | FSC size = 132
+
+> progress 9.197%, elapsed 57 s, estimated 619 s, iters = {MDP: 75613}, opt = 0.17
+> progress 11.467%, elapsed 60 s, estimated 523 s, iters = {MDP: 79975}, opt = 0.17
+> progress 14.261%, elapsed 63 s, estimated 441 s, iters = {MDP: 84084}, opt = 0.17
+> progress 15.305%, elapsed 66 s, estimated 431 s, iters = {MDP: 88880}, opt = 0.17
+-----------PAYNT-----------                     
+Value = 0.1942218620004683 | Time elapsed = 68.3s | FSC size = 132
+
+> progress 15.671%, elapsed 69 s, estimated 440 s, iters = {MDP: 94094}, opt = 0.194
+> progress 15.889%, elapsed 72 s, estimated 453 s, iters = {MDP: 99376}, opt = 0.194
+> progress 16.096%, elapsed 75 s, estimated 466 s, iters = {MDP: 104696}, opt = 0.194
+> progress 16.685%, elapsed 78 s, estimated 467 s, iters = {MDP: 110130}, opt = 0.194
+> progress 16.766%, elapsed 81 s, estimated 483 s, iters = {MDP: 115264}, opt = 0.194
+> progress 16.858%, elapsed 84 s, estimated 498 s, iters = {MDP: 120327}, opt = 0.194
+> progress 16.897%, elapsed 87 s, estimated 514 s, iters = {MDP: 125381}, opt = 0.194
+> progress 16.97%, elapsed 90 s, estimated 530 s, iters = {MDP: 130679}, opt = 0.194
+> progress 17.06%, elapsed 93 s, estimated 545 s, iters = {MDP: 135419}, opt = 0.194
+> progress 17.94%, elapsed 96 s, estimated 535 s, iters = {MDP: 139332}, opt = 0.194
+> progress 19.21%, elapsed 99 s, estimated 515 s, iters = {MDP: 142801}, opt = 0.194
+-----------PAYNT-----------                     
+Value = 0.195645305957086 | Time elapsed = 100.9s | FSC size = 132
+
+> progress 21.906%, elapsed 102 s, estimated 465 s, iters = {MDP: 146615}, opt = 0.196
+> progress 22.043%, elapsed 105 s, estimated 476 s, iters = {MDP: 151660}, opt = 0.196
+> progress 22.127%, elapsed 108 s, estimated 488 s, iters = {MDP: 156419}, opt = 0.196
+> progress 22.254%, elapsed 111 s, estimated 498 s, iters = {MDP: 161508}, opt = 0.196
+> progress 22.924%, elapsed 114 s, estimated 497 s, iters = {MDP: 166369}, opt = 0.196
+> progress 22.998%, elapsed 117 s, estimated 508 s, iters = {MDP: 171636}, opt = 0.196
+> progress 23.107%, elapsed 120 s, estimated 519 s, iters = {MDP: 176989}, opt = 0.196
+2024-02-20 11:57:08,740 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 11:57:08,838 - storm_pomdp_control.py - Interactive Storm started
+2024-02-20 11:57:08,840 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-02-20 11:57:14,846 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.44585292200343984 | Time elapsed = 135.2s | FSC size = 140
+
+
+------------------------------------
+
+PAYNT results: 
+0.195645305957086
+controller size: 132
+
+Storm results: 
+0.44585292200343984
+controller size: 140
+
+------------------------------------
+
+2024-02-20 11:57:23,861 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-02-20 11:57:24,760 - synthesizer_ar_storm.py - Resuming synthesis
+2024-02-20 11:57:24,761 - synthesizer_ar_storm.py - Additional memory needed
+2024-02-20 11:57:24,761 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-20 11:57:24,762 - synthesizer.py - A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'west'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'north'}, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'west'}, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=3 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=6 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=3 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'north'}, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=2 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'west'}, A([start & fuel=4 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=4 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=7 & cangoeast=1 & cangosouth=1],0)={'south'}, A([start & fuel=3 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'west'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=2 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=5 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=5 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=1 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, A([start & fuel=1 & cangoeast=1 & cangonorth=1],0)={'south'}, A([start & fuel=2 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=6 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=7 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1],0)={'south'}, A([start & fuel=6 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'east'}, A([start & fuel=3 & cangoeast=1 & cangonorth=1],0)={'south'}, A([start & fuel=1 & cangosouth=1 & cangowest=1],0)={'east'}
+2024-02-20 11:57:24,762 - synthesizer.py - double-checking specification satisfiability:  : 0.195645305957086
+2024-02-20 11:57:24,763 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-02-20 11:57:24,764 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-20 11:57:24,765 - pomdp.py - constructed quotient MDP having 648 states and 3377 actions.
+2024-02-20 11:57:24,950 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4522487307570679132924674048 to 68719476736
+2024-02-20 11:57:24,950 - synthesizer.py - synthesis initiated, design space: 4522487307570679132924674048
+-----------PAYNT-----------                     
+Value = 0.2118161754551975 | Time elapsed = 136.3s | FSC size = 142
+
+-----------PAYNT-----------                     
+Value = 0.21285034390451987 | Time elapsed = 136.9s | FSC size = 142
+
+-----------PAYNT-----------                     
+Value = 0.28803483926086787 | Time elapsed = 136.9s | FSC size = 142
+
+-----------PAYNT-----------                     
+Value = 0.2927520215636799 | Time elapsed = 136.9s | FSC size = 142
+
+> progress 0.0%, elapsed 3 s, estimated 530297617229958784 s (16815627131 years), iters = {MDP: 4595}, opt = 0.293
+> progress 0.0%, elapsed 6 s, estimated 576414488153068864 s (18277983515 years), iters = {MDP: 9065}, opt = 0.293
+> progress 0.0%, elapsed 9 s, estimated 598276695388107264 s (18971229559 years), iters = {MDP: 13281}, opt = 0.293
+2024-02-20 11:57:34,277 - synthesizer_ar_storm.py - Main family synthesis done
+2024-02-20 11:57:34,277 - synthesizer_ar_storm.py - Subfamilies buffer contains: 20 families
+> progress 0.0%, elapsed 12 s, estimated 243804942 s (7 years), iters = {MDP: 17390}, opt = 0.293
+> progress 0.0%, elapsed 15 s, estimated 291191264 s (9 years), iters = {MDP: 20918}, opt = 0.293
+> progress 0.0%, elapsed 18 s, estimated 312010571 s (9 years), iters = {MDP: 25289}, opt = 0.293
+> progress 0.0%, elapsed 21 s, estimated 332266677 s (10 years), iters = {MDP: 29912}, opt = 0.293
+> progress 0.0%, elapsed 24 s, estimated 369335357 s (11 years), iters = {MDP: 33661}, opt = 0.293
+> progress 0.0%, elapsed 27 s, estimated 402259762 s (12 years), iters = {MDP: 37918}, opt = 0.293
+> progress 0.0%, elapsed 30 s, estimated 440336006 s (13 years), iters = {MDP: 42288}, opt = 0.293
+> progress 0.0%, elapsed 33 s, estimated 424693672 s (13 years), iters = {MDP: 46360}, opt = 0.293
+> progress 0.0%, elapsed 36 s, estimated 436613843 s (13 years), iters = {MDP: 50670}, opt = 0.293
+> progress 0.0%, elapsed 39 s, estimated 423286684 s (13 years), iters = {MDP: 55236}, opt = 0.293
+> progress 0.0%, elapsed 42 s, estimated 443507998 s (14 years), iters = {MDP: 59481}, opt = 0.293
+> progress 0.0%, elapsed 45 s, estimated 461137443 s (14 years), iters = {MDP: 63759}, opt = 0.293
+> progress 0.0%, elapsed 48 s, estimated 293515045 s (9 years), iters = {MDP: 67379}, opt = 0.293
+> progress 0.0%, elapsed 51 s, estimated 283980758 s (9 years), iters = {MDP: 71012}, opt = 0.293
+> progress 0.0%, elapsed 54 s, estimated 272766354 s (8 years), iters = {MDP: 75320}, opt = 0.293
+> progress 0.0%, elapsed 57 s, estimated 277857913 s (8 years), iters = {MDP: 79504}, opt = 0.293
+> progress 0.0%, elapsed 60 s, estimated 287359410 s (9 years), iters = {MDP: 84203}, opt = 0.293
+> progress 0.0%, elapsed 63 s, estimated 288004617 s (9 years), iters = {MDP: 88582}, opt = 0.293
+> progress 0.0%, elapsed 66 s, estimated 298171033 s (9 years), iters = {MDP: 92504}, opt = 0.293
+> progress 0.0%, elapsed 69 s, estimated 302038516 s (9 years), iters = {MDP: 96727}, opt = 0.293
+> progress 0.0%, elapsed 72 s, estimated 308464119 s (9 years), iters = {MDP: 100800}, opt = 0.293
+> progress 0.0%, elapsed 75 s, estimated 316401700 s (10 years), iters = {MDP: 105248}, opt = 0.293
+> progress 0.0%, elapsed 78 s, estimated 296672719 s (9 years), iters = {MDP: 109009}, opt = 0.293
+> progress 0.0%, elapsed 81 s, estimated 288692300 s (9 years), iters = {MDP: 113328}, opt = 0.293
+> progress 0.0%, elapsed 84 s, estimated 290246875 s (9 years), iters = {MDP: 117901}, opt = 0.293
+> progress 0.0%, elapsed 87 s, estimated 293441984 s (9 years), iters = {MDP: 121606}, opt = 0.293
+> progress 0.0%, elapsed 90 s, estimated 297536549 s (9 years), iters = {MDP: 124927}, opt = 0.293
+> progress 0.0%, elapsed 93 s, estimated 303855136 s (9 years), iters = {MDP: 128900}, opt = 0.293
+> progress 0.0%, elapsed 96 s, estimated 303562139 s (9 years), iters = {MDP: 133080}, opt = 0.293
+> progress 0.0%, elapsed 99 s, estimated 310381387 s (9 years), iters = {MDP: 137293}, opt = 0.293
+> progress 0.0%, elapsed 102 s, estimated 273871003 s (8 years), iters = {MDP: 141217}, opt = 0.293
+> progress 0.0%, elapsed 105 s, estimated 177387736 s (5 years), iters = {MDP: 144971}, opt = 0.293
+> progress 0.0%, elapsed 108 s, estimated 153342293 s (4 years), iters = {MDP: 147816}, opt = 0.293
+> progress 0.0%, elapsed 111 s, estimated 155227863 s (4 years), iters = {MDP: 151816}, opt = 0.293
+> progress 0.0%, elapsed 114 s, estimated 106011860 s (3 years), iters = {MDP: 155433}, opt = 0.293
+> progress 0.0%, elapsed 117 s, estimated 103313669 s (3 years), iters = {MDP: 159383}, opt = 0.293
+2024-02-20 11:59:23,953 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 11:59:24,045 - storm_pomdp_control.py - Interactive Storm resumed
+2024-02-20 11:59:24,047 - storm_pomdp_control.py - Updating FSC values in Storm
+Current FSC values: [[{}], [{234: 0.0, 243: 0.0, 247: 0.0, 248: 0.0, 250: 0.0, 251: 0.0, 252: 0.0, 254: 0.0, 257: 0.0, 258: 0.0, 259: 0.0, 260: 0.0, 262: 0.0, 263: 0.0, 271: 0.0, 272: 0.0, 276: 0.0, 277: 0.0, 282: 0.0, 283: 0.0, 292: 0.0}], [{}, {166: 0.0, 176: 0.39811198, 177: 0.0, 180: 0.17061942, 181: 0.0, 182: 0.0, 183: 0.0, 186: 0.0, 187: 0.0, 188: 0.0, 189: 0.0, 199: 0.0, 216: 0.3660299999999999, 217: 0.0, 453: 0.0, 456: 0.0, 457: 0.0}], [{23: 0.3730309252599999, 24: 0.27867838599999994, 27: 0.26432859387999996, 28: 0.27256466999999995, 36: 0.10134797105999999, 37: 0.19985237999999997, 334: 0.045899999999999996, 344: 0.643, 349: 0.2601, 350: 0.44699999999999995, 353: 0.2601, 354: 0.657, 355: 0.657, 359: 0.44699999999999995, 363: 1.0, 415: 1.0, 417: 0.3}], [{}], [{}, {94: 0.39811198, 103: 0.27867838599999994, 106: 0.11943359399999999, 108: 0.0, 111: 0.0, 112: 0.0, 113: 0.0, 122: 0.15686999999999998, 123: 0.3660299999999999, 135: 0.10980899999999998, 136: 0.2562209999999999, 431: 0.0, 432: 0.0, 435: 0.09, 436: 0.3, 439: 0.0, 441: 0.3}], [{107: 0.5687314}], [{}, {53: 0.23090494839999995, 56: 0.08360351579999999, 58: 0.3622819017999999, 59: 0.39811198, 61: 0.0, 67: 0.10980899999999998, 77: 0.14275169999999998, 78: 0.3330872999999999, 387: 0.153, 389: 0.027, 390: 0.09, 397: 0.51, 400: 0.153, 405: 0.51, 406: 0.3, 408: 0.21, 409: 1.0}], [{}], [{407: 0.657, 411: 1.0, 450: 1.0, 451: 1.0}], [{459: 0.0, 462: 0.3, 463: 1.0}], [{449: 1.0}], [{202: 0.589051, 203: 0.521319, 204: 0.29647199999999996, 205: 0.44928899999999994, 324: 0.44699999999999995, 325: 0.7, 326: 0.7899999999999999, 327: 1.0}], [{467: 0.0}], [{}], [{}, {9: 0.3404202258459999, 10: 0.27684427119999994, 13: 0.21543440703399996, 14: 0.2507509829999999, 304: 0.52813, 305: 0.7312, 309: 0.37917, 313: 0.28803, 314: 0.31616999999999995, 316: 0.7599, 369: 0.51, 370: 0.3, 372: 1.0, 375: 0.7}], [{}], [{}], [{418: 0.0}], [{}], [{419: 1.0, 420: 1.0}], [{}], [{1: 0.2927520215636799}], [{}], [{460: 0.3, 461: 1.0}], [{}], [{373: 0.0}], [{443: 0.51, 446: 1.0, 447: 1.0}], [{434: 0.51, 444: 1.0, 445: 1.0}], [{345: 0.853}], [{422: 1.0, 423: 1.0}], [{}], [{}], [{310: 0.853}], [{469: 1.0}], [{}], [{}], [{465: 1.0}], [{322: 0.0, 468: 0.0}], [{242: 0.5687314, 275: 0.5228999999999999}], [{}], [{}], [{}], [{}], [{165: 0.5687314, 198: 0.5228999999999999}], [{376: 1.0}], [{}], [{}], [{}], [{}], [{}], [{464: 1.0}], [{458: 0.0}], [{66: 0.34231709999999993, 383: 0.853}], [{2: 0.3213474394521999, 3: 0.22602937982379992}], [{124: 0.34231709999999993, 291: 0.853}, {124: 0.5687314, 291: 0.5228999999999999}], [{}], [{}], [{442: 0.0}], [{410: 0.0}], [{452: 1.0}], [{}], [{0: 0.2927520215636799}], [{}], [{}], [{}]]
+2024-02-20 11:59:30,098 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.44585292200343984 | Time elapsed = 276.4s | FSC size = 140
+
+
+------------------------------------
+
+PAYNT results: 
+0.2927520215636799
+controller size: 142
+
+Storm results: 
+0.44585292200343984
+controller size: 140
+
+------------------------------------
+
+2024-02-20 12:00:21,493 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-02-20 12:00:22,351 - synthesizer_ar_storm.py - Resuming synthesis
+2024-02-20 12:00:22,351 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-02-20 12:00:22,355 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 30
+> progress 0.0%, elapsed 120 s, estimated 105654182 s (3 years), iters = {MDP: 161344}, opt = 0.293
+> progress 0.0%, elapsed 123 s, estimated 107894771 s (3 years), iters = {MDP: 164356}, opt = 0.293
+> progress 0.0%, elapsed 126 s, estimated 110259254 s (3 years), iters = {MDP: 167098}, opt = 0.293
+> progress 0.0%, elapsed 129 s, estimated 112493590 s (3 years), iters = {MDP: 170001}, opt = 0.293
+> progress 0.0%, elapsed 132 s, estimated 114387434 s (3 years), iters = {MDP: 172669}, opt = 0.293
+> progress 0.0%, elapsed 135 s, estimated 115702883 s (3 years), iters = {MDP: 175273}, opt = 0.293
+> progress 0.0%, elapsed 138 s, estimated 117852748 s (3 years), iters = {MDP: 178159}, opt = 0.293
+> progress 0.0%, elapsed 141 s, estimated 119937681 s (3 years), iters = {MDP: 180931}, opt = 0.293
+> progress 0.0%, elapsed 144 s, estimated 122182714 s (3 years), iters = {MDP: 183583}, opt = 0.293
+> progress 0.0%, elapsed 147 s, estimated 117159043 s (3 years), iters = {MDP: 186422}, opt = 0.293
+> progress 0.0%, elapsed 150 s, estimated 117091258 s (3 years), iters = {MDP: 189517}, opt = 0.293
+> progress 0.0%, elapsed 153 s, estimated 118639564 s (3 years), iters = {MDP: 192564}, opt = 0.293
+> progress 0.0%, elapsed 156 s, estimated 119899540 s (3 years), iters = {MDP: 195513}, opt = 0.293
+> progress 0.0%, elapsed 159 s, estimated 120912148 s (3 years), iters = {MDP: 198405}, opt = 0.293
+> progress 0.0%, elapsed 162 s, estimated 120840074 s (3 years), iters = {MDP: 201280}, opt = 0.293
+> progress 0.0%, elapsed 165 s, estimated 122097590 s (3 years), iters = {MDP: 204217}, opt = 0.293
+> progress 0.0%, elapsed 168 s, estimated 123408033 s (3 years), iters = {MDP: 207032}, opt = 0.293
+> progress 0.0%, elapsed 171 s, estimated 125097665 s (3 years), iters = {MDP: 209893}, opt = 0.293
+> progress 0.0%, elapsed 174 s, estimated 90516266 s (2 years), iters = {MDP: 212352}, opt = 0.293
+> progress 0.0%, elapsed 177 s, estimated 80407739 s (2 years), iters = {MDP: 214906}, opt = 0.293
+> progress 0.0%, elapsed 180 s, estimated 63520605 s (2 years), iters = {MDP: 217402}, opt = 0.293
+> progress 0.0%, elapsed 183 s, estimated 50670831 s (1 year), iters = {MDP: 219889}, opt = 0.293
+> progress 0.0%, elapsed 186 s, estimated 40231846 s (1 year), iters = {MDP: 222220}, opt = 0.293
+> progress 0.0%, elapsed 189 s, estimated 37395348 s (1 year), iters = {MDP: 224867}, opt = 0.293
+> progress 0.0%, elapsed 192 s, estimated 37639869 s (1 year), iters = {MDP: 227284}, opt = 0.293
+> progress 0.0%, elapsed 195 s, estimated 37744764 s (1 year), iters = {MDP: 230257}, opt = 0.293
+> progress 0.0%, elapsed 198 s, estimated 37977260 s (1 year), iters = {MDP: 233102}, opt = 0.293
+> progress 0.0%, elapsed 201 s, estimated 38419160 s (1 year), iters = {MDP: 235936}, opt = 0.293
+> progress 0.0%, elapsed 204 s, estimated 36825952 s (1 year), iters = {MDP: 238675}, opt = 0.293
+> progress 0.0%, elapsed 207 s, estimated 36456309 s (1 year), iters = {MDP: 241334}, opt = 0.293
+> progress 0.0%, elapsed 210 s, estimated 35752575 s (1 year), iters = {MDP: 244072}, opt = 0.293
+> progress 0.0%, elapsed 213 s, estimated 35342709 s (1 year), iters = {MDP: 246718}, opt = 0.293
+> progress 0.0%, elapsed 216 s, estimated 35596495 s (1 year), iters = {MDP: 248941}, opt = 0.293
+> progress 0.0%, elapsed 219 s, estimated 35051415 s (1 year), iters = {MDP: 251436}, opt = 0.293
+> progress 0.0%, elapsed 222 s, estimated 34591596 s (1 year), iters = {MDP: 254177}, opt = 0.293
+> progress 0.0%, elapsed 225 s, estimated 34242887 s (1 year), iters = {MDP: 256968}, opt = 0.293
+> progress 0.0%, elapsed 228 s, estimated 34429756 s (1 year), iters = {MDP: 259878}, opt = 0.293
+> progress 0.0%, elapsed 231 s, estimated 34566332 s (1 year), iters = {MDP: 262875}, opt = 0.293
+> progress 0.0%, elapsed 234 s, estimated 34761754 s (1 year), iters = {MDP: 265741}, opt = 0.293
+> progress 0.0%, elapsed 237 s, estimated 35028680 s (1 year), iters = {MDP: 268852}, opt = 0.293
+2024-02-20 12:02:21,602 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 12:02:21,699 - storm_pomdp_control.py - Interactive Storm resumed
+2024-02-20 12:02:21,699 - storm_pomdp_control.py - Updating FSC values in Storm
+Current FSC values: [[{}], [{234: 0.0, 243: 0.0, 247: 0.0, 248: 0.0, 250: 0.0, 251: 0.0, 252: 0.0, 254: 0.0, 257: 0.0, 258: 0.0, 259: 0.0, 260: 0.0, 262: 0.0, 263: 0.0, 271: 0.0, 272: 0.0, 276: 0.0, 277: 0.0, 282: 0.0, 283: 0.0, 292: 0.0}], [{}, {166: 0.0, 176: 0.39811198, 177: 0.0, 180: 0.17061942, 181: 0.0, 182: 0.0, 183: 0.0, 186: 0.0, 187: 0.0, 188: 0.0, 189: 0.0, 199: 0.0, 216: 0.3660299999999999, 217: 0.0, 453: 0.0, 456: 0.0, 457: 0.0}], [{23: 0.3730309252599999, 24: 0.27867838599999994, 27: 0.26432859387999996, 28: 0.27256466999999995, 36: 0.10134797105999999, 37: 0.19985237999999997, 334: 0.045899999999999996, 344: 0.643, 349: 0.2601, 350: 0.44699999999999995, 353: 0.2601, 354: 0.657, 355: 0.657, 359: 0.44699999999999995, 363: 1.0, 415: 1.0, 417: 0.3}], [{}], [{}, {94: 0.39811198, 103: 0.27867838599999994, 106: 0.11943359399999999, 108: 0.0, 111: 0.0, 112: 0.0, 113: 0.0, 122: 0.15686999999999998, 123: 0.3660299999999999, 135: 0.10980899999999998, 136: 0.2562209999999999, 431: 0.0, 432: 0.0, 435: 0.09, 436: 0.3, 439: 0.0, 441: 0.3}], [{107: 0.5687314}], [{}, {53: 0.23090494839999995, 56: 0.08360351579999999, 58: 0.3622819017999999, 59: 0.39811198, 61: 0.0, 67: 0.10980899999999998, 77: 0.14275169999999998, 78: 0.3330872999999999, 387: 0.153, 389: 0.027, 390: 0.09, 397: 0.51, 400: 0.153, 405: 0.51, 406: 0.3, 408: 0.21, 409: 1.0}], [{}], [{407: 0.657, 411: 1.0, 450: 1.0, 451: 1.0}], [{459: 0.0, 462: 0.3, 463: 1.0}], [{449: 1.0}], [{202: 0.589051, 203: 0.521319, 204: 0.29647199999999996, 205: 0.44928899999999994, 324: 0.44699999999999995, 325: 0.7, 326: 0.7899999999999999, 327: 1.0}], [{467: 0.0}], [{}], [{}, {9: 0.3404202258459999, 10: 0.27684427119999994, 13: 0.21543440703399996, 14: 0.2507509829999999, 304: 0.52813, 305: 0.7312, 309: 0.37917, 313: 0.28803, 314: 0.31616999999999995, 316: 0.7599, 369: 0.51, 370: 0.3, 372: 1.0, 375: 0.7}], [{}], [{}], [{418: 0.0}], [{}], [{419: 1.0, 420: 1.0}], [{}], [{1: 0.2927520215636799}], [{}], [{460: 0.3, 461: 1.0}], [{}], [{373: 0.0}], [{443: 0.51, 446: 1.0, 447: 1.0}], [{434: 0.51, 444: 1.0, 445: 1.0}], [{345: 0.853}], [{422: 1.0, 423: 1.0}], [{}], [{}], [{310: 0.853}], [{469: 1.0}], [{}], [{}], [{465: 1.0}], [{322: 0.0, 468: 0.0}], [{242: 0.5687314, 275: 0.5228999999999999}], [{}], [{}], [{}], [{}], [{165: 0.5687314, 198: 0.5228999999999999}], [{376: 1.0}], [{}], [{}], [{}], [{}], [{}], [{464: 1.0}], [{458: 0.0}], [{66: 0.34231709999999993, 383: 0.853}], [{2: 0.3213474394521999, 3: 0.22602937982379992}], [{124: 0.34231709999999993, 291: 0.853}, {124: 0.5687314, 291: 0.5228999999999999}], [{}], [{}], [{442: 0.0}], [{410: 0.0}], [{452: 1.0}], [{}], [{0: 0.2927520215636799}], [{}], [{}], [{}]]
+2024-02-20 12:02:27,706 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.44585292200343984 | Time elapsed = 426.7s | FSC size = 140
+
+
+------------------------------------
+
+PAYNT results: 
+0.2927520215636799
+controller size: 142
+
+Storm results: 
+0.44585292200343984
+controller size: 140
+
+------------------------------------
+
+2024-02-20 12:02:52,637 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-02-20 12:02:52,639 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-20 12:02:52,639 - synthesizer.py - A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'north'}, A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)={'north'}, A([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=1, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, M([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)=0, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'west'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)={'east'}, M([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=0, M([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)=1, M([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1 & refuelAllowed=1],0)=1, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'north'}, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)={'south'}, M([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=0, M([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)=1, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, M([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)=0, A([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, M([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangowest=1],0)=0, A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=3 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=3 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=0, A([start & fuel=6 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=6 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=1, A([start & fuel=3 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, M([start & fuel=3 & cangoeast=1 & cangosouth=1 & cangowest=1],0)=0, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)={'south'}, A([start & fuel=2 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, M([start & fuel=2 & cangoeast=1 & cangosouth=1 & cangowest=1],0)=0, A([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, A([start & fuel=4 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, M([start & fuel=4 & cangoeast=1 & cangosouth=1 & cangowest=1],0)=0, A([start & fuel=4 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=4 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=0, A([start & fuel=7 & cangoeast=1 & cangosouth=1],0)={'south'}, A([start & fuel=3 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, M([start & fuel=2 & cangoeast=1 & cangonorth=1 & cangowest=1],0)=0, A([start & fuel=2 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=2 & cangonorth=1 & cangosouth=1 & cangowest=1],0)=0, M([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1 & refuelAllowed=1],0)=0, A([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, M([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangowest=1],0)=0, A([start & fuel=5 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, A([start & fuel=5 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1 & refuelAllowed=1],0)=0, M([start & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1 & refuelAllowed=1],0)=1, A([start & fuel=1 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'south'}, M([start & fuel=1 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1 & refuelAllowed=1],0)=1, A([start & fuel=5 & cangoeast=1 & cangonorth=1 & cangowest=1],0)={'south'}, A([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, M([start & fuel=4 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)=0, A([start & fuel=1 & cangoeast=1 & cangonorth=1],0)={'south'}, A([start & fuel=2 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=3 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1 & refuelAllowed=1],0)=0, A([start & fuel=6 & cangoeast=1 & cangosouth=1 & cangowest=1],0)={'east'}, M([start & fuel=6 & cangoeast=1 & cangosouth=1 & cangowest=1],0)=1, A([start & fuel=7 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],0)={'east'}, A([start & fuel=7 & cangoeast=1 & cangonorth=1 & cangosouth=1 & cangowest=1],1)={'south'}, A([start & fuel=2 & cangoeast=1 & cangonorth=1],0)={'south'}, A([start & fuel=6 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)={'south'}, M([start & fuel=6 & cangoeast=1 & cangonorth=1 & cangosouth=1],0)=0, A([start & fuel=3 & cangoeast=1 & cangonorth=1],0)={'south'}, A([start & fuel=1 & cangosouth=1 & cangowest=1],0)={'east'}
+2024-02-20 12:02:52,640 - synthesizer.py - double-checking specification satisfiability:  : 0.2927520215636799
+2024-02-20 12:02:52,644 - storm_pomdp_control.py - Storm POMDP analysis completed
+
+------------------------------------
+
+PAYNT results: 
+0.2927520215636799
+controller size: 142
+
+Storm results: 
+0.44585292200343984
+controller size: 140
+
+------------------------------------
+

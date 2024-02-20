@@ -42,6 +42,12 @@ def example():
     sub_pomdp = sub_pomdp_builder.start_from_belief(initial_belief)
     print(sub_pomdp)
 
+    sub_pomdp = sub_pomdp_builder.start_from_belief(belief)
+    # mapping of states of the sub-POMDP to the states of the full POMDP
+    state_sub_to_full = sub_pomdp_builder.state_sub_to_full
+    # fresh states are mapped to an invalid value equal to the number of states in the full POMDP
+    assert state_sub_to_full[sub_pomdp.initial_states[0]] == pomdp_quotient.pomdp.nr_states
+
 
 
 import stormpy

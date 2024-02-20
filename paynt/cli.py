@@ -27,6 +27,7 @@ def setup_logger(log_path = None):
     root.setLevel(logging.DEBUG)
     # root.setLevel(logging.INFO)
 
+    # disable all logging
     logging.disable(logging.CRITICAL)
 
     # formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')

@@ -1,0 +1,411 @@
+2024-02-20 12:04:02,561 - cli.py - This is Paynt version 0.1.0.
+2024-02-20 12:04:02,561 - sketch.py - loading sketch from models/pomdp/storm-integration/4x3-95/sketch.templ ...
+2024-02-20 12:04:02,561 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+2024-02-20 12:04:02,567 - sketch.py - assuming sketch in DRN format...
+2024-02-20 12:04:02,573 - prism_parser.py - loading properties from models/pomdp/storm-integration/4x3-95/sketch.props ...
+2024-02-20 12:04:02,574 - prism_parser.py - found the following specification: optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-02-20 12:04:02,574 - sketch.py - sketch parsing OK
+2024-02-20 12:04:02,575 - sketch.py - constructed explicit quotient having 22 states and 82 actions
+2024-02-20 12:04:02,575 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-02-20 12:04:02,576 - pomdp.py - constructed POMDP having 9 observations.
+2024-02-20 12:04:02,576 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-20 12:04:02,577 - pomdp.py - constructed quotient MDP having 22 states and 82 actions.
+2024-02-20 12:04:02,587 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-02-20 12:04:02,588 - synthesizer_pomdp.py - Storm settings: iterative - (300, 60, 5), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False
+2024-02-20 12:04:02,588 - synthesizer.py - synthesis initiated, design space: 16384
+2024-02-20 12:04:02,589 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = -0.9097672837142294 | Time elapsed = 0.0s | FSC size = 18
+
+-----------PAYNT-----------                     
+Value = -0.8686599675278818 | Time elapsed = 0.0s | FSC size = 18
+
+-----------PAYNT-----------                     
+Value = -0.40761788722743514 | Time elapsed = 0.0s | FSC size = 18
+
+-----------PAYNT-----------                     
+Value = -0.3958092794894377 | Time elapsed = 0.0s | FSC size = 18
+
+-----------PAYNT-----------                     
+Value = -0.25128453587513117 | Time elapsed = 0.0s | FSC size = 18
+
+-----------PAYNT-----------                     
+Value = 0.32562887393853235 | Time elapsed = 0.0s | FSC size = 18
+
+-----------PAYNT-----------                     
+Value = 0.44176908305750945 | Time elapsed = 0.0s | FSC size = 18
+
+2024-02-20 12:04:02,606 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-20 12:04:02,606 - synthesizer.py - A(0,0)={'(n)'}, A(1,0)={'(w)'}, A(2,0)={'(e)'}, A(3,0)={'(n)'}, A(4,0)={'(n)'}, A(5,0)={'(n)'}, A(7,0)={'(n)'}
+2024-02-20 12:04:02,606 - synthesizer.py - double-checking specification satisfiability:  : 0.44176908305750945
+2024-02-20 12:04:02,607 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-02-20 12:04:02,607 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 1, 2, 1, 1, 1, 1, 2, 1] ...
+2024-02-20 12:04:02,607 - pomdp.py - constructed quotient MDP having 38 states and 291 actions.
+2024-02-20 12:04:02,611 - synthesizer.py - synthesis initiated, design space: 2147483648
+-----------PAYNT-----------                     
+Value = 0.6610746739835868 | Time elapsed = 0.0s | FSC size = 24
+
+-----------PAYNT-----------                     
+Value = 0.7288788196786052 | Time elapsed = 0.0s | FSC size = 24
+
+-----------PAYNT-----------                     
+Value = 0.7361988615171265 | Time elapsed = 0.1s | FSC size = 24
+
+-----------PAYNT-----------                     
+Value = 0.8174378257349435 | Time elapsed = 0.1s | FSC size = 24
+
+-----------PAYNT-----------                     
+Value = 0.8252283068971517 | Time elapsed = 0.1s | FSC size = 24
+
+-----------PAYNT-----------                     
+Value = 1.3754338972603506 | Time elapsed = 0.1s | FSC size = 24
+
+-----------PAYNT-----------                     
+Value = 1.4681428605850353 | Time elapsed = 0.1s | FSC size = 24
+
+2024-02-20 12:04:02,975 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-20 12:04:02,976 - synthesizer.py - A(0,0)={'(e)'}, A(0,1)={'(n)'}, M(0,0)=1, M(0,1)=1, A(1,0)={'(w)'}, M(1,0)=0, A(2,0)={'(n)'}, A(2,1)={'(e)'}, M(2,0)=1, M(2,1)=1, A(3,0)={'(n)'}, M(3,0)=0, A(4,0)={'(n)'}, M(4,0)=1, A(5,0)={'(n)'}, M(5,0)=1, M(6,0)=1, A(7,0)={'(w)'}, A(7,1)={'(e)'}, M(7,0)=1, M(7,1)=1
+2024-02-20 12:04:02,976 - synthesizer.py - double-checking specification satisfiability:  : 1.4681428605850353
+2024-02-20 12:04:02,977 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-02-20 12:04:02,977 - pomdp.py - unfolding POMDP using the following memory allocation vector: [3, 1, 3, 1, 1, 1, 1, 3, 1] ...
+2024-02-20 12:04:02,978 - pomdp.py - constructed quotient MDP having 54 states and 628 actions.
+2024-02-20 12:04:02,987 - synthesizer.py - synthesis initiated, design space: 320979616137216
+-----------PAYNT-----------                     
+Value = 1.5116000157356837 | Time elapsed = 0.6s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.5237202739501625 | Time elapsed = 0.7s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.5255690107070157 | Time elapsed = 0.8s | FSC size = 30
+
+> progress 1.571%, elapsed 3 s, estimated 190 s, iters = {MDP: 6424}, opt = 1.526
+-----------PAYNT-----------                     
+Value = 1.574057948441746 | Time elapsed = 6.1s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.6529422928931599 | Time elapsed = 6.2s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.6583341177864457 | Time elapsed = 6.4s | FSC size = 30
+
+> progress 1.571%, elapsed 6 s, estimated 381 s, iters = {MDP: 12976}, opt = 1.658
+> progress 7.853%, elapsed 9 s, estimated 114 s, iters = {MDP: 18800}, opt = 1.658
+-----------PAYNT-----------                     
+Value = 1.699522453744746 | Time elapsed = 9.4s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.7012942644226126 | Time elapsed = 9.5s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.7466447168185586 | Time elapsed = 10.0s | FSC size = 30
+
+-----------PAYNT-----------                     
+Value = 1.7484123523708022 | Time elapsed = 10.0s | FSC size = 30
+
+> progress 7.942%, elapsed 12 s, estimated 151 s, iters = {MDP: 24898}, opt = 1.748
+> progress 8.987%, elapsed 15 s, estimated 166 s, iters = {MDP: 30945}, opt = 1.748
+> progress 16.03%, elapsed 18 s, estimated 112 s, iters = {MDP: 36616}, opt = 1.748
+> progress 26.764%, elapsed 21 s, estimated 78 s, iters = {MDP: 42378}, opt = 1.748
+> progress 26.975%, elapsed 24 s, estimated 88 s, iters = {MDP: 48504}, opt = 1.748
+> progress 31.422%, elapsed 27 s, estimated 85 s, iters = {MDP: 54166}, opt = 1.748
+> progress 31.522%, elapsed 30 s, estimated 95 s, iters = {MDP: 60470}, opt = 1.748
+> progress 31.904%, elapsed 33 s, estimated 103 s, iters = {MDP: 66572}, opt = 1.748
+> progress 63.66%, elapsed 36 s, estimated 56 s, iters = {MDP: 71865}, opt = 1.748
+2024-02-20 12:04:39,719 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-20 12:04:39,719 - synthesizer.py - A(0,0)={'(e)'}, A(0,1)={'(n)'}, A(0,2)={'(n)'}, M(0,0)=2, M(0,1)=2, M(0,2)=0, A(1,0)={'(w)'}, M(1,0)=0, A(2,0)={'(n)'}, A(2,1)={'(e)'}, A(2,2)={'(e)'}, M(2,0)=1, M(2,1)=1, M(2,2)=1, A(3,0)={'(n)'}, M(3,0)=0, A(4,0)={'(n)'}, M(4,0)=1, A(5,0)={'(n)'}, M(5,0)=1, M(6,0)=2, A(7,0)={'(w)'}, A(7,1)={'(w)'}, A(7,2)={'(n)'}, M(7,0)=0, M(7,1)=0, M(7,2)=1
+2024-02-20 12:04:39,720 - synthesizer.py - double-checking specification satisfiability:  : 1.7484123523708022
+2024-02-20 12:04:39,720 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-02-20 12:04:39,720 - pomdp.py - unfolding POMDP using the following memory allocation vector: [4, 1, 4, 1, 1, 1, 1, 4, 1] ...
+2024-02-20 12:04:39,721 - pomdp.py - constructed quotient MDP having 70 states and 1093 actions.
+2024-02-20 12:04:39,756 - synthesizer.py - synthesis initiated, design space: 73786976294838206464
+> progress 0.39%, elapsed 3 s, estimated 767 s, iters = {MDP: 4680}, opt = 1.748
+> progress 0.392%, elapsed 6 s, estimated 1530 s, iters = {MDP: 9209}, opt = 1.748
+> progress 0.392%, elapsed 9 s, estimated 2293 s, iters = {MDP: 13689}, opt = 1.748
+> progress 0.392%, elapsed 12 s, estimated 3057 s, iters = {MDP: 18524}, opt = 1.748
+> progress 0.392%, elapsed 15 s, estimated 3820 s, iters = {MDP: 23171}, opt = 1.748
+> progress 0.394%, elapsed 18 s, estimated 4564 s, iters = {MDP: 27565}, opt = 1.748
+> progress 0.397%, elapsed 21 s, estimated 5289 s, iters = {MDP: 31950}, opt = 1.748
+2024-02-20 12:05:02,655 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 12:05:02,754 - storm_pomdp_control.py - Interactive Storm started
+2024-02-20 12:05:02,755 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-02-20 12:05:08,757 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8805783113663543 | Time elapsed = 79.2s | FSC size = 674
+
+
+------------------------------------
+
+PAYNT results: 
+1.7484123523708022
+controller size: 30
+
+Storm results: 
+1.8805783113663543
+controller size: 674
+
+------------------------------------
+
+2024-02-20 12:05:21,780 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-02-20 12:05:22,680 - synthesizer_ar_storm.py - Resuming synthesis
+2024-02-20 12:05:22,680 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-02-20 12:05:22,682 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 18446744073709551616 to 35184372088832
+2024-02-20 12:05:22,684 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4611686018427387904 to 17592186044416
+2024-02-20 12:05:22,685 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1152921504606846976 to 8796093022208
+2024-02-20 12:05:22,686 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 144115188075855872 to 2199023255552
+2024-02-20 12:05:22,687 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 72057594037927936 to 1099511627776
+2024-02-20 12:05:22,687 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 18014398509481984 to 549755813888
+2024-02-20 12:05:22,688 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1125899906842624 to 68719476736
+2024-02-20 12:05:22,688 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 562949953421312 to 34359738368
+2024-02-20 12:05:22,689 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 281474976710656 to 17179869184
+2024-02-20 12:05:22,690 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 70368744177664 to 8589934592
+2024-02-20 12:05:22,690 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 35184372088832 to 4294967296
+2024-02-20 12:05:22,691 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 11, Subfamilies - 141
+> progress 0.4%, elapsed 24 s, estimated 6001 s, iters = {MDP: 36415}, opt = 1.748
+> progress 0.4%, elapsed 27 s, estimated 6751 s, iters = {MDP: 41643}, opt = 1.748
+-----------PAYNT-----------                     
+Value = 1.7506136275988977 | Time elapsed = 86.2s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.7607818885773052 | Time elapsed = 86.4s | FSC size = 36
+
+> progress 0.4%, elapsed 30 s, estimated 7501 s (2 hours), iters = {MDP: 47338}, opt = 1.761
+> progress 0.4%, elapsed 33 s, estimated 8251 s (2 hours), iters = {MDP: 53032}, opt = 1.761
+> progress 0.4%, elapsed 36 s, estimated 9001 s (2 hours), iters = {MDP: 58847}, opt = 1.761
+> progress 0.4%, elapsed 39 s, estimated 9751 s (2 hours), iters = {MDP: 64524}, opt = 1.761
+-----------PAYNT-----------                     
+Value = 1.7629499869256797 | Time elapsed = 97.0s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.7717869087184803 | Time elapsed = 97.0s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.772693610668604 | Time elapsed = 97.2s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.7819574340151374 | Time elapsed = 97.2s | FSC size = 36
+
+> progress 0.4%, elapsed 42 s, estimated 10502 s (2 hours), iters = {MDP: 70477}, opt = 1.782
+> progress 0.4%, elapsed 45 s, estimated 11252 s (3 hours), iters = {MDP: 76284}, opt = 1.782
+-----------PAYNT-----------                     
+Value = 1.7855444894702448 | Time elapsed = 103.7s | FSC size = 36
+
+> progress 0.4%, elapsed 48 s, estimated 12002 s (3 hours), iters = {MDP: 82404}, opt = 1.786
+> progress 0.4%, elapsed 51 s, estimated 12752 s (3 hours), iters = {MDP: 88294}, opt = 1.786
+-----------PAYNT-----------                     
+Value = 1.78648783495129 | Time elapsed = 108.3s | FSC size = 36
+
+> progress 0.4%, elapsed 54 s, estimated 13502 s (3 hours), iters = {MDP: 94227}, opt = 1.786
+> progress 0.4%, elapsed 57 s, estimated 14252 s (3 hours), iters = {MDP: 100032}, opt = 1.786
+> progress 0.4%, elapsed 60 s, estimated 15002 s (4 hours), iters = {MDP: 106015}, opt = 1.786
+-----------PAYNT-----------                     
+Value = 1.7936746270545352 | Time elapsed = 119.0s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.80349104230893 | Time elapsed = 119.1s | FSC size = 36
+
+> progress 0.4%, elapsed 63 s, estimated 15752 s (4 hours), iters = {MDP: 112044}, opt = 1.803
+> progress 0.4%, elapsed 66 s, estimated 16502 s (4 hours), iters = {MDP: 118490}, opt = 1.803
+> progress 0.4%, elapsed 69 s, estimated 17253 s (4 hours), iters = {MDP: 124739}, opt = 1.803
+-----------PAYNT-----------                     
+Value = 1.8064620349131448 | Time elapsed = 128.1s | FSC size = 36
+
+> progress 0.4%, elapsed 72 s, estimated 18003 s (5 hours), iters = {MDP: 131201}, opt = 1.806
+> progress 0.4%, elapsed 75 s, estimated 18753 s (5 hours), iters = {MDP: 137174}, opt = 1.806
+> progress 0.4%, elapsed 78 s, estimated 19503 s (5 hours), iters = {MDP: 143194}, opt = 1.806
+> progress 0.4%, elapsed 81 s, estimated 20253 s (5 hours), iters = {MDP: 149127}, opt = 1.806
+2024-02-20 12:06:21,847 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 12:06:21,946 - storm_pomdp_control.py - Interactive Storm resumed
+2024-02-20 12:06:21,947 - storm_pomdp_control.py - Updating FSC values in Storm
+Current FSC values: [[{17: 2.128281352777177}, {13: 0.9704488090039443, 15: 1.340582353755997, 17: 2.128288908507862}, {13: 2.183381188985011}, {13: 2.0681389149627103, 15: 1.7008766039095162, 17: 2.00225669074476}], [{12: 1.644687130584589}], [{11: 1.9090768402316949}, {11: 1.5508452995201831, 14: 1.4056415975573737, 18: 2.3436342936885146, 19: 2.550540493396108}, {11: 1.5508452995201831, 14: 1.4056565993282126, 18: 2.343649299667152, 19: 2.550548068292607}, {11: 1.5508452995201831, 14: 1.4056415975573737, 18: 2.3436342936885146, 19: 2.550540493396108}], [{16: 1.9474482254025784}], [{20: 2.816964663446287}], [{10: 0.816964663446287}], [{0: 1.8064620349131448}], [{}, {}, {}, {1: 1.8944989241039423, 2: 2.173601941682484, 3: 2.3885915741567865, 4: 1.8516545588140134, 5: 2.1724194595483244, 6: 1.7351045574856818, 7: 1.3371254263423509, 8: 1.8214905800554182, 9: 0.8843927980994318}], [{21: 0.0}]]
+2024-02-20 12:06:27,953 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8823539684832795 | Time elapsed = 164.4s | FSC size = 680
+
+
+------------------------------------
+
+PAYNT results: 
+1.8064620349131448
+controller size: 36
+
+Storm results: 
+1.8823539684832795
+controller size: 680
+
+------------------------------------
+
+2024-02-20 12:06:46,978 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-02-20 12:06:47,876 - synthesizer_ar_storm.py - Resuming synthesis
+2024-02-20 12:06:47,876 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-02-20 12:06:47,877 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 35184372088832 to 2199023255552
+2024-02-20 12:06:47,877 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 17592186044416 to 1099511627776
+2024-02-20 12:06:47,877 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2199023255552 to 137438953472
+2024-02-20 12:06:47,877 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1099511627776 to 68719476736
+2024-02-20 12:06:47,878 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 549755813888 to 34359738368
+2024-02-20 12:06:47,878 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 274877906944 to 17179869184
+2024-02-20 12:06:47,878 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 137438953472 to 8589934592
+2024-02-20 12:06:47,878 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 17179869184 to 1073741824
+2024-02-20 12:06:47,879 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 17179869184 to 1073741824
+2024-02-20 12:06:47,879 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1073741824 to 67108864
+2024-02-20 12:06:47,879 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 536870912 to 33554432
+2024-02-20 12:06:47,880 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 268435456 to 16777216
+2024-02-20 12:06:47,880 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 33554432 to 2097152
+2024-02-20 12:06:47,880 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 33554432 to 2097152
+2024-02-20 12:06:47,880 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8388608 to 524288
+2024-02-20 12:06:47,881 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8388608 to 524288
+2024-02-20 12:06:47,881 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2097152 to 131072
+2024-02-20 12:06:47,881 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2097152 to 131072
+2024-02-20 12:06:47,881 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2097152 to 131072
+2024-02-20 12:06:47,882 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 32768 to 2048
+2024-02-20 12:06:47,882 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 32768 to 2048
+2024-02-20 12:06:47,882 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 21, Subfamilies - 84
+> progress 0.4%, elapsed 84 s, estimated 21003 s (5 hours), iters = {MDP: 155803}, opt = 1.806
+> progress 0.4%, elapsed 87 s, estimated 21753 s (6 hours), iters = {MDP: 162509}, opt = 1.806
+> progress 0.4%, elapsed 90 s, estimated 22503 s (6 hours), iters = {MDP: 169680}, opt = 1.806
+> progress 0.4%, elapsed 93 s, estimated 23253 s (6 hours), iters = {MDP: 176457}, opt = 1.806
+> progress 0.4%, elapsed 96 s, estimated 24003 s (6 hours), iters = {MDP: 182836}, opt = 1.806
+> progress 0.4%, elapsed 99 s, estimated 24754 s (6 hours), iters = {MDP: 190112}, opt = 1.806
+> progress 0.4%, elapsed 102 s, estimated 25504 s (7 hours), iters = {MDP: 196913}, opt = 1.806
+> progress 0.4%, elapsed 105 s, estimated 26254 s (7 hours), iters = {MDP: 203986}, opt = 1.806
+> progress 0.4%, elapsed 108 s, estimated 27004 s (7 hours), iters = {MDP: 210876}, opt = 1.806
+> progress 0.4%, elapsed 111 s, estimated 27754 s (7 hours), iters = {MDP: 217807}, opt = 1.806
+> progress 0.4%, elapsed 114 s, estimated 28504 s (7 hours), iters = {MDP: 224864}, opt = 1.806
+> progress 0.4%, elapsed 117 s, estimated 29254 s (8 hours), iters = {MDP: 232084}, opt = 1.806
+> progress 0.4%, elapsed 120 s, estimated 30004 s (8 hours), iters = {MDP: 239632}, opt = 1.806
+> progress 0.4%, elapsed 123 s, estimated 30754 s (8 hours), iters = {MDP: 246789}, opt = 1.806
+> progress 0.4%, elapsed 126 s, estimated 31505 s (8 hours), iters = {MDP: 254099}, opt = 1.806
+> progress 0.4%, elapsed 129 s, estimated 32255 s (8 hours), iters = {MDP: 261292}, opt = 1.806
+> progress 0.4%, elapsed 132 s, estimated 33005 s (9 hours), iters = {MDP: 268368}, opt = 1.806
+> progress 0.4%, elapsed 135 s, estimated 33755 s (9 hours), iters = {MDP: 275570}, opt = 1.806
+> progress 0.4%, elapsed 138 s, estimated 34505 s (9 hours), iters = {MDP: 282845}, opt = 1.806
+> progress 0.4%, elapsed 141 s, estimated 35255 s (9 hours), iters = {MDP: 289717}, opt = 1.806
+2024-02-20 12:07:47,044 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 12:07:47,144 - storm_pomdp_control.py - Interactive Storm resumed
+2024-02-20 12:07:47,144 - storm_pomdp_control.py - Updating FSC values in Storm
+Current FSC values: [[{17: 2.128281352777177}, {13: 0.9704488090039443, 15: 1.340582353755997, 17: 2.128288908507862}, {13: 2.183381188985011}, {13: 2.0681389149627103, 15: 1.7008766039095162, 17: 2.00225669074476}], [{12: 1.644687130584589}], [{11: 1.9090768402316949}, {11: 1.5508452995201831, 14: 1.4056415975573737, 18: 2.3436342936885146, 19: 2.550540493396108}, {11: 1.5508452995201831, 14: 1.4056565993282126, 18: 2.343649299667152, 19: 2.550548068292607}, {11: 1.5508452995201831, 14: 1.4056415975573737, 18: 2.3436342936885146, 19: 2.550540493396108}], [{16: 1.9474482254025784}], [{20: 2.816964663446287}], [{10: 0.816964663446287}], [{0: 1.8064620349131448}], [{}, {}, {}, {1: 1.8944989241039423, 2: 2.173601941682484, 3: 2.3885915741567865, 4: 1.8516545588140134, 5: 2.1724194595483244, 6: 1.7351045574856818, 7: 1.3371254263423509, 8: 1.8214905800554182, 9: 0.8843927980994318}], [{21: 0.0}]]
+2024-02-20 12:07:53,151 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8823539684832795 | Time elapsed = 260.6s | FSC size = 680
+
+
+------------------------------------
+
+PAYNT results: 
+1.8064620349131448
+controller size: 36
+
+Storm results: 
+1.8823539684832795
+controller size: 680
+
+------------------------------------
+
+2024-02-20 12:08:23,191 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-02-20 12:08:24,088 - synthesizer_ar_storm.py - Resuming synthesis
+2024-02-20 12:08:24,089 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-02-20 12:08:24,089 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2199023255552 to 2199023255552
+2024-02-20 12:08:24,089 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 549755813888 to 549755813888
+2024-02-20 12:08:24,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 68719476736 to 68719476736
+2024-02-20 12:08:24,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 34359738368 to 34359738368
+2024-02-20 12:08:24,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8589934592 to 8589934592
+2024-02-20 12:08:24,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4294967296 to 4294967296
+2024-02-20 12:08:24,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2147483648 to 2147483648
+2024-02-20 12:08:24,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1073741824 to 1073741824
+2024-02-20 12:08:24,091 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 536870912 to 536870912
+2024-02-20 12:08:24,091 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 134217728 to 134217728
+2024-02-20 12:08:24,091 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 67108864 to 67108864
+2024-02-20 12:08:24,091 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8388608 to 8388608
+2024-02-20 12:08:24,091 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8388608 to 8388608
+2024-02-20 12:08:24,091 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8388608 to 8388608
+2024-02-20 12:08:24,092 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2097152 to 2097152
+2024-02-20 12:08:24,092 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 524288 to 524288
+2024-02-20 12:08:24,092 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 131072 to 131072
+2024-02-20 12:08:24,092 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 131072 to 131072
+2024-02-20 12:08:24,092 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 32768 to 32768
+2024-02-20 12:08:24,092 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 32768 to 32768
+2024-02-20 12:08:24,093 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 32768 to 32768
+2024-02-20 12:08:24,093 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 32768 to 32768
+2024-02-20 12:08:24,093 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 22, Subfamilies - 0
+> progress 0.4%, elapsed 144 s, estimated 36005 s (10 hours), iters = {MDP: 296129}, opt = 1.806
+> progress 0.4%, elapsed 147 s, estimated 36755 s (10 hours), iters = {MDP: 302772}, opt = 1.806
+> progress 0.4%, elapsed 150 s, estimated 37505 s (10 hours), iters = {MDP: 308558}, opt = 1.806
+> progress 0.4%, elapsed 153 s, estimated 38255 s (10 hours), iters = {MDP: 315274}, opt = 1.806
+> progress 0.4%, elapsed 156 s, estimated 39005 s (10 hours), iters = {MDP: 322182}, opt = 1.806
+> progress 0.4%, elapsed 159 s, estimated 39755 s (11 hours), iters = {MDP: 329339}, opt = 1.806
+> progress 0.4%, elapsed 162 s, estimated 40505 s (11 hours), iters = {MDP: 335740}, opt = 1.806
+> progress 0.4%, elapsed 165 s, estimated 41255 s (11 hours), iters = {MDP: 342818}, opt = 1.806
+> progress 0.4%, elapsed 168 s, estimated 42005 s (11 hours), iters = {MDP: 350301}, opt = 1.806
+> progress 0.4%, elapsed 171 s, estimated 42756 s (11 hours), iters = {MDP: 356797}, opt = 1.806
+> progress 0.4%, elapsed 174 s, estimated 43506 s (12 hours), iters = {MDP: 363015}, opt = 1.806
+> progress 0.4%, elapsed 177 s, estimated 44256 s (12 hours), iters = {MDP: 369763}, opt = 1.806
+> progress 0.4%, elapsed 180 s, estimated 45006 s (12 hours), iters = {MDP: 376709}, opt = 1.806
+> progress 0.4%, elapsed 183 s, estimated 45756 s (12 hours), iters = {MDP: 383329}, opt = 1.806
+> progress 0.4%, elapsed 186 s, estimated 46506 s (12 hours), iters = {MDP: 390276}, opt = 1.806
+> progress 0.4%, elapsed 189 s, estimated 47256 s (13 hours), iters = {MDP: 397247}, opt = 1.806
+-----------PAYNT-----------                     
+Value = 1.8131435779372187 | Time elapsed = 309.7s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.8166200890431814 | Time elapsed = 309.9s | FSC size = 36
+
+-----------PAYNT-----------                     
+Value = 1.8376397918129683 | Time elapsed = 311.4s | FSC size = 36
+
+> progress 0.4%, elapsed 192 s, estimated 48006 s (13 hours), iters = {MDP: 403924}, opt = 1.838
+-----------PAYNT-----------                     
+Value = 1.8523556164141644 | Time elapsed = 312.5s | FSC size = 36
+
+> progress 0.4%, elapsed 195 s, estimated 48757 s (13 hours), iters = {MDP: 411066}, opt = 1.852
+> progress 0.4%, elapsed 198 s, estimated 49507 s (13 hours), iters = {MDP: 418397}, opt = 1.852
+2024-02-20 12:09:23,257 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-20 12:09:23,357 - storm_pomdp_control.py - Interactive Storm resumed
+2024-02-20 12:09:23,358 - storm_pomdp_control.py - Updating FSC values in Storm
+Current FSC values: [[{13: 1.0238655295810888, 15: 1.4199811684408707, 17: 2.1632770245897923}, {13: 2.2207962418714104, 15: 1.7759348724826356, 17: 1.9225135427051177}, {13: 2.110833803343183, 15: 1.7419611435666544, 17: 2.035736344336022}, {13: 2.2207962418714104}], [{12: 1.7091640185276393}], [{11: 1.6049284079290154, 14: 1.496089448598974, 18: 2.3811983696659813, 19: 2.592764086620817}, {11: 1.624791529883633, 14: 1.7735014311052708, 18: 2.1745564574818923, 19: 2.5844222744057688}, {11: 1.638343380942141, 14: 1.5317271319271601, 18: 2.337246915575489, 19: 2.6015804860402776}, {11: 1.9785786006363724, 14: 1.6308502987732196, 18: 2.0407419437170295, 19: 2.403809628688084}], [{16: 1.9802803621183516}], [{20: 2.875216206363234}], [{10: 0.8752162063632343}], [{0: 1.8523556164141644}], [{}, {}, {}, {1: 1.9225135427051177, 2: 2.1767729742326636, 3: 2.432305480275826, 4: 1.883333646249789, 5: 2.2207962418714104, 6: 1.7759348724826356, 7: 1.4451618749180204, 8: 1.872038613737654, 9: 0.943097964588186}], [{21: 0.0}]]
+2024-02-20 12:09:29,364 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8869544017337347 | Time elapsed = 363.8s | FSC size = 681
+
+
+------------------------------------
+
+PAYNT results: 
+1.8523556164141644
+controller size: 36
+
+Storm results: 
+1.8869544017337347
+controller size: 681
+
+------------------------------------
+
+2024-02-20 12:10:07,308 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-02-20 12:10:07,323 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-20 12:10:07,329 - synthesizer.py - A(0,0)={'(e)'}, A(0,1)={'(n)'}, A(0,2)={'(n)'}, A(0,3)={'(n)'}, M(0,0)=0, M(0,1)=2, M(0,2)=0, M(0,3)=2, A(1,0)={'(w)'}, M(1,0)=3, A(2,0)={'(e)'}, A(2,1)={'(e)'}, A(2,2)={'(e)'}, A(2,3)={'(n)'}, M(2,0)=2, M(2,1)=3, M(2,2)=1, M(2,3)=1, A(3,0)={'(n)'}, M(3,0)=0, A(4,0)={'(n)'}, M(4,0)=1, A(5,0)={'(n)'}, M(5,0)=1, M(6,0)=3, A(7,0)={'(n)'}, A(7,1)={'(n)'}, A(7,2)={'(n)'}, A(7,3)={'(n)'}, M(7,0)=3, M(7,1)=3, M(7,2)=3, M(7,3)=2
+2024-02-20 12:10:07,334 - synthesizer.py - double-checking specification satisfiability:  : 1.8523556164141644
+2024-02-20 12:10:07,336 - storm_pomdp_control.py - Storm POMDP analysis completed
+
+------------------------------------
+
+PAYNT results: 
+1.8523556164141644
+controller size: 36
+
+Storm results: 
+1.8869544017337347
+controller size: 681
+
+------------------------------------
+
