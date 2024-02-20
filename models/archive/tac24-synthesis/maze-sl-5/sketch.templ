@@ -1,0 +1,195 @@
+dtmc
+
+// 3 | x x x x x
+// 2 | x   x   x
+// 1 | x   x   x
+// 0 | x   x   x
+// y ____________
+//   x 0 1 2 3 4
+
+// can go in this direction
+formula u = y<8;
+formula r = y=8 & x<4;
+formula d = y>0 & (x=0 | x=2 | x=4);
+formula l = y=8 & x>0;
+
+// target cell
+formula goal = x=2 & y=0;
+formula bad = x=4 & y=0;
+
+// updates of coordinates (if possible)
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+
+//
+// 3-FSC
+//
+// holes
+hole int M_0_1 in {0,1,2};
+hole int M_1_1 in {0,1,2};
+hole int M_2_1 in {0,1,2};
+
+hole int M_0_2 in {0,1,2};
+hole int M_1_2 in {0,1,2};
+hole int M_2_2 in {0,1,2};
+
+hole int M_0_3 in {0,1,2};
+hole int M_1_3 in {0,1,2};
+hole int M_2_3 in {0,1,2};
+
+hole int M_0_4 in {0,1,2};
+hole int M_1_4 in {0,1,2};
+hole int M_2_4 in {0,1,2};
+
+hole int M_0_5 in {0,1,2};
+hole int M_1_5 in {0,1,2};
+hole int M_2_5 in {0,1,2};
+
+hole int M_0_6 in {0,1,2};
+hole int M_1_6 in {0,1,2};
+hole int M_2_6 in {0,1,2};
+
+hole int M_0_7 in {0,1,2};
+hole int M_1_7 in {0,1,2};
+hole int M_2_7 in {0,1,2};
+
+hole int M_0_8 in {0,1,2};
+hole int M_1_8 in {0,1,2};
+hole int M_2_8 in {0,1,2};
+
+
+hole int P_0_1 in {1,2,3,4};
+hole int P_1_1 in {1,2,3,4};
+hole int P_2_1 in {1,2,3,4};
+
+hole int P_0_2 in {1,2,3,4};
+hole int P_1_2 in {1,2,3,4};
+hole int P_2_2 in {1,2,3,4};
+
+hole int P_0_3 in {1,2,3,4};
+hole int P_1_3 in {1,2,3,4};
+hole int P_2_3 in {1,2,3,4};
+
+hole int P_0_4 in {1,2,3,4};
+hole int P_1_4 in {1,2,3,4};
+hole int P_2_4 in {1,2,3,4};
+
+hole int P_0_5 in {1,2,3,4};
+hole int P_1_5 in {1,2,3,4};
+hole int P_2_5 in {1,2,3,4};
+
+hole int P_0_6 in {1,2,3,4};
+hole int P_1_6 in {1,2,3,4};
+hole int P_2_6 in {1,2,3,4};
+
+hole int P_0_7 in {1,2,3,4};
+hole int P_1_7 in {1,2,3,4};
+hole int P_2_7 in {1,2,3,4};
+
+hole int P_0_8 in {1,2,3,4};
+hole int P_1_8 in {1,2,3,4};
+hole int P_2_8 in {1,2,3,4};
+
+
+
+
+// modules
+
+module strategy
+	pick : [0..4] init 0;
+	mem : [0..2] init 0;
+
+	[p] pick = 0 & mem = 0 & u & !r & !d & !l & !goal & !bad -> (mem'=M_0_1) & (pick'=P_0_1);
+	[p] pick = 0 & mem = 1 & u & !r & !d & !l & !goal & !bad -> (mem'=M_1_1) & (pick'=P_1_1);
+	[p] pick = 0 & mem = 2 & u & !r & !d & !l & !goal & !bad -> (mem'=M_2_1) & (pick'=P_2_1);
+	
+	[p] pick = 0 & mem = 0 & u & !r & d & !l & !goal & !bad -> (mem'=M_0_2) & (pick'=P_0_2);
+	[p] pick = 0 & mem = 1 & u & !r & d & !l & !goal & !bad -> (mem'=M_1_2) & (pick'=P_1_2);
+	[p] pick = 0 & mem = 2 & u & !r & d & !l & !goal & !bad -> (mem'=M_2_2) & (pick'=P_2_2);
+
+    [p] pick = 0 & mem = 0 & !u & r & d & !l & !goal & !bad -> (mem'=M_0_3) & (pick'=P_0_3);
+	[p] pick = 0 & mem = 1 & !u & r & d & !l & !goal & !bad -> (mem'=M_1_3) & (pick'=P_1_3);
+	[p] pick = 0 & mem = 2 & !u & r & d & !l & !goal & !bad -> (mem'=M_2_3) & (pick'=P_2_3);
+
+    [p] pick = 0 & mem = 0 & !u & r & !d & l & !goal & !bad -> (mem'=M_0_4) & (pick'=P_0_4);
+	[p] pick = 0 & mem = 1 & !u & r & !d & l & !goal & !bad -> (mem'=M_1_4) & (pick'=P_1_4);
+	[p] pick = 0 & mem = 2 & !u & r & !d & l & !goal & !bad -> (mem'=M_2_4) & (pick'=P_2_4);
+
+    [p] pick = 0 & mem = 0 & !u & r & d & l & !goal & !bad -> (mem'=M_0_5) & (pick'=P_0_5);
+	[p] pick = 0 & mem = 1 & !u & r & d & l & !goal & !bad -> (mem'=M_1_5) & (pick'=P_1_5);
+	[p] pick = 0 & mem = 2 & !u & r & d & l & !goal & !bad -> (mem'=M_2_5) & (pick'=P_2_5);
+
+    [p] pick = 0 & mem = 0 & !u & !r & d & l & !goal & !bad -> (mem'=M_0_6) & (pick'=P_0_6);
+	[p] pick = 0 & mem = 1 & !u & !r & d & l & !goal & !bad -> (mem'=M_1_6) & (pick'=P_1_6);
+	[p] pick = 0 & mem = 2 & !u & !r & d & l & !goal & !bad -> (mem'=M_2_6) & (pick'=P_2_6);
+
+    [p] pick = 0 & mem = 0 & u & !r & !d & !l & goal & !bad -> (mem'=M_0_7) & (pick'=P_0_7);
+	[p] pick = 0 & mem = 1 & u & !r & !d & !l & goal & !bad -> (mem'=M_1_7) & (pick'=P_1_7);
+	[p] pick = 0 & mem = 2 & u & !r & !d & !l & goal & !bad -> (mem'=M_2_7) & (pick'=P_2_7);
+
+    [p] pick = 0 & mem = 0 & u & !r & !d & !l & !goal & bad -> (mem'=M_0_8) & (pick'=P_0_8);
+	[p] pick = 0 & mem = 1 & u & !r & !d & !l & !goal & bad -> (mem'=M_1_8) & (pick'=P_1_8);
+	[p] pick = 0 & mem = 2 & u & !r & !d & !l & !goal & bad -> (mem'=M_2_8) & (pick'=P_2_8);
+
+    [up] pick=1 -> (pick'=0);
+	[right] pick=2 -> (pick'=0);
+	[down] pick=3 -> (pick'=0);
+	[left] pick=4 -> (pick'=0);
+endmodule
+
+
+
+module clock
+    // 0 - init, 1 - drive
+    clk : [0..1] init 0;
+
+    // random placement
+    [place] clk=0 -> (clk'=1);
+    
+    // drive
+    [up] 	clk=1 -> true;
+    [right] clk=1 -> true;
+    [down] 	clk=1 -> true;
+    [left]  clk=1 -> true;
+	[p]     clk=1 -> true;
+endmodule
+
+module maze
+
+	x : [0..4] init 0;
+    y : [0..8] init 0;
+	
+	// initialisation
+	[place] true ->
+          1/13 :    (x'=0)&(y'=0)
+        + 1/13 :    (x'=0)&(y'=1)
+		+ 1/13 :    (x'=0)&(y'=7)
+		+ 1/13 :    (x'=0)&(y'=8)
+		+ 1/13 :    (x'=1)&(y'=8)
+		+ 1/13 :    (x'=2)&(y'=0)
+		+ 1/13 :    (x'=2)&(y'=1)
+		+ 1/13 :    (x'=2)&(y'=7)
+		+ 1/13 :    (x'=2)&(y'=8)
+		+ 1/13 :    (x'=3)&(y'=8)
+		+ 1/13 :    (x'=4)&(y'=1)
+		+ 1/13 :    (x'=4)&(y'=7)
+		+ 1/13 :    (x'=4)&(y'=8);
+
+	// moving around the maze (all combinations)
+    
+    [up]        true -> 0.8: (y'=yu) + 0.08: (x'=xr) + 0.08: (x'=xl) + 0.04: (y'=yd);
+    [right]     true -> 0.8: (x'=xr) + 0.08: (y'=yu) + 0.08: (y'=yd) + 0.04: (x'=xl);
+    [down]      true -> 0.8: (y'=yd) + 0.08: (x'=xr) + 0.08: (x'=xl) + 0.04: (y'=yu);
+    [left]      true -> 0.8: (x'=xl) + 0.08: (y'=yu) + 0.08: (y'=yd) + 0.04: (x'=xr);
+	
+endmodule
+
+// rewards
+
+rewards "steps"
+	clk=1 & pick != 0: 1;
+endrewards
+

@@ -1,0 +1,128 @@
+pomdp
+
+const double FAIL=0.8;
+const int ITER=100;
+
+const int SIZE=100;
+
+//formula goal = x=25 & i=ITER;
+formula imgoal = y=1 | y=SIZE+2;
+formula start = y=0;
+formula ooo = y>1 & y<SIZE+2;
+
+formula blue = z=0 | z=1 | z=4;
+formula yell = z=2 | z=3;
+formula goal = z=5;
+formula sink = z=6;
+
+observable "blue" = blue & m=2;
+observable "yell" = yell & m=2;
+observable "goal" = goal & m=2;
+observable "sink" = sink & m=2;
+
+observable "in" = x=0;
+observable "slow" = x>0 & x<9;
+observable "mid" = x>8 & x<17;
+observable "fast" = x>16 & x<25;
+//observable "goal" = goal;
+observable "imgoal" = imgoal;
+observable "ooin" = y=0 & m=1;
+observable "o0" = y>1 & y<SIZE+2 & m=1;
+
+module test
+
+    x : [0..25] init 0;
+    i : [0..ITER] init 0;
+
+    y : [0..SIZE+2] init 0;
+
+    z : [0..6] init 0;
+
+    m : [0..2] init 0;
+
+    [in]  x=0 -> 1/3: (x'=(mod(i,8)+1)) + 1/3:(x'=(mod(i,8)+9)) + 1/3:(x'=(mod(i,8)+17));
+
+    //Slow lane
+    [A]   x=1 | x=3 | x=5 | x=7 -> 1-FAIL: (x'=x+9) + FAIL: (x'=x+1);
+    [B]   x=1 | x=3 | x=5 | x=7 -> (x'=x+1);
+
+    [A]   x=2 | x=4 | x=6 -> (x'=x+1);
+    [B]   x=2 | x=4 | x=6 -> 1-FAIL: (x'=x+9) + FAIL: (x'=x+1);
+
+    [A]   x=8 -> 1-FAIL: (x'=16) + FAIL: (x'=1);
+    [B]   x=8 -> (x'=1);
+
+    //Middle lane
+    [E]   x=9 | x=10 | x=13 | x=14 -> 1-FAIL: (x'=x+9) + FAIL: (x'=x+1);
+    [F]   x=9 | x=10 | x=13 | x=14 -> (x'=x+1);
+
+    [E]   x=11 | x=12 | x=15 -> (x'=x+1);
+    [F]   x=11 | x=12 | x=15 -> 1-FAIL: (x'=x+9) + FAIL: (x'=x+1);
+
+    [E]   x=16-> (x'=9);
+    [F]   x=16-> 1-FAIL: (x'=24) + FAIL: (x'=9);
+
+    //Fast lane
+    [I]   x=17 | x=18 | x=19 | x=20 -> 1-FAIL: (x'=25) + FAIL: (x'=x+1);
+    [J]   x=17 | x=18 | x=19 | x=20 -> (x'=x+1);
+
+    [I]   x=21 | x=22 | x=23 -> (x'=x+1);
+    [J]   x=21 | x=22 | x=23 -> 1-FAIL: (x'=25) + FAIL: (x'=x+1);
+
+    [I]   x=24 -> (x'=17);
+    [J]   x=24 -> 1-FAIL: (x'=25) + FAIL: (x'=17);
+
+
+    [reset] x=25 & i<ITER & m=0 -> (x'=0)&(i'=i+1);
+    [reset] x=25 & i=ITER & m=0 -> (m'=1);
+
+
+
+    //second model
+    [in]  m=1 & start -> .5: (y'=SIZE/2+1) + .5: (y'=SIZE/2+2);
+
+    [l]   m=1 & ooo -> .5: true + .5: (y'=y-1);
+    [r]   m=1 & ooo -> .5: true + .5: (y'=y+1);
+
+    [c]   m=1 & imgoal -> (m'=2);
+
+
+
+    //third model
+    // initial state
+    [A]   m=2 & z=0 -> (z'=2);
+    [B]   m=2 & z=0 -> (z'=1);
+    [C]   m=2 & z=0 -> 0.5:(z'=1) + 0.5:(z'=3);
+
+    // c,d no longer needed
+    [C]   m=2 & z!=0 -> true;
+
+    // yellow states
+    [A]   m=2 & z=2 -> (z'=3);
+    [B]   m=2 & z=2 -> true;
+
+    [A]   m=2 & z=3 -> (z'=2);
+    [B]   m=2 & z=3 -> (z'=4);
+
+    // blue states (exluding initial)
+    [A]   m=2 & z=1 -> 0.3:(z'=5) + 0.7:true;
+    [B]   m=2 & z=1 -> 0.1:(z'=5) + 0.9:true;
+
+    [A]   m=2 & z=4 -> true;
+    [B]   m=2 & z=4 -> (z'=5);
+
+    // goal & sink
+    [A]   m=2 & (goal | sink) -> true;
+    [B]   m=2 & (goal | sink) -> true;
+
+
+endmodule
+
+rewards "steps"
+    x=0 & m=0: 1;
+    x>0 & x<9 & m=0: 5;
+    x>8 & x<17 & m=0: 3;
+    x>16 & x<25 & m=0: 1;
+    m=1: 5;
+    m=2: 500;
+endrewards
