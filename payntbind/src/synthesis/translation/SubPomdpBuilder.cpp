@@ -98,6 +98,8 @@ namespace synthesis {
         observability_classes[translated_initial_state] = pomdp.getNrObservations();
         components.observabilityClasses = observability_classes;
 
+        state_sub_to_full = state_translator.translationToItem();
+
         clearMemory();
         return std::make_shared<storm::models::sparse::Pomdp<ValueType>>(std::move(components));
     }

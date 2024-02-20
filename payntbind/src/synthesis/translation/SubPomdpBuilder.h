@@ -24,6 +24,12 @@ namespace synthesis {
             std::map<uint64_t,ValueType> const& initial_belief
         );
 
+        /**
+         * Sub-POMDP-to-POMDP state mapping. Fresh states have an invalid value
+         * equal to the number of states in the POMDP.
+         */
+        std::vector<uint64_t> state_sub_to_full;
+
     private:
 
         /** The original POMDP. */
