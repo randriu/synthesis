@@ -1,0 +1,40 @@
+mdp
+
+const int N = 6;
+const int xMIN = 1;
+const int yMIN = 1;
+const int xMAX = N;
+const int yMAX = N;
+
+hole int OX in {2..5};
+hole int OY in {2..4};
+
+formula goal = (x=xMAX & y=yMAX);
+formula done = goal | crash;
+
+const double slip = 0.09;
+
+formula xright  = min(x+1,xMAX);
+formula xleft   = max(x-1,xMIN);
+formula yup     = min(y+1,yMAX);
+formula ydown   = max(y-1,yMIN);
+
+module clock
+    clk : [0..1] init 0;
+    [left]  !done & clk=0 -> (clk'=1);
+    [right] !done & clk=0 -> (clk'=1);
+    [down]  !done & clk=0 -> (clk'=1);
+    [up]    !done & clk=0 -> (clk'=1);
+    [crash] !done & clk=1 -> (clk'=0);
+endmodule
+
+module agent
+    x : [xMIN..xMAX] init xMIN;
+    y : [yMIN..yMAX] init yMIN;
+    crash : bool init false;
+    [crash] true -> (crash'=(x = OX & y = OY));
+    [left]  true -> 1-slip : (x'=xleft)  + slip/3 : (y'=ydown)  + slip/3 : (y'=yup)    + slip/3 : (x'=xright) ;
+    [right] true -> 1-slip : (x'=xright) + slip/3 : (y'=yup)    + slip/3 : (y'=ydown)  + slip/3 : (x'=xleft)  ;
+    [down]  true -> 1-slip : (y'=ydown)  + slip/3 : (x'=xright) + slip/3 : (x'=xleft)  + slip/3 : (y'=yup)    ;
+    [up]    true -> 1-slip : (y'=yup)    + slip/3 : (x'=xleft)  + slip/3 : (x'=xright) + slip/3 : (y'=ydown)  ;
+endmodule

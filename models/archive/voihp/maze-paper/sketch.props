@@ -1,0 +1,5 @@
+//Pmax=? [ F goal ]
+//Pmax=? [ F goal ]
+//R{"steps"}min=? [ F (goal | bad) ]
+
+R{"steps"}min=? [ F goal ]

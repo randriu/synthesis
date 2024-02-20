@@ -1,0 +1,67 @@
+pomdp
+
+observables
+start, dx, dy, turn
+endobservables
+
+const int N = 4; // grid size NxN
+const int R = 2; // Radius within the drone can see the agent, shall be smaller N 
+
+const int xMAX = N;
+const int yMAX = N;
+const int axMAX = xMAX;
+const int ayMAX = yMAX;
+const int axMIN = 0;
+const int ayMIN = 0;
+const int dxMAX = xMAX;
+const int dyMAX = yMAX;
+const int dxMIN = 0;
+const int dyMIN = 0;
+const double slippery = 0.3;
+
+
+formula done = start & dx = dxMAX & dy = dyMAX;
+observable "amdone" = done;
+formula crash =  (dx = ax & dy = ay);
+observable "hascrash" = crash;
+formula seedrone = ax-dx < R + 1 & dx-ax < R +1 & ay-dy < R+1 & dy -ay < R+1;
+observable "seedx" = seedrone ? ax : -1;
+observable "seedy" = seedrone ? ay : -1;
+
+
+module master
+    start : bool init false;
+    turn : bool init false;
+
+    [placement] !start -> (start'=true);
+    [north] start & turn -> (turn'=!turn);
+    [south] start & !done & turn -> (turn'=!turn);
+    [east]  start & !done & turn -> (turn'=!turn);
+    [west]  start & !done & turn -> (turn'=!turn);
+    [adv]  start & !done & !turn -> (turn'=!turn);
+endmodule
+
+
+module drone
+    dx : [dxMIN..dxMAX] init 0;
+    dy : [dyMIN..dyMAX] init 0;
+
+    [west] true -> (1-slippery): (dx'=max(dx-1,dxMIN)) + slippery: (dx'=max(dx,dxMIN));
+    [east] true -> (1-slippery): (dx'=min(dx+1,dxMAX)) + slippery: (dx'=min(dx,dxMAX));
+    [south]  true -> (1-slippery): (dy'=min(dy+1,dyMAX)) + slippery: (dy'=min(dy,dyMAX));
+    [north]  true -> (1-slippery): (dy'=max(dy-1,dyMIN)) + slippery: (dy'=max(dy,dyMIN));
+endmodule
+
+
+
+module agent
+    ax : [axMIN..axMAX] init axMAX-1;
+    ay : [ayMIN..ayMAX] init ayMAX;
+
+    [adv] true -> 1/4 : (ax'=max(ax-1,axMIN)) +  1/4 : (ax'=min(ax+1,axMAX)) + 1/4 : (ay'=max(ay-1,ayMIN)) + 1/4 : (ay'=min(ay+1,ayMAX));
+endmodule
+
+
+label "goal" = done;
+label "traps" = crash;
+label "notbad" =  !crash;

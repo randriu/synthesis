@@ -1,0 +1,2 @@
+R{"steps"}min=? [ F "goal" | "bad" ]
+P>=0.25 [F "goal"]

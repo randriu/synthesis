@@ -1,0 +1,30 @@
+pomdp
+
+formula goal = s=-1;
+
+//observable "s" = s;
+observable "yellow" = s=0 | s=1;
+observable "blue" = s=2 | s=3;
+
+module m
+
+    s : [-1..3] init 0;
+
+    [a] s=0 -> .5:(s'=s+1) + .5:(s'=2);
+    [b] s=0 -> true;
+
+    [a] s=1 -> true;
+    [b] s=1 -> .5:(s'=s+1) + .5:(s'=0);
+
+    [a] s=2 -> .5:(s'=s+1) + .5:(s'=1);
+    [b] s=2 -> true;
+
+    [a] s=3 -> true;
+    [b] s=3 -> 1/2:(s'=-1) + 1/3:(s'=0) + 1/6:true;
+    
+
+endmodule
+
+rewards "steps"
+    true: 1;
+endrewards

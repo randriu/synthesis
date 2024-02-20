@@ -1,0 +1,281 @@
+mdp
+
+// probabilities
+//const double infect=0.5; // probability virus infects a node
+//const double detect1=0.5; // probability virus detected by firewall of high/low node
+//const double detect2=0.8; // probability virus detected by firewall of barrier node
+
+hole int infect in {5..10};
+hole int detect1 in {0..5};
+hole int detect2 in {5..10};
+
+
+hole int fail_rate in {0..100:5};
+
+//hole double node22_recovery in {0.0..1.0:0.1};
+
+// node1 that cannot be infected
+hole int node1x in {1..2};
+hole int node1y in {2..3};
+
+// node2 that cannot be infected
+hole int node2x in {2..3};
+hole int node2y in {1..2};
+
+
+module strategy
+    step : [0..2] init 0;
+
+    // Alternate between horizontal and vertical attack. Unclear how to start.
+    [attack23_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 -> (step'=1);
+    [attack32_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 -> (step'=1);
+
+    // This part is clear. We just attack target if possible.
+    [attack11_21] step=0 & s21 = 2 -> (step'=1);
+    [attack11_12] step=0 & s12 = 2 -> (step'=1);
+
+    [attack13_12] false -> true;
+    [attack23_22] false -> true;
+    [attack31_21] false -> true;
+    [attack32_22] false -> true;
+
+
+    // This part is also rather clear, we just have to decide whether we attack horizontal or vertical. No need to attack a non-neighbour.
+    [attack21_22] step=0 & s22 = 2 -> (step'=1);
+    [attack12_22] step=0 & s22 = 2 -> (step'=1);
+
+    // s33 and s23
+    [attack32_33] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 -> (step'=1);
+    [attack13_23] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 -> (step'=1);
+    [attack22_23] step=0 & s23 = 2 & s22 != 2 & s32 != 2 & s13 != 2 -> (step'=1);
+
+    // s33 and s32
+    [attack23_33] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 -> (step'=1);
+    [attack31_32] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 -> (step'=1);
+    [attack22_32] step=0 & s32 = 2 & s22 != 2 & s23 != 2 & s31 != 2 -> (step'=1);
+
+    // s33 and s23 and s13
+    [attack32_33] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 -> (step'=1);
+    [attack12_13] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 -> (step'=1);
+    [attack22_23] step=0 & s13 = 2 & s22 != 2 & s32 != 2 & s12 != 2 -> (step'=1);
+
+    // s33 and s32 and s31
+    [attack23_33] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 -> (step'=1);
+    [attack21_31] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 -> (step'=1);
+    [attack22_32] step=0 & s31 = 2 & s22 != 2 & s23 != 2 & s12 != 2 -> (step'=1);
+
+
+    // s33 and s32 and s23
+    [attack31_32] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack13_23] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack22_32] step=0 & s32 = 2 & s23 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+
+
+    // s33 and s32 and s31 and s23
+    [attack13_23] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 -> (step'=1);
+    [attack21_31] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 -> (step'=1);
+    [attack22_23] step=0 & s31 = 2 & s23 = 2 & s22 != 2 & s21 != 2 & s13 != 2 -> (step'=1);
+
+
+    // s33 and s32 and s13 and s23
+    [attack12_13] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack31_32] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+    [attack22_23] step=0 & s13 = 2 & s32 = 2 & s22 != 2 & s31 != 2 & s12 != 2 -> (step'=1);
+
+    // s33 and s32 and s31 and s23 and s13
+    [attack12_13] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 -> (step'=1);
+    [attack21_31] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 -> (step'=1);
+    [attack22_23] step=0 & s31 = 2 & s13 = 2 & s22 != 2 & s21 != 2 & s12 != 2 -> (step'=1);
+
+
+    [eval]   step=1 -> (step'=2);
+    [report] step=2 -> (step'=0);
+
+    [] s11 = 2 -> true;
+endmodule
+
+
+// first column (1..N)
+module n11
+
+	s11 : [0..4]; // node uninfected
+	// 0 - node uninfected
+	// 1 - node uninfected but firewall breached
+	// 2 - node infected
+    // 3 - save mode
+    // 4 - infection taking place right now.
+
+	// firewall attacked (from an infected neighbour)
+	[attack11_21] (s11=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s11'=1);
+	[attack11_12] (s11=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s11'=1);
+	// if the firewall has been breached tries to infect the node
+	[eval] (s11=1) -> infect*0.1 : (s11'=4) + (1-infect*0.1) : (s11'=3);
+	// restore save mode
+	[eval] (s11=3) -> (s11'=0);
+	// never block eval.
+	[eval] (s11!=1) & (s11!=3) -> true;
+
+	[report] (s11=4) -> (s11'=2);
+  [report] (s11!=4) -> true;
+	// if the node is infected, then it tries to attack its neighbouring nodes
+	[attack21_11] (s11=2) -> true;
+	[attack12_11] (s11=2) -> true;
+
+endmodule
+
+module n21
+
+	s21 : [0..4]; // node uninfected
+	// 0 - node uninfected
+	// 1 - node uninfected but firewall breached
+	// 2 - node infected
+
+	// firewall attacked (from an infected neighbour)
+	[attack21_31] (s21=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s21'=1);
+	[attack21_22] (s21=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s21'=1);
+	[attack21_11] (s21=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s21'=1);
+	// if the firewall has been breached tries to infect the node
+	[eval] (s21=1) -> infect*0.1 : (s21'=4) + (1-infect*0.1) : (s21'=3);
+	// restore save mode
+	[eval] (s21=3) -> (s21'=0);
+	// never block eval.
+	[eval] (s21!=1) & (s21!=3) -> true;
+  [report] (s21=4) -> (s21'=2);
+  [report] (s21!=4) -> true;
+
+	// if the node is infected, then it tries to attack its neighbouring nodes
+	[attack31_21] (s21=2) -> true;
+	[attack22_21] (s21=2) -> true;
+	[attack11_21] (s21=2) -> true;
+
+endmodule
+
+module n31=n11[s11=s31,attack21_11=attack21_31,attack12_11=attack32_31,attack11_21=attack31_21,attack11_12=attack31_32] endmodule
+
+// second column
+module n12=n21[s21=s12,detect2=detect1,attack31_21=attack13_12,attack22_21=attack22_12,attack11_21=attack11_12,attack21_31=attack12_13,attack21_22=attack12_22,attack21_11=attack12_11] endmodule
+
+module n22
+
+	s22 : [0..4]; // node uninfected
+	// 0 - node uninfected
+	// 1 - node uninfected but firewall breached
+	// 2 - node infected
+
+	// firewall attacked (from an infected neighbour)
+	[attack22_32] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	[attack22_23] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	[attack22_12] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	[attack22_21] (s22=0) -> detect2*0.1 : true + (1-detect2*0.1) : (s22'=1);
+	// if the firewall has been breached tries to infect the node
+	[eval] (s22=1) -> infect*0.1 : (s22'=4) + (1-infect*0.1) : (s22'=3);
+	// restore save mode
+	[eval] (s22=3) -> (s22'=0);
+	// never block eval.
+	[eval] (s22!=1) & (s22!=3) -> true;
+  [report] (s22=4) -> (s22'=2);
+  [report] (s22!=4) -> true;
+	// if the node is infected, then it tries to attack its neighbouring nodes
+	[attack32_22] (s22=2) -> true;
+	[attack23_22] (s22=2) -> true;
+	[attack12_22] (s22=2) -> true;
+	[attack21_22] (s22=2) -> true;
+
+endmodule
+
+module n32=n21[s21=s32,detect2=detect1,attack31_21=attack33_32,attack22_21=attack22_32,attack11_21=attack31_32,attack21_31=attack32_33,attack21_22=attack32_22,attack21_11=attack32_31] endmodule
+
+// columns 3..N-1
+
+// column N
+module n13=n11[s11=s13,attack21_11=attack23_13,attack12_11=attack12_13,attack11_21=attack13_23,attack11_12=attack13_12] endmodule
+module n23=n21[s21=s23,attack31_21=attack33_23,attack22_21=attack22_23,attack11_21=attack13_23,attack21_31=attack23_33,attack21_22=attack23_22,attack21_11=attack23_13] endmodule
+
+module n33
+
+	s33 : [0..4] init 2; // node infected;
+	// 0 - node uninfected
+	// 1 - node uninfected but firewall breached
+	// 2 - node infected
+
+	// firewall attacked (from an infected neighbour)
+	[attack33_32] (s33=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s33'=1);
+	[attack33_23] (s33=0) ->  detect1*0.1 : true + (1-detect1*0.1) : (s33'=1);
+	// if the firewall has been breached tries to infect the node
+	[eval] (s33=1) -> infect*0.1 : (s33'=4) + (1-infect*0.1) : (s33'=3);
+	// restore save mode
+	[eval] (s33=3) -> (s33'=0);
+	// never block eval.
+	[eval] (s33!=1) & (s33!=3) -> true;
+  [report] (s33=4) -> (s33'=2);
+  [report] (s33!=4) -> true;
+	// if the node is infected, then it tries to attack its neighbouring nodes
+	[attack32_33] (s33=2) -> true;
+	[attack23_33] (s33=2) -> true;
+
+endmodule
+
+
+module infect_fail
+
+	fail : bool init false;
+
+	[eval] !fail & (node1x = 1) & (node1y = 2) & (s12 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node1x = 1) & (node1y = 2) & (s12 <= 1) -> true;
+	[eval] !fail & (node1x = 2) & (node1y = 2) & (s22 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node1x = 2) & (node1y = 2) & (s22 <= 1) -> true;
+	[eval] !fail & (node1x = 1) & (node1y = 3) & (s13 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node1x = 1) & (node1y = 3) & (s13 <= 1) -> true;
+	[eval] !fail & (node1x = 2) & (node1y = 3) & (s23 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node1x = 2) & (node1y = 3) & (s23 <= 1) -> true;
+
+	[eval] !fail & (node2x = 2) & (node2y = 1) & (s21 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node2x = 2) & (node2y = 1) & (s21 <= 1) -> true;
+	[eval] !fail & (node2x = 2) & (node2y = 2) & (s22 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node2x = 2) & (node2y = 2) & (s22 <= 1) -> true;
+	[eval] !fail & (node2x = 3) & (node2y = 1) & (s31 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node2x = 3) & (node2y = 1) & (s31 <= 1) -> true;
+	[eval] !fail & (node2x = 3) & (node2y = 2) & (s32 > 1)  -> fail_rate*0.01: (fail'=true) + (1-fail_rate*0.01): true;
+	[eval] !fail & (node2x = 3) & (node2y = 2) & (s32 <= 1) -> true;
+
+	[] fail -> true;
+
+endmodule
+
+// reward structure (number of attacks)
+//rewards "attacks"
+//
+//	// corner nodes
+//
+//	[attack11_12] true : 1;
+//	[attack11_21] true : 1;
+//	[attack31_21] true : 1;
+//	[attack31_32] true : 1;
+//	[attack13_12] true : 1;
+//	[attack13_23] true : 1;
+//	[attack33_32] true : 1;
+//	[attack33_23] true : 1;
+//
+//	// edge nodes
+//
+//	[attack12_13] true : 1;
+//	[attack12_11] true : 1;
+//	[attack12_22] true : 1;
+//	[attack21_31] true : 1;
+//	[attack21_11] true : 1;
+//	[attack21_22] true : 1;
+//	[attack32_33] true : 1;
+//	[attack32_31] true : 1;
+//	[attack32_22] true : 1;
+//	[attack23_33] true : 1;
+//	[attack23_13] true : 1;
+//	[attack23_22] true : 1;
+//
+//	// middle nodes
+//
+//	[attack22_32] true : 1;
+//	[attack22_23] true : 1;
+//	[attack22_12] true : 1;
+//	[attack22_21] true : 1;
+//
+//endrewards

@@ -1,0 +1,2 @@
+P >= 0.99 [F "stable" ];
+R{"steps"} <= 18.1 [F "stable"];

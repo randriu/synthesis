@@ -1,0 +1,5 @@
+//R{"steps"}min=? [F goal]
+//P<=0.24 [F (x=4 & y=3)]
+Pmax=? [F goal]
+R{"collect"}>=10 [F (goal | bad)]
+R{"faults"}<=7 [F (goal | bad)]

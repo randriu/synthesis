@@ -1,0 +1,70 @@
+pomdp
+
+formula blue = x=0 | x=1 | x=4;
+formula yell = x=2 | x=3;
+formula purp = x=6 | x=7;
+formula goal = x=5;
+formula sink = x=8;
+
+observable "blue" = blue;
+observable "yell" = yell;
+observable "purp" = purp;
+observable "goal" = goal;
+observable "sink" = sink;
+observable "ooin" = y=0;
+observable "oo0" = y=1 | y=2;
+
+module test
+
+    x : [0..9] init 9;
+    y : [0..3] init 0;
+
+    // initial state
+    [A]   x=0 -> (x'=2);
+    [B]   x=0 -> (x'=1);
+    [C]   x=0 -> 0.5:(x'=1) + 0.5:(x'=3);
+    [D]   x=0 -> 0.5:(x'=6) + 0.5:(x'=7);
+
+    // c,d no longer needed
+    [C] x!=0 -> true;
+    [D] x!=0 -> true;
+
+    // yellow states
+    [A]   x=2 -> (x'=3);
+    [B]   x=2 -> true;
+
+    [A]   x=3 -> (x'=2);
+    [B]   x=3 -> (x'=4);
+
+    // blue states (exluding initial)
+    [A]   x=1 -> 0.3:(x'=5) + 0.7:true;
+    [B]   x=1 -> 0.1:(x'=5) + 0.9:true;
+
+    [A]   x=4 -> true;
+    [B]   x=4 -> (x'=5);
+
+    // purple states
+    [A]   x=6 -> (x'=5);
+    [B]   x=6 -> (x'=8);
+    
+    [A]   x=7 -> (x'=8);
+    [B]   x=7 -> (x'=5);
+
+    // goal & sink
+    [A]   goal | sink -> true;
+    [B]   goal | sink -> true;
+
+    [in]  y=0 -> 0.5: (y'=1) + 0.5: (y'=2);
+
+    [L]   y=1 -> 0.5: (x'=0) + 0.5: (y'=1);
+    [R]   y=1 -> 0.5: (y'=1) + 0.5: (y'=2);
+    [L]   y=2 -> 0.5: (y'=2) + 0.5: (y'=1);
+    [R]   y=2 -> 0.5: (x'=0) + 0.5: (y'=2);  
+
+    
+
+endmodule
+
+rewards "steps"
+    true: 1;
+endrewards

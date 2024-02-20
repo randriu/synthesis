@@ -1,0 +1,148 @@
+
+dtmc
+
+// 7 | x x x x x x x x
+// 6 | x x x          
+// 5 | x x A   x x x x
+// 4 | x x x   x x x x
+// 3 | x x x   x   x x
+// 2 | x x x x x   A x
+// 1 |     x x x   x x
+// 0 |     x x x   x x
+// y _________________
+//   x 0 1 2 3 4 5 6 7
+
+
+// agent1 can go in this direction
+formula u1 = ya1<7 & !(xa1=3 & ya1=2) & !(ya1=5 & xa1>3);
+formula r1 = xa1<7 & !(xa1=4 & ya1<4) & !(xa1=2 & (ya1>2 & ya1<7));
+formula d1 = ya1>0 & !(ya1=2 & xa1<2) & !(ya1=7 & xa1>2) & !(ya1=4 & xa1=5);
+formula l1 = xa1>0 & !(xa1=2 & ya1<2) & !(xa1=6 & ya1<4) & !(xa1=4 & (ya1>2 & ya1<6));
+
+// updates of coordinates (if possible)
+formula y1u = u1 ? (ya1+1) : ya1;
+formula x1r = r1 ? (xa1+1) : xa1;
+formula y1d = d1 ? (ya1-1) : ya1;
+formula x1l = l1 ? (xa1-1) : xa1;
+
+
+// agent2 can go in this direction
+formula u2 = ya2<7 & !(xa2=3 & ya2=2) & !(ya2=5 & xa2>3);
+formula r2 = xa2<7 & !(xa2=4 & ya2<4) & !(xa2=2 & (ya2>2 & ya2<7));
+formula d2 = ya2>0 & !(ya2=2 & xa2<2) & !(ya2=7 & xa2>2) & !(ya2=4 & xa2=5);
+formula l2 = xa2>0 & !(xa2=2 & ya2<2) & !(xa2=6 & ya2<4) & !(xa2=4 & (ya2>2 & ya2<6));
+
+// updates of coordinates (if possible)
+formula y2u = u2 ? (ya2+1) : ya2;
+formula x2r = r2 ? (xa2+1) : xa2;
+formula y2d = d2 ? (ya2-1) : ya2;
+formula x2l = l2 ? (xa2-1) : xa2;
+
+
+const double sl=0.1;
+
+// agent 1 holes
+hole int M1_0_1 in {0,1};
+hole int M1_0_0 in {0,1};
+hole int M1_1_1 in {0,1};
+hole int M1_1_0 in {0,1};
+hole int P1_0_1 in {1,2,3,4};
+hole int P1_0_0 in {1,2,3,4};
+hole int P1_1_1 in {1,2,3,4};
+hole int P1_1_0 in {1,2,3,4};
+
+// agent 2 holes
+hole int M2_0_1 in {0,1};
+hole int M2_0_0 in {0,1};
+hole int M2_1_1 in {0,1};
+hole int M2_1_0 in {0,1};
+hole int P2_0_1 in {1,2,3,4};
+hole int P2_0_0 in {1,2,3,4};
+hole int P2_1_1 in {1,2,3,4};
+hole int P2_1_0 in {1,2,3,4};
+
+module strategy1
+	mem : [0..1] init 0;
+
+	[move]  mem=0 & r1  -> (mem'=M1_0_1);
+	[move]  mem=0 & !r1 -> (mem'=M1_0_0);
+	[move]  mem=1 & r1  -> (mem'=M1_1_1);
+	[move]  mem=1 & !r1 -> (mem'=M1_1_0);
+endmodule
+
+module grid1
+
+	xa1 : [0..7] init 2; // agent1 x coordinate
+	ya1 : [0..7] init 5; // agent1 y coordinate
+
+	
+	[move]   mem=0 & r1 &  P1_0_1=1 -> 1-sl: (ya1'=y1u) + sl: true;
+    [move]   mem=0 & r1 &  P1_0_1=2 -> 1-sl: (xa1'=x1r) + sl: true;
+    [move]   mem=0 & r1 &  P1_0_1=3 -> 1-sl: (ya1'=y1d) + sl: true;
+    [move]   mem=0 & r1 &  P1_0_1=4 -> 1-sl: (xa1'=x1l) + sl: true;
+
+	[move]   mem=0 & !r1 & P1_0_0=1 -> 1-sl: (ya1'=y1u) + sl: true;
+    [move]   mem=0 & !r1 & P1_0_0=2 -> 1-sl: (xa1'=x1r) + sl: true;
+    [move]   mem=0 & !r1 & P1_0_0=3 -> 1-sl: (ya1'=y1d) + sl: true;
+    [move]   mem=0 & !r1 & P1_0_0=4 -> 1-sl: (xa1'=x1l) + sl: true;
+	
+	[move]   mem=1 & r1 &  P1_1_1=1 -> 1-sl: (ya1'=y1u) + sl: true;
+    [move]   mem=1 & r1 &  P1_1_1=2 -> 1-sl: (xa1'=x1r) + sl: true;
+    [move]   mem=1 & r1 &  P1_1_1=3 -> 1-sl: (ya1'=y1d) + sl: true;
+    [move]   mem=1 & r1 &  P1_1_1=4 -> 1-sl: (xa1'=x1l) + sl: true;
+	
+	[move]   mem=1 & !r1 & P1_1_0=1 -> 1-sl: (ya1'=y1u) + sl: true;
+    [move]   mem=1 & !r1 & P1_1_0=2 -> 1-sl: (xa1'=x1r) + sl: true;
+    [move]   mem=1 & !r1 & P1_1_0=3 -> 1-sl: (ya1'=y1d) + sl: true;
+    [move]   mem=1 & !r1 & P1_1_0=4 -> 1-sl: (xa1'=x1l) + sl: true;
+	
+endmodule
+
+
+module strategy2
+	mem2 : [0..1] init 0;
+
+	[move]  mem2=0 & l2  -> (mem2'=M2_0_1);
+	[move]  mem2=0 & !l2 -> (mem2'=M2_0_0);
+	[move]  mem2=1 & l2  -> (mem2'=M2_1_1);
+	[move]  mem2=1 & !l2 -> (mem2'=M2_1_0);
+endmodule
+
+
+module grid2
+
+	xa2 : [0..7] init 6; // agent2 x coordinate
+	ya2 : [0..7] init 2; // agent2 y coordinate
+
+	[move]   mem2=0 & l2 &  P2_0_1=1 -> 1-sl: (ya2'=y2u) + sl: true;
+    [move]   mem2=0 & l2 &  P2_0_1=2 -> 1-sl: (xa2'=x2r) + sl: true;
+    [move]   mem2=0 & l2 &  P2_0_1=3 -> 1-sl: (ya2'=y2d) + sl: true;
+    [move]   mem2=0 & l2 &  P2_0_1=4 -> 1-sl: (xa2'=x2l) + sl: true;
+
+	[move]   mem2=0 & !l2 & P2_0_0=1 -> 1-sl: (ya2'=y2u) + sl: true;
+    [move]   mem2=0 & !l2 & P2_0_0=2 -> 1-sl: (xa2'=x2r) + sl: true;
+    [move]   mem2=0 & !l2 & P2_0_0=3 -> 1-sl: (ya2'=y2d) + sl: true;
+    [move]   mem2=0 & !l2 & P2_0_0=4 -> 1-sl: (xa2'=x2l) + sl: true;
+	
+	[move]   mem2=1 & l2 &  P2_1_1=1 -> 1-sl: (ya2'=y2u) + sl: true;
+    [move]   mem2=1 & l2 &  P2_1_1=2 -> 1-sl: (xa2'=x2r) + sl: true;
+    [move]   mem2=1 & l2 &  P2_1_1=3 -> 1-sl: (ya2'=y2d) + sl: true;
+    [move]   mem2=1 & l2 &  P2_1_1=4 -> 1-sl: (xa2'=x2l) + sl: true;
+	
+	[move]   mem2=1 & !l2 & P2_1_0=1 -> 1-sl: (ya2'=y2u) + sl: true;
+    [move]   mem2=1 & !l2 & P2_1_0=2 -> 1-sl: (xa2'=x2r) + sl: true;
+    [move]   mem2=1 & !l2 & P2_1_0=3 -> 1-sl: (ya2'=y2d) + sl: true;
+    [move]   mem2=1 & !l2 & P2_1_0=4 -> 1-sl: (xa2'=x2l) + sl: true;
+endmodule
+	
+
+
+
+// reward
+rewards "moves"
+	true: 1;
+endrewards
+
+// target
+label "goal" = (xa1=xa2) & (ya1=ya2);
+

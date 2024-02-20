@@ -1,0 +1,29 @@
+pomdp
+
+const int N = 30;
+const int M = N;
+const int NDIV = 5;
+const int MDIV = NDIV;
+
+observable "xobs" = floor((x-1)/NDIV);
+observable "yobs" = floor((y-1)/MDIV);
+observable "end" = x=N & y=M;
+
+formula slip = 1/2 + 1/ (100 * (x+y));
+//formula slip = (1/3);
+//formula slip = 0;
+
+module main
+x : [1..N];
+y : [1..M];
+[east] true -> slip: true + (1-slip):(x'=min(x+1,N));
+[west] true -> slip: true + (1-slip): (x'=max(x-1,1));
+[north] true -> slip: true + (1-slip):(y'=min(y+1, M));
+[south] true -> slip: true + (1-slip):(y'=max(y-1, 1));
+endmodule
+
+label "done" = x=N & y=M;
+
+rewards "steps"
+    true : 1;
+endrewards
