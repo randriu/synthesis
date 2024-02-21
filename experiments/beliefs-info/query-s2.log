@@ -1,0 +1,16 @@
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+Finished exploring under-approximation MDP.
+Start analysis...
+starting Storm POMDP analysis
+===========================
+belief count: 448521
+max prob >0.5: 196872 (43.89%)
+max prob >0.9: 0 (0.0%)
+Observations (overall count: 3 - count: 3): 2: 149507 (33.33%), 1: 149507 (33.33%), 0: 149507 (33.33%), 
+Supports (overall count: 5 - count: 5): (34, 32, 30, 27, 23, 20): 74754 (16.67%), (33, 31, 29, 26, 22, 19): 74754 (16.67%), (28, 25, 21, 18, 17, 14, 24, 11, 10): 149507 (33.33%), (30, 27, 23, 20, 16, 13): 74753 (16.67%), (29, 26, 22, 19, 15, 12): 74753 (16.67%), 
+===========================
+query-s2 36 6 448521 43.89 0.0 3 3 5 5
+Storm POMDP analysis completed

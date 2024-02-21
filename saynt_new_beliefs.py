@@ -39,7 +39,24 @@ def get_interactive_options():
     return options
 
 
-def run_paynt_with_timeout(sub_pomdp_quotient, storm_control, timeout=1):
+def run_paynt_with_belief(sub_pomdp_builder, specification, initial_belief, use_storm_control=False, timeout=1):
+    sub_pomdp = sub_pomdp_builder.start_from_belief(initial_belief)
+    sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, specification.copy())
+
+    if use_storm_control:
+        storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+        storm_control.set_options()
+        storm_control.quotient = sub_pomdp_quotient
+        storm_control.latest_storm_result = main_storm_control.latest_storm_result
+        if storm_control.quotient.specification.optimality.minimizing:
+            storm_control.storm_bounds = storm_control.latest_storm_result.upper_bound
+        else:
+            storm_control.storm_bounds = storm_control.latest_storm_result.lower_bound
+        storm_control.parse_results(storm_control.quotient)
+        storm_control.update_data()
+    else:
+        storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+
     synthesizer = paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(sub_pomdp_quotient, "ar", storm_control)
     family = sub_pomdp_quotient.design_space
 
@@ -55,49 +72,72 @@ def run_paynt_with_timeout(sub_pomdp_quotient, storm_control, timeout=1):
     interactive_queue.put("terminate")
     paynt_thread.join()
 
+    return sub_pomdp_quotient, storm_control.paynt_export
 
-def different_initial_belief_with_timeout(sub_pomdp_builder, belief, timeout=1):
 
-    storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+def run_paynt_on_pomdp(pomdp_quotient, use_storm_control=False, timeout=1):
+    if use_storm_control:
+        storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+        storm_control.set_options()
+        storm_control.quotient = pomdp_quotient
+        storm_control.latest_storm_result = main_storm_control.latest_storm_result
+        if storm_control.quotient.specification.optimality.minimizing:
+            storm_control.storm_bounds = storm_control.latest_storm_result.upper_bound
+        else:
+            storm_control.storm_bounds = storm_control.latest_storm_result.lower_bound
+        storm_control.parse_results(storm_control.quotient)
+        storm_control.update_data()
+    else:
+        storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+
     pomdp_quotient.specification.optimality.optimum = None
 
-    sub_pomdp = sub_pomdp_builder.start_from_belief(belief)
-    sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, pomdp_quotient.specification)
+    synthesizer = paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(pomdp_quotient, "ar", storm_control)
 
-    run_paynt_with_timeout(sub_pomdp_quotient, storm_control, timeout)
+    family = pomdp_quotient.design_space
+
+    paynt_thread = Thread(target=synthesizer.strategy_iterative_storm, args=(True, True))
+    interactive_queue = Queue()
+    synthesizer.synthesizer.s_queue = interactive_queue
+    paynt_thread.start()
+    sleep(timeout)
+    interactive_queue.put("timeout")
+    while not interactive_queue.empty():
+        sleep(0.02)
+    synthesizer.synthesis_terminate = True
+    interactive_queue.put("terminate")
+    paynt_thread.join()
+
+    export = storm_control.paynt_export
+
+    return export
+
+
+def different_initial_belief_with_timeout(sub_pomdp_builder, specification, belief, use_storm_control=False, timeout=1):
+
+    sub_pomdp_quotient, _ = run_paynt_with_belief(sub_pomdp_builder, specification, belief, use_storm_control, timeout)
 
     belief_value = sub_pomdp_quotient.specification.optimality.optimum
 
     if belief_value is None:
         return None, None
 
-    assignment = storm_control.latest_paynt_result
-
-    return belief_value, assignment
+    return belief_value
 
 
-def uniform_support_belief(sub_pomdp_builder, belief, belief_obs, timeout=1):
-
-    storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
-    pomdp_quotient.specification.optimality.optimum = None
+def uniform_support_belief(sub_pomdp_builder, specification, belief, belief_obs, use_storm_control=False, timeout=1):
 
     states = belief.keys()
     prob = 1/len(states)
-    support_belief = {x:prob for x in states}
+    belief = {x:prob for x in states}
 
-    sub_pomdp = sub_pomdp_builder.start_from_belief(support_belief)
+    sub_pomdp_quotient, export = run_paynt_with_belief(sub_pomdp_builder, specification, belief, use_storm_control, timeout)
     state_sub_to_full = sub_pomdp_builder.state_sub_to_full
-    sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, pomdp_quotient.specification)
-
-    run_paynt_with_timeout(sub_pomdp_quotient, storm_control, timeout)
 
     support_value = sub_pomdp_quotient.specification.optimality.optimum
-    assignment = storm_control.latest_paynt_result
 
     if support_value is None:
         return None, None
-
-    export = storm_control.paynt_export
 
     export_full = []
 
@@ -110,34 +150,25 @@ def uniform_support_belief(sub_pomdp_builder, belief, belief_obs, timeout=1):
 
     belief_value = compute_belief_value(belief, belief_obs, sub_pomdp_quotient.specification.optimality.minimizing, export_full)
 
-    return belief_value, assignment
+    return belief_value
 
 
-def uniform_observation_belief(sub_pomdp_builder, belief, belief_obs, pomdp_quotient, timeout=1):
-
-    storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
-    pomdp_quotient.specification.optimality.optimum = None
+def uniform_observation_belief(sub_pomdp_builder, specification, belief, belief_obs, pomdp_quotient, use_storm_control=False, timeout=1):
 
     obs_states = []
     for state in range(pomdp_quotient.pomdp.nr_states):
         if pomdp_quotient.pomdp.observations[state] == belief_obs:
             obs_states.append(state)
     prob = 1/len(obs_states)
-    obs_uniform_belief = {x:prob for x in obs_states}
+    belief = {x:prob for x in obs_states}
 
-    sub_pomdp = sub_pomdp_builder.start_from_belief(obs_uniform_belief)
+    sub_pomdp_quotient, export = run_paynt_with_belief(sub_pomdp_builder, specification, belief, use_storm_control, timeout)
     state_sub_to_full = sub_pomdp_builder.state_sub_to_full
-    sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, pomdp_quotient.specification)
-
-    run_paynt_with_timeout(sub_pomdp_quotient, storm_control, timeout)
 
     support_value = sub_pomdp_quotient.specification.optimality.optimum
-    assignment = storm_control.latest_paynt_result
 
     if support_value is None:
         return None, None
-
-    export = storm_control.paynt_export
 
     export_full = []
 
@@ -150,21 +181,15 @@ def uniform_observation_belief(sub_pomdp_builder, belief, belief_obs, pomdp_quot
 
     belief_value = compute_belief_value(belief, belief_obs, sub_pomdp_quotient.specification.optimality.minimizing, export_full)
 
-    return belief_value, assignment
+    return belief_value
 
 
-def max_state_belief(sub_pomdp_builder, belief, timeout=1):
-
-    storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
-    pomdp_quotient.specification.optimality.optimum = None
+def max_state_belief(sub_pomdp_builder, specification, belief, use_storm_control=False, timeout=1):
     
     max_state = max(belief, key=belief.get)
-    max_st_belief = {max_state:1}
+    belief = {max_state:1}
 
-    sub_pomdp = sub_pomdp_builder.start_from_belief(max_st_belief)
-    sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, pomdp_quotient.specification)
-
-    run_paynt_with_timeout(sub_pomdp_quotient, storm_control, timeout)
+    sub_pomdp_quotient, _ = run_paynt_with_belief(sub_pomdp_builder, specification, belief, use_storm_control, timeout)
 
     max_state_belief_value = sub_pomdp_quotient.specification.optimality.optimum
 
@@ -172,9 +197,8 @@ def max_state_belief(sub_pomdp_builder, belief, timeout=1):
         return None, None
 
     belief_value = max_state_belief_value*belief[max_state]
-    assignment = storm_control.latest_paynt_result
 
-    return belief_value, assignment
+    return belief_value
 
 
 def compute_belief_value(belief, obs, minimizing, fsc_values=None):
@@ -213,20 +237,18 @@ def compute_belief_value(belief, obs, minimizing, fsc_values=None):
     return best_value
 
 
-def storm_generate_beliefs(pomdp_quotient, spec_formulas):
-    global belmc
-    options = get_interactive_options()
-    belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(pomdp_quotient.pomdp, options)
-    # print(dir(belmc))
-    # exit()
+def storm_generate_beliefs(pomdp_quotient, spec_formulas, start=True):
+    
+    if start:
+        global storm_thread
+        storm_thread = Thread(target=storm_run, args=(belmc,spec_formulas,))
 
-    global storm_thread
-    storm_thread = Thread(target=storm_run, args=(belmc,spec_formulas,))
+        storm_thread.start()
 
-    storm_thread.start()
-
-    while not belmc.is_exploring():
-        sleep(0.1)
+        while not belmc.is_exploring():
+            sleep(0.1)
+    else:
+        belmc.continue_unfolding()
 
     sleep(2)
 
@@ -234,6 +256,17 @@ def storm_generate_beliefs(pomdp_quotient, spec_formulas):
 
     while not belmc.is_result_ready():
         sleep(0.1)
+
+    result = belmc.get_interactive_result()
+    main_storm_control.latest_storm_result = result
+    if main_storm_control.quotient.specification.optimality.minimizing:
+        main_storm_control.storm_bounds = main_storm_control.latest_storm_result.upper_bound
+    else:
+        main_storm_control.storm_bounds = main_storm_control.latest_storm_result.lower_bound
+    main_storm_control.parse_results(main_storm_control.quotient)
+    main_storm_control.update_data()
+    value = result.upper_bound if pomdp_quotient.specification.optimality.minimizing else result.lower_bound
+    print(f"Storm value: {value}")
 
     return belmc.get_beliefs_from_exchange()
 
@@ -250,6 +283,59 @@ def load_beliefs_from_file(file):
             beliefs[len(beliefs)] = belief
     
     return beliefs
+
+
+def print_beliefs_stats(beliefs, pomdp_quotient, print_stats=True):
+
+    obs_dict = {}
+    support_dict = {}
+    prob05_count = 0
+    prob09_count = 0
+    count = 0
+
+    for belief in beliefs.values():
+        belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+        if belief_obs not in obs_dict.keys():
+            obs_dict[belief_obs] = 1
+        else:
+            obs_dict[belief_obs] += 1
+
+        support = tuple(list(belief.keys()))
+        if support not in support_dict.keys():
+            support_dict[support] = 1
+        else:
+            support_dict[support] += 1
+
+        max_prob = max(list(belief.values()))
+        if max_prob > 0.5:
+            prob05_count += 1
+        if max_prob > 0.9:
+            prob09_count += 1
+
+        # count += 1
+        # if count >= 200:
+        #     break
+
+    if print_stats:
+        print("===========================")
+        print(f"belief count: {len(beliefs)}")
+        print(f"max prob >0.5: {prob05_count} ({round(prob05_count*100/len(beliefs), 2)}%)")
+        print(f"max prob >0.9: {prob09_count} ({round(prob09_count*100/len(beliefs), 2)}%)")
+        obs_strings = [f"{obs}: {count} ({round(count*100/len(beliefs), 2)}%)" for obs, count in obs_dict.items() if round(count*100/len(beliefs), 2) > 1]
+        print(f"Observations (overall count: {len(obs_dict)} - count: {len(obs_strings)}): ", end="")
+        for string in obs_strings:
+            print(string, end=", ")
+        print()
+        support_strings = [f"{support}: {count} ({round(count*100/len(beliefs), 2)}%)" for support, count in support_dict.items() if round(count*100/len(beliefs), 2) > 1]
+        print(f"Supports (overall count: {len(support_dict)} - count: {len(support_strings)}): ", end="")
+        for string in support_strings:
+            print(string, end=", ")
+        print()
+        print("===========================")
+
+        print(f"{model} {pomdp_quotient.pomdp.nr_states} {pomdp_quotient.observations} {len(beliefs)} {round(prob05_count*100/len(beliefs), 2)} {round(prob09_count*100/len(beliefs), 2)} {len(obs_dict)} {len(obs_strings)} {len(support_dict)} {len(support_strings)}")
+
+    return obs_dict, support_dict
 
 
 if __name__ == "__main__":
@@ -272,57 +358,145 @@ if __name__ == "__main__":
     pomdp_quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path)
     spec_formulas = pomdp_quotient.specification.stormpy_formulae()
     minimizing = pomdp_quotient.specification.optimality.minimizing
+    specification = pomdp_quotient.specification.copy()
 
-    #beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas)
-    beliefs = load_beliefs_from_file(belief_file)
+    global belmc
+    options = get_interactive_options()
+    belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(pomdp_quotient.pomdp, options)
 
-    try:
-        
-        print(len(beliefs))
+    global main_storm_control
+    main_storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+    main_storm_control.set_options()
+    main_storm_control.quotient = pomdp_quotient
 
-        sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(pomdp_quotient.pomdp)
+    sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(pomdp_quotient.pomdp)
+    timeout = 1
 
-        timeout = 5
+    obs_dict_values = {}
 
-        print("constructing pomdps")
-        for belief in list(beliefs.values())[:50]:
+    if False:
+        iters = 0
+        max_iters = 3
+        while True:
 
-            # if max(belief.values()) < 0.9:
-            #     continue
-            belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+            if iters == 0:
+                beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas)
+            else:
+                beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas, False)
 
-            belief_value, _ = different_initial_belief_with_timeout(sub_pomdp_builder, belief, timeout)
-            belief_value_uniform_support, _ = uniform_support_belief(sub_pomdp_builder, belief, belief_obs, timeout)
-            belief_value_uniform_observation, _ = uniform_observation_belief(sub_pomdp_builder, belief, belief_obs, pomdp_quotient, timeout)
-            belief_value_max_state, _ = max_state_belief(sub_pomdp_builder, belief, timeout)
+            obs_dict, support_dict = print_beliefs_stats(beliefs, pomdp_quotient, False)
 
-            old_fsc_belief_value = compute_belief_value(belief, belief_obs, minimizing)
+            storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
 
-            # if (minimizing and belief_value <= old_fsc_belief_value) or (not(minimizing) and belief_value >= old_fsc_belief_value):
-            #     print("TRUE", end=" ")
-            # else:
-            #     print("FALSE", end=" ")
-            # print(belief, end=" ")
+            # uniform observations
+            if True:
+                for obs in obs_dict.keys():
+                    if obs in obs_dict_values.keys():
+                        continue
 
-    #         print(f"computed value: {round(belief_value,3) if belief_value is not None else None}\
-    # uniform support: {round(belief_value_uniform_support,3) if belief_value_uniform_support is not None else None}\
-    # uniform observation: {round(belief_value_uniform_observation,3) if belief_value_uniform_observation is not None else None}\
-    # max state: {round(belief_value_max_state,3) if belief_value_max_state is not None else None}\
-    # old fsc value: {round(old_fsc_belief_value,3) if old_fsc_belief_value is not None else None}")
-            
-            print(f"{round(belief_value,3) if belief_value is not None else None}\
- {round(belief_value_uniform_support,3) if belief_value_uniform_support is not None else None}\
- {round(belief_value_uniform_observation,3) if belief_value_uniform_observation is not None else None}\
- {round(belief_value_max_state,3) if belief_value_max_state is not None else None}\
- {round(old_fsc_belief_value,3) if old_fsc_belief_value is not None else None}")
+                    pomdp_quotient.specification.optimality.optimum = None
+
+                    obs_states = []
+                    for state in range(pomdp_quotient.pomdp.nr_states):
+                        if pomdp_quotient.pomdp.observations[state] == obs:
+                            obs_states.append(state)
+                    prob = 1/len(obs_states)
+                    obs_uniform_belief = {x:prob for x in obs_states}
+
+                    sub_pomdp_quotient = run_paynt_with_belief(sub_pomdp_builder, obs_uniform_belief, storm_control, timeout)
+                    state_sub_to_full = sub_pomdp_builder.state_sub_to_full
+
+                    export = storm_control.paynt_export
+
+                    export_full = []
+
+                    for x in export:
+                        one_memory = []
+                        for y in x:
+                            full_pomdp_values = {state_sub_to_full[x]:val for x, val in y.items()}
+                            one_memory.append(full_pomdp_values)
+                        export_full.append(one_memory)
+
+                    obs_dict_values[obs] = export_full
+
+                for belief_id, belief in beliefs.items():
+                    belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+                    # belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, None)
+                    belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, obs_dict_values[belief_obs])
+                    if belief_value is not None:
+                        print(belief_id, belief_value)
+                        belmc.set_value_in_exchange(belief_id, belief_value)
+
+            # uniform supports
+            if False:
+                pass
 
 
-    except Exception as e:
-        print(traceback.format_exc())
-        pass
+            iters += 1
+            if iters >= max_iters:
+                break
+
+
+    if True:
+        beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas)
+        beliefs = load_beliefs_from_file(belief_file)
+
+        print_beliefs_stats(beliefs, pomdp_quotient)
+
+        use_storm_control = True
+
+        try:
+
+            print("constructing pomdps")
+            for belief in list(beliefs.values())[:2]:
+
+                # if max(belief.values()) < 0.9:
+                #     continue
+                belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+
+                belief_value = None
+                belief_value_uniform_support = None
+                belief_value_uniform_observation = None
+                belief_value_max_state = None
+
+                belief_value = different_initial_belief_with_timeout(sub_pomdp_builder, specification, belief, use_storm_control, timeout)
+                belief_value_uniform_support = uniform_support_belief(sub_pomdp_builder, specification, belief, belief_obs, use_storm_control, timeout)
+                belief_value_uniform_observation = uniform_observation_belief(sub_pomdp_builder, specification, belief, belief_obs, pomdp_quotient, use_storm_control, timeout)
+                belief_value_max_state = max_state_belief(sub_pomdp_builder, specification, belief, use_storm_control, timeout)
+
+                # old_fsc_belief_value = compute_belief_value(belief, belief_obs, minimizing)
+
+                export = run_paynt_on_pomdp(pomdp_quotient, use_storm_control, timeout)
+                old_fsc_belief_value = compute_belief_value(belief, belief_obs, minimizing, export)
+
+                # if (minimizing and belief_value <= old_fsc_belief_value) or (not(minimizing) and belief_value >= old_fsc_belief_value):
+                #     print("TRUE", end=" ")
+                # else:
+                #     print("FALSE", end=" ")
+                # print(belief, end=" ")
+
+        #         print(f"computed value: {round(belief_value,3) if belief_value is not None else None}\
+        # uniform support: {round(belief_value_uniform_support,3) if belief_value_uniform_support is not None else None}\
+        # uniform observation: {round(belief_value_uniform_observation,3) if belief_value_uniform_observation is not None else None}\
+        # max state: {round(belief_value_max_state,3) if belief_value_max_state is not None else None}\
+        # old fsc value: {round(old_fsc_belief_value,3) if old_fsc_belief_value is not None else None}")
+                
+                print(f"{round(belief_value,3) if belief_value is not None else None}\
+    {round(belief_value_uniform_support,3) if belief_value_uniform_support is not None else None}\
+    {round(belief_value_uniform_observation,3) if belief_value_uniform_observation is not None else None}\
+    {round(belief_value_max_state,3) if belief_value_max_state is not None else None}\
+    {round(old_fsc_belief_value,3) if old_fsc_belief_value is not None else None}")
+
+
+        except Exception as e:
+            print(traceback.format_exc())
+            pass
 
 
 
     belmc.terminate_unfolding()
+    result = belmc.get_interactive_result()
+    value = result.upper_bound if pomdp_quotient.specification.optimality.minimizing else result.lower_bound
+    print(f"Storm value: {value}")
     storm_thread.join()
 

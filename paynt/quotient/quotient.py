@@ -63,7 +63,7 @@ class Quotient:
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
         '''
-        keep_unreachable_states = False # TODO investigate this
+        keep_unreachable_states = True # TODO investigate this
         all_states = stormpy.BitVector(mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
             mdp, all_states, choices, keep_unreachable_states, self.subsystem_builder_options

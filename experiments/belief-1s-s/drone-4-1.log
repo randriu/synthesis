@@ -1,0 +1,105 @@
+ WARN (FormulaParserGrammar.cpp:338): Identifier `R' coincides with a reserved keyword or operator. Property expressions using the variable or constant 'R' will not be parsed correctly.
+Finished exploring under-approximation MDP.
+Start analysis...
+starting Storm POMDP analysis
+Storm value: 0.8299050536595395
+===========================
+belief count: 1000
+max prob >0.5: 2 (0.2%)
+max prob >0.9: 0 (0.0%)
+Observations (overall count: 48 - count: 35): 33: 32 (3.2%), 12: 41 (4.1%), 96: 33 (3.3%), 66: 12 (1.2%), 47: 64 (6.4%), 21: 23 (2.3%), 70: 13 (1.3%), 46: 19 (1.9%), 93: 58 (5.8%), 14: 32 (3.2%), 31: 46 (4.6%), 57: 17 (1.7%), 58: 37 (3.7%), 49: 19 (1.9%), 61: 25 (2.5%), 56: 20 (2.0%), 48: 35 (3.5%), 77: 41 (4.1%), 81: 29 (2.9%), 29: 12 (1.2%), 94: 16 (1.6%), 84: 24 (2.4%), 54: 34 (3.4%), 80: 22 (2.2%), 91: 28 (2.8%), 20: 20 (2.0%), 50: 12 (1.2%), 60: 27 (2.7%), 3: 13 (1.3%), 0: 19 (1.9%), 2: 18 (1.8%), 17: 20 (2.0%), 1: 20 (2.0%), 4: 20 (2.0%), 44: 13 (1.3%), 
+Supports (overall count: 382 - count: 16): (451, 299, 214, 211, 36, 25, 77, 26, 78, 30, 31, 34, 574, 23, 81, 120, 285, 24, 111): 29 (2.9%), (576, 301, 99, 125, 216, 87, 287, 113, 88, 89, 86, 115, 94, 95, 93, 122): 45 (4.5%), (773, 497, 498, 511, 550, 992, 499, 530, 532, 539, 546, 583, 587, 768, 536, 594): 24 (2.4%), (998, 763, 578, 764, 474, 464, 233, 235, 251, 303, 252, 255, 307, 257, 289, 266, 234, 263, 292): 12 (1.2%), (988, 753, 288, 100, 126, 101, 102, 219, 103, 116, 220, 104, 117, 105, 454, 106, 107, 108): 12 (1.2%), (765, 230, 256, 308, 579, 231, 236, 238, 290, 253, 254, 989, 293, 258, 304, 476): 27 (2.7%), (580, 243, 244, 245, 246, 247, 260, 248, 250, 755, 262, 291, 990, 294, 259, 462): 15 (1.5%), (449, 297, 212, 209, 468, 4, 17, 5, 221, 18, 283, 109, 27, 572, 79, 2, 118, 3, 32, 73, 74): 28 (2.8%), (467, 756, 466, 991, 295, 269, 282, 270, 271, 272, 273, 767, 274, 275, 276, 277, 278, 279, 280): 15 (1.5%), (575, 761, 471, 300, 96, 98, 994, 124, 90, 91, 83, 286, 112, 85, 114, 92, 121, 224): 11 (1.1%), (723, 601, 432, 412, 319, 11, 141, 14, 8, 66, 183, 39, 57, 42, 129, 16, 132, 313, 197): 11 (1.1%), (469, 298, 210, 222, 19, 284, 110, 20, 33, 21, 35, 28, 573, 22, 80, 119, 29, 75, 76): 36 (3.6%), (725, 434, 414, 44, 46, 59, 48, 61, 50, 68, 185, 71, 136, 134, 315, 199): 11 (1.1%), (995, 775, 770, 515, 528, 541, 516, 517, 518, 519, 520, 521, 522, 523, 525, 527): 20 (2.0%), (1000, 871, 865, 860, 857, 853, 827, 806, 790, 819, 809, 810, 811, 812, 825, 793, 851, 788, 817): 15 (1.5%), (761, 471, 300, 575, 82, 96, 98, 124, 90, 91, 121, 92, 286, 83, 112, 85, 114, 224): 11 (1.1%), 
+===========================
+drone-4-1 1226 384 1000 0.2 0.0 48 35 382 16
+constructing pomdps
+None    None    None    None    0.648
+None    None    None    None    0.664
+None    None    None    None    0.87
+None    None    None    None    0.665
+None    None    None    None    0.825
+None    None    None    None    0.732
+None    None    None    None    0.737
+None    None    None    None    0.642
+None    None    None    None    0.664
+None    None    None    None    0.709
+None    None    None    None    0.65
+None    None    None    None    0.857
+None    None    None    None    0.736
+None    None    None    None    0.669
+None    None    None    None    0.918
+None    None    None    None    0.731
+None    None    None    None    0.73
+None    None    None    None    0.73
+None    None    None    None    0.855
+None    None    None    None    0.722
+None    None    None    None    0.706
+None    None    None    None    0.656
+None    None    None    None    0.641
+None    None    None    None    0.739
+None    None    None    None    0.644
+None    None    None    None    0.728
+None    None    None    None    0.655
+None    None    None    None    0.835
+None    None    None    None    0.684
+None    None    None    None    0.728
+None    None    None    None    0.999
+None    None    None    None    0.654
+None    None    None    None    0.648
+None    None    None    None    0.649
+None    None    None    None    0.647
+None    None    None    None    0.971
+None    None    None    None    0.665
+None    None    None    None    0.653
+None    None    None    None    0.722
+None    None    None    None    0.641
+None    None    None    None    0.655
+None    None    None    None    0.644
+None    None    None    None    0.66
+None    None    None    None    0.737
+None    None    None    None    0.651
+None    None    None    None    0.785
+None    None    None    None    0.812
+None    None    None    None    0.653
+None    None    None    None    0.725
+None    None    None    None    0.81
+None    None    None    None    0.652
+None    None    None    None    0.659
+None    None    None    None    0.653
+None    None    None    None    0.651
+None    None    None    None    0.722
+None    None    None    None    0.995
+None    None    None    None    0.643
+None    None    None    None    0.653
+None    None    None    None    0.663
+None    None    None    None    0.704
+None    None    None    None    0.648
+None    None    None    None    0.668
+None    None    None    None    0.647
+None    None    None    None    0.853
+None    None    None    None    0.69
+None    None    None    None    0.658
+None    None    None    None    0.916
+None    None    None    None    0.665
+None    None    None    None    0.737
+None    None    None    None    0.658
+None    None    None    None    0.738
+None    None    None    None    0.995
+None    None    None    None    0.909
+None    None    None    None    0.776
+None    None    None    None    0.646
+None    None    None    None    0.643
+None    None    None    None    0.657
+None    None    None    None    0.654
+None    None    None    None    0.64
+None    None    None    None    0.728
+None    None    None    None    0.651
+None    None    None    None    0.728
+None    None    None    None    0.645
+None    None    None    None    0.655
+None    None    None    None    0.647
+None    None    None    None    0.658
+None    None    None    None    0.73
+None    None    None    None    0.649
+None    None    None    None    0.999
+None    None    None    None    0.709
+None    None    None    None    0.723

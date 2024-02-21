@@ -1,0 +1,16 @@
+ WARN (FormulaParserGrammar.cpp:341): Identifier `T' coincides with a reserved keyword or operator. Property expressions using the variable or constant 'T' might not be parsed correctly.
+ WARN (FormulaParserGrammar.cpp:341): Identifier `T' coincides with a reserved keyword or operator. Property expressions using the variable or constant 'T' might not be parsed correctly.
+ WARN (FormulaParserGrammar.cpp:341): Identifier `T' coincides with a reserved keyword or operator. Property expressions using the variable or constant 'T' might not be parsed correctly.
+ WARN (FormulaParserGrammar.cpp:341): Identifier `T' coincides with a reserved keyword or operator. Property expressions using the variable or constant 'T' might not be parsed correctly.
+Finished exploring under-approximation MDP.
+Start analysis...
+starting Storm POMDP analysis
+===========================
+belief count: 25523
+max prob >0.5: 0 (0.0%)
+max prob >0.9: 0 (0.0%)
+Observations (overall count: 16 - count: 15): 1766: 267 (1.05%), 1312: 320 (1.25%), 739: 310 (1.21%), 1951: 371 (1.45%), 844: 415 (1.63%), 1860: 350 (1.37%), 162: 301 (1.18%), 1212: 358 (1.4%), 204: 10915 (42.77%), 1546: 3232 (12.66%), 798: 3211 (12.58%), 1467: 727 (2.85%), 1614: 3219 (12.61%), 2157: 740 (2.9%), 856: 735 (2.88%), 
+Supports (overall count: 40 - count: 8): (1685, 1683, 1680, 1691, 1678, 1676, 1688, 1675): 272 (1.07%), (1618, 1617, 1616, 1615, 1614, 1613, 1612, 1611): 10915 (42.77%), (1642, 1641, 1640, 1639, 1638, 1637, 1636, 1635): 3232 (12.66%), (1634, 1633, 1632, 1631, 1630, 1629, 1628, 1627): 3211 (12.58%), (1666, 1665, 1664, 1663, 1662, 1661, 1660, 1659): 727 (2.85%), (1626, 1625, 1624, 1623, 1622, 1621, 1620, 1619): 3219 (12.61%), (1658, 1657, 1656, 1655, 1654, 1653, 1652, 1651): 740 (2.9%), (1650, 1649, 1648, 1647, 1646, 1645, 1644, 1643): 735 (2.88%), 
+===========================
+network-3-8-20 17253 2205 25523 0.0 0.0 16 15 40 8
+Storm POMDP analysis completed

@@ -1,0 +1,16 @@
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+Finished exploring under-approximation MDP.
+Start analysis...
+starting Storm POMDP analysis
+===========================
+belief count: 475459
+max prob >0.5: 164653 (34.63%)
+max prob >0.9: 10511 (2.21%)
+Observations (overall count: 8 - count: 8): 7: 39938 (8.4%), 6: 39848 (8.38%), 5: 39934 (8.4%), 1: 76124 (16.01%), 4: 40010 (8.42%), 3: 39848 (8.38%), 2: 39880 (8.39%), 0: 159877 (33.63%), 
+Supports (overall count: 851 - count: 3): (103, 95, 94, 4, 30, 5, 70, 13, 78, 14, 22, 38, 104, 46, 141, 112, 54, 55, 86): 23220 (4.88%), (103, 95, 94, 4, 30, 5, 70, 13, 78, 14, 22, 38, 104, 46, 112, 54, 55, 86): 8932 (1.88%), (103, 95, 94, 149, 4, 30, 5, 70, 13, 78, 14, 22, 38, 104, 46, 141, 112, 54, 55, 86): 26774 (5.63%), 
+===========================
+milos-aaai97 165 11 475459 34.63 2.21 8 8 851 3
+Storm POMDP analysis completed

@@ -62,8 +62,8 @@ class StormPOMDPControl:
         pass
 
     def set_options(self,
-        storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-        unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+        storm_options="cutoff", get_storm_result=None, iterative_storm=None, use_storm_cutoffs=False,
+        unfold_strategy_storm="storm", prune_storm=False, export_fsc_storm=None, export_fsc_paynt=None
     ):
         self.storm_options = storm_options
         if get_storm_result is not None:
