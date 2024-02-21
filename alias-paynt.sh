@@ -35,6 +35,11 @@ source prerequisites/venv/bin/activate
 python3 paynt.py --project models/cassandra/decpomdp/ --sketch basic.dpomdp --pomdp-memory-size 2
 )'
 
+alias runb2='(
+source prerequisites/venv/bin/activate
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch basic2.dpomdp --pomdp-memory-size 2
+)'
+
 alias rund='(
 source prerequisites/venv/bin/activate
 python3 paynt.py --project models/cassandra/decpomdp/ --sketch dectiger.dpomdp --profiling --pomdp-memory-size 2

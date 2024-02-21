@@ -1,0 +1,42 @@
+agents: 2 
+#
+discount: 0.75
+#
+values: reward
+#
+states: left middle right goal
+#  
+start: 
+uniform
+#
+actions: 
+a
+w0 e0
+#
+observations: 
+o
+nothing goal
+#
+T : a w0 : left : left : 1.0
+T : a w0 : middle : left : 1.0
+T : a w0 : right : goal : 1.0
+#
+T : a w0 : goal : left : 0.333333
+T : a w0 : goal : middle : 0.333333
+T : a w0 : goal : right : 0.333334
+#
+T : a e0 : left : middle : 1.0
+T : a e0 : middle : goal : 1.0
+T : a e0 : right : right : 1.0
+#
+T : a e0 : goal : left : 0.333334
+T : a e0 : goal : middle : 0.333333
+T : a e0 : goal : right : 0.333333
+#
+O : a * : left : o nothing : 1.0
+O : a * : middle : o nothing : 1.0
+O : a * : right : o nothing : 1.0
+O : a * : goal : o goal : 1.0
+#
+R: * *: * : goal : o goal : 1.0
+#R: a a: s2 : * : * : 1

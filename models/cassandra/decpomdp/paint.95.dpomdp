@@ -1,0 +1,79 @@
+agents: 2 
+#
+discount: 0.95
+#
+values: reward
+#
+states: NFL-NBL-NPA NFL-NBL-PA FL-NBL-PA FL-BL-NPA
+#  
+start:
+0.5 0.0 0.0 0.5
+#
+actions: 
+a
+paint inspect ship reject
+#
+observations: 
+o
+NBL BL
+#
+T: a paint : NFL-NBL-NPA : NFL-NBL-NPA : 0.1
+#
+T: a paint : NFL-NBL-NPA : NFL-NBL-PA : 0.9
+#
+T: a paint :NFL-NBL-PA : NFL-NBL-PA : 1.0
+#
+T: a paint : FL-NBL-PA : FL-NBL-PA : 1.0
+#
+T: a paint : FL-BL-NPA : FL-NBL-PA : 0.9
+#
+T: a paint :FL-BL-NPA : FL-BL-NPA : 0.1
+#
+T: a inspect :
+identity
+#
+T: a reject : * :
+0.5 0.0 0.0 0.5
+#
+T: a ship : * :
+0.5 0.0 0.0 0.5
+#
+O: a paint : * : o NBL : 1.0
+#
+O: a inspect : NFL-NBL-NPA : o NBL : 0.75
+#
+O: a inspect : NFL-NBL-NPA : o BL : 0.25
+#
+O: a inspect : NFL-NBL-PA : o NBL : 0.75
+#
+O: a inspect : NFL-NBL-PA : o BL : 0.25
+#
+O: a inspect : FL-NBL-PA : o NBL : 0.75
+#
+O: a inspect : FL-NBL-PA : o BL : 0.25
+#
+O: a inspect : FL-BL-NPA : o NBL : 0.25
+#
+O: a inspect : FL-BL-NPA : o BL : 0.75
+#
+O: a ship : * : o NBL : 1.0
+#
+O: a reject : * : o NBL : 1.0
+#
+#O : a b : s2 : o o1 : 1.0
+#
+R: a ship : NFL-NBL-PA : * : * : 1.0
+#
+R: a reject : FL-BL-NPA : * : * : 1.0
+#
+# I added these when things didn't work out.
+#
+R: a ship : NFL-NBL-NPA : * : * : -1.0
+#
+R: a reject : NFL-NBL-NPA : * : * : -1.0
+#
+R: a reject : NFL-NBL-PA : * : * : -1.0
+#
+R: a ship : FL-NBL-PA : * : * : -1.0
+#
+R: a ship : FL-BL-NPA : * : * : -1.0
