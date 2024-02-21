@@ -82,3 +82,8 @@ source prerequisites/venv/bin/activate
 python3 paynt.py --project models/cassandra/pomdp/ --sketch 4x3.95.pomdp
 )'
 
+alias exp='(
+source prerequisites/venv/bin/activate
+python3 experiments.py
+)'
+
