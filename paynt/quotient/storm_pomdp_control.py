@@ -86,6 +86,21 @@ class StormPOMDPControl:
         elif unfold_strategy_storm == "cutoff":
             self.unfold_cutoff = True
 
+    # create copy of the storm control with the same settings
+    def copy(self):
+        copy_storm_control = StormPOMDPControl()
+        copy_storm_control.storm_options = self.storm_options
+        copy_storm_control.use_cutoffs = self.use_cutoffs
+        copy_storm_control.unfold_strategy_storm = self.unfold_strategy_storm
+        copy_storm_control.incomplete_exploration = self.incomplete_exploration
+        copy_storm_control.unfold_storm = self.unfold_storm
+        copy_storm_control.unfold_cutoff = self.unfold_cutoff
+        copy_storm_control.unfold_storm = self.unfold_storm
+        copy_storm_control.unfold_cutoff = self.unfold_cutoff
+
+        return copy_storm_control
+
+
     def get_storm_result(self):
         self.run_storm_analysis()
         self.parse_results(self.quotient)

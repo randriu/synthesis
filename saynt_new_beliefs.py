@@ -293,12 +293,25 @@ def print_beliefs_stats(beliefs, pomdp_quotient, print_stats=True):
     prob09_count = 0
     count = 0
 
+    total_obs_belief_dict = {}
+
     for belief in beliefs.values():
         belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
         if belief_obs not in obs_dict.keys():
             obs_dict[belief_obs] = 1
         else:
             obs_dict[belief_obs] += 1
+
+        if belief_obs not in total_obs_belief_dict.keys():
+            total_obs_belief_dict[belief_obs] = {}
+            for state, probability in belief.items():
+                total_obs_belief_dict[belief_obs][state] = probability
+        else:
+            for state, probability in belief.items():
+                if state not in total_obs_belief_dict[belief_obs].keys():
+                    total_obs_belief_dict[belief_obs][state] = probability
+                else:
+                    total_obs_belief_dict[belief_obs][state] += probability
 
         support = tuple(list(belief.keys()))
         if support not in support_dict.keys():
@@ -315,6 +328,14 @@ def print_beliefs_stats(beliefs, pomdp_quotient, print_stats=True):
         # count += 1
         # if count >= 200:
         #     break
+
+    average_obs_belief_dict = {}
+            
+    for obs, total_dict in total_obs_belief_dict.items():
+        total_value = sum(list(total_dict.values()))
+        average_obs_belief_dict[obs] = {}
+        for state, state_total_val in total_dict.items():
+            average_obs_belief_dict[obs][state] = state_total_val / total_value
 
     if print_stats:
         print("===========================")
@@ -335,7 +356,7 @@ def print_beliefs_stats(beliefs, pomdp_quotient, print_stats=True):
 
         print(f"{model} {pomdp_quotient.pomdp.nr_states} {pomdp_quotient.observations} {len(beliefs)} {round(prob05_count*100/len(beliefs), 2)} {round(prob09_count*100/len(beliefs), 2)} {len(obs_dict)} {len(obs_strings)} {len(support_dict)} {len(support_strings)}")
 
-    return obs_dict, support_dict
+    return obs_dict, support_dict, average_obs_belief_dict
 
 
 if __name__ == "__main__":
@@ -370,11 +391,13 @@ if __name__ == "__main__":
     main_storm_control.quotient = pomdp_quotient
 
     sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(pomdp_quotient.pomdp)
-    timeout = 1
+    timeout = 5
 
     obs_dict_values = {}
 
-    if False:
+    average_obs_dict_values = {}
+
+    if True:
         iters = 0
         max_iters = 3
         while True:
@@ -384,12 +407,10 @@ if __name__ == "__main__":
             else:
                 beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas, False)
 
-            obs_dict, support_dict = print_beliefs_stats(beliefs, pomdp_quotient, False)
-
-            storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
+            obs_dict, support_dict, average_obs_dict = print_beliefs_stats(beliefs, pomdp_quotient, False)
 
             # uniform observations
-            if True:
+            if False:
                 for obs in obs_dict.keys():
                     if obs in obs_dict_values.keys():
                         continue
@@ -403,10 +424,8 @@ if __name__ == "__main__":
                     prob = 1/len(obs_states)
                     obs_uniform_belief = {x:prob for x in obs_states}
 
-                    sub_pomdp_quotient = run_paynt_with_belief(sub_pomdp_builder, obs_uniform_belief, storm_control, timeout)
+                    sub_pomdp_quotient, export = run_paynt_with_belief(sub_pomdp_builder, specification, obs_uniform_belief, False, timeout)
                     state_sub_to_full = sub_pomdp_builder.state_sub_to_full
-
-                    export = storm_control.paynt_export
 
                     export_full = []
 
@@ -424,28 +443,55 @@ if __name__ == "__main__":
                     # belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, None)
                     belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, obs_dict_values[belief_obs])
                     if belief_value is not None:
-                        print(belief_id, belief_value)
                         belmc.set_value_in_exchange(belief_id, belief_value)
 
             # uniform supports
             if False:
                 pass
 
+            # average obs beliefs
+            if True:
+                for obs, obs_belief in average_obs_dict.items():
+                    if obs in average_obs_dict_values.keys():
+                        continue
+
+                    sub_pomdp_quotient, export = run_paynt_with_belief(sub_pomdp_builder, specification, obs_belief, False, timeout)
+                    state_sub_to_full = sub_pomdp_builder.state_sub_to_full
+
+                    export_full = []
+
+                    for x in export:
+                        one_memory = []
+                        for y in x:
+                            full_pomdp_values = {state_sub_to_full[x]:val for x, val in y.items()}
+                            one_memory.append(full_pomdp_values)
+                        export_full.append(one_memory)
+
+                    average_obs_dict_values[obs] = export_full
+
+                for belief_id, belief in beliefs.items():
+                    belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+                    # belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, None)
+                    belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, average_obs_dict_values[belief_obs])
+                    if belief_value is not None:
+                        belmc.set_value_in_exchange(belief_id, belief_value)
 
             iters += 1
             if iters >= max_iters:
                 break
 
 
-    if True:
+    if False:
         beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas)
-        beliefs = load_beliefs_from_file(belief_file)
+        # beliefs = load_beliefs_from_file(belief_file)
 
         print_beliefs_stats(beliefs, pomdp_quotient)
 
-        use_storm_control = True
+        use_storm_control = False
 
         try:
+
+            print_beliefs_stats(beliefs, pomdp_quotient)
 
             print("constructing pomdps")
             for belief in list(beliefs.values())[:2]:
