@@ -138,7 +138,7 @@ class SynthesizerARStorm(Synthesizer):
                     self.stat.synthesis_timer.stop()
                     # check for the signal that PAYNT can be resumed or terminated
                     while self.s_queue.empty():
-                        sleep(1)
+                        sleep(0.1)
                     status = self.s_queue.get()
                     if status == "resume":
                         logger.info("Resuming synthesis")

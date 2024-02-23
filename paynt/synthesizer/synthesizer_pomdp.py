@@ -181,6 +181,7 @@ class SynthesizerPOMDP:
             self.synthesizer.main_family = main_family
 
             assignment = self.synthesize(family)
+            logger.info(f"Terminate: {self.synthesis_terminate}")
 
             if assignment is not None:
                 self.storm_control.latest_paynt_result = assignment
@@ -190,6 +191,7 @@ class SynthesizerPOMDP:
 
             self.storm_control.update_data()
 
+            logger.info(f"Terminate: {self.synthesis_terminate}")
             if self.synthesis_terminate:
                 break
 
@@ -267,7 +269,7 @@ class SynthesizerPOMDP:
             if time.time() > iteration_timeout:
                 break
 
-            time.sleep(1)
+            time.sleep(0.1)
 
         self.interactive_queue.put("pause")
         self.interactive_queue.put("terminate")

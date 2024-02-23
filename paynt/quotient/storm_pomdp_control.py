@@ -257,7 +257,7 @@ class StormPOMDPControl:
         while not belmc.is_exploring():
             if belmc.has_converged():
                 break
-            sleep(1)
+            sleep(0.01)
 
         sleep(storm_timeout)
         if self.storm_terminated:

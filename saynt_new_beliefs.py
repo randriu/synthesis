@@ -75,6 +75,21 @@ def run_paynt_with_belief(sub_pomdp_builder, specification, initial_belief, use_
     return sub_pomdp_quotient, storm_control.paynt_export
 
 
+def create_synthesizer_for_belief(sub_pomdp_builder, specification, initial_belief):
+    sub_pomdp = sub_pomdp_builder.start_from_belief(initial_belief)
+    sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, specification.copy())
+
+    storm_control = main_storm_control.copy()
+
+    synthesizer = paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(sub_pomdp_quotient, "ar", storm_control)
+
+    paynt_thread = Thread(target=synthesizer.strategy_iterative_storm, args=(True, False))
+    interactive_queue = Queue()
+    synthesizer.synthesizer.s_queue = interactive_queue
+
+    return synthesizer, paynt_thread, sub_pomdp_builder.state_sub_to_full
+
+
 def run_paynt_on_pomdp(pomdp_quotient, use_storm_control=False, timeout=1):
     if use_storm_control:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
@@ -203,6 +218,7 @@ def max_state_belief(sub_pomdp_builder, specification, belief, use_storm_control
 
 def compute_belief_value(belief, obs, minimizing, fsc_values=None):
     if fsc_values is None:
+        return None
         if model == "network":
             fsc_values = [[{9: 204.0452641165161, 10: 254.451094669461, 11: 308.7802481177184, 12: 354.99816900056464, 14: 367.08271559132925, 16: 349.89462108887227}, {9: 216.90956400740205, 10: 263.9864682247423, 11: 312.1450947479491, 12: 350.37924485395683, 14: 357.9535757328584, 16: 335.014529533564}, {9: 231.2657147022061, 10: 278.54630727825656, 11: 317.94374488155256, 12: 332.8314954043184, 14: 335.6739344430485, 16: 294.99835162868743}], [{8: 179.69193608885138, 13: 179.69193608885138, 15: 179.69193608885138, 17: 179.69193608885138}, {8: 150.69669142837122, 13: 322.41420733754455, 15: 335.70833569784685, 17: 334.42549463624437}, {8: 123.15105173412988, 13: 354.99816900056464, 15: 367.08271559132925, 17: 349.89462108887227}], [{0: 280.3315563645335}], [{}, {}, {1: 204.0452641165161, 2: 254.451094669461, 3: 308.7802481177184, 4: 354.99816900056464, 5: 367.08271559132925, 6: 349.89462108887227, 7: 123.15105173412988}], [{18: 0.0}]]
         elif model == "drone-4-1":
@@ -246,7 +262,7 @@ def storm_generate_beliefs(pomdp_quotient, spec_formulas, start=True):
         storm_thread.start()
 
         while not belmc.is_exploring():
-            sleep(0.1)
+            sleep(0.02)
     else:
         belmc.continue_unfolding()
 
@@ -283,6 +299,22 @@ def load_beliefs_from_file(file):
             beliefs[len(beliefs)] = belief
     
     return beliefs
+
+def update_belief_value(value, obs, best_value, best_obs, minimizing):
+    if best_value is None:
+        return value, obs
+
+    if value is None:
+        return best_value, best_obs
+    
+    if minimizing:
+        if value < best_value:
+            return value, obs
+    else:
+        if value > best_value:
+            return value, obs
+    
+    return best_value, best_obs
 
 
 def print_beliefs_stats(beliefs, pomdp_quotient, print_stats=True):
@@ -391,9 +423,10 @@ if __name__ == "__main__":
     main_storm_control.quotient = pomdp_quotient
 
     sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(pomdp_quotient.pomdp)
-    timeout = 5
+    timeout = 3
 
     obs_dict_values = {}
+    obs_dict_control = {}
 
     average_obs_dict_values = {}
 
@@ -406,6 +439,16 @@ if __name__ == "__main__":
                 beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas)
             else:
                 beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas, False)
+
+            if iters >= max_iters:
+                for obs, control in obs_dict_control.items():
+                    control[0].synthesis_terminate = True
+                    control[0].synthesizer.s_queue.put("terminate")
+                    while not control[0].synthesizer.s_queue.empty():
+                        control[0].synthesis_terminate = True
+                        sleep(0.02)
+                    control[1].join()
+                break
 
             obs_dict, support_dict, average_obs_dict = print_beliefs_stats(beliefs, pomdp_quotient, False)
 
@@ -450,7 +493,7 @@ if __name__ == "__main__":
                 pass
 
             # average obs beliefs
-            if True:
+            if False:
                 for obs, obs_belief in average_obs_dict.items():
                     if obs in average_obs_dict_values.keys():
                         continue
@@ -476,9 +519,82 @@ if __name__ == "__main__":
                     if belief_value is not None:
                         belmc.set_value_in_exchange(belief_id, belief_value)
 
+
+            # iterative uniform observations
+            if True:
+                for obs in obs_dict.keys():
+                    if obs in obs_dict_control.keys():
+                        obs_dict_control[obs][0].synthesizer.s_queue.put("resume")
+                        while not obs_dict_control[obs][0].synthesizer.s_queue.empty():
+                            sleep(0.02)
+                        sleep(timeout)
+                        obs_dict_control[obs][0].synthesizer.s_queue.put("timeout")
+                        while not obs_dict_control[obs][0].synthesizer.s_queue.empty():
+                            sleep(0.02)
+
+                        export = obs_dict_control[obs][0].storm_control.paynt_export
+                    else:
+
+                        pomdp_quotient.specification.optimality.optimum = None
+
+                        obs_states = []
+                        for state in range(pomdp_quotient.pomdp.nr_states):
+                            if pomdp_quotient.pomdp.observations[state] == obs:
+                                obs_states.append(state)
+                        prob = 1/len(obs_states)
+                        obs_uniform_belief = {x:prob for x in obs_states}
+
+                        belief_synthesizer, belief_thread, belief_sub_to_full = create_synthesizer_for_belief(sub_pomdp_builder, specification, obs_uniform_belief)
+
+                        obs_dict_control[obs] = [belief_synthesizer, belief_thread, belief_sub_to_full, obs_uniform_belief, []]
+
+                        obs_dict_control[obs][1].start()
+                        sleep(timeout)
+                        obs_dict_control[obs][0].synthesizer.s_queue.put("timeout")
+                        while not obs_dict_control[obs][0].synthesizer.s_queue.empty():
+                            sleep(0.02)
+
+                        export = obs_dict_control[obs][0].storm_control.paynt_export
+
+                    export_full = []
+
+                    for x in export:
+                        one_memory = []
+                        for y in x:
+                            full_pomdp_values = {obs_dict_control[obs][2][x]:val for x, val in y.items()}
+                            one_memory.append(full_pomdp_values)
+                        export_full.append(one_memory)
+
+                    obs_dict_control[obs][-1] = export_full
+
+                maps = {obs:obs_dict_control[obs][2] for obs in obs_dict_control.keys()}
+
+                exports = {obs:obs_dict_control[obs][-1] for obs in obs_dict_control.keys()}
+
+                set_beliefs = 0
+                for belief_id, belief in beliefs.items():
+                    best_value = None
+                    best_export = None
+                    belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+                    for obs, export in exports.items():
+                        # belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, None)
+                        belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, export)
+                        best_value, best_export = update_belief_value(belief_value, obs, best_value, best_export, pomdp_quotient.specification.optimality.minimizing)
+                    # if best_export != belief_obs:
+                    #     print(f"FSC from other observation is better for belief: {belief}")
+                    if best_value is not None:
+                        set_beliefs += 1
+                        belmc.set_value_in_exchange(belief_id, best_value)
+
+                print(f"belief values set: {set_beliefs}/{len(beliefs)}")
+
             iters += 1
-            if iters >= max_iters:
-                break
+            # if iters >= max_iters:
+            #     for obs, control in obs_dict_control.items():
+            #         control[0].synthesis_terminate = True
+            #         control[0].synthesizer.s_queue.put("terminate")
+            #         control[1].join()
+            #     break
 
 
     if False:
