@@ -444,7 +444,7 @@ namespace synthesis {
                 row_index++;
             }
         } 
-        std::cout << "action_rewards " << action_rewards<< std::endl;
+        // std::cout << "action_rewards " << action_rewards<< std::endl;
         return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
     }
 
@@ -1000,13 +1000,13 @@ namespace synthesis {
                 }
             }
 
-            std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
-            std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; 
+            // std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
+            // std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; 
             // std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; 
             // std::cout << "this->row_action_option " << this->row_action_option << std::endl; 
 
 
-            std::cout << "this->discount_sink_state " << this->discount_sink_state << std::endl; 
+            // std::cout << "this->discount_sink_state " << this->discount_sink_state << std::endl; 
         
     }
 

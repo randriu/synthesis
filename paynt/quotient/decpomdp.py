@@ -15,14 +15,14 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
         # self.initial_memory_size = 1;
-        print("self.initial_memory_size",self.initial_memory_size)
+        # print("self.initial_memory_size",self.initial_memory_size)
 
         assert decpomdp_manager.num_agents > 1
 
         self.decpomdp_manager = decpomdp_manager
 
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        print("self.agent_observation_labels",self.agent_observation_labels)
+        # print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
         # print("self.agent_action_labels",self.agent_action_labels)
@@ -39,7 +39,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-        print("self.joint_observations",self.joint_observations)
+        # print("self.joint_observations",self.joint_observations)
 
         self.row_joint_action = decpomdp_manager.row_joint_action
         # print("self.row_joint_action",self.row_joint_action)
@@ -142,7 +142,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        print("transition matrix: ", self.quotient_mdp.transition_matrix)
+        # print("transition matrix: ", self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         
@@ -232,7 +232,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                         name = self.create_hole_name(agent,obs,mem,True)
                         all_holes.add_hole(name,option_labels)
                         self.is_action_hole.append(True)
-                    print("a self.agent_observation_labels[agent][obs]",self.agent_observation_labels[agent][obs])
+                    # print("a self.agent_observation_labels[agent][obs]",self.agent_observation_labels[agent][obs])
                 self.observation_action_holes.append(hole_indices)
 
                 # memory holes
@@ -264,8 +264,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             choice_to_hole_options.append(hole_options)
         # logger.info(f"choice_to_hole_options is: {choice_to_hole_options}")
         # logger.info(f"pm.row_action_hole is: {pm.row_action_hole}")
-        print("pm.num_holes",pm.num_holes)
-        print("all_holes",all_holes)
-        print("choice_to_hole_options",choice_to_hole_options)
+        # print("pm.num_holes",pm.num_holes)
+        # print("all_holes",all_holes)
+        # print("choice_to_hole_options",choice_to_hole_options)
 
         return all_holes, choice_to_hole_options

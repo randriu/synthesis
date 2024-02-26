@@ -1,6 +1,8 @@
-# This is a Dec-POMDP (.dpomdp) file for the Prisoner's dilemma.
+# This is a Dec-POMDP (.dpomdp) file for the Dec-Tiger problem.
 # For more detailed documentation, see test.dpomdp in the parser subdirectory 
 # (src/parser).
+
+# Allright, here we go!
 #
 #The agents. 
 #----------
@@ -10,12 +12,12 @@
 #   agents: agent1_name, name-of-agent2, ... 
 agents: 2 
 #   discount: %f 
-discount: 0.95 
+discount: 0.9
 #.0
 #   values: [ reward, cost ] 
 values: reward
 #   states: [ %d, <list of states> ] 
-states: NULL_STATE
+states: s_small s_large     
 #
 #Examples of this are:
 #   start: 0.3 0.1 0.0 0.2 0.5
@@ -37,8 +39,8 @@ uniform
 #   ...
 #   [ %d, <list of actions> ] 
 actions: 
-StaySilent Betray
-StaySilent Betray
+observe attack
+observe attack
 #the (number/list of) observations for each of the agents on a separate line
 #   observations: 
 #   [ %d, <list of observations> ]
@@ -46,8 +48,8 @@ StaySilent Betray
 #   ...
 #   [ %d, <list of observations> ]
 observations: 
-O_StaySilent O_Betray
-O_StaySilent O_Betray
+o_small o_large
+o_small o_large
 #Transition probabilities
 #   T: <a1 a2...an> : <start-state> : <end-state> : %f
 #or
@@ -64,6 +66,8 @@ O_StaySilent O_Betray
 #   [ identity, uniform ]
 T: * :
 uniform
+T: observe observe :
+identity 
 #Observation probabilities
 #    O: <a1 a2...an> : <end-state> : <o1 o2 ... om> : %f
 #or
@@ -75,12 +79,16 @@ uniform
 #    %f %f ... %f	    ... 
 #    ...		    ...
 #    %f %f ... %f	    P(jo_1|ja,s_k') ... P(jo_x|ja,s_k') 
-#O: * :
-#uniform
-O: StaySilent StaySilent : * : O_StaySilent O_StaySilent : 1.0
-O: StaySilent Betray : * : O_StaySilent O_Betray : 1.0
-O: Betray StaySilent : * : O_Betray O_StaySilent : 1.0
-O: Betray Betray : * : O_Betray O_Betray : 1.0
+O: * :
+uniform
+O: observe observe : s_small : o_small o_small : 0.7225
+O: observe observe : s_small : o_small o_large : 0.1275
+O: observe observe : s_small : o_large o_small : 0.1275
+O: observe observe : s_small : o_large o_large : 0.0225
+O: observe observe : s_large : o_large o_large : 0.7225
+O: observe observe : s_large : o_small o_large : 0.1275
+O: observe observe : s_large : o_large o_small : 0.1275
+O: observe observe : s_large : o_small o_small : 0.0225
 #The rewards
 #or
 #    R: <a1 a2...an> : <start-state> : <end-state> :
@@ -94,7 +102,8 @@ O: Betray Betray : * : O_Betray O_Betray : 1.0
 #
 #Typical problems only use R(s,ja) which is specified by:
 #   R: <a1 a2...an> : <start-state> : * : * : %f
-R: StaySilent StaySilent : * : * : * : -1
-R: StaySilent Betray : * : * : * : -10 
-R: Betray StaySilent : * : * : * : 0 
-R: Betray Betray : * : * : * : -5
+R: observe observe: * : * : * : -1
+R: attack attack : s_small : * : * : +5
+R: attack attack : s_large : * : * : -20
+R: attack observe: * : * : * : -10
+R: observe attack: * : * : * : -10

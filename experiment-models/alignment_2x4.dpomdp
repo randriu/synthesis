@@ -1,0 +1,357 @@
+#2x4 Robot Alignment
+#From Kraemer & Banerjee, AAMAS 2013
+#Created by Landon Kraemer, 2013
+#In this particular version of the alignment problem 
+#transitions (except for reset) are deterministic, and there 
+#is no noise added to the observations
+#Also, it is assumed that agent1 always emits IR when turning.
+
+agents: 2
+discount: 0.9
+values: reward
+#Agent 1's heading space is discretized into 2 slices, say S1
+#Agent 2's heading space is discretized into 4 slices, say S2
+#The state space is S1 x S2, i.e. the set of all joint headings
+#a0b0 represents the state in which agents are aligned (facing each other)
+states: a0b0 a0b1 a0b2 a0b3 a1b0 a1b1 a1b2 a1b3 
+start:
+0.125 0.125 0.125 0.125 0.125 0.125 0.125 0.125 
+actions:
+done noop emit-IR turn-left-IR
+done noop emit-IR turn-left
+observations:
+no-IR IR
+no-IR IR
+T: * * : * : * : 0
+T: noop noop : a0b0 : a0b0 : 1
+T: noop emit-IR : a0b0 : a0b0 : 1
+T: noop turn-left : a0b0 : a0b3 : 1
+T: emit-IR noop : a0b0 : a0b0 : 1
+T: emit-IR emit-IR : a0b0 : a0b0 : 1
+T: emit-IR turn-left : a0b0 : a0b3 : 1
+T: turn-left-IR noop : a0b0 : a1b0 : 1
+T: turn-left-IR emit-IR : a0b0 : a1b0 : 1
+T: turn-left-IR turn-left : a0b0 : a1b3 : 1
+T: noop noop : a0b1 : a0b1 : 1
+T: noop emit-IR : a0b1 : a0b1 : 1
+T: noop turn-left : a0b1 : a0b0 : 1
+T: emit-IR noop : a0b1 : a0b1 : 1
+T: emit-IR emit-IR : a0b1 : a0b1 : 1
+T: emit-IR turn-left : a0b1 : a0b0 : 1
+T: turn-left-IR noop : a0b1 : a1b1 : 1
+T: turn-left-IR emit-IR : a0b1 : a1b1 : 1
+T: turn-left-IR turn-left : a0b1 : a1b0 : 1
+T: noop noop : a0b2 : a0b2 : 1
+T: noop emit-IR : a0b2 : a0b2 : 1
+T: noop turn-left : a0b2 : a0b1 : 1
+T: emit-IR noop : a0b2 : a0b2 : 1
+T: emit-IR emit-IR : a0b2 : a0b2 : 1
+T: emit-IR turn-left : a0b2 : a0b1 : 1
+T: turn-left-IR noop : a0b2 : a1b2 : 1
+T: turn-left-IR emit-IR : a0b2 : a1b2 : 1
+T: turn-left-IR turn-left : a0b2 : a1b1 : 1
+T: noop noop : a0b3 : a0b3 : 1
+T: noop emit-IR : a0b3 : a0b3 : 1
+T: noop turn-left : a0b3 : a0b2 : 1
+T: emit-IR noop : a0b3 : a0b3 : 1
+T: emit-IR emit-IR : a0b3 : a0b3 : 1
+T: emit-IR turn-left : a0b3 : a0b2 : 1
+T: turn-left-IR noop : a0b3 : a1b3 : 1
+T: turn-left-IR emit-IR : a0b3 : a1b3 : 1
+T: turn-left-IR turn-left : a0b3 : a1b2 : 1
+T: noop noop : a1b0 : a1b0 : 1
+T: noop emit-IR : a1b0 : a1b0 : 1
+T: noop turn-left : a1b0 : a1b3 : 1
+T: emit-IR noop : a1b0 : a1b0 : 1
+T: emit-IR emit-IR : a1b0 : a1b0 : 1
+T: emit-IR turn-left : a1b0 : a1b3 : 1
+T: turn-left-IR noop : a1b0 : a0b0 : 1
+T: turn-left-IR emit-IR : a1b0 : a0b0 : 1
+T: turn-left-IR turn-left : a1b0 : a0b3 : 1
+T: noop noop : a1b1 : a1b1 : 1
+T: noop emit-IR : a1b1 : a1b1 : 1
+T: noop turn-left : a1b1 : a1b0 : 1
+T: emit-IR noop : a1b1 : a1b1 : 1
+T: emit-IR emit-IR : a1b1 : a1b1 : 1
+T: emit-IR turn-left : a1b1 : a1b0 : 1
+T: turn-left-IR noop : a1b1 : a0b1 : 1
+T: turn-left-IR emit-IR : a1b1 : a0b1 : 1
+T: turn-left-IR turn-left : a1b1 : a0b0 : 1
+T: noop noop : a1b2 : a1b2 : 1
+T: noop emit-IR : a1b2 : a1b2 : 1
+T: noop turn-left : a1b2 : a1b1 : 1
+T: emit-IR noop : a1b2 : a1b2 : 1
+T: emit-IR emit-IR : a1b2 : a1b2 : 1
+T: emit-IR turn-left : a1b2 : a1b1 : 1
+T: turn-left-IR noop : a1b2 : a0b2 : 1
+T: turn-left-IR emit-IR : a1b2 : a0b2 : 1
+T: turn-left-IR turn-left : a1b2 : a0b1 : 1
+T: noop noop : a1b3 : a1b3 : 1
+T: noop emit-IR : a1b3 : a1b3 : 1
+T: noop turn-left : a1b3 : a1b2 : 1
+T: emit-IR noop : a1b3 : a1b3 : 1
+T: emit-IR emit-IR : a1b3 : a1b3 : 1
+T: emit-IR turn-left : a1b3 : a1b2 : 1
+T: turn-left-IR noop : a1b3 : a0b3 : 1
+T: turn-left-IR emit-IR : a1b3 : a0b3 : 1
+T: turn-left-IR turn-left : a1b3 : a0b2 : 1
+T: done * :
+ uniform
+T: * done :
+ uniform
+O: done done : a0b0 : no-IR no-IR : 1
+O: done done : a0b1 : no-IR no-IR : 1
+O: done done : a0b2 : no-IR no-IR : 1
+O: done done : a0b3 : no-IR no-IR : 1
+O: done done : a1b0 : no-IR no-IR : 1
+O: done done : a1b1 : no-IR no-IR : 1
+O: done done : a1b2 : no-IR no-IR : 1
+O: done done : a1b3 : no-IR no-IR : 1
+O: done noop : a0b0 : no-IR no-IR : 1
+O: done noop : a0b1 : no-IR no-IR : 1
+O: done noop : a0b2 : no-IR no-IR : 1
+O: done noop : a0b3 : no-IR no-IR : 1
+O: done noop : a1b0 : no-IR no-IR : 1
+O: done noop : a1b1 : no-IR no-IR : 1
+O: done noop : a1b2 : no-IR no-IR : 1
+O: done noop : a1b3 : no-IR no-IR : 1
+O: done emit-IR : a0b0 : IR no-IR : 1
+O: done emit-IR : a0b1 : no-IR no-IR : 1
+O: done emit-IR : a0b2 : no-IR no-IR : 1
+O: done emit-IR : a0b3 : no-IR no-IR : 1
+O: done emit-IR : a1b0 : no-IR no-IR : 1
+O: done emit-IR : a1b1 : no-IR no-IR : 1
+O: done emit-IR : a1b2 : no-IR no-IR : 1
+O: done emit-IR : a1b3 : no-IR no-IR : 1
+O: done turn-left : a0b0 : no-IR no-IR : 1
+O: done turn-left : a0b1 : no-IR no-IR : 1
+O: done turn-left : a0b2 : no-IR no-IR : 1
+O: done turn-left : a0b3 : no-IR no-IR : 1
+O: done turn-left : a1b0 : no-IR no-IR : 1
+O: done turn-left : a1b1 : no-IR no-IR : 1
+O: done turn-left : a1b2 : no-IR no-IR : 1
+O: done turn-left : a1b3 : no-IR no-IR : 1
+O: noop done : a0b0 : no-IR no-IR : 1
+O: noop done : a0b1 : no-IR no-IR : 1
+O: noop done : a0b2 : no-IR no-IR : 1
+O: noop done : a0b3 : no-IR no-IR : 1
+O: noop done : a1b0 : no-IR no-IR : 1
+O: noop done : a1b1 : no-IR no-IR : 1
+O: noop done : a1b2 : no-IR no-IR : 1
+O: noop done : a1b3 : no-IR no-IR : 1
+O: noop noop : a0b0 : no-IR no-IR : 1
+O: noop noop : a0b1 : no-IR no-IR : 1
+O: noop noop : a0b2 : no-IR no-IR : 1
+O: noop noop : a0b3 : no-IR no-IR : 1
+O: noop noop : a1b0 : no-IR no-IR : 1
+O: noop noop : a1b1 : no-IR no-IR : 1
+O: noop noop : a1b2 : no-IR no-IR : 1
+O: noop noop : a1b3 : no-IR no-IR : 1
+O: noop emit-IR : a0b0 : IR no-IR : 1
+O: noop emit-IR : a0b1 : no-IR no-IR : 1
+O: noop emit-IR : a0b2 : no-IR no-IR : 1
+O: noop emit-IR : a0b3 : no-IR no-IR : 1
+O: noop emit-IR : a1b0 : no-IR no-IR : 1
+O: noop emit-IR : a1b1 : no-IR no-IR : 1
+O: noop emit-IR : a1b2 : no-IR no-IR : 1
+O: noop emit-IR : a1b3 : no-IR no-IR : 1
+O: noop turn-left : a0b0 : no-IR no-IR : 1
+O: noop turn-left : a0b1 : no-IR no-IR : 1
+O: noop turn-left : a0b2 : no-IR no-IR : 1
+O: noop turn-left : a0b3 : no-IR no-IR : 1
+O: noop turn-left : a1b0 : no-IR no-IR : 1
+O: noop turn-left : a1b1 : no-IR no-IR : 1
+O: noop turn-left : a1b2 : no-IR no-IR : 1
+O: noop turn-left : a1b3 : no-IR no-IR : 1
+O: emit-IR done : a0b0 : no-IR IR : 1
+O: emit-IR done : a0b1 : no-IR no-IR : 1
+O: emit-IR done : a0b2 : no-IR no-IR : 1
+O: emit-IR done : a0b3 : no-IR no-IR : 1
+O: emit-IR done : a1b0 : no-IR no-IR : 1
+O: emit-IR done : a1b1 : no-IR no-IR : 1
+O: emit-IR done : a1b2 : no-IR no-IR : 1
+O: emit-IR done : a1b3 : no-IR no-IR : 1
+O: emit-IR noop : a0b0 : no-IR IR : 1
+O: emit-IR noop : a0b1 : no-IR no-IR : 1
+O: emit-IR noop : a0b2 : no-IR no-IR : 1
+O: emit-IR noop : a0b3 : no-IR no-IR : 1
+O: emit-IR noop : a1b0 : no-IR no-IR : 1
+O: emit-IR noop : a1b1 : no-IR no-IR : 1
+O: emit-IR noop : a1b2 : no-IR no-IR : 1
+O: emit-IR noop : a1b3 : no-IR no-IR : 1
+O: emit-IR emit-IR : a0b0 : no-IR no-IR : 1
+O: emit-IR emit-IR : a0b1 : no-IR no-IR : 1
+O: emit-IR emit-IR : a0b2 : no-IR no-IR : 1
+O: emit-IR emit-IR : a0b3 : no-IR no-IR : 1
+O: emit-IR emit-IR : a1b0 : no-IR no-IR : 1
+O: emit-IR emit-IR : a1b1 : no-IR no-IR : 1
+O: emit-IR emit-IR : a1b2 : no-IR no-IR : 1
+O: emit-IR emit-IR : a1b3 : no-IR no-IR : 1
+O: emit-IR turn-left : a0b0 : no-IR IR : 1
+O: emit-IR turn-left : a0b1 : no-IR no-IR : 1
+O: emit-IR turn-left : a0b2 : no-IR no-IR : 1
+O: emit-IR turn-left : a0b3 : no-IR no-IR : 1
+O: emit-IR turn-left : a1b0 : no-IR no-IR : 1
+O: emit-IR turn-left : a1b1 : no-IR no-IR : 1
+O: emit-IR turn-left : a1b2 : no-IR no-IR : 1
+O: emit-IR turn-left : a1b3 : no-IR no-IR : 1
+O: turn-left-IR done : a0b0 : no-IR IR : 1
+O: turn-left-IR done : a0b1 : no-IR no-IR : 1
+O: turn-left-IR done : a0b2 : no-IR no-IR : 1
+O: turn-left-IR done : a0b3 : no-IR no-IR : 1
+O: turn-left-IR done : a1b0 : no-IR no-IR : 1
+O: turn-left-IR done : a1b1 : no-IR no-IR : 1
+O: turn-left-IR done : a1b2 : no-IR no-IR : 1
+O: turn-left-IR done : a1b3 : no-IR no-IR : 1
+O: turn-left-IR noop : a0b0 : no-IR IR : 1
+O: turn-left-IR noop : a0b1 : no-IR no-IR : 1
+O: turn-left-IR noop : a0b2 : no-IR no-IR : 1
+O: turn-left-IR noop : a0b3 : no-IR no-IR : 1
+O: turn-left-IR noop : a1b0 : no-IR no-IR : 1
+O: turn-left-IR noop : a1b1 : no-IR no-IR : 1
+O: turn-left-IR noop : a1b2 : no-IR no-IR : 1
+O: turn-left-IR noop : a1b3 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a0b0 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a0b1 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a0b2 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a0b3 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a1b0 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a1b1 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a1b2 : no-IR no-IR : 1
+O: turn-left-IR emit-IR : a1b3 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a0b0 : no-IR IR : 1
+O: turn-left-IR turn-left : a0b1 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a0b2 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a0b3 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a1b0 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a1b1 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a1b2 : no-IR no-IR : 1
+O: turn-left-IR turn-left : a1b3 : no-IR no-IR : 1
+R: done done : a0b0 : * : * : 100
+R: done done : a0b1 : * : * : -100
+R: done done : a0b2 : * : * : -100
+R: done done : a0b3 : * : * : -100
+R: done done : a1b0 : * : * : -100
+R: done done : a1b1 : * : * : -100
+R: done done : a1b2 : * : * : -100
+R: done done : a1b3 : * : * : -100
+R: done noop : a0b0 : * : * : -100
+R: done noop : a0b1 : * : * : -100
+R: done noop : a0b2 : * : * : -100
+R: done noop : a0b3 : * : * : -100
+R: done noop : a1b0 : * : * : -100
+R: done noop : a1b1 : * : * : -100
+R: done noop : a1b2 : * : * : -100
+R: done noop : a1b3 : * : * : -100
+R: done emit-IR : a0b0 : * : * : -100
+R: done emit-IR : a0b1 : * : * : -100
+R: done emit-IR : a0b2 : * : * : -100
+R: done emit-IR : a0b3 : * : * : -100
+R: done emit-IR : a1b0 : * : * : -100
+R: done emit-IR : a1b1 : * : * : -100
+R: done emit-IR : a1b2 : * : * : -100
+R: done emit-IR : a1b3 : * : * : -100
+R: done turn-left : a0b0 : * : * : -100
+R: done turn-left : a0b1 : * : * : -100
+R: done turn-left : a0b2 : * : * : -100
+R: done turn-left : a0b3 : * : * : -100
+R: done turn-left : a1b0 : * : * : -100
+R: done turn-left : a1b1 : * : * : -100
+R: done turn-left : a1b2 : * : * : -100
+R: done turn-left : a1b3 : * : * : -100
+R: noop done : a0b0 : * : * : -100
+R: noop done : a0b1 : * : * : -100
+R: noop done : a0b2 : * : * : -100
+R: noop done : a0b3 : * : * : -100
+R: noop done : a1b0 : * : * : -100
+R: noop done : a1b1 : * : * : -100
+R: noop done : a1b2 : * : * : -100
+R: noop done : a1b3 : * : * : -100
+R: noop noop : a0b0 : * : * : -1
+R: noop noop : a0b1 : * : * : -1
+R: noop noop : a0b2 : * : * : -1
+R: noop noop : a0b3 : * : * : -1
+R: noop noop : a1b0 : * : * : -1
+R: noop noop : a1b1 : * : * : -1
+R: noop noop : a1b2 : * : * : -1
+R: noop noop : a1b3 : * : * : -1
+R: noop emit-IR : a0b0 : * : * : -1
+R: noop emit-IR : a0b1 : * : * : -1
+R: noop emit-IR : a0b2 : * : * : -1
+R: noop emit-IR : a0b3 : * : * : -1
+R: noop emit-IR : a1b0 : * : * : -1
+R: noop emit-IR : a1b1 : * : * : -1
+R: noop emit-IR : a1b2 : * : * : -1
+R: noop emit-IR : a1b3 : * : * : -1
+R: noop turn-left : a0b0 : * : * : -1
+R: noop turn-left : a0b1 : * : * : -1
+R: noop turn-left : a0b2 : * : * : -1
+R: noop turn-left : a0b3 : * : * : -1
+R: noop turn-left : a1b0 : * : * : -1
+R: noop turn-left : a1b1 : * : * : -1
+R: noop turn-left : a1b2 : * : * : -1
+R: noop turn-left : a1b3 : * : * : -1
+R: emit-IR done : a0b0 : * : * : -100
+R: emit-IR done : a0b1 : * : * : -100
+R: emit-IR done : a0b2 : * : * : -100
+R: emit-IR done : a0b3 : * : * : -100
+R: emit-IR done : a1b0 : * : * : -100
+R: emit-IR done : a1b1 : * : * : -100
+R: emit-IR done : a1b2 : * : * : -100
+R: emit-IR done : a1b3 : * : * : -100
+R: emit-IR noop : a0b0 : * : * : -1
+R: emit-IR noop : a0b1 : * : * : -1
+R: emit-IR noop : a0b2 : * : * : -1
+R: emit-IR noop : a0b3 : * : * : -1
+R: emit-IR noop : a1b0 : * : * : -1
+R: emit-IR noop : a1b1 : * : * : -1
+R: emit-IR noop : a1b2 : * : * : -1
+R: emit-IR noop : a1b3 : * : * : -1
+R: emit-IR emit-IR : a0b0 : * : * : -1
+R: emit-IR emit-IR : a0b1 : * : * : -1
+R: emit-IR emit-IR : a0b2 : * : * : -1
+R: emit-IR emit-IR : a0b3 : * : * : -1
+R: emit-IR emit-IR : a1b0 : * : * : -1
+R: emit-IR emit-IR : a1b1 : * : * : -1
+R: emit-IR emit-IR : a1b2 : * : * : -1
+R: emit-IR emit-IR : a1b3 : * : * : -1
+R: emit-IR turn-left : a0b0 : * : * : -1
+R: emit-IR turn-left : a0b1 : * : * : -1
+R: emit-IR turn-left : a0b2 : * : * : -1
+R: emit-IR turn-left : a0b3 : * : * : -1
+R: emit-IR turn-left : a1b0 : * : * : -1
+R: emit-IR turn-left : a1b1 : * : * : -1
+R: emit-IR turn-left : a1b2 : * : * : -1
+R: emit-IR turn-left : a1b3 : * : * : -1
+R: turn-left-IR done : a0b0 : * : * : -100
+R: turn-left-IR done : a0b1 : * : * : -100
+R: turn-left-IR done : a0b2 : * : * : -100
+R: turn-left-IR done : a0b3 : * : * : -100
+R: turn-left-IR done : a1b0 : * : * : -100
+R: turn-left-IR done : a1b1 : * : * : -100
+R: turn-left-IR done : a1b2 : * : * : -100
+R: turn-left-IR done : a1b3 : * : * : -100
+R: turn-left-IR noop : a0b0 : * : * : -1
+R: turn-left-IR noop : a0b1 : * : * : -1
+R: turn-left-IR noop : a0b2 : * : * : -1
+R: turn-left-IR noop : a0b3 : * : * : -1
+R: turn-left-IR noop : a1b0 : * : * : -1
+R: turn-left-IR noop : a1b1 : * : * : -1
+R: turn-left-IR noop : a1b2 : * : * : -1
+R: turn-left-IR noop : a1b3 : * : * : -1
+R: turn-left-IR emit-IR : a0b0 : * : * : -1
+R: turn-left-IR emit-IR : a0b1 : * : * : -1
+R: turn-left-IR emit-IR : a0b2 : * : * : -1
+R: turn-left-IR emit-IR : a0b3 : * : * : -1
+R: turn-left-IR emit-IR : a1b0 : * : * : -1
+R: turn-left-IR emit-IR : a1b1 : * : * : -1
+R: turn-left-IR emit-IR : a1b2 : * : * : -1
+R: turn-left-IR emit-IR : a1b3 : * : * : -1
+R: turn-left-IR turn-left : a0b0 : * : * : -1
+R: turn-left-IR turn-left : a0b1 : * : * : -1
+R: turn-left-IR turn-left : a0b2 : * : * : -1
+R: turn-left-IR turn-left : a0b3 : * : * : -1
+R: turn-left-IR turn-left : a1b0 : * : * : -1
+R: turn-left-IR turn-left : a1b1 : * : * : -1
+R: turn-left-IR turn-left : a1b2 : * : * : -1
+R: turn-left-IR turn-left : a1b3 : * : * : -1
