@@ -437,6 +437,7 @@ if __name__ == "__main__":
 
             if iters == 0:
                 beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas)
+                belief_explorer = belmc.get_interactive_belief_explorer()
             else:
                 beliefs = storm_generate_beliefs(pomdp_quotient, spec_formulas, False)
 
@@ -546,7 +547,7 @@ if __name__ == "__main__":
 
                         belief_synthesizer, belief_thread, belief_sub_to_full = create_synthesizer_for_belief(sub_pomdp_builder, specification, obs_uniform_belief)
 
-                        obs_dict_control[obs] = [belief_synthesizer, belief_thread, belief_sub_to_full, obs_uniform_belief, []]
+                        obs_dict_control[obs] = [belief_synthesizer, belief_thread, belief_sub_to_full, obs_uniform_belief, [], False]
 
                         obs_dict_control[obs][1].start()
                         sleep(timeout)
@@ -565,28 +566,37 @@ if __name__ == "__main__":
                             one_memory.append(full_pomdp_values)
                         export_full.append(one_memory)
 
-                    obs_dict_control[obs][-1] = export_full
+                    obs_dict_control[obs][-2] = export_full
 
                 maps = {obs:obs_dict_control[obs][2] for obs in obs_dict_control.keys()}
 
-                exports = {obs:obs_dict_control[obs][-1] for obs in obs_dict_control.keys()}
+                exports = {obs:obs_dict_control[obs][-2] for obs in obs_dict_control.keys()}
 
-                set_beliefs = 0
-                for belief_id, belief in beliefs.items():
-                    best_value = None
-                    best_export = None
-                    belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
-                    for obs, export in exports.items():
-                        # belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, None)
-                        belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, export)
-                        best_value, best_export = update_belief_value(belief_value, obs, best_value, best_export, pomdp_quotient.specification.optimality.minimizing)
-                    # if best_export != belief_obs:
-                    #     print(f"FSC from other observation is better for belief: {belief}")
-                    if best_value is not None:
-                        set_beliefs += 1
-                        belmc.set_value_in_exchange(belief_id, best_value)
+                for index, (obs, export) in enumerate(exports.items()):
+                    if obs_dict_control[obs][-1]:
+                        belief_explorer.set_fsc_values(export, index)
+                    else:
+                        obs_dict_control[obs][-1] = True
+                        belief_explorer.add_fsc_values(export)
 
-                print(f"belief values set: {set_beliefs}/{len(beliefs)}")
+                # set_beliefs = 0
+                # for belief_id, belief in beliefs.items():
+                #     best_value = None
+                #     best_export = None
+                #     belief_obs = pomdp_quotient.pomdp.get_observation(list(belief.keys())[0])
+                #     for obs, export in exports.items():
+                #         # belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, None)
+                #         if obs >= len(export):
+                #             print(obs, export)
+                #         belief_value = compute_belief_value(belief, belief_obs, pomdp_quotient.specification.optimality.minimizing, export)
+                #         best_value, best_export = update_belief_value(belief_value, obs, best_value, best_export, pomdp_quotient.specification.optimality.minimizing)
+                #     # if best_export != belief_obs:
+                #     #     print(f"FSC from other observation is better for belief: {belief}")
+                #     if best_value is not None:
+                #         set_beliefs += 1
+                #         belmc.set_value_in_exchange(belief_id, best_value)
+
+                # print(f"belief values set: {set_beliefs}/{len(beliefs)}")
 
             iters += 1
             # if iters >= max_iters:

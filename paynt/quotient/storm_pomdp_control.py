@@ -1,6 +1,7 @@
 import stormpy
 import stormpy.pomdp
 import payntbind
+import paynt.quotient.pomdp
 
 from ..quotient.models import MarkovChain
 from ..utils.profiler import Timer
@@ -9,6 +10,8 @@ from os import makedirs
 
 from threading import Thread
 from time import sleep
+
+from queue import Queue
 
 import logging
 logger = logging.getLogger(__name__)
@@ -49,6 +52,8 @@ class StormPOMDPControl:
     iteration_timeout = None
     paynt_timeout = None
     storm_timeout = None
+    enhanced_saynt = None
+    enhanced_saynt_threads = []
 
     storm_terminated = False
 
@@ -58,12 +63,14 @@ class StormPOMDPControl:
     export_fsc_storm = None
     export_fsc_paynt = None
 
+    belief_threads_info = []
+
     def __init__(self):
         pass
 
     def set_options(self,
         storm_options="cutoff", get_storm_result=None, iterative_storm=None, use_storm_cutoffs=False,
-        unfold_strategy_storm="storm", prune_storm=False, export_fsc_storm=None, export_fsc_paynt=None
+        unfold_strategy_storm="storm", prune_storm=False, export_fsc_storm=None, export_fsc_paynt=None, enhanced_saynt=None
     ):
         self.storm_options = storm_options
         if get_storm_result is not None:
@@ -74,6 +81,7 @@ class StormPOMDPControl:
         self.unfold_strategy_storm = unfold_strategy_storm
         self.export_fsc_storm = export_fsc_storm
         self.export_fsc_paynt = export_fsc_paynt
+        self.enhanced_saynt = enhanced_saynt
 
         self.incomplete_exploration = False
         if prune_storm:
@@ -183,9 +191,9 @@ class StormPOMDPControl:
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
     # start interactive belief model checker, this function is called only once to start the storm thread. To resume Storm computation 'interactive_storm_resume' is used
-    def interactive_storm_start(self, storm_timeout):
+    def interactive_storm_start(self, storm_timeout, enhanced=False):
         self.storm_thread = Thread(target=self.interactive_run, args=(belmc,))
-        control_thread = Thread(target=self.interactive_control, args=(belmc, True, storm_timeout,))
+        control_thread = Thread(target=self.interactive_control, args=(belmc, True, storm_timeout, enhanced))
 
         logger.info("Interactive Storm started")
         control_thread.start()
@@ -241,7 +249,7 @@ class StormPOMDPControl:
         logger.info("Storm POMDP analysis completed")
 
     # ensures correct execution of one loop of Storm exploration
-    def interactive_control(self, belmc, start, storm_timeout):
+    def interactive_control(self, belmc, start, storm_timeout, enhanced=False):
         if belmc.has_converged():
             logger.info("Storm already terminated.")
             return
@@ -249,8 +257,7 @@ class StormPOMDPControl:
         # Update cut-off FSC values provided by PAYNT
         if not start:
             logger.info("Updating FSC values in Storm")
-            print(f"Current FSC values: {self.paynt_export}")
-            self.belief_explorer.set_fsc_values(self.paynt_export)
+            self.belief_explorer.set_fsc_values(self.paynt_export, 0)
             belmc.continue_unfolding()
 
         # wait for Storm to start exploring
@@ -263,13 +270,20 @@ class StormPOMDPControl:
         if self.storm_terminated:
             return
         logger.info("Pausing Storm")
-        belmc.pause_unfolding()
+        if enhanced:
+            belmc.pause_unfolding_for_cut_off_values()
+        else:
+            belmc.pause_unfolding()
 
         # wait for the result to be constructed from the explored belief MDP
         while not belmc.is_result_ready():
             sleep(1)
 
         result = belmc.get_interactive_result()
+
+        if enhanced:
+            beliefs = belmc.get_beliefs_from_exchange()
+            self.parse_belief_data(beliefs)
 
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
         size = self.get_belief_controller_size(result, self.paynt_fsc_size)
@@ -375,6 +389,45 @@ class StormPOMDPControl:
 
         return result
     
+
+
+    def create_thread_control(self, index, belief_type, obs_option=0):
+        if belief_type == "obs":
+            if obs_option == 0:
+                obs_states = []
+                for state in range(self.quotient.pomdp.nr_states):
+                    if self.quotient.pomdp.observations[state] == index:
+                        obs_states.append(state)
+                prob = 1/len(obs_states)
+                initial_belief = {x:prob for x in obs_states}
+            else:
+                initial_belief = self.average_belief_data[index]
+        elif belief_type == "sup":
+            states = list(index)
+            prob = 1/len(states)
+            initial_belief = {x:prob for x in states}
+        else:
+            assert False, "wrong belief type"
+
+        sub_pomdp = self.sub_pomdp_builder.start_from_belief(initial_belief)
+        sub_pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(sub_pomdp, self.quotient.specification.copy())
+
+        sub_pomdp_storm_control = self.copy()
+
+        sub_pomdp_synthesizer = paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(sub_pomdp_quotient, "ar", sub_pomdp_storm_control)
+
+        sub_pomdp_thread = Thread(target=sub_pomdp_synthesizer.strategy_iterative_storm, args=(True, False))
+        sub_pomdp_interactive_queue = Queue()
+        sub_pomdp_synthesizer.synthesizer.s_queue = sub_pomdp_interactive_queue
+
+        sub_pomdp_states_to_full = self.sub_pomdp_builder.state_sub_to_full
+
+        belief_thread_data = [sub_pomdp_synthesizer, sub_pomdp_thread, sub_pomdp_states_to_full]
+
+        self.enhanced_saynt_threads.append(belief_thread_data)
+
+
+    
     # parse the current Storm and PAYNT results if they are available
     def parse_results(self, quotient):
         if self.latest_storm_result is not None:
@@ -443,7 +496,7 @@ class StormPOMDPControl:
                         
             # parse cut-off states
             else:
-                if 'finite_mem' in state.labels and not finite_mem:
+                if 'finite_mem_0' in state.labels and not finite_mem:
                     finite_mem = True
                     self.parse_paynt_result(self.quotient)
                     for obs, actions in self.result_dict_paynt.items():
@@ -488,7 +541,61 @@ class StormPOMDPControl:
                 del result_no_cutoffs[obs]
 
         self.result_dict = result    
-        self.result_dict_no_cutoffs = result_no_cutoffs       
+        self.result_dict_no_cutoffs = result_no_cutoffs
+
+
+    def parse_belief_data(self, beliefs):
+        obs_dict = {}
+        support_dict = {}
+        total_obs_belief_dict = {}
+
+        for belief in beliefs.values():
+            belief_obs = self.quotient.pomdp.get_observation(list(belief.keys())[0])
+            if belief_obs not in obs_dict.keys():
+                obs_dict[belief_obs] = 1
+            else:
+                obs_dict[belief_obs] += 1
+
+            if belief_obs not in total_obs_belief_dict.keys():
+                total_obs_belief_dict[belief_obs] = {}
+                for state, probability in belief.items():
+                    total_obs_belief_dict[belief_obs][state] = probability
+            else:
+                for state, probability in belief.items():
+                    if state not in total_obs_belief_dict[belief_obs].keys():
+                        total_obs_belief_dict[belief_obs][state] = probability
+                    else:
+                        total_obs_belief_dict[belief_obs][state] += probability
+
+            support = tuple(list(belief.keys()))
+            if support not in support_dict.keys():
+                support_dict[support] = 1
+            else:
+                support_dict[support] += 1
+
+        average_obs_belief_dict = {}
+            
+        for obs, total_dict in total_obs_belief_dict.items():
+            total_value = sum(list(total_dict.values()))
+            average_obs_belief_dict[obs] = {}
+            for state, state_total_val in total_dict.items():
+                average_obs_belief_dict[obs][state] = state_total_val / total_value
+
+        percent_1 = round(len(beliefs)/100)
+
+        sorted_obs = sorted(obs_dict, key=obs_dict.get)
+        sorted_support = sorted(support_dict, key=support_dict.get)
+
+        main_observation_list = [obs for obs in sorted_obs if obs_dict[obs] > percent_1]
+        main_support_list = [sup for sup in sorted_support if support_dict[sup] > percent_1]
+
+        residue_observation_list = [obs for obs in sorted_obs if obs not in main_observation_list]
+        residue_support_list = [sup for sup in sorted_support if sup not in main_support_list]
+
+        self.main_obs_belief_data = main_observation_list
+        self.main_support_belief_data = main_support_list
+        self.residue_obs_belief_data = residue_observation_list
+        self.average_belief_data = average_obs_belief_dict
             
 
     # help function for cut-off parsing, returns list of actions for given choice_string

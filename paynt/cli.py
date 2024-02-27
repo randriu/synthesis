@@ -28,7 +28,7 @@ def setup_logger(log_path = None):
     # root.setLevel(logging.INFO)
 
     # disable all logging
-    logging.disable(logging.CRITICAL)
+    # logging.disable(logging.CRITICAL)
 
     # formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
     formatter = logging.Formatter('%(asctime)s - %(filename)s - %(message)s')
@@ -108,6 +108,8 @@ def setup_logger(log_path = None):
     type=click.Choice(["storm", "paynt", "cutoff"]),
     show_default=True,
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
+@click.option("--enhanced-saynt", default=None, type=int,
+    help="run SAYNT with FSCs for non-initial beliefs. 0 - for dynamic number of different beliefs, N > 0 - set number of different beliefs")
 
 @click.option("--export-fsc-storm", type=click.Path(), default=None,
     help="path to output file for SAYNT belief FSC")
@@ -148,7 +150,7 @@ def paynt_run(
     incomplete_search, disable_expected_visits,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
-    use_storm_cutoffs, unfold_strategy_storm,
+    use_storm_cutoffs, unfold_strategy_storm, enhanced_saynt,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
@@ -179,7 +181,7 @@ def paynt_run(
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, enhanced_saynt
         )
 
     sketch_path = os.path.join(project, sketch)
