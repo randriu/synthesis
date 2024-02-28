@@ -52,8 +52,11 @@ class StormPOMDPControl:
     iteration_timeout = None
     paynt_timeout = None
     storm_timeout = None
+
     enhanced_saynt = None
     enhanced_saynt_threads = []
+    belief_threads_info = []
+    storm_fsc_usage = {}
 
     storm_terminated = False
 
@@ -63,7 +66,6 @@ class StormPOMDPControl:
     export_fsc_storm = None
     export_fsc_paynt = None
 
-    belief_threads_info = []
 
     def __init__(self):
         pass
@@ -105,6 +107,7 @@ class StormPOMDPControl:
         copy_storm_control.unfold_cutoff = self.unfold_cutoff
         copy_storm_control.unfold_storm = self.unfold_storm
         copy_storm_control.unfold_cutoff = self.unfold_cutoff
+        copy_storm_control.iteration_timeout = self.iteration_timeout
 
         return copy_storm_control
 
@@ -415,10 +418,9 @@ class StormPOMDPControl:
         sub_pomdp_storm_control = self.copy()
 
         sub_pomdp_synthesizer = paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(sub_pomdp_quotient, "ar", sub_pomdp_storm_control)
+        sub_pomdp_synthesizer.main_synthesizer = False
 
         sub_pomdp_thread = Thread(target=sub_pomdp_synthesizer.strategy_iterative_storm, args=(True, False))
-        sub_pomdp_interactive_queue = Queue()
-        sub_pomdp_synthesizer.synthesizer.s_queue = sub_pomdp_interactive_queue
 
         sub_pomdp_states_to_full = self.sub_pomdp_builder.state_sub_to_full
 
@@ -451,6 +453,8 @@ class StormPOMDPControl:
 
         result = {x:[] for x in range(quotient.observations)}
         result_no_cutoffs = {x:[] for x in range(quotient.observations)}
+
+        self.storm_fsc_usage = {}
         
         for state in self.latest_storm_result.induced_mc_from_scheduler.states:
             # TODO what if there were no labels in the model?
@@ -496,6 +500,13 @@ class StormPOMDPControl:
                         
             # parse cut-off states
             else:
+                for label in state.labels:
+                    if 'finite_mem' in label:
+                        fsc_index = label.split('_')[-1]
+                        if fsc_index not in self.storm_fsc_usage.keys():
+                            self.storm_fsc_usage[fsc_index] = 1
+                        else:
+                            self.storm_fsc_usage[fsc_index] += 1
                 if 'finite_mem_0' in state.labels and not finite_mem:
                     finite_mem = True
                     self.parse_paynt_result(self.quotient)

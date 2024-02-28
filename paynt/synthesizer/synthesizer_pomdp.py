@@ -78,6 +78,9 @@ class SynthesizerPOMDP:
             self.synthesizer = SynthesizerHybrid
         self.total_iters = 0
 
+        self.storm_control = None
+        self.main_synthesizer = True
+
         if storm_control is not None:
             self.use_storm = True
             self.storm_control = storm_control
@@ -88,13 +91,16 @@ class SynthesizerPOMDP:
             self.synthesizer = SynthesizerARStorm       # SAYNT only works with abstraction refinement
             if self.storm_control.iteration_timeout is not None:
                 self.saynt_timer = Timer()
-                self.synthesizer.saynt_timer = self.saynt_timer
+                self.interactive_queue = Queue()
                 self.storm_control.saynt_timer = self.saynt_timer
             if self.storm_control.enhanced_saynt is not None:
                 self.storm_control.sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(self.quotient.pomdp)
 
-    def synthesize(self, family, print_stats=False):
-        synthesizer = self.synthesizer(self.quotient)
+    def synthesize(self, family, print_stats=False, main_family=None, subfamilies=None):
+        if self.storm_control is not None:
+            synthesizer = self.synthesizer(self.quotient, subfamilies_buffer=subfamilies, main_family=main_family, storm_control=self.storm_control, s_queue=self.interactive_queue, saynt_timer=self.saynt_timer, main_thread=self.main_synthesizer)
+        else:
+            synthesizer = self.synthesizer(self.quotient)
         family.constraint_indices = self.quotient.design_space.constraint_indices
         assignment = synthesizer.synthesize(family, keep_optimum=True, print_stats=print_stats)
         if synthesizer.stat.iterations_mdp is not None:
@@ -107,8 +113,6 @@ class SynthesizerPOMDP:
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
         mem_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size
-
-        self.synthesizer.storm_control = self.storm_control
 
         while True:
         # for x in range(2):
@@ -180,10 +184,7 @@ class SynthesizerPOMDP:
                 main_family = family
                 subfamilies = []
 
-            self.synthesizer.subfamilies_buffer = subfamilies
-            self.synthesizer.main_family = main_family
-
-            assignment = self.synthesize(family)
+            assignment = self.synthesize(family, subfamilies=subfamilies, main_family=main_family)
 
             if assignment is not None:
                 self.storm_control.latest_paynt_result = assignment
@@ -203,8 +204,6 @@ class SynthesizerPOMDP:
 
     # main SAYNT loop
     def iterative_storm_loop(self, timeout, paynt_timeout, storm_timeout, iteration_limit=0):
-        self.interactive_queue = Queue()
-        self.synthesizer.s_queue = self.interactive_queue
         self.storm_control.interactive_storm_setup()
         iteration = 1
         paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, self.storm_control.unfold_storm))
@@ -262,8 +261,6 @@ class SynthesizerPOMDP:
 
     # enhanced SAYNT loop
     def enhanced_iterative_storm_loop(self, timeout, paynt_timeout, storm_timeout, number_of_beliefs=0, iteration_limit=0):
-        self.interactive_queue = Queue()
-        self.synthesizer.s_queue = self.interactive_queue
         self.storm_control.interactive_storm_setup()
         iteration = 1
         paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, self.storm_control.unfold_storm))
@@ -280,11 +277,11 @@ class SynthesizerPOMDP:
                 self.interactive_queue.put("timeout")
 
                 while not self.interactive_queue.empty():
-                    time.sleep(0.1)
+                    time.sleep(0.5)
             elif iteration == 2:
                 if number_of_beliefs == 0:
-                    beliefs_remaining == 9
-                    number_of_beliefs = 10
+                    beliefs_remaining = len(self.storm_control.main_obs_belief_data)
+                    number_of_beliefs = beliefs_remaining + 1
                 else:
                     beliefs_remaining = number_of_beliefs - 1
                 if beliefs_remaining != 0:
@@ -299,20 +296,21 @@ class SynthesizerPOMDP:
                             break
 
                 logger.info(f"{len(self.storm_control.enhanced_saynt_threads)} threads for enhanced SAYNT created")
+                logger.info(f"new synthesis time per thread: {paynt_timeout/number_of_beliefs}s")
                 
                 self.interactive_queue.put("resume")
                 time.sleep(paynt_timeout/number_of_beliefs)
                 self.interactive_queue.put("timeout")
 
                 while not self.interactive_queue.empty():
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                 for belief_thread in self.storm_control.enhanced_saynt_threads:
                     belief_thread[1].start()
                     time.sleep(paynt_timeout/number_of_beliefs)
-                    belief_thread[0].synthesizer.s_queue.put("timeout")
-                    while not belief_thread[0].synthesizer.s_queue.empty():
-                        time.sleep(0.1)
+                    belief_thread[0].interactive_queue.put("timeout")
+                    while not belief_thread[0].interactive_queue.empty():
+                        time.sleep(0.5)
 
                     export_full = []
                     for mem_export in belief_thread[0].storm_control.paynt_export:
@@ -329,14 +327,14 @@ class SynthesizerPOMDP:
                 self.interactive_queue.put("timeout")
 
                 while not self.interactive_queue.empty():
-                    time.sleep(0.1)
+                    time.sleep(0.5)
 
                 for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                    belief_thread[0].synthesizer.s_queue.put("resume")
+                    belief_thread[0].interactive_queue.put("resume")
                     time.sleep(paynt_timeout/number_of_beliefs)
-                    belief_thread[0].synthesizer.s_queue.put("timeout")
-                    while not belief_thread[0].synthesizer.s_queue.empty():
-                        time.sleep(0.1)
+                    belief_thread[0].interactive_queue.put("timeout")
+                    while not belief_thread[0].interactive_queue.empty():
+                        time.sleep(0.5)
 
                     export_full = []
                     for mem_export in belief_thread[0].storm_control.paynt_export:
@@ -368,6 +366,8 @@ class SynthesizerPOMDP:
             print("controller size: {}".format(self.storm_control.belief_controller_size))
             print("\n------------------------------------\n")
 
+            print(f"used FSCs: {self.storm_control.storm_fsc_usage}")
+
             if time.time() > iteration_timeout or iteration == iteration_limit:
                 break
 
@@ -377,14 +377,17 @@ class SynthesizerPOMDP:
         self.synthesis_terminate = True
         paynt_thread.join()
 
+        for belief_thread in self.storm_control.enhanced_saynt_threads:
+            belief_thread[0].interactive_queue.put("terminate")
+            belief_thread[0].synthesis_terminate = True
+            belief_thread[1].join()
+
         self.storm_control.interactive_storm_terminate()
 
         self.saynt_timer.stop()
 
     # run PAYNT POMDP synthesis with a given timeout
     def run_synthesis_timeout(self, timeout):
-        self.interactive_queue = Queue()
-        self.synthesizer.s_queue = self.interactive_queue
         paynt_thread = Thread(target=self.strategy_iterative_storm, args=(True, False))
         iteration_timeout = time.time() + timeout
         paynt_thread.start()
@@ -407,8 +410,6 @@ class SynthesizerPOMDP:
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
         mem_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size
-
-        self.synthesizer.storm_control = self.storm_control
 
         while True:
         # for x in range(2):
@@ -482,10 +483,7 @@ class SynthesizerPOMDP:
                 main_family = family
                 subfamilies = []
 
-            self.synthesizer.subfamilies_buffer = subfamilies
-            self.synthesizer.main_family = main_family
-
-            assignment = self.synthesize(family)
+            assignment = self.synthesize(family, subfamilies=subfamilies, main_family=main_family)
 
             if assignment is not None:
                 self.storm_control.latest_paynt_result = assignment
