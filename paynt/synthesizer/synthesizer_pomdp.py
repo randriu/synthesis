@@ -288,7 +288,7 @@ class SynthesizerPOMDP:
                     for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data, self.storm_control.main_support_belief_data]):
                         index_type = "obs" if index in [0,1] else "sup"
                         for obs_or_sup in belief_type_data:
-                            self.storm_control.create_thread_control(obs_or_sup, index_type)
+                            self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
                             beliefs_remaining -= 1
                             if beliefs_remaining == 0:
                                 break
@@ -322,29 +322,56 @@ class SynthesizerPOMDP:
 
                     self.storm_control.belief_explorer.add_fsc_values(export_full)
             else:
-                self.interactive_queue.put("resume")
-                time.sleep(paynt_timeout/number_of_beliefs)
-                self.interactive_queue.put("timeout")
-
-                while not self.interactive_queue.empty():
-                    time.sleep(0.5)
-
-                for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                    belief_thread[0].interactive_queue.put("resume")
+                if not self.storm_control.dynamic_thread_timeout:
+                    self.interactive_queue.put("resume")
                     time.sleep(paynt_timeout/number_of_beliefs)
-                    belief_thread[0].interactive_queue.put("timeout")
-                    while not belief_thread[0].interactive_queue.empty():
+                    self.interactive_queue.put("timeout")
+
+                    while not self.interactive_queue.empty():
                         time.sleep(0.5)
 
-                    export_full = []
-                    for mem_export in belief_thread[0].storm_control.paynt_export:
-                        one_memory = []
-                        for val_export in mem_export:
-                            full_pomdp_values = {belief_thread[2][mem_export]:val for mem_export, val in val_export.items()}
-                            one_memory.append(full_pomdp_values)
-                        export_full.append(one_memory)
+                    for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
+                        belief_thread[0].interactive_queue.put("resume")
+                        time.sleep(paynt_timeout/number_of_beliefs)
+                        belief_thread[0].interactive_queue.put("timeout")
+                        while not belief_thread[0].interactive_queue.empty():
+                            time.sleep(0.5)
 
-                    self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
+                        export_full = []
+                        for mem_export in belief_thread[0].storm_control.paynt_export:
+                            one_memory = []
+                            for val_export in mem_export:
+                                full_pomdp_values = {belief_thread[2][mem_export]:val for mem_export, val in val_export.items()}
+                                one_memory.append(full_pomdp_values)
+                            export_full.append(one_memory)
+
+                        self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
+                else:
+                    if 0 in self.storm_control.storm_fsc_usage.keys():
+                        self.interactive_queue.put("resume")
+                        time.sleep(paynt_timeout*(self.storm_control.storm_fsc_usage[0]/self.storm_control.total_fsc_used))
+                        self.interactive_queue.put("timeout")
+
+                        while not self.interactive_queue.empty():
+                            time.sleep(0.5)
+                    
+                    for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
+                        if index+1 in self.storm_control.storm_fsc_usage.keys():
+                            belief_thread[0].interactive_queue.put("resume")
+                            time.sleep(paynt_timeout*(self.storm_control.storm_fsc_usage[index+1]/self.storm_control.total_fsc_used))
+                            belief_thread[0].interactive_queue.put("timeout")
+                            while not belief_thread[0].interactive_queue.empty():
+                                time.sleep(0.5)
+
+                            export_full = []
+                            for mem_export in belief_thread[0].storm_control.paynt_export:
+                                one_memory = []
+                                for val_export in mem_export:
+                                    full_pomdp_values = {belief_thread[2][mem_export]:val for mem_export, val in val_export.items()}
+                                    one_memory.append(full_pomdp_values)
+                                export_full.append(one_memory)
+
+                            self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
 
             if iteration == 1:
                 self.storm_control.interactive_storm_start(storm_timeout, True)
@@ -367,6 +394,7 @@ class SynthesizerPOMDP:
             print("\n------------------------------------\n")
 
             print(f"used FSCs: {self.storm_control.storm_fsc_usage}")
+            print(f"FSCs used count: {self.storm_control.total_fsc_used}")
 
             if time.time() > iteration_timeout or iteration == iteration_limit:
                 break

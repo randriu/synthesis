@@ -57,6 +57,9 @@ class StormPOMDPControl:
     enhanced_saynt_threads = []
     belief_threads_info = []
     storm_fsc_usage = {}
+    total_fsc_used = 0
+    use_uniform_obs_beliefs = True
+    dynamic_thread_timeout = True
 
     storm_terminated = False
 
@@ -394,9 +397,9 @@ class StormPOMDPControl:
     
 
 
-    def create_thread_control(self, index, belief_type, obs_option=0):
+    def create_thread_control(self, index, belief_type, obs_option=True):
         if belief_type == "obs":
-            if obs_option == 0:
+            if obs_option:
                 obs_states = []
                 for state in range(self.quotient.pomdp.nr_states):
                     if self.quotient.pomdp.observations[state] == index:
@@ -502,20 +505,22 @@ class StormPOMDPControl:
             else:
                 for label in state.labels:
                     if 'finite_mem' in label:
-                        fsc_index = label.split('_')[-1]
+                        fsc_index = int(label.split('_')[-1])
                         if fsc_index not in self.storm_fsc_usage.keys():
                             self.storm_fsc_usage[fsc_index] = 1
+                            if fsc_index == 0:
+                                finite_mem_dict = self.result_dict_paynt
+                            else:
+                                finite_mem_dict = self.enhanced_saynt_threads[fsc_index-1][0].storm_control.result_dict_paynt
+                            for obs, actions in finite_mem_dict.items():
+                                for action in actions:
+                                    if action not in result_no_cutoffs[obs]:
+                                        result_no_cutoffs[obs].append(action)
+                                    if action not in result[obs]:
+                                        result[obs].append(action)
                         else:
                             self.storm_fsc_usage[fsc_index] += 1
-                if 'finite_mem_0' in state.labels and not finite_mem:
-                    finite_mem = True
-                    self.parse_paynt_result(self.quotient)
-                    for obs, actions in self.result_dict_paynt.items():
-                        for action in actions:
-                            if action not in result_no_cutoffs[obs]:
-                                result_no_cutoffs[obs].append(action)
-                            if action not in result[obs]:
-                                result[obs].append(action)
+                        break
                 else:
                     if len(cutoff_epxloration) == 0:
                         continue
@@ -553,6 +558,7 @@ class StormPOMDPControl:
 
         self.result_dict = result    
         self.result_dict_no_cutoffs = result_no_cutoffs
+        self.total_fsc_used = sum(list(self.storm_fsc_usage.values()))
 
 
     def parse_belief_data(self, beliefs):
