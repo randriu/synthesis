@@ -58,8 +58,8 @@ class StormPOMDPControl:
     belief_threads_info = []
     storm_fsc_usage = {}
     total_fsc_used = 0
-    use_uniform_obs_beliefs = True
-    dynamic_thread_timeout = True
+    use_uniform_obs_beliefs = False
+    dynamic_thread_timeout = False
 
     storm_terminated = False
 

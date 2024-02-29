@@ -1,0 +1,253 @@
+2024-02-28 20:01:08,277 - cli.py - This is Paynt version 0.1.0.
+2024-02-28 20:01:08,278 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/milos-aaai97/sketch.templ ...
+2024-02-28 20:01:08,278 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+2024-02-28 20:01:08,289 - sketch.py - assuming sketch in DRN format...
+2024-02-28 20:01:08,306 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/milos-aaai97/sketch.props ...
+2024-02-28 20:01:08,310 - prism_parser.py - found the following specification: optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-02-28 20:01:08,310 - sketch.py - sketch parsing OK
+2024-02-28 20:01:08,313 - sketch.py - constructed explicit quotient having 165 states and 980 actions
+2024-02-28 20:01:08,314 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-02-28 20:01:08,315 - pomdp.py - constructed POMDP having 11 observations.
+2024-02-28 20:01:08,315 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:01:08,316 - pomdp.py - constructed quotient MDP having 165 states and 980 actions.
+2024-02-28 20:01:08,336 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-02-28 20:01:08,337 - synthesizer_pomdp.py - Storm settings: iterative - (900, 60, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False
+2024-02-28 20:01:08,337 - synthesizer.py - synthesis initiated, design space: 10077696
+2024-02-28 20:01:08,337 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = 19.994633388712238 | Time elapsed = 0.0s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.054092576368394 | Time elapsed = 0.0s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.38033532848474 | Time elapsed = 0.0s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.38711364286808 | Time elapsed = 0.1s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.404668034268582 | Time elapsed = 0.2s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.411120366802038 | Time elapsed = 0.2s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.495753307319227 | Time elapsed = 0.3s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.502514775361195 | Time elapsed = 0.3s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 20.540826726748346 | Time elapsed = 0.4s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.42895167927262 | Time elapsed = 0.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 25.09209800933766 | Time elapsed = 0.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 25.852101221760996 | Time elapsed = 0.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 27.522618796440018 | Time elapsed = 1.1s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 27.61915841923631 | Time elapsed = 1.4s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 29.45856489035425 | Time elapsed = 1.5s | FSC size = 22
+
+2024-02-28 20:01:12,557 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:01:12,557 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a0)'}, A(6,0)={'(a3)'}, A(7,0)={'(a1)'}, A(9,0)={'(a3)'}
+2024-02-28 20:01:12,557 - synthesizer.py - double-checking specification satisfiability:  : 29.45856489035425
+2024-02-28 20:01:12,558 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:01:12,558 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-02-28 20:01:12,558 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1] ...
+2024-02-28 20:01:12,562 - pomdp.py - constructed quotient MDP having 328 states and 3915 actions.
+2024-02-28 20:01:12,748 - synthesizer.py - synthesis initiated, design space: 53246666561770487808
+-----------PAYNT-----------                     
+Value = 31.562357639160666 | Time elapsed = 4.5s | FSC size = 40
+
+-----------PAYNT-----------                     
+Value = 31.564582766681255 | Time elapsed = 17.6s | FSC size = 40
+
+2024-02-28 20:02:08,416 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:02:08,914 - storm_pomdp_control.py - Interactive Storm started
+2024-02-28 20:02:08,914 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-02-28 20:02:18,945 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 40.64225803695829 | Time elapsed = 94.4s | FSC size = 484
+
+
+------------------------------------
+
+PAYNT results: 
+31.564582766681255
+controller size: 40
+
+Storm results: 
+40.64225803695829
+controller size: 484
+
+------------------------------------
+
+used FSCs: {0: 12}
+FSCs used count: 12
+2024-02-28 20:02:42,972 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:42,973 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:42,973 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:42,982 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:42,982 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:42,983 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:42,991 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:42,992 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:42,992 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:43,001 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:43,001 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:43,001 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:43,010 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:43,010 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:43,011 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:43,019 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:43,020 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:43,020 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:43,029 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:43,029 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:43,030 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:43,038 - pomdp.py - constructed POMDP having 12 observations.
+2024-02-28 20:02:43,038 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:43,039 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:43,046 - synthesizer_pomdp.py - 8 threads for enhanced SAYNT created
+2024-02-28 20:02:43,046 - synthesizer_pomdp.py - new synthesis time per thread: 6.666666666666667s
+2024-02-28 20:02:43,483 - synthesizer_ar_storm.py - Resuming synthesis
+2024-02-28 20:02:43,483 - synthesizer_ar_storm.py - Additional memory needed
+2024-02-28 20:02:43,483 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:02:43,483 - synthesizer.py - A(0,0)={'(a3)'}, A(0,1)={'(a2)'}, M(0,0)=1, M(0,1)=0, A(1,0)={'(a0)'}, A(1,1)={'(a0)'}, M(1,0)=0, M(1,1)=0, A(2,0)={'(a0)'}, A(2,1)={'(a0)'}, M(2,0)=0, M(2,1)=0, A(3,0)={'(a0)'}, A(3,1)={'(a0)'}, M(3,0)=0, M(3,1)=0, A(4,0)={'(a0)'}, A(4,1)={'(a3)'}, M(4,0)=0, M(4,1)=0, A(5,0)={'(a0)'}, A(5,1)={'(a0)'}, M(5,0)=0, M(5,1)=0, A(6,0)={'(a0)'}, A(6,1)={'(a0)'}, M(6,0)=0, M(6,1)=0, A(7,0)={'(a0)'}, A(7,1)={'(a0)'}, M(7,0)=0, M(7,1)=0, M(8,0)=0, A(9,0)={'(a3)'}, A(9,1)={'(a2)'}, M(9,0)=0, M(9,1)=1
+2024-02-28 20:02:43,484 - synthesizer.py - double-checking specification satisfiability:  : 31.564582766681255
+2024-02-28 20:02:43,486 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:02:43,486 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-02-28 20:02:43,486 - pomdp.py - unfolding POMDP using the following memory allocation vector: [5, 3, 2, 1, 3, 1, 1, 1, 1, 2, 1] ...
+2024-02-28 20:02:43,496 - pomdp.py - constructed quotient MDP having 348 states and 10383 actions.
+2024-02-28 20:02:44,766 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 23245229340000000000000000000 to 1390457153320312500000
+2024-02-28 20:02:44,766 - synthesizer.py - synthesis initiated, design space: 23245229340000000000000000000
+-----------PAYNT-----------                     
+Value = 32.13262079140259 | Time elapsed = 97.0s | FSC size = 42
+
+2024-02-28 20:02:49,730 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:02:50,226 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:02:50,226 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:50,226 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:50,235 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:02:52,879 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:02:52,879 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a0)'}, A(6,0)={'(a1)'}, A(7,0)={'(a3)'}
+2024-02-28 20:02:52,880 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+2024-02-28 20:02:52,881 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:02:52,881 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:02:52,881 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:02:52,884 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:02:53,050 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:02:56,905 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:02:57,403 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:02:57,403 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:02:57,404 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:02:57,412 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:00,564 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:00,564 - synthesizer.py - A(0,0)={'(a5)'}, A(1,0)={'(a3)'}, A(2,0)={'(a3)'}, A(3,0)={'(a1)'}, A(4,0)={'(a3)'}, A(5,0)={'(a3)'}, A(6,0)={'(a2)'}, A(7,0)={'(a1)'}
+2024-02-28 20:03:00,564 - synthesizer.py - double-checking specification satisfiability:  : 41.293261349918225
+2024-02-28 20:03:00,565 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:00,565 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:00,565 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:00,566 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:00,749 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:04,085 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:04,583 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:03:04,583 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:03:04,585 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:03:04,597 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:09,294 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:09,294 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a3)'}, A(6,0)={'(a3)'}, A(7,0)={'(a1)'}
+2024-02-28 20:03:09,295 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+2024-02-28 20:03:09,295 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:09,295 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:09,295 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:09,297 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:09,457 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:11,270 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:11,769 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:03:11,770 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:03:11,771 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:03:11,781 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:14,651 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:14,651 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a3)'}, A(6,0)={'(a3)'}, A(7,0)={'(a0)'}
+2024-02-28 20:03:14,651 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+2024-02-28 20:03:14,652 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:14,652 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:14,652 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:14,654 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:14,824 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:18,452 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:18,949 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:03:18,949 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:03:18,950 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:03:18,958 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:22,715 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:22,715 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a1)'}, A(6,0)={'(a3)'}, A(7,0)={'(a1)'}
+2024-02-28 20:03:22,715 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+2024-02-28 20:03:22,716 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:22,716 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:22,716 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:22,719 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:22,888 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:25,630 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:26,128 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:03:26,129 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:03:26,129 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:03:26,137 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:30,104 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:30,104 - synthesizer.py - A(0,0)={'(a5)'}, A(1,0)={'(a3)'}, A(2,0)={'(a3)'}, A(3,0)={'(a3)'}, A(4,0)={'(a1)'}, A(5,0)={'(a3)'}, A(6,0)={'(a2)'}, A(7,0)={'(a1)'}
+2024-02-28 20:03:30,104 - synthesizer.py - double-checking specification satisfiability:  : 41.293261349918225
+2024-02-28 20:03:30,105 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:30,105 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:30,105 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:30,108 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:30,298 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:32,812 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:33,312 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:03:33,312 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:03:33,316 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:03:33,324 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:36,312 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:36,312 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a3)'}, A(6,0)={'(a2)'}, A(7,0)={'(a0)'}
+2024-02-28 20:03:36,312 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+2024-02-28 20:03:36,313 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:36,313 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:36,313 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:36,314 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:36,477 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:39,983 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:40,482 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-02-28 20:03:40,483 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-02-28 20:03:40,484 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-02-28 20:03:40,492 - synthesizer.py - synthesis initiated, design space: 1679616
+2024-02-28 20:03:41,794 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-02-28 20:03:41,794 - synthesizer.py - A(0,0)={'(a4)'}, A(1,0)={'(a1)'}, A(2,0)={'(a1)'}, A(3,0)={'(a0)'}, A(4,0)={'(a3)'}, A(5,0)={'(a0)'}, A(6,0)={'(a3)'}, A(7,0)={'(a1)'}
+2024-02-28 20:03:41,794 - synthesizer.py - double-checking specification satisfiability:  : 41.478095146259584
+2024-02-28 20:03:41,795 - synthesizer_pomdp.py - Terminate: False
+2024-02-28 20:03:41,795 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-02-28 20:03:41,795 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1] ...
+2024-02-28 20:03:41,797 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-02-28 20:03:41,966 - synthesizer.py - synthesis initiated, design space: 369768517790072832
+2024-02-28 20:03:47,161 - synthesizer_ar_storm.py - Pausing synthesis
+2024-02-28 20:03:47,660 - storm_pomdp_control.py - Interactive Storm resumed
+2024-02-28 20:03:47,660 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-02-28 20:03:57,681 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
