@@ -97,9 +97,11 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
 
     auto num_holes = family.numHoles();
     std::vector<BitVector> hole_to_inconsistent_options_mask(num_holes);
+    
     for(uint64_t hole=0; hole<num_holes; ++hole) {
         hole_to_inconsistent_options_mask[hole] = BitVector(family.holeNumOptionsTotal(hole));
     }
+
     BitVector inconsistent_holes(num_holes);
     for(auto const& [hole,options]: hole_to_inconsistent_options) {
         inconsistent_holes.set(hole);
@@ -107,11 +109,14 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
             hole_to_inconsistent_options_mask[hole].set(option);
         }
     }
+    // for (auto i: hole_to_inconsistent_options_mask)
+    //     std::cout << i << ' ';
 
     std::vector<double> hole_difference_avg(num_holes,0);
     std::vector<uint64_t> hole_states_affected(num_holes,0);
     auto const& choice_to_assignment = coloring.getChoiceToAssignment();
     
+    // std::cout << "choice_to_assignment " << choice_to_assignment[0][0] << std::endl;
     std::vector<bool> hole_set(num_holes);
     std::vector<double> hole_min(num_holes);
     std::vector<double> hole_max(num_holes);
@@ -122,7 +127,8 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
         for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
             auto value = choice_to_value[choice];
             auto choice_global = choice_to_global_choice[choice];
-            
+            std::cout << "choice " << choice << std::endl;
+            std::cout << "choice_global " << choice_global << std::endl;
             for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
                     continue;

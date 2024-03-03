@@ -51,7 +51,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # # print("self.nr_joint_actions",self.nr_joint_actions)
 
         self.nr_joint_observations = len(self.joint_observations)
-        # # print("self.nr_joint_observations",self.nr_joint_observations)
+        # print("self.nr_joint_observations",self.nr_joint_observations)
 
         self.state_joint_observation = decpomdp_manager.state_joint_observation
         # # print("self.state_joint_observation",self.state_joint_observation)
@@ -269,3 +269,9 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("choice_to_hole_options",choice_to_hole_options)
 
         return all_holes, choice_to_hole_options
+
+    def new_scores(self,scores):
+        if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
+            return super().new_scores(scores)
+
+        return 0

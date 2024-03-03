@@ -174,11 +174,19 @@ class Quotient:
     def scheduler_selection(self, mdp, scheduler, coloring=None):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
+        
         state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
+        
         choices = self.state_to_choice_to_choices(state_to_choice)
         if coloring is None:
             coloring = self.coloring
+        
         hole_selection = coloring.collectHoleOptions(choices)
+        print("scheduler",scheduler)
+        print("state_to_choice",state_to_choice)
+        print("choices",choices)
+        print("coloring",coloring)
+        print("hole_selection",hole_selection)
         return hole_selection
 
     
@@ -265,17 +273,23 @@ class Quotient:
         # get qualitative scheduler selection, filter inconsistent assignments
         selection = self.scheduler_selection(mdp, result.scheduler)
         inconsistent_assignments = {hole:options for hole,options in enumerate(selection) if len(options) > 1 }
+        # print("result.scheduler",result.scheduler)
         scheduler_is_consistent = len(inconsistent_assignments) == 0
         choice_values = None
         expected_visits = None
         inconsistent_differences = None
+        
         if not scheduler_is_consistent:
             # extract choice values, compute expected visits and estimate scheduler difference
             choice_values = self.choice_values(mdp.model, prop, result.get_values())
             choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
             expected_visits = self.expected_visits(mdp.model, prop, choices)
             inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
-
+        # print("mdp.model",mdp.model)
+        # print("mdp.quotient_choice_map",mdp.quotient_choice_map)
+        # print("inconsistent_assignments",inconsistent_assignments)
+        # print("choice_values",choice_values)
+        # print("expected_visits",expected_visits)
         for hole,options in enumerate(selection):
             if len(options) == 0:
                 # TODO why is this necessary?
@@ -346,6 +360,8 @@ class Quotient:
 
         return reduced_design_space, suboptions
 
+    def new_scores(self,scores):
+        return scores
 
     def split(self, family, incomplete_search):
 
@@ -357,8 +373,11 @@ class Quotient:
 
         hole_assignments = result.primary_selection
         scores = result.primary_scores
+        # print("scores",scores)
         if scores is None:
             scores = {hole:0 for hole in range(mdp.design_space.num_holes) if mdp.design_space.hole_num_options(hole) > 1}
+
+        # print("new method",self.new_scores(scores))
         
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]

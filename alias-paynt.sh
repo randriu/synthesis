@@ -27,7 +27,7 @@ cd ..
 
 alias runp='(
 source prerequisites/venv/bin/activate
-python3 paynt.py --project models/cassandra/decpomdp/ --sketch 2generals.dpomdp --pomdp-memory-size 2
+python3 paynt.py --project models/cassandra/decpomdp/ --sketch 2generals.dpomdp --pomdp-memory-size 1
 )'
 
 alias runb='(
