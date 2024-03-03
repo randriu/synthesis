@@ -1,0 +1,453 @@
+2024-03-02 15:51:58,772 - cli.py - This is Paynt version 0.1.0.
+2024-03-02 15:51:58,772 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/4x3-95/sketch.templ ...
+2024-03-02 15:51:58,772 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+2024-03-02 15:51:58,773 - sketch.py - assuming sketch in DRN format...
+2024-03-02 15:51:58,775 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/4x3-95/sketch.props ...
+2024-03-02 15:51:58,776 - prism_parser.py - found the following specification: optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-03-02 15:51:58,776 - sketch.py - sketch parsing OK
+2024-03-02 15:51:58,776 - sketch.py - constructed explicit quotient having 22 states and 82 actions
+2024-03-02 15:51:58,776 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-03-02 15:51:58,776 - pomdp.py - constructed POMDP having 9 observations.
+2024-03-02 15:51:58,776 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:51:58,776 - pomdp.py - constructed quotient MDP having 22 states and 82 actions.
+2024-03-02 15:51:58,779 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-03-02 15:51:58,779 - synthesizer_pomdp.py - Storm settings: iterative - (900, 120, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False
+2024-03-02 15:51:58,779 - synthesizer.py - synthesis initiated, design space: 16384
+-----------PAYNT-----------                     
+Value = -0.9105579716659931 | Time elapsed = 0.0s | FSC size = 73
+
+2024-03-02 15:51:58,779 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = -0.8686599675278818 | Time elapsed = 0.0s | FSC size = 75
+
+-----------PAYNT-----------                     
+Value = -0.40761788722743514 | Time elapsed = 0.0s | FSC size = 77
+
+-----------PAYNT-----------                     
+Value = -0.3958092794894377 | Time elapsed = 0.0s | FSC size = 79
+
+-----------PAYNT-----------                     
+Value = -0.25128453587513117 | Time elapsed = 0.0s | FSC size = 79
+
+-----------PAYNT-----------                     
+Value = 0.32562887393853235 | Time elapsed = 0.0s | FSC size = 79
+
+-----------PAYNT-----------                     
+Value = 0.44176908305750945 | Time elapsed = 0.0s | FSC size = 81
+
+2024-03-02 15:51:58,787 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:51:58,787 - synthesizer.py - A(0,0)={'(n)'}, A(0,1)={'(w)'}, A(0,2)={'(e)'}, A(0,3)={'(n)'}, A(0,4)={'(n)'}, A(0,5)={'(n)'}, A(0,7)={'(n)'}
+2024-03-02 15:51:58,787 - synthesizer.py - double-checking specification satisfiability:  : 0.44176908305750945
+2024-03-02 15:51:58,788 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:51:58,788 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-03-02 15:51:58,788 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 1, 2, 1, 1, 1, 1, 2, 1] ...
+2024-03-02 15:51:58,788 - pomdp.py - constructed quotient MDP having 38 states and 472 actions.
+2024-03-02 15:51:58,789 - synthesizer.py - synthesis initiated, design space: 549755813888
+-----------PAYNT-----------                     
+Value = 0.6610747820998917 | Time elapsed = 0.0s | FSC size = 114
+
+-----------PAYNT-----------                     
+Value = 0.7288789628303098 | Time elapsed = 0.0s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 0.7361992091154147 | Time elapsed = 0.0s | FSC size = 114
+
+-----------PAYNT-----------                     
+Value = 0.817438242879613 | Time elapsed = 0.0s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 0.8252286419228276 | Time elapsed = 0.0s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.225187274583031 | Time elapsed = 0.2s | FSC size = 114
+
+-----------PAYNT-----------                     
+Value = 1.2774645003545293 | Time elapsed = 0.2s | FSC size = 114
+
+-----------PAYNT-----------                     
+Value = 1.2812314463600387 | Time elapsed = 0.2s | FSC size = 114
+
+-----------PAYNT-----------                     
+Value = 1.3352473781401064 | Time elapsed = 0.2s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.3825649288723394 | Time elapsed = 0.2s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.403047797733828 | Time elapsed = 0.2s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.4054891839416486 | Time elapsed = 0.3s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.4305108742204977 | Time elapsed = 0.3s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.4440169730552805 | Time elapsed = 0.4s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.4790220278372723 | Time elapsed = 0.4s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.49255992210492 | Time elapsed = 0.4s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.5237173266709274 | Time elapsed = 0.5s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.5255723420393672 | Time elapsed = 0.5s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.5638035371163066 | Time elapsed = 0.7s | FSC size = 114
+
+-----------PAYNT-----------                     
+Value = 1.643658136296114 | Time elapsed = 0.7s | FSC size = 116
+
+-----------PAYNT-----------                     
+Value = 1.6583105877828117 | Time elapsed = 0.8s | FSC size = 116
+
+2024-03-02 15:52:00,944 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:52:00,944 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=1, A(1,0)={'(n)'}, M(1,0,0)=0, M(1,0,2)=1, A(0,1)={'(w)'}, M(0,1,2)=0, A(0,2)={'(n)'}, M(0,2,0)=1, M(0,2,2)=1, A(1,2)={'(e)'}, M(1,2,0)=1, M(1,2,2)=1, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=1, M(0,4,2)=1, A(0,5)={'(n)'}, M(0,5,0)=1, M(0,5,2)=1, M(0,6,7)=1, A(0,7)={'(w)'}, M(0,7,0)=0, M(0,7,2)=1, A(1,7)={'(n)'}, M(1,7,0)=1, M(1,7,2)=1
+2024-03-02 15:52:00,944 - synthesizer.py - double-checking specification satisfiability:  : 1.6583105877828117
+2024-03-02 15:52:00,945 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:52:00,945 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-03-02 15:52:00,945 - pomdp.py - unfolding POMDP using the following memory allocation vector: [3, 1, 3, 1, 1, 1, 1, 3, 1] ...
+2024-03-02 15:52:00,946 - pomdp.py - constructed quotient MDP having 54 states and 1424 actions.
+2024-03-02 15:52:00,957 - synthesizer.py - synthesis initiated, design space: 56860576059859402752
+-----------PAYNT-----------                     
+Value = 1.6617125552432521 | Time elapsed = 46.1s | FSC size = 151
+
+-----------PAYNT-----------                     
+Value = 1.66504394640979 | Time elapsed = 112.1s | FSC size = 151
+
+-----------PAYNT-----------                     
+Value = 1.6663436324603997 | Time elapsed = 112.1s | FSC size = 151
+
+2024-03-02 15:53:58,889 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 15:53:59,388 - storm_pomdp_control.py - Interactive Storm started
+2024-03-02 15:53:59,388 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-03-02 15:54:09,401 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8767929522277664 | Time elapsed = 169.0s | FSC size = 705
+
+
+------------------------------------
+
+PAYNT results: 
+1.6663436324603997
+controller size: 151
+
+Storm results: 
+1.8767929522277664
+controller size: 705
+
+------------------------------------
+
+used FSCs: {0: 31}
+FSCs used count: 31
+2024-03-02 15:54:47,927 - pomdp.py - constructed POMDP having 10 observations.
+2024-03-02 15:54:47,927 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:54:47,928 - pomdp.py - constructed quotient MDP having 13 states and 46 actions.
+2024-03-02 15:54:47,928 - pomdp.py - constructed POMDP having 10 observations.
+2024-03-02 15:54:47,928 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:54:47,928 - pomdp.py - constructed quotient MDP having 13 states and 46 actions.
+2024-03-02 15:54:47,928 - synthesizer_pomdp.py - 2 threads for enhanced SAYNT created
+2024-03-02 15:54:47,928 - synthesizer_pomdp.py - new synthesis time per thread: 40.0s
+2024-03-02 15:54:48,268 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 15:54:48,268 - synthesizer_ar_storm.py - Additional memory needed
+2024-03-02 15:54:48,268 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:54:48,268 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=1, M(0,0,2)=0, A(1,0)={'(e)'}, M(1,0,0)=0, M(1,0,2)=0, A(2,0)={'(n)'}, M(2,0,0)=0, M(2,0,2)=0, A(0,1)={'(w)'}, M(0,1,2)=2, A(0,2)={'(e)'}, M(0,2,0)=2, M(0,2,2)=1, A(1,2)={'(e)'}, M(1,2,0)=2, M(1,2,2)=2, A(2,2)={'(n)'}, M(2,2,0)=2, M(2,2,2)=1, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=2, M(0,4,2)=1, A(0,5)={'(n)'}, M(0,5,0)=2, M(0,5,2)=1, M(0,6,7)=2, A(0,7)={'(w)'}, M(0,7,0)=2, M(0,7,2)=2, A(1,7)={'(w)'}, M(1,7,0)=2, M(1,7,2)=2, A(2,7)={'(n)'}, M(2,7,0)=2, M(2,7,2)=1
+2024-03-02 15:54:48,269 - synthesizer.py - double-checking specification satisfiability:  : 1.6663436324603997
+2024-03-02 15:54:48,270 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:54:48,270 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-02 15:54:48,270 - pomdp.py - unfolding POMDP using the following memory allocation vector: [3, 2, 3, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:54:48,271 - pomdp.py - constructed quotient MDP having 37 states and 1154 actions.
+2024-03-02 15:54:48,281 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 44926874911493849088 to 7808611824626688
+2024-03-02 15:54:48,282 - synthesizer.py - synthesis initiated, design space: 44926874911493849088
+-----------PAYNT-----------                     
+Value = 1.6793476235374614 | Time elapsed = 169.7s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.6862690706103214 | Time elapsed = 169.7s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.689393296445129 | Time elapsed = 169.7s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.6907020662346015 | Time elapsed = 169.7s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7133546047524089 | Time elapsed = 169.9s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7194809437275107 | Time elapsed = 169.9s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7227764951510849 | Time elapsed = 169.9s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7241144735527014 | Time elapsed = 169.9s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7394946823093134 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7492324059518047 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7626267787701093 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7725380995716369 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.7816387394184876 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.792623589727901 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8010314248339467 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8012776913213682 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8108221228146144 | Time elapsed = 171.6s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.821246136532776 | Time elapsed = 171.8s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8290232352641105 | Time elapsed = 171.8s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8312718348839534 | Time elapsed = 171.8s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8390489336152875 | Time elapsed = 171.8s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8436749675266564 | Time elapsed = 172.0s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8569195307221331 | Time elapsed = 172.1s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8639298155388169 | Time elapsed = 172.1s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8672320608650006 | Time elapsed = 172.1s | FSC size = 134
+
+-----------PAYNT-----------                     
+Value = 1.8742423456816841 | Time elapsed = 172.1s | FSC size = 134
+
+2024-03-02 15:55:01,444 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-02 15:55:01,444 - synthesizer_ar_storm.py - Subfamilies buffer contains: 12 families
+2024-03-02 15:55:27,975 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 15:55:28,474 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-02 15:55:28,670 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:55:28,670 - pomdp.py - constructed quotient MDP having 13 states and 46 actions.
+2024-03-02 15:55:28,671 - synthesizer.py - synthesis initiated, design space: 4096
+2024-03-02 15:55:28,674 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:55:28,674 - synthesizer.py - A(0,0)={'(n)'}, A(0,1)={'(w)'}, A(0,2)={'(e)'}, A(0,3)={'(n)'}, A(0,4)={'(n)'}, A(0,5)={'(n)'}
+2024-03-02 15:55:28,674 - synthesizer.py - double-checking specification satisfiability:  : 0.5367934020870333
+2024-03-02 15:55:28,674 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:55:28,674 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-02 15:55:28,674 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 1, 2, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:55:28,675 - pomdp.py - constructed quotient MDP having 20 states and 246 actions.
+2024-03-02 15:55:28,675 - synthesizer.py - synthesis initiated, design space: 2147483648
+2024-03-02 15:55:28,720 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:55:28,720 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=1, A(1,0)={'(n)'}, M(1,0,0)=0, M(1,0,2)=1, A(0,1)={'(w)'}, M(0,1,2)=0, A(0,2)={'(n)'}, M(0,2,0)=1, M(0,2,2)=1, A(1,2)={'(e)'}, M(1,2,0)=1, M(1,2,2)=1, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=1, M(0,4,2)=1, A(0,5)={'(n)'}, M(0,5,0)=1, M(0,5,2)=1, M(0,9,0)=1
+2024-03-02 15:55:28,720 - synthesizer.py - double-checking specification satisfiability:  : 1.7829786163369183
+2024-03-02 15:55:28,720 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:55:28,720 - synthesizer_pomdp.py - Synthesizing optimal k=3 controller ...
+2024-03-02 15:55:28,720 - pomdp.py - unfolding POMDP using the following memory allocation vector: [3, 1, 3, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:55:28,721 - pomdp.py - constructed quotient MDP having 27 states and 728 actions.
+2024-03-02 15:55:28,722 - synthesizer.py - synthesis initiated, design space: 1218719480020992
+2024-03-02 15:55:44,732 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:55:44,732 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=2, A(1,0)={'(n)'}, M(1,0,0)=0, M(1,0,2)=2, A(2,0)={'(n)'}, M(2,0,0)=1, M(2,0,2)=2, A(0,1)={'(w)'}, M(0,1,2)=1, A(0,2)={'(e)'}, M(0,2,0)=2, M(0,2,2)=1, A(1,2)={'(n)'}, M(1,2,0)=2, M(1,2,2)=0, A(2,2)={'(e)'}, M(2,2,0)=2, M(2,2,2)=2, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=2, M(0,4,2)=0, A(0,5)={'(n)'}, M(0,5,0)=2, M(0,5,2)=0, M(0,9,0)=2
+2024-03-02 15:55:44,733 - synthesizer.py - double-checking specification satisfiability:  : 1.99143896424329
+2024-03-02 15:55:44,734 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:55:44,734 - synthesizer_pomdp.py - Synthesizing optimal k=4 controller ...
+2024-03-02 15:55:44,734 - pomdp.py - unfolding POMDP using the following memory allocation vector: [4, 1, 4, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:55:44,735 - pomdp.py - constructed quotient MDP having 34 states and 1618 actions.
+2024-03-02 15:55:44,748 - synthesizer.py - synthesis initiated, design space: 1180591620717411303424
+2024-03-02 15:56:08,715 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 15:56:09,216 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-02 15:56:09,216 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:56:09,217 - pomdp.py - constructed quotient MDP having 13 states and 46 actions.
+2024-03-02 15:56:09,217 - synthesizer.py - synthesis initiated, design space: 4096
+2024-03-02 15:56:09,220 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:56:09,220 - synthesizer.py - A(0,0)={'(n)'}, A(0,1)={'(w)'}, A(0,2)={'(e)'}, A(0,3)={'(n)'}, A(0,4)={'(n)'}, A(0,5)={'(n)'}
+2024-03-02 15:56:09,220 - synthesizer.py - double-checking specification satisfiability:  : 0.49927277946165005
+2024-03-02 15:56:09,220 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:56:09,220 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-02 15:56:09,221 - pomdp.py - unfolding POMDP using the following memory allocation vector: [2, 1, 2, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:56:09,221 - pomdp.py - constructed quotient MDP having 20 states and 246 actions.
+2024-03-02 15:56:09,221 - synthesizer.py - synthesis initiated, design space: 2147483648
+2024-03-02 15:56:09,276 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:56:09,277 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=1, A(1,0)={'(n)'}, M(1,0,0)=0, M(1,0,2)=1, A(0,1)={'(w)'}, M(0,1,2)=0, A(0,2)={'(n)'}, M(0,2,0)=1, M(0,2,2)=1, A(1,2)={'(e)'}, M(1,2,0)=1, M(1,2,2)=1, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=1, M(0,4,2)=1, A(0,5)={'(n)'}, M(0,5,0)=1, M(0,5,2)=1, M(0,9,2)=1
+2024-03-02 15:56:09,277 - synthesizer.py - double-checking specification satisfiability:  : 1.7821880170615993
+2024-03-02 15:56:09,277 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:56:09,277 - synthesizer_pomdp.py - Synthesizing optimal k=3 controller ...
+2024-03-02 15:56:09,278 - pomdp.py - unfolding POMDP using the following memory allocation vector: [3, 1, 3, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:56:09,278 - pomdp.py - constructed quotient MDP having 27 states and 728 actions.
+2024-03-02 15:56:09,279 - synthesizer.py - synthesis initiated, design space: 1218719480020992
+2024-03-02 15:56:15,478 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 15:56:15,478 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=2, A(1,0)={'(n)'}, M(1,0,0)=2, M(1,0,2)=2, A(2,0)={'(n)'}, M(2,0,0)=0, M(2,0,2)=2, A(0,1)={'(w)'}, M(0,1,2)=1, A(0,2)={'(e)'}, M(0,2,0)=1, M(0,2,2)=1, A(1,2)={'(n)'}, M(1,2,0)=1, M(1,2,2)=0, A(2,2)={'(e)'}, M(2,2,0)=1, M(2,2,2)=2, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=1, M(0,4,2)=0, A(0,5)={'(n)'}, M(0,5,0)=1, M(0,5,2)=0, M(0,9,2)=0
+2024-03-02 15:56:15,478 - synthesizer.py - double-checking specification satisfiability:  : 2.0530413690761167
+2024-03-02 15:56:15,479 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 15:56:15,479 - synthesizer_pomdp.py - Synthesizing optimal k=4 controller ...
+2024-03-02 15:56:15,479 - pomdp.py - unfolding POMDP using the following memory allocation vector: [4, 1, 4, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 15:56:15,481 - pomdp.py - constructed quotient MDP having 34 states and 1618 actions.
+2024-03-02 15:56:15,484 - synthesizer.py - synthesis initiated, design space: 1180591620717411303424
+2024-03-02 15:56:49,262 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 15:56:49,763 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-02 15:56:49,763 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-03-02 15:56:59,774 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8885148697306051 | Time elapsed = 402.1s | FSC size = 769
+
+
+------------------------------------
+
+PAYNT results: 
+1.8742423456816841
+controller size: 134
+
+Storm results: 
+1.8885148697306051
+controller size: 769
+
+------------------------------------
+
+used FSCs: {0: 38}
+FSCs used count: 38
+2024-03-02 15:58:41,206 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 15:58:41,206 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-02 15:58:41,206 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9476762676643233792 to 1156831381426176
+2024-03-02 15:58:41,206 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4738381338321616896 to 578415690713088
+2024-03-02 15:58:41,207 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 2, Subfamilies - 38
+2024-03-02 15:58:49,651 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-02 15:58:49,651 - synthesizer_ar_storm.py - Subfamilies buffer contains: 38 families
+2024-03-02 15:59:20,930 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 15:59:21,774 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 15:59:21,774 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-02 16:00:01,475 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 16:00:02,300 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 16:00:02,300 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-02 16:00:42,022 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 16:00:42,522 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-02 16:00:42,522 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-03-02 16:00:52,542 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8887861426628962 | Time elapsed = 642.9s | FSC size = 769
+
+
+------------------------------------
+
+PAYNT results: 
+1.8742423456816841
+controller size: 134
+
+Storm results: 
+1.8887861426628962
+controller size: 769
+
+------------------------------------
+
+used FSCs: {2: 32, 0: 6}
+FSCs used count: 38
+2024-03-02 16:02:41,997 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 16:02:41,997 - synthesizer_ar_storm.py - Additional memory needed
+2024-03-02 16:02:41,997 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 16:02:41,997 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=2, A(1,0)={'(n)'}, M(1,0,0)=2, M(1,0,2)=2, A(2,0)={'(n)'}, M(2,0,0)=0, M(2,0,2)=2, A(0,1)={'(w)'}, M(0,1,1)=1, M(0,1,2)=1, A(1,1)={'(w)'}, M(1,1,1)=0, M(1,1,2)=1, A(0,2)={'(e)'}, M(0,2,0)=1, M(0,2,1)=0, M(0,2,2)=1, A(1,2)={'(n)'}, M(1,2,0)=1, M(1,2,1)=0, M(1,2,2)=0, A(2,2)={'(e)'}, M(2,2,0)=1, M(2,2,1)=0, M(2,2,2)=2, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=1, M(0,4,1)=0, M(0,4,2)=0, A(0,5)={'(n)'}, M(0,5,0)=1, M(0,5,1)=0, M(0,5,2)=0, A(0,7)={'(n)'}, M(0,7,0)=2, M(0,7,1)=0, M(0,7,2)=0
+2024-03-02 16:02:41,998 - synthesizer.py - double-checking specification satisfiability:  : 1.8742423456816841
+2024-03-02 16:02:41,998 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 16:02:41,998 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-02 16:02:41,999 - pomdp.py - unfolding POMDP using the following memory allocation vector: [3, 3, 2, 1, 1, 1, 1, 1, 1] ...
+2024-03-02 16:02:41,999 - pomdp.py - constructed quotient MDP having 34 states and 826 actions.
+2024-03-02 16:02:42,002 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4437222213480873984 to 771220920950784
+2024-03-02 16:02:42,002 - synthesizer.py - synthesis initiated, design space: 4437222213480873984
+2024-03-02 16:02:42,113 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-02 16:02:42,114 - synthesizer_ar_storm.py - Subfamilies buffer contains: 12 families
+2024-03-02 16:02:50,412 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 16:02:50,412 - synthesizer.py - None
+2024-03-02 16:02:50,412 - synthesizer_pomdp.py - Terminate: False
+2024-03-02 16:02:50,412 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-02 16:02:50,412 - pomdp.py - unfolding POMDP using the following memory allocation vector: [4, 4, 3, 2, 2, 2, 2, 2, 1] ...
+2024-03-02 16:02:50,416 - pomdp.py - constructed quotient MDP having 55 states and 4609 actions.
+2024-03-02 16:02:50,435 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1373253760318618790144679416681236193926447104 to 262223123614980661139685010212869111808
+2024-03-02 16:02:50,436 - synthesizer.py - synthesis initiated, design space: 1373253760318618790144679416681236193926447104
+-----------PAYNT-----------                     
+Value = 1.8744630117821963 | Time elapsed = 655.6s | FSC size = 210
+
+2024-03-02 16:03:21,673 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 16:03:22,524 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 16:03:22,524 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-02 16:04:02,217 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 16:04:03,085 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-02 16:04:03,085 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-02 16:04:42,763 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-02 16:04:43,263 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-02 16:04:43,263 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-03-02 16:04:53,275 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 1.8895980489959736 | Time elapsed = 904.6s | FSC size = 769
+
+
+------------------------------------
+
+PAYNT results: 
+1.8744630117821963
+controller size: 210
+
+Storm results: 
+1.8895980489959736
+controller size: 769
+
+------------------------------------
+
+used FSCs: {2: 38}
+FSCs used count: 38
+2024-03-02 16:07:03,745 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-03-02 16:07:03,745 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 16:07:03,745 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=1, M(0,0,2)=1, M(0,0,3)=0, M(0,0,5)=0, A(1,0)={'(e)'}, M(1,0,0)=0, M(1,0,2)=1, M(1,0,3)=0, M(1,0,5)=0, A(2,0)={'(n)'}, M(2,0,0)=3, M(2,0,2)=1, M(2,0,3)=0, M(2,0,5)=0, A(3,0)={'(n)'}, M(3,0,0)=0, M(3,0,2)=1, M(3,0,3)=0, M(3,0,5)=0, A(0,1)={'(w)'}, M(0,1,1)=1, M(0,1,2)=2, M(0,1,5)=0, A(1,1)={'(w)'}, M(1,1,1)=2, M(1,1,2)=2, M(1,1,5)=0, A(2,1)={'(w)'}, M(2,1,1)=3, M(2,1,2)=2, M(2,1,5)=0, A(3,1)={'(w)'}, M(3,1,1)=0, M(3,1,2)=2, M(3,1,5)=0, A(0,2)={'(e)'}, M(0,2,0)=2, M(0,2,1)=0, M(0,2,2)=2, M(0,2,4)=0, A(1,2)={'(e)'}, M(1,2,0)=2, M(1,2,1)=0, M(1,2,2)=1, M(1,2,4)=0, A(2,2)={'(n)'}, M(2,2,0)=2, M(2,2,1)=0, M(2,2,2)=0, M(2,2,4)=0, A(0,3)={'(n)'}, M(0,3,0)=0, M(0,3,3)=1, A(1,3)={'(n)'}, M(1,3,0)=0, M(1,3,3)=0, A(0,4)={'(n)'}, M(0,4,0)=2, M(0,4,1)=0, M(0,4,2)=0, M(0,4,3)=0, A(1,4)={'(n)'}, M(1,4,0)=0, M(1,4,1)=0, M(1,4,2)=0, M(1,4,3)=0, A(0,5)={'(n)'}, M(0,5,0)=2, M(0,5,1)=0, M(0,5,2)=0, M(0,5,3)=0, A(1,5)={'(n)'}, M(1,5,0)=0, M(1,5,1)=0, M(1,5,2)=0, M(1,5,3)=0, M(0,6,7)=1, M(1,6,7)=0, A(0,7)={'(n)'}, M(0,7,0)=2, M(0,7,1)=0, M(0,7,2)=2, M(0,7,3)=0, M(0,7,4)=0, M(0,7,5)=0, A(1,7)={'(n)'}, M(1,7,0)=3, M(1,7,1)=0, M(1,7,2)=0, M(1,7,3)=0, M(1,7,4)=0, M(1,7,5)=0
+2024-03-02 16:07:03,746 - synthesizer.py - double-checking specification satisfiability:  : 1.8744630117821963
+2024-03-02 16:07:03,747 - synthesizer_pomdp.py - Terminate: True
+2024-03-02 16:07:03,842 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-03-02 16:07:03,842 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 16:07:03,842 - synthesizer.py - None
+2024-03-02 16:07:03,842 - synthesizer_pomdp.py - Terminate: True
+2024-03-02 16:07:03,923 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-03-02 16:07:03,924 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-02 16:07:03,924 - synthesizer.py - A(0,0)={'(e)'}, M(0,0,0)=0, M(0,0,2)=3, A(1,0)={'(n)'}, M(1,0,0)=2, M(1,0,2)=3, A(2,0)={'(n)'}, M(2,0,0)=3, M(2,0,2)=3, A(3,0)={'(n)'}, M(3,0,0)=0, M(3,0,2)=3, A(0,1)={'(w)'}, M(0,1,2)=2, A(0,2)={'(e)'}, M(0,2,0)=0, M(0,2,2)=1, A(1,2)={'(e)'}, M(1,2,0)=1, M(1,2,2)=2, A(2,2)={'(n)'}, M(2,2,0)=1, M(2,2,2)=1, A(3,2)={'(e)'}, M(3,2,0)=1, M(3,2,2)=3, A(0,3)={'(n)'}, M(0,3,0)=0, A(0,4)={'(n)'}, M(0,4,0)=2, M(0,4,2)=1, A(0,5)={'(n)'}, M(0,5,0)=2, M(0,5,2)=1, M(0,9,2)=1
+2024-03-02 16:07:03,924 - synthesizer.py - double-checking specification satisfiability:  : 2.0677852250211286
+2024-03-02 16:07:03,925 - synthesizer_pomdp.py - Terminate: True
+2024-03-02 16:07:03,925 - storm_pomdp_control.py - Storm POMDP analysis completed
+
+------------------------------------
+
+PAYNT results: 
+1.8744630117821963
+controller size: 210
+
+Storm results: 
+1.8895980489959736
+controller size: 769
+
+------------------------------------
+

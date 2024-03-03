@@ -89,9 +89,9 @@ class SynthesizerPOMDP:
             self.storm_control.spec_formulas = self.quotient.specification.stormpy_formulae()
             self.synthesis_terminate = False
             self.synthesizer = SynthesizerARStorm       # SAYNT only works with abstraction refinement
+            self.saynt_timer = Timer()
+            self.interactive_queue = Queue()
             if self.storm_control.iteration_timeout is not None:
-                self.saynt_timer = Timer()
-                self.interactive_queue = Queue()
                 self.storm_control.saynt_timer = self.saynt_timer
             if self.storm_control.enhanced_saynt is not None:
                 self.storm_control.sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(self.quotient.pomdp)
