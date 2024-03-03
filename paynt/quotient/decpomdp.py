@@ -275,3 +275,33 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             return super().new_scores(scores)
 
         return 0
+
+    def scheduler_selection(self, mdp, scheduler, coloring=None):
+        ''' Get hole options involved in the scheduler selection. '''
+        assert scheduler.memoryless and scheduler.deterministic
+
+        if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
+            return super().scheduler_selection(mdp,scheduler,coloring)
+
+
+        
+        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
+        
+        choices = self.state_to_choice_to_choices(state_to_choice)
+        if coloring is None:
+            coloring = self.coloring
+        
+        hole_selection = coloring.collectHoleOptions(choices)
+
+        for hole in range(len(hole_selection)):
+            # print(hole_selection[hole])
+            for option in hole_selection[hole]:
+                pass
+                # print(option)
+                # print(self.hole_option_to_actions[hole][option])
+        # print("scheduler",scheduler)
+        # print("state_to_choice",state_to_choice)
+        # print("choices",choices)
+        # print("coloring",coloring)
+        # print("hole_selection",hole_selection)
+        return hole_selection

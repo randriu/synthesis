@@ -182,11 +182,6 @@ class Quotient:
             coloring = self.coloring
         
         hole_selection = coloring.collectHoleOptions(choices)
-        print("scheduler",scheduler)
-        print("state_to_choice",state_to_choice)
-        print("choices",choices)
-        print("coloring",coloring)
-        print("hole_selection",hole_selection)
         return hole_selection
 
     

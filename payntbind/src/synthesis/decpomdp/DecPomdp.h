@@ -147,6 +147,9 @@ namespace synthesis {
         // for each agent observation contains the maximum memory size of a destination
         // across all rows of a prototype state having this observation
         std::vector<std::vector<uint64_t>> agent_max_successor_memory_size;
+
+        // for each combination of memory and joint observation, the coresponding unique number
+        std::vector<std::vector<uint64_t>> memory_joint_observation;
             
 
 
@@ -197,6 +200,7 @@ namespace synthesis {
         storm::models::sparse::StandardRewardModel<double> constructQuotientRewardModel();
 
         void resetDesignSpace();
+        void made_memory_joint_observation();
         void buildDesignSpaceSpurious(); 
 
         // for each prototype state contains a list of its duplicates (including itself)

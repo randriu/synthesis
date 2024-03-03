@@ -127,8 +127,8 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
         for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
             auto value = choice_to_value[choice];
             auto choice_global = choice_to_global_choice[choice];
-            std::cout << "choice " << choice << std::endl;
-            std::cout << "choice_global " << choice_global << std::endl;
+            // std::cout << "choice " << choice << std::endl;
+            // std::cout << "choice_global " << choice_global << std::endl;
             for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
                     continue;
