@@ -882,7 +882,8 @@ namespace synthesis {
                         
 
         }
-    void DecPomdp::made_memory_joint_observation() {
+
+    void DecPomdp::construct_memory_joint_observation() {
         this->memory_joint_observation.clear();
         this->memory_joint_observation.resize(this->joint_observations.size());
         uint64_t id = 0;
@@ -898,9 +899,16 @@ namespace synthesis {
         // std::cout << "this->memory_joint_observation" << this->memory_joint_observation  << std::endl;
     }
 
+    void DecPomdp::construct_acton_to_memory_joint_observation() {
+        this->action_to_memory_joint_observation.clear();
+        this->action_to_memory_joint_observation.resize(this->num_joint_actions());
+        // std::cout << "this->memory_joint_observation" << this->memory_joint_observation  << std::endl;
+    }
+
     void DecPomdp::buildDesignSpaceSpurious() {
             this->resetDesignSpace();
-            this->made_memory_joint_observation();
+            this->construct_memory_joint_observation();
+            this->construct_acton_to_memory_joint_observation();
             
             // for each (z,n) create an action and a memory hole (if necessary)
             // store hole range
