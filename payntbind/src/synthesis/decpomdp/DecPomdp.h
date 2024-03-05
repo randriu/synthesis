@@ -151,7 +151,7 @@ namespace synthesis {
         // for each combination of memory and joint observation, the coresponding unique number
         std::vector<std::vector<uint64_t>> memory_joint_observation;
         // for each action, set of memory_joint_observation 
-        std::vector<std::vector<uint64_t>> action_to_memory_joint_observation; // TODO not completed
+        std::vector<uint64_t> action_to_memory_joint_observation; // TODO not completed
             
 
 

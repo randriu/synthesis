@@ -59,6 +59,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.nr_agent_observations = [len(observation) for observation in self.agent_observation_labels]
         # # print("self.nr_agent_observations",self.nr_agent_observations)
 
+
         # self.num_rows = decpomdp_manager.num_rows()
         # # print("self.num_rows",self.num_rows)
 
@@ -194,6 +195,10 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
         self.state_to_holes = self.coloring.getStateToHoles().copy()
 
+        self.memory_joint_observation = self.decpomdp_manager.memory_joint_observation
+        self.action_to_memory_joint_observation = self.decpomdp_manager.action_to_memory_joint_observation
+
+
         # to each hole-option pair a list of actions colored by this combination
         self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
         for hole in range(family.num_holes):
@@ -294,7 +299,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         hole_selection = coloring.collectHoleOptions(choices)
 
         for hole in range(len(hole_selection)):
-            print(hole_selection[hole])
+            # print(hole_selection[hole])
             if len(hole_selection[hole]) < 2:
                 continue
             # for option in hole_selection[hole]: TODO must be for all combinations of choices
@@ -305,13 +310,20 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             set1 = set(self.hole_option_to_actions[hole][hole_selection[hole][0]])
             set2 = set(self.hole_option_to_actions[hole][hole_selection[hole][1]])
             set_choices = set(choices)
-            print("set1",set1.intersection(set_choices))
-            print("set2",set2.intersection(set_choices))
+            list1 = list(set1.intersection(set_choices))
+            list2 = list(set2.intersection(set_choices))
+            # print("list1",list1)
+            # print("list2",list2)
+
+            obs1  = list(map(lambda x: self.action_to_memory_joint_observation[x], list1))
+            print("\n obs1",obs1)
+            obs2  = list(map(lambda x: self.action_to_memory_joint_observation[x], list2))
+            print("obs2 ",obs2)
 
             # only for testing
         # print("scheduler",scheduler)
         # print("state_to_choice",state_to_choice)
-        print("choices",choices)
+        # print("choices",choices)
         # print("coloring",coloring)
-        print("hole_selection",hole_selection)
+        # print("hole_selection",hole_selection)
         return hole_selection

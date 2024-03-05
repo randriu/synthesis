@@ -901,8 +901,24 @@ namespace synthesis {
 
     void DecPomdp::construct_acton_to_memory_joint_observation() {
         this->action_to_memory_joint_observation.clear();
-        this->action_to_memory_joint_observation.resize(this->num_joint_actions());
-        // std::cout << "this->memory_joint_observation" << this->memory_joint_observation  << std::endl;
+        // this->action_to_memory_joint_observation.resize(this->num_joint_actions());
+
+        
+        // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
+        for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+            auto prototype_state = this->state_prototype[state];
+            auto state_mem = this->state_memory[state];
+            auto observ = this->state_joint_observation[prototype_state];
+            for(auto row: this->transition_matrix[prototype_state]) {
+                // std::cout << "2 " << std::endl;
+                for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observ]; dst_mem++) {
+                    // std::cout << "3 " << std::endl;
+                    this->action_to_memory_joint_observation.push_back(this->memory_joint_observation[observ][state_mem]);
+                }               
+            }
+        }
+
+        // std::cout << "this->action_to_memory_joint_observation" << this->action_to_memory_joint_observation  << std::endl;
     }
 
     void DecPomdp::buildDesignSpaceSpurious() {
