@@ -298,27 +298,41 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         
         hole_selection = coloring.collectHoleOptions(choices)
 
-        for hole in range(len(hole_selection)):
-            # print(hole_selection[hole])
-            if len(hole_selection[hole]) < 2:
-                continue
-            # for option in hole_selection[hole]: TODO must be for all combinations of choices
-            #     pass
-            #     print(option)
-            #     print("self.hole_option_to_actions[hole][option]",self.hole_option_to_actions[hole][option])
-            # only for testing
-            set1 = set(self.hole_option_to_actions[hole][hole_selection[hole][0]])
-            set2 = set(self.hole_option_to_actions[hole][hole_selection[hole][1]])
-            set_choices = set(choices)
-            list1 = list(set1.intersection(set_choices))
-            list2 = list(set2.intersection(set_choices))
-            # print("list1",list1)
-            # print("list2",list2)
+        new_hole_selection = hole_selection.copy()
 
-            obs1  = list(map(lambda x: self.action_to_memory_joint_observation[x], list1))
-            print("\n obs1",obs1)
-            obs2  = list(map(lambda x: self.action_to_memory_joint_observation[x], list2))
-            print("obs2 ",obs2)
+        exist_inconsistency = False
+        for hole in range(len(hole_selection)):
+            result_set = set()
+            # print(hole_selection[hole])
+            num_options = len(hole_selection[hole])
+            if num_options < 2:
+                continue
+            for opt1 in range(num_options): 
+                for opt2 in range(opt1,num_options):
+                    set1 = set(self.hole_option_to_actions[hole][hole_selection[hole][opt1]])
+                    set2 = set(self.hole_option_to_actions[hole][hole_selection[hole][opt2]])
+                    set_choices = set(choices)
+                    list1 = list(set1.intersection(set_choices))
+                    list2 = list(set2.intersection(set_choices))
+                    # print("list1",list1)
+                    # print("list2",list2)
+
+                    obs1  = set(map(lambda x: self.action_to_memory_joint_observation[x], list1))
+                    # print("\n obs1",obs1)
+                    obs2  = set(map(lambda x: self.action_to_memory_joint_observation[x], list2))
+                    # print("obs2 ",obs2)
+
+                    # print("obs1 & obs2",obs1 & obs2)
+                    # print("len",len(obs1 & obs2))
+                    if len(obs1 & obs2) < 1:
+                        result_set = result_set.union({opt1,opt2})
+                        exist_inconsistency = True
+                    # print("result_set",result_set)
+            new_hole_selection[hole] = list(result_set)
+
+        if exist_inconsistency:
+            hole_selection = new_hole_selection.copy()
+
 
             # only for testing
         # print("scheduler",scheduler)
