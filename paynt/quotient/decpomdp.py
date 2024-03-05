@@ -294,14 +294,24 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         hole_selection = coloring.collectHoleOptions(choices)
 
         for hole in range(len(hole_selection)):
-            # print(hole_selection[hole])
-            for option in hole_selection[hole]:
-                pass
-                # print(option)
-                # print(self.hole_option_to_actions[hole][option])
+            print(hole_selection[hole])
+            if len(hole_selection[hole]) < 2:
+                continue
+            # for option in hole_selection[hole]: TODO must be for all combinations of choices
+            #     pass
+            #     print(option)
+            #     print("self.hole_option_to_actions[hole][option]",self.hole_option_to_actions[hole][option])
+            # only for testing
+            set1 = set(self.hole_option_to_actions[hole][hole_selection[hole][0]])
+            set2 = set(self.hole_option_to_actions[hole][hole_selection[hole][1]])
+            set_choices = set(choices)
+            print("set1",set1.intersection(set_choices))
+            print("set2",set2.intersection(set_choices))
+
+            # only for testing
         # print("scheduler",scheduler)
         # print("state_to_choice",state_to_choice)
-        # print("choices",choices)
+        print("choices",choices)
         # print("coloring",coloring)
-        # print("hole_selection",hole_selection)
+        print("hole_selection",hole_selection)
         return hole_selection
