@@ -126,6 +126,8 @@ def setup_logger(log_path = None):
     help="# if set, randomized abstraction guess-and-verify will be used instead of game abstraction;" +
     " MDP abstraction scheduler will be used for splitting"
 )
+@click.option("--use-inheritance", is_flag=True, default=False,
+    help="# if set, inheritance dependencies will be used for the synthesis of FSCs")
 
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
@@ -145,6 +147,7 @@ def paynt_run(
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
+    use_inheritance,
     ce_generator,
     profiling
 ):
@@ -166,6 +169,8 @@ def paynt_run(
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_randomized_abstraction = mdp_use_randomized_abstraction
 
+    paynt.quotient.quotient.Quotient.use_inheritance_build = use_inheritance
+    
     storm_control = None
     if storm_pomdp:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()

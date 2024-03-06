@@ -35,7 +35,14 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         satisfying_assignment = None
         families = [family]
 
+        iteration_limit = 500
+        iteration_count = 0
+
         while families:
+
+            iteration_count += 1
+            if iteration_count > iteration_limit:
+                break
 
             family = families.pop(-1)
 

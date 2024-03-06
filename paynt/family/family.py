@@ -136,6 +136,11 @@ class ParentInfo():
         # index of a hole used to split the family
         self.splitter = None
 
+        # explicit list of all non-default actions in the MDP
+        self.selected_choices = None
+        # for each hole and for each option explicit list of all non-default actions in the MDP
+        self.hole_selected_choices = None
+
 
 class DesignSpace(Family):
     '''
@@ -152,6 +157,9 @@ class DesignSpace(Family):
         super().__init__(family)
 
         self.mdp = None
+
+        self.hole_selected_choices = None
+        self.selected_choices = None
         
         # SMT encoding
         self.encoding = None
@@ -223,12 +231,15 @@ class DesignSpace(Family):
 
     def collect_parent_info(self, specification):
         pi = ParentInfo()
+        pi.hole_selected_choices = self.hole_selected_choices
+        pi.selected_choices = self.selected_choices
         pi.refinement_depth = self.refinement_depth
         pi.analysis_hints = self.collect_analysis_hints(specification)
         cr = self.analysis_result.constraints_result
         pi.constraint_indices = cr.undecided_constraints if cr is not None else []
         pi.splitter = self.splitter
         pi.mdp = self.mdp
+        pi.analysis_result = self.analysis_result
         return pi
 
     def encode(self, smt_solver):

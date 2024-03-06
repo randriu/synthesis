@@ -210,6 +210,11 @@ class Statistic:
         members_total = self.quotient.design_space.size
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
+    
+    def get_summary_affected(self):
+        if not self.quotient.use_inheritance_build or self.quotient.perc_affected_entries == 0:
+            return ""
+        return f"\naffected states average: {self.quotient.perc_affected_sum/self.quotient.perc_affected_entries} %"
 
     
     def get_summary(self):
@@ -220,8 +225,10 @@ class Statistic:
 
         quotient_states = self.quotient.quotient_mdp.nr_states
         quotient_actions = self.quotient.quotient_mdp.nr_choices
-        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size}, quotient: {quotient_states} states / {quotient_actions} actions"
+        # design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size}, quotient: {quotient_states} states / {quotient_actions} actions"
+        design_space = f"number of holes: {self.quotient.design_space.num_holes}, quotient: {quotient_states} states / {quotient_actions} actions"
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
+        affected = self.get_summary_affected()
 
         iterations = self.get_summary_iterations()
         
@@ -234,7 +241,7 @@ class Statistic:
         summary = f"{sep}"\
                 f"Synthesis summary:\n" \
                 f"{specification}\n{timing}\n{design_space}\n{explored}\n" \
-                f"{iterations}\n{result}\n"\
+                f"{iterations}\n{result}{affected}\n"\
                 f"{sep}"
         return summary
     

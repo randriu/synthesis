@@ -130,7 +130,7 @@ class Synthesizer:
             self.quotient.specification.optimality.update_optimum(optimum_threshold)
             logger.debug(f"optimality threshold set to {optimum_threshold}")
         
-        logger.info("synthesis initiated, design space: {}".format(family.size))
+        # logger.info("synthesis initiated, design space: {}".format(family.size))
         self.quotient.discarded = 0
         self.stat.start(family)
         assignment = self.synthesize_one(family)

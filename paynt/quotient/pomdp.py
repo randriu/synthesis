@@ -383,6 +383,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # create inverse quotient-choice-to-mdp-choice map
         # TODO optimize this for multiple properties
         quotient_to_restricted_action_map = [None] * self.quotient_mdp.nr_choices
+        # print(self.quotient_mdp.nr_choices)
         for choice in range(mdp.nr_choices):
             quotient_to_restricted_action_map[quotient_choice_map[choice]] = choice
 
@@ -420,8 +421,13 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
                     assert len(self.hole_option_to_actions[hole_index][option]) > choice_index
                     choice_global = self.hole_option_to_actions[hole_index][option][choice_index]
-                    choice = quotient_to_restricted_action_map[choice_global]
+                    choice = quotient_to_restricted_action_map[choice_global]                    
+                    if choice is None:
+                        continue
+
                     choice_value = choice_values[choice]
+                    # print(choice_value)
+                    # print()
                     state_values.append(choice_value)
 
                 min_value = min(state_values)
