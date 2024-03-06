@@ -316,6 +316,23 @@ namespace synthesis {
         return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
     }
 
+    storm::models::sparse::StandardRewardModel<double> DecPomdp::constructConstraintRewardModel() {
+        std::optional<std::vector<double>> state_rewards;
+        std::vector<double> action_rewards;
+        for(uint64_t state = 0; state < this->num_states(); state++) {
+            for(uint64_t row = 0; row < this->transition_matrix[state].size(); row++) {
+                auto reward = this->row_reward[state][row];
+                // no matter what the bound is there should not be any cost in the initial state or the discount state
+                if (reward < this->constraint_bound && (state != this->initial_state && state != this->discount_sink_state)) {
+                    action_rewards.push_back(1);
+                } else {
+                    action_rewards.push_back(0);
+                }
+            }
+        } 
+        return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
+    }
+
 
 
     std::vector<uint32_t> DecPomdp::constructObservabilityClasses() {
@@ -333,6 +350,9 @@ namespace synthesis {
         components.choiceLabeling = this->constructChoiceLabeling();
         components.transitionMatrix = this->constructTransitionMatrix();
         components.rewardModels.emplace(this->reward_model_name, this->constructRewardModel());
+        if (this->constraint_bound < std::numeric_limits<double>::infinity()) {
+            components.rewardModels.emplace(this->constraint_reward_model_name, this->constructConstraintRewardModel());
+        }
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
@@ -342,6 +362,9 @@ namespace synthesis {
         components.choiceLabeling = this->constructChoiceLabeling();
         components.transitionMatrix = this->constructTransitionMatrix();
         components.rewardModels.emplace(this->reward_model_name, this->constructRewardModel());
+        if (this->constraint_bound < std::numeric_limits<double>::infinity()) {
+            components.rewardModels.emplace(this->constraint_reward_model_name, this->constructConstraintRewardModel());
+        }
         components.observabilityClasses = this->constructObservabilityClasses();
         return std::make_shared<storm::models::sparse::Pomdp<double>>(std::move(components));
     }

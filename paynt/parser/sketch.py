@@ -57,9 +57,11 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, discount_factor=1, precision=1e-4):
+        export=None, relative_error=0, discount_factor=1, precision=1e-4, constraint_bound=None):
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
+        if discount_factor < 1:
+            logger.warning("ignoring non-trivial discount factor")
 
         prism = None
         explicit_quotient = None
@@ -97,41 +99,27 @@ class Sketch:
             try:
                 logger.info(f"assuming sketch in Cassandra format...")
                 decpomdp_manager = payntbind.synthesis.parse_decpomdp(sketch_path)
+                if constraint_bound is not None:
+                    decpomdp_manager.set_constraint(constraint_bound)
                 if decpomdp_manager is None:
                     raise SyntaxError
                 logger.info("applying discount factor transformation...")
                 decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
-                optimality = paynt.verification.property.construct_reward_property(
-                    decpomdp_manager.reward_model_name,
-                    decpomdp_manager.reward_minimizing,
-                    decpomdp_manager.discount_sink_label)
-                specification = paynt.verification.property.Specification([optimality])
+                if constraint_bound is not None:
+                    specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
+                else:
+                    optimality = paynt.verification.property.construct_reward_property(
+                        decpomdp_manager.reward_model_name,
+                        decpomdp_manager.reward_minimizing,
+                        decpomdp_manager.discount_sink_label)
+                    specification = paynt.verification.property.Specification([optimality])
                 filetype = "cassandra"
             except SyntaxError:
                 pass
 
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
-
-        if filetype=="prism" or filetype =="drn":
-            assert specification is not None
-            if discount_factor < 1:
-                logger.info("applying discount factor transformation")
-                assert specification.is_single_property and specification.all_properties()[0].reward, \
-                    "non-trivial discount factor can only be used in combination with a single reward property"
-                assert explicit_quotient.is_partially_observable, \
-                    "non-trivial discount factor can only be used for POMDPs (for now...)"
-                prop = specification.all_properties()[0]
-                reward_name = prop.formula.reward_name
-                target_label = str(prop.formula.subformula.subformula)
-                subpomdp_builder = payntbind.synthesis.SubPomdpBuilder(explicit_quotient, reward_name, target_label)
-                subpomdp_builder.set_discount_factor(discount_factor)
-                initial_distribution = {explicit_quotient.initial_states[0] : 1}
-                relevant_observations = stormpy.storage.BitVector(explicit_quotient.nr_observations,True)
-                subpomdp_builder.set_relevant_observations(relevant_observations, initial_distribution)
-                explicit_quotient = subpomdp_builder.restrict_pomdp(initial_distribution)
-                logger.debug('WARNING: discount factor transformation has not been properly tested')
              
         paynt.quotient.models.MarkovChain.initialize(specification)
         paynt.verification.property.Property.initialize()

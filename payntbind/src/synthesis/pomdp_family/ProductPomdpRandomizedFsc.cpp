@@ -124,8 +124,9 @@ namespace synthesis {
     ) {
         this->buildStateSpace(action_function,update_function);
         storm::storage::sparse::ModelComponents<ValueType> components;
+        auto translated_initial_state = this->translateInitialState();
         components.stateLabeling = synthesis::translateStateLabeling(
-            this->quotient,this->state_translator.translationToItem(),this->translateInitialState()
+            this->quotient,this->state_translator.translationToItem(),translated_initial_state
         );
         
         components.transitionMatrix = this->buildTransitionMatrix(action_function,update_function);

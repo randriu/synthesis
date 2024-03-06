@@ -14,8 +14,6 @@ namespace synthesis {
         ItemTranslator(uint64_t num_items);
         /** Remove all translations. */
         void clear();
-        /** Prepare to translate \p num_items items. It is assumed that translator has currently size 0. */
-        void resize(uint64_t num_items);
 
         /** Number of created translations. */
         uint64_t numTranslations() const;
@@ -25,7 +23,9 @@ namespace synthesis {
         uint64_t translate(uint64_t item);
         /** Retrieve the item that has the given translation. */
         uint64_t retrieve(uint64_t translation) const;
-
+        
+        /** Returns mapping of item to translation. */
+        std::vector<uint64_t> const& itemToTranslation() const;
         /** Returns reverse mapping of translation to item. */
         std::vector<uint64_t> const& translationToItem() const;
 

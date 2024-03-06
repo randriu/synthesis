@@ -1,3 +1,5 @@
+# WARNING: this module is currently not maintained
+
 import stormpy
 import payntbind
 

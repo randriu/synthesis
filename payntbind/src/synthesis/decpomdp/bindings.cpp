@@ -15,6 +15,8 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("reward_model_name", [](synthesis::DecPomdp& decpomdp) {return decpomdp.reward_model_name;})
         .def_property_readonly("reward_minimizing", [](synthesis::DecPomdp& decpomdp) {return decpomdp.reward_minimizing;})
         .def_property_readonly("discount_factor", [](synthesis::DecPomdp& decpomdp) {return decpomdp.discount_factor;})
+
+        .def("set_constraint", &synthesis::DecPomdp::set_constraint_bound, py::arg("bound"))
         
         .def("apply_discount_factor_transformation", &synthesis::DecPomdp::applyDiscountFactorTransformation)
         .def_property_readonly("discount_sink_label", [](synthesis::DecPomdp& decpomdp) {return decpomdp.discount_sink_label;})
