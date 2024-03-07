@@ -119,10 +119,20 @@ if __name__ == '__main__':
     export_fsc = len(sys.argv) > 3
 
     if experiment == 'default':
-        experiment_models = ["drone-4-2", "network", "4x3-95", "query-s3", "milos-aaai97", "refuel-20"]
+        experiment_models = ["drone-4-2", "network", "4x3-95", "query-s3", "milos-aaai97", "refuel-20", "network-3-8-20", "refuel-08", "4x5x2-95"]
 
-        options = "--storm-pomdp --iterative-storm 900 120 10 --enhanced-saynt 6"
-        logs_string = "order-uniform-6-120-10"
+        options = "--storm-pomdp --iterative-storm 900 90 15 --enhanced-saynt 9"
+        logs_string = "order-uniform-9-90-15"
+        timeout = 1200
+        run_experiment(options, logs_string, experiment_models, timeout)
+
+        print("\n EXPERIMENT COMPLETE\n")
+
+    if experiment == 'posterior':
+        experiment_models = ["drone-4-2", "network", "4x3-95"]
+
+        options = "--storm-pomdp --iterative-storm 900 60 10 --enhanced-saynt 0 --posterior-aware"
+        logs_string = "order-uniform-default-60-10-posterior"
         timeout = 1200
         run_experiment(options, logs_string, experiment_models, timeout)
 

@@ -649,8 +649,11 @@ class StormPOMDPControl:
                 continue
             name = name.strip('A()')
             obs = name.split(',')[0]
-            assert obs in self.quotient.observation_labels, f"observation labels {self.quotient.observation_labels} don't contain {obs} even though it's used in hole name {name}"
-            observation = self.quotient.observation_labels.index(obs)
+            if obs.isdigit():
+                observation = int(obs)
+            else:
+                assert obs in self.quotient.observation_labels, f"observation labels {self.quotient.observation_labels} don't contain {obs} even though it's used in hole name {name}"
+                observation = self.quotient.observation_labels.index(obs)
 
             option = self.latest_paynt_result.hole_options(hole)[0]
             if option not in result[observation]:

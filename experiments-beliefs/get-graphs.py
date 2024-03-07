@@ -46,16 +46,36 @@ def get_milos_header():
         anchor=north west, draw=black, \n\
         fill=white,align=left},\n]\n"
 
+def get_drone42_header():
+    return "\\begin{tikzpicture}\n\\begin{axis}[\n\
+    title={Drone-4-2},\n\
+    xlabel={Time [min]},\n\
+    ylabel={Value [Pmax]},\n\
+    xmin=0, xmax=15,\n\
+    ymin=0.5, ymax=1.0,\n\
+    xtick={0,2,4,6,8,10,12,14},\n\
+    ytick={0.5,0.6,0.7,0.8,0.9,1.0},\n\
+    xtick pos=left,\n\
+    ytick pos=left,\n\
+    restrict y to domain=0.0:1.0,\n\
+    ymajorgrids=true,\n\
+    grid style=dashed,\n\
+    height=8cm,\n\
+    width=12cm,\n\
+    legend style ={ at={(1.03,1)},\n\
+        anchor=north west, draw=black, \n\
+        fill=white,align=left},\n]\n"
 
-def get_refuel_header():
+
+def get_refuel20_header():
     return "\\begin{tikzpicture}\n\\begin{axis}[\n\
     title={Refuel-20},\n\
     xlabel={Time [min]},\n\
     ylabel={Value [Pmax]},\n\
     xmin=0, xmax=15,\n\
-    ymin=0, ymax=0.25,\n\
+    ymin=0, ymax=0.35,\n\
     xtick={0,2,4,6,8,10,12,14},\n\
-    ytick={0,0.05,0.1,0.15,0.2,0.25},\n\
+    ytick={0,0.07,0.14,0.21,0.28,0.35},\n\
     xtick pos=left,\n\
     ytick pos=left,\n\
     restrict y to domain=0:0.4,\n\
@@ -68,7 +88,7 @@ def get_refuel_header():
         fill=white,align=left},\n]\n"
 
 
-def get_query_header():
+def get_querys3_header():
     return "\\begin{tikzpicture}\n\\begin{axis}[\n\
     title={Query-s3},\n\
     xlabel={Time [min]},\n\
@@ -133,7 +153,7 @@ def get_hallway_header():
         fill=white,align=left},\n]\n"
 
 
-def get_network_header():
+def get_network3820_header():
     return "\\begin{tikzpicture}\n\\begin{axis}[\n\
     title={Network-3-8-20},\n\
     xlabel={Time [min]},\n\
@@ -147,6 +167,26 @@ def get_network_header():
     restrict y to domain=8:14,\n\
     ymajorgrids=true,\n\
     y dir=reverse,\n\
+    grid style=dashed,\n\
+    height=8cm,\n\
+    width=12cm,\n\
+    legend style ={ at={(1.03,1)},\n\
+        anchor=north west, draw=black, \n\
+        fill=white,align=left},\n]\n"
+
+
+def get_network_header():
+    return "\\begin{tikzpicture}\n\\begin{axis}[\n\
+    title={Network},\n\
+    xlabel={Time [min]},\n\
+    ylabel={Value [Rmax]},\n\
+    xmin=0, xmax=15,\n\
+    ymin=200, ymax=300,\n\
+    xtick={0,2,4,6,8,10,12,14},\n\
+    ytick={200,220,240,260,280,300},\n\
+    xtick pos=left,\n\
+    ytick pos=left,\n\
+    restrict y to domain=180:300,\n\
     grid style=dashed,\n\
     height=8cm,\n\
     width=12cm,\n\
@@ -182,7 +222,7 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
     line width=1.5pt,mark size=2pt,]\n\
     coordinates {\n" + enhanced_saynt_storm_coordinates + "\n\
     };\n\
-    \\addlegendentry{Enhanced SAYNT $F_{B}$};\n", file=output_file)
+    \\addlegendentry{SAYNT2.0 $F_{B}$};\n", file=output_file)
 
     split1 = enhanced_saynt_log.split("-----------PAYNT-----------")
     for i in range(len(split1)):
@@ -202,7 +242,7 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
     line width=1.5pt,mark size=2pt,]\n\
     coordinates {\n" + enhanced_saynt_paynt_coordinates + "\n\
     };\n\
-    \\addlegendentry{Enhanced SAYNT $F_{I}$};\n", file=output_file)
+    \\addlegendentry{SAYNT2.0 $F_{I}$};\n", file=output_file)
     
 
 
@@ -259,6 +299,7 @@ def get_graphs(enhanced_saynt_experiment):
 
     for model in models:
         model_name = os.path.basename(model).decode("utf-8")
+        print(model_name)
 
         try:
 
@@ -276,10 +317,10 @@ def get_graphs(enhanced_saynt_experiment):
                 header = get_milos_header()
                 output_file_name = "source-milos-97.tex"
             elif model_name == "refuel-20":
-                header = get_refuel_header()
+                header = get_refuel20_header()
                 output_file_name = "source-refuel-20.tex"
             elif model_name == "query-s3":
-                header = get_query_header()
+                header = get_querys3_header()
                 output_file_name = "source-query-s3.tex"
             elif model_name == "lanes-100-combined-new":
                 header = get_lanes_header()
@@ -288,8 +329,14 @@ def get_graphs(enhanced_saynt_experiment):
                 header = get_hallway_header()
                 output_file_name = "source-hallway.tex"
             elif model_name == "network-3-8-20":
-                header = get_network_header()
+                header = get_network3820_header()
                 output_file_name = "source-network-3-8-20.tex"
+            elif model_name == "network":
+                header = get_network_header()
+                output_file_name = "source-network.tex"
+            elif model_name == "drone-4-2":
+                header = get_drone42_header()
+                output_file_name = "source-drone-4-2.tex"
 
 
             with open(result_folder.decode("utf-8") + "/" + output_file_name, "w") as text_file:
@@ -328,15 +375,17 @@ def get_string_if_file_exists(path):
         return ""
 
 def get_figure(enhanced_saynt_experiment):
-    string_4x3 = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-4x3-95.tex")
-    string_lanes = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-lanes.tex")
-    string_milos = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-milos-97.tex")
-    string_hallway = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-hallway.tex")
-    string_network = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-network-3-8-20.tex")
-    string_query = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-query-s3.tex")
-    string_refuel = get_string_if_file_exists(result_folder.decode("utf-8") + "/source-refuel-20.tex")
+    figure_contents = ""
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-4x3-95.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-lanes.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-milos-97.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-hallway.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-network-3-8-20.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-query-s3.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-refuel-20.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-network.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-drone-4-2.tex")
 
-    figure_contents = string_4x3 + string_lanes + string_milos + string_hallway + string_network + string_query + string_refuel
 
     with open(result_folder.decode("utf-8") + f"/figure-{enhanced_saynt_experiment}.tex", "w") as text_file:
         print(get_figure_start(), file=text_file)

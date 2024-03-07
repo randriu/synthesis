@@ -1,0 +1,479 @@
+2024-03-07 23:38:26,346 - cli.py - This is Paynt version 0.1.0.
+2024-03-07 23:38:26,347 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/refuel-20/sketch.templ ...
+2024-03-07 23:38:26,347 - sketch.py - assuming sketch in PRISM format...
+2024-03-07 23:38:26,374 - prism_parser.py - PRISM model type: POMDP
+2024-03-07 23:38:26,374 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/refuel-20/sketch.props ...
+2024-03-07 23:38:26,378 - prism_parser.py - found the following specification: optimality: Pmax=? ["notbad" U "goal"] 
+2024-03-07 23:38:26,505 - sketch.py - sketch parsing OK
+2024-03-07 23:38:26,505 - sketch.py - constructed explicit quotient having 6834 states and 24763 actions
+2024-03-07 23:38:26,505 - property.py - converting until formula to eventually...
+2024-03-07 23:38:26,505 - sketch.py - found the following specification optimality: Pmax=? [F "goal"] 
+2024-03-07 23:38:26,517 - pomdp.py - constructed POMDP having 174 observations.
+2024-03-07 23:38:27,083 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:38:27,090 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:38:32,671 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-03-07 23:38:32,671 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 15), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False
+2024-03-07 23:38:32,686 - storm_pomdp_control.py - Interactive Storm started
+2024-03-07 23:38:32,687 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-03-07 23:38:47,873 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.13441287769717072 | Time elapsed = 42.9s | FSC size = 1153
+
+2024-03-07 23:39:16,482 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:16,894 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:16,908 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:39:22,472 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:22,892 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:22,897 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:39:28,536 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:28,963 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:28,968 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:39:34,635 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:35,041 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:35,046 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:39:40,457 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:40,876 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:40,900 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:39:46,486 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:46,487 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:46,487 - pomdp.py - constructed quotient MDP having 19 states and 28 actions.
+2024-03-07 23:39:46,673 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:46,675 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:46,675 - pomdp.py - constructed quotient MDP having 323 states and 783 actions.
+2024-03-07 23:39:46,882 - pomdp.py - constructed POMDP having 175 observations.
+2024-03-07 23:39:46,883 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:46,883 - pomdp.py - constructed quotient MDP having 19 states and 28 actions.
+2024-03-07 23:39:46,883 - synthesizer_pomdp.py - 8 threads for enhanced SAYNT created
+2024-03-07 23:39:46,883 - synthesizer_pomdp.py - new synthesis time per thread: 10.0s
+2024-03-07 23:39:46,884 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4453613905990308588714535800947710777258344972288 to 2
+2024-03-07 23:39:46,884 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-03-07 23:39:46,885 - synthesizer.py - synthesis initiated, design space: 4453613905990308588714535800947710777258344972288
+-----------PAYNT-----------                     
+Value = 0.11084902583077773 | Time elapsed = 74.2s | FSC size = 348
+
+-----------PAYNT-----------                     
+Value = 0.15541658291131832 | Time elapsed = 74.2s | FSC size = 348
+
+2024-03-07 23:39:46,921 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-07 23:39:46,921 - synthesizer_ar_storm.py - Subfamilies buffer contains: 20 families
+2024-03-07 23:39:57,339 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:39:57,403 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:39:57,405 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:39:57,411 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:40:02,422 - synthesizer.py - synthesis initiated, design space: 4453613905990308588714535800947710777258344972288
+2024-03-07 23:40:07,928 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:40:08,428 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:40:08,430 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:08,436 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:40:13,456 - synthesizer.py - synthesis initiated, design space: 4453613905990308588714535800947710777258344972288
+2024-03-07 23:40:18,918 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:40:19,027 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:40:19,028 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:19,065 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:40:24,167 - synthesizer.py - synthesis initiated, design space: 4453613905990308588714535800947710777258344972288
+2024-03-07 23:40:29,160 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:40:29,656 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:40:29,659 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:29,671 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:40:34,774 - synthesizer.py - synthesis initiated, design space: 4453613905990308588714535800947710777258344972288
+2024-03-07 23:40:39,671 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:40:40,168 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:40:40,170 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:40,181 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-07 23:40:45,200 - synthesizer.py - synthesis initiated, design space: 4453613905990308588714535800947710777258344972288
+2024-03-07 23:40:50,681 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:40:50,725 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:40:50,725 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,726 - pomdp.py - constructed quotient MDP having 19 states and 28 actions.
+2024-03-07 23:40:50,726 - synthesizer.py - synthesis initiated, design space: 18
+2024-03-07 23:40:50,726 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,726 - synthesizer.py - A(19,0)={'east'}, A(77,0)={'east'}, A(161,0)={'east'}
+2024-03-07 23:40:50,727 - synthesizer.py - double-checking specification satisfiability:  : 0.0
+2024-03-07 23:40:50,727 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,727 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-07 23:40:50,727 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,727 - pomdp.py - constructed quotient MDP having 35 states and 102 actions.
+2024-03-07 23:40:50,728 - synthesizer.py - synthesis initiated, design space: 331776
+2024-03-07 23:40:50,728 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,728 - synthesizer.py - None
+2024-03-07 23:40:50,728 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,728 - synthesizer_pomdp.py - Synthesizing optimal k=3 controller ...
+2024-03-07 23:40:50,728 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,728 - pomdp.py - constructed quotient MDP having 51 states and 224 actions.
+2024-03-07 23:40:50,729 - synthesizer.py - synthesis initiated, design space: 62762119218
+2024-03-07 23:40:50,729 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,729 - synthesizer.py - None
+2024-03-07 23:40:50,729 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,729 - synthesizer_pomdp.py - Synthesizing optimal k=4 controller ...
+2024-03-07 23:40:50,729 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,730 - pomdp.py - constructed quotient MDP having 67 states and 394 actions.
+2024-03-07 23:40:50,732 - synthesizer.py - synthesis initiated, design space: 57711166318706688
+2024-03-07 23:40:50,732 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,732 - synthesizer.py - None
+2024-03-07 23:40:50,732 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,732 - synthesizer_pomdp.py - Synthesizing optimal k=5 controller ...
+2024-03-07 23:40:50,732 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,733 - pomdp.py - constructed quotient MDP having 83 states and 612 actions.
+2024-03-07 23:40:50,737 - synthesizer.py - synthesis initiated, design space: 175979733467102050781250
+2024-03-07 23:40:50,738 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,738 - synthesizer.py - None
+2024-03-07 23:40:50,738 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,738 - synthesizer_pomdp.py - Synthesizing optimal k=6 controller ...
+2024-03-07 23:40:50,738 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,743 - pomdp.py - constructed quotient MDP having 99 states and 878 actions.
+2024-03-07 23:40:50,751 - synthesizer.py - synthesis initiated, design space: 1409852939643675077467378286592
+2024-03-07 23:40:50,752 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,752 - synthesizer.py - None
+2024-03-07 23:40:50,752 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,752 - synthesizer_pomdp.py - Synthesizing optimal k=7 controller ...
+2024-03-07 23:40:50,752 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,752 - pomdp.py - constructed quotient MDP having 115 states and 1192 actions.
+2024-03-07 23:40:50,767 - synthesizer.py - synthesis initiated, design space: 25366292864181001812522887368945506738
+2024-03-07 23:40:50,768 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,768 - synthesizer.py - None
+2024-03-07 23:40:50,768 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,768 - synthesizer_pomdp.py - Synthesizing optimal k=8 controller ...
+2024-03-07 23:40:50,768 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,768 - pomdp.py - constructed quotient MDP having 131 states and 1554 actions.
+2024-03-07 23:40:50,794 - synthesizer.py - synthesis initiated, design space: 915502506879079193429786277787490795950964736
+2024-03-07 23:40:50,794 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,794 - synthesizer.py - None
+2024-03-07 23:40:50,794 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,794 - synthesizer_pomdp.py - Synthesizing optimal k=9 controller ...
+2024-03-07 23:40:50,795 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,795 - pomdp.py - constructed quotient MDP having 147 states and 1964 actions.
+2024-03-07 23:40:50,835 - synthesizer.py - synthesis initiated, design space: 60865054443409074172743986503060341063573494133274098
+2024-03-07 23:40:50,836 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,836 - synthesizer.py - None
+2024-03-07 23:40:50,836 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,836 - synthesizer_pomdp.py - Synthesizing optimal k=10 controller ...
+2024-03-07 23:40:50,836 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,836 - pomdp.py - constructed quotient MDP having 163 states and 2422 actions.
+2024-03-07 23:40:50,892 - synthesizer.py - synthesis initiated, design space: 6973568802000000000000000000000000000000000000000000000000000
+2024-03-07 23:40:50,893 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,893 - synthesizer.py - None
+2024-03-07 23:40:50,893 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,893 - synthesizer_pomdp.py - Synthesizing optimal k=11 controller ...
+2024-03-07 23:40:50,893 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,894 - pomdp.py - constructed quotient MDP having 179 states and 2928 actions.
+2024-03-07 23:40:50,984 - synthesizer.py - synthesis initiated, design space: 1305232768293872386740972730148071218879194312089192873417348860413298
+2024-03-07 23:40:50,985 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:50,985 - synthesizer.py - None
+2024-03-07 23:40:50,985 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:50,985 - synthesizer_pomdp.py - Synthesizing optimal k=12 controller ...
+2024-03-07 23:40:50,985 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:50,986 - pomdp.py - constructed quotient MDP having 195 states and 3482 actions.
+2024-03-07 23:40:51,104 - synthesizer.py - synthesis initiated, design space: 381940856654913353571107872439637464917742377647517892412654555616180011270144
+2024-03-07 23:40:51,105 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:51,105 - synthesizer.py - None
+2024-03-07 23:40:51,105 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:51,105 - synthesizer_pomdp.py - Synthesizing optimal k=13 controller ...
+2024-03-07 23:40:51,105 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:51,106 - pomdp.py - constructed quotient MDP having 211 states and 4084 actions.
+2024-03-07 23:40:51,281 - synthesizer.py - synthesis initiated, design space: 168439471705386322038203985000297316730802513827173729045316946518548015583614560265122
+2024-03-07 23:40:51,282 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:51,282 - synthesizer.py - None
+2024-03-07 23:40:51,282 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:51,282 - synthesizer_pomdp.py - Synthesizing optimal k=14 controller ...
+2024-03-07 23:40:51,282 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:51,283 - pomdp.py - constructed quotient MDP having 227 states and 4734 actions.
+2024-03-07 23:40:51,517 - synthesizer.py - synthesis initiated, design space: 108521468254430534355541992946368659818117454081299081624178604015820509464897271751844988715008
+2024-03-07 23:40:51,518 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:51,518 - synthesizer.py - None
+2024-03-07 23:40:51,518 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:51,518 - synthesizer_pomdp.py - Synthesizing optimal k=15 controller ...
+2024-03-07 23:40:51,518 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:51,519 - pomdp.py - constructed quotient MDP having 243 states and 5432 actions.
+2024-03-07 23:40:51,831 - synthesizer.py - synthesis initiated, design space: 99449665219896290133973307418203370043005507602189177284438730344828805129964166553691029548645019531250
+2024-03-07 23:40:51,832 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:51,832 - synthesizer.py - None
+2024-03-07 23:40:51,832 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:51,832 - synthesizer_pomdp.py - Synthesizing optimal k=16 controller ...
+2024-03-07 23:40:51,832 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:51,878 - pomdp.py - constructed quotient MDP having 259 states and 6178 actions.
+2024-03-07 23:40:52,262 - synthesizer.py - synthesis initiated, design space: 126656867221991964373651922487290940943426512709793834939097639756000311586951631110165735597574286422221690765312
+2024-03-07 23:40:52,263 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:52,263 - synthesizer.py - None
+2024-03-07 23:40:52,263 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:52,263 - synthesizer_pomdp.py - Synthesizing optimal k=17 controller ...
+2024-03-07 23:40:52,264 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:52,265 - pomdp.py - constructed quotient MDP having 275 states and 6972 actions.
+2024-03-07 23:40:52,740 - synthesizer.py - synthesis initiated, design space: 219664509328813359714601624442683246609917071102947012481015201333693183072125018949561980590313640716945924323596683322322
+2024-03-07 23:40:52,741 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:52,741 - synthesizer.py - None
+2024-03-07 23:40:52,741 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:52,741 - synthesizer_pomdp.py - Synthesizing optimal k=18 controller ...
+2024-03-07 23:40:52,741 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:52,742 - pomdp.py - constructed quotient MDP having 291 states and 7814 actions.
+2024-03-07 23:40:53,360 - synthesizer.py - synthesis initiated, design space: 509557419945983413697333615936238439188489225958375221756889962719494045719675341905753671283418192272181265873583340553978085638144
+2024-03-07 23:40:53,361 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:53,362 - synthesizer.py - None
+2024-03-07 23:40:53,362 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:53,362 - synthesizer_pomdp.py - Synthesizing optimal k=19 controller ...
+2024-03-07 23:40:53,362 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:53,363 - pomdp.py - constructed quotient MDP having 307 states and 8704 actions.
+2024-03-07 23:40:54,187 - synthesizer.py - synthesis initiated, design space: 1555906039124263793803388821719567159178477813356928886942911915352859966815321720635261113233173455035228770758309282622194049590985110314418
+2024-03-07 23:40:54,189 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:54,189 - synthesizer.py - None
+2024-03-07 23:40:54,189 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:54,189 - synthesizer_pomdp.py - Synthesizing optimal k=20 controller ...
+2024-03-07 23:40:54,189 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:54,191 - pomdp.py - constructed quotient MDP having 323 states and 9642 actions.
+2024-03-07 23:40:55,152 - synthesizer.py - synthesis initiated, design space: 6164668766619011176025053955421813290607564973670400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2024-03-07 23:40:55,154 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:55,154 - synthesizer.py - None
+2024-03-07 23:40:55,154 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:55,154 - synthesizer_pomdp.py - Synthesizing optimal k=21 controller ...
+2024-03-07 23:40:55,154 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:55,156 - pomdp.py - constructed quotient MDP having 339 states and 10628 actions.
+2024-03-07 23:40:56,318 - synthesizer.py - synthesis initiated, design space: 31287289138361311887192443492819150339741139444944265863355455098517650384798810070283619685210508603314442287378999815888625818622350862845830800649824867512578
+2024-03-07 23:40:56,319 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:56,319 - synthesizer.py - None
+2024-03-07 23:40:56,320 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:56,320 - synthesizer_pomdp.py - Synthesizing optimal k=22 controller ...
+2024-03-07 23:40:56,320 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:56,322 - pomdp.py - constructed quotient MDP having 355 states and 11662 actions.
+2024-03-07 23:40:57,735 - synthesizer.py - synthesis initiated, design space: 201040138415046224342796512278938261992795783892079807759722348962019601754152844081769908773329767476098536193916680671334040586615241727574652846810225068208672196263936
+2024-03-07 23:40:57,737 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:57,737 - synthesizer.py - None
+2024-03-07 23:40:57,737 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:57,737 - synthesizer_pomdp.py - Synthesizing optimal k=23 controller ...
+2024-03-07 23:40:57,737 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:57,739 - pomdp.py - constructed quotient MDP having 371 states and 12744 actions.
+2024-03-07 23:40:59,385 - synthesizer.py - synthesis initiated, design space: 1618216744823015785288600438198800722418635268003689951596709594782826821246988095570136401430966568086085153630246440507570743441589988230206476570927873748934804346749852271647538
+2024-03-07 23:40:59,387 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:40:59,387 - synthesizer.py - None
+2024-03-07 23:40:59,387 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:40:59,387 - synthesizer_pomdp.py - Synthesizing optimal k=24 controller ...
+2024-03-07 23:40:59,388 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:40:59,390 - pomdp.py - constructed quotient MDP having 387 states and 13874 actions.
+2024-03-07 23:41:01,331 - synthesizer.py - synthesis initiated, design space: 16158850737839220500211347600217073537067099892318683613617591751839589581953817600050492404985553461076095656608411803357046102623127048595149401414634308860029806109249785710446504551907328
+2024-03-07 23:41:01,331 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:41:01,747 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:41:01,747 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:01,748 - pomdp.py - constructed quotient MDP having 323 states and 783 actions.
+2024-03-07 23:41:01,754 - synthesizer.py - synthesis initiated, design space: 15552
+2024-03-07 23:41:01,755 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:01,755 - synthesizer.py - A(3,0)={'north'}, A(5,0)={'east'}, A(19,0)={'east'}, A(22,0)={'east'}, A(39,0)={'east'}, A(71,0)={'east'}, A(75,0)={'east'}, A(77,0)={'east'}, A(161,0)={'east'}
+2024-03-07 23:41:01,755 - synthesizer.py - double-checking specification satisfiability:  : 0.20526315789473684
+2024-03-07 23:41:01,756 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:01,756 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-07 23:41:01,756 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:01,800 - pomdp.py - constructed quotient MDP having 636 states and 3101 actions.
+2024-03-07 23:41:01,905 - synthesizer.py - synthesis initiated, design space: 2028908190892032
+2024-03-07 23:41:01,906 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:01,906 - synthesizer.py - None
+2024-03-07 23:41:01,906 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:01,906 - synthesizer_pomdp.py - Synthesizing optimal k=3 controller ...
+2024-03-07 23:41:01,907 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 3, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:01,908 - pomdp.py - constructed quotient MDP having 949 states and 6961 actions.
+2024-03-07 23:41:02,439 - synthesizer.py - synthesis initiated, design space: 35286121891029938443235278848
+2024-03-07 23:41:02,441 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:02,441 - synthesizer.py - None
+2024-03-07 23:41:02,441 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:02,441 - synthesizer_pomdp.py - Synthesizing optimal k=4 controller ...
+2024-03-07 23:41:02,441 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 4, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:02,443 - pomdp.py - constructed quotient MDP having 1262 states and 12363 actions.
+2024-03-07 23:41:04,082 - synthesizer.py - synthesis initiated, design space: 18104419691700540690383957153512391228522496
+2024-03-07 23:41:04,084 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:04,084 - synthesizer.py - None
+2024-03-07 23:41:04,084 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:04,084 - synthesizer_pomdp.py - Synthesizing optimal k=5 controller ...
+2024-03-07 23:41:04,085 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 5, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:04,088 - pomdp.py - constructed quotient MDP having 1575 states and 19307 actions.
+2024-03-07 23:41:08,542 - synthesizer.py - synthesis initiated, design space: 123296720185753656551241874694824218750000000000000000000000
+2024-03-07 23:41:08,546 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:08,546 - synthesizer.py - None
+2024-03-07 23:41:08,546 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:08,546 - synthesizer_pomdp.py - Synthesizing optimal k=6 controller ...
+2024-03-07 23:41:08,547 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 6, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:08,551 - pomdp.py - constructed quotient MDP having 1888 states and 27793 actions.
+2024-03-07 23:41:17,637 - synthesizer.py - synthesis initiated, design space: 6805402328125738605173856949563102297261913650759946578573666316348928557056
+2024-03-07 23:41:17,638 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-07 23:41:17,832 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-07 23:41:17,832 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,832 - pomdp.py - constructed quotient MDP having 19 states and 28 actions.
+2024-03-07 23:41:17,833 - synthesizer.py - synthesis initiated, design space: 18
+2024-03-07 23:41:17,833 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,833 - synthesizer.py - A(3,0)={'south'}, A(27,0)={'south'}, A(139,0)={'south'}
+2024-03-07 23:41:17,833 - synthesizer.py - double-checking specification satisfiability:  : 0.0
+2024-03-07 23:41:17,833 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,833 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-07 23:41:17,833 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,833 - pomdp.py - constructed quotient MDP having 35 states and 102 actions.
+2024-03-07 23:41:17,834 - synthesizer.py - synthesis initiated, design space: 331776
+2024-03-07 23:41:17,834 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,834 - synthesizer.py - None
+2024-03-07 23:41:17,834 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,834 - synthesizer_pomdp.py - Synthesizing optimal k=3 controller ...
+2024-03-07 23:41:17,834 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,834 - pomdp.py - constructed quotient MDP having 51 states and 224 actions.
+2024-03-07 23:41:17,836 - synthesizer.py - synthesis initiated, design space: 62762119218
+2024-03-07 23:41:17,836 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,836 - synthesizer.py - None
+2024-03-07 23:41:17,836 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,836 - synthesizer_pomdp.py - Synthesizing optimal k=4 controller ...
+2024-03-07 23:41:17,836 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,836 - pomdp.py - constructed quotient MDP having 67 states and 394 actions.
+2024-03-07 23:41:17,838 - synthesizer.py - synthesis initiated, design space: 57711166318706688
+2024-03-07 23:41:17,838 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,838 - synthesizer.py - None
+2024-03-07 23:41:17,838 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,838 - synthesizer_pomdp.py - Synthesizing optimal k=5 controller ...
+2024-03-07 23:41:17,838 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,839 - pomdp.py - constructed quotient MDP having 83 states and 612 actions.
+2024-03-07 23:41:17,843 - synthesizer.py - synthesis initiated, design space: 175979733467102050781250
+2024-03-07 23:41:17,843 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,843 - synthesizer.py - None
+2024-03-07 23:41:17,843 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,843 - synthesizer_pomdp.py - Synthesizing optimal k=6 controller ...
+2024-03-07 23:41:17,844 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,844 - pomdp.py - constructed quotient MDP having 99 states and 878 actions.
+2024-03-07 23:41:17,852 - synthesizer.py - synthesis initiated, design space: 1409852939643675077467378286592
+2024-03-07 23:41:17,852 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,852 - synthesizer.py - None
+2024-03-07 23:41:17,853 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,853 - synthesizer_pomdp.py - Synthesizing optimal k=7 controller ...
+2024-03-07 23:41:17,853 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,853 - pomdp.py - constructed quotient MDP having 115 states and 1192 actions.
+2024-03-07 23:41:17,867 - synthesizer.py - synthesis initiated, design space: 25366292864181001812522887368945506738
+2024-03-07 23:41:17,868 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,868 - synthesizer.py - None
+2024-03-07 23:41:17,868 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,868 - synthesizer_pomdp.py - Synthesizing optimal k=8 controller ...
+2024-03-07 23:41:17,868 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,869 - pomdp.py - constructed quotient MDP having 131 states and 1554 actions.
+2024-03-07 23:41:17,893 - synthesizer.py - synthesis initiated, design space: 915502506879079193429786277787490795950964736
+2024-03-07 23:41:17,894 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,894 - synthesizer.py - None
+2024-03-07 23:41:17,894 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,894 - synthesizer_pomdp.py - Synthesizing optimal k=9 controller ...
+2024-03-07 23:41:17,894 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,894 - pomdp.py - constructed quotient MDP having 147 states and 1964 actions.
+2024-03-07 23:41:17,939 - synthesizer.py - synthesis initiated, design space: 60865054443409074172743986503060341063573494133274098
+2024-03-07 23:41:17,939 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,939 - synthesizer.py - None
+2024-03-07 23:41:17,939 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,939 - synthesizer_pomdp.py - Synthesizing optimal k=10 controller ...
+2024-03-07 23:41:17,940 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,940 - pomdp.py - constructed quotient MDP having 163 states and 2422 actions.
+2024-03-07 23:41:17,997 - synthesizer.py - synthesis initiated, design space: 6973568802000000000000000000000000000000000000000000000000000
+2024-03-07 23:41:17,998 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:17,998 - synthesizer.py - None
+2024-03-07 23:41:17,998 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:17,998 - synthesizer_pomdp.py - Synthesizing optimal k=11 controller ...
+2024-03-07 23:41:17,998 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:17,999 - pomdp.py - constructed quotient MDP having 179 states and 2928 actions.
+2024-03-07 23:41:18,088 - synthesizer.py - synthesis initiated, design space: 1305232768293872386740972730148071218879194312089192873417348860413298
+2024-03-07 23:41:18,089 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:18,089 - synthesizer.py - None
+2024-03-07 23:41:18,089 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:18,089 - synthesizer_pomdp.py - Synthesizing optimal k=12 controller ...
+2024-03-07 23:41:18,089 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:18,089 - pomdp.py - constructed quotient MDP having 195 states and 3482 actions.
+2024-03-07 23:41:18,205 - synthesizer.py - synthesis initiated, design space: 381940856654913353571107872439637464917742377647517892412654555616180011270144
+2024-03-07 23:41:18,206 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:18,206 - synthesizer.py - None
+2024-03-07 23:41:18,206 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:18,206 - synthesizer_pomdp.py - Synthesizing optimal k=13 controller ...
+2024-03-07 23:41:18,206 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:18,207 - pomdp.py - constructed quotient MDP having 211 states and 4084 actions.
+2024-03-07 23:41:18,376 - synthesizer.py - synthesis initiated, design space: 168439471705386322038203985000297316730802513827173729045316946518548015583614560265122
+2024-03-07 23:41:18,376 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:18,376 - synthesizer.py - None
+2024-03-07 23:41:18,376 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:18,376 - synthesizer_pomdp.py - Synthesizing optimal k=14 controller ...
+2024-03-07 23:41:18,377 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 14, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:18,377 - pomdp.py - constructed quotient MDP having 227 states and 4734 actions.
+2024-03-07 23:41:18,603 - synthesizer.py - synthesis initiated, design space: 108521468254430534355541992946368659818117454081299081624178604015820509464897271751844988715008
+2024-03-07 23:41:18,604 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:18,604 - synthesizer.py - None
+2024-03-07 23:41:18,604 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:18,604 - synthesizer_pomdp.py - Synthesizing optimal k=15 controller ...
+2024-03-07 23:41:18,604 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:18,605 - pomdp.py - constructed quotient MDP having 243 states and 5432 actions.
+2024-03-07 23:41:18,899 - synthesizer.py - synthesis initiated, design space: 99449665219896290133973307418203370043005507602189177284438730344828805129964166553691029548645019531250
+2024-03-07 23:41:18,900 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:18,900 - synthesizer.py - None
+2024-03-07 23:41:18,900 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:18,900 - synthesizer_pomdp.py - Synthesizing optimal k=16 controller ...
+2024-03-07 23:41:18,900 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 16, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:18,901 - pomdp.py - constructed quotient MDP having 259 states and 6178 actions.
+2024-03-07 23:41:19,280 - synthesizer.py - synthesis initiated, design space: 126656867221991964373651922487290940943426512709793834939097639756000311586951631110165735597574286422221690765312
+2024-03-07 23:41:19,281 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:19,283 - synthesizer.py - None
+2024-03-07 23:41:19,283 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:19,283 - synthesizer_pomdp.py - Synthesizing optimal k=17 controller ...
+2024-03-07 23:41:19,283 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 17, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:19,284 - pomdp.py - constructed quotient MDP having 275 states and 6972 actions.
+2024-03-07 23:41:19,814 - synthesizer.py - synthesis initiated, design space: 219664509328813359714601624442683246609917071102947012481015201333693183072125018949561980590313640716945924323596683322322
+2024-03-07 23:41:19,815 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:19,815 - synthesizer.py - None
+2024-03-07 23:41:19,815 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:19,815 - synthesizer_pomdp.py - Synthesizing optimal k=18 controller ...
+2024-03-07 23:41:19,816 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:19,817 - pomdp.py - constructed quotient MDP having 291 states and 7814 actions.
+2024-03-07 23:41:20,449 - synthesizer.py - synthesis initiated, design space: 509557419945983413697333615936238439188489225958375221756889962719494045719675341905753671283418192272181265873583340553978085638144
+2024-03-07 23:41:20,450 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:20,450 - synthesizer.py - None
+2024-03-07 23:41:20,450 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:20,450 - synthesizer_pomdp.py - Synthesizing optimal k=19 controller ...
+2024-03-07 23:41:20,451 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 19, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:20,452 - pomdp.py - constructed quotient MDP having 307 states and 8704 actions.
+2024-03-07 23:41:21,224 - synthesizer.py - synthesis initiated, design space: 1555906039124263793803388821719567159178477813356928886942911915352859966815321720635261113233173455035228770758309282622194049590985110314418
+2024-03-07 23:41:21,225 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:21,225 - synthesizer.py - None
+2024-03-07 23:41:21,225 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:21,225 - synthesizer_pomdp.py - Synthesizing optimal k=20 controller ...
+2024-03-07 23:41:21,226 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 20, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:21,227 - pomdp.py - constructed quotient MDP having 323 states and 9642 actions.
+2024-03-07 23:41:22,175 - synthesizer.py - synthesis initiated, design space: 6164668766619011176025053955421813290607564973670400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2024-03-07 23:41:22,177 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:22,177 - synthesizer.py - None
+2024-03-07 23:41:22,177 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:22,177 - synthesizer_pomdp.py - Synthesizing optimal k=21 controller ...
+2024-03-07 23:41:22,177 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 21, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:22,179 - pomdp.py - constructed quotient MDP having 339 states and 10628 actions.
+2024-03-07 23:41:23,375 - synthesizer.py - synthesis initiated, design space: 31287289138361311887192443492819150339741139444944265863355455098517650384798810070283619685210508603314442287378999815888625818622350862845830800649824867512578
+2024-03-07 23:41:23,376 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:23,376 - synthesizer.py - None
+2024-03-07 23:41:23,376 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:23,376 - synthesizer_pomdp.py - Synthesizing optimal k=22 controller ...
+2024-03-07 23:41:23,377 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 22, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:23,379 - pomdp.py - constructed quotient MDP having 355 states and 11662 actions.
+2024-03-07 23:41:24,778 - synthesizer.py - synthesis initiated, design space: 201040138415046224342796512278938261992795783892079807759722348962019601754152844081769908773329767476098536193916680671334040586615241727574652846810225068208672196263936
+2024-03-07 23:41:24,780 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:24,780 - synthesizer.py - None
+2024-03-07 23:41:24,780 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:24,780 - synthesizer_pomdp.py - Synthesizing optimal k=23 controller ...
+2024-03-07 23:41:24,781 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:24,783 - pomdp.py - constructed quotient MDP having 371 states and 12744 actions.
+2024-03-07 23:41:26,434 - synthesizer.py - synthesis initiated, design space: 1618216744823015785288600438198800722418635268003689951596709594782826821246988095570136401430966568086085153630246440507570743441589988230206476570927873748934804346749852271647538
+2024-03-07 23:41:26,435 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 23:41:26,436 - synthesizer.py - None
+2024-03-07 23:41:26,436 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 23:41:26,436 - synthesizer_pomdp.py - Synthesizing optimal k=24 controller ...
+2024-03-07 23:41:26,436 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 23:41:26,438 - pomdp.py - constructed quotient MDP having 387 states and 13874 actions.
+2024-03-07 23:41:28,424 - synthesizer.py - synthesis initiated, design space: 16158850737839220500211347600217073537067099892318683613617591751839589581953817600050492404985553461076095656608411803357046102623127048595149401414634308860029806109249785710446504551907328
+2024-03-07 23:41:28,424 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+0.15541658291131832
+controller size: 348
+
+Storm results: 
+0.13441287769717072
+controller size: 1153
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 23:41:28,888 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 23:41:28,888 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-03-07 23:41:43,914 - storm_pomdp_control.py - Pausing Storm

@@ -1,0 +1,866 @@
+2024-03-07 17:40:10,901 - cli.py - This is Paynt version 0.1.0.
+2024-03-07 17:40:10,901 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/4x5x2-95/sketch.templ ...
+2024-03-07 17:40:10,901 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+2024-03-07 17:40:10,903 - sketch.py - assuming sketch in DRN format...
+2024-03-07 17:40:10,909 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/4x5x2-95/sketch.props ...
+2024-03-07 17:40:10,910 - prism_parser.py - found the following specification: optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-03-07 17:40:10,910 - sketch.py - sketch parsing OK
+2024-03-07 17:40:10,910 - sketch.py - constructed explicit quotient having 79 states and 310 actions
+2024-03-07 17:40:10,910 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-03-07 17:40:10,910 - pomdp.py - constructed POMDP having 7 observations.
+2024-03-07 17:40:10,911 - pomdp.py - unfolding POMDP using the following memory allocation vector: [1, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 17:40:10,911 - pomdp.py - constructed quotient MDP having 79 states and 310 actions.
+2024-03-07 17:40:10,916 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-03-07 17:40:10,916 - synthesizer_pomdp.py - Storm settings: iterative - (900, 60, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False
+2024-03-07 17:40:10,916 - storm_pomdp_control.py - Interactive Storm started
+2024-03-07 17:40:10,917 - storm_pomdp_control.py - starting Storm POMDP analysis
+Finished exploring under-approximation MDP.
+Start analysis...
+2024-03-07 17:40:20,937 - storm_pomdp_control.py - Pausing Storm
+-----------Storm-----------               
+Value = 2.0825116184442476 | Time elapsed = 10.0s | FSC size = 102
+
+2024-03-07 17:40:20,944 - synthesizer_pomdp.py - 0 threads for enhanced SAYNT created
+2024-03-07 17:40:20,944 - synthesizer_pomdp.py - new synthesis time per thread: 60.0s
+2024-03-07 17:40:20,944 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1024 to 4
+2024-03-07 17:40:20,944 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-03-07 17:40:20,944 - synthesizer.py - synthesis initiated, design space: 1024
+-----------PAYNT-----------                     
+Value = 0.02885875140038869 | Time elapsed = 10.0s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 0.23228808538170473 | Time elapsed = 10.0s | FSC size = 14
+
+2024-03-07 17:40:20,947 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-07 17:40:20,947 - synthesizer_ar_storm.py - Subfamilies buffer contains: 4 families
+2024-03-07 17:40:20,965 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 17:40:20,965 - synthesizer.py - A(0,0)={'(E0)'}, A(1,0)={'(E0)'}, A(2,0)={'(N0)'}, A(3,0)={'(W0)'}, A(5,0)={'(S0)'}
+2024-03-07 17:40:20,965 - synthesizer.py - double-checking specification satisfiability:  : 0.23228808538170473
+2024-03-07 17:40:20,966 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 17:40:20,966 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-07 17:40:20,966 - pomdp.py - unfolding POMDP using the following memory allocation vector: [4, 1, 1, 1, 1, 1, 1] ...
+2024-03-07 17:40:20,967 - pomdp.py - constructed quotient MDP having 187 states and 2962 actions.
+2024-03-07 17:40:21,090 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4294967296 to 16777216
+2024-03-07 17:40:21,091 - synthesizer.py - synthesis initiated, design space: 4294967296
+-----------PAYNT-----------                     
+Value = 0.23675686702915466 | Time elapsed = 10.2s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.2532764153130979 | Time elapsed = 10.2s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.28282732215557177 | Time elapsed = 10.2s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.3447325120854526 | Time elapsed = 10.3s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.4892274441975821 | Time elapsed = 10.3s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.6576194866823734 | Time elapsed = 10.4s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.6617092597549027 | Time elapsed = 10.4s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.6843298787505059 | Time elapsed = 10.6s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.6899015201573547 | Time elapsed = 10.6s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.7759133132539807 | Time elapsed = 10.6s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.8501209328423467 | Time elapsed = 10.6s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 0.9398780709153457 | Time elapsed = 10.7s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 1.980231181177418 | Time elapsed = 11.0s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 1.9959291648344961 | Time elapsed = 11.0s | FSC size = 20
+
+2024-03-07 17:40:24,085 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-07 17:40:24,085 - synthesizer_ar_storm.py - Subfamilies buffer contains: 4 families
+-----------PAYNT-----------                     
+Value = 2.007519017876084 | Time elapsed = 13.3s | FSC size = 20
+
+-----------PAYNT-----------                     
+Value = 2.017821589964777 | Time elapsed = 13.3s | FSC size = 20
+
+2024-03-07 17:40:35,737 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 17:40:35,737 - synthesizer.py - A(0,0)={'(W0)'}, A(0,1)={'(E0)'}, A(0,2)={'(S0)'}, A(0,3)={'(N0)'}, M(0,0)=2, M(0,1)=1, M(0,2)=0, M(0,3)=3, A(1,0)={'(E0)'}, M(1,0)=1, A(2,0)={'(N0)'}, M(2,0)=3, A(3,0)={'(W0)'}, M(3,0)=0, A(5,0)={'(W0)'}, M(5,0)=0
+2024-03-07 17:40:35,737 - synthesizer.py - double-checking specification satisfiability:  : 2.017821589964777
+2024-03-07 17:40:35,738 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 17:40:35,738 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-07 17:40:35,738 - pomdp.py - unfolding POMDP using the following memory allocation vector: [5, 2, 2, 2, 2, 2, 1] ...
+2024-03-07 17:40:35,743 - pomdp.py - constructed quotient MDP having 265 states and 5245 actions.
+2024-03-07 17:40:36,117 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 327680000000000000 to 5000000000000
+2024-03-07 17:40:36,117 - synthesizer.py - synthesis initiated, design space: 327680000000000000
+-----------PAYNT-----------                     
+Value = 2.031341746176371 | Time elapsed = 26.3s | FSC size = 32
+
+2024-03-07 17:41:21,012 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:41:21,511 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:41:21,511 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:41:21,512 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:41:21,512 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1250000000000 to 1250000000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1250000000000 to 1250000000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1250000000000 to 1250000000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500000000 to 312500000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 15625000000 to 15625000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 15625000000 to 15625000000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3906250000 to 3906250000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3906250000 to 3906250000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 781250000 to 781250000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:41:21,513 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 31250000 to 31250000
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 31250000 to 31250000
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 31250000 to 31250000
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 31250000 to 31250000
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:41:21,514 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:41:21,514 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 20, Subfamilies - 0
+2024-03-07 17:42:21,578 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:42:22,077 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:42:22,078 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:42:22,079 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:42:22,079 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:42:22,079 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1250000000000 to 1250000000000
+2024-03-07 17:42:22,079 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1250000000000 to 1250000000000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500000000 to 312500000000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 11718750000 to 11718750000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3906250000 to 3906250000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500000 to 312500000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500000 to 312500000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500000 to 312500000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500000 to 62500000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 12500000 to 12500000
+2024-03-07 17:42:22,080 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 12500000 to 12500000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 12500000 to 12500000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 12500000 to 12500000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3125000 to 3125000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 625000 to 625000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 250000 to 250000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 125000 to 125000
+2024-03-07 17:42:22,081 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500 to 62500
+2024-03-07 17:42:22,081 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 21, Subfamilies - 0
+2024-03-07 17:43:22,087 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:43:22,586 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:43:22,586 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:43:22,588 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:43:22,588 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1250000000000 to 1250000000000
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500000000 to 312500000000
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 19531250000 to 19531250000
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 19531250000 to 19531250000
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 11718750000 to 11718750000
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3906250000 to 3906250000
+2024-03-07 17:43:22,588 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500000 to 62500000
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 31250000 to 31250000
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7812500 to 7812500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7812500 to 7812500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7812500 to 7812500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1562500 to 1562500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500 to 312500
+2024-03-07 17:43:22,589 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500 to 312500
+2024-03-07 17:43:22,590 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 312500 to 312500
+2024-03-07 17:43:22,590 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500 to 62500
+2024-03-07 17:43:22,590 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500 to 62500
+2024-03-07 17:43:22,590 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500 to 62500
+2024-03-07 17:43:22,590 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500 to 62500
+2024-03-07 17:43:22,590 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500 to 62500
+2024-03-07 17:43:22,590 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 26, Subfamilies - 0
+2024-03-07 17:44:22,653 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:44:23,152 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:44:23,153 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:44:23,154 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:44:23,154 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:44:23,154 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:44:23,154 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78125000000 to 78125000000
+2024-03-07 17:44:23,154 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 31250000000 to 31250000000
+2024-03-07 17:44:23,154 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 15625000000 to 15625000000
+2024-03-07 17:44:23,154 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 15625000000 to 15625000000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3906250000 to 3906250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 781250000 to 781250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156250000 to 156250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 62500000 to 62500000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6250000 to 6250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6250000 to 6250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6250000 to 6250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6250000 to 6250000
+2024-03-07 17:44:23,155 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6250000 to 6250000
+2024-03-07 17:44:23,155 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 16, Subfamilies - 0
+2024-03-07 17:44:24,777 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 17:44:24,777 - synthesizer.py - A(0,0)={'(W0)'}, A(0,1)={'(W0)'}, A(0,2)={'(E0)'}, A(0,3)={'(N0)'}, A(0,4)={'(S0)'}, M(0,0)=4, M(0,1)=0, M(0,2)=2, M(0,3)=3, M(0,4)=0, A(1,0)={'(E0)'}, A(1,1)={'(E0)'}, M(1,0)=2, M(1,1)=2, A(2,0)={'(N0)'}, A(2,1)={'(N0)'}, M(2,0)=3, M(2,1)=3, A(3,0)={'(W0)'}, A(3,1)={'(W0)'}, M(3,0)=1, M(3,1)=1, M(4,0)=1, M(4,1)=0, A(5,0)={'(S0)'}, A(5,1)={'(S0)'}, M(5,0)=4, M(5,1)=1
+2024-03-07 17:44:24,778 - synthesizer.py - double-checking specification satisfiability:  : 2.031341746176371
+2024-03-07 17:44:24,779 - synthesizer_pomdp.py - Terminate: False
+2024-03-07 17:44:24,780 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-07 17:44:24,780 - pomdp.py - unfolding POMDP using the following memory allocation vector: [6, 3, 3, 3, 3, 3, 1] ...
+2024-03-07 17:44:24,786 - pomdp.py - constructed quotient MDP having 343 states and 8146 actions.
+2024-03-07 17:44:25,693 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 188436971148778297205194752 to 11231718727873462272
+2024-03-07 17:44:25,694 - synthesizer.py - synthesis initiated, design space: 188436971148778297205194752
+2024-03-07 17:45:23,218 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:45:23,719 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:45:23,719 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:45:23,719 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:45:23,719 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:45:23,719 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:45:23,719 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:45:23,719 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 21936950640377856 to 21936950640377856
+2024-03-07 17:45:23,720 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3656158440062976 to 3656158440062976
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1218719480020992 to 1218719480020992
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1218719480020992 to 1218719480020992
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 11284439629824 to 11284439629824
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 11284439629824 to 11284439629824
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 11284439629824 to 11284439629824
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 11284439629824 to 11284439629824
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3761479876608 to 3761479876608
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1880739938304 to 1880739938304
+2024-03-07 17:45:23,721 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1880739938304 to 1880739938304
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1880739938304 to 1880739938304
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:45:23,722 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:45:23,723 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:45:23,723 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:45:23,723 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 36, Subfamilies - 0
+2024-03-07 17:46:23,786 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:46:24,285 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:46:24,286 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:46:24,287 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:46:24,287 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:46:24,287 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:46:24,287 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:46:24,287 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:46:24,287 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:46:24,287 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 21936950640377856 to 21936950640377856
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1828079220031488 to 1828079220031488
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:46:24,288 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 101559956668416 to 101559956668416
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 101559956668416 to 101559956668416
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 16926659444736 to 16926659444736
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 5642219814912 to 5642219814912
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 470184984576 to 470184984576
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 78364164096 to 78364164096
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:46:24,289 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:46:24,290 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:46:24,290 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:46:24,290 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 28, Subfamilies - 0
+2024-03-07 17:47:24,352 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:47:24,852 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:47:24,853 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:47:24,853 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:47:24,853 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:47:24,853 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:47:24,853 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:47:24,853 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:47:24,853 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:47:24,853 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 21936950640377856 to 21936950640377856
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 457019805007872 to 457019805007872
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 228509902503936 to 228509902503936
+2024-03-07 17:47:24,854 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 76169967501312 to 76169967501312
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 76169967501312 to 76169967501312
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 19042491875328 to 19042491875328
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6347497291776 to 6347497291776
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 528958107648 to 528958107648
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 528958107648 to 528958107648
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 528958107648 to 528958107648
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 528958107648 to 528958107648
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 176319369216 to 176319369216
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 176319369216 to 176319369216
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:47:24,855 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:47:24,856 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:47:24,857 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:47:24,857 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:47:24,857 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 40, Subfamilies - 0
+2024-03-07 17:48:24,919 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:48:25,419 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:48:25,419 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:48:25,420 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:48:25,420 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:48:25,420 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:48:25,420 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:48:25,420 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:48:25,420 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 10968475320188928 to 10968475320188928
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 10968475320188928 to 10968475320188928
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:48:25,421 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1828079220031488 to 1828079220031488
+2024-03-07 17:48:25,422 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 609359740010496 to 609359740010496
+2024-03-07 17:48:25,422 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:48:25,422 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:48:25,422 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:48:25,422 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8463329722368 to 8463329722368
+2024-03-07 17:48:25,422 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2115832430592 to 2115832430592
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2115832430592 to 2115832430592
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 352638738432 to 352638738432
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:48:25,423 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:48:25,423 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 28, Subfamilies - 0
+2024-03-07 17:49:25,433 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:49:25,933 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:49:25,934 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:49:25,934 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:49:25,934 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 43873901280755712 to 43873901280755712
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1828079220031488 to 1828079220031488
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 609359740010496 to 609359740010496
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 50779978334208 to 50779978334208
+2024-03-07 17:49:25,935 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 50779978334208 to 50779978334208
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 5642219814912 to 5642219814912
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 58773123072 to 58773123072
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 58773123072 to 58773123072
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:49:25,936 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:49:25,937 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 29, Subfamilies - 0
+2024-03-07 17:50:25,948 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:50:26,448 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:50:26,448 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:50:26,448 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:50:26,448 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:50:26,448 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:50:26,449 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3656158440062976 to 3656158440062976
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1218719480020992 to 1218719480020992
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1218719480020992 to 1218719480020992
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 67706637778944 to 67706637778944
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8463329722368 to 8463329722368
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8463329722368 to 8463329722368
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8463329722368 to 8463329722368
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:50:26,450 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:50:26,451 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:50:26,452 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:50:26,452 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:50:26,452 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:50:26,452 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:50:26,452 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 38, Subfamilies - 0
+2024-03-07 17:51:26,515 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:51:27,014 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:51:27,014 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:51:27,015 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:51:27,015 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:51:27,015 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:51:27,016 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 3656158440062976 to 3656158440062976
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 406239826673664 to 406239826673664
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 33853318889472 to 33853318889472
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 33853318889472 to 33853318889472
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8463329722368 to 8463329722368
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1410554953728 to 1410554953728
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1410554953728 to 1410554953728
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1410554953728 to 1410554953728
+2024-03-07 17:51:27,017 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1410554953728 to 1410554953728
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 9795520512 to 9795520512
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:51:27,018 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:51:27,019 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:51:27,019 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:51:27,019 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 37, Subfamilies - 0
+2024-03-07 17:52:27,027 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.031341746176371
+controller size: 32
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:52:27,526 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:52:27,527 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:52:27,528 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:52:27,528 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:52:27,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 67706637778944 to 67706637778944
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 67706637778944 to 67706637778944
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 5642219814912 to 5642219814912
+2024-03-07 17:52:27,529 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 5642219814912 to 5642219814912
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 156728328192 to 156728328192
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:52:27,530 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1632586752 to 1632586752
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:52:27,531 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:52:27,531 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 38, Subfamilies - 0
+-----------PAYNT-----------                     
+Value = 2.0343000802998947 | Time elapsed = 788.3s | FSC size = 44
+
+2024-03-07 17:53:27,539 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.0343000802998947
+controller size: 44
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:53:28,037 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:53:28,037 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:53:28,040 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:53:28,040 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:53:28,040 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 87747802561511424 to 87747802561511424
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 7312316880125952 to 7312316880125952
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1218719480020992 to 1218719480020992
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 304679870005248 to 304679870005248
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 16926659444736 to 16926659444736
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 8463329722368 to 8463329722368
+2024-03-07 17:53:28,041 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1410554953728 to 1410554953728
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1410554953728 to 1410554953728
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 235092492288 to 235092492288
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 39182082048 to 39182082048
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 39182082048 to 39182082048
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:53:28,042 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 6530347008 to 6530347008
+2024-03-07 17:53:28,043 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:53:28,043 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:53:28,043 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:53:28,043 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:53:28,043 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:53:28,043 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:53:28,043 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 37, Subfamilies - 0
+2024-03-07 17:54:28,107 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.0343000802998947
+controller size: 44
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:54:28,604 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-07 17:54:28,604 - storm_pomdp_control.py - Storm already terminated.
+2024-03-07 17:54:28,607 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-07 17:54:28,607 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-03-07 17:54:28,607 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2807929681968365568 to 2807929681968365568
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 701982420492091392 to 701982420492091392
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 175495605123022848 to 175495605123022848
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 87747802561511424 to 87747802561511424
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 29249267520503808 to 29249267520503808
+2024-03-07 17:54:28,608 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4874877920083968 to 4874877920083968
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1218719480020992 to 1218719480020992
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 406239826673664 to 406239826673664
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 203119913336832 to 203119913336832
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 33853318889472 to 33853318889472
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 33853318889472 to 33853318889472
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:54:28,609 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 940369969152 to 940369969152
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 26121388032 to 26121388032
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4353564672 to 4353564672
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4353564672 to 4353564672
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4353564672 to 4353564672
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4353564672 to 4353564672
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1088391168 to 1088391168
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:54:28,610 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 272097792 to 272097792
+2024-03-07 17:54:28,610 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 35, Subfamilies - 0
+2024-03-07 17:55:28,616 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+2.0343000802998947
+controller size: 44
+
+Storm results: 
+2.0825116184442476
+controller size: 102
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-07 17:55:29,117 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-03-07 17:55:29,118 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-07 17:55:29,118 - synthesizer.py - A(0,0)={'(W0)'}, A(0,1)={'(W0)'}, A(0,2)={'(E0)'}, A(0,3)={'(E0)'}, A(0,4)={'(S0)'}, A(0,5)={'(N0)'}, M(0,0)=4, M(0,1)=0, M(0,2)=3, M(0,3)=2, M(0,4)=0, M(0,5)=5, A(1,0)={'(E0)'}, A(1,1)={'(E0)'}, A(1,2)={'(E0)'}, M(1,0)=2, M(1,1)=2, M(1,2)=0, A(2,0)={'(N0)'}, A(2,1)={'(N0)'}, A(2,2)={'(N0)'}, M(2,0)=5, M(2,1)=5, M(2,2)=0, A(3,0)={'(W0)'}, A(3,1)={'(W0)'}, A(3,2)={'(W0)'}, M(3,0)=1, M(3,1)=1, M(3,2)=0, M(4,0)=2, M(4,1)=0, M(4,2)=0, A(5,0)={'(S0)'}, A(5,1)={'(S0)'}, A(5,2)={'(S0)'}, M(5,0)=5, M(5,1)=5, M(5,2)=1
+2024-03-07 17:55:29,120 - synthesizer.py - double-checking specification satisfiability:  : 2.0343000802998947
+2024-03-07 17:55:29,123 - synthesizer_pomdp.py - Terminate: True
