@@ -1,0 +1,121 @@
+Exception in thread Thread-3:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-4:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-5:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-6:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-7:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-8:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-9:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+Exception in thread Thread-10:
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.8/threading.py", line 870, in run
+    self._target(*self._args, **self._kwargs)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 276, in interactive_control
+    self.parse_results(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 395, in parse_results
+    self.parse_storm_result(quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 477, in parse_storm_result
+    self.parse_paynt_result(self.quotient)
+  File "/mnt/d/src/PP/synthesis-CAV/paynt/quotient/storm_pomdp_control.py", line 558, in parse_paynt_result
+    observation = self.quotient.observation_labels.index(obs)
+ValueError: '0' is not in list
+double free or corruption (out)
