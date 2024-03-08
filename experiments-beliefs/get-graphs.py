@@ -1,5 +1,6 @@
 import sys
 import os
+import glob
 from subprocess import DEVNULL, STDOUT, check_call
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -16,7 +17,28 @@ def get_4x3_header():
     ytick={1.7,1.74,1.78,1.82,1.86,1.9},\n\
     xtick pos=left,\n\
     ytick pos=left,\n\
-    restrict y to domain=1.5:2.1,\n\
+    restrict y to domain=1.5:2.2,\n\
+    ymajorgrids=true,\n\
+    grid style=dashed,\n\
+    height=8cm,\n\
+    width=12cm,\n\
+    legend style ={ at={(1.03,1)},\n\
+        anchor=north west, draw=black, \n\
+        fill=white,align=left},\n]\n"
+
+
+def get_4x5x2_header():
+    return "\\begin{tikzpicture}\n\\begin{axis}[\n\
+    title={4x5x2-95},\n\
+    xlabel={Time [min]},\n\
+    ylabel={Value [Rmax]},\n\
+    xmin=0, xmax=15,\n\
+    ymin=1.7, ymax=2.2,\n\
+    xtick={0,2,4,6,8,10,12,14},\n\
+    ytick={1.7,1.8,1.9,2.0,2.1,2.2},\n\
+    xtick pos=left,\n\
+    ytick pos=left,\n\
+    restrict y to domain=1.5:2.2,\n\
     ymajorgrids=true,\n\
     grid style=dashed,\n\
     height=8cm,\n\
@@ -66,6 +88,25 @@ def get_drone42_header():
         anchor=north west, draw=black, \n\
         fill=white,align=left},\n]\n"
 
+def get_refuel08_header():
+    return "\\begin{tikzpicture}\n\\begin{axis}[\n\
+    title={Refuel-08},\n\
+    xlabel={Time [min]},\n\
+    ylabel={Value [Pmax]},\n\
+    xmin=0, xmax=15,\n\
+    ymin=0.1, ymax=0.5,\n\
+    xtick={0,2,4,6,8,10,12,14},\n\
+    ytick={0.1,0.2,0.3,0.4,0.5},\n\
+    xtick pos=left,\n\
+    ytick pos=left,\n\
+    restrict y to domain=0:0.6,\n\
+    ymajorgrids=true,\n\
+    grid style=dashed,\n\
+    height=8cm,\n\
+    width=12cm,\n\
+    legend style ={ at={(1.03,1)},\n\
+        anchor=north west, draw=black, \n\
+        fill=white,align=left},\n]\n"
 
 def get_refuel20_header():
     return "\\begin{tikzpicture}\n\\begin{axis}[\n\
@@ -181,12 +222,13 @@ def get_network_header():
     xlabel={Time [min]},\n\
     ylabel={Value [Rmax]},\n\
     xmin=0, xmax=15,\n\
-    ymin=200, ymax=300,\n\
+    ymin=250, ymax=300,\n\
     xtick={0,2,4,6,8,10,12,14},\n\
-    ytick={200,220,240,260,280,300},\n\
+    ytick={250,260,270,280,290,300},\n\
     xtick pos=left,\n\
     ytick pos=left,\n\
-    restrict y to domain=180:300,\n\
+    restrict y to domain=180:320,\n\
+    ymajorgrids=true,\n\
     grid style=dashed,\n\
     height=8cm,\n\
     width=12cm,\n\
@@ -214,6 +256,8 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
             time = float(split2[7][:-1])
             time = round(time/60,2)
             enhanced_saynt_storm_coordinates = enhanced_saynt_storm_coordinates + f"({time}, {val})"
+    if time < 15.0:
+        enhanced_saynt_storm_coordinates = enhanced_saynt_storm_coordinates + f"(15, {val})"
 
     print("\\addplot[\n\
     color=red,\n\
@@ -259,6 +303,8 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
             time = float(split2[7][:-1])
             time = round(time/60,2)
             saynt_storm_coordinates = saynt_storm_coordinates + f"({time}, {val})"
+    if time < 15.0:
+        saynt_storm_coordinates = saynt_storm_coordinates + f"(15, {val})"
 
     print("\\addplot[\n\
     color=blue,\n\
@@ -299,7 +345,6 @@ def get_graphs(enhanced_saynt_experiment):
 
     for model in models:
         model_name = os.path.basename(model).decode("utf-8")
-        print(model_name)
 
         try:
 
@@ -313,9 +358,15 @@ def get_graphs(enhanced_saynt_experiment):
             if model_name == "4x3-95":
                 header = get_4x3_header()
                 output_file_name = "source-4x3-95.tex"
+            if model_name == "4x5x2-95":
+                header = get_4x5x2_header()
+                output_file_name = "source-4x5x2-95.tex"
             elif model_name == "milos-aaai97":
                 header = get_milos_header()
                 output_file_name = "source-milos-97.tex"
+            elif model_name == "refuel-08":
+                header = get_refuel08_header()
+                output_file_name = "source-refuel-08.tex"
             elif model_name == "refuel-20":
                 header = get_refuel20_header()
                 output_file_name = "source-refuel-20.tex"
@@ -377,11 +428,13 @@ def get_string_if_file_exists(path):
 def get_figure(enhanced_saynt_experiment):
     figure_contents = ""
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-4x3-95.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-4x5x2-95.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-lanes.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-milos-97.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-hallway.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-network-3-8-20.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-query-s3.tex")
+    figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-refuel-08.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-refuel-20.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-network.tex")
     figure_contents += get_string_if_file_exists(result_folder.decode("utf-8") + "/source-drone-4-2.tex")
@@ -409,6 +462,9 @@ if __name__ == '__main__':
 
     if not os.path.isdir(dir_path + "/output/source"):
         os.mkdir(dir_path + "/output/source")
+
+    for source_file in glob.glob(dir_path + "/output/source/source-*"):
+        os.remove(source_file)
 
     get_graphs(sys.argv[1])
 
