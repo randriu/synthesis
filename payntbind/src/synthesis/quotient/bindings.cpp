@@ -109,12 +109,15 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
             hole_to_inconsistent_options_mask[hole].set(option);
         }
     }
+    std::cout << inconsistent_holes << std::endl;
     // for (auto i: hole_to_inconsistent_options_mask)
     //     std::cout << i << ' ';
+    // std::cout << std::endl;
 
     std::vector<double> hole_difference_avg(num_holes,0);
     std::vector<uint64_t> hole_states_affected(num_holes,0);
     auto const& choice_to_assignment = coloring.getChoiceToAssignment();
+  
     
     // std::cout << "choice_to_assignment " << choice_to_assignment[0][0] << std::endl;
     std::vector<bool> hole_set(num_holes);

@@ -322,9 +322,10 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                     obs2  = set(map(lambda x: self.action_to_memory_joint_observation[x], list2))
                     # print("obs2 ",obs2)
 
-                    # print("obs1 & obs2",obs1 & obs2)
+                    # print("obs1 - obs2",obs1 - obs2)
                     # print("len",len(obs1 & obs2))
-                    if len(obs1 & obs2) < 1:
+                    if len(obs1 - obs2) < 1 and len(obs2 - obs1) < 1:
+                    # if len(obs1 & obs2) < 1:
                         result_set = result_set.union({opt1,opt2})
                         exist_inconsistency = True
                     # print("result_set",result_set)
