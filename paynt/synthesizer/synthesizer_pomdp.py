@@ -276,12 +276,15 @@ class SynthesizerPOMDP:
 
                     if number_of_beliefs == 0:
                         beliefs_remaining = len(self.storm_control.main_obs_belief_data)
+                        # beliefs_remaining = len(self.storm_control.main_support_belief_data)
                         number_of_beliefs = beliefs_remaining + 1
                     else:
                         beliefs_remaining = number_of_beliefs - 1
                     if beliefs_remaining != 0:
                         for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data]):
+                        # for index, belief_type_data in enumerate([self.storm_control.main_support_belief_data]):
                             index_type = "obs" if index in [0,1] else "sup"
+                            # index_type = "sup"
                             for obs_or_sup in belief_type_data:
                                 self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
                                 beliefs_remaining -= 1
