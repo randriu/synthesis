@@ -154,6 +154,8 @@ namespace synthesis {
         std::vector<uint64_t> action_to_memory_joint_observation; 
         // for each state, set of memory_joint_observation 
         std::vector<uint64_t> state_to_memory_joint_observation; 
+        // total number of combinations of observations and memory
+        uint64_t nr_memory_joint_observations;
             
 
 

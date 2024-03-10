@@ -198,6 +198,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.memory_joint_observation = self.decpomdp_manager.memory_joint_observation
         self.action_to_memory_joint_observation = self.decpomdp_manager.action_to_memory_joint_observation
         self.state_to_memory_joint_observation = self.decpomdp_manager.state_to_memory_joint_observation
+        self.nr_memory_joint_observations = self.decpomdp_manager.nr_memory_joint_observations
 
 
         # to each hole-option pair a list of actions colored by this combination
@@ -351,10 +352,11 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
             return super().estimate_scheduler_difference(mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
 
-        print("self.state_to_memory_joint_observation",self.state_to_memory_joint_observation)
+        print("nr_memory_joint_observations",self.nr_memory_joint_observations)
+
         if expected_visits is None:
             expected_visits = [1] * mdp.nr_states
         hole_variance = payntbind.synthesis.alternativeComputeInconsistentHoleVariance(
             self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
-            self.coloring, inconsistent_assignments, expected_visits)
+            self.coloring, inconsistent_assignments, expected_visits,self.state_to_memory_joint_observation,self.nr_memory_joint_observations)
         return hole_variance

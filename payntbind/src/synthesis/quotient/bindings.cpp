@@ -175,7 +175,7 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
     Family const& family,
     std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice, std::vector<double> const& choice_to_value,
     Coloring const& coloring, std::map<uint64_t,std::vector<uint64_t>> const& hole_to_inconsistent_options,
-    std::vector<double> const& state_to_expected_visits
+    std::vector<double> const& state_to_expected_visits,std::vector<uint64_t> const& state_to_memory_joint_observation,uint64_t const& nr_memory_joint_observations
 ) {
 
     auto num_holes = family.numHoles();
@@ -192,7 +192,7 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
             hole_to_inconsistent_options_mask[hole].set(option);
         }
     }
-    std::cout << inconsistent_holes << std::endl;
+    // std::cout << inconsistent_holes << std::endl;
     // for (auto i: hole_to_inconsistent_options_mask)
     //     std::cout << i << ' ';
     // std::cout << std::endl;
@@ -200,6 +200,8 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
     std::vector<double> hole_difference_avg(num_holes,0);
     std::vector<uint64_t> hole_states_affected(num_holes,0);
     auto const& choice_to_assignment = coloring.getChoiceToAssignment();
+
+    std::vector<double> holes_used_in_observation(num_holes,0); //TODO change
   
     
     // std::cout << "choice_to_assignment " << choice_to_assignment[0][0] << std::endl;

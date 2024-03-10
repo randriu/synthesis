@@ -896,7 +896,8 @@ namespace synthesis {
                     id++;
                 }
             }
-        // std::cout << "this->memory_joint_observation" << this->memory_joint_observation  << std::endl;
+        this->nr_memory_joint_observations = id;
+        // std::cout << "this->nr_memory_joint_observations" << this->nr_memory_joint_observations  << std::endl;
     }
 
     void DecPomdp::construct_acton_to_memory_joint_observation() {
