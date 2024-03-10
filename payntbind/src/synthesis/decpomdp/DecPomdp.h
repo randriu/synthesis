@@ -151,7 +151,9 @@ namespace synthesis {
         // for each combination of memory and joint observation, the coresponding unique number
         std::vector<std::vector<uint64_t>> memory_joint_observation;
         // for each action, set of memory_joint_observation 
-        std::vector<uint64_t> action_to_memory_joint_observation; // TODO not completed
+        std::vector<uint64_t> action_to_memory_joint_observation; 
+        // for each state, set of memory_joint_observation 
+        std::vector<uint64_t> state_to_memory_joint_observation; 
             
 
 
@@ -204,6 +206,7 @@ namespace synthesis {
         void resetDesignSpace();
         void construct_memory_joint_observation();
         void construct_acton_to_memory_joint_observation();
+        void construct_state_to_memory_joint_observation();
         void buildDesignSpaceSpurious(); 
 
         // for each prototype state contains a list of its duplicates (including itself)

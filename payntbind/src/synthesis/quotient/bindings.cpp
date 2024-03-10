@@ -109,6 +109,89 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
             hole_to_inconsistent_options_mask[hole].set(option);
         }
     }
+    // std::cout << inconsistent_holes << std::endl;
+    // for (auto i: hole_to_inconsistent_options_mask)
+    //     std::cout << i << ' ';
+    // std::cout << std::endl;
+
+    std::vector<double> hole_difference_avg(num_holes,0);
+    std::vector<uint64_t> hole_states_affected(num_holes,0);
+    auto const& choice_to_assignment = coloring.getChoiceToAssignment();
+  
+    
+    // std::cout << "choice_to_assignment " << choice_to_assignment[0][0] << std::endl;
+    std::vector<bool> hole_set(num_holes);
+    std::vector<double> hole_min(num_holes);
+    std::vector<double> hole_max(num_holes);
+        
+    auto num_states = row_groups.size()-1;
+    for(uint64_t state=0; state<num_states; ++state) {
+
+        for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
+            auto value = choice_to_value[choice];
+            auto choice_global = choice_to_global_choice[choice];
+            // std::cout << "choice " << choice << std::endl;
+            // std::cout << "choice_global " << choice_global << std::endl;
+            for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
+                if(not  hole_to_inconsistent_options_mask[hole][option]) {
+                    continue;
+                }
+
+                if(not hole_set[hole]) {
+                    hole_min[hole] = value;
+                    hole_max[hole] = value;
+                    hole_set[hole] = true;
+                } else {
+                    if(value < hole_min[hole]) {
+                        hole_min[hole] = value;
+                    }
+                    if(value > hole_max[hole]) {
+                        hole_max[hole] = value;
+                    }
+                }
+            }
+        }
+
+        for(auto hole: inconsistent_holes) {
+            if(not hole_set[hole]) {
+                continue;
+            }
+            double difference = (hole_max[hole]-hole_min[hole])*state_to_expected_visits[state];
+            hole_states_affected[hole] += 1;
+            hole_difference_avg[hole] += (difference-hole_difference_avg[hole]) / hole_states_affected[hole];
+        }
+        std::fill(hole_set.begin(), hole_set.end(), false);
+    }
+
+    std::map<uint64_t,double> inconsistent_hole_variance;
+    for(auto hole: inconsistent_holes) {
+        inconsistent_hole_variance[hole] = hole_difference_avg[hole];
+    }
+
+    return inconsistent_hole_variance;
+}
+
+std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
+    Family const& family,
+    std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice, std::vector<double> const& choice_to_value,
+    Coloring const& coloring, std::map<uint64_t,std::vector<uint64_t>> const& hole_to_inconsistent_options,
+    std::vector<double> const& state_to_expected_visits
+) {
+
+    auto num_holes = family.numHoles();
+    std::vector<BitVector> hole_to_inconsistent_options_mask(num_holes);
+    
+    for(uint64_t hole=0; hole<num_holes; ++hole) {
+        hole_to_inconsistent_options_mask[hole] = BitVector(family.holeNumOptionsTotal(hole));
+    }
+
+    BitVector inconsistent_holes(num_holes);
+    for(auto const& [hole,options]: hole_to_inconsistent_options) {
+        inconsistent_holes.set(hole);
+        for(auto option: options) {
+            hole_to_inconsistent_options_mask[hole].set(option);
+        }
+    }
     std::cout << inconsistent_holes << std::endl;
     // for (auto i: hole_to_inconsistent_options_mask)
     //     std::cout << i << ' ';
@@ -276,6 +359,7 @@ void bindings_coloring(py::module& m) {
 
     m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
+    m.def("alternativeComputeInconsistentHoleVariance", &synthesis::alternativeComputeInconsistentHoleVariance);
     
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 

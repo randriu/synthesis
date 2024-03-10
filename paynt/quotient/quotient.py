@@ -284,7 +284,7 @@ class Quotient:
         # print("mdp.quotient_choice_map",mdp.quotient_choice_map)
         # print("inconsistent_assignments",inconsistent_assignments)
         # print("choice_values",choice_values)
-        print("expected_visits",expected_visits)
+        # print("expected_visits",expected_visits)
         for hole,options in enumerate(selection):
             if len(options) == 0:
                 # TODO why is this necessary?

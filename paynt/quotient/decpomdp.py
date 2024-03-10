@@ -197,6 +197,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         self.memory_joint_observation = self.decpomdp_manager.memory_joint_observation
         self.action_to_memory_joint_observation = self.decpomdp_manager.action_to_memory_joint_observation
+        self.state_to_memory_joint_observation = self.decpomdp_manager.state_to_memory_joint_observation
 
 
         # to each hole-option pair a list of actions colored by this combination
@@ -284,6 +285,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def scheduler_selection(self, mdp, scheduler, coloring=None):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
+# TODO delete this return
+        return super().scheduler_selection(mdp,scheduler,coloring) 
 
         if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
             return super().scheduler_selection(mdp,scheduler,coloring)
@@ -342,3 +345,16 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("coloring",coloring)
         # print("hole_selection",hole_selection)
         return hole_selection
+
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):
+
+        if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
+            return super().estimate_scheduler_difference(mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+
+        print("self.state_to_memory_joint_observation",self.state_to_memory_joint_observation)
+        if expected_visits is None:
+            expected_visits = [1] * mdp.nr_states
+        hole_variance = payntbind.synthesis.alternativeComputeInconsistentHoleVariance(
+            self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
+            self.coloring, inconsistent_assignments, expected_visits)
+        return hole_variance

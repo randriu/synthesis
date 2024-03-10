@@ -39,6 +39,8 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("agent_max_successor_memory_size", [](synthesis::DecPomdp& decpomdp) {return decpomdp.agent_max_successor_memory_size;})
         .def_property_readonly("memory_joint_observation", [](synthesis::DecPomdp& decpomdp) {return decpomdp.memory_joint_observation;})
         .def_property_readonly("action_to_memory_joint_observation", [](synthesis::DecPomdp& decpomdp) {return decpomdp.action_to_memory_joint_observation;})
+        .def_property_readonly("state_to_memory_joint_observation", [](synthesis::DecPomdp& decpomdp) {return decpomdp.state_to_memory_joint_observation;})
+        
 
 
 
