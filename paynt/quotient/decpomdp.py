@@ -352,7 +352,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
             return super().estimate_scheduler_difference(mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
 
-        print("nr_memory_joint_observations",self.nr_memory_joint_observations)
+        # print("nr_memory_joint_observations",self.nr_memory_joint_observations)
 
         if expected_visits is None:
             expected_visits = [1] * mdp.nr_states

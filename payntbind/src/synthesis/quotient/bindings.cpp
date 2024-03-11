@@ -201,17 +201,47 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
     std::vector<uint64_t> hole_states_affected(num_holes,0);
     auto const& choice_to_assignment = coloring.getChoiceToAssignment();
 
-    std::vector<double> holes_used_in_observation(num_holes,0); //TODO change
+    std::vector<std::vector<BitVector>> holes_used_in_observation(nr_memory_joint_observations); //TODO change
+    for(uint64_t id=0; id<nr_memory_joint_observations; ++id) {
+        holes_used_in_observation[id].resize(num_holes);
+        for (uint64_t hole=0; hole<num_holes; ++hole)
+        {
+            holes_used_in_observation[id][hole] =  BitVector(family.holeNumOptionsTotal(hole));
+        }
+       
+    }
+
+    auto num_states = row_groups.size()-1;
+    for(uint64_t state=0; state<num_states; ++state) {
+        auto id = state_to_memory_joint_observation[state];
+        for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
+            auto choice_global = choice_to_global_choice[choice];
+            for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
+                if(not  hole_to_inconsistent_options_mask[hole][option]) {
+                    continue;
+                }
+                holes_used_in_observation[id][hole].set(option);
+            }
+        }
+    }
   
+    // for(uint64_t id=0; id<nr_memory_joint_observations; ++id) {
+    //     holes_used_in_observation[id].resize(num_holes);
+    //     for (uint64_t hole=0; hole<num_holes; ++hole)
+    //     {
+    //         std::cout << "holes_used_in_observation " << holes_used_in_observation[id][hole] << std::endl;
+    //     }
+       
+    // }
     
-    // std::cout << "choice_to_assignment " << choice_to_assignment[0][0] << std::endl;
+    
     std::vector<bool> hole_set(num_holes);
     std::vector<double> hole_min(num_holes);
     std::vector<double> hole_max(num_holes);
         
-    auto num_states = row_groups.size()-1;
+    // auto num_states = row_groups.size()-1;
     for(uint64_t state=0; state<num_states; ++state) {
-
+        auto id = state_to_memory_joint_observation[state];
         for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
             auto value = choice_to_value[choice];
             auto choice_global = choice_to_global_choice[choice];
@@ -219,6 +249,9 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
             // std::cout << "choice_global " << choice_global << std::endl;
             for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
+                    continue;
+                }
+                if(not  holes_used_in_observation[id][hole][option]) {
                     continue;
                 }
 
