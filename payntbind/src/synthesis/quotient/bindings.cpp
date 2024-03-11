@@ -201,12 +201,12 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
     std::vector<uint64_t> hole_states_affected(num_holes,0);
     auto const& choice_to_assignment = coloring.getChoiceToAssignment();
 
-    std::vector<std::vector<BitVector>> holes_used_in_observation(nr_memory_joint_observations); //TODO change
+    std::vector<std::vector<BitVector>> option_used_in_concrete_observation(nr_memory_joint_observations); //TODO change
     for(uint64_t id=0; id<nr_memory_joint_observations; ++id) {
-        holes_used_in_observation[id].resize(num_holes);
+        option_used_in_concrete_observation[id].resize(num_holes);
         for (uint64_t hole=0; hole<num_holes; ++hole)
         {
-            holes_used_in_observation[id][hole] =  BitVector(family.holeNumOptionsTotal(hole));
+            option_used_in_concrete_observation[id][hole] =  BitVector(family.holeNumOptionsTotal(hole));
         }
        
     }
@@ -220,20 +220,20 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
                     continue;
                 }
-                holes_used_in_observation[id][hole].set(option);
+                option_used_in_concrete_observation[id][hole].set(option);
             }
         }
     }
   
     // for(uint64_t id=0; id<nr_memory_joint_observations; ++id) {
-    //     holes_used_in_observation[id].resize(num_holes);
+    //     option_used_in_concrete_observation[id].resize(num_holes);
     //     for (uint64_t hole=0; hole<num_holes; ++hole)
     //     {
-    //         std::cout << "holes_used_in_observation " << holes_used_in_observation[id][hole] << std::endl;
+    //         std::cout << "option_used_in_concrete_observation " << option_used_in_concrete_observation[id][hole] << std::endl;
     //     }
        
     // }
-    
+    bool exist_inconsistency = false;
     
     std::vector<bool> hole_set(num_holes);
     std::vector<double> hole_min(num_holes);
@@ -251,7 +251,7 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
                     continue;
                 }
-                if(not  holes_used_in_observation[id][hole][option]) {
+                if(not  option_used_in_concrete_observation[id][hole][option]) {
                     continue;
                 }
 
@@ -260,6 +260,7 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
                     hole_max[hole] = value;
                     hole_set[hole] = true;
                 } else {
+                    exist_inconsistency = true;
                     if(value < hole_min[hole]) {
                         hole_min[hole] = value;
                     }
@@ -279,6 +280,48 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
             hole_difference_avg[hole] += (difference-hole_difference_avg[hole]) / hole_states_affected[hole];
         }
         std::fill(hole_set.begin(), hole_set.end(), false);
+    }
+
+    if (not exist_inconsistency)
+    {
+        std::fill(hole_set.begin(), hole_set.end(), false);
+        for(uint64_t state=0; state<num_states; ++state) {
+
+            for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
+                auto value = choice_to_value[choice];
+                auto choice_global = choice_to_global_choice[choice];
+                // std::cout << "choice " << choice << std::endl;
+                // std::cout << "choice_global " << choice_global << std::endl;
+                for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
+                    if(not  hole_to_inconsistent_options_mask[hole][option]) {
+                        continue;
+                    }
+
+                    if(not hole_set[hole]) {
+                        hole_min[hole] = value;
+                        hole_max[hole] = value;
+                        hole_set[hole] = true;
+                    } else {
+                        if(value < hole_min[hole]) {
+                            hole_min[hole] = value;
+                        }
+                        if(value > hole_max[hole]) {
+                            hole_max[hole] = value;
+                        }
+                    }
+                }
+            }
+
+            for(auto hole: inconsistent_holes) {
+                if(not hole_set[hole]) {
+                    continue;
+                }
+                double difference = (hole_max[hole]-hole_min[hole])*state_to_expected_visits[state];
+                hole_states_affected[hole] += 1;
+                hole_difference_avg[hole] += (difference-hole_difference_avg[hole]) / hole_states_affected[hole];
+            }
+            std::fill(hole_set.begin(), hole_set.end(), false);
+        }
     }
 
     std::map<uint64_t,double> inconsistent_hole_variance;
