@@ -4,6 +4,7 @@ import payntbind
 
 import paynt.family.family
 import paynt.quotient.quotient
+import paynt.quotient.fsc
 
 from .models import MarkovChain,MDP,DTMC
 
@@ -20,6 +21,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     initial_memory_size = 1
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
+
+    # label associated with un-labelled choices
+    EMPTY_LABEL = "__no_label__"
 
     
     def __init__(self, pomdp, specification, decpomdp_manager=None):
@@ -70,7 +74,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         if self.pomdp.has_observation_valuations():
             ov = self.pomdp.observation_valuations
             self.observation_labels = [ov.get_string(obs) for obs in range(self.observations)]
-            self.observation_labels = [self.simplify_label(label) for label in self.observation_labels]
         else:
             if decpomdp_manager is None:
                 self.observation_labels = list(range(self.observations))
@@ -102,7 +105,12 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             for offset in range(actions):
                 choice = self.pomdp.get_choice_index(state,offset)
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
-                self.action_labels_at_observation[obs].append(labels)
+                assert len(labels) <= 1, "expected at most 1 label"
+                if len(labels) == 0:
+                    label = PomdpQuotient.EMPTY_LABEL
+                else :
+                    label = list(labels)[0]
+                self.action_labels_at_observation[obs].append(label)
 
         # mark perfect observations
         self.observation_states = [0 for obs in range(self.observations)]
@@ -152,22 +160,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 observation = obs
                 break
         return (is_action_hole, observation, memory)
-
-    def simplify_label(self,label):
-        label = re.sub(r"\s+", "", label)
-        label = label[1:-1]
-
-        output = "[";
-        first = True
-        for p in label.split("&"):
-            if not p.endswith("=0"):
-                if first:
-                    first = False
-                else:
-                    output += " & "
-                output += p
-        output += "]"
-        return output
 
     def set_manager_memory_vector(self):
         for obs in range(self.observations):
@@ -671,8 +663,10 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         return size_gamma + size_delta
 
     
-    # constructs pomdp from the quotient MDP, used for computing POMDP abstraction bounds
     def get_family_pomdp(self, mdp):
+        '''
+        Constructs POMDP from the quotient MDP. Used for computing POMDP abstraction bounds.
+        '''
         no_obs = self.pomdp.nr_observations
         tm = mdp.model.transition_matrix
         components = stormpy.storage.SparseModelComponents(tm, mdp.model.labeling, mdp.model.reward_models)
@@ -709,3 +703,42 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         pomdp = stormpy.pomdp.make_canonic(pomdp)
 
         return pomdp
+
+
+    def assignment_to_fsc(self, assignment):
+        assert assignment.size == 1, "expected family of size 1"
+        num_nodes = max(self.observation_memory_size)
+        fsc = paynt.quotient.fsc.FSC(num_nodes, self.observations, is_deterministic=True)
+        fsc.observation_labels = self.observation_labels
+
+        # collect action labels
+        action_labels = set()
+        for labels in self.action_labels_at_observation:
+            action_labels.update(labels)
+        action_labels = list(action_labels)
+        fsc.action_labels = action_labels
+
+        # map observations to unique indices of available actions
+        action_label_indices = {label:index for index,label in enumerate(action_labels)}
+        observation_to_actions = [[] for obs in range(self.observations)]
+        for obs,action_labels in enumerate(self.action_labels_at_observation):
+            observation_to_actions[obs] = [action_label_indices[label] for label in action_labels]
+
+        fsc.fill_trivial_actions(observation_to_actions)
+        fsc.fill_zero_updates()
+
+        # convert hole assignment to FSC
+        for obs,holes in enumerate(self.observation_action_holes):
+            for memory,hole in enumerate(holes):
+                option = assignment.hole_options(hole)[0]
+                action_label = self.action_labels_at_observation[obs][option]
+                action = action_label_indices[action_label]
+                fsc.action_function[memory][obs] = action
+        for obs,holes in enumerate(self.observation_memory_holes):
+            for memory,hole in enumerate(holes):
+                option = assignment.hole_options(hole)[0]
+                fsc.update_function[memory][obs] = option
+
+        fsc.check(observation_to_actions)
+
+        return fsc
