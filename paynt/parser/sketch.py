@@ -57,7 +57,7 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, discount_factor=1, precision=1e-4, constraint_bound=None):
+        export=None, relative_error=0, discount_factor=1, precision=1e-4, constraint_bound=None, native_discount=False):
 
         assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
         if discount_factor < 1:
@@ -104,9 +104,17 @@ class Sketch:
                 if decpomdp_manager is None:
                     raise SyntaxError
                 logger.info("applying discount factor transformation...")
-                decpomdp_manager.apply_discount_factor_transformation()
+                if not native_discount:
+                    decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
-                if constraint_bound is not None:
+                if native_discount:
+                    paynt.quotient.models.MarkovChain.native_cassandra = True
+                    optimality = paynt.verification.property.construct_discount_property(
+                        decpomdp_manager.reward_model_name, 
+                        decpomdp_manager.reward_minimizing, 
+                        decpomdp_manager.discount_factor)
+                    specification = paynt.verification.property.Specification([optimality])
+                elif constraint_bound is not None:
                     specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
                 else:
                     optimality = paynt.verification.property.construct_reward_property(

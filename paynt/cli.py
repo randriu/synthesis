@@ -135,6 +135,10 @@ def setup_logger(log_path = None):
 @click.option(
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for cassandra models",
 )
+@click.option(
+    "--native-discount", is_flag=True, default=False,
+    help="# if set, MDP dicount model checking engine is used (expecting cassandra models)"
+)
 
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
@@ -154,7 +158,7 @@ def paynt_run(
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
-    constraint_bound,
+    constraint_bound, native_discount,
     ce_generator,
     profiling
 ):
@@ -187,7 +191,7 @@ def paynt_run(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
     if all_in_one is None:
-        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound)
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound, native_discount)
         synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
         synthesizer.run(optimum_threshold, export_evaluation)
     else:

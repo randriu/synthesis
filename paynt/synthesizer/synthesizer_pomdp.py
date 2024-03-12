@@ -96,7 +96,7 @@ class SynthesizerPOMDP:
             if self.storm_control.enhanced_saynt is not None:
                 self.storm_control.sub_pomdp_builder = payntbind.synthesis.SubPomdpBuilder(self.quotient.pomdp)
 
-    def synthesize(self, family, print_stats=False, main_family=None, subfamilies=None):
+    def synthesize(self, family, print_stats=True, main_family=None, subfamilies=None):
         if self.storm_control is not None:
             synthesizer = self.synthesizer(self.quotient, subfamilies_buffer=subfamilies, main_family=main_family, storm_control=self.storm_control, s_queue=self.interactive_queue, saynt_timer=self.saynt_timer, main_thread=self.main_synthesizer)
         else:

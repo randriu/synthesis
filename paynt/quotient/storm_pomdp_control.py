@@ -178,11 +178,11 @@ class StormPOMDPControl:
                 #print(result.lower_bound)
             else:
                 print(f'-----------Storm----------- \
-                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\n', flush=True)
             exit()
 
         print(f'-----------Storm----------- \
-              \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+              \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\n', flush=True)
 
         self.latest_storm_result = result
         if self.quotient.specification.optimality.minimizing:
