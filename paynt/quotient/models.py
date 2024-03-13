@@ -47,22 +47,6 @@ class MarkovChain:
         self.quotient_container = quotient_container
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
-        self.hole_is_simple = None
-
-
-    @property
-    def hole_simple(self):
-        if self.hole_is_simple is not None:
-            return self.hole_is_simple
-        num_holes = self.quotient_container.design_space.num_holes
-        hole_to_states = [0 for _ in range(num_holes)]
-        for state in range(self.states):
-            quotient_state = self.quotient_state_map[state]
-            for hole in self.quotient_container.state_to_holes[quotient_state]:
-                hole_to_states[hole] += 1
-        self.hole_is_simple = [hole_to_states[hole] <= 1 for hole in range(num_holes)]
-        return self.hole_is_simple
-
 
     @property
     def states(self):

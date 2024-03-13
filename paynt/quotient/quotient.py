@@ -43,9 +43,6 @@ class Quotient:
         if self.quotient_mdp is not None:
             self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
-        if coloring is not None:
-            self.state_to_holes = coloring.getStateToHoles().copy()
-
         # (optional) counter of discarded assignments
         self.discarded = 0
 
@@ -325,9 +322,16 @@ class Quotient:
 
         # reduce simple holes
         ds_before = reduced_design_space.size
+
+        hole_to_states = [0] * self.design_space.num_holes
+        state_to_holes = self.coloring.getStateToHoles().copy()
+        for state in range(mdp.model.nr_states):
+            quotient_state = mdp.quotient_state_map[state]
+            for hole in state_to_holes[quotient_state]:
+                hole_to_states[hole] += 1
+
         for hole in range(reduced_design_space.num_holes):
-            if mdp.hole_simple[hole]:
-                assert len(hole_assignments[hole]) == 1
+            if hole_to_states[hole] <= 1:
                 reduced_design_space.hole_set_options(hole, hole_assignments[hole])
         ds_after = reduced_design_space.size
         self.discarded += ds_before - ds_after
