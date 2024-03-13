@@ -191,9 +191,28 @@ def paynt_run(
         all_in_one_analysis.run()
     if profiling:
         profiler.disable()
-        stats = profiler.create_stats()
-        pstats.Stats(profiler).sort_stats('tottime').print_stats(20)
+        print_profiler_stats(profiler)
 
+def print_profiler_stats(profiler):
+    stats = pstats.Stats(profiler)
+    NUM_LINES = 20
+
+    logger.debug("cProfiler info:")
+    stats.sort_stats('tottime').print_stats(NUM_LINES)
+
+    logger.debug("percentage breakdown:")
+    entries = [ (key,data[2]) for key,data in stats.stats.items()]
+    entries = sorted(entries, key=lambda x : x[1], reverse=True)
+    entries = entries[:NUM_LINES]
+    for key,data in entries:
+        module,line,method = key
+        if module == "~":
+            callee = method
+        else:
+            callee = f"{module}:{line}({method})"
+        percentage = round(data / stats.total_tt * 100,1)
+        percentage = str(percentage).ljust(4)
+        print(f"{percentage} %  {callee}")
 
 def main():
     setup_logger()

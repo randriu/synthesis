@@ -220,7 +220,7 @@ class Statistic:
 
         quotient_states = self.quotient.quotient_mdp.nr_states
         quotient_actions = self.quotient.quotient_mdp.nr_choices
-        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size}, quotient: {quotient_states} states / {quotient_actions} actions"
+        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size_or_order}, quotient: {quotient_states} states / {quotient_actions} actions"
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
 
         iterations = self.get_summary_iterations()
