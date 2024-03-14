@@ -221,7 +221,8 @@ class Quotient:
         if prop.minimizing:
             dtmc_visits = Quotient.make_vector_defined(dtmc_visits)
         else:
-            dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
+            max_without_inf = max([value for value in dtmc_visits if value != math.inf])
+            dtmc_visits = [ value if value != math.inf else max_without_inf*10 for value in dtmc_visits]
 
         # map vector of expected visits onto the state space of the quotient MDP
         expected_visits = [0] * mdp.nr_states
