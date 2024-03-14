@@ -109,6 +109,7 @@ class Sketch:
                 explicit_quotient = decpomdp_manager.construct_pomdp()
                 if native_discount:
                     paynt.quotient.models.MarkovChain.native_cassandra = True
+                    paynt.quotient.quotient.Quotient.discounted_expected_visits = decpomdp_manager.discount_factor
                     optimality = paynt.verification.property.construct_discount_property(
                         decpomdp_manager.reward_model_name, 
                         decpomdp_manager.reward_minimizing, 

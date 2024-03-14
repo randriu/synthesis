@@ -16,6 +16,9 @@ class Quotient:
     # if True, hole scores in the state will be multiplied with the number of expected visits of this state
     compute_expected_visits = True
 
+    # if the value is <1, the dtmc is transformed to discounted version using this value as the discount factor before computing EVTs
+    discounted_expected_visits = 1
+
     @staticmethod
     def make_vector_defined(vector):
         vector_noinf = [ value if value != math.inf else 0 for value in vector]
@@ -210,9 +213,16 @@ class Quotient:
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
         dtmc = Quotient.mdp_to_dtmc(sub_mdp)
 
-        # compute visits
-        dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc).get_values()
-        dtmc_visits = list(dtmc_visits)
+        if self.discounted_expected_visits < 1:
+            # compute discounted visits
+            discounted_dtmc = payntbind.synthesis.apply_discount_transformation_to_dtmc(dtmc, self.discounted_expected_visits)     
+            dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, discounted_dtmc).get_values()
+            dtmc_visits = list(dtmc_visits)[:-1]
+        else:
+            # compute visits
+            dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc).get_values()
+            dtmc_visits = list(dtmc_visits)
+        
 
         # handle infinity- and zero-visits
         if prop.minimizing:
