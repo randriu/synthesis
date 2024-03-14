@@ -4,6 +4,7 @@ import payntbind
 
 import paynt.family.family
 import paynt.quotient.quotient
+import paynt.quotient.fsc
 
 from .models import MarkovChain,MDP,DTMC
 
@@ -20,6 +21,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     initial_memory_size = 1
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
+
+    # label associated with un-labelled choices
+    EMPTY_LABEL = "__no_label__"
 
     
     def __init__(self, pomdp, specification, decpomdp_manager=None):
@@ -70,7 +74,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         if self.pomdp.has_observation_valuations():
             ov = self.pomdp.observation_valuations
             self.observation_labels = [ov.get_string(obs) for obs in range(self.observations)]
-            self.observation_labels = [self.simplify_label(label) for label in self.observation_labels]
         else:
             if decpomdp_manager is None:
                 self.observation_labels = list(range(self.observations))
@@ -102,7 +105,12 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             for offset in range(actions):
                 choice = self.pomdp.get_choice_index(state,offset)
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
-                self.action_labels_at_observation[obs].append(labels)
+                assert len(labels) <= 1, "expected at most 1 label"
+                if len(labels) == 0:
+                    label = PomdpQuotient.EMPTY_LABEL
+                else :
+                    label = list(labels)[0]
+                self.action_labels_at_observation[obs].append(label)
 
         # mark perfect observations
         self.observation_states = [0 for obs in range(self.observations)]
@@ -111,7 +119,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             self.observation_states[obs] += 1
 
         # initialize POMDP manager
-        if not self.posterior_aware:
+        if not PomdpQuotient.posterior_aware:
             self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp)
         else:
             self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
@@ -152,22 +160,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 observation = obs
                 break
         return (is_action_hole, observation, memory)
-
-    def simplify_label(self,label):
-        label = re.sub(r"\s+", "", label)
-        label = label[1:-1]
-
-        output = "[";
-        first = True
-        for p in label.split("&"):
-            if not p.endswith("=0"):
-                if first:
-                    first = False
-                else:
-                    output += " & "
-                output += p
-        output += "]"
-        return output
 
     def set_manager_memory_vector(self):
         for obs in range(self.observations):
@@ -225,14 +217,12 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     
     def create_coloring(self):
-
-        # short aliases
-        pm = self.pomdp_manager
-        pomdp = self.pomdp
-        mdp = self.quotient_mdp
+        logger.debug("creating coloring ...")
+        if PomdpQuotient.posterior_aware:
+            return self.create_coloring_aposteriori()
 
         # create holes
-        all_holes = paynt.family.family.Family()
+        family = paynt.family.family.Family()
         self.observation_action_holes = []
         self.observation_memory_holes = []
         self.is_action_hole = []
@@ -243,39 +233,45 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             hole_indices = []
             num_actions = self.actions_at_observation[obs]
             if num_actions > 1:
-                option_labels = [str(labels) for labels in self.action_labels_at_observation[obs]]
+                option_labels = self.action_labels_at_observation[obs]
                 for mem in range(self.observation_memory_size[obs]):
-                    hole_indices.append(all_holes.num_holes)
+                    hole_indices.append(family.num_holes)
                     name = self.create_hole_name(obs,mem,True)
-                    all_holes.add_hole(name,option_labels)
+                    family.add_hole(name,option_labels)
                     self.is_action_hole.append(True)
             self.observation_action_holes.append(hole_indices)
 
             # memory holes
             hole_indices = []
-            num_updates = pm.max_successor_memory_size[obs]
+            num_updates = self.pomdp_manager.max_successor_memory_size[obs]
             if num_updates > 1:
                 option_labels = [str(x) for x in range(num_updates)]
                 for mem in range(self.observation_memory_size[obs]):
                     name = self.create_hole_name(obs,mem,False)
-                    hole_indices.append(all_holes.num_holes)
-                    all_holes.add_hole(name,option_labels)
+                    hole_indices.append(family.num_holes)
+                    family.add_hole(name,option_labels)
                     self.is_action_hole.append(False)
             self.observation_memory_holes.append(hole_indices)
 
         # create the coloring
+        assert self.pomdp_manager.num_holes == family.num_holes
+        num_holes = family.num_holes
+        choice_action_hole = self.pomdp_manager.row_action_hole
+        choice_memory_hole = self.pomdp_manager.row_memory_hole
+        choice_action_option = self.pomdp_manager.row_action_option
+        choice_memory_option = self.pomdp_manager.row_memory_option
         choice_to_hole_options = []
-        for action in range(mdp.nr_choices):
+        for choice in range(self.quotient_mdp.nr_choices):
             hole_options = []
-            h = pm.row_action_hole[action]
-            if h != pm.num_holes:
-                hole_options.append( (h,pm.row_action_option[action]) )
-            h = pm.row_memory_hole[action]
-            if h != pm.num_holes:
-                hole_options.append( (h,pm.row_memory_option[action]) )
+            hole = choice_action_hole[choice]
+            if hole != num_holes:
+                hole_options.append( (hole,choice_action_option[choice]) )
+            hole = choice_memory_hole[choice]
+            if hole != num_holes:
+                hole_options.append( (hole,choice_memory_option[choice]) )
             choice_to_hole_options.append(hole_options)
 
-        return all_holes, choice_to_hole_options
+        return family, choice_to_hole_options
 
     def create_coloring_aposteriori(self):
         # a posteriori unfolding
@@ -307,14 +303,14 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             holes[index] = (name,option_labels)
 
         # filter out trivial holes
-        all_holes = paynt.family.family.Family()
+        family = paynt.family.family.Family()
         old_to_new_indices = [None] * len(holes)
         for index,name_labels in enumerate(holes):
             if name_labels is None:
                 continue
-            old_to_new_indices[index] = all_holes.num_holes
+            old_to_new_indices[index] = family.num_holes
             name,option_labels = name_labels
-            all_holes.add_hole(name,option_labels)
+            family.add_hole(name,option_labels)
 
         choice_to_hole_options_new = []
         for hole_options in choice_to_hole_options:
@@ -330,7 +326,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             if new_index is not None:
                 self.observation_action_holes[prior].append(new_index)
 
-        return all_holes, choice_to_hole_options
+        return family, choice_to_hole_options
 
     
     def unfold_memory(self):
@@ -338,27 +334,20 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # reset attributes
         self.quotient_mdp = None
         self.coloring = None
-        self.state_to_holes = None
         self.hole_option_to_actions = None
         
         self.observation_action_holes = None
         self.observation_memory_holes = None
         self.is_action_hole = None
         
-        logger.debug(
-            "unfolding POMDP using the following memory allocation vector: {} ..."
-            .format(self.observation_memory_size))
+        logger.debug("unfolding {}-FSC template into POMDP ...".format(max(self.observation_memory_size)))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
-        if not PomdpQuotient.posterior_aware:
-            family, choice_to_hole_options = self.create_coloring()
-        else:
-            family, choice_to_hole_options = self.create_coloring_aposteriori()
+        family, choice_to_hole_options = self.create_coloring()
 
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
-        self.state_to_holes = self.coloring.getStateToHoles().copy()
 
         # to each hole-option pair a list of actions colored by this combination
         self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
@@ -671,8 +660,10 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         return size_gamma + size_delta
 
     
-    # constructs pomdp from the quotient MDP, used for computing POMDP abstraction bounds
     def get_family_pomdp(self, mdp):
+        '''
+        Constructs POMDP from the quotient MDP. Used for computing POMDP abstraction bounds.
+        '''
         no_obs = self.pomdp.nr_observations
         tm = mdp.model.transition_matrix
         components = stormpy.storage.SparseModelComponents(tm, mdp.model.labeling, mdp.model.reward_models)
@@ -709,3 +700,42 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         pomdp = stormpy.pomdp.make_canonic(pomdp)
 
         return pomdp
+
+
+    def assignment_to_fsc(self, assignment):
+        assert assignment.size == 1, "expected family of size 1"
+        num_nodes = max(self.observation_memory_size)
+        fsc = paynt.quotient.fsc.FSC(num_nodes, self.observations, is_deterministic=True)
+        fsc.observation_labels = self.observation_labels
+
+        # collect action labels
+        action_labels = set()
+        for labels in self.action_labels_at_observation:
+            action_labels.update(labels)
+        action_labels = list(action_labels)
+        fsc.action_labels = action_labels
+
+        # map observations to unique indices of available actions
+        action_label_indices = {label:index for index,label in enumerate(action_labels)}
+        observation_to_actions = [[] for obs in range(self.observations)]
+        for obs,action_labels in enumerate(self.action_labels_at_observation):
+            observation_to_actions[obs] = [action_label_indices[label] for label in action_labels]
+
+        fsc.fill_trivial_actions(observation_to_actions)
+        fsc.fill_zero_updates()
+
+        # convert hole assignment to FSC
+        for obs,holes in enumerate(self.observation_action_holes):
+            for memory,hole in enumerate(holes):
+                option = assignment.hole_options(hole)[0]
+                action_label = self.action_labels_at_observation[obs][option]
+                action = action_label_indices[action_label]
+                fsc.action_function[memory][obs] = action
+        for obs,holes in enumerate(self.observation_memory_holes):
+            for memory,hole in enumerate(holes):
+                option = assignment.hole_options(hole)[0]
+                fsc.update_function[memory][obs] = option
+
+        fsc.check(observation_to_actions)
+
+        return fsc
