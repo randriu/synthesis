@@ -95,14 +95,25 @@ class Sketch:
                 decpomdp_manager = payntbind.synthesis.parse_decpomdp(sketch_path)
                 if decpomdp_manager is None:
                     raise SyntaxError
-                logger.info("applying discount factor transformation...")
-                decpomdp_manager.apply_discount_factor_transformation()
-                explicit_quotient = decpomdp_manager.construct_pomdp()
-                optimality = paynt.verification.property.construct_reward_property(
-                    decpomdp_manager.reward_model_name,
-                    decpomdp_manager.reward_minimizing,
-                    decpomdp_manager.discount_sink_label)
-                specification = paynt.verification.property.Specification([optimality])
+                print("paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation",paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation)
+                if paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation:
+                    explicit_quotient = decpomdp_manager.construct_pomdp()
+                    optimality = paynt.verification.property.construct_reward_property(
+                        decpomdp_manager.reward_model_name,
+                        decpomdp_manager.reward_minimizing,
+                        decpomdp_manager.discount_sink_label)
+                    specification = paynt.verification.property.Specification([optimality])
+                else:
+                    logger.info("applying discount factor transformation...")
+                    decpomdp_manager.apply_discount_factor_transformation()
+                    explicit_quotient = decpomdp_manager.construct_pomdp()
+                    optimality = paynt.verification.property.construct_reward_property(
+                        decpomdp_manager.reward_model_name,
+                        decpomdp_manager.reward_minimizing,
+                        decpomdp_manager.discount_sink_label)
+                    specification = paynt.verification.property.Specification([optimality])
+                    
+
                 filetype = "cassandra"
             except SyntaxError:
                 pass

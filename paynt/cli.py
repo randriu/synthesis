@@ -117,6 +117,8 @@ def setup_logger(log_path = None):
     help="run profiling")
 @click.option("--use-new-split-method", is_flag=True, default=False,
     help="enable using new split method")
+@click.option("--dont-use-discount-transformation", is_flag=True, default=False,
+    help="enable using discount transformation for dec-pomdp models")
 def paynt_run(
     project, sketch, props, relative_error, discount_factor, optimum_threshold,
     export,
@@ -127,7 +129,7 @@ def paynt_run(
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     ce_generator,
-    profiling,use_new_split_method
+    profiling,use_new_split_method,dont_use_discount_transformation
 ):
     profiler = None
     if profiling:
@@ -143,6 +145,7 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.pomdp.PomdpQuotient.use_new_split_method = use_new_split_method
+    paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation = dont_use_discount_transformation
 
     storm_control = None
     if storm_pomdp:
