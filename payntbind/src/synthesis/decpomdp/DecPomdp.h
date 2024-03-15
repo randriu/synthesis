@@ -99,6 +99,9 @@ namespace synthesis {
         /** Label associated with the sink. */
         std::string discount_sink_label = "discount_sink";
 
+        /** Label associated with the target state. */
+        std::string target_label = "target";
+
         // for each observation contains the number of allocated memory states (initially 1)
         std::vector<uint64_t> observation_memory_size;
 
@@ -106,6 +109,12 @@ namespace synthesis {
         void setObservationMemorySize(uint64_t obs, uint64_t memory_size);
         // set memory size to all observations
         void setGlobalMemorySize(uint64_t memory_size);
+
+        // for each state contains if it is target state (initially false)
+        std::vector<bool> target_states;
+
+        // set target state
+        void setTargetState(uint64_t state);
 
         // for each state contains its prototype state (reverse of prototype_duplicates)
         std::vector<uint64_t> state_prototype;

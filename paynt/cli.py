@@ -146,6 +146,7 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.pomdp.PomdpQuotient.use_new_split_method = use_new_split_method
     paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation = dont_use_discount_transformation
+    paynt.quotient.pomdp.PomdpQuotient.properties_path = os.path.join(project, sketch)
 
     storm_control = None
     if storm_pomdp:

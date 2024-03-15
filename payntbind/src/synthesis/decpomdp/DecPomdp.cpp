@@ -221,6 +221,7 @@ namespace synthesis {
         }
 
         this->observation_memory_size.resize(this->joint_observations.size() + 1, 1); //TODO +1 is for sink state
+        this->target_states.resize(this->num_states(), false);
         this->prototype_duplicates.resize(this->num_states() + 1); //TODO +1 is for sink state
     }
 
@@ -263,9 +264,20 @@ namespace synthesis {
             labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
         }
         else{//TODO delete
-            storm::storage::BitVector discount_sink_flags(this->num_quotient_states, false);
-            discount_sink_flags.set(this->prototype_duplicates[this->initial_state][0]);
-            labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
+            storm::storage::BitVector target_flags(this->num_quotient_states, false);
+            for (uint64_t prototype = 0; prototype < this->num_states() ; prototype++){
+                std::cout << "this->target_states o " << this->target_states<< std::endl;
+                if (not this->target_states[prototype])
+                {
+                    continue;
+                }
+                for(auto duplicate: this->prototype_duplicates[prototype]) {
+                    target_flags.set(duplicate);
+                }
+            }
+            
+            
+            labeling.addLabel(this->target_label, std::move(target_flags));
         }
         
         return labeling;
@@ -601,6 +613,10 @@ namespace synthesis {
             }
             // auto obs = this->state_joint_observation[this->initial_state];
             // this->observation_memory_size[obs] = 1;
+        }
+
+    void DecPomdp::setTargetState(uint64_t state) {
+            this->target_states[state] = true;
         }
 
     void DecPomdp::buildStateSpace() {

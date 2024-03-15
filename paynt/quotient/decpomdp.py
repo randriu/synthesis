@@ -13,6 +13,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
+        print("paynt.quotient.pomdp.PomdpQuotient.properties_path ",paynt.quotient.pomdp.PomdpQuotient.properties_path )
         self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
         # self.initial_memory_size = 1;
         # print("self.initial_memory_size",self.initial_memory_size)
@@ -54,7 +55,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("self.nr_joint_observations",self.nr_joint_observations)
 
         self.state_joint_observation = decpomdp_manager.state_joint_observation
-        # # print("self.state_joint_observation",self.state_joint_observation)
+        print("self.state_joint_observation",self.state_joint_observation)
 
         self.nr_agent_observations = [len(observation) for observation in self.agent_observation_labels]
         # # print("self.nr_agent_observations",self.nr_agent_observations)
@@ -165,12 +166,19 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("self.observation_memory_size",self.observation_memory_size)
 
         self.set_manager_memory_vector()
+        self.set_target_states()
         self.unfold_memory()
 
     def set_manager_memory_vector(self):
         mem = pow( self.initial_memory_size , self.nr_agents) 
         # logger.debug(f"memory of every state of quotient mdp was set to  {mem}.")
         self.decpomdp_manager.set_global_memory_size(mem)
+
+    # TODO not completed
+    def set_target_states(self): 
+        if paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation:
+            # for state in range(self.nr_states):
+            self.decpomdp_manager.set_target_state(2)
 
     def unfold_memory(self):
         

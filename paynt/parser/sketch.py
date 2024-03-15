@@ -101,7 +101,7 @@ class Sketch:
                     optimality = paynt.verification.property.construct_reward_property(
                         decpomdp_manager.reward_model_name,
                         decpomdp_manager.reward_minimizing,
-                        decpomdp_manager.discount_sink_label)
+                        decpomdp_manager.target_label)
                     specification = paynt.verification.property.Specification([optimality])
                 else:
                     logger.info("applying discount factor transformation...")
