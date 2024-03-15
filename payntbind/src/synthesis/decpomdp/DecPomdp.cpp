@@ -883,8 +883,66 @@ namespace synthesis {
 
         }
 
+    void DecPomdp::construct_memory_joint_observation() {
+        this->memory_joint_observation.clear();
+        this->memory_joint_observation.resize(this->joint_observations.size());
+        uint64_t id = 0;
+        for (int obs = 0; obs < this->joint_observations.size(); ++obs)
+            {
+                this->memory_joint_observation[obs].resize(this->observation_memory_size[obs] ,0); 
+                for (int mem = 0; mem < this->observation_memory_size[obs] ; ++mem){
+                    // std::cout << mem  << std::endl;
+                    this->memory_joint_observation[obs][mem] = id;
+                    id++;
+                }
+            }
+        this->nr_memory_joint_observations = id;
+        // std::cout << "this->nr_memory_joint_observations" << this->nr_memory_joint_observations  << std::endl;
+    }
+
+    void DecPomdp::construct_acton_to_memory_joint_observation() {
+        this->action_to_memory_joint_observation.clear();
+        // this->action_to_memory_joint_observation.resize(this->num_joint_actions());
+
+        
+        // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
+        for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+            auto prototype_state = this->state_prototype[state];
+            auto state_mem = this->state_memory[state];
+            auto observ = this->state_joint_observation[prototype_state];
+            for(auto row: this->transition_matrix[prototype_state]) {
+                // std::cout << "2 " << std::endl;
+                for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observ]; dst_mem++) {
+                    // std::cout << "3 " << std::endl;
+                    this->action_to_memory_joint_observation.push_back(this->memory_joint_observation[observ][state_mem]);
+                }               
+            }
+        }
+
+        // std::cout << "this->action_to_memory_joint_observation" << this->action_to_memory_joint_observation  << std::endl;
+    }
+
+    void DecPomdp::construct_state_to_memory_joint_observation() {
+        this->state_to_memory_joint_observation.clear();
+        // this->action_to_memory_joint_observation.resize(this->num_joint_actions());
+
+        
+        // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
+        for(uint64_t state = 0; state < this->num_quotient_states; state++) {
+            auto prototype_state = this->state_prototype[state];
+            auto state_mem = this->state_memory[state];
+            auto observ = this->state_joint_observation[prototype_state];
+            this->state_to_memory_joint_observation.push_back(this->memory_joint_observation[observ][state_mem]);
+        }
+
+        // std::cout << "this->state_to_memory_joint_observation" << this->state_to_memory_joint_observation  << std::endl;
+    }
+
     void DecPomdp::buildDesignSpaceSpurious() {
             this->resetDesignSpace();
+            this->construct_memory_joint_observation();
+            this->construct_acton_to_memory_joint_observation();
+            this->construct_state_to_memory_joint_observation();
             
             // for each (z,n) create an action and a memory hole (if necessary)
             // store hole range

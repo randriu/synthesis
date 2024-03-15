@@ -115,7 +115,8 @@ def setup_logger(log_path = None):
 )
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
-
+@click.option("--use-new-split-method", is_flag=True, default=False,
+    help="enable using new split method")
 def paynt_run(
     project, sketch, props, relative_error, discount_factor, optimum_threshold,
     export,
@@ -126,7 +127,7 @@ def paynt_run(
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     ce_generator,
-    profiling
+    profiling,use_new_split_method
 ):
     profiler = None
     if profiling:
@@ -141,6 +142,7 @@ def paynt_run(
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
+    paynt.quotient.pomdp.PomdpQuotient.use_new_split_method = use_new_split_method
 
     storm_control = None
     if storm_pomdp:

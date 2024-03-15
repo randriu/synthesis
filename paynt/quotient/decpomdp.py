@@ -51,13 +51,14 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # # print("self.nr_joint_actions",self.nr_joint_actions)
 
         self.nr_joint_observations = len(self.joint_observations)
-        # # print("self.nr_joint_observations",self.nr_joint_observations)
+        # print("self.nr_joint_observations",self.nr_joint_observations)
 
         self.state_joint_observation = decpomdp_manager.state_joint_observation
         # # print("self.state_joint_observation",self.state_joint_observation)
 
         self.nr_agent_observations = [len(observation) for observation in self.agent_observation_labels]
         # # print("self.nr_agent_observations",self.nr_agent_observations)
+
 
         # self.num_rows = decpomdp_manager.num_rows()
         # # print("self.num_rows",self.num_rows)
@@ -194,6 +195,12 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
         self.state_to_holes = self.coloring.getStateToHoles().copy()
 
+        self.memory_joint_observation = self.decpomdp_manager.memory_joint_observation
+        self.action_to_memory_joint_observation = self.decpomdp_manager.action_to_memory_joint_observation
+        self.state_to_memory_joint_observation = self.decpomdp_manager.state_to_memory_joint_observation
+        self.nr_memory_joint_observations = self.decpomdp_manager.nr_memory_joint_observations
+
+
         # to each hole-option pair a list of actions colored by this combination
         self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
         for hole in range(family.num_holes):
@@ -269,3 +276,87 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("choice_to_hole_options",choice_to_hole_options)
 
         return all_holes, choice_to_hole_options
+
+    def new_scores(self,scores):
+        if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
+            return super().new_scores(scores)
+
+        return 0
+
+    def scheduler_selection(self, mdp, scheduler, coloring=None):
+        ''' Get hole options involved in the scheduler selection. '''
+        assert scheduler.memoryless and scheduler.deterministic
+# TODO delete this return
+        return super().scheduler_selection(mdp,scheduler,coloring) 
+
+        if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
+            return super().scheduler_selection(mdp,scheduler,coloring)
+
+
+        
+        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
+        
+        choices = self.state_to_choice_to_choices(state_to_choice)
+        if coloring is None:
+            coloring = self.coloring
+        
+        hole_selection = coloring.collectHoleOptions(choices)
+
+        new_hole_selection = hole_selection.copy()
+
+        exist_inconsistency = False
+        for hole in range(len(hole_selection)):
+            result_set = set()
+            # print(hole_selection[hole])
+            num_options = len(hole_selection[hole])
+            if num_options < 2:
+                continue
+            for opt1 in range(num_options): 
+                for opt2 in range(opt1,num_options):
+                    set1 = set(self.hole_option_to_actions[hole][hole_selection[hole][opt1]])
+                    set2 = set(self.hole_option_to_actions[hole][hole_selection[hole][opt2]])
+                    set_choices = set(choices)
+                    list1 = list(set1.intersection(set_choices))
+                    list2 = list(set2.intersection(set_choices))
+                    # print("list1",list1)
+                    # print("list2",list2)
+
+                    obs1  = set(map(lambda x: self.action_to_memory_joint_observation[x], list1))
+                    # print("\n obs1",obs1)
+                    obs2  = set(map(lambda x: self.action_to_memory_joint_observation[x], list2))
+                    # print("obs2 ",obs2)
+
+                    # print("obs1 - obs2",obs1 - obs2)
+                    # print("len",len(obs1 & obs2))
+                    if len(obs1 - obs2) < 1 and len(obs2 - obs1) < 1:
+                    # if len(obs1 & obs2) < 1:
+                        result_set = result_set.union({opt1,opt2})
+                        exist_inconsistency = True
+                    # print("result_set",result_set)
+            new_hole_selection[hole] = list(result_set)
+
+        if exist_inconsistency:
+            hole_selection = new_hole_selection.copy()
+
+
+            # only for testing
+        # print("scheduler",scheduler)
+        # print("state_to_choice",state_to_choice)
+        # print("choices",choices)
+        # print("coloring",coloring)
+        # print("hole_selection",hole_selection)
+        return hole_selection
+
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):
+
+        if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
+            return super().estimate_scheduler_difference(mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+
+        # print("nr_memory_joint_observations",self.nr_memory_joint_observations)
+
+        if expected_visits is None:
+            expected_visits = [1] * mdp.nr_states
+        hole_variance = payntbind.synthesis.alternativeComputeInconsistentHoleVariance(
+            self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
+            self.coloring, inconsistent_assignments, expected_visits,self.state_to_memory_joint_observation,self.nr_memory_joint_observations)
+        return hole_variance

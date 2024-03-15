@@ -103,7 +103,7 @@ O: listen listen : tiger-right : hear-left hear-left : 0.0225
 #
 #Typical problems only use R(s,ja) which is specified by:
 #   R: <a1 a2...an> : <start-state> : * : * : %f
-R: listen listen: * : * : * : -2
+R: listen listen: * : * : * : -300
 R: open-left open-left : tiger-left : * : * : -50
 R: open-right open-right : tiger-right : * : * : -50
 R: open-left open-left : tiger-right : * : * : +20
