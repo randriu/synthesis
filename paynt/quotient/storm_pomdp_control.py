@@ -210,8 +210,8 @@ class StormPOMDPControl:
         self.belief_explorer = belmc.get_interactive_belief_explorer()
 
     # resume interactive belief model checker, should be called only after belief model checker was previously started
-    def interactive_storm_resume(self, storm_timeout):
-        control_thread = Thread(target=self.interactive_control, args=(belmc, False, storm_timeout,))
+    def interactive_storm_resume(self, storm_timeout, enhanced=False):
+        control_thread = Thread(target=self.interactive_control, args=(belmc, False, storm_timeout, enhanced))
 
         logger.info("Interactive Storm resumed")
         control_thread.start()
@@ -289,6 +289,10 @@ class StormPOMDPControl:
 
         if enhanced:
             beliefs = belmc.get_beliefs_from_exchange()
+            belief_overapp_values = belmc.get_exchange_overapproximation_map()
+            print(len(beliefs), len(belief_overapp_values))
+            for belief, value in belief_overapp_values.items():
+                print(belief, value)
             self.parse_belief_data(beliefs)
 
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
@@ -360,9 +364,11 @@ class StormPOMDPControl:
         return options
 
     def get_interactive_options(self):
-        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, True)
+        # options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
+        options.resolution_init = 4
         options.skip_heuristic_schedulers = False
         options.interactive_unfolding = True
         options.gap_threshold_init = 0
@@ -427,10 +433,13 @@ class StormPOMDPControl:
 
         sub_pomdp_states_to_full = self.sub_pomdp_builder.state_sub_to_full
 
-        belief_thread_data = [sub_pomdp_synthesizer, sub_pomdp_thread, sub_pomdp_states_to_full]
+        belief_thread_data = {"synthesizer": sub_pomdp_synthesizer, "thread": sub_pomdp_thread, "state_map": sub_pomdp_states_to_full, "active": True}
 
         self.enhanced_saynt_threads.append(belief_thread_data)
 
+        # create index for FSC in Storm
+        thread_index = self.belief_explorer.add_fsc_values([])
+        assert thread_index == len(self.enhanced_saynt_threads), "Newly created thread and its index in Storm are not matching"
 
     
     # parse the current Storm and PAYNT results if they are available
@@ -511,7 +520,7 @@ class StormPOMDPControl:
                             if fsc_index == 0:
                                 finite_mem_dict = self.result_dict_paynt
                             else:
-                                finite_mem_dict = self.enhanced_saynt_threads[fsc_index-1][0].storm_control.result_dict_paynt
+                                finite_mem_dict = self.enhanced_saynt_threads[fsc_index-1]["synthesizer"].storm_control.result_dict_paynt
                             for obs, actions in finite_mem_dict.items():
                                 for action in actions:
                                     if action not in result_no_cutoffs[obs]:
