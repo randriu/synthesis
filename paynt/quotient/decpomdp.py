@@ -183,14 +183,19 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         if paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation:
 
             # print("paynt.quotient.pomdp.PomdpQuotient.sketch_path ",paynt.quotient.pomdp.PomdpQuotient.sketch_path )
-            # sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
-            # props_path = self.substitute_suffix(sketch_path, '.', 'props')
-            # print("props_path",props_path)
-            # h = open(props_path, 'r')
+            sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
+            props_path = self.substitute_suffix(sketch_path, '.', 'props')
+            print("props_path",props_path)
+            h = open(props_path, 'r')
+            content = h.readlines()
+            for i in content[0]:
+                if i.isdigit() == True: 
+                    assert int(i) < self.nr_states
+                    self.decpomdp_manager.set_target_state(int(i))
 
 
             # for state in range(self.nr_states):
-            self.decpomdp_manager.set_target_state(0)
+            
 
     def substitute_suffix(self, string, delimiter, replacer):
         '''Subsitute the suffix behind the last delimiter.'''
