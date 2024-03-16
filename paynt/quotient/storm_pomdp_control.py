@@ -393,13 +393,13 @@ class StormPOMDPControl:
                 for label in state.labels:
                     # observation based on prism observables
                     if '[' in label:
-                        simplified_label = self.quotient.simplify_label(label)
-                        observation = self.quotient.observation_labels.index(simplified_label)
+                        observation = self.quotient.observation_labels.index(label)
 
                         index = -1
 
+                        choice_label = list(get_choice_label(state.id))[0]
                         for i in range(len(quotient.action_labels_at_observation[int(observation)])):
-                            if list(get_choice_label(state.id))[0] in quotient.action_labels_at_observation[int(observation)][i]:
+                            if choice_label == quotient.action_labels_at_observation[int(observation)][i]:
                                 index = i
                                 break
 
@@ -413,9 +413,9 @@ class StormPOMDPControl:
                         _, observation = label.split('_')
 
                         index = -1
-
+                        choice_label = list(get_choice_label(state.id))[0]
                         for i in range(len(quotient.action_labels_at_observation[int(observation)])):
-                            if list(get_choice_label(state.id))[0] in quotient.action_labels_at_observation[int(observation)][i]:
+                            if choice_label == quotient.action_labels_at_observation[int(observation)][i]:
                                 index = i
                                 break
 

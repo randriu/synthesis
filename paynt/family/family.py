@@ -52,6 +52,15 @@ class Family:
     def size(self):
         return math.prod([self.family.holeNumOptions(hole) for hole in range(self.num_holes)])
 
+    INT_PRINT_MAX_ORDER = 5
+
+    @property
+    def size_or_order(self):
+        order = int(math.fsum([math.log10(self.family.holeNumOptions(hole)) for hole in range(self.num_holes)]))
+        if order <= Family.INT_PRINT_MAX_ORDER:
+            return self.size
+        return f"1e{order}"
+
     def hole_options_to_string(self, hole, options):
         name = self.hole_name(hole)
         labels = [self.hole_to_option_labels[hole][option] for option in options]
