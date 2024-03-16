@@ -184,7 +184,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
             # print("paynt.quotient.pomdp.PomdpQuotient.sketch_path ",paynt.quotient.pomdp.PomdpQuotient.sketch_path )
             sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
-            props_path = self.substitute_suffix(sketch_path, '.', 'props')
+            props_path = self.substitute_suffix(sketch_path, '.', 'target')
             print("props_path",props_path)
             h = open(props_path, 'r')
             content = h.readlines()
