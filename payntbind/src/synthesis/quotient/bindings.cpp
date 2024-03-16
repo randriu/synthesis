@@ -209,6 +209,38 @@ storm::storage::BitVector policyToChoicesForFamily(
     return choices & family_choices;
 }
 
+template<typename ValueType>
+storm::storage::BitVector affectedToChoices(
+    std::vector<uint64_t> quotient_choice_map,
+    std::vector<uint64_t> quotient_state_map,
+    storm::models::sparse::Mdp<ValueType> const& quotient_mdp,
+    storm::storage::BitVector& states_affected,
+    std::vector<uint64_t> const& row_groups,
+    std::vector<int>& parent_state_choice,
+    storm::storage::BitVector& compatible_choices
+) {
+    
+    uint64_t num_states = quotient_mdp.getNumberOfStates();
+    auto const& nci = quotient_mdp.getNondeterministicChoiceIndices();
+    storm::storage::BitVector all_true(compatible_choices.size(), true);
+
+    for(uint64_t state=0; state<num_states; ++state) {
+        uint64_t qstate = quotient_state_map[state];
+        if (states_affected[qstate]) {
+            continue;
+        }
+        for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
+            uint64_t qchoice = quotient_choice_map[choice];
+            all_true.set(qchoice, false);
+        }
+
+        uint64_t parent_choice = parent_state_choice[qstate];
+        all_true.set(parent_choice, true);
+    }
+
+    return all_true & compatible_choices;
+}
+
 
 /*std::pair<std::vector<uint64_t>,storm::storage::BitVector> fixPolicyForFamily(
     std::vector<uint64_t> const& policy, uint64_t invalid_action,
@@ -269,6 +301,8 @@ void bindings_coloring(py::module& m) {
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
     
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
+
+    m.def("affectedToChoices", &synthesis::affectedToChoices<double>);
 
 
     py::class_<synthesis::Family>(m, "Family")

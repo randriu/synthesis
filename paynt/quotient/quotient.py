@@ -97,7 +97,7 @@ class Quotient:
 
     def mine_scheduler_to_state_to_choice(self, family, parent_mdp, scheduler, compatible_choices, discard_unreachable_choices=True):
         state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, parent_mdp.model, parent_mdp.quotient_choice_map)
-        parent_state_choice = self.empty_scheduler()
+        parent_state_choice = [-1] * self.quotient_mdp.nr_states
         states_affected = [False for state in range(self.quotient_mdp.nr_states)]
         parent_mdp = family.parent_info.mdp
         for state in range(parent_mdp.model.nr_states):
@@ -144,7 +144,7 @@ class Quotient:
         
         parent_mdp = family.parent_info.mdp
         tm = parent_mdp.model.transition_matrix
-        qndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        # qndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
         ndi = parent_mdp.model.nondeterministic_choice_indices.copy()
 
                 
@@ -179,20 +179,29 @@ class Quotient:
         #         affected_states.append( (state,qstate) )
         
         
-        all_true = stormpy.BitVector(self.quotient_mdp.nr_choices, True)
-        for state,qstate in enumerate(parent_mdp.quotient_state_map):
-            if states_affected[qstate]:
-                continue
-            for choice in range(ndi[state],ndi[state+1]):
-                qchoice = parent_mdp.quotient_choice_map[choice]
-                all_true.set(qchoice, False)
+        # all_true = stormpy.BitVector(self.quotient_mdp.nr_choices, True)
+        # for state,qstate in enumerate(parent_mdp.quotient_state_map):
+        #     if states_affected[qstate]:
+        #         continue
+        #     for choice in range(ndi[state],ndi[state+1]):
+        #         qchoice = parent_mdp.quotient_choice_map[choice]
+        #         all_true.set(qchoice, False)
             
-            parent_choice = parent_state_choice[qstate]
-            all_true.set(parent_choice, True)
+        #     parent_choice = parent_state_choice[qstate]
+        #     all_true.set(parent_choice, True)
         
-        return all_true & compatible_choices
+        # return all_true & compatible_choices    
         ######################################
+
+        states_affected_to_vector = stormpy.BitVector(self.quotient_mdp.nr_states,False)
+        for state in range(self.quotient_mdp.nr_states):
+            if states_affected[state]:
+                states_affected_to_vector.set(state, True)
+        
+        # print(states_affected_to_vector)
+        # exit()
     
+        return payntbind.synthesis.affectedToChoices(parent_mdp.quotient_choice_map, parent_mdp.quotient_state_map, parent_mdp.model, states_affected_to_vector, ndi, parent_state_choice, compatible_choices)
 
         ######################################
     
