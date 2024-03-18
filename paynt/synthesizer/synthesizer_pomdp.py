@@ -400,6 +400,8 @@ class SynthesizerPOMDP:
                 print(f"used FSCs: {self.storm_control.storm_fsc_usage}")
                 print(f"FSCs used count: {self.storm_control.total_fsc_used}")
 
+                self.storm_control.belief_value_analysis()
+
                 if time.time() > iteration_timeout or iteration == iteration_limit:
                     break
 
@@ -928,9 +930,9 @@ class SynthesizerPOMDP:
         # choose the synthesis strategy:
         if self.use_storm:
             logger.info("Storm POMDP option enabled")
-            logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}, enhanced_saynt - {}".format(
+            logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}, enhanced_saynt - {}, saynt_overapprox - {}".format(
                         (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
-                        self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs, self.storm_control.enhanced_saynt
+                        self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs, self.storm_control.enhanced_saynt, self.storm_control.saynt_overapprox
             ))
             # start SAYNT
             if self.storm_control.iteration_timeout is not None:

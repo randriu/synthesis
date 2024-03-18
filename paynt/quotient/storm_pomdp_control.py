@@ -10,6 +10,7 @@ from os import makedirs
 
 from threading import Thread
 from time import sleep
+import math
 
 from queue import Queue
 
@@ -75,7 +76,8 @@ class StormPOMDPControl:
 
     def set_options(self,
         storm_options="cutoff", get_storm_result=None, iterative_storm=None, use_storm_cutoffs=False,
-        unfold_strategy_storm="storm", prune_storm=False, export_fsc_storm=None, export_fsc_paynt=None, enhanced_saynt=None
+        unfold_strategy_storm="storm", prune_storm=False, export_fsc_storm=None, export_fsc_paynt=None, enhanced_saynt=None,
+        saynt_overapprox = False
     ):
         self.storm_options = storm_options
         if get_storm_result is not None:
@@ -87,6 +89,7 @@ class StormPOMDPControl:
         self.export_fsc_storm = export_fsc_storm
         self.export_fsc_paynt = export_fsc_paynt
         self.enhanced_saynt = enhanced_saynt
+        self.saynt_overapprox = saynt_overapprox
 
         self.incomplete_exploration = False
         if prune_storm:
@@ -291,8 +294,8 @@ class StormPOMDPControl:
             beliefs = belmc.get_beliefs_from_exchange()
             belief_overapp_values = belmc.get_exchange_overapproximation_map()
             print(len(beliefs), len(belief_overapp_values))
-            for belief, value in belief_overapp_values.items():
-                print(belief, value)
+            # for belief, value in belief_overapp_values.items():
+            #     print(belief, value)
             self.parse_belief_data(beliefs)
 
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
@@ -364,11 +367,10 @@ class StormPOMDPControl:
         return options
 
     def get_interactive_options(self):
-        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, True)
-        # options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(self.saynt_overapprox, True)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
-        options.resolution_init = 4
+        options.resolution_init = 2
         options.skip_heuristic_schedulers = False
         options.interactive_unfolding = True
         options.gap_threshold_init = 0
@@ -622,6 +624,75 @@ class StormPOMDPControl:
         self.main_support_belief_data = main_support_list
         self.residue_obs_belief_data = residue_observation_list
         self.average_belief_data = average_obs_belief_dict
+
+
+    def compute_belief_value(self, belief, obs, fsc_values=[]):
+        best_value = None
+
+        for values in fsc_values:
+            for index, mem_values in enumerate(values[obs]):
+                vl = 0
+                for state, prob in belief.items():
+                    if not state in mem_values.keys():
+                        break
+                    vl += prob * mem_values[state]
+                else:
+                    if best_value is None:
+                        best_value = vl
+                    elif (self.quotient.specification.optimality.minimizing and best_value > vl) or (not(self.quotient.specification.optimality.minimizing) and best_value < vl):
+                        best_value = vl
+            
+        return best_value
+    
+
+    def belief_value_analysis(self):
+        beliefs = belmc.get_beliefs_from_exchange()
+        belief_overapp_values = belmc.get_exchange_overapproximation_map()
+
+        export_values = [x["synthesizer"].storm_control.paynt_export for x in self.enhanced_saynt_threads]
+        export_values.append(self.paynt_export)
+
+        epsilon = 0.1
+
+        analysed_beliefs = 0
+        big_difference_count = 0
+        difference = 0
+        biggest_difference = 0
+        smallest_difference = 1
+
+        obs_differences = {}
+        obs_count = {}
+
+        for belief_id, belief in beliefs.items():
+            if belief_id in belief_overapp_values.keys():
+                analysed_beliefs += 1
+                belief_obs = self.quotient.pomdp.get_observation(list(belief.keys())[0])
+                belief_value = self.compute_belief_value(belief, belief_obs, export_values)
+
+                if belief_obs not in obs_differences.keys():
+                    obs_count[belief_obs] = 1
+                    obs_differences[belief_obs] = belief_overapp_values[belief_id] - belief_value
+                else:
+                    obs_count[belief_obs] += 1
+                    obs_differences[belief_obs] += belief_overapp_values[belief_id] - belief_value
+
+                # if 1-(belief_value / belief_overapp_values[belief_id]) < epsilon:
+                #     big_difference_count += 1
+                # difference += 1-(belief_value / belief_overapp_values[belief_id])
+                # if 1-(belief_value / belief_overapp_values[belief_id]) > biggest_difference:
+                #     biggest_difference = 1-(belief_value / belief_overapp_values[belief_id])
+                # if 1-(belief_value / belief_overapp_values[belief_id]) < smallest_difference:
+                #     smallest_difference = 1-(belief_value / belief_overapp_values[belief_id])
+
+        obs_values = {obs_key:obs_dif/obs_count[obs_key] for obs_key, obs_dif in obs_differences.items()}
+
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        print(obs_values)
+        # print(f"Analysed {analysed_beliefs} out of {len(beliefs)} possible beliefs \
+        #       \n{big_difference_count} of them have bounds more than {epsilon} (10% difference) apart \
+        #       \nAverage difference {difference/analysed_beliefs} \
+        #       \nBiggest difference: {biggest_difference}, smallest difference: {smallest_difference}")
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
             
 
     # help function for cut-off parsing, returns list of actions for given choice_string

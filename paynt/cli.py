@@ -110,6 +110,8 @@ def setup_logger(log_path = None):
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
 @click.option("--enhanced-saynt", default=None, type=int,
     help="run SAYNT with FSCs for non-initial beliefs. 0 - for dynamic number of different beliefs, N > 0 - set number of different beliefs")
+@click.option("--saynt-overapprox", is_flag=True, default=False,
+    help="run Storm to obtain belief value overapproximations that can be used to better choose from what beliefs FSCs should be computed")
 
 @click.option("--export-fsc-storm", type=click.Path(), default=None,
     help="path to output file for SAYNT belief FSC")
@@ -154,7 +156,7 @@ def paynt_run(
     incomplete_search, disable_expected_visits,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
-    use_storm_cutoffs, unfold_strategy_storm, enhanced_saynt,
+    use_storm_cutoffs, unfold_strategy_storm, enhanced_saynt, saynt_overapprox,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
@@ -185,7 +187,7 @@ def paynt_run(
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, enhanced_saynt
+            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, enhanced_saynt, saynt_overapprox
         )
 
     sketch_path = os.path.join(project, sketch)
