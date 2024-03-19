@@ -342,6 +342,7 @@ class SynthesizerPOMDP:
                         pass
 
                 logger.info(f"{len(self.storm_control.enhanced_saynt_threads) - number_of_threads} new threads for enhanced SAYNT created")
+                logger.info(f"total number of created threads: {len(self.storm_control.enhanced_saynt_threads)}")
                 number_of_threads = len(self.storm_control.enhanced_saynt_threads)
                 active_beliefs = len([True for x in self.storm_control.enhanced_saynt_threads if x["active"]]) + 1
                 logger.info(f"number of currently active threads: {active_beliefs}")
@@ -356,7 +357,7 @@ class SynthesizerPOMDP:
 
                 for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
                     if belief_thread["active"]:
-                        logger.info(f'resuming synthesis for {belief_thread["type"]}')
+                        logger.info(f'starting synthesis for {belief_thread["type"]}')
                         belief_thread["synthesizer"].interactive_queue.put("resume")
                         time.sleep(paynt_timeout/active_beliefs)
                         belief_thread["synthesizer"].interactive_queue.put("timeout")
@@ -396,14 +397,14 @@ class SynthesizerPOMDP:
 
             iteration += 1
 
-        self.interactive_queue.put("terminate")
-        self.synthesis_terminate = True
-        paynt_thread.join()
-
         for belief_thread in self.storm_control.enhanced_saynt_threads:
             belief_thread["synthesizer"].interactive_queue.put("terminate")
             belief_thread["synthesizer"].synthesis_terminate = True
             belief_thread["thread"].join()
+
+        self.interactive_queue.put("terminate")
+        self.synthesis_terminate = True
+        paynt_thread.join()
 
         self.storm_control.interactive_storm_terminate()
 

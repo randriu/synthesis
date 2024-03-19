@@ -56,7 +56,6 @@ class StormPOMDPControl:
 
     enhanced_saynt = None
     enhanced_saynt_threads = []
-    belief_threads_info = []
     storm_fsc_usage = {}
     total_fsc_used = 0
     use_uniform_obs_beliefs = True
@@ -684,26 +683,26 @@ class StormPOMDPControl:
 
         if number_of_beliefs == 0:
             number_of_threads_to_activate = len(self.main_obs_belief_data)
+            if number_of_threads_to_activate <= 4:
+                number_of_threads_to_activate = 5
         else:
             number_of_threads_to_activate = number_of_beliefs - 1
 
-        if number_of_threads_to_activate <= 4:
-            number_of_threads_to_activate = 5
-
         for obs in sorted_obs_values.keys():
             obs_to_activate.append(obs)
-            number_of_beliefs -= 1
-            if number_of_beliefs == 2:
+            number_of_threads_to_activate -= 1
+            if number_of_threads_to_activate <= 2:
                 break
 
         added_belief_obs = [self.quotient.pomdp.get_observation(list(self.beliefs[list(sorted_belief_values_dif.keys())[0]].keys())[0])]
         beliefs_to_activate.append(list(sorted_belief_values_dif.keys())[0])
-        number_of_beliefs -= 1
+        number_of_threads_to_activate -= 1
 
         for belief_id, _ in sorted_belief_values_dif.items():
-            if number_of_beliefs > 1 and belief_id not in beliefs_to_activate:
+            if number_of_threads_to_activate > 1 and belief_id not in beliefs_to_activate:
                 added_belief_obs.append(self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]))
                 beliefs_to_activate.append(belief_id)
+                number_of_threads_to_activate -= 1
                 continue
             if self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]) not in added_belief_obs:
                 beliefs_to_activate.append(belief_id)
@@ -711,10 +710,15 @@ class StormPOMDPControl:
 
         self.activate_threads(obs_to_activate, beliefs_to_activate)
 
-        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-        print(sorted_obs_values)
-        print(list(sorted_belief_values_dif.items())[:10])
-        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        # print(sorted_obs_values)
+        # my_iter = 0
+        # for belief_id, diff in sorted_belief_values_dif.items():
+        #     print(belief_id, self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]), diff)
+        #     my_iter += 1
+        #     if my_iter == 20:
+        #         break
+        # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
             
 
     # help function for cut-off parsing, returns list of actions for given choice_string
@@ -866,27 +870,31 @@ class StormPOMDPControl:
         return memory_needed
     
     def deactivate_threads(self):
-        for thread in self.belief_threads_info:
+        for thread in self.enhanced_saynt_threads:
             thread["active"] = False
 
     def activate_threads(self, obs_threads, belief_threads):
+        logger.info(f"activating observation threads: {obs_threads}")
+
         for obs in obs_threads:
-            for thread in self.belief_threads_info:
+            for thread in self.enhanced_saynt_threads:
                 thread_type = thread["type"].split('_')
                 thread_val = thread_type[1]
                 thread_type = thread_type[0]
-                if thread_type == "obs" and thread_val == obs:
+                if thread_type == "obs" and int(thread_val) == obs:
                     thread["active"] = True
                     break
             else:
                 self.create_thread_control(obs, "obs", self.use_uniform_obs_beliefs)
+
+        logger.info(f"activating belief threads: {belief_threads}")        
             
         for belief in belief_threads:
-            for thread in self.belief_threads_info:
+            for thread in self.enhanced_saynt_threads:
                 thread_type = thread["type"].split('_')
                 thread_val = thread_type[1]
                 thread_type = thread_type[0]
-                if thread_type == "belief" and thread_val == belief:
+                if thread_type == "belief" and int(thread_val) == belief:
                     thread["active"] = True
                     break
             else:

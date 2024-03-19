@@ -1,0 +1,446 @@
+2024-03-19 22:36:31,727 - cli.py - This is Paynt version 0.1.0.
+2024-03-19 22:36:31,728 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/milos-aaai97/sketch.templ ...
+2024-03-19 22:36:31,728 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
+	@type: POMDP
+	^
+
+2024-03-19 22:36:31,744 - sketch.py - assuming sketch in DRN format...
+2024-03-19 22:36:31,763 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/milos-aaai97/sketch.props ...
+2024-03-19 22:36:31,769 - prism_parser.py - found the following specification: optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-03-19 22:36:31,769 - sketch.py - sketch parsing OK
+2024-03-19 22:36:31,772 - sketch.py - constructed explicit quotient having 165 states and 980 actions
+2024-03-19 22:36:31,772 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-03-19 22:36:31,775 - pomdp.py - constructed POMDP having 11 observations.
+2024-03-19 22:36:31,776 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:36:31,777 - pomdp.py - constructed quotient MDP having 165 states and 980 actions.
+2024-03-19 22:36:31,777 - pomdp.py - creating coloring ...
+2024-03-19 22:36:31,786 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-03-19 22:36:31,786 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - 0, saynt_overapprox - True
+2024-03-19 22:36:31,789 - storm_pomdp_control.py - Interactive Storm started
+2024-03-19 22:36:31,789 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-03-19 22:36:41,870 - storm_pomdp_control.py - Pausing Storm
+### 2257223 beliefs in underapproximation MDP ##### 2022840 beliefs queued
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 38.3497912381676 | Time elapsed = 303.3s | FSC size = 613
+
+2024-03-19 22:41:39,447 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,448 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,448 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,448 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,449 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,449 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,449 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,449 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,450 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,456 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,457 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,457 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,457 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,457 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,458 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,459 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,459 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,459 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,460 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,460 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,460 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,460 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,461 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,461 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,462 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,462 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,462 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,463 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,463 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,464 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,464 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,464 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,464 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,464 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,465 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,466 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,466 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,466 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,467 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,467 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,467 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,467 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,468 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,469 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,469 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,469 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,470 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,470 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,470 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,470 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,471 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,471 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,471 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,472 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,472 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,472 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,472 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,472 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,473 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,479 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,480 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,480 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,480 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,480 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,481 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,481 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,542 - pomdp.py - constructed POMDP having 12 observations.
+2024-03-19 22:41:39,542 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,543 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,543 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,543 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,544 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,544 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,544 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,545 - synthesizer_pomdp.py - Synthesizing optimal k=1 controller ...
+2024-03-19 22:41:39,545 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-19 22:41:39,545 - pomdp.py - constructed quotient MDP having 162 states and 962 actions.
+2024-03-19 22:41:39,545 - synthesizer_pomdp.py - 8 threads for enhanced SAYNT created
+2024-03-19 22:41:39,545 - pomdp.py - creating coloring ...
+2024-03-19 22:41:39,545 - synthesizer_pomdp.py - number of currently active threads: 9
+2024-03-19 22:41:39,546 - synthesizer.py - synthesis initiated, design space: 1e6
+2024-03-19 22:41:39,546 - synthesizer_pomdp.py - new synthesis time per thread: 10.0s
+2024-03-19 22:41:39,546 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:39,546 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 10077696 to 10
+2024-03-19 22:41:39,546 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-03-19 22:41:39,547 - synthesizer.py - synthesis initiated, design space: 1e7
+-----------PAYNT-----------                     
+Value = 17.13915438508933 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 21.48094184757177 | Time elapsed = 307.8s | FSC size = 22
+
+2024-03-19 22:41:39,553 - synthesizer_ar_storm.py - Main family synthesis done
+2024-03-19 22:41:39,553 - synthesizer_ar_storm.py - Subfamilies buffer contains: 6 families
+-----------PAYNT-----------                     
+Value = 21.99931084936651 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 22.023737274086184 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 22.10004081485301 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 22.171706375236415 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 22.43286982253418 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 22.871304597812472 | Time elapsed = 307.8s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.073550870606386 | Time elapsed = 307.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.20350191505543 | Time elapsed = 307.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.219155972759598 | Time elapsed = 307.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.305473672127757 | Time elapsed = 307.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.31247319503965 | Time elapsed = 307.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 23.323030502603295 | Time elapsed = 307.9s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 24.050705576637842 | Time elapsed = 308.0s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 25.354340264522875 | Time elapsed = 308.0s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 25.42131396914399 | Time elapsed = 308.0s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 27.304914638829054 | Time elapsed = 308.2s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 27.61915841923631 | Time elapsed = 308.2s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 27.715454776159994 | Time elapsed = 308.2s | FSC size = 22
+
+-----------PAYNT-----------                     
+Value = 29.45856489035425 | Time elapsed = 308.2s | FSC size = 22
+
+2024-03-19 22:41:40,255 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:41:40,255 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a0), A(6,0)=(a0), A(7,0)=(a0), A(9,0)=(a3)
+2024-03-19 22:41:40,255 - synthesizer.py - double-checking specification satisfiability:  : 29.45856489035425
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.71 s
+number of holes: 9, family size: 1e7, quotient: 165 states / 980 actions
+explored: 99 %
+MDP stats: avg MDP size: 165, iterations: 1208
+
+optimum: 29.458565
+--------------------
+2024-03-19 22:41:40,256 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:41:40,256 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-03-19 22:41:40,256 - pomdp.py - unfolding 5-FSC template into POMDP ...
+2024-03-19 22:41:40,259 - pomdp.py - constructed quotient MDP having 265 states and 7892 actions.
+2024-03-19 22:41:40,259 - pomdp.py - creating coloring ...
+2024-03-19 22:41:40,264 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 478296900000000000000 to 76293945312500
+2024-03-19 22:41:40,264 - synthesizer.py - synthesis initiated, design space: 1e20
+-----------PAYNT-----------                     
+Value = 31.562357639160666 | Time elapsed = 308.7s | FSC size = 32
+
+-----------PAYNT-----------                     
+Value = 32.13262079140259 | Time elapsed = 308.7s | FSC size = 32
+
+> progress 0.0%, elapsed 3 s, estimated 24501531848 s (776 years), iters = {MDP: 2263}, opt = 32.133
+-----------PAYNT-----------                     
+Value = 32.13491029606815 | Time elapsed = 312.4s | FSC size = 32
+
+> progress 0.0%, elapsed 6 s, estimated 18013407094 s (571 years), iters = {MDP: 4565}, opt = 32.135
+> progress 0.0%, elapsed 9 s, estimated 24472557928 s (776 years), iters = {MDP: 6957}, opt = 32.135
+-----------PAYNT-----------                     
+Value = 35.40540305636788 | Time elapsed = 317.7s | FSC size = 32
+
+2024-03-19 22:41:49,565 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:41:50,063 - synthesizer_pomdp.py - starting synthesis for obs_6
+2024-03-19 22:41:50,085 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:41:50,085 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-19 22:41:52,420 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:41:52,420 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a0), A(6,0)=(a1), A(7,0)=(a3)
+2024-03-19 22:41:52,421 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 2.34 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 4898
+
+optimum: 43.097973
+--------------------
+2024-03-19 22:41:52,421 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:41:52,421 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:41:52,422 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:41:52,423 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:41:52,423 - pomdp.py - creating coloring ...
+2024-03-19 22:41:52,496 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.179%, elapsed 3 s, estimated 94 s, iters = {MDP: 1453}, opt = 43.841
+> progress 3.18%, elapsed 6 s, estimated 188 s, iters = {MDP: 3155}, opt = 43.841
+2024-03-19 22:42:00,081 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:42:00,579 - synthesizer_pomdp.py - starting synthesis for obs_3
+2024-03-19 22:42:00,710 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:42:00,710 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-19 22:42:03,648 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:42:03,648 - synthesizer.py - A(0,0)=(a5), A(1,0)=(a3), A(2,0)=(a3), A(3,0)=(a1), A(4,0)=(a3), A(5,0)=(a3), A(6,0)=(a2), A(7,0)=(a1)
+2024-03-19 22:42:03,649 - synthesizer.py - double-checking specification satisfiability:  : 41.293261349918225
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 2.94 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 6246
+
+optimum: 41.293261
+--------------------
+2024-03-19 22:42:03,649 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:42:03,649 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:42:03,650 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:42:03,652 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:42:03,652 - pomdp.py - creating coloring ...
+2024-03-19 22:42:03,729 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.165%, elapsed 3 s, estimated 94 s, iters = {MDP: 1609}, opt = 43.841
+> progress 3.171%, elapsed 6 s, estimated 189 s, iters = {MDP: 3201}, opt = 43.841
+2024-03-19 22:42:10,599 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:42:11,095 - synthesizer_pomdp.py - starting synthesis for obs_7
+2024-03-19 22:42:11,330 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:42:11,330 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+> progress 38.046%, elapsed 3 s, estimated 7 s, iters = {MDP: 7530}, opt = 34.121
+2024-03-19 22:42:15,744 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:42:15,745 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a3), A(6,0)=(a3), A(7,0)=(a1)
+2024-03-19 22:42:15,745 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 4.42 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 10328
+
+optimum: 43.097973
+--------------------
+2024-03-19 22:42:15,746 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:42:15,746 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:42:15,746 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:42:15,749 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:42:15,749 - pomdp.py - creating coloring ...
+2024-03-19 22:42:15,831 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.195%, elapsed 3 s, estimated 93 s, iters = {MDP: 1370}, opt = 43.841
+2024-03-19 22:42:21,112 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:42:21,611 - synthesizer_pomdp.py - starting synthesis for obs_2
+2024-03-19 22:42:21,929 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:42:21,929 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-19 22:42:24,751 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:42:24,751 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a3), A(6,0)=(a3), A(7,0)=(a0)
+2024-03-19 22:42:24,752 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 2.82 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 5890
+
+optimum: 43.097973
+--------------------
+2024-03-19 22:42:24,752 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:42:24,753 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:42:24,753 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:42:24,756 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:42:24,756 - pomdp.py - creating coloring ...
+2024-03-19 22:42:24,758 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.177%, elapsed 3 s, estimated 94 s, iters = {MDP: 1431}, opt = 43.841
+> progress 3.177%, elapsed 6 s, estimated 188 s, iters = {MDP: 3006}, opt = 43.841
+2024-03-19 22:42:31,627 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:42:32,125 - synthesizer_pomdp.py - starting synthesis for obs_5
+2024-03-19 22:42:32,595 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:42:32,595 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+> progress 81.267%, elapsed 3 s, estimated 3 s, iters = {MDP: 6461}, opt = 43.098
+2024-03-19 22:42:36,062 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:42:36,062 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a1), A(6,0)=(a3), A(7,0)=(a1)
+2024-03-19 22:42:36,063 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 3.47 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 7291
+
+optimum: 43.097973
+--------------------
+2024-03-19 22:42:36,064 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:42:36,064 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:42:36,064 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:42:36,065 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:42:36,065 - pomdp.py - creating coloring ...
+2024-03-19 22:42:36,069 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.171%, elapsed 3 s, estimated 94 s, iters = {MDP: 1393}, opt = 43.841
+> progress 3.177%, elapsed 6 s, estimated 188 s, iters = {MDP: 2916}, opt = 43.841
+2024-03-19 22:42:42,143 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:42:42,641 - synthesizer_pomdp.py - starting synthesis for obs_4
+2024-03-19 22:42:42,746 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:42:42,746 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+> progress 85.939%, elapsed 3 s, estimated 3 s, iters = {MDP: 6330}, opt = 41.293
+2024-03-19 22:42:46,580 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:42:46,580 - synthesizer.py - A(0,0)=(a5), A(1,0)=(a3), A(2,0)=(a3), A(3,0)=(a3), A(4,0)=(a1), A(5,0)=(a3), A(6,0)=(a2), A(7,0)=(a1)
+2024-03-19 22:42:46,580 - synthesizer.py - double-checking specification satisfiability:  : 41.293261349918225
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 3.84 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 7951
+
+optimum: 41.293261
+--------------------
+2024-03-19 22:42:46,581 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:42:46,581 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:42:46,581 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:42:46,582 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:42:46,582 - pomdp.py - creating coloring ...
+2024-03-19 22:42:46,584 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.164%, elapsed 3 s, estimated 94 s, iters = {MDP: 1558}, opt = 43.841
+> progress 3.165%, elapsed 6 s, estimated 189 s, iters = {MDP: 3105}, opt = 43.841
+2024-03-19 22:42:52,659 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:42:53,157 - synthesizer_pomdp.py - starting synthesis for obs_1
+2024-03-19 22:42:53,374 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:42:53,374 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-19 22:42:56,337 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:42:56,337 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a3), A(6,0)=(a2), A(7,0)=(a0)
+2024-03-19 22:42:56,337 - synthesizer.py - double-checking specification satisfiability:  : 43.09797332870724
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 2.96 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 6100
+
+optimum: 43.097973
+--------------------
+2024-03-19 22:42:56,338 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:42:56,338 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:42:56,339 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:42:56,341 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:42:56,341 - pomdp.py - creating coloring ...
+2024-03-19 22:42:56,344 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 3.149%, elapsed 3 s, estimated 95 s, iters = {MDP: 1330}, opt = 43.841
+> progress 3.622%, elapsed 6 s, estimated 165 s, iters = {MDP: 2609}, opt = 43.841
+2024-03-19 22:43:03,176 - synthesizer_ar_storm.py - Pausing synthesis
+2024-03-19 22:43:03,674 - synthesizer_pomdp.py - starting synthesis for obs_0
+2024-03-19 22:43:03,972 - synthesizer_ar_storm.py - Resuming synthesis
+2024-03-19 22:43:03,972 - synthesizer_ar_storm.py - PAYNT's value is better. Prioritizing synthesis results
+2024-03-19 22:43:05,290 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-03-19 22:43:05,290 - synthesizer.py - A(0,0)=(a4), A(1,0)=(a1), A(2,0)=(a1), A(3,0)=(a0), A(4,0)=(a3), A(5,0)=(a0), A(6,0)=(a3), A(7,0)=(a1)
+2024-03-19 22:43:05,290 - synthesizer.py - double-checking specification satisfiability:  : 41.478095146259584
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 1.32 s
+number of holes: 8, family size: 1e6, quotient: 162 states / 962 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 2277
+
+optimum: 41.478095
+--------------------
+2024-03-19 22:43:05,292 - synthesizer_pomdp.py - Terminate: False
+2024-03-19 22:43:05,292 - synthesizer_pomdp.py - Synthesizing optimal k=2 controller ...
+2024-03-19 22:43:05,292 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-03-19 22:43:05,293 - pomdp.py - constructed quotient MDP having 322 states and 3843 actions.
+2024-03-19 22:43:05,293 - pomdp.py - creating coloring ...
+2024-03-19 22:43:05,295 - synthesizer.py - synthesis initiated, design space: 1e17
+> progress 11.111%, elapsed 3 s, estimated 26 s, iters = {MDP: 1634}, opt = 41.641
+> progress 11.112%, elapsed 6 s, estimated 54 s, iters = {MDP: 3337}, opt = 41.641
+2024-03-19 22:43:13,684 - synthesizer_ar_storm.py - Pausing synthesis
+
+------------------------------------
+
+PAYNT results: 
+35.40540305636788
+controller size: 32
+
+Storm results: 
+38.3497912381676
+controller size: 613
+
+------------------------------------
+
+used FSCs: {}
+FSCs used count: 0
+2024-03-19 22:43:14,186 - storm_pomdp_control.py - Interactive Storm resumed
+2024-03-19 22:43:14,186 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-03-19 22:43:24,207 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
