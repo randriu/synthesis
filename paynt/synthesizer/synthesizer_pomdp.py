@@ -269,52 +269,53 @@ class SynthesizerPOMDP:
 
         self.saynt_timer.start()
 
-        if True:
-            while True:
-                if iteration == 1:
-                    self.storm_control.interactive_storm_start(storm_timeout, True)
+        while True:
+            if iteration == 1:
+                self.storm_control.interactive_storm_start(storm_timeout, True)
+                self.storm_control.parse_belief_data()
 
-                    self.storm_control.belief_explorer.add_fsc_values(self.storm_control.paynt_export)
+                self.storm_control.belief_explorer.add_fsc_values(self.storm_control.paynt_export)
 
-                    if number_of_beliefs == 0:
-                        beliefs_remaining = len(self.storm_control.main_obs_belief_data)
-                        # beliefs_remaining = len(self.storm_control.main_support_belief_data)
-                        number_of_beliefs = beliefs_remaining + 1
-                    else:
-                        beliefs_remaining = number_of_beliefs - 1
-                    if beliefs_remaining != 0:
-                        for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data]):
-                        # for index, belief_type_data in enumerate([self.storm_control.main_support_belief_data]):
-                            index_type = "obs" if index in [0,1] else "sup"
-                            # index_type = "sup"
-                            for obs_or_sup in belief_type_data:
-                                self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
-                                beliefs_remaining -= 1
-                                if beliefs_remaining == 0:
-                                    break
+                if number_of_beliefs == 0:
+                    beliefs_remaining = len(self.storm_control.main_obs_belief_data)
+                    # beliefs_remaining = len(self.storm_control.main_support_belief_data)
+                else:
+                    beliefs_remaining = number_of_beliefs - 1
+                if beliefs_remaining != 0:
+                    for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data]):
+                    # for index, belief_type_data in enumerate([self.storm_control.main_support_belief_data]):
+                        index_type = "obs" if index in [0,1] else "sup"
+                        # index_type = "sup"
+                        for obs_or_sup in belief_type_data:
+                            self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
+                            beliefs_remaining -= 1
                             if beliefs_remaining == 0:
                                 break
-                        else:
-                            number_of_beliefs = number_of_beliefs - beliefs_remaining
+                        if beliefs_remaining == 0:
+                            break
 
-                    logger.info(f"{len(self.storm_control.enhanced_saynt_threads)} threads for enhanced SAYNT created")
-                    logger.info(f"new synthesis time per thread: {paynt_timeout/number_of_beliefs}s")
-                    
+                number_of_threads = len(self.storm_control.enhanced_saynt_threads)
+                logger.info(f"{number_of_threads} threads for enhanced SAYNT created")
+                active_beliefs = len([True for x in self.storm_control.enhanced_saynt_threads if x["active"]]) + 1
+                logger.info(f"number of currently active threads: {active_beliefs}")
+                logger.info(f"new synthesis time per thread: {paynt_timeout/active_beliefs}s")
+                
+                paynt_thread.start()
 
-                    paynt_thread.start()
+                logger.info("Timeout for PAYNT started")
+                time.sleep(paynt_timeout/active_beliefs)
+                self.interactive_queue.put("timeout")
 
-                    logger.info("Timeout for PAYNT started")
-                    time.sleep(paynt_timeout/number_of_beliefs)
-                    self.interactive_queue.put("timeout")
+                while not self.interactive_queue.empty():
+                    time.sleep(0.5)
 
-                    while not self.interactive_queue.empty():
-                        time.sleep(0.5)
+                self.storm_control.belief_explorer.set_fsc_values(self.storm_control.paynt_export, 0)
 
-                    self.storm_control.belief_explorer.set_fsc_values(self.storm_control.paynt_export, 0)
-
-                    for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                        belief_thread["thread"].start()
-                        time.sleep(paynt_timeout/number_of_beliefs)
+                for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
+                    if belief_thread["active"]:
+                        logger.info(f'starting synthesis for {belief_thread["type"]}')
+                        belief_thread["synthesizer"].interactive_queue.put("resume")
+                        time.sleep(paynt_timeout/active_beliefs)
                         belief_thread["synthesizer"].interactive_queue.put("timeout")
                         while not belief_thread["synthesizer"].interactive_queue.empty():
                             time.sleep(0.5)
@@ -328,141 +329,36 @@ class SynthesizerPOMDP:
                             export_full.append(one_memory)
 
                         self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
-                else:
-                    self.storm_control.interactive_storm_resume(storm_timeout)
+            else:
+                self.storm_control.interactive_storm_resume(storm_timeout)
+                self.storm_control.parse_belief_data()
 
-                    if not self.storm_control.dynamic_thread_timeout:
-                        self.interactive_queue.put("resume")
-                        time.sleep(paynt_timeout/number_of_beliefs)
-                        self.interactive_queue.put("timeout")
-
-                        while not self.interactive_queue.empty():
-                            time.sleep(0.5)
-
-                        for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                            belief_thread["synthesizer"].interactive_queue.put("resume")
-                            time.sleep(paynt_timeout/number_of_beliefs)
-                            belief_thread["synthesizer"].interactive_queue.put("timeout")
-                            while not belief_thread["synthesizer"].interactive_queue.empty():
-                                time.sleep(0.5)
-
-                            export_full = []
-                            for mem_export in belief_thread["synthesizer"].storm_control.paynt_export:
-                                one_memory = []
-                                for val_export in mem_export:
-                                    full_pomdp_values = {belief_thread["state_map"][mem_export]:val for mem_export, val in val_export.items()}
-                                    one_memory.append(full_pomdp_values)
-                                export_full.append(one_memory)
-
-                            self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
+                if self.storm_control.dynamic_thread_timeout:
+                    if self.storm_control.saynt_overapprox:
+                        self.storm_control.deactivate_threads()
+                        self.storm_control.overapp_belief_value_analysis(number_of_beliefs)
                     else:
-                        if 0 in self.storm_control.storm_fsc_usage.keys():
-                            self.interactive_queue.put("resume")
-                            time.sleep(paynt_timeout*(self.storm_control.storm_fsc_usage[0]/self.storm_control.total_fsc_used))
-                            self.interactive_queue.put("timeout")
+                        # TODO some other dynamic timeout method
+                        pass
 
-                            while not self.interactive_queue.empty():
-                                time.sleep(0.5)
-                        
-                        for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                            if index+1 in self.storm_control.storm_fsc_usage.keys():
-                                belief_thread["synthesizer"].interactive_queue.put("resume")
-                                time.sleep(paynt_timeout*(self.storm_control.storm_fsc_usage[index+1]/self.storm_control.total_fsc_used))
-                                belief_thread["synthesizer"].interactive_queue.put("timeout")
-                                while not belief_thread["synthesizer"].interactive_queue.empty():
-                                    time.sleep(0.5)
+                logger.info(f"{len(self.storm_control.enhanced_saynt_threads) - number_of_threads} new threads for enhanced SAYNT created")
+                number_of_threads = len(self.storm_control.enhanced_saynt_threads)
+                active_beliefs = len([True for x in self.storm_control.enhanced_saynt_threads if x["active"]]) + 1
+                logger.info(f"number of currently active threads: {active_beliefs}")
+                logger.info(f"new synthesis time per thread: {paynt_timeout/active_beliefs}s")
 
-                                export_full = []
-                                for mem_export in belief_thread["synthesizer"].storm_control.paynt_export:
-                                    one_memory = []
-                                    for val_export in mem_export:
-                                        full_pomdp_values = {belief_thread["state_map"][mem_export]:val for mem_export, val in val_export.items()}
-                                        one_memory.append(full_pomdp_values)
-                                    export_full.append(one_memory)
+                self.interactive_queue.put("resume")
+                time.sleep(paynt_timeout/active_beliefs)
+                self.interactive_queue.put("timeout")
 
-                                self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
+                while not self.interactive_queue.empty():
+                    time.sleep(0.5)
 
-                # compute sizes of controllers
-                self.storm_control.belief_controller_size = self.storm_control.get_belief_controller_size(self.storm_control.latest_storm_result, self.storm_control.paynt_fsc_size)
-
-                print("\n------------------------------------\n")
-                print("PAYNT results: ")
-                print(self.storm_control.paynt_bounds)
-                print("controller size: {}".format(self.storm_control.paynt_fsc_size))
-
-                print()
-
-                print("Storm results: ")
-                print(self.storm_control.storm_bounds)
-                print("controller size: {}".format(self.storm_control.belief_controller_size))
-                print("\n------------------------------------\n")
-
-                print(f"used FSCs: {self.storm_control.storm_fsc_usage}")
-                print(f"FSCs used count: {self.storm_control.total_fsc_used}")
-
-                self.storm_control.belief_value_analysis()
-
-                if time.time() > iteration_timeout or iteration == iteration_limit:
-                    break
-
-                iteration += 1
-
-            self.interactive_queue.put("terminate")
-            self.synthesis_terminate = True
-            paynt_thread.join()
-
-            for belief_thread in self.storm_control.enhanced_saynt_threads:
-                belief_thread["synthesizer"].interactive_queue.put("terminate")
-                belief_thread["synthesizer"].synthesis_terminate = True
-                belief_thread["thread"].join()
-
-            self.storm_control.interactive_storm_terminate()
-
-            self.saynt_timer.stop()
-
-        else:
-            while True:
-                if iteration == 1:
-                    paynt_thread.start()
-
-                    logger.info("Timeout for PAYNT started")
-                    time.sleep(paynt_timeout)
-                    self.interactive_queue.put("timeout")
-
-                    while not self.interactive_queue.empty():
-                        time.sleep(0.5)
-                elif iteration == 2:
-                    if number_of_beliefs == 0:
-                        beliefs_remaining = len(self.storm_control.main_obs_belief_data)
-                        number_of_beliefs = beliefs_remaining + 1
-                    else:
-                        beliefs_remaining = number_of_beliefs - 1
-                    if beliefs_remaining != 0:
-                        for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data]):
-                            index_type = "obs" if index in [0,1] else "sup"
-                            for obs_or_sup in belief_type_data:
-                                self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
-                                beliefs_remaining -= 1
-                                if beliefs_remaining == 0:
-                                    break
-                            if beliefs_remaining == 0:
-                                break
-                        else:
-                            number_of_beliefs = number_of_beliefs - beliefs_remaining
-
-                    logger.info(f"{len(self.storm_control.enhanced_saynt_threads)} threads for enhanced SAYNT created")
-                    logger.info(f"new synthesis time per thread: {paynt_timeout/number_of_beliefs}s")
-                    
-                    self.interactive_queue.put("resume")
-                    time.sleep(paynt_timeout/number_of_beliefs)
-                    self.interactive_queue.put("timeout")
-
-                    while not self.interactive_queue.empty():
-                        time.sleep(0.5)
-
-                    for belief_thread in self.storm_control.enhanced_saynt_threads:
-                        belief_thread["thread"].start()
-                        time.sleep(paynt_timeout/number_of_beliefs)
+                for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
+                    if belief_thread["active"]:
+                        logger.info(f'resuming synthesis for {belief_thread["type"]}')
+                        belief_thread["synthesizer"].interactive_queue.put("resume")
+                        time.sleep(paynt_timeout/active_beliefs)
                         belief_thread["synthesizer"].interactive_queue.put("timeout")
                         while not belief_thread["synthesizer"].interactive_queue.empty():
                             time.sleep(0.5)
@@ -475,99 +371,46 @@ class SynthesizerPOMDP:
                                 one_memory.append(full_pomdp_values)
                             export_full.append(one_memory)
 
-                        self.storm_control.belief_explorer.add_fsc_values(export_full)
-                else:
-                    if not self.storm_control.dynamic_thread_timeout:
-                        self.interactive_queue.put("resume")
-                        time.sleep(paynt_timeout/number_of_beliefs)
-                        self.interactive_queue.put("timeout")
+                        self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
 
-                        while not self.interactive_queue.empty():
-                            time.sleep(0.5)
+            # compute sizes of controllers
+            self.storm_control.belief_controller_size = self.storm_control.get_belief_controller_size(self.storm_control.latest_storm_result, self.storm_control.paynt_fsc_size)
 
-                        for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                            belief_thread["synthesizer"].interactive_queue.put("resume")
-                            time.sleep(paynt_timeout/number_of_beliefs)
-                            belief_thread["synthesizer"].interactive_queue.put("timeout")
-                            while not belief_thread["synthesizer"].interactive_queue.empty():
-                                time.sleep(0.5)
+            print("\n------------------------------------\n")
+            print("PAYNT results: ")
+            print(self.storm_control.paynt_bounds)
+            print("controller size: {}".format(self.storm_control.paynt_fsc_size))
 
-                            export_full = []
-                            for mem_export in belief_thread["synthesizer"].storm_control.paynt_export:
-                                one_memory = []
-                                for val_export in mem_export:
-                                    full_pomdp_values = {belief_thread["state_map"][mem_export]:val for mem_export, val in val_export.items()}
-                                    one_memory.append(full_pomdp_values)
-                                export_full.append(one_memory)
+            print()
 
-                            self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
-                    else:
-                        if 0 in self.storm_control.storm_fsc_usage.keys():
-                            self.interactive_queue.put("resume")
-                            time.sleep(paynt_timeout*(self.storm_control.storm_fsc_usage[0]/self.storm_control.total_fsc_used))
-                            self.interactive_queue.put("timeout")
+            print("Storm results: ")
+            print(self.storm_control.storm_bounds)
+            print("controller size: {}".format(self.storm_control.belief_controller_size))
+            print("\n------------------------------------\n")
 
-                            while not self.interactive_queue.empty():
-                                time.sleep(0.5)
-                        
-                        for index, belief_thread in enumerate(self.storm_control.enhanced_saynt_threads):
-                            if index+1 in self.storm_control.storm_fsc_usage.keys():
-                                belief_thread["synthesizer"].interactive_queue.put("resume")
-                                time.sleep(paynt_timeout*(self.storm_control.storm_fsc_usage[index+1]/self.storm_control.total_fsc_used))
-                                belief_thread["synthesizer"].interactive_queue.put("timeout")
-                                while not belief_thread["synthesizer"].interactive_queue.empty():
-                                    time.sleep(0.5)
+            print(f"used FSCs: {self.storm_control.storm_fsc_usage}")
+            print(f"FSCs used count: {self.storm_control.total_fsc_used}")
 
-                                export_full = []
-                                for mem_export in belief_thread["synthesizer"].storm_control.paynt_export:
-                                    one_memory = []
-                                    for val_export in mem_export:
-                                        full_pomdp_values = {belief_thread["state_map"][mem_export]:val for mem_export, val in val_export.items()}
-                                        one_memory.append(full_pomdp_values)
-                                    export_full.append(one_memory)
+            if time.time() > iteration_timeout or iteration == iteration_limit:
+                break
 
-                                self.storm_control.belief_explorer.set_fsc_values(export_full, index+1)
+            iteration += 1
 
-                if iteration == 1:
-                    self.storm_control.interactive_storm_start(storm_timeout, True)
-                else:
-                    self.storm_control.interactive_storm_resume(storm_timeout)
+        self.interactive_queue.put("terminate")
+        self.synthesis_terminate = True
+        paynt_thread.join()
 
-                # compute sizes of controllers
-                self.storm_control.belief_controller_size = self.storm_control.get_belief_controller_size(self.storm_control.latest_storm_result, self.storm_control.paynt_fsc_size)
+        for belief_thread in self.storm_control.enhanced_saynt_threads:
+            belief_thread["synthesizer"].interactive_queue.put("terminate")
+            belief_thread["synthesizer"].synthesis_terminate = True
+            belief_thread["thread"].join()
 
-                print("\n------------------------------------\n")
-                print("PAYNT results: ")
-                print(self.storm_control.paynt_bounds)
-                print("controller size: {}".format(self.storm_control.paynt_fsc_size))
+        self.storm_control.interactive_storm_terminate()
 
-                print()
+        self.saynt_timer.stop()
 
-                print("Storm results: ")
-                print(self.storm_control.storm_bounds)
-                print("controller size: {}".format(self.storm_control.belief_controller_size))
-                print("\n------------------------------------\n")
 
-                print(f"used FSCs: {self.storm_control.storm_fsc_usage}")
-                print(f"FSCs used count: {self.storm_control.total_fsc_used}")
 
-                if time.time() > iteration_timeout or iteration == iteration_limit:
-                    break
-
-                iteration += 1
-
-            self.interactive_queue.put("terminate")
-            self.synthesis_terminate = True
-            paynt_thread.join()
-
-            for belief_thread in self.storm_control.enhanced_saynt_threads:
-                belief_thread["synthesizer"].interactive_queue.put("terminate")
-                belief_thread["synthesizer"].synthesis_terminate = True
-                belief_thread["thread"].join()
-
-            self.storm_control.interactive_storm_terminate()
-
-            self.saynt_timer.stop()
 
     # run PAYNT POMDP synthesis with a given timeout
     def run_synthesis_timeout(self, timeout):

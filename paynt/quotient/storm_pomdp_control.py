@@ -91,6 +91,9 @@ class StormPOMDPControl:
         self.enhanced_saynt = enhanced_saynt
         self.saynt_overapprox = saynt_overapprox
 
+        if self.saynt_overapprox:
+            self.dynamic_thread_timeout = True
+
         self.incomplete_exploration = False
         if prune_storm:
             self.incomplete_exploration = True
@@ -291,12 +294,8 @@ class StormPOMDPControl:
         result = belmc.get_interactive_result()
 
         if enhanced:
-            beliefs = belmc.get_beliefs_from_exchange()
-            belief_overapp_values = belmc.get_exchange_overapproximation_map()
-            print(len(beliefs), len(belief_overapp_values))
-            # for belief, value in belief_overapp_values.items():
-            #     print(belief, value)
-            self.parse_belief_data(beliefs)
+            self.beliefs = belmc.get_beliefs_from_exchange()
+            self.belief_overapp_values = belmc.get_exchange_overapproximation_map()
 
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
         size = self.get_belief_controller_size(result, self.paynt_fsc_size)
@@ -405,21 +404,23 @@ class StormPOMDPControl:
     
 
 
-    def create_thread_control(self, index, belief_type, obs_option=True):
+    def create_thread_control(self, belief_info, belief_type, obs_option=True):
         if belief_type == "obs":
             if obs_option:
                 obs_states = []
                 for state in range(self.quotient.pomdp.nr_states):
-                    if self.quotient.pomdp.observations[state] == index:
+                    if self.quotient.pomdp.observations[state] == belief_info:
                         obs_states.append(state)
                 prob = 1/len(obs_states)
                 initial_belief = {x:prob for x in obs_states}
             else:
-                initial_belief = self.average_belief_data[index]
+                initial_belief = self.average_belief_data[belief_info]
         elif belief_type == "sup":
-            states = list(index)
+            states = list(belief_info)
             prob = 1/len(states)
             initial_belief = {x:prob for x in states}
+        elif belief_type == "belief":
+            initial_belief = self.beliefs[belief_info]
         else:
             assert False, "wrong belief type"
 
@@ -435,13 +436,16 @@ class StormPOMDPControl:
 
         sub_pomdp_states_to_full = self.sub_pomdp_builder.state_sub_to_full
 
-        belief_thread_data = {"synthesizer": sub_pomdp_synthesizer, "thread": sub_pomdp_thread, "state_map": sub_pomdp_states_to_full, "active": True}
+        belief_thread_data = {"synthesizer": sub_pomdp_synthesizer, "thread": sub_pomdp_thread, "state_map": sub_pomdp_states_to_full, "active": True, "type": "obs_" + str(belief_info) if belief_type == "obs" else "belief_" + str(belief_info)}
 
         self.enhanced_saynt_threads.append(belief_thread_data)
 
         # create index for FSC in Storm
         thread_index = self.belief_explorer.add_fsc_values([])
         assert thread_index == len(self.enhanced_saynt_threads), "Newly created thread and its index in Storm are not matching"
+
+        self.enhanced_saynt_threads[thread_index-1]["thread"].start()
+        self.enhanced_saynt_threads[thread_index-1]["synthesizer"].interactive_queue.put("timeout")
 
     
     # parse the current Storm and PAYNT results if they are available
@@ -572,12 +576,12 @@ class StormPOMDPControl:
         self.total_fsc_used = sum(list(self.storm_fsc_usage.values()))
 
 
-    def parse_belief_data(self, beliefs):
+    def parse_belief_data(self):      
         obs_dict = {}
         support_dict = {}
         total_obs_belief_dict = {}
 
-        for belief in beliefs.values():
+        for belief in self.beliefs.values():
             belief_obs = self.quotient.pomdp.get_observation(list(belief.keys())[0])
             if belief_obs not in obs_dict.keys():
                 obs_dict[belief_obs] = 1
@@ -609,7 +613,7 @@ class StormPOMDPControl:
             for state, state_total_val in total_dict.items():
                 average_obs_belief_dict[obs][state] = state_total_val / total_value
 
-        percent_1 = round(len(beliefs)/100)
+        percent_1 = round(len(self.beliefs)/100)
 
         sorted_obs = sorted(obs_dict, key=obs_dict.get)
         sorted_support = sorted(support_dict, key=support_dict.get)
@@ -645,53 +649,71 @@ class StormPOMDPControl:
         return best_value
     
 
-    def belief_value_analysis(self):
-        beliefs = belmc.get_beliefs_from_exchange()
-        belief_overapp_values = belmc.get_exchange_overapproximation_map()
+    def overapp_belief_value_analysis(self, number_of_beliefs):
 
         export_values = [x["synthesizer"].storm_control.paynt_export for x in self.enhanced_saynt_threads]
         export_values.append(self.paynt_export)
 
-        epsilon = 0.1
-
         analysed_beliefs = 0
-        big_difference_count = 0
-        difference = 0
-        biggest_difference = 0
-        smallest_difference = 1
 
         obs_differences = {}
         obs_count = {}
+        belief_values_dif = {}
 
-        for belief_id, belief in beliefs.items():
-            if belief_id in belief_overapp_values.keys():
+        for belief_id, belief in self.beliefs.items():
+            if belief_id in self.belief_overapp_values.keys():
                 analysed_beliefs += 1
                 belief_obs = self.quotient.pomdp.get_observation(list(belief.keys())[0])
                 belief_value = self.compute_belief_value(belief, belief_obs, export_values)
+                belief_values_dif[belief_id] = abs(self.belief_overapp_values[belief_id] - belief_value)
 
                 if belief_obs not in obs_differences.keys():
                     obs_count[belief_obs] = 1
-                    obs_differences[belief_obs] = belief_overapp_values[belief_id] - belief_value
+                    obs_differences[belief_obs] = abs(self.belief_overapp_values[belief_id] - belief_value)
                 else:
                     obs_count[belief_obs] += 1
-                    obs_differences[belief_obs] += belief_overapp_values[belief_id] - belief_value
-
-                # if 1-(belief_value / belief_overapp_values[belief_id]) < epsilon:
-                #     big_difference_count += 1
-                # difference += 1-(belief_value / belief_overapp_values[belief_id])
-                # if 1-(belief_value / belief_overapp_values[belief_id]) > biggest_difference:
-                #     biggest_difference = 1-(belief_value / belief_overapp_values[belief_id])
-                # if 1-(belief_value / belief_overapp_values[belief_id]) < smallest_difference:
-                #     smallest_difference = 1-(belief_value / belief_overapp_values[belief_id])
+                    obs_differences[belief_obs] += abs(self.belief_overapp_values[belief_id] - belief_value)
 
         obs_values = {obs_key:obs_dif/obs_count[obs_key] for obs_key, obs_dif in obs_differences.items()}
+        sorted_obs_values = {k: v for k, v in sorted(obs_values.items(), key=lambda item: item[1], reverse=True)}
+
+        sorted_belief_values_dif = {k: v for k, v in sorted(belief_values_dif.items(), key=lambda item: item[1], reverse=True)}
+
+        obs_to_activate = []
+        beliefs_to_activate = []
+
+        if number_of_beliefs == 0:
+            number_of_threads_to_activate = len(self.main_obs_belief_data)
+        else:
+            number_of_threads_to_activate = number_of_beliefs - 1
+
+        if number_of_threads_to_activate <= 4:
+            number_of_threads_to_activate = 5
+
+        for obs in sorted_obs_values.keys():
+            obs_to_activate.append(obs)
+            number_of_beliefs -= 1
+            if number_of_beliefs == 2:
+                break
+
+        added_belief_obs = [self.quotient.pomdp.get_observation(list(self.beliefs[list(sorted_belief_values_dif.keys())[0]].keys())[0])]
+        beliefs_to_activate.append(list(sorted_belief_values_dif.keys())[0])
+        number_of_beliefs -= 1
+
+        for belief_id, _ in sorted_belief_values_dif.items():
+            if number_of_beliefs > 1 and belief_id not in beliefs_to_activate:
+                added_belief_obs.append(self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]))
+                beliefs_to_activate.append(belief_id)
+                continue
+            if self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]) not in added_belief_obs:
+                beliefs_to_activate.append(belief_id)
+                break
+
+        self.activate_threads(obs_to_activate, beliefs_to_activate)
 
         print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-        print(obs_values)
-        # print(f"Analysed {analysed_beliefs} out of {len(beliefs)} possible beliefs \
-        #       \n{big_difference_count} of them have bounds more than {epsilon} (10% difference) apart \
-        #       \nAverage difference {difference/analysed_beliefs} \
-        #       \nBiggest difference: {biggest_difference}, smallest difference: {smallest_difference}")
+        print(sorted_obs_values)
+        print(list(sorted_belief_values_dif.items())[:10])
         print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
             
 
@@ -842,6 +864,35 @@ class StormPOMDPControl:
                 memory_needed = True
                 break
         return memory_needed
+    
+    def deactivate_threads(self):
+        for thread in self.belief_threads_info:
+            thread["active"] = False
+
+    def activate_threads(self, obs_threads, belief_threads):
+        for obs in obs_threads:
+            for thread in self.belief_threads_info:
+                thread_type = thread["type"].split('_')
+                thread_val = thread_type[1]
+                thread_type = thread_type[0]
+                if thread_type == "obs" and thread_val == obs:
+                    thread["active"] = True
+                    break
+            else:
+                self.create_thread_control(obs, "obs", self.use_uniform_obs_beliefs)
+            
+        for belief in belief_threads:
+            for thread in self.belief_threads_info:
+                thread_type = thread["type"].split('_')
+                thread_val = thread_type[1]
+                thread_type = thread_type[0]
+                if thread_type == "belief" and thread_val == belief:
+                    thread["active"] = True
+                    break
+            else:
+                self.create_thread_control(belief, "belief", self.use_uniform_obs_beliefs)
+
+
 
     # update all of the important data structures according to the current results
     def update_data(self):
