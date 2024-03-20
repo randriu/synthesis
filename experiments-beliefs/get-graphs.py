@@ -237,16 +237,18 @@ def get_network_header():
         fill=white,align=left},\n]\n"
 
 
-def get_end(file):
-    print("\\end{axis}\n\\end{tikzpicture}\n", file=file)
+def get_end():
+    return "\\end{axis}\n\\end{tikzpicture}\n"
 
 
-def get_plots(output_file, enhanced_saynt_file, saynt_file):
+def get_plots(enhanced_saynt_file, saynt_file):
 
     # Enhanced SAYNT
     enhanced_saynt_log = enhanced_saynt_file.read()
     enhanced_saynt_storm_coordinates = ""
     enhanced_saynt_paynt_coordinates = ""
+
+    source_text = ""
 
     split1 = enhanced_saynt_log.split("-----------Storm-----------")
     for i in range(len(split1)):
@@ -259,14 +261,14 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
     if time < 15.0:
         enhanced_saynt_storm_coordinates = enhanced_saynt_storm_coordinates + f"(15, {val})"
 
-    print("\\addplot[\n\
+    source_text += "\\addplot[\n\
     color=red,\n\
     every mark/.append style={solid, fill=red},\n\
     mark=square*,\n\
     line width=1.5pt,mark size=2pt,]\n\
     coordinates {\n" + enhanced_saynt_storm_coordinates + "\n\
     };\n\
-    \\addlegendentry{SAYNT2.0 $F_{B}$};\n", file=output_file)
+    \\addlegendentry{SAYNT2.0 $F_{B}$};\n"
 
     split1 = enhanced_saynt_log.split("-----------PAYNT-----------")
     for i in range(len(split1)):
@@ -279,14 +281,14 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
     if time < 15.0:
         enhanced_saynt_paynt_coordinates = enhanced_saynt_paynt_coordinates + f"(15, {val})"
 
-    print("\\addplot[\n\
+    source_text += "\\addplot[\n\
     color=orange,\n\
     every mark/.append style={solid, fill=orange},\n\
     mark=triangle*,\n\
     line width=1.5pt,mark size=2pt,]\n\
     coordinates {\n" + enhanced_saynt_paynt_coordinates + "\n\
     };\n\
-    \\addlegendentry{SAYNT2.0 $F_{I}$};\n", file=output_file)
+    \\addlegendentry{SAYNT2.0 $F_{I}$};\n"
     
 
 
@@ -306,14 +308,14 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
     if time < 15.0:
         saynt_storm_coordinates = saynt_storm_coordinates + f"(15, {val})"
 
-    print("\\addplot[\n\
+    source_text += "\\addplot[\n\
     color=blue,\n\
     every mark/.append style={solid, fill=blue},\n\
     mark=square*,\n\
     line width=1.5pt,mark size=2pt,]\n\
     coordinates {\n" + saynt_storm_coordinates + "\n\
     };\n\
-    \\addlegendentry{SAYNT $F_{B}$};\n", file=output_file)
+    \\addlegendentry{SAYNT $F_{B}$};\n"
 
     split1 = saynt_log.split("-----------PAYNT-----------")
     for i in range(len(split1)):
@@ -326,14 +328,16 @@ def get_plots(output_file, enhanced_saynt_file, saynt_file):
     if time < 15.0:
         saynt_paynt_coordinates = saynt_paynt_coordinates + f"(15, {val})"
 
-    print("\\addplot[\n\
+    source_text += "\\addplot[\n\
     color=green,\n\
     every mark/.append style={solid, fill=green},\n\
     mark=triangle*,\n\
     line width=1.5pt,mark size=2pt,]\n\
     coordinates {\n" + saynt_paynt_coordinates + "\n\
     };\n\
-    \\addlegendentry{SAYNT $F_{I}$};\n", file=output_file)
+    \\addlegendentry{SAYNT $F_{I}$};\n"
+
+    return source_text
 
 
 
@@ -388,12 +392,16 @@ def get_graphs(enhanced_saynt_experiment):
             elif model_name == "drone-4-2":
                 header = get_drone42_header()
                 output_file_name = "source-drone-4-2.tex"
+            else:
+                continue
 
 
             with open(result_folder.decode("utf-8") + "/" + output_file_name, "w") as text_file:
-                print(header, file=text_file)
-                get_plots(text_file, enhanced_saynt_file, saynt_file)
-                get_end(text_file)
+                source_text = header
+                source_text += get_plots(enhanced_saynt_file, saynt_file)
+                source_text += get_end()
+
+                print(source_text, file=text_file)
 
                 enhanced_saynt_file.close()
                 saynt_file.close()

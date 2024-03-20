@@ -51,14 +51,21 @@ module cells
     pos33 : [0..4] init 0;
     pos23 : [0..4] init 0;
 
+
+    [up]    true -> (pos11'=0) & (pos21'=0) & (pos31'=0) & (pos32'=0) & (pos33'=0) & (pos23'=0);
+    [right] true -> (pos11'=0) & (pos21'=0) & (pos31'=0) & (pos32'=0) & (pos33'=0) & (pos23'=0);
+    [down]  true -> (pos11'=0) & (pos21'=0) & (pos31'=0) & (pos32'=0) & (pos33'=0) & (pos23'=0);
+    [left]  true -> (pos11'=0) & (pos21'=0) & (pos31'=0) & (pos32'=0) & (pos33'=0) & (pos23'=0);
+
+
     [in]  x=x1 & y=y1 & pos11=0 -> 0.5: (pos11'=1) + 0.5: (pos11'=2);
 
     [l]   x=x1 & y=y1 & pos11=1 -> switch_rate: (pos11'=4) + 1-switch_rate: (pos11'=1);
     [r]   x=x1 & y=y1 & pos11=1 -> switch_rate: (pos11'=1) + 1-switch_rate: (pos11'=2);
     [l]   x=x1 & y=y1 & pos11=2 -> switch_rate: (pos11'=2) + 1-switch_rate: (pos11'=1);
     [r]   x=x1 & y=y1 & pos11=2 -> switch_rate: (pos11'=4) + 1-switch_rate: (pos11'=2);
-    [l]   x=x1 & y=y1 & pos11=4 -> exit_rate: (pos11'=3) + 1-exit_rate: (pos11'=1);
-    [r]   x=x1 & y=y1 & pos11=4 -> exit_rate: (pos11'=3) + 1-exit_rate: (pos11'=2);
+    [l]   x=x1 & y=y1 & pos11=4 -> exit_rate: (pos11'=3) + 1-exit_rate: (pos11'=0);
+    [r]   x=x1 & y=y1 & pos11=4 -> exit_rate: (pos11'=3) + 1-exit_rate: (pos11'=0);
 
 
     [in]  x=x2 & y=y1 & pos21=0 -> 0.5: (pos21'=1) + 0.5: (pos21'=2);
@@ -67,8 +74,8 @@ module cells
     [r]   x=x2 & y=y1 & pos21=1 -> switch_rate: (pos21'=1) + 1-switch_rate: (pos21'=2);
     [l]   x=x2 & y=y1 & pos21=2 -> switch_rate: (pos21'=2) + 1-switch_rate: (pos21'=1);
     [r]   x=x2 & y=y1 & pos21=2 -> switch_rate: (pos21'=4) + 1-switch_rate: (pos21'=2);  
-    [l]   x=x2 & y=y1 & pos21=4 -> exit_rate: (pos21'=3) + 1-exit_rate: (pos21'=1);
-    [r]   x=x2 & y=y1 & pos21=4 -> exit_rate: (pos21'=3) + 1-exit_rate: (pos21'=2);
+    [l]   x=x2 & y=y1 & pos21=4 -> exit_rate: (pos21'=3) + 1-exit_rate: (pos21'=0);
+    [r]   x=x2 & y=y1 & pos21=4 -> exit_rate: (pos21'=3) + 1-exit_rate: (pos21'=0);
 
 
 
@@ -78,8 +85,8 @@ module cells
     [r]   x=x3 & y=y1 & pos31=1 -> switch_rate: (pos31'=1) + 1-switch_rate: (pos31'=2);
     [l]   x=x3 & y=y1 & pos31=2 -> switch_rate: (pos31'=2) + 1-switch_rate: (pos31'=1);
     [r]   x=x3 & y=y1 & pos31=2 -> switch_rate: (pos31'=4) + 1-switch_rate: (pos31'=2);
-    [l]   x=x3 & y=y1 & pos31=4 -> exit_rate: (pos31'=3) + 1-exit_rate: (pos31'=1);
-    [r]   x=x3 & y=y1 & pos31=4 -> exit_rate: (pos31'=3) + 1-exit_rate: (pos31'=2);
+    [l]   x=x3 & y=y1 & pos31=4 -> exit_rate: (pos31'=3) + 1-exit_rate: (pos31'=0);
+    [r]   x=x3 & y=y1 & pos31=4 -> exit_rate: (pos31'=3) + 1-exit_rate: (pos31'=0);
 
 
 
@@ -89,8 +96,8 @@ module cells
     [r]   x=x3 & y=y2 & pos32=1 -> switch_rate: (pos32'=1) + 1-switch_rate: (pos32'=2);
     [l]   x=x3 & y=y2 & pos32=2 -> switch_rate: (pos32'=2) + 1-switch_rate: (pos32'=1);
     [r]   x=x3 & y=y2 & pos32=2 -> switch_rate: (pos32'=4) + 1-switch_rate: (pos32'=2); 
-    [l]   x=x3 & y=y2 & pos32=4 -> exit_rate: (pos32'=3) + 1-exit_rate: (pos32'=1);
-    [r]   x=x3 & y=y2 & pos32=4 -> exit_rate: (pos32'=3) + 1-exit_rate: (pos32'=2);
+    [l]   x=x3 & y=y2 & pos32=4 -> exit_rate: (pos32'=3) + 1-exit_rate: (pos32'=0);
+    [r]   x=x3 & y=y2 & pos32=4 -> exit_rate: (pos32'=3) + 1-exit_rate: (pos32'=0);
 
 
 
@@ -100,8 +107,8 @@ module cells
     [r]   x=x3 & y=y3 & pos33=1 -> switch_rate: (pos33'=1) + 1-switch_rate: (pos33'=2);
     [l]   x=x3 & y=y3 & pos33=2 -> switch_rate: (pos33'=2) + 1-switch_rate: (pos33'=1);
     [r]   x=x3 & y=y3 & pos33=2 -> switch_rate: (pos33'=4) + 1-switch_rate: (pos33'=2); 
-    [l]   x=x3 & y=y3 & pos33=4 -> exit_rate: (pos33'=3) + 1-exit_rate: (pos33'=1);
-    [r]   x=x3 & y=y3 & pos33=4 -> exit_rate: (pos33'=3) + 1-exit_rate: (pos33'=2);
+    [l]   x=x3 & y=y3 & pos33=4 -> exit_rate: (pos33'=3) + 1-exit_rate: (pos33'=0);
+    [r]   x=x3 & y=y3 & pos33=4 -> exit_rate: (pos33'=3) + 1-exit_rate: (pos33'=0);
 
 
 
@@ -111,8 +118,8 @@ module cells
     [r]   x=x2 & y=y3 & pos23=1 -> switch_rate: (pos23'=1) + 1-switch_rate: (pos23'=2);
     [l]   x=x2 & y=y3 & pos23=2 -> switch_rate: (pos23'=2) + 1-switch_rate: (pos23'=1);
     [r]   x=x2 & y=y3 & pos23=2 -> switch_rate: (pos23'=4) + 1-switch_rate: (pos23'=2);        
-    [l]   x=x2 & y=y3 & pos23=4 -> exit_rate: (pos23'=3) + 1-exit_rate: (pos23'=1);
-    [r]   x=x2 & y=y3 & pos23=4 -> exit_rate: (pos23'=3) + 1-exit_rate: (pos23'=2); 
+    [l]   x=x2 & y=y3 & pos23=4 -> exit_rate: (pos23'=3) + 1-exit_rate: (pos23'=0);
+    [r]   x=x2 & y=y3 & pos23=4 -> exit_rate: (pos23'=3) + 1-exit_rate: (pos23'=0); 
 
 endmodule
 

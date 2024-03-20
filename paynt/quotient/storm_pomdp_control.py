@@ -420,6 +420,8 @@ class StormPOMDPControl:
             initial_belief = {x:prob for x in states}
         elif belief_type == "belief":
             initial_belief = self.beliefs[belief_info]
+        elif belief_type == "custom":
+            initial_belief = belief_info
         else:
             assert False, "wrong belief type"
 
@@ -435,7 +437,14 @@ class StormPOMDPControl:
 
         sub_pomdp_states_to_full = self.sub_pomdp_builder.state_sub_to_full
 
-        belief_thread_data = {"synthesizer": sub_pomdp_synthesizer, "thread": sub_pomdp_thread, "state_map": sub_pomdp_states_to_full, "active": True, "type": "obs_" + str(belief_info) if belief_type == "obs" else "belief_" + str(belief_info)}
+        if belief_type == "obs":
+            belief_thread_type_label = "obs_" + str(belief_info)
+        elif belief_type == "belief":
+            belief_thread_type_label = "belief_" + str(belief_info)
+        else:
+            belief_thread_type_label = "custom"
+            
+        belief_thread_data = {"synthesizer": sub_pomdp_synthesizer, "thread": sub_pomdp_thread, "state_map": sub_pomdp_states_to_full, "active": True, "type": belief_thread_type_label}
 
         self.enhanced_saynt_threads.append(belief_thread_data)
 
@@ -633,6 +642,8 @@ class StormPOMDPControl:
         best_value = None
 
         for values in fsc_values:
+            if obs >= len(values):
+                continue
             for index, mem_values in enumerate(values[obs]):
                 vl = 0
                 for state, prob in belief.items():
@@ -710,15 +721,15 @@ class StormPOMDPControl:
 
         self.activate_threads(obs_to_activate, beliefs_to_activate)
 
-        # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-        # print(sorted_obs_values)
-        # my_iter = 0
-        # for belief_id, diff in sorted_belief_values_dif.items():
-        #     print(belief_id, self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]), diff)
-        #     my_iter += 1
-        #     if my_iter == 20:
-        #         break
-        # print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+        print(sorted_obs_values)
+        my_iter = 0
+        for belief_id, diff in sorted_belief_values_dif.items():
+            print(belief_id, self.quotient.pomdp.get_observation(list(self.beliefs[belief_id].keys())[0]), diff)
+            my_iter += 1
+            if my_iter == 20:
+                break
+        print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
             
 
     # help function for cut-off parsing, returns list of actions for given choice_string

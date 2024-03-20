@@ -276,23 +276,36 @@ class SynthesizerPOMDP:
 
                 self.storm_control.belief_explorer.add_fsc_values(self.storm_control.paynt_export)
 
-                if number_of_beliefs == 0:
-                    beliefs_remaining = len(self.storm_control.main_obs_belief_data)
-                    # beliefs_remaining = len(self.storm_control.main_support_belief_data)
+                if False:
+                    obs = self.quotient.observation_labels.index("[goal=0\t& in=1\t& out=0\t& switch=0]")
+                    obs_states = []
+                    
+                    for state in self.quotient.pomdp.states:
+                        state_obs = self.quotient.pomdp.get_observation(state)
+                        if state_obs == obs:
+                            obs_states.append(state.id)
+
+                    for state in obs_states:
+                        self.storm_control.create_thread_control({state: 1}, "custom", self.storm_control.use_uniform_obs_beliefs)
+
                 else:
-                    beliefs_remaining = number_of_beliefs - 1
-                if beliefs_remaining != 0:
-                    for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data]):
-                    # for index, belief_type_data in enumerate([self.storm_control.main_support_belief_data]):
-                        index_type = "obs" if index in [0,1] else "sup"
-                        # index_type = "sup"
-                        for obs_or_sup in belief_type_data:
-                            self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
-                            beliefs_remaining -= 1
+                    if number_of_beliefs == 0:
+                        beliefs_remaining = len(self.storm_control.main_obs_belief_data)
+                        # beliefs_remaining = len(self.storm_control.main_support_belief_data)
+                    else:
+                        beliefs_remaining = number_of_beliefs - 1
+                    if beliefs_remaining != 0:
+                        for index, belief_type_data in enumerate([self.storm_control.main_obs_belief_data, self.storm_control.residue_obs_belief_data]):
+                        # for index, belief_type_data in enumerate([self.storm_control.main_support_belief_data]):
+                            index_type = "obs" if index in [0,1] else "sup"
+                            # index_type = "sup"
+                            for obs_or_sup in belief_type_data:
+                                self.storm_control.create_thread_control(obs_or_sup, index_type, self.storm_control.use_uniform_obs_beliefs)
+                                beliefs_remaining -= 1
+                                if beliefs_remaining == 0:
+                                    break
                             if beliefs_remaining == 0:
                                 break
-                        if beliefs_remaining == 0:
-                            break
 
                 number_of_threads = len(self.storm_control.enhanced_saynt_threads)
                 logger.info(f"{number_of_threads} threads for enhanced SAYNT created")
