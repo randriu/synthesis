@@ -1,0 +1,19 @@
+2024-03-20 19:52:36,619 - cli.py - This is Paynt version 0.1.0.
+2024-03-20 19:52:36,619 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/refuel-20/sketch.templ ...
+2024-03-20 19:52:36,619 - sketch.py - assuming sketch in PRISM format...
+2024-03-20 19:52:36,621 - prism_parser.py - PRISM model type: POMDP
+2024-03-20 19:52:36,621 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/refuel-20/sketch.props ...
+2024-03-20 19:52:36,622 - prism_parser.py - found the following specification: optimality: Pmax=? ["notbad" U "goal"] 
+2024-03-20 19:52:36,683 - sketch.py - sketch parsing OK
+2024-03-20 19:52:36,683 - sketch.py - constructed explicit quotient having 6834 states and 24763 actions
+2024-03-20 19:52:36,683 - property.py - converting until formula to eventually...
+2024-03-20 19:52:36,683 - sketch.py - found the following specification optimality: Pmax=? [F "goal"] 
+2024-03-20 19:52:36,692 - pomdp.py - constructed POMDP having 174 observations.
+2024-03-20 19:52:37,258 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-03-20 19:52:37,263 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-03-20 19:52:37,263 - pomdp.py - creating coloring ...
+2024-03-20 19:52:37,283 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-03-20 19:52:37,283 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 2), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - 0, saynt_overapprox - True
+2024-03-20 19:52:37,284 - storm_pomdp_control.py - Interactive Storm started
+2024-03-20 19:52:37,284 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-03-20 19:52:45,631 - storm_pomdp_control.py - Pausing Storm
