@@ -144,7 +144,7 @@ class Sketch:
         logger.info(f"found the following specification {specification}")
 
         if export is not None:
-            Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)
+            Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient, specification)
             logger.info("export OK, aborting...")
             exit(0)
 
@@ -205,7 +205,7 @@ class Sketch:
         return prism, specification, family
     
     @classmethod
-    def export(cls, export, sketch_path, jani_unfolder, explicit_quotient):
+    def export(cls, export, sketch_path, jani_unfolder, explicit_quotient, specification=None):
         if export == "jani":
             assert jani_unfolder is not None, "jani unfolder was not used"
             output_path = substitute_suffix(sketch_path, '.', 'jani')
@@ -218,7 +218,7 @@ class Sketch:
                 "cannot '--export pomdp' with non-POMDP sketches"
             output_path = substitute_suffix(sketch_path, '.', 'pomdp')
             property_path = substitute_suffix(sketch_path, '/', 'props.pomdp')
-            PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
+            PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, specification, output_path, property_path)
 
 
     @classmethod
