@@ -94,6 +94,12 @@ def setup_logger(log_path = None):
     type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp", "2mil", "5mil", "10mil", "20mil", "30mil", "50mil"]),
     show_default=True,
     help="run Storm using pre-defined settings and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
+@click.option(
+    "--storm-exploration-heuristic",
+    default="bfs",
+    type=click.Choice(["bfs", "gap", "reachability", "uncertainty"]),
+    show_default=True,
+    help="chooses Storm's belief exploration heuristic, Can only be used together with --storm-pomdp flag")
 @click.option("--iterative-storm", nargs=3, type=int, show_default=True, default=None,
     help="runs the iterative PAYNT/Storm integration. Arguments timeout, paynt_timeout, storm_timeout. Can only be used together with --storm-pomdp flag")
 @click.option("--get-storm-result", default=None, type=int,
@@ -155,7 +161,7 @@ def paynt_run(
     method,
     incomplete_search, disable_expected_visits,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
-    storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
+    storm_pomdp, iterative_storm, get_storm_result, storm_options, storm_exploration_heuristic, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm, enhanced_saynt, saynt_overapprox,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
@@ -187,7 +193,8 @@ def paynt_run(
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, enhanced_saynt, saynt_overapprox
+            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, enhanced_saynt, saynt_overapprox,
+            storm_exploration_heuristic
         )
 
     sketch_path = os.path.join(project, sketch)

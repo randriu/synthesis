@@ -76,7 +76,7 @@ class StormPOMDPControl:
     def set_options(self,
         storm_options="cutoff", get_storm_result=None, iterative_storm=None, use_storm_cutoffs=False,
         unfold_strategy_storm="storm", prune_storm=False, export_fsc_storm=None, export_fsc_paynt=None, enhanced_saynt=None,
-        saynt_overapprox = False
+        saynt_overapprox = False, storm_exploration_heuristic = "bfs"
     ):
         self.storm_options = storm_options
         if get_storm_result is not None:
@@ -89,6 +89,7 @@ class StormPOMDPControl:
         self.export_fsc_paynt = export_fsc_paynt
         self.enhanced_saynt = enhanced_saynt
         self.saynt_overapprox = saynt_overapprox
+        self.storm_exploration_heuristic = storm_exploration_heuristic
 
         if self.saynt_overapprox:
             self.dynamic_thread_timeout = True
@@ -116,6 +117,7 @@ class StormPOMDPControl:
         copy_storm_control.unfold_storm = self.unfold_storm
         copy_storm_control.unfold_cutoff = self.unfold_cutoff
         copy_storm_control.iteration_timeout = self.iteration_timeout
+        copy_storm_control.storm_exploration_heuristic = self.storm_exploration_heuristic
 
         return copy_storm_control
 
@@ -318,9 +320,21 @@ class StormPOMDPControl:
 
     ########
     # Different options for Storm below (would be nice to make this more succint)
+        
+    def get_exploration_heuristic(self):
+        if self.storm_exploration_heuristic == "bfs":
+            return stormpy.pomdp.BeliefExplorationHeuristic.BreadthFirst
+        if self.storm_exploration_heuristic == "gap":
+            return stormpy.pomdp.BeliefExplorationHeuristic.GapPrio
+        if self.storm_exploration_heuristic == "reachability":
+            return stormpy.pomdp.BeliefExplorationHeuristic.ProbabilityPrio
+        if self.storm_exploration_heuristic == "uncertainty":
+            return stormpy.pomdp.BeliefExplorationHeuristic.ExcessUncertainty
+        
 
     def get_cutoff_options(self, belief_states=100000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.exploration_heuristic = self.get_exploration_heuristic()
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = belief_states
         options.use_clipping = False
@@ -328,6 +342,7 @@ class StormPOMDPControl:
 
     def get_overapp_options(self, belief_states=20000000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
+        options.exploration_heuristic = self.get_exploration_heuristic()
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = belief_states
         options.use_clipping = False
@@ -335,6 +350,7 @@ class StormPOMDPControl:
 
     def get_refine_options(self, step_limit=0):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.exploration_heuristic = self.get_exploration_heuristic()
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.size_threshold_factor = 2
@@ -348,6 +364,7 @@ class StormPOMDPControl:
 
     def get_clip2_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.exploration_heuristic = self.get_exploration_heuristic()
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.use_clipping = True
@@ -357,6 +374,7 @@ class StormPOMDPControl:
 
     def get_clip4_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
+        options.exploration_heuristic = self.get_exploration_heuristic()
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.use_clipping = True
@@ -366,6 +384,7 @@ class StormPOMDPControl:
 
     def get_interactive_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(self.saynt_overapprox, True)
+        options.exploration_heuristic = self.get_exploration_heuristic()
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.resolution_init = 2
