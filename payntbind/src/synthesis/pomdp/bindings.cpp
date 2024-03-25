@@ -2,6 +2,7 @@
 
 #include "PomdpManager.h"
 #include "PomdpManagerAposteriori.h"
+#include "BeliefMCExplorer.h"
 
 void bindings_pomdp(py::module& m) {
 
@@ -37,6 +38,16 @@ void bindings_pomdp(py::module& m) {
         .def_property_readonly("hole_num_options", [](synthesis::PomdpManagerAposteriori<double>& manager) {return manager.hole_num_options;})
         .def_property_readonly("action_holes", [](synthesis::PomdpManagerAposteriori<double>& manager) {return manager.action_holes;})
         .def_property_readonly("update_holes", [](synthesis::PomdpManagerAposteriori<double>& manager) {return manager.update_holes;})
+        ;
+
+    py::class_<synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>>(m, "BeliefMCExplorer", "Exploration of belief space with alpha vectors")
+        .def(py::init<std::shared_ptr<storm::models::sparse::Pomdp<double>>>(), "Constructor.", py::arg("pomdp"))
+        .def("check_alpha_vectors", &synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>::checkAlphaVectors, py::arg("formula"), py::arg("alpha_vectors"))
+        ;
+
+    py::class_<synthesis::AlphaVectorSet>(m, "AlphaVectorsSet" , "Alpha vectors class")
+        .def(py::init<std::vector<std::vector<double>> const&, std::vector<uint64_t> const&>())
+        .def_property_readonly("alpha_vectors", [](synthesis::AlphaVectorSet alphaVectorsSet) {return alphaVectorsSet.alphaVectors;})
         ;
 
 }
