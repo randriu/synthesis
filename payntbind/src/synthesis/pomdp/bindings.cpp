@@ -40,9 +40,9 @@ void bindings_pomdp(py::module& m) {
         .def_property_readonly("update_holes", [](synthesis::PomdpManagerAposteriori<double>& manager) {return manager.update_holes;})
         ;
 
-    py::class_<synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>>(m, "BeliefMCExplorer", "Exploration of belief space with alpha vectors")
-        .def(py::init<std::shared_ptr<storm::models::sparse::Pomdp<double>>>(), "Constructor.", py::arg("pomdp"))
-        .def("check_alpha_vectors", &synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>::checkAlphaVectors, py::arg("formula"), py::arg("alpha_vectors"))
+    py::class_<synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>>(m, "BeliefMCExplorer")
+        .def(py::init<std::shared_ptr<storm::models::sparse::Pomdp<double>>>(), py::arg("pomdp"))
+        .def("check_alpha_vectors", py::overload_cast<storm::logic::Formula const&, synthesis::AlphaVectorSet const&>(&synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>::checkAlphaVectors), py::arg("formula"), py::arg("alpha_vector_set"))
         ;
 
     py::class_<synthesis::AlphaVectorSet>(m, "AlphaVectorsSet" , "Alpha vectors class")
