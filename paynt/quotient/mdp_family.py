@@ -219,5 +219,4 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
         model,state_map,choice_map = self.restrict_quotient(choices)
-        mdp = paynt.quotient.models.MDP(model,self,state_map,choice_map,family)
-        return mdp
+        return paynt.quotient.models.SubMdp(model,state_map,choice_map)

@@ -70,7 +70,7 @@ class Statistic:
     
     def iteration(self, model):
         ''' Identify the type of the model and count corresponding iteration. '''
-        if isinstance(model, paynt.quotient.models.MarkovChain):
+        if isinstance(model, paynt.quotient.models.Mdp):
             model = model.model
         if type(model) == stormpy.storage.SparseDtmc:
             self.iteration_dtmc(model.nr_states)

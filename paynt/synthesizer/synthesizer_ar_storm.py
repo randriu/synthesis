@@ -1,7 +1,9 @@
 from stormpy import pomdp
+import paynt.synthesizer.synthesizer_ar
 from .synthesizer import Synthesizer
 from ..quotient.storm_pomdp_control import StormPOMDPControl
 from os import makedirs
+
 
 from time import sleep
 
@@ -74,7 +76,7 @@ class SynthesizerARStorm(Synthesizer):
 
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
-        res = family.mdp.check_specification(self.quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
+        res = self.check_specification_for_mdp(mdp, family.constraint_indices)
         family.analysis_result = res
 
         if family.analysis_result.improving_value is not None:

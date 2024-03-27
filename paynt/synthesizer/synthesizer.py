@@ -141,9 +141,9 @@ class Synthesizer:
         logger.info(assignment)
 
         if assignment is not None and assignment.size == 1:
-            model = self.quotient.build_assignment(assignment)
-            mc_result = model.check_specification(self.quotient.specification)
-            logger.info(f"double-checking specification satisfiability: {mc_result}")
+            dtmc = self.quotient.build_assignment(assignment)
+            result = self.quotient.check_specification_for_dtmc(dtmc)
+            logger.info(f"double-checking specification satisfiability: {result}")
 
         if print_stats:
             self.stat.print()

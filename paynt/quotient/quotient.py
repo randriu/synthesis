@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Quotient:
 
-    # if True, hole scores in the state will be multiplied with the number of expected visits of this state
-    compute_expected_visits = True
+    # if True, expected visits will not be computed for hole scoring
+    disable_expected_visits = False
 
     @staticmethod
     def make_vector_defined(vector):
@@ -31,7 +31,6 @@ class Quotient:
         self.family = family
         self.coloring = coloring
         self.specification = specification
-        self.design_space = None
 
         # builder options
         self.subsystem_builder_options = stormpy.SubsystemBuilderOptions()
@@ -65,30 +64,25 @@ class Quotient:
         submodel_construction = stormpy.construct_submodel(
             mdp, all_states, choices, keep_unreachable_states, self.subsystem_builder_options
         )
-        
         model = submodel_construction.model
         state_map = submodel_construction.new_to_old_state_mapping.copy()
         choice_map = submodel_construction.new_to_old_action_mapping.copy()
-
         return model,state_map,choice_map
 
  
     def restrict_quotient(self, choices):
         return self.restrict_mdp(self.quotient_mdp, choices)        
-
     
-    def build_from_choice_mask(self, choice_mask):
-        mdp,state_map,choice_map = self.restrict_quotient(choice_mask)
-        mdp = paynt.quotient.models.MDP(mdp, self, state_map, choice_map, None)
-        return mdp
-
+    def build_from_choice_mask(self, choices):
+        mdp,state_map,choice_map = self.restrict_quotient(choices)
+        return paynt.quotient.models.SubMdp(mdp, state_map, choice_map)
     
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
         # select actions compatible with the family and restrict the quotient
         choices = self.coloring.selectCompatibleChoices(family.family)
-        family.selected_choices = choices
         family.mdp = self.build_from_choice_mask(choices)
+        family.selected_choices = choices
         family.mdp.design_space = family
 
 
@@ -119,8 +113,8 @@ class Quotient:
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
         mdp,state_map,choice_map = self.restrict_quotient(choices)
-        dtmc = Quotient.mdp_to_dtmc(mdp)
-        return paynt.quotient.models.DTMC(dtmc,self,state_map,choice_map)
+        model = Quotient.mdp_to_dtmc(mdp)
+        return paynt.quotient.models.SubMdp(model,state_map,choice_map)
     
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states
@@ -199,20 +193,17 @@ class Quotient:
         return choice_values
 
 
-    def expected_visits(self, mdp, prop, choices):
+    def compute_expected_visits(self, mdp, prop, choices):
         '''
         Compute expected number of visits in the states of DTMC induced by the shoices.
         '''
-        if not Quotient.compute_expected_visits:
-            return None
+        if Quotient.disable_expected_visits:
+            return [1]*self.quotient_mdp.nr_states
 
         # extract DTMC induced by this MDP-scheduler
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
         dtmc = Quotient.mdp_to_dtmc(sub_mdp)
-
-        # compute visits
-        dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc).get_values()
-        dtmc_visits = list(dtmc_visits)
+        dtmc_visits = paynt.verification.property.Property.compute_expected_visits(dtmc)
 
         # handle infinity- and zero-visits
         if prop.minimizing:
@@ -230,16 +221,14 @@ class Quotient:
         return expected_visits
 
 
-    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):
-        if expected_visits is None:
-            expected_visits = [1] * mdp.nr_states
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
         hole_variance = payntbind.synthesis.computeInconsistentHoleVariance(
             self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
             self.coloring, inconsistent_assignments, expected_visits)
         return hole_variance
 
     
-    def scheduler_consistent(self, mdp, prop, result):
+    def scheduler_is_consistent(self, mdp, prop, result):
         '''
         Get hole assignment induced by this scheduler and fill undefined
         holes by some option from the design space of this mdp.
@@ -249,30 +238,33 @@ class Quotient:
         # selection = self.scheduler_selection(mdp, result.scheduler)
         if mdp.is_deterministic:
             selection = [[mdp.design_space.hole_options(hole)[0]] for hole in range(mdp.design_space.num_holes)]
-            return selection, None, None, None, True
+            return selection, True
 
         # get qualitative scheduler selection, filter inconsistent assignments
         selection = self.scheduler_selection(mdp, result.scheduler)
         inconsistent_assignments = {hole:options for hole,options in enumerate(selection) if len(options) > 1 }
         scheduler_is_consistent = len(inconsistent_assignments) == 0
-        choice_values = None
-        expected_visits = None
-        inconsistent_differences = None
-        if not scheduler_is_consistent:
-            # extract choice values, compute expected visits and estimate scheduler difference
-            choice_values = self.choice_values(mdp.model, prop, result.get_values())
-            choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-            expected_visits = self.expected_visits(mdp.model, prop, choices)
-            inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
-
         for hole,options in enumerate(selection):
             if len(options) == 0:
-                # TODO why is this necessary?
+                # if some hole options are not involved in the selection, we can fix an arbitrary value
                 selection[hole] = [mdp.design_space.hole_options(hole)[0]]
 
-        return selection, choice_values, expected_visits, inconsistent_differences, scheduler_is_consistent
+        return selection, scheduler_is_consistent
 
-    
+    def scheduler_get_quantitative_values(self, mdp, prop, result, selection):
+        '''
+        :return choice values
+        :return expected visits
+        :return hole scores
+        '''
+        inconsistent_assignments = {hole:options for hole,options in enumerate(selection) if len(options) > 1 }
+        choice_values = self.choice_values(mdp.model, prop, result.get_values())
+        choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
+        expected_visits = self.compute_expected_visits(mdp.model, prop, choices)
+        inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+        return choice_values, expected_visits, inconsistent_differences
+
+
     def suboptions_half(self, mdp, splitter):
         ''' Split options of a splitter into two halves. '''
         options = mdp.design_space.hole_options(splitter)
@@ -387,7 +379,7 @@ class Quotient:
         Double-check whether this assignment truly improves optimum.
         '''
         dtmc = self.build_assignment(assignment)
-        res = dtmc.check_specification(self.specification)
+        res = self.check_specification_for_dtmc(dtmc)
         # opt_result = dtmc.model_check_property(opt_prop)
         if res.constraints_result.sat and self.specification.optimality.improves_optimum(res.optimality_result.value):
             return assignment, res.optimality_result.value
@@ -452,6 +444,100 @@ class Quotient:
         assert self.specification.num_properties == 1, "expecting a single property"
         return self.specification.all_properties()[0]
 
+
+
+    def check_specification_for_dtmc(self, dtmc, constraint_indices=None, short_evaluation=False):
+        
+        # check constraints
+        if constraint_indices is None:
+            constraint_indices = range(len(self.specification.constraints))
+        results = [None for _ in self.specification.constraints]
+        for index in constraint_indices:
+            result = dtmc.model_check_property(self.specification.constraints[index])
+            results[index] = result
+            if short_evaluation and result.sat is False:
+                break
+        constraints_result = paynt.verification.property_result.ConstraintsResult(results)
+
+        #check optimality
+        optimality_result = None
+        if self.specification.has_optimality and not (short_evaluation and constraints_result.sat is False):
+            optimality_result = dtmc.model_check_property(self.specification.optimality)
+
+        return paynt.verification.property_result.SpecificationResult(constraints_result, optimality_result)
+
+
+    def check_specification_for_mdp(self, mdp, constraint_indices=None, double_check=True):
+        '''
+        Check specification.
+        :param specification containing constraints and optimality
+        :param constraint_indices a selection of property indices to investigate (default: all)
+        :param double_check if True, the new optimum is double-checked
+        '''
+        # check constraints
+        if constraint_indices is None:
+            constraint_indices = range(len(self.specification.constraints))
+        results = [None for _ in self.specification.constraints]
+        for index in constraint_indices:
+            constraint = self.specification.constraints[index]
+            result = paynt.verification.property_result.MdpPropertyResult(constraint)
+
+            # check primary direction
+            result.primary = mdp.model_check_property(constraint)
+
+            # no need to check secondary direction if primary direction yields UNSAT
+            if not result.primary.sat:
+                result.sat = False
+            else:
+                # check secondary direction
+                result.secondary = mdp.model_check_property(constraint, alt=True)
+                if mdp.is_deterministic and result.primary.value != result.secondary.value:
+                    logger.warning("WARNING: model is deterministic but min<max")
+                if result.secondary.sat:
+                    result.sat = True
+
+            # primary direction is SAT
+            if result.sat is None:
+                # check if the primary scheduler is consistent
+                result.primary_selection,consistent = self.scheduler_is_consistent(mdp, constraint, result.primary.result)
+                if not consistent:
+                    result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
+                        self.scheduler_get_quantitative_values(mdp, constraint, result.primary.result, result.primary_selection)
+
+            results[index] = result
+            if result.sat is False:
+                break
+        constraints_result = paynt.verification.property_result.ConstraintsResult(results)
+
+        # check optimality
+        optimality_result = None
+        if self.specification.has_optimality and not constraints_result.sat is False:
+            opt = self.specification.optimality
+            result = paynt.verification.property_result.MdpOptimalityResult(opt)
+
+            # check primary direction
+            result.primary = mdp.model_check_property(opt, alt = False)
+            if not result.primary.improves_optimum:
+                # OPT <= LB
+                result.can_improve = False
+            else:
+                # LB < OPT
+                # check if LB is tight
+                result.primary_selection,consistent = self.scheduler_is_consistent(mdp, opt, result.primary.result)
+                if not consistent:
+                    result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
+                        self.scheduler_get_quantitative_values(mdp, opt, result.primary.result, result.primary_selection)                        
+                if consistent:
+                    # LB is tight and LB < OPT
+                    result.improving_assignment = mdp.design_space.assume_options_copy(result.primary_selection)
+                    result.can_improve = False
+                else:
+                    result.can_improve = True
+            optimality_result = result
+
+            if optimality_result.improving_assignment is not None and double_check:
+                optimality_result.improving_assignment, optimality_result.improving_value = self.double_check_assignment(optimality_result.improving_assignment)
+        return paynt.verification.property_result.MdpSpecificationResult(constraints_result, optimality_result)
 
 
 class DtmcFamilyQuotient(Quotient):

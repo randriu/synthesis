@@ -136,8 +136,6 @@ class ParentInfo():
     def __init__(self):
         # list of constraint indices still undecided in this family
         self.constraint_indices = None
-        # for each undecided property contains analysis results
-        self.analysis_hints = None
 
         # how many refinements were needed to create this family
         self.refinement_depth = None
@@ -179,61 +177,9 @@ class DesignSpace(Family):
         return DesignSpace(super().copy())
 
     
-    def generalize_hint(self, hint):
-        hint_global = dict()
-        hint = list(hint.get_values())
-        for state in range(self.mdp.states):
-            hint_global[self.mdp.quotient_state_map[state]] = hint[state]
-        return hint_global
-
-    
-    def generalize_hints(self, result):
-        hint_prim = self.generalize_hint(result.primary.result)
-        hint_seco = self.generalize_hint(result.secondary.result) if result.secondary is not None else None
-        return (hint_prim, hint_seco)
-
-    
-    def collect_analysis_hints(self, specification):
-        res = self.analysis_result
-        analysis_hints = dict()
-        for index in res.constraints_result.undecided_constraints:
-            prop = specification.constraints[index]
-            hints = self.generalize_hints(res.constraints_result.results[index])
-            analysis_hints[prop] = hints
-        if res.optimality_result is not None:
-            prop = specification.optimality
-            hints = self.generalize_hints(res.optimality_result)
-            analysis_hints[prop] = hints
-        return analysis_hints
-
-    
-    def translate_analysis_hint(self, hint):
-        if hint is None:
-            return None
-        translated_hint = [0] * self.mdp.states
-        for state in range(self.mdp.states):
-            global_state = self.mdp.quotient_state_map[state]
-            translated_hint[state] = hint[global_state]
-        return translated_hint
-
-    
-    def translate_analysis_hints(self):
-        if not DesignSpace.store_hints or self.parent_info is None:
-            return None
-
-        analysis_hints = dict()
-        for prop,hints in self.parent_info.analysis_hints.items():
-            hint_prim,hint_seco = hints
-            translated_hint_prim = self.translate_analysis_hint(hint_prim)
-            translated_hint_seco = self.translate_analysis_hint(hint_seco)
-            analysis_hints[prop] = (translated_hint_prim,translated_hint_seco)
-
-        return analysis_hints
-
     def collect_parent_info(self, specification):
         pi = ParentInfo()
         pi.refinement_depth = self.refinement_depth
-        pi.analysis_hints = self.collect_analysis_hints(specification)
         cr = self.analysis_result.constraints_result
         pi.constraint_indices = cr.undecided_constraints if cr is not None else []
         pi.splitter = self.splitter
