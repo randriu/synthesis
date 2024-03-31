@@ -10,6 +10,8 @@ import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
+import paynt.parser.alpha_vector_parser
+import paynt.verification.alpha_vector_verification
 
 import click
 import sys
@@ -148,6 +150,9 @@ def setup_logger(log_path = None):
     help="# if set, MDP dicount model checking engine is used (expecting cassandra models)"
 )
 
+@click.option("--alpha-vector-analysis", type=click.Path(), default=None,
+    help="filename containing alpha vector policy")
+
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
     help="counterexample generator",
@@ -167,6 +172,7 @@ def paynt_run(
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
     constraint_bound, native_discount,
+    alpha_vector_analysis,
     ce_generator,
     profiling
 ):
@@ -199,14 +205,20 @@ def paynt_run(
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    if all_in_one is None:
+    if alpha_vector_analysis is not None:
         quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound, native_discount)
-        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
-        synthesizer.run(optimum_threshold, export_evaluation)
-    else:
+        assert isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient), "expected POMDP input for alpha vector analysis"
+        alpha_vector_set = paynt.parser.alpha_vector_parser.AlphaVectorParser.parse_sarsop_xml(alpha_vector_analysis)
+        alpha_vector_verifier = paynt.verification.alpha_vector_verification.AlphaVectorVerification(quotient)
+        alpha_vector_verifier.verify_alpha_vectors(alpha_vector_set)
+    elif all_in_one is not None:
         all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
         all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, family)
         all_in_one_analysis.run()
+    else:
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound, native_discount)
+        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
+        synthesizer.run(optimum_threshold, export_evaluation)
     if profiling:
         profiler.disable()
         print_profiler_stats(profiler)

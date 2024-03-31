@@ -108,7 +108,6 @@ class Sketch:
                     decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
                 if native_discount:
-                    paynt.quotient.models.MarkovChain.native_cassandra = True
                     paynt.quotient.quotient.Quotient.discounted_expected_visits = decpomdp_manager.discount_factor
                     optimality = paynt.verification.property.construct_discount_property(
                         decpomdp_manager.reward_model_name, 
@@ -126,6 +125,10 @@ class Sketch:
                 filetype = "cassandra"
             except SyntaxError:
                 pass
+
+        if specification.has_optimality:
+            optimality_subformula = specification.optimality.formula.subformula
+            paynt.quotient.models.MarkovChain.native_cassandra = (optimality_subformula.is_discounted_total_reward_formula or optimality_subformula.is_discounted_cumulative_reward_formula)
 
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
@@ -206,6 +209,8 @@ class Sketch:
     
     @classmethod
     def export(cls, export, sketch_path, jani_unfolder, explicit_quotient, specification=None):
+        if (explicit_quotient.is_nondeterministic_model and explicit_quotient.is_partially_observable):
+            explicit_quotient = stormpy.pomdp.make_canonic(explicit_quotient)
         if export == "jani":
             assert jani_unfolder is not None, "jani unfolder was not used"
             output_path = substitute_suffix(sketch_path, '.', 'jani')

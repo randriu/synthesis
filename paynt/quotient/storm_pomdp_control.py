@@ -320,6 +320,13 @@ class StormPOMDPControl:
 
     ########
     # Different options for Storm below (would be nice to make this more succint)
+
+    def get_base_options(self, options):
+        if paynt.quotient.models.MarkovChain.native_cassandra:
+            options.recompute_initial_value_without_discounting = True
+        options.exploration_heuristic = self.get_exploration_heuristic()
+        return options
+    
         
     def get_exploration_heuristic(self):
         if self.storm_exploration_heuristic == "bfs":
@@ -334,7 +341,7 @@ class StormPOMDPControl:
 
     def get_cutoff_options(self, belief_states=100000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.exploration_heuristic = self.get_exploration_heuristic()
+        options = self.get_base_options(options)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = belief_states
         options.use_clipping = False
@@ -342,7 +349,7 @@ class StormPOMDPControl:
 
     def get_overapp_options(self, belief_states=20000000):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(True, False)
-        options.exploration_heuristic = self.get_exploration_heuristic()
+        options = self.get_base_options(options)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = belief_states
         options.use_clipping = False
@@ -350,7 +357,7 @@ class StormPOMDPControl:
 
     def get_refine_options(self, step_limit=0):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.exploration_heuristic = self.get_exploration_heuristic()
+        options = self.get_base_options(options)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.size_threshold_factor = 2
@@ -364,7 +371,7 @@ class StormPOMDPControl:
 
     def get_clip2_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.exploration_heuristic = self.get_exploration_heuristic()
+        options = self.get_base_options(options)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.use_clipping = True
@@ -374,7 +381,7 @@ class StormPOMDPControl:
 
     def get_clip4_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(False, True)
-        options.exploration_heuristic = self.get_exploration_heuristic()
+        options = self.get_base_options(options)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.use_clipping = True
@@ -384,7 +391,7 @@ class StormPOMDPControl:
 
     def get_interactive_options(self):
         options = stormpy.pomdp.BeliefExplorationModelCheckerOptionsDouble(self.saynt_overapprox, True)
-        options.exploration_heuristic = self.get_exploration_heuristic()
+        options = self.get_base_options(options)
         options.use_state_elimination_cutoff = False
         options.size_threshold_init = 0
         options.resolution_init = 2

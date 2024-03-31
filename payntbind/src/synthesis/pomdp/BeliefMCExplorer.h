@@ -43,9 +43,9 @@ namespace synthesis {
 
             double checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env);
 
-        private:
-
             PomdpModelType const& pomdp() const;
+
+        private:
 
             bool exploreMC(std::set<uint32_t> const &targetObservations, bool min, bool computeRewards, std::shared_ptr<BeliefManagerType>& beliefManager, std::shared_ptr<ExplorerType>& beliefExplorer, std::vector<typename PomdpModelType::ValueType> const &cutoffVec, AlphaVectorSet const& alphaVectorSet,
             storm::Environment const& env);

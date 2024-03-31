@@ -1,3 +1,5 @@
+// Most of the code taken from Alex Bork
+
 #include "BeliefMCExplorer.h"
 #include <storm-pomdp/transformer/MakeStateSetObservationClosed.h>
 #include <storm/modelchecker/results/ExplicitQuantitativeCheckResult.h>
@@ -129,11 +131,19 @@ namespace synthesis {
             }
 
             uint64_t currId = beliefExplorer->exploreNextState();
+            // std::cout << "exploring " << currId << std::endl;
+            // std::cout << "{";
+            // for (auto const &pointEntry : beliefManager->getBeliefAsMap(currId)) {
+            //     std::cout << pointEntry.first << " : " << pointEntry.second << ", ";
+            // }
+            // std::cout << "}" << std::endl;
+
 
             if (timeLimitExceeded) {
                 fixPoint = false;
             }
             if (targetObservations.count(beliefManager->getBeliefObservation(currId)) != 0) {
+                // std::cout << "adding target" << std::endl;
                 beliefExplorer->setCurrentStateIsTarget();
                 beliefExplorer->addSelfloopTransition();
                 beliefExplorer->addChoiceLabelToCurrentState(0, "loop");
@@ -143,19 +153,31 @@ namespace synthesis {
                     beliefExplorer->setCurrentStateIsTruncated();
                 }
                 if(!stopExploration) {
+                    auto numberOfLocalChoices = beliefManager->getBeliefNumberOfChoices(currId);
+                    // if (numberOfLocalChoices == 1) {
+                    //     auto successors = beliefManager->expand(currId, 0);
+                    //     for (auto const &successor : successors) {
+                    //         bool added = beliefExplorer->addTransitionToBelief(0, successor.first, successor.second, stopExploration);
+                    //         STORM_LOG_ASSERT(added, "transition was supposed to be added");
+                    //     }
+                    //     continue;
+                    // }
                     // determine the best action from the alpha vectors
                     auto chosenLocalActionIndex = getBestActionInBelief(currId, beliefManager, beliefExplorer, alphaVectorSet);
+                    // std::cout << "chosen action index " << chosenLocalActionIndex << std::endl;
                     // if action is not in the model, treat it as a self loop action
-                    if(chosenLocalActionIndex >= beliefManager->getBeliefNumberOfChoices(currId)){
+                    if(chosenLocalActionIndex >= numberOfLocalChoices){
+                        // std::cout << "adding self loop " << currId << std::endl;
                         beliefExplorer->addSelfloopTransition();
                         beliefExplorer->addChoiceLabelToCurrentState(0, "loop");
                     }
                     else {
                         // Add successor transitions for the chosen action
                         auto truncationProbability = storm::utility::zero<typename PomdpModelType::ValueType>();
-                        auto truncationValueBound = storm::utility::zero<typename PomdpModelType::ValueType>();
+                        auto truncationValueBound = storm::utility::zero<typename PomdpModelType::ValueType>();\
                         auto successors = beliefManager->expand(currId, chosenLocalActionIndex);
                         for (auto const &successor : successors) {
+                            // std::cout << "adding successor " << successor.first << " with probability " << successor.second << std::endl;
                             bool added = beliefExplorer->addTransitionToBelief(0, successor.first, successor.second, stopExploration);
                             if (!added) {
                                 STORM_LOG_ASSERT(stopExploration, "Didn't add a transition although exploration shouldn't be stopped.");
@@ -207,23 +229,22 @@ namespace synthesis {
     uint64_t BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::getBestActionInBelief(uint64_t beliefId, std::shared_ptr<BeliefManagerType> &beliefManager, std::shared_ptr<ExplorerType> &beliefExplorer, AlphaVectorSet const& alphaVectorSet) {
         uint64_t bestAlphaIndex = 0;
         double bestAlphaValue = 0;
-        for (uint64_t alphaIndex = 0; alphaIndex < alphaVectorSet.alphaVectors.size(); alphaIndex++ ) {
-            if (alphaIndex == 0) {
-                auto belief = beliefManager->getBeliefAsMap(beliefId);
-                for (auto const &pointEntry : belief) {
-                    bestAlphaValue += alphaVectorSet.alphaVectors.at(alphaIndex).at(pointEntry.first) * pointEntry.second;
-                }
-            } else {
-                double alphaValue = 0;
-                auto belief = beliefManager->getBeliefAsMap(beliefId);
-                for (auto const &pointEntry : belief) {
-                    alphaValue += alphaVectorSet.alphaVectors.at(alphaIndex).at(pointEntry.first) * pointEntry.second;
-                }
+        auto belief = beliefManager->getBeliefAsMap(beliefId);
+        for (auto const &pointEntry : belief) {
+            if (alphaVectorSet.alphaVectors.at(0).size() <= pointEntry.first) {
+                return 0;
+            }
+            bestAlphaValue += alphaVectorSet.alphaVectors.at(0).at(pointEntry.first) * pointEntry.second;
+        }
+        for (uint64_t alphaIndex = 1; alphaIndex < alphaVectorSet.alphaVectors.size(); alphaIndex++ ) {
+            double alphaValue = 0;
+            for (auto const &pointEntry : belief) {
+                alphaValue += alphaVectorSet.alphaVectors.at(alphaIndex).at(pointEntry.first) * pointEntry.second;
+            }
 
-                if (alphaValue > bestAlphaValue) {
-                    bestAlphaValue = alphaValue;
-                    bestAlphaIndex = alphaIndex;
-                }
+            if (alphaValue > bestAlphaValue) {
+                bestAlphaValue = alphaValue;
+                bestAlphaIndex = alphaIndex;
             }
         }
         return alphaVectorSet.alphaVectorActions.at(bestAlphaIndex);
