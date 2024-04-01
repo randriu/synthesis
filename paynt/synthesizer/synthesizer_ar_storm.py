@@ -137,7 +137,7 @@ class SynthesizerARStorm(Synthesizer):
                         self.storm_control.update_data()
                     logger.info("Pausing synthesis")
                     self.s_queue.get()
-                    self.stat.synthesis_time.stop()
+                    self.stat.synthesis_timer.stop()
                     # check for the signal that PAYNT can be resumed or terminated
                     while self.s_queue.empty():
                         sleep(1)
@@ -155,7 +155,7 @@ class SynthesizerARStorm(Synthesizer):
                         # if Storm's result is not better continue with the synthesis normally
                         else:
                             logger.info("PAYNT's value is better. Prioritizing synthesis results")
-                        self.stat.synthesis_time.start()
+                        self.stat.synthesis_timer.start()
 
                     elif status == "terminate":
                         logger.info("Terminating controller synthesis")
