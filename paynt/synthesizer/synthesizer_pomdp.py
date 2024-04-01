@@ -366,12 +366,11 @@ class SynthesizerPOMDP:
 
         # solve quotient MDP
         self.quotient.build(family)
-        mdp = family.mdp
-        spec = self.check_specification_for_mdp(mdp, family.constraint_indices)
+        spec = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
 
         # nothing more to do if optimality cannot be improved
         if not spec.optimality_result.can_improve:
-            return mdp, spec, None, None, None, None
+            return family.mdp, spec, None, None, None, None
 
         # hole scores = sum of scores wrt individual formulae
         hole_scores = {}
@@ -391,7 +390,7 @@ class SynthesizerPOMDP:
         # scores = result.primary_scores
         scores = hole_scores
 
-        return mdp, spec, selection, choice_values, expected_visits, scores
+        return family.mdp, spec, selection, choice_values, expected_visits, scores
 
     
     def strategy_expected_uai(self):

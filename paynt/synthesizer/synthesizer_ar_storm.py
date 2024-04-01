@@ -76,7 +76,7 @@ class SynthesizerARStorm(Synthesizer):
 
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
-        res = self.check_specification_for_mdp(mdp, family.constraint_indices)
+        res = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
         family.analysis_result = res
 
         if family.analysis_result.improving_value is not None:
