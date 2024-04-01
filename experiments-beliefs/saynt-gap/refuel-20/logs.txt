@@ -1,0 +1,521 @@
+2024-04-01 19:02:28,667 - cli.py - This is Paynt version 0.1.0.
+2024-04-01 19:02:28,667 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/refuel-20/sketch.templ ...
+2024-04-01 19:02:28,667 - sketch.py - assuming sketch in PRISM format...
+2024-04-01 19:02:28,670 - prism_parser.py - PRISM model type: POMDP
+2024-04-01 19:02:28,670 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/refuel-20/sketch.props ...
+2024-04-01 19:02:28,672 - prism_parser.py - found the following specification: optimality: Pmax=? ["notbad" U "goal"] 
+2024-04-01 19:02:28,723 - sketch.py - sketch parsing OK
+2024-04-01 19:02:28,723 - sketch.py - constructed explicit quotient having 6834 states and 24763 actions
+2024-04-01 19:02:28,723 - property.py - converting until formula to eventually...
+2024-04-01 19:02:28,723 - sketch.py - found the following specification optimality: Pmax=? [F "goal"] 
+2024-04-01 19:02:28,731 - pomdp.py - constructed POMDP having 174 observations.
+2024-04-01 19:02:29,317 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-01 19:02:29,322 - pomdp.py - constructed quotient MDP having 6834 states and 24763 actions.
+2024-04-01 19:02:29,322 - pomdp.py - creating coloring ...
+2024-04-01 19:02:29,342 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-01 19:02:29,342 - synthesizer_pomdp.py - Storm settings: iterative - (900, 60, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-01 19:02:29,342 - synthesizer.py - synthesis initiated, design space: 1e48
+2024-04-01 19:02:29,356 - synthesizer_pomdp.py - Timeout for PAYNT started
+> progress 0.0%, elapsed 3 s, estimated 3204518 s (37 days), iters = {MDP: 12}
+> progress 0.0%, elapsed 6 s, estimated 6621692 s (76 days), iters = {MDP: 23}
+-----------PAYNT-----------                     
+Value = 0.0 | Time elapsed = 6.6s | FSC size = 348
+
+> progress 0.0%, elapsed 9 s, estimated 2612886845836 s (82854 years), iters = {MDP: 42}, opt = 0.0
+> progress 0.0%, elapsed 12 s, estimated 3461396210913 s (109760 years), iters = {MDP: 88}, opt = 0.0
+> progress 0.0%, elapsed 16 s, estimated 4316215831469 s (136866 years), iters = {MDP: 142}, opt = 0.0
+> progress 0.0%, elapsed 19 s, estimated 5124764235024 s (162505 years), iters = {MDP: 189}, opt = 0.0
+> progress 0.0%, elapsed 22 s, estimated 5936518789062 s (188245 years), iters = {MDP: 235}, opt = 0.0
+> progress 0.0%, elapsed 25 s, estimated 6755256633505 s (214207 years), iters = {MDP: 280}, opt = 0.0
+> progress 0.0%, elapsed 28 s, estimated 7564990052580 s (239884 years), iters = {MDP: 333}, opt = 0.0
+> progress 0.0%, elapsed 31 s, estimated 8412900653972 s (266771 years), iters = {MDP: 379}, opt = 0.0
+> progress 0.0%, elapsed 34 s, estimated 9221521225283 s (292412 years), iters = {MDP: 430}, opt = 0.0
+> progress 0.0%, elapsed 37 s, estimated 10084860650664 s (319788 years), iters = {MDP: 478}, opt = 0.0
+> progress 0.0%, elapsed 40 s, estimated 10933985316402 s (346714 years), iters = {MDP: 528}, opt = 0.0
+> progress 0.0%, elapsed 43 s, estimated 11796216863336 s (374055 years), iters = {MDP: 582}, opt = 0.0
+> progress 0.0%, elapsed 47 s, estimated 12656472068272 s (401334 years), iters = {MDP: 636}, opt = 0.0
+> progress 0.0%, elapsed 50 s, estimated 13496313367235 s (427965 years), iters = {MDP: 686}, opt = 0.0
+> progress 0.0%, elapsed 53 s, estimated 14350782307985 s (455060 years), iters = {MDP: 740}, opt = 0.0
+-----------PAYNT-----------                     
+Value = 0.000829602209682266 | Time elapsed = 56.1s | FSC size = 348
+
+> progress 0.0%, elapsed 56 s, estimated 15193215774343 s (481773 years), iters = {MDP: 787}, opt = 0.001
+> progress 0.0%, elapsed 59 s, estimated 16003226395566 s (507458 years), iters = {MDP: 835}, opt = 0.001
+2024-04-01 19:03:30,114 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:03:30,214 - storm_pomdp_control.py - Interactive Storm started
+2024-04-01 19:03:30,214 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-04-01 19:03:40,328 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.07416982209101766 | Time elapsed = 85.0s | FSC size = 1116
+
+
+------------------------------------
+
+PAYNT results: 
+0.000829602209682266
+controller size: 348
+
+Storm results: 
+0.07416982209101766
+controller size: 1116
+
+------------------------------------
+
+2024-04-01 19:03:54,415 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:03:54,641 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:03:54,642 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:03:54,642 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1113403476497577147178633950236927694314586243072 to 1
+2024-04-01 19:03:54,642 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1113403476497577147178633950236927694314586243072 to 1
+2024-04-01 19:03:54,643 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1113403476497577147178633950236927694314586243072 to 1
+2024-04-01 19:03:54,643 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 371134492165859049059544650078975898104862081024 to 1
+2024-04-01 19:03:54,644 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 371134492165859049059544650078975898104862081024 to 1
+2024-04-01 19:03:54,644 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 123711497388619683019848216692991966034954027008 to 1
+2024-04-01 19:03:54,645 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 123711497388619683019848216692991966034954027008 to 1
+2024-04-01 19:03:54,646 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 41237165796206561006616072230997322011651342336 to 1
+2024-04-01 19:03:54,646 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 41237165796206561006616072230997322011651342336 to 1
+2024-04-01 19:03:54,647 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 13745721932068853668872024076999107337217114112 to 1
+2024-04-01 19:03:54,648 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 13745721932068853668872024076999107337217114112 to 1
+2024-04-01 19:03:54,648 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4581907310689617889624008025666369112405704704 to 1
+2024-04-01 19:03:54,649 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 4581907310689617889624008025666369112405704704 to 1
+2024-04-01 19:03:54,649 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1527302436896539296541336008555456370801901568 to 1
+2024-04-01 19:03:54,650 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 1527302436896539296541336008555456370801901568 to 1
+2024-04-01 19:03:54,650 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 509100812298846432180445336185152123600633856 to 1
+2024-04-01 19:03:54,651 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 509100812298846432180445336185152123600633856 to 1
+2024-04-01 19:03:54,651 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 169700270766282144060148445395050707866877952 to 1
+2024-04-01 19:03:54,652 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 169700270766282144060148445395050707866877952 to 1
+2024-04-01 19:03:54,653 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 42425067691570536015037111348762676966719488 to 1
+2024-04-01 19:03:54,653 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 42425067691570536015037111348762676966719488 to 1
+2024-04-01 19:03:54,654 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 42425067691570536015037111348762676966719488 to 1
+2024-04-01 19:03:54,654 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 10606266922892634003759277837190669241679872 to 1
+2024-04-01 19:03:54,656 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 23, Subfamilies - 427
+-----------PAYNT-----------                     
+Value = 0.07286438318896005 | Time elapsed = 85.3s | FSC size = 348
+
+-----------PAYNT-----------                     
+Value = 0.15280534629233095 | Time elapsed = 85.4s | FSC size = 348
+
+2024-04-01 19:03:54,769 - synthesizer_ar_storm.py - Main family synthesis done
+2024-04-01 19:03:54,769 - synthesizer_ar_storm.py - Subfamilies buffer contains: 427 families
+> progress 0.0%, elapsed 62 s, estimated 16588440135909 s (526015 years), iters = {MDP: 911}, opt = 0.153
+> progress 0.0%, elapsed 65 s, estimated 17330666927101 s (549551 years), iters = {MDP: 947}, opt = 0.153
+> progress 0.0%, elapsed 68 s, estimated 17476601299395 s (554179 years), iters = {MDP: 982}, opt = 0.153
+> progress 0.0%, elapsed 71 s, estimated 18117374691656 s (574498 years), iters = {MDP: 1011}, opt = 0.153
+> progress 0.0%, elapsed 74 s, estimated 18849672027025 s (597719 years), iters = {MDP: 1040}, opt = 0.153
+> progress 0.0%, elapsed 77 s, estimated 19601735370596 s (621566 years), iters = {MDP: 1081}, opt = 0.153
+> progress 0.0%, elapsed 80 s, estimated 20356785851039 s (645509 years), iters = {MDP: 1111}, opt = 0.153
+> progress 0.0%, elapsed 84 s, estimated 21121907721728 s (669771 years), iters = {MDP: 1146}, opt = 0.153
+> progress 0.0%, elapsed 87 s, estimated 21302039452280 s (675483 years), iters = {MDP: 1181}, opt = 0.153
+> progress 0.0%, elapsed 90 s, estimated 21826415382462 s (692111 years), iters = {MDP: 1210}, opt = 0.153
+> progress 0.0%, elapsed 93 s, estimated 22537152534736 s (714648 years), iters = {MDP: 1243}, opt = 0.153
+> progress 0.0%, elapsed 96 s, estimated 23249975062041 s (737251 years), iters = {MDP: 1280}, opt = 0.153
+> progress 0.0%, elapsed 99 s, estimated 23945964297282 s (759321 years), iters = {MDP: 1313}, opt = 0.153
+> progress 0.0%, elapsed 103 s, estimated 24640331463171 s (781339 years), iters = {MDP: 1346}, opt = 0.153
+> progress 0.0%, elapsed 106 s, estimated 23459168806139 s (743885 years), iters = {MDP: 1381}, opt = 0.153
+> progress 0.0%, elapsed 109 s, estimated 23500969393718 s (745210 years), iters = {MDP: 1410}, opt = 0.153
+> progress 0.0%, elapsed 112 s, estimated 23982526898258 s (760480 years), iters = {MDP: 1439}, opt = 0.153
+> progress 0.0%, elapsed 115 s, estimated 24545117290425 s (778320 years), iters = {MDP: 1480}, opt = 0.153
+> progress 0.0%, elapsed 118 s, estimated 25063668214831 s (794763 years), iters = {MDP: 1510}, opt = 0.153
+2024-04-01 19:04:55,064 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:04:55,064 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:04:55,064 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:05:05,085 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.15470134653000298 | Time elapsed = 181.8s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.15280534629233095
+controller size: 348
+
+Storm results: 
+0.15470134653000298
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:05:31,119 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:05:31,605 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:05:31,605 - synthesizer_ar_storm.py - Additional memory needed
+2024-04-01 19:05:31,607 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-01 19:05:31,607 - synthesizer.py - A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=north, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=north, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=4	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=8	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=10	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=7	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=3	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=11	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=14	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=18	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=2	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=12	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=1	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=13	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=18	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=19	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=19	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=18	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=15	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=8	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=3	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=2	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=7	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=4	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east
+2024-04-01 19:05:31,611 - synthesizer.py - double-checking specification satisfiability:  : 0.15280534629233095
+--------------------
+Synthesis summary:
+optimality objective: Pmax=? [F "goal"] 
+
+method: AR, synthesis time: 121.18 s
+number of holes: 104, family size: 1e48, quotient: 6834 states / 24763 actions
+explored: 0 %
+MDP stats: avg MDP size: 6834, iterations: 1532
+
+optimum: 0.152805
+--------------------
+2024-04-01 19:05:32,031 - synthesizer_pomdp.py - Terminate: False
+2024-04-01 19:05:32,031 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-04-01 19:05:32,032 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-04-01 19:05:32,063 - pomdp.py - constructed quotient MDP having 8268 states and 40021 actions.
+2024-04-01 19:05:32,064 - pomdp.py - creating coloring ...
+2024-04-01 19:05:32,106 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 5014323481867503240865866303377659289768121387991167478857203712 to 1125899906842624
+2024-04-01 19:05:32,111 - synthesizer.py - synthesis initiated, design space: 1e63
+-----------PAYNT-----------                     
+Value = 0.19485602238818334 | Time elapsed = 183.1s | FSC size = 358
+
+-----------PAYNT-----------                     
+Value = 0.2005052042510493 | Time elapsed = 183.3s | FSC size = 358
+
+> progress 0.0%, elapsed 3 s, estimated 1369095163680659978552836646241122538986182314819584 s (43413722846291860163670588552403039471796224 years), iters = {MDP: 220}, opt = 0.201
+> progress 0.0%, elapsed 6 s, estimated 1306113200280199050013744296466184134222481603952640 s (41416577888134164717819286507477760926023680 years), iters = {MDP: 448}, opt = 0.201
+> progress 0.0%, elapsed 9 s, estimated 1558064444783942144059577237202304255810476305285120 s (49405899441398465508271338811338494656380928 years), iters = {MDP: 682}, opt = 0.201
+> progress 0.0%, elapsed 12 s, estimated 1646775196701301987708201628733797366602093173932032 s (52218898931421298055775745869379978622140416 years), iters = {MDP: 908}, opt = 0.201
+> progress 0.0%, elapsed 15 s, estimated 1807153042935554560242168495281965889438616591007744 s (57304447074313627025267652700850106042155008 years), iters = {MDP: 1135}, opt = 0.201
+> progress 0.0%, elapsed 18 s, estimated 1871817679798029270372125625541079574970654319968256 s (59354949257928375937052820450056353548861440 years), iters = {MDP: 1364}, opt = 0.201
+> progress 0.0%, elapsed 21 s, estimated 1847770274774421255582413969758473720679991758290944 s (58592411046880433742121935149872043492638720 years), iters = {MDP: 1589}, opt = 0.201
+> progress 0.0%, elapsed 24 s, estimated 1914445785636610691312656165156078820464201226518528 s (60706677626731696780775614886669066730209280 years), iters = {MDP: 1804}, opt = 0.201
+> progress 0.0%, elapsed 27 s, estimated 1778810124734838633322424853464006574994821390270464 s (56405699033956073261730183498812632174952448 years), iters = {MDP: 2025}, opt = 0.201
+> progress 0.0%, elapsed 30 s, estimated 1838178440861682870944457744632754663403677842145280 s (58288255988764671063426727069141472133513216 years), iters = {MDP: 2256}, opt = 0.201
+> progress 0.0%, elapsed 33 s, estimated 1889705451994363704265885902074221717009359110668288 s (59922166793327107895306392660156225893171200 years), iters = {MDP: 2486}, opt = 0.201
+> progress 0.0%, elapsed 36 s, estimated 1957242437159410256933631469311255161096422572425216 s (62063750544121331033790543241104865271742464 years), iters = {MDP: 2708}, opt = 0.201
+> progress 0.0%, elapsed 39 s, estimated 1941470637693932818061764577032821495068557265862656 s (61563630063861393009945426540390820603756544 years), iters = {MDP: 2933}, opt = 0.201
+> progress 0.0%, elapsed 42 s, estimated 1748358928514896437410860734368587351511065633488896 s (55440097936164903003939773168319217486790656 years), iters = {MDP: 3159}, opt = 0.201
+> progress 0.0%, elapsed 45 s, estimated 1609014274595140883690370142335442319209037008207872 s (51021507946319788041663705304792568040521728 years), iters = {MDP: 3371}, opt = 0.201
+> progress 0.0%, elapsed 48 s, estimated 1716417634046790786736720263598039263977840691904512 s (54427246132889111571046426269849352788770816 years), iters = {MDP: 3595}, opt = 0.201
+> progress 0.0%, elapsed 51 s, estimated 1823279234551324443320077164033748206801808946888704 s (57815805255940022308561216060196901240176640 years), iters = {MDP: 3817}, opt = 0.201
+> progress 0.0%, elapsed 54 s, estimated 1930908285637838736899651005421008030099366140182528 s (61228700077303363943992051634512501812494336 years), iters = {MDP: 4039}, opt = 0.201
+> progress 0.0%, elapsed 57 s, estimated 2037723311058081474717634863817165643323325982703616 s (64615782314119790364265985267142365374578688 years), iters = {MDP: 4250}, opt = 0.201
+2024-04-01 19:06:31,976 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:06:32,022 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:06:32,023 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:06:42,043 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 287.7s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:07:17,083 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:07:17,527 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:07:17,528 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:07:17,528 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 281474976710656 to 140737488355328
+2024-04-01 19:07:17,530 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 1, Subfamilies - 22
+> progress 0.0%, elapsed 60 s, estimated 2074670913937937879027450869236164531800451640721408 s (65787383115738761555533681233949321053863936 years), iters = {MDP: 4399}, opt = 0.201
+> progress 0.0%, elapsed 63 s, estimated 2083194544599350963432816765954964097597696221642752 s (66057665670958612451807423602893359130083328 years), iters = {MDP: 4613}, opt = 0.201
+> progress 0.0%, elapsed 66 s, estimated 2021535090147507470751561601728724898946569467854848 s (64102457196458251348737721423364009429565440 years), iters = {MDP: 4836}, opt = 0.201
+> progress 0.0%, elapsed 69 s, estimated 2043474610189231393000835437300835554973604640718848 s (64798154813204946447288936997763367594622976 years), iters = {MDP: 5057}, opt = 0.201
+> progress 0.0%, elapsed 72 s, estimated 2042137969956428654575152758037821637676099914694656 s (64755770229465646416155878493831503418490880 years), iters = {MDP: 5279}, opt = 0.201
+> progress 0.0%, elapsed 75 s, estimated 2060551313371837005095571102477041037617672973451264 s (65339653518893863834350447055222569919578112 years), iters = {MDP: 5514}, opt = 0.201
+> progress 0.0%, elapsed 78 s, estimated 2057760934604486480274157488634629499394189953073152 s (65251171188625276689776077867179895051780096 years), iters = {MDP: 5748}, opt = 0.201
+> progress 0.0%, elapsed 81 s, estimated 2054598976563383954854039479086300033891286118301696 s (65150906156880513341015087391521598167056384 years), iters = {MDP: 5975}, opt = 0.201
+> progress 0.0%, elapsed 84 s, estimated 2049301901954902690804860960605829031934076953559040 s (64982937022923088250402154814979141099585536 years), iters = {MDP: 6211}, opt = 0.201
+> progress 0.0%, elapsed 87 s, estimated 1990062873381339973387498354330461898702896704258048 s (63104479749535127569146523536801369474203648 years), iters = {MDP: 6443}, opt = 0.201
+> progress 0.0%, elapsed 90 s, estimated 2028051466750672962293054138503682530029452843286528 s (64309090143032500144119563828877074209177600 years), iters = {MDP: 6666}, opt = 0.201
+> progress 0.0%, elapsed 93 s, estimated 2039096990024286313087236855694664437042798024196096 s (64659341388390608890699796590940763910569984 years), iters = {MDP: 6881}, opt = 0.201
+> progress 0.0%, elapsed 96 s, estimated 2062709343960775110927302050480641576531033279430656 s (65408084219963699944698652504477258347446272 years), iters = {MDP: 7104}, opt = 0.201
+> progress 0.0%, elapsed 99 s, estimated 2056404660642872888946405148396935068271110709575680 s (65208164023429512271365149455016671399903232 years), iters = {MDP: 7319}, opt = 0.201
+> progress 0.0%, elapsed 102 s, estimated 1955030346314553877716000528817989121322714786693120 s (61993605603581741845946525234019195185790976 years), iters = {MDP: 7542}, opt = 0.201
+2024-04-01 19:08:02,077 - synthesizer_ar_storm.py - Main family synthesis done
+2024-04-01 19:08:02,077 - synthesizer_ar_storm.py - Subfamilies buffer contains: 22 families
+> progress 0.0%, elapsed 105 s, estimated 1876115039207036843475919072353716319543243139186688 s (59491217630867477863869957301820519237025792 years), iters = {MDP: 7773}, opt = 0.201
+> progress 0.0%, elapsed 108 s, estimated 1929702421102384000744438479847276438546830306836480 s (61190462363723487477827341733488848741072896 years), iters = {MDP: 8004}, opt = 0.201
+> progress 0.0%, elapsed 111 s, estimated 1983168967011613768909298999256993216688979168985088 s (62885875412595574377798860638899203037200384 years), iters = {MDP: 8230}, opt = 0.201
+> progress 0.0%, elapsed 114 s, estimated 2036590331179799635422270403819198923073343346180096 s (64579855757857684506151130479489256995684352 years), iters = {MDP: 8457}, opt = 0.201
+> progress 0.0%, elapsed 117 s, estimated 2090293494093446493335877774921397917411887150006272 s (66282771882719643450332188438020379442675712 years), iters = {MDP: 8690}, opt = 0.201
+2024-04-01 19:08:17,901 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:08:17,959 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:08:17,959 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:08:27,980 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 400.7s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:09:10,027 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:09:10,461 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:09:10,461 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:09:10,463 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 15
+> progress 0.0%, elapsed 120 s, estimated 2143811495469265130632782417058661389817255099891712 s (67979816573733668320121624013308488249769984 years), iters = {MDP: 8859}, opt = 0.201
+> progress 0.0%, elapsed 123 s, estimated 2196896003492899418781848690014565136279276626116608 s (69663115280723601626197841038695420567486464 years), iters = {MDP: 9077}, opt = 0.201
+> progress 0.0%, elapsed 126 s, estimated 2250637704282085511134447991264595978819634517245952 s (71367253433602401169016163630154179927867392 years), iters = {MDP: 9300}, opt = 0.201
+> progress 0.0%, elapsed 129 s, estimated 2304368423746896417575566448702797727989006468120576 s (73071043370969577686529278801776706343403520 years), iters = {MDP: 9528}, opt = 0.201
+> progress 0.0%, elapsed 132 s, estimated 2358058397438752966869075390436133441394443498291200 s (74773541268352131051231526390877416130084864 years), iters = {MDP: 9756}, opt = 0.201
+> progress 0.0%, elapsed 135 s, estimated 2411544800458706047311794045252095432266773579169792 s (76469583982074641057966846302695802428981248 years), iters = {MDP: 9976}, opt = 0.201
+> progress 0.0%, elapsed 138 s, estimated 2465190427123433500137441449996518787880886214852608 s (78170675644451844977746817578203843215228928 years), iters = {MDP: 10206}, opt = 0.201
+> progress 0.0%, elapsed 141 s, estimated 2518652198172384222242199473542016649628118142681088 s (79865937283497722989041120951611264965017600 years), iters = {MDP: 10439}, opt = 0.201
+> progress 0.0%, elapsed 144 s, estimated 2572283294653279332414437973910517074870080915898368 s (81566568196768128519556175306627764010876928 years), iters = {MDP: 10673}, opt = 0.201
+> progress 0.0%, elapsed 147 s, estimated 2625687055418166878679106989264487738712333924433920 s (83259990341773427285639882947029131031740416 years), iters = {MDP: 10907}, opt = 0.201
+> progress 0.0%, elapsed 150 s, estimated 2679088365272213354953407915654418301886114727723008 s (84953334768905802990676988823100891791884288 years), iters = {MDP: 11131}, opt = 0.201
+> progress 0.0%, elapsed 153 s, estimated 2732686960159326020556309590649577439866061592723456 s (86652935063398201679690395332523433251569664 years), iters = {MDP: 11361}, opt = 0.201
+> progress 0.0%, elapsed 156 s, estimated 2786227024103903813395149117535147152643147434033152 s (88350679353878244031685962538851936289947648 years), iters = {MDP: 11592}, opt = 0.201
+> progress 0.0%, elapsed 159 s, estimated 2839610979753829810077403523193603533901841874026496 s (90043473482807903866172096014969485421182976 years), iters = {MDP: 11823}, opt = 0.201
+> progress 0.0%, elapsed 162 s, estimated 2893360486414886482415412382153433298256077311180800 s (91747859158259971546912910597554100234092544 years), iters = {MDP: 12057}, opt = 0.201
+> progress 0.0%, elapsed 165 s, estimated 2946917835695247156928089551388209560075403714887680 s (93446151563142035900805551087485951645057024 years), iters = {MDP: 12276}, opt = 0.201
+> progress 0.0%, elapsed 168 s, estimated 3000297657448954798116946300922341327992647573307392 s (95138814607082524192217331271401778318409728 years), iters = {MDP: 12501}, opt = 0.201
+> progress 0.0%, elapsed 171 s, estimated 3053727487387856279896375789281517286874259696648192 s (96833063400173031561729355464167547109113856 years), iters = {MDP: 12731}, opt = 0.201
+> progress 0.0%, elapsed 174 s, estimated 3107199432975352138227484018660178916701863686438912 s (98528647671719697141408121290525563687010304 years), iters = {MDP: 12965}, opt = 0.201
+> progress 0.0%, elapsed 177 s, estimated 3160620070153902727288458747438002957487590296518656 s (100222604964291691903245507235662233702760448 years), iters = {MDP: 13188}, opt = 0.201
+2024-04-01 19:10:10,766 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:10:10,825 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:10:10,825 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:10:20,838 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 519.5s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:11:08,891 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:11:09,332 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:11:09,332 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:11:09,334 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 18
+> progress 0.0%, elapsed 180 s, estimated 3214367557053187287174267628462990505547837825089536 s (101926926593518123525842405600398614275817472 years), iters = {MDP: 13367}, opt = 0.201
+> progress 0.0%, elapsed 183 s, estimated 3267989710081907037859667177991916730119223355899904 s (103627273911780400916003936103370047916867584 years), iters = {MDP: 13592}, opt = 0.201
+> progress 0.0%, elapsed 186 s, estimated 3321413244524801234880750747729520034378810375798784 s (105321323076002080320637553715269706740400128 years), iters = {MDP: 13822}, opt = 0.201
+> progress 0.0%, elapsed 189 s, estimated 3374780563666294504402777159172066875718549828009984 s (107013589664710003875287171828541733449236480 years), iters = {MDP: 14037}, opt = 0.201
+> progress 0.0%, elapsed 192 s, estimated 3428202134019346459771692688797053207735094183198720 s (108707576548051326450486847971044815190097920 years), iters = {MDP: 14257}, opt = 0.201
+> progress 0.0%, elapsed 195 s, estimated 3481985867445791492554294900744938832702189328138240 s (110413047547114140667930901677632663712694272 years), iters = {MDP: 14477}, opt = 0.201
+> progress 0.0%, elapsed 198 s, estimated 3535408462557614965926392240097291530315209994403840 s (112107066925342951923085188418886052966563840 years), iters = {MDP: 14686}, opt = 0.201
+> progress 0.0%, elapsed 201 s, estimated 3588840280020252809717310595391014051581906254823424 s (113801378742397663978288775585303671781457920 years), iters = {MDP: 14907}, opt = 0.201
+> progress 0.0%, elapsed 204 s, estimated 3642497140152152217993252868964345695866076880961536 s (115502826615682166597557816565116513873297408 years), iters = {MDP: 15130}, opt = 0.201
+> progress 0.0%, elapsed 207 s, estimated 3696253957687513407072994315799687684343828370685952 s (117207444117437644844259104627686432500088832 years), iters = {MDP: 15358}, opt = 0.201
+> progress 0.0%, elapsed 210 s, estimated 3749658034827837067065841655039471433897339227471872 s (118900876294642232638065035213999153266819072 years), iters = {MDP: 15590}, opt = 0.201
+> progress 0.0%, elapsed 213 s, estimated 3802151412051567881176377835113113381023866358333440 s (120565430366932000913852251935452783815163904 years), iters = {MDP: 15821}, opt = 0.201
+> progress 0.0%, elapsed 216 s, estimated 3855535756164971825410089873587644705283650241953792 s (122258236813957757521641332167393664038862848 years), iters = {MDP: 16049}, opt = 0.201
+> progress 0.0%, elapsed 219 s, estimated 3909237335914526756757700441628800360453115138277376 s (123961102737015697029964228618086896520658944 years), iters = {MDP: 16275}, opt = 0.201
+> progress 0.0%, elapsed 222 s, estimated 3962702649393583767424352230594730266489150626594816 s (125656476705783346680842306082546018934587392 years), iters = {MDP: 16505}, opt = 0.201
+> progress 0.0%, elapsed 225 s, estimated 4016171391237009213506118580027231809980723814727680 s (127351959387272000008794809938797870729658368 years), iters = {MDP: 16727}, opt = 0.201
+> progress 0.0%, elapsed 228 s, estimated 4069715730144639652345583104640343281550053427118080 s (129049839235941125187806494086462136662360064 years), iters = {MDP: 16956}, opt = 0.201
+> progress 0.0%, elapsed 231 s, estimated 4123277259968988785216994007383678255004364811796480 s (130748264205003462490770156101631556779507712 years), iters = {MDP: 17185}, opt = 0.201
+> progress 0.0%, elapsed 234 s, estimated 4176693321814974781125149811520925339986504340996096 s (132442076414731587825488774955658531315908608 years), iters = {MDP: 17392}, opt = 0.201
+> progress 0.0%, elapsed 237 s, estimated 4230078336992333843001488255362339866082932628127744 s (134134904141055738675573135359474217150054400 years), iters = {MDP: 17619}, opt = 0.201
+2024-04-01 19:12:09,649 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:12:09,690 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:12:09,691 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:12:19,711 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 642.4s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:13:11,768 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:13:12,219 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:13:12,219 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:13:12,221 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 18
+> progress 0.0%, elapsed 240 s, estimated 4285037377137789502008645132412744894307254489055232 s (135877643871695506304529922643268017680547840 years), iters = {MDP: 17791}, opt = 0.201
+> progress 0.0%, elapsed 243 s, estimated 4338470084563977616750751015481624774347351092363264 s (137571983909309277992588927460570102293856256 years), iters = {MDP: 18010}, opt = 0.201
+> progress 0.0%, elapsed 246 s, estimated 4391183125836320854431741759478281629648278500933632 s (139243503482886874592160017514900697722650624 years), iters = {MDP: 18229}, opt = 0.201
+> progress 0.0%, elapsed 249 s, estimated 4444631032684989579527071250062508330311952885612544 s (140938325491025803822186550426027588698767360 years), iters = {MDP: 18453}, opt = 0.201
+> progress 0.0%, elapsed 252 s, estimated 4498094588852003821775261794610358268441090173435904 s (142633643735794132503624134055128861333520384 years), iters = {MDP: 18675}, opt = 0.201
+> progress 0.0%, elapsed 255 s, estimated 4551500496117050030507967069723104588752582634110976 s (144327133945872977038610168231194595036233728 years), iters = {MDP: 18895}, opt = 0.201
+> progress 0.0%, elapsed 258 s, estimated 4605121773048303267767761874361805296749953289289728 s (146027453483266846632469361648154577389748224 years), iters = {MDP: 19127}, opt = 0.201
+> progress 0.0%, elapsed 261 s, estimated 4658643239852697731840331018632061965442120039792640 s (147724608062300157869290085712981916051832832 years), iters = {MDP: 19351}, opt = 0.201
+> progress 0.0%, elapsed 264 s, estimated 4712037708680756530283778361564171664771288009801728 s (149417735561921493311837391161047215469756416 years), iters = {MDP: 19581}, opt = 0.201
+> progress 0.0%, elapsed 267 s, estimated 4765402630312445283469645850890884327546986346577920 s (151109926126092236959365382708678119949074432 years), iters = {MDP: 19805}, opt = 0.201
+> progress 0.0%, elapsed 270 s, estimated 4819119298497640424800280382479979209269426706710528 s (152813270500305687693899088955034339542827008 years), iters = {MDP: 20027}, opt = 0.201
+> progress 0.0%, elapsed 273 s, estimated 4872429824941891822147834702250817826690431748931584 s (154503736204397870456780433394558919107411968 years), iters = {MDP: 20242}, opt = 0.201
+> progress 0.0%, elapsed 276 s, estimated 4925766065094665839947540323273202185886799816032256 s (156195017284838475876253113268598094411333632 years), iters = {MDP: 20463}, opt = 0.201
+> progress 0.0%, elapsed 279 s, estimated 4979400179025209716542048649710439093762848446218240 s (157895743880809525068395161389240423874035712 years), iters = {MDP: 20690}, opt = 0.201
+> progress 0.0%, elapsed 282 s, estimated 5032686344629244214178084984761954038286042645135360 s (159585437107725898049671553651661583840968704 years), iters = {MDP: 20910}, opt = 0.201
+> progress 0.0%, elapsed 285 s, estimated 5086061081063472658992822006080991702316517137842176 s (161277938897243531229675735096073184641810432 years), iters = {MDP: 21125}, opt = 0.201
+> progress 0.0%, elapsed 288 s, estimated 5139514109648905001633263621676275529675085877084160 s (162972923314589832519353092271688203150295040 years), iters = {MDP: 21345}, opt = 0.201
+> progress 0.0%, elapsed 291 s, estimated 5192768485241192566397642753349338958023683490185216 s (164661608486846530157712457296146342134939648 years), iters = {MDP: 21563}, opt = 0.201
+> progress 0.0%, elapsed 295 s, estimated 5246110864222876854687098943776353973238321102454784 s (166353084228274895647033765194877172883390464 years), iters = {MDP: 21782}, opt = 0.201
+> progress 0.0%, elapsed 298 s, estimated 5299435647698604781778174474449554607202693705367552 s (168044002019869508680971429514480542248075264 years), iters = {MDP: 22003}, opt = 0.201
+2024-04-01 19:14:12,500 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:14:12,569 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:14:12,569 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:14:22,590 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 768.3s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:15:17,652 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:15:18,074 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:15:18,075 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:15:18,077 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 17
+> progress 0.0%, elapsed 301 s, estimated 5355105117289368954171065320124632136444883352158208 s (169809269320439133609800699730758148011589632 years), iters = {MDP: 22188}, opt = 0.201
+> progress 0.0%, elapsed 304 s, estimated 5408688219751272325256913589308021137584976308469760 s (171508378353350833955813928737877894820265984 years), iters = {MDP: 22407}, opt = 0.201
+> progress 0.0%, elapsed 307 s, estimated 5462301005208185251934419567513625286222523622490112 s (173208428627859783280080508231709112596955136 years), iters = {MDP: 22626}, opt = 0.201
+> progress 0.0%, elapsed 310 s, estimated 5515861903039350693348785245731771544465911746396160 s (174906833556549700687497298957226410407624704 years), iters = {MDP: 22851}, opt = 0.201
+> progress 0.0%, elapsed 313 s, estimated 5569383727798394343449652658724003822894862441644032 s (176603999486250458635178279145783747902701568 years), iters = {MDP: 23082}, opt = 0.201
+> progress 0.0%, elapsed 316 s, estimated 5622715222018306951725191358291341907493297103831040 s (178295130074147208380409907039059184327852032 years), iters = {MDP: 23307}, opt = 0.201
+> progress 0.0%, elapsed 319 s, estimated 5676126509455927161729192988636983982096986738262016 s (179988790888379241422650072498133910931111936 years), iters = {MDP: 23537}, opt = 0.201
+> progress 0.0%, elapsed 322 s, estimated 5729512725145858562071903990257969364653581944225792 s (181681656682707370377748665262907659290411008 years), iters = {MDP: 23761}, opt = 0.201
+> progress 0.0%, elapsed 325 s, estimated 5782802392523618430472342463418728500772641123074048 s (183371460950140100876748674433977747417071616 years), iters = {MDP: 23987}, opt = 0.201
+> progress 0.0%, elapsed 328 s, estimated 5836414435143189921460145905218913249496805746409472 s (185071487669431427052332500734780741236293632 years), iters = {MDP: 24223}, opt = 0.201
+> progress 0.0%, elapsed 331 s, estimated 5889856290255048651481981740576491582657455405924352 s (186766117778254997780740988139006122069590016 years), iters = {MDP: 24449}, opt = 0.201
+> progress 0.0%, elapsed 334 s, estimated 5943108334092711990381471899592344703428763490189312 s (188454729011057602230760946602529984278953984 years), iters = {MDP: 24678}, opt = 0.201
+> progress 0.0%, elapsed 337 s, estimated 5996384878901197076027562900322766499855522498347008 s (190144117164548362777648259518698851277996032 years), iters = {MDP: 24906}, opt = 0.201
+> progress 0.0%, elapsed 340 s, estimated 6049982539937932493235778138285682311146254110818304 s (191843687846839581867890758397000594095079424 years), iters = {MDP: 25135}, opt = 0.201
+> progress 0.0%, elapsed 343 s, estimated 6103604804520627707112948462694518969162755177709568 s (193544038702455228884353069263310810869923840 years), iters = {MDP: 25369}, opt = 0.201
+> progress 0.0%, elapsed 346 s, estimated 6156832914993763383762658143181135948767117214482432 s (195231891013247224227972617907597378314043392 years), iters = {MDP: 25584}, opt = 0.201
+> progress 0.0%, elapsed 349 s, estimated 6210257358907026129049309365403263459725185053097984 s (196925969016585065532168073458490462252826624 years), iters = {MDP: 25812}, opt = 0.201
+> progress 0.0%, elapsed 352 s, estimated 6263781810043328921538048395171286757784272293068800 s (198623218228162383003003650214449138274140160 years), iters = {MDP: 26031}, opt = 0.201
+> progress 0.0%, elapsed 355 s, estimated 6317313804628084685848021712607509364076631721771008 s (200320706640920995398975700035198697435299840 years), iters = {MDP: 26258}, opt = 0.201
+> progress 0.0%, elapsed 358 s, estimated 6370681156432917483026088272492272677753754837057536 s (202012974265376627570377632636093354743955456 years), iters = {MDP: 26487}, opt = 0.201
+2024-04-01 19:16:18,367 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:16:18,450 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:16:18,450 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:16:28,468 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 896.2s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:17:25,531 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 19:17:25,943 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 19:17:25,943 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 19:17:25,945 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 19
+> progress 0.0%, elapsed 361 s, estimated 6425599508073251356589937460420329136255350377283584 s (203754423771982841755261844475587091727646720 years), iters = {MDP: 26670}, opt = 0.201
+> progress 0.0%, elapsed 364 s, estimated 6478961972267419771605038401822545571034133826633728 s (205446536411321004774786645842665870773452800 years), iters = {MDP: 26883}, opt = 0.201
+> progress 0.0%, elapsed 367 s, estimated 6532374242071270068944228626518041797212671366397952 s (207140228376181819281793775888377849229344768 years), iters = {MDP: 27097}, opt = 0.201
+> progress 0.0%, elapsed 370 s, estimated 6585676543592600378454459029129117460351631237316608 s (208830433269679101625849636066557173201633280 years), iters = {MDP: 27316}, opt = 0.201
+> progress 0.0%, elapsed 373 s, estimated 6639320607131772297209370749229813450926853948702720 s (210531475365670131711544745466462355270402048 years), iters = {MDP: 27539}, opt = 0.201
+> progress 0.0%, elapsed 376 s, estimated 6692688603741193931658532247337425802420725827502080 s (212223763436745122882687882001232970624532480 years), iters = {MDP: 27759}, opt = 0.201
+> progress 0.0%, elapsed 379 s, estimated 6746195871072197653614466753355827263859435289706496 s (213920467753430920064789837875065480542158848 years), iters = {MDP: 27983}, opt = 0.201
+> progress 0.0%, elapsed 382 s, estimated 6799502682889723541384840334944602919127743572475904 s (215610815667482353068357866648862695857586176 years), iters = {MDP: 28202}, opt = 0.201
+> progress 0.0%, elapsed 385 s, estimated 6852929220138207201324631192338347278304674857353216 s (217304960050044612686714510702422602069049344 years), iters = {MDP: 28421}, opt = 0.201
+> progress 0.0%, elapsed 388 s, estimated 6905818489605981122918603292172305359306022056886272 s (218982067783040998015330203299479189343698944 years), iters = {MDP: 28644}, opt = 0.201
+> progress 0.0%, elapsed 391 s, estimated 6959466824625810775260081902696124658258009227526144 s (220683245326795076790128938172122398787108864 years), iters = {MDP: 28872}, opt = 0.201
+> progress 0.0%, elapsed 394 s, estimated 7012846014136135800880293444093225237766585916063744 s (222375888322429474676302959092781392599187456 years), iters = {MDP: 29094}, opt = 0.201
+> progress 0.0%, elapsed 397 s, estimated 7066284998561706926056962303201047185114314959749120 s (224070427402387967940204335894383561441017856 years), iters = {MDP: 29325}, opt = 0.201
+> progress 0.0%, elapsed 400 s, estimated 7119652019302916594999220363638741398576251755560960 s (225762684528884959443734398626992905496035328 years), iters = {MDP: 29554}, opt = 0.201
+> progress 0.0%, elapsed 403 s, estimated 7173223181030782707604357785293651403614115531325440 s (227461414923604226243443932398475214667644928 years), iters = {MDP: 29787}, opt = 0.201
+> progress 0.0%, elapsed 406 s, estimated 7226509181397828410587584211231696203999896997462016 s (229151102910890023804101924468032318673518592 years), iters = {MDP: 30007}, opt = 0.201
+> progress 0.0%, elapsed 409 s, estimated 7279962905233027019271586377542081949293006792163328 s (230846109374461827139065578698613304709873664 years), iters = {MDP: 30236}, opt = 0.201
+> progress 0.0%, elapsed 412 s, estimated 7333336398565986854999979697881685283052585371041792 s (232538571745496809644360531418497432416157696 years), iters = {MDP: 30464}, opt = 0.201
+> progress 0.0%, elapsed 415 s, estimated 7386719369228345132252508592904543978382306305900544 s (234231334640675560347442413352133086129684480 years), iters = {MDP: 30693}, opt = 0.201
+> progress 0.0%, elapsed 418 s, estimated 7440034905449377309552884849091553037718700037242880 s (235921959203747387012552761060784500409106432 years), iters = {MDP: 30917}, opt = 0.201
+2024-04-01 19:18:26,325 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 19:18:26,330 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 19:18:26,330 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 19:18:36,351 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.20122756909425682 | Time elapsed = 1026.1s | FSC size = 66
+
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+
+2024-04-01 19:19:35,903 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-04-01 19:19:35,904 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-01 19:19:35,904 - synthesizer.py - A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=west, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=north, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=east, M([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=1, M([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=1, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=north, M([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=1, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=north, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=south, M([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, M([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=0, A([start	& fuel=4	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=8	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=8	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=10	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=10	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, M([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, M([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=7	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=9	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=9	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, M([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=3	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=11	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, M([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, M([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=6	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=14	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=18	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, M([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=2	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=12	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=1	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=1	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=11	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, M([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=13	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=0, A([start	& fuel=13	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=west, A([start	& fuel=18	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=1, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=5	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=19	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=14	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=10	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, M([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, M([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=9	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=12	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=19	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=19	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],1)=east, A([start	& fuel=9	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=3	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=6	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=6	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=2	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, M([start	& fuel=0	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, M([start	& fuel=15	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=4	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=1	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=17	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=18	& amdone=0	& cangoeast=1	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, M([start	& fuel=16	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=1],0)=0, A([start	& fuel=15	& amdone=0	& cangoeast=0	& cangonorth=1	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=8	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=8	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=3	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=2	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=5	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=7	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=7	& amdone=0	& cangoeast=1	& cangonorth=1	& cangosouth=0	& cangowest=0	& hascrash=0	& refuelAllowed=0],0)=south, A([start	& fuel=5	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east, A([start	& fuel=4	& amdone=0	& cangoeast=0	& cangonorth=0	& cangosouth=1	& cangowest=1	& hascrash=0	& refuelAllowed=0],0)=east
+2024-04-01 19:19:35,909 - synthesizer.py - double-checking specification satisfiability:  : 0.2005052042510493
+--------------------
+Synthesis summary:
+optimality objective: Pmax=? [F "goal"] 
+
+method: AR, synthesis time: 421.8 s
+number of holes: 149, family size: 1e63, quotient: 8268 states / 40021 actions
+explored: 0 %
+MDP stats: avg MDP size: 8268, iterations: 31105
+
+optimum: 0.200505
+--------------------
+2024-04-01 19:19:36,658 - synthesizer_pomdp.py - Terminate: True
+2024-04-01 19:19:36,659 - storm_pomdp_control.py - Storm POMDP analysis completed
+
+------------------------------------
+
+PAYNT results: 
+0.2005052042510493
+controller size: 358
+
+Storm results: 
+0.20122756909425682
+controller size: 66
+
+------------------------------------
+

@@ -1,0 +1,980 @@
+2024-04-01 17:05:39,042 - cli.py - This is Paynt version 0.1.0.
+2024-04-01 17:05:39,042 - sketch.py - loading sketch from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/drone-4-1/sketch.templ ...
+2024-04-01 17:05:39,042 - sketch.py - assuming sketch in PRISM format...
+2024-04-01 17:05:39,044 - prism_parser.py - PRISM model type: POMDP
+2024-04-01 17:05:39,044 - prism_parser.py - loading properties from /home/fpmk/research/synthesis/experiments-beliefs/../models/archive/cav23-saynt/drone-4-1/sketch.props ...
+ WARN (FormulaParserGrammar.cpp:338): Identifier `R' coincides with a reserved keyword or operator. Property expressions using the variable or constant 'R' will not be parsed correctly.
+2024-04-01 17:05:39,045 - prism_parser.py - found the following specification: optimality: Pmax=? ["notbad" U "goal"] 
+2024-04-01 17:05:39,058 - sketch.py - sketch parsing OK
+2024-04-01 17:05:39,059 - sketch.py - constructed explicit quotient having 1226 states and 2954 actions
+2024-04-01 17:05:39,059 - property.py - converting until formula to eventually...
+2024-04-01 17:05:39,059 - sketch.py - found the following specification optimality: Pmax=? [F "goal"] 
+2024-04-01 17:05:39,060 - pomdp.py - constructed POMDP having 384 observations.
+2024-04-01 17:05:39,078 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-01 17:05:39,078 - pomdp.py - constructed quotient MDP having 1226 states and 2954 actions.
+2024-04-01 17:05:39,078 - pomdp.py - creating coloring ...
+2024-04-01 17:05:39,083 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-01 17:05:39,083 - synthesizer_pomdp.py - Storm settings: iterative - (900, 60, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-01 17:05:39,083 - synthesizer.py - synthesis initiated, design space: 1e99
+2024-04-01 17:05:39,091 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = 0.6820085583874671 | Time elapsed = 0.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6825642513725465 | Time elapsed = 0.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6828243333680803 | Time elapsed = 0.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6845676883236435 | Time elapsed = 0.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6851137253688773 | Time elapsed = 0.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6854350614718079 | Time elapsed = 0.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6856631188466669 | Time elapsed = 1.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6857770573037023 | Time elapsed = 1.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6863258247366325 | Time elapsed = 1.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6888698210853039 | Time elapsed = 1.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6893738216288703 | Time elapsed = 1.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6894750345508011 | Time elapsed = 1.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6899810264056347 | Time elapsed = 1.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6904325873737334 | Time elapsed = 1.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6907523315532836 | Time elapsed = 2.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6908676526139924 | Time elapsed = 2.5s | FSC size = 768
+
+> progress 0.0%, elapsed 3 s, estimated 795012748 s (25 years), iters = {MDP: 348}, opt = 0.691
+-----------PAYNT-----------                     
+Value = 0.6924151346073943 | Time elapsed = 3.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6928740121648498 | Time elapsed = 3.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6931031779603009 | Time elapsed = 3.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6935639756177842 | Time elapsed = 3.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6939731386838965 | Time elapsed = 3.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6995821402581448 | Time elapsed = 4.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.6996837091463988 | Time elapsed = 4.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.700021023721864 | Time elapsed = 4.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.700152281150485 | Time elapsed = 4.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7002673784344264 | Time elapsed = 4.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7004423601574483 | Time elapsed = 4.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7005740018081109 | Time elapsed = 4.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7014029417295051 | Time elapsed = 4.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7018678978171271 | Time elapsed = 4.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7020823417120485 | Time elapsed = 5.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7025481417435178 | Time elapsed = 5.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.702997006368497 | Time elapsed = 5.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.705132630489785 | Time elapsed = 5.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7055688316456269 | Time elapsed = 5.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7059757051025158 | Time elapsed = 5.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.706413901713148 | Time elapsed = 5.8s | FSC size = 768
+
+> progress 0.0%, elapsed 6 s, estimated 262678109 s (8 years), iters = {MDP: 714}, opt = 0.706
+-----------PAYNT-----------                     
+Value = 0.706663372096068 | Time elapsed = 6.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7070995872183164 | Time elapsed = 6.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7072076523308121 | Time elapsed = 6.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7111698032603961 | Time elapsed = 6.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7117298040018074 | Time elapsed = 6.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7122635252216174 | Time elapsed = 6.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7138372273277056 | Time elapsed = 7.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7143880405198958 | Time elapsed = 7.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7145408679573462 | Time elapsed = 7.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7149720574521992 | Time elapsed = 7.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7150793702345886 | Time elapsed = 7.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7156328923578845 | Time elapsed = 7.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7181857936196419 | Time elapsed = 7.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7186878790011634 | Time elapsed = 7.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7191416637988912 | Time elapsed = 7.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7195334830309988 | Time elapsed = 8.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7197153731849983 | Time elapsed = 8.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7200480598663732 | Time elapsed = 8.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7201510260269676 | Time elapsed = 8.7s | FSC size = 768
+
+> progress 0.0%, elapsed 9 s, estimated 37570426 s (1 year), iters = {MDP: 1114}, opt = 0.72
+-----------PAYNT-----------                     
+Value = 0.7217602651958481 | Time elapsed = 9.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7222393790742707 | Time elapsed = 9.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7226655395860251 | Time elapsed = 10.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7244073330282553 | Time elapsed = 10.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.724875555126157 | Time elapsed = 10.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7251391279788407 | Time elapsed = 10.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7256132346466113 | Time elapsed = 10.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7258127566587778 | Time elapsed = 10.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7262815449157447 | Time elapsed = 10.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7288773930578445 | Time elapsed = 10.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.729295678849558 | Time elapsed = 10.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7294119066665536 | Time elapsed = 11.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7296949264239201 | Time elapsed = 11.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7298042677388932 | Time elapsed = 11.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7299535825684167 | Time elapsed = 11.9s | FSC size = 768
+
+> progress 0.0%, elapsed 12 s, estimated 49531752 s (1 year), iters = {MDP: 1520}, opt = 0.73
+-----------PAYNT-----------                     
+Value = 0.7302028468184283 | Time elapsed = 12.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7303065271189889 | Time elapsed = 12.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7304177317760678 | Time elapsed = 12.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7306331500912381 | Time elapsed = 13.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7307402310452997 | Time elapsed = 13.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7315266573495949 | Time elapsed = 13.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7317777691074208 | Time elapsed = 13.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7322926547500491 | Time elapsed = 13.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7694896394656754 | Time elapsed = 13.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7698665181995601 | Time elapsed = 13.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7700797544828653 | Time elapsed = 13.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7715796046157115 | Time elapsed = 14.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7719550518685926 | Time elapsed = 14.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7722644054576384 | Time elapsed = 14.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7725000443132054 | Time elapsed = 14.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7728761724608939 | Time elapsed = 14.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7748555118339 | Time elapsed = 14.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7752073808674462 | Time elapsed = 14.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7754963662485449 | Time elapsed = 14.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.775600217364944 | Time elapsed = 15.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.775805584556142 | Time elapsed = 15.0s | FSC size = 768
+
+> progress 0.0%, elapsed 15 s, estimated 49111687 s (1 year), iters = {MDP: 1962}, opt = 0.776
+-----------PAYNT-----------                     
+Value = 0.7759560456336703 | Time elapsed = 15.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7760781925254648 | Time elapsed = 15.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7762692610356132 | Time elapsed = 16.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7770415107896044 | Time elapsed = 16.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7773244969032439 | Time elapsed = 16.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7776024589093937 | Time elapsed = 16.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7777039778152001 | Time elapsed = 16.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7779875806227486 | Time elapsed = 16.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7781484898398935 | Time elapsed = 17.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7783823279373351 | Time elapsed = 17.9s | FSC size = 768
+
+> progress 0.0%, elapsed 18 s, estimated 3389115 s (39 days), iters = {MDP: 2432}, opt = 0.778
+-----------PAYNT-----------                     
+Value = 0.7785882678013317 | Time elapsed = 18.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7788581009630191 | Time elapsed = 19.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7791600376403824 | Time elapsed = 19.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7792948111155852 | Time elapsed = 19.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7795025523960075 | Time elapsed = 19.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7796092532945545 | Time elapsed = 20.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7797206556583032 | Time elapsed = 20.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7798220200436577 | Time elapsed = 20.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7802532497181381 | Time elapsed = 20.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7803546387924757 | Time elapsed = 20.9s | FSC size = 768
+
+> progress 0.0%, elapsed 21 s, estimated 3948723 s (45 days), iters = {MDP: 2890}, opt = 0.78
+-----------PAYNT-----------                     
+Value = 0.7804781471250242 | Time elapsed = 21.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.780592202738219 | Time elapsed = 21.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7810073436248952 | Time elapsed = 22.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7813259624320845 | Time elapsed = 22.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7816595832155672 | Time elapsed = 22.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7819243239837876 | Time elapsed = 22.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7822454709293624 | Time elapsed = 22.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7843611031769009 | Time elapsed = 22.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7846605860307422 | Time elapsed = 22.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.785043145962928 | Time elapsed = 22.6s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7853582105985102 | Time elapsed = 22.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7856046084655236 | Time elapsed = 23.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7857048066098927 | Time elapsed = 23.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7859316254490302 | Time elapsed = 23.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.786227237321059 | Time elapsed = 23.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7865311527351001 | Time elapsed = 23.8s | FSC size = 768
+
+> progress 0.001%, elapsed 24 s, estimated 1395523 s (16 days), iters = {MDP: 3352}, opt = 0.787
+-----------PAYNT-----------                     
+Value = 0.7868004956132254 | Time elapsed = 24.2s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7872049419515934 | Time elapsed = 25.1s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7874629906663034 | Time elapsed = 25.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7877485534450054 | Time elapsed = 25.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7880223362332559 | Time elapsed = 26.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7884062834528824 | Time elapsed = 26.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7885822227847817 | Time elapsed = 26.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.788773082123635 | Time elapsed = 26.9s | FSC size = 768
+
+> progress 0.002%, elapsed 27 s, estimated 1285285 s (14 days), iters = {MDP: 3846}, opt = 0.789
+-----------PAYNT-----------                     
+Value = 0.7889855166445963 | Time elapsed = 27.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7891173858037057 | Time elapsed = 27.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7892488291013221 | Time elapsed = 27.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7899970825943952 | Time elapsed = 28.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7901340967202711 | Time elapsed = 28.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7902795556394011 | Time elapsed = 28.0s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7903953172165619 | Time elapsed = 28.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7905438958352637 | Time elapsed = 28.4s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7907348193075499 | Time elapsed = 29.3s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7908466653895793 | Time elapsed = 29.5s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7909981285889438 | Time elapsed = 29.6s | FSC size = 768
+
+> progress 0.002%, elapsed 30 s, estimated 1425862 s (16 days), iters = {MDP: 4317}, opt = 0.791
+> progress 0.006%, elapsed 33 s, estimated 509168 s (5 days), iters = {MDP: 4909}, opt = 0.791
+-----------PAYNT-----------                     
+Value = 0.7913645506633664 | Time elapsed = 33.9s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.7915141070628543 | Time elapsed = 35.8s | FSC size = 768
+
+> progress 0.006%, elapsed 36 s, estimated 555484 s (6 days), iters = {MDP: 5515}, opt = 0.792
+-----------PAYNT-----------                     
+Value = 0.7925891867357346 | Time elapsed = 37.9s | FSC size = 768
+
+> progress 0.006%, elapsed 39 s, estimated 601729 s (6 days), iters = {MDP: 6109}, opt = 0.793
+-----------PAYNT-----------                     
+Value = 0.7935232968191052 | Time elapsed = 40.0s | FSC size = 768
+
+> progress 0.006%, elapsed 42 s, estimated 647834 s (7 days), iters = {MDP: 6704}, opt = 0.794
+> progress 0.006%, elapsed 45 s, estimated 694094 s (8 days), iters = {MDP: 7295}, opt = 0.794
+-----------PAYNT-----------                     
+Value = 0.794234766991592 | Time elapsed = 45.6s | FSC size = 768
+
+> progress 0.006%, elapsed 48 s, estimated 740301 s (8 days), iters = {MDP: 7876}, opt = 0.794
+> progress 0.006%, elapsed 51 s, estimated 786353 s (9 days), iters = {MDP: 8411}, opt = 0.794
+> progress 0.006%, elapsed 54 s, estimated 832447 s (9 days), iters = {MDP: 8936}, opt = 0.794
+> progress 0.006%, elapsed 57 s, estimated 878601 s (10 days), iters = {MDP: 9460}, opt = 0.794
+-----------PAYNT-----------                     
+Value = 0.8119168678366628 | Time elapsed = 58.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.8157303930037227 | Time elapsed = 58.7s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.8165517395545132 | Time elapsed = 58.8s | FSC size = 768
+
+-----------PAYNT-----------                     
+Value = 0.8166809664454245 | Time elapsed = 58.9s | FSC size = 768
+
+2024-04-01 17:06:39,184 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:06:39,263 - storm_pomdp_control.py - Interactive Storm started
+2024-04-01 17:06:39,264 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-04-01 17:06:49,274 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8167452069181533 | Time elapsed = 84.2s | FSC size = 4376
+
+
+------------------------------------
+
+PAYNT results: 
+0.8166809664454245
+controller size: 768
+
+Storm results: 
+0.8167452069181533
+controller size: 4376
+
+------------------------------------
+
+2024-04-01 17:07:03,304 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:07:03,711 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:07:03,711 - synthesizer_ar_storm.py - Additional memory needed
+2024-04-01 17:07:03,712 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-01 17:07:03,712 - synthesizer.py - A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=north, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=west, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=north, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=west, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=north, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=north, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=west, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=north, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=north, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=north, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=north, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=north, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=north, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=north, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=north, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=west, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=north, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=north, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=north, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=north, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=west, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=north, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=north, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=west, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=east, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=east, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=south, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=north, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=north, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=south, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=east, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=west, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=north, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=east, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=north, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=east
+2024-04-01 17:07:03,716 - synthesizer.py - double-checking specification satisfiability:  : 0.8166809664454245
+--------------------
+Synthesis summary:
+optimality objective: Pmax=? [F "goal"] 
+
+method: AR, synthesis time: 60.1 s
+number of holes: 165, family size: 1e99, quotient: 1226 states / 2954 actions
+explored: 0 %
+MDP stats: avg MDP size: 1226, iterations: 9984
+
+optimum: 0.816681
+--------------------
+2024-04-01 17:07:03,735 - synthesizer_pomdp.py - Terminate: False
+2024-04-01 17:07:03,735 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-04-01 17:07:03,736 - pomdp.py - unfolding 3-FSC template into POMDP ...
+2024-04-01 17:07:03,736 - pomdp.py - constructed quotient MDP having 1268 states and 3170 actions.
+2024-04-01 17:07:03,736 - pomdp.py - creating coloring ...
+2024-04-01 17:07:03,742 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2834676939318783453986762886344437289497707582437603317607798705907299086962391196497673077421877755904 to 2187
+2024-04-01 17:07:03,754 - synthesizer.py - synthesis initiated, design space: 1e102
+2024-04-01 17:07:04,184 - synthesizer_ar_storm.py - Main family synthesis done
+2024-04-01 17:07:04,184 - synthesizer_ar_storm.py - Subfamilies buffer contains: 167 families
+> progress 0.0%, elapsed 3 s, estimated 596464910304681919561048950737100274429189226440103459943337664392769193836781636357137994088448 s (18913778231376265387989987757857620828085117806742231598370279748445102864091239870889984 years), iters = {MDP: 580}, opt = 0.817
+> progress 0.0%, elapsed 6 s, estimated 80385963261713802645139132118605137056957379402216473156210305217726228135050246543051325440 s (2549022173443486727010457137334885620634313285417552473795129772790618500662034432000 years), iters = {MDP: 1131}, opt = 0.817
+> progress 0.0%, elapsed 9 s, estimated 8700138613087217865023060895626146679839128819799971375914677052660116846098324387790848 s (275879585650913813407688833663162436020964194454402697675256270412196529014046720 years), iters = {MDP: 1678}, opt = 0.817
+> progress 0.0%, elapsed 12 s, estimated 1298213021303221500891978389016526727181840416171627521214954516204218717755183988736 s (41166064856139697475047770367947110743107325480463948867050092589386873962496 years), iters = {MDP: 2215}, opt = 0.817
+> progress 0.0%, elapsed 15 s, estimated 113179156530318819143782090177749416188909903639742749967507461523005736356937728 s (3588887510474341475227767710813811998715163035662051359350999150380449792 years), iters = {MDP: 2747}, opt = 0.817
+> progress 0.0%, elapsed 18 s, estimated 9164321931125908461659791195761907566835645829936442057840852539913084600320 s (290598742108254309150805261665176341653773503997298027281202792103936 years), iters = {MDP: 3294}, opt = 0.817
+> progress 0.0%, elapsed 21 s, estimated 1377766896337863396423357130354137765381410198043255578477697005780992000 s (43688701684990591182308430042381695204945593619223264716394594304 years), iters = {MDP: 3813}, opt = 0.817
+> progress 0.0%, elapsed 24 s, estimated 225588979576892859478724589239853980062453305075583624305101953302528 s (7153379616212989858708775239302264972868370048330430251270144 years), iters = {MDP: 4331}, opt = 0.817
+> progress 0.0%, elapsed 27 s, estimated 37993511723168516819250592212711014310364120135323241072702783488 s (1204766353474394782686074110338857963376007447507252543488 years), iters = {MDP: 4853}, opt = 0.817
+> progress 0.0%, elapsed 30 s, estimated 5367076085364585161300140132260866092463035339273360090595328 s (170188866227948540378263432797125790782171931465482240 years), iters = {MDP: 5378}, opt = 0.817
+> progress 0.0%, elapsed 33 s, estimated 288229296395386597088667604623259097126412146688563085312 s (9139691032324537629407010247094709714107051802624 years), iters = {MDP: 5914}, opt = 0.817
+> progress 0.0%, elapsed 36 s, estimated 31985200593677215770492652572853905989964315813216256 s (1014244057384488099013269589830353397697478656 years), iters = {MDP: 6465}, opt = 0.817
+> progress 0.0%, elapsed 39 s, estimated 3513616373209098937198373613369414887649040138240 s (111416044305209885739584913486849962409984 years), iters = {MDP: 7005}, opt = 0.817
+> progress 0.0%, elapsed 42 s, estimated 326315858361297585800746100135253624026562560 s (10347407989640332892217702681677922304 years), iters = {MDP: 7521}, opt = 0.817
+> progress 0.0%, elapsed 45 s, estimated 28044699116255216648222320000744810348544 s (889291575223719405953571520249856 years), iters = {MDP: 8060}, opt = 0.817
+> progress 0.0%, elapsed 48 s, estimated 2367070474551352871664596439506354176 s (75059312358934315505478008832 years), iters = {MDP: 8607}, opt = 0.817
+> progress 0.0%, elapsed 51 s, estimated 306981230634819689959291592114176 s (9734310966350194724044800 years), iters = {MDP: 9114}, opt = 0.817
+> progress 0.0%, elapsed 54 s, estimated 51011095250085521976268423168 s (1617551219244213731328 years), iters = {MDP: 9637}, opt = 0.817
+-----------PAYNT-----------                     
+Value = 0.818322888273095 | Time elapsed = 141.1s | FSC size = 772
+
+-----------PAYNT-----------                     
+Value = 0.8189214157647444 | Time elapsed = 141.2s | FSC size = 772
+
+> progress 0.0%, elapsed 57 s, estimated 16002489558486606038433792 s (507435615121975040 years), iters = {MDP: 10166}, opt = 0.819
+-----------PAYNT-----------                     
+Value = 0.8212841869790913 | Time elapsed = 142.4s | FSC size = 772
+
+2024-04-01 17:08:03,403 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:08:03,470 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:08:03,470 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:08:13,486 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8212868126381676 | Time elapsed = 180.4s | FSC size = 13492
+
+
+------------------------------------
+
+PAYNT results: 
+0.8212841869790913
+controller size: 772
+
+Storm results: 
+0.8212868126381676
+controller size: 13492
+
+------------------------------------
+
+2024-04-01 17:08:39,562 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:08:39,944 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:08:39,944 - synthesizer_ar_storm.py - Additional memory needed
+2024-04-01 17:08:39,945 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-01 17:08:39,945 - synthesizer.py - A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=north, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=0, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=west, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=north, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=2, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=west, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],1)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],2)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=north, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=north, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=west, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=north, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=north, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=north, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=north, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=north, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=north, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=west, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=north, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=north, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=north, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=2, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=north, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=west, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=north, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=north, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=west, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=east, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=2, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=east, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=south, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=north, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=north, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=south, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=east, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=west, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=north, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=east, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=north, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=east
+2024-04-01 17:08:39,958 - synthesizer.py - double-checking specification satisfiability:  : 0.8212841869790913
+--------------------
+Synthesis summary:
+optimality objective: Pmax=? [F "goal"] 
+
+method: AR, synthesis time: 59.65 s
+number of holes: 171, family size: 1e102, quotient: 1268 states / 3170 actions
+explored: 0 %
+MDP stats: avg MDP size: 1268, iterations: 10600
+
+optimum: 0.821284
+--------------------
+2024-04-01 17:08:39,982 - synthesizer_pomdp.py - Terminate: False
+2024-04-01 17:08:39,982 - synthesizer_pomdp.py - Added memory nodes for observation based on Storm data
+2024-04-01 17:08:39,982 - pomdp.py - unfolding 3-FSC template into POMDP ...
+2024-04-01 17:08:39,983 - pomdp.py - constructed quotient MDP having 1307 states and 3372 actions.
+2024-04-01 17:08:39,983 - pomdp.py - creating coloring ...
+2024-04-01 17:08:39,987 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 185773387895195792440476492519469042204521764122630771022744695990340752963167269453671502801920180610924544 to 143327232
+2024-04-01 17:08:39,999 - synthesizer.py - synthesis initiated, design space: 1e107
+-----------PAYNT-----------                     
+Value = 0.8261695740735291 | Time elapsed = 181.1s | FSC size = 778
+
+> progress 0.0%, elapsed 3 s, estimated 11036328954853528477743138528032942127840501478359155359433648372125742020329109267841591639386619904 s (349959695422803404010850913252909655263565306654139428908050565787922981740583631405117865984 years), iters = {MDP: 467}, opt = 0.826
+2024-04-01 17:08:46,005 - synthesizer_ar_storm.py - Main family synthesis done
+2024-04-01 17:08:46,005 - synthesizer_ar_storm.py - Subfamilies buffer contains: 170 families
+> progress 0.0%, elapsed 6 s, estimated 7785152984721630138330541946487446871531591784680712138800873796837775331285320681348071689382002688 s (246865581707306906843351850497705742445466685867142514298168144844306199141799333345934442496 years), iters = {MDP: 925}, opt = 0.826
+> progress 0.0%, elapsed 9 s, estimated 5709608683500741894247582896307209548837216469770936634396913591183466611385206509482685431459872768 s (181050503662504506664944827024194191859518750354933647211222654912255980778346464994538815488 years), iters = {MDP: 1371}, opt = 0.826
+> progress 0.0%, elapsed 12 s, estimated 4599686401642663341490347031229219375715261143807863073362541991173754609366989617680731640071979008 s (145855098986639483186362793819723603657477121408242601075006939778378467275850455135211749376 years), iters = {MDP: 1797}, opt = 0.826
+> progress 0.0%, elapsed 15 s, estimated 2855872614382740523031336407299033150044152726414977728325445610820970618193666060636446475979587584 s (90559126534206644166078532100761950171344078264063521574447338474267398669723764697910476800 years), iters = {MDP: 2214}, opt = 0.826
+> progress 0.0%, elapsed 18 s, estimated 2075111444163301100616495021248374550360751695137854401319897628450038579630525719537553429044920320 s (65801352237547593342220198435598940620740667083925691082104937659676632446360997336262377472 years), iters = {MDP: 2641}, opt = 0.826
+> progress 0.0%, elapsed 21 s, estimated 1148904182355011554293669994940486490262913822568220997453161351344846060510515919617161746249154560 s (36431512631754548581438125462486082408684644016288693475845597064994124730735484761674874880 years), iters = {MDP: 3065}, opt = 0.826
+> progress 0.0%, elapsed 24 s, estimated 812896230620650722480607623144709260092405229588296205292563052541165695598660646081527930205241344 s (25776770377367158893767045858531045781039202647063684055120114170017790812933111408307994624 years), iters = {MDP: 3512}, opt = 0.826
+> progress 0.0%, elapsed 27 s, estimated 376610097202323212540981840813459499314142129904402251757028521005345291212022402386473297945559040 s (11942227841271028364065168043762161776277491552468268400183169664358936710651246460740304896 years), iters = {MDP: 3959}, opt = 0.826
+> progress 0.0%, elapsed 30 s, estimated 256481400740623361725075204647373895680649116375165487075594397484072413373514479260980599419043840 s (8132971865189731642392014014016005867238041892657107816624288583250430696474245793694351360 years), iters = {MDP: 4402}, opt = 0.826
+> progress 0.0%, elapsed 33 s, estimated 119855394890338570444570103982733891195491611197770011093601452439348353087773384561151122633392128 s (3800589640104597274322544931206043808544484867942448852214687952990294904244803696022519808 years), iters = {MDP: 4840}, opt = 0.826
+> progress 0.0%, elapsed 36 s, estimated 78225058595734419636637168324894136430138206642166847329447013803469878758621534437082192226025472 s (2480500335988534082924327890072347689417981945620423400607349976601241271332847357555376128 years), iters = {MDP: 5287}, opt = 0.826
+> progress 0.0%, elapsed 39 s, estimated 35774568540643598035914034673248585797976243261787545647433975482562772463334926475238654223581184 s (1134404126732737020550659577688015859010456025891011675478498062382698051553619848741257216 years), iters = {MDP: 5747}, opt = 0.826
+> progress 0.0%, elapsed 42 s, estimated 23375933060812616970861694224097497453955665446435996209629769888544834810172044250321252874452992 s (741245974784773538026992670749201486764994295731159826640143352160248000411061299556909056 years), iters = {MDP: 6193}, opt = 0.826
+> progress 0.0%, elapsed 45 s, estimated 11003647698316429121993799706980167292419385174187865908367837327269165658990324080983054103871488 s (348923379576243944142036466321967436061838862654032411029980217310676634063421630111023104 years), iters = {MDP: 6615}, opt = 0.826
+> progress 0.0%, elapsed 48 s, estimated 7044121243485022510191501697907296056226100636613022472034289043060331835394103406332999932837888 s (223367619339327167197908633468148145787705909658436763149204203803821713300960757336244224 years), iters = {MDP: 7049}, opt = 0.826
+> progress 0.0%, elapsed 51 s, estimated 2309266317955682069904129551422851209843324176197387981330682209455807440964675918288633093685248 s (73226354577488659878410734837601330573633012190300255565401451298291249886693987104849920 years), iters = {MDP: 7513}, opt = 0.826
+> progress 0.0%, elapsed 54 s, estimated 757831987525292914785216258736838330199055512899868440881179177260656166606018823723657363193856 s (24030694683069918691488159476434650181015852803420553350070555158467895925223602243239936 years), iters = {MDP: 7969}, opt = 0.826
+> progress 0.0%, elapsed 57 s, estimated 489751780535701006654913175973158581340030748137467964298370224932705605863522723208866123743232 s (15529927084465403933206566258573584977942341348070088969261000722527288726267223322132480 years), iters = {MDP: 8387}, opt = 0.826
+2024-04-01 17:09:39,664 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:09:39,729 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:09:39,729 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:09:49,749 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 284.7s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:10:23,828 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:10:24,215 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:10:24,215 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 17:10:24,235 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 170
+> progress 0.0%, elapsed 60 s, estimated 222484397678522487384099442421989578723100397810902854707789131047824055035019399737988045864960 s (7054933970019104826212901251161596037438210718750069209303422039341393821206872816877568 years), iters = {MDP: 8818}, opt = 0.826
+> progress 0.0%, elapsed 63 s, estimated 144232162950183015667357676597871044769404042604112930700763941529035644068814951581777011933184 s (4573571884518741064796418268544071047970328685857316135788778599648962363108602689880064 years), iters = {MDP: 9241}, opt = 0.826
+> progress 0.0%, elapsed 66 s, estimated 68808307445643263175035065809677289880502235634177225247478546230532457387794459908925927981056 s (2181897115856267832914600297593535053520158458250143917387365651958191279697612115017728 years), iters = {MDP: 9689}, opt = 0.826
+> progress 0.0%, elapsed 69 s, estimated 39301945988418525306812886538206161561537041146513757587700980281736865416159479425763135979520 s (1246256531849902677395947227171675830044761741207492262292865359562825454098238459084800 years), iters = {MDP: 10139}, opt = 0.826
+> progress 0.0%, elapsed 72 s, estimated 17068781082089113227700364646001278821221114850730298789735378103322333892576336216541110468608 s (541247497529461920261418559683561913124489903075294271222158542741883731623063056285696 years), iters = {MDP: 10591}, opt = 0.826
+> progress 0.0%, elapsed 75 s, estimated 10713864602562395572786605826504189238126848484274079820171203954062214741262613597238643916800 s (339734417889472204092418693798590533936235189101450571584317008803798324673871966371840 years), iters = {MDP: 11045}, opt = 0.826
+> progress 0.0%, elapsed 78 s, estimated 5235423426616102491729830716323371749492968139115820406788021421836795024239110409195263885312 s (166014187804924607969823996176310150953061455037938590624876040459478053493526728015872 years), iters = {MDP: 11484}, opt = 0.826
+> progress 0.0%, elapsed 81 s, estimated 3028541104728882699522150821359815266946360002013777519363175105540289618514182101975221403648 s (96034408445233475380884436612956457013670863782256249432747534956288152047664173678592 years), iters = {MDP: 11926}, opt = 0.826
+> progress 0.0%, elapsed 84 s, estimated 1695576904364313889245711024201450369324223253560767719492285421254895378566800915948841730048 s (53766390929867894735695941247216515672673436390724844054499895511276209375844161814528 years), iters = {MDP: 12384}, opt = 0.826
+> progress 0.0%, elapsed 87 s, estimated 827144065842698653599975083630141407510118184632150874047380092216363365626979798194258444288 s (26228566268477252748534000537048581878125598028114356254148640052812844725353268117504 years), iters = {MDP: 12840}, opt = 0.826
+> progress 0.0%, elapsed 90 s, estimated 554659226126430949120284440903731991225747355676730986833151165436194310990147463075145449472 s (17588128682344969855275998027986038747566388625233915163791357063440456568902311215104 years), iters = {MDP: 13265}, opt = 0.826
+> progress 0.0%, elapsed 93 s, estimated 274418016858632247156102534801106664734035289361819613560014160649179061292735777699205742592 s (8701738231184433641372124257718203519716170726888180493570920166346033565500115517440 years), iters = {MDP: 13689}, opt = 0.826
+> progress 0.0%, elapsed 96 s, estimated 154267009744827005643728675601161174267476443059429799811308089074484040863781755980938739712 s (4891774788965848715602266930778205509654411630281266903035056977364252934801675255808 years), iters = {MDP: 14141}, opt = 0.826
+> progress 0.0%, elapsed 99 s, estimated 78218786258048307167817140945191688552038590737741848868960432804997656217245075523967647744 s (2480301441465255994486996434776921243471174414407666931963074547888501624557816250368 years), iters = {MDP: 14586}, opt = 0.826
+> progress 0.0%, elapsed 102 s, estimated 49326525675463701016309143120495223532325747029460915516642304318559328578262797916626223104 s (1564133868450776975197139469332951815523706541442952153893245923850392533227137925120 years), iters = {MDP: 15038}, opt = 0.826
+> progress 0.0%, elapsed 105 s, estimated 21557016683406298817298657371273246279644435704693944671214245280314706103099573384555528192 s (683568514821356473891028925194836038045676169405022636036420580386992127556024532992 years), iters = {MDP: 15476}, opt = 0.826
+> progress 0.0%, elapsed 108 s, estimated 13825020004536842384465560884401873128067704019409685090408836280600914172167396516146708480 s (438388508515247383591116934823448404663589456800299578501242757376725225363206045696 years), iters = {MDP: 15907}, opt = 0.826
+> progress 0.0%, elapsed 111 s, estimated 6156947088187553082818742719958507427869667433903820326488449611068939251938060768699744256 s (195235511421472390849618164881322622897775769857621528431867921642848079498184753152 years), iters = {MDP: 16353}, opt = 0.826
+> progress 0.0%, elapsed 114 s, estimated 3967152240591287650190696098733726673068182559280147805547845658838859633480841760115523584 s (125797572317075328508259887104422274539132299222490775456118485212780442877050224640 years), iters = {MDP: 16783}, opt = 0.826
+> progress 0.0%, elapsed 117 s, estimated 1917338787576035912124883164359842832164937176764306333700549100648161760473049934124285952 s (60798414116439502807840772682841623479147589184713651876867016178085300089793806336 years), iters = {MDP: 17195}, opt = 0.826
+2024-04-01 17:11:23,927 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:11:24,000 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:11:24,000 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:11:34,021 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 395.0s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:12:14,104 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:12:14,484 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:12:14,484 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 17:12:14,505 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 160
+> progress 0.0%, elapsed 120 s, estimated 1106620331543718740181239200694757505601502157819374016159420256929084839721580366158364672 s (35090700518255921694576936254310505014525471319410032679710734540130790630724993024 years), iters = {MDP: 17611}, opt = 0.826
+> progress 0.0%, elapsed 123 s, estimated 733816554953415434907826598553563614986191050593235377884239710214385021060850090288087040 s (23269170311815555115324069225423658347224025951271655634852954821231671388095381504 years), iters = {MDP: 18034}, opt = 0.826
+> progress 0.0%, elapsed 126 s, estimated 386018645845209900600967638246086753145059322247146430897676744779799872819106363455045632 s (12240570961606099258577228453354658689491148725537115454212953153561975466942791680 years), iters = {MDP: 18473}, opt = 0.826
+> progress 0.0%, elapsed 129 s, estimated 250679715264104220623033488947898367158402016323180801380178104596721393474895747026518016 s (7949001625574081407517360218765302303653335268918679048334919269466019240047804416 years), iters = {MDP: 18903}, opt = 0.826
+> progress 0.0%, elapsed 132 s, estimated 106882262267570061951796404546939654765320076374189165126185253101626282777578235962064896 s (3389214303258817434456158790502358302399764803061935274416720601609462878155309056 years), iters = {MDP: 19345}, opt = 0.826
+> progress 0.0%, elapsed 135 s, estimated 67320490238340450842242955584561825566872320319226111424564822320872502209280528923754496 s (2134718741702830468705853419333798558091624576664186420950946734521467384616714240 years), iters = {MDP: 19796}, opt = 0.826
+> progress 0.0%, elapsed 138 s, estimated 29628922386817096460145834314869674633275077841437927562540541492953552034005809889280000 s (939526965589075852391602749494666492921428785522081786355853565797081161798778880 years), iters = {MDP: 20221}, opt = 0.826
+> progress 0.0%, elapsed 141 s, estimated 19028579186179119393331830456734448683910784876610903970583752693470038453529942142484480 s (603392287740332297059493131302403127914230447033075139997932925076611895488675840 years), iters = {MDP: 20665}, opt = 0.826
+> progress 0.0%, elapsed 144 s, estimated 8880762634253862380231035234335500894933330882000393315886206734721285792360618623238144 s (281607135789379200616476927404400413697018200669733789317870705089773452807634944 years), iters = {MDP: 21104}, opt = 0.826
+> progress 0.0%, elapsed 147 s, estimated 5039645924423129428661105938665681801346275397525408194179298253724492716049267152650240 s (159806123935284425396452918646848818716831483044636608991010663054502888206237696 years), iters = {MDP: 21562}, opt = 0.826
+> progress 0.0%, elapsed 150 s, estimated 2386545632919775738726807237417928645175394927604270753017588227892708498401192572878848 s (75676865579647898380602054931575605528486980126032693919859248913967540927987712 years), iters = {MDP: 22014}, opt = 0.826
+> progress 0.0%, elapsed 153 s, estimated 1346129433904985844146397282128966788103006531718932931946096933637112045626341862670336 s (42685484332349879145535163024296693307308802550607544904843709289630355221905408 years), iters = {MDP: 22469}, opt = 0.826
+> progress 0.0%, elapsed 156 s, estimated 761933706288496079784469530067643835266977132270703588285722861630490984757255697596416 s (24160759331826993781473505808106432130223189408706845874829899670465437254025216 years), iters = {MDP: 22919}, opt = 0.826
+> progress 0.0%, elapsed 159 s, estimated 366709503419054490729418490853080958206213424587907151047189627625447852340494070710272 s (11628282071887826292003782766964510493827000326268235965461167449916155354939392 years), iters = {MDP: 23352}, opt = 0.826
+> progress 0.0%, elapsed 162 s, estimated 253786853481402852062918419911061489290014688098339266311592716843437023450524077260800 s (8047528332109426694212672078471622008123769409436719622022006015991147527143424 years), iters = {MDP: 23781}, opt = 0.826
+> progress 0.0%, elapsed 165 s, estimated 126266346342028856720805151700120049433108303500117222345258587637147664557531040055296 s (4003879577055709314758764543504549459047714130923728540818907864416252585836544 years), iters = {MDP: 24217}, opt = 0.826
+> progress 0.0%, elapsed 168 s, estimated 80628510051481824781004749174158696768604282770391301530209040826697232438303771328512 s (2556713281693360875855789239304530200075484388643820106953981740382762995548160 years), iters = {MDP: 24654}, opt = 0.826
+> progress 0.0%, elapsed 171 s, estimated 34460015369341130333904634901239246022454501333707096562299841205953728321214717362176 s (1092719919119137849967939590889052885707092707518017731599097901818887475822592 years), iters = {MDP: 25108}, opt = 0.826
+> progress 0.0%, elapsed 174 s, estimated 21433774246041818626426237826663478363315113376033177596249822353274589179109290541056 s (679660522768956791867492233948049437296298441606845408027420485830495696846848 years), iters = {MDP: 25550}, opt = 0.826
+> progress 0.0%, elapsed 177 s, estimated 9372090161868455435868837683939834818685111755257184767563928341661322534725139562496 s (297187029485935297678590027518405639803364389084571748283604853967493053546496 years), iters = {MDP: 26008}, opt = 0.826
+2024-04-01 17:13:14,203 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:13:14,265 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:13:14,265 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:13:24,285 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 510.3s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:14:09,376 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:14:09,765 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:14:09,765 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 17:14:09,783 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 146
+> progress 0.0%, elapsed 180 s, estimated 5977937134390235110351110050170284211752702766087545363487610439668098443591280492544 s (189559143023536124925368120967662261719960559447439187433189059883035374125056 years), iters = {MDP: 26440}, opt = 0.826
+> progress 0.0%, elapsed 183 s, estimated 2877672052211939606049392010929221711817101932183237415109420984760327549859741564928 s (91250382173133541886029265525851216383311395504180988323769656991414013132800 years), iters = {MDP: 26867}, opt = 0.826
+> progress 0.0%, elapsed 186 s, estimated 1577085535358631084946921661710036650066378796643443704965492083655234683307684790272 s (50009054266826200117651606638498807161123435351313042460586668620060228059136 years), iters = {MDP: 27318}, opt = 0.826
+> progress 0.0%, elapsed 189 s, estimated 738535175452564675133725786431575098599727005761278634461063045339704164742791692288 s (23418796786293908588164782446025702222983357073456674752733450085146547978240 years), iters = {MDP: 27771}, opt = 0.826
+> progress 0.0%, elapsed 192 s, estimated 417935653155710176464849179483853124716210547666709262732700646069473560521342976000 s (13252652624166355247570144207081597361767271764570225458172752788019770032128 years), iters = {MDP: 28212}, opt = 0.826
+> progress 0.0%, elapsed 195 s, estimated 262795689814302508568720264828325855263844008268649939190367653655391412314424999936 s (8333196658241454097551100147932266220961608185672580496228895283139259138048 years), iters = {MDP: 28621}, opt = 0.826
+> progress 0.0%, elapsed 198 s, estimated 140015899129739547260202718892448351046379186715314460332192879069246435842609643520 s (4439875035823806227198560508745967829630507252171526067770147311075310174208 years), iters = {MDP: 29056}, opt = 0.826
+> progress 0.0%, elapsed 201 s, estimated 86692262774457961737004663314021130701922451615147968987768519235440536691926892544 s (2748993619179920332670471170370772684343005892827398888672329594010442137600 years), iters = {MDP: 29500}, opt = 0.826
+> progress 0.0%, elapsed 204 s, estimated 38527585405394126948626511362463434203633967474074831584575379828699035298066071552 s (1221701718841772127665589689496521685233874095740271443901395837989205049344 years), iters = {MDP: 29933}, opt = 0.826
+> progress 0.0%, elapsed 207 s, estimated 24349228896663483325227522616521137575174534398601257729442439154727741868489048064 s (772108983278268774694908084067573611958398976810523969615494109819110948864 years), iters = {MDP: 30357}, opt = 0.826
+> progress 0.0%, elapsed 210 s, estimated 10433976405901707965291391874317762977243472424603499012087546913555058749276684288 s (330859221394650784056536485742587834379222955984346957951902260804406214656 years), iters = {MDP: 30813}, opt = 0.826
+> progress 0.0%, elapsed 213 s, estimated 6387503461005867729802262782395349341576663220090183467905451591219485920880230400 s (202546406044072410907776196755425072213235527974358793008038030675122585600 years), iters = {MDP: 31271}, opt = 0.826
+> progress 0.0%, elapsed 216 s, estimated 2787789672447521977913657912223740404577075740349872988835182486785664642610888704 s (88400230607798126071910618359000450054056443140750171651456050555258929152 years), iters = {MDP: 31727}, opt = 0.826
+> progress 0.0%, elapsed 219 s, estimated 1756097298443491171385612697409977758847971137789786850666579294094532288524058624 s (55685480036894061771221383533389618161638820317213478293858705904676896768 years), iters = {MDP: 32187}, opt = 0.826
+> progress 0.0%, elapsed 222 s, estimated 812891002662489291138723015838521476580871817194755304593507099579152228664999936 s (25776604599901361263436828869387193842241289306800657823167905595320696832 years), iters = {MDP: 32639}, opt = 0.826
+> progress 0.0%, elapsed 225 s, estimated 461258370181373285339521681976128693324110439825647543133209115007397971921731584 s (14626406969221629606388422488073060680643813712177221086324323596661424128 years), iters = {MDP: 33074}, opt = 0.826
+> progress 0.0%, elapsed 228 s, estimated 214071141448650395033030028915450667561339370093618961275688482999261804732874752 s (6788151365063748129771656218350339565827890378291476205862578605579567104 years), iters = {MDP: 33532}, opt = 0.826
+> progress 0.0%, elapsed 231 s, estimated 119547270673507014559077815578138856874461851205611398482376355691452477212721152 s (3790819085283708329838877248345118705773697030843846847784910585621118976 years), iters = {MDP: 33991}, opt = 0.826
+> progress 0.0%, elapsed 234 s, estimated 57900904578025230572882265354649732677566179398685633027433917439627187208585216 s (1836025639840982924506014105887161314371451622713329323990689572578131968 years), iters = {MDP: 34447}, opt = 0.826
+> progress 0.0%, elapsed 237 s, estimated 31663051069800502061078631675276725977250979690861537409421727913778835359793152 s (1004028762994688715821910535479250054127650034705345032309717334587604992 years), iters = {MDP: 34908}, opt = 0.826
+2024-04-01 17:15:09,442 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:15:09,514 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:15:09,514 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:15:19,534 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 629.5s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:16:08,645 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:16:09,008 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:16:09,009 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 17:16:09,024 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 143
+> progress 0.0%, elapsed 240 s, estimated 17727174884292576438953664899066752888976454960556014275463287668186951781974016 s (562125028040733703349449483103753169139856730533974818686716395391025152 years), iters = {MDP: 35366}, opt = 0.826
+> progress 0.0%, elapsed 243 s, estimated 8351303033519724500724124392330590205094033665074846400449300895730451768934400 s (264818081986292580762777354498736825478208522537753568834228235330912256 years), iters = {MDP: 35807}, opt = 0.826
+> progress 0.0%, elapsed 246 s, estimated 5550519699429377388381530830256982143404755608750622189707219544923696181280768 s (176005825070693110820484163054756490126779473172634224087399314329960448 years), iters = {MDP: 36258}, opt = 0.826
+> progress 0.0%, elapsed 249 s, estimated 2762862641151465183618939335942333628581444600902810877175335613913213536567296 s (87609799630627391273364790329156880759733291687359167604333391736995840 years), iters = {MDP: 36715}, opt = 0.826
+> progress 0.0%, elapsed 252 s, estimated 1623780174974434787667616421815367772736652594081818195638020094164533310914560 s (51489731575800194787728366147268716017414225983219737035706962355945472 years), iters = {MDP: 37169}, opt = 0.826
+> progress 0.0%, elapsed 255 s, estimated 743455728020645099436137653217217394899159998873703900839071137890597618057216 s (23574826484672914733147067292582394363522422509044309803652636540403712 years), iters = {MDP: 37597}, opt = 0.826
+> progress 0.0%, elapsed 258 s, estimated 466651367671948616461972067351360438804526949101793246854061735122186442637312 s (14797417797816736785977248158942969100219469852789430976268572393734144 years), iters = {MDP: 38042}, opt = 0.826
+> progress 0.0%, elapsed 261 s, estimated 201811093530036990522550112964559807483700400319493910685076718157507749478400 s (6399387795853532443286943915930272012859927068717363666340233730850816 years), iters = {MDP: 38497}, opt = 0.826
+> progress 0.0%, elapsed 264 s, estimated 127579541551546323769637813846574275961745470796211468152495739161786881933312 s (4045520723983584555363798760342751453349875219152149085740476972138496 years), iters = {MDP: 38948}, opt = 0.826
+> progress 0.0%, elapsed 267 s, estimated 54518773941927465709521713540784905739262169664549707611997543542617907658752 s (1728778980908405217914214163521345597457227927933904380101627450753024 years), iters = {MDP: 39414}, opt = 0.826
+> progress 0.0%, elapsed 270 s, estimated 33321821548817488096020537501547282318460704483469344457935173010908076048384 s (1056628029833126711725901544175430431137779069377648704713178017169408 years), iters = {MDP: 39883}, opt = 0.826
+> progress 0.0%, elapsed 273 s, estimated 15339905518314485663527644764178247038165906530780487665207497070994939445248 s (486425213036354782305197814583030269615155636460088470695242289381376 years), iters = {MDP: 40347}, opt = 0.826
+> progress 0.0%, elapsed 276 s, estimated 8522305741952175362556424635816550767465048726936465228104383143202848243712 s (270240542299346024584911111307665966023328204405154037016874893443072 years), iters = {MDP: 40810}, opt = 0.826
+> progress 0.0%, elapsed 279 s, estimated 3919277040868283582434173506090158038771971879662966135200395375240005287936 s (124279459692677677905900225617309085472257271243296100734754785067008 years), iters = {MDP: 41267}, opt = 0.826
+> progress 0.0%, elapsed 282 s, estimated 2169939660333792148024731216796084738649669308471063669887689164404018905088 s (68808335246505326341312622258247048518150429511708822527028385284096 years), iters = {MDP: 41732}, opt = 0.826
+> progress 0.0%, elapsed 285 s, estimated 998969033385709355250579232647332809419150915669515063505773771296870498304 s (31677100246883222756589020525152800280566428494910135556758239707136 years), iters = {MDP: 42174}, opt = 0.826
+> progress 0.0%, elapsed 288 s, estimated 563013659257374032848879754233141140772209885254753660963393986289454809088 s (17853046019069446216496610385055178162795993898854116648933188960256 years), iters = {MDP: 42627}, opt = 0.826
+> progress 0.0%, elapsed 291 s, estimated 266340416086536695386258080431517346950920540660295129249928849020722085888 s (8445599190973385953432547618431832396051549063155138459301874499584 years), iters = {MDP: 43089}, opt = 0.826
+> progress 0.0%, elapsed 294 s, estimated 147020433554358866370486489949329113858277751580894491422813593930288857088 s (4661987365371602449267054206167093531954658675518933542598827048960 years), iters = {MDP: 43559}, opt = 0.826
+> progress 0.0%, elapsed 297 s, estimated 73771464892824354749478923192124724641383367763685842563686931853618446336 s (2339277806089052549322758466132851885386008181934200654364288221184 years), iters = {MDP: 44030}, opt = 0.826
+2024-04-01 17:17:08,758 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:17:08,815 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:17:08,815 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:17:18,836 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 752.8s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:18:11,932 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:18:12,329 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:18:12,329 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 17:18:12,341 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 132
+> progress 0.0%, elapsed 300 s, estimated 37965827874439888263762515889922671127786942169321536168590607655142162432 s (1203888504389899970452920675945872631951413450645830234528219660288 years), iters = {MDP: 44477}, opt = 0.826
+> progress 0.0%, elapsed 303 s, estimated 21423081870619908021904623590254616693391209772678200679789316380091744256 s (679321469768515563855058830714623294691556328549704651410235195392 years), iters = {MDP: 44916}, opt = 0.826
+> progress 0.0%, elapsed 306 s, estimated 9988225993538880773136211105825762418339911281816461410588202095186280448 s (316724568541948319781090062595223742020510801490095277079149936640 years), iters = {MDP: 45368}, opt = 0.826
+> progress 0.0%, elapsed 309 s, estimated 6628533758173418476648789330486558840811346256200714563200317488038412288 s (210189426629040426270828282557204470562407190702415118579152191488 years), iters = {MDP: 45816}, opt = 0.826
+> progress 0.0%, elapsed 312 s, estimated 3321349344893176390285819846296337463003417358831337920654310822989791232 s (105319296831975398379720851967785148837270130689250627310822883328 years), iters = {MDP: 46263}, opt = 0.826
+> progress 0.0%, elapsed 315 s, estimated 1976899919184372928026134561706891592525407276204829064848307168500252672 s (62687085210057486195405461961383470144916130637161369134086225920 years), iters = {MDP: 46717}, opt = 0.826
+> progress 0.0%, elapsed 318 s, estimated 872539447422267151848842479576020844631834198945847200265611379266813952 s (27668044375388985754142936415680375264717065341716392803632676864 years), iters = {MDP: 47180}, opt = 0.826
+> progress 0.0%, elapsed 321 s, estimated 547306142258724325872206139670614688004622720740076230055508123521646592 s (17354963922460816944647187351892429999545479798573426488098422784 years), iters = {MDP: 47640}, opt = 0.826
+> progress 0.0%, elapsed 324 s, estimated 231398286173374906801441917730026285273316494057651598798917347833806848 s (7337591519957347803710043461766147588019141229195032511010308096 years), iters = {MDP: 48094}, opt = 0.826
+> progress 0.0%, elapsed 327 s, estimated 142609499659189116094376464713636191141757649505650811201360339486638080 s (4522117569101633492428969863682869493498236470924168059863171072 years), iters = {MDP: 48545}, opt = 0.826
+> progress 0.0%, elapsed 330 s, estimated 61140486354057306365452959743132253342698860540869755846677568050692096 s (1938752104073354591436757061442363454497482289933759756468486144 years), iters = {MDP: 48998}, opt = 0.826
+> progress 0.0%, elapsed 333 s, estimated 37738803019440919457160976890081420780307060925836738501201262599471104 s (1196689593462738484416496550030385509239987883183452052527251456 years), iters = {MDP: 49458}, opt = 0.826
+> progress 0.0%, elapsed 336 s, estimated 16591509103234203343615955577084741146875826805597379134948741883101184 s (526113302360293021882109987625200184552186897397624055703535616 years), iters = {MDP: 49916}, opt = 0.826
+> progress 0.0%, elapsed 339 s, estimated 10058344204580985510301329787333107764926290805419605124780260864294912 s (318948002428367126272853175542640919581792191246049391211970560 years), iters = {MDP: 50358}, opt = 0.826
+> progress 0.0%, elapsed 342 s, estimated 4805631868436636232291442813638550531351911949385089049664973824851968 s (152385586898675667150791016802600189429648468575205859012902912 years), iters = {MDP: 50799}, opt = 0.826
+> progress 0.0%, elapsed 345 s, estimated 2674602459823157297691024881289139692197953168408651373726896916267008 s (84811087640257394109893114501472643762438505517204411168849920 years), iters = {MDP: 51251}, opt = 0.826
+> progress 0.0%, elapsed 348 s, estimated 1518851708151749000522867567222667898840483689716639329363417479774208 s (48162471719677482646243305102232204913348780931391666840928256 years), iters = {MDP: 51706}, opt = 0.826
+> progress 0.0%, elapsed 351 s, estimated 699301622455763170814450565141785728145367913927722033575059546701824 s (22174708981981328982521961315509129067103902078612754994823168 years), iters = {MDP: 52166}, opt = 0.826
+> progress 0.0%, elapsed 354 s, estimated 460710805885081290813472937388991687917506115874960062255186281758720 s (14609043819288471850934893431201524694992894089126890073751552 years), iters = {MDP: 52618}, opt = 0.826
+> progress 0.0%, elapsed 357 s, estimated 219105739012331253362986213491572986524487014670262450408525444153344 s (6947797406530037270517859087357738143272124183234898617696256 years), iters = {MDP: 53081}, opt = 0.826
+2024-04-01 17:19:12,026 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:19:12,098 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:19:12,098 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:19:22,118 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 878.1s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:20:17,222 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-01 17:20:17,599 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-01 17:20:17,599 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-01 17:20:17,610 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 123
+> progress 0.0%, elapsed 360 s, estimated 134092481703394418510848823480024233095498520215879715165536509755392 s (4252044701401395594945884639735938456266329552801254774669312 years), iters = {MDP: 53530}, opt = 0.826
+> progress 0.0%, elapsed 363 s, estimated 60510264672200848181062509515387453641936176090476402249084717498368 s (1918767905638027894896912283132450772331044640268470313811968 years), iters = {MDP: 53987}, opt = 0.826
+> progress 0.0%, elapsed 366 s, estimated 37724522569816430742357610273653956238609951857388629511344513613824 s (1196236763375711249183970329339416950639581379713476759388160 years), iters = {MDP: 54463}, opt = 0.826
+> progress 0.0%, elapsed 369 s, estimated 15377651831362200024439621565977805177533336784484006264687162294272 s (487622140771251858388623363415452324113550765327755688017920 years), iters = {MDP: 54935}, opt = 0.826
+> progress 0.0%, elapsed 372 s, estimated 8811985964595541692935917104669920152622045363478484567297569587200 s (279426241901177761204221175871383079190531221979745566588928 years), iters = {MDP: 55413}, opt = 0.826
+> progress 0.0%, elapsed 375 s, estimated 3868067198411728896752537555622589023487167132173866715612694183936 s (122655606240858971103867464655828246652096367586723342843904 years), iters = {MDP: 55885}, opt = 0.826
+> progress 0.0%, elapsed 378 s, estimated 2389455277747880256449554495754636656383077455432073671480946196480 s (75769129811893701300068541347431617160880835304047710830592 years), iters = {MDP: 56350}, opt = 0.826
+> progress 0.0%, elapsed 381 s, estimated 1007128360027832622086953225201945353682177463265383006764307316736 s (31935830797432543862306071795900879963767629760690193956864 years), iters = {MDP: 56803}, opt = 0.826
+> progress 0.0%, elapsed 384 s, estimated 630459036315134122592402181314154480378714802389916743184020406272 s (19991724895837588142729193569096258048273859562161160847360 years), iters = {MDP: 57249}, opt = 0.826
+> progress 0.0%, elapsed 387 s, estimated 266817125466365452242246886621713593465443727464193254931637993472 s (8460715546244464996234385460896837959626308866849227407360 years), iters = {MDP: 57730}, opt = 0.826
+> progress 0.0%, elapsed 390 s, estimated 160938989501613340993900560357728939608149982257641870366278156288 s (5103341879173431605402433422386834150645527631161695666176 years), iters = {MDP: 58207}, opt = 0.826
+> progress 0.0%, elapsed 393 s, estimated 68750723613303446701016211309768308097981529317897560297677258752 s (2180071144511144041641187012807930992356474407730831949824 years), iters = {MDP: 58683}, opt = 0.826
+> progress 0.0%, elapsed 396 s, estimated 41236567406047189250482768301691496909002687845400513839340978176 s (1307602974570243098682803220920183311498500342756650516480 years), iters = {MDP: 59158}, opt = 0.826
+> progress 0.0%, elapsed 399 s, estimated 17625381422050764574716575885195563577584886513768920599654039552 s (558897178527738660298680065357382366980395325209154945024 years), iters = {MDP: 59636}, opt = 0.826
+> progress 0.0%, elapsed 402 s, estimated 10687084832639863771340366405736435440310523931215323812981637120 s (338885236955855662101799696097323591998924829511550763008 years), iters = {MDP: 60110}, opt = 0.826
+> progress 0.0%, elapsed 405 s, estimated 4587910520402715970651792497210398488266198499273610511459024896 s (145481688242095254920045216277196809573098290668044812288 years), iters = {MDP: 60580}, opt = 0.826
+> progress 0.0%, elapsed 408 s, estimated 2831559747028843717354245435794348877651435095083944454595280896 s (89788170567885713256436665260019225715693247355500363776 years), iters = {MDP: 61055}, opt = 0.826
+> progress 0.0%, elapsed 411 s, estimated 1192684878690426303906054938004566326358691276832690562075197440 s (37819789405454914196640804421756989251116694003009978368 years), iters = {MDP: 61536}, opt = 0.826
+> progress 0.0%, elapsed 414 s, estimated 724399191673113550477153663173469789617851187099115167976259584 s (22970547681161640284005240117136714986261384205497794560 years), iters = {MDP: 62008}, opt = 0.826
+> progress 0.0%, elapsed 417 s, estimated 325437338695875448326754191410465269035055697357394516780253184 s (10319550313796151796995510183419740784854867636243136512 years), iters = {MDP: 62489}, opt = 0.826
+2024-04-01 17:21:17,321 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-01 17:21:17,387 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-01 17:21:17,387 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-01 17:21:27,408 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 0.8261709207606082 | Time elapsed = 1001.4s | FSC size = 13477
+
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+
+2024-04-01 17:22:20,891 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-04-01 17:22:20,891 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-01 17:22:20,891 - synthesizer.py - A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],1)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=north, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=0, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],1)=south, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, M([start	& !turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=0, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=west, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, M([start	& !turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=0, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=west, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=north, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=2, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=west, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],1)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],2)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, M([start	& !turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=0, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=east, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=-1	& seedy=-1],0)=south, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=north, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=north, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=west, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=north, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=west, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],1)=west, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=north, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=north, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=north, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=north, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=north, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=west, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=north, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=north, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=north, M([start	& !turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=0, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=2, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=north, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=west, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=north, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=north, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, M([start	& !turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=0, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=west, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=south, M([start	& !turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=0, M([start	& !turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=1, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=2	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=4],0)=east, M([start	& !turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=2, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=4],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=south, M([start	& !turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=1, A([start	& turn	& dx=3	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=east, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=south, A([start	& turn	& dx=1	& dy=4	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=4	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=south, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=north, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=0	& dy=3	& amdone=0	& hascrash=0	& seedx=1	& seedy=3],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=2	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=south, M([start	& !turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=2],0)=1, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=2],0)=south, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=3	& seedy=0],0)=north, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=1],0)=south, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=2],0)=east, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=3],0)=west, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=south, A([start	& turn	& dx=1	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=north, A([start	& turn	& dx=4	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=north, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=3	& seedy=2],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=east, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=east, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=south, A([start	& turn	& dx=4	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=2	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=east, A([start	& turn	& dx=2	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=2	& seedy=2],0)=west, A([start	& turn	& dx=3	& dy=3	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=4	& dy=3	& amdone=0	& hascrash=0	& seedx=4	& seedy=4],0)=south, A([start	& turn	& dx=2	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=1],0)=south, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=east, A([start	& turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=south, A([start	& turn	& dx=3	& dy=4	& amdone=0	& hascrash=0	& seedx=2	& seedy=4],0)=east, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=4	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=3	& dy=0	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=north, A([start	& turn	& dx=0	& dy=2	& amdone=0	& hascrash=0	& seedx=0	& seedy=3],0)=east, A([start	& turn	& dx=4	& dy=1	& amdone=0	& hascrash=0	& seedx=4	& seedy=0],0)=south, A([start	& turn	& dx=1	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=0],0)=east, M([start	& !turn	& dx=1	& dy=0	& amdone=0	& hascrash=0	& seedx=2	& seedy=0],0)=0, A([start	& turn	& dx=3	& dy=2	& amdone=0	& hascrash=0	& seedx=3	& seedy=3],0)=east, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=1	& seedy=1],0)=south, A([start	& turn	& dx=0	& dy=1	& amdone=0	& hascrash=0	& seedx=0	& seedy=0],0)=east
+2024-04-01 17:22:20,903 - synthesizer.py - double-checking specification satisfiability:  : 0.8261695740735291
+--------------------
+Synthesis summary:
+optimality objective: Pmax=? [F "goal"] 
+
+method: AR, synthesis time: 417.84 s
+number of holes: 184, family size: 1e107, quotient: 1307 states / 3372 actions
+explored: 0 %
+MDP stats: avg MDP size: 1307, iterations: 62508
+
+optimum: 0.82617
+--------------------
+2024-04-01 17:22:20,927 - synthesizer_pomdp.py - Terminate: True
+2024-04-01 17:22:20,928 - storm_pomdp_control.py - Storm POMDP analysis completed
+
+------------------------------------
+
+PAYNT results: 
+0.8261695740735291
+controller size: 778
+
+Storm results: 
+0.8261709207606082
+controller size: 13477
+
+------------------------------------
+

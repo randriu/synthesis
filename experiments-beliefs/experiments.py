@@ -112,6 +112,60 @@ def run_experiment(options, logs_string, experiment_models, timeout, special={})
 
     print(f'\nExperiment {logs_string} completed. The logs are saved in folder {logs_dir.decode("utf-8")}')
 
+
+def run_sarsop(options, logs_string, experiment_models, timeout):
+    logs_dir = os.fsencode(dir_path + "/{}/".format(logs_string))
+
+    print(f'\nRunning experiment {logs_string}. The logs will be saved in folder {logs_dir.decode("utf-8")}')
+    print(f'The options used: "{options}"\n')
+
+    real_timeout = int(timeout*timeout_multiplier)
+
+    for model in experiment_models:
+
+        model_name = model[:-6]
+        model_name = model_name.replace(".", "-")
+
+        # THE REST OF THE MODELS
+        command = "./pomdpsol ../models/{} -p 1e-4 -o ../output/{}.out".format(model, model_name)
+
+        if not overwrite_logs:
+            if os.path.isfile(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt"):
+                print(model_name, "LOG EXISTS")
+                continue
+
+        process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            # TIMEOUT HERE TO TERMINATE EXPERIMENT
+            # timeout should be higher than the expected running time of a given experiment
+            output, error = process.communicate(timeout=real_timeout)
+            process.wait()
+        except subprocess.TimeoutExpired:
+            process.send_signal(signal.SIGINT)
+            output, error = process.communicate()
+            process.wait()
+
+        if os.path.isfile(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt"):
+            print(model_name, "OVERWRITEN LOG")
+            os.remove(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt")
+        else:
+            print(model_name)
+
+        if os.path.isfile(logs_dir.decode("utf-8") + model_name + "/" + "stderr.txt"):    
+            os.remove(logs_dir.decode("utf-8") + model_name + "/" + "stderr.txt")
+
+        os.makedirs(os.path.dirname(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt"), exist_ok=True)
+        with open(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt", "w") as text_file:
+            text_file.write(output.decode("utf-8"))
+
+        # TODO remove after
+        if error:
+            with open(logs_dir.decode("utf-8") + model_name + "/" + "stderr.txt", "w") as text_file:
+                text_file.write(error.decode("utf-8"))
+
+    print(f'\nExperiment {logs_string} completed. The logs are saved in folder {logs_dir.decode("utf-8")}')
+
+
 if __name__ == '__main__':
     experiment = sys.argv[1]
     overwrite = sys.argv[2]
@@ -135,6 +189,53 @@ if __name__ == '__main__':
         logs_string = "uniform-overapp-default-90-2-posterior"
         timeout = 1200
         run_experiment(options, logs_string, experiment_models, timeout)
+
+        print("\n EXPERIMENT COMPLETE\n")
+
+    elif experiment == 'saynt-variants':
+        experiment_models = ["drone-4-1", "drone-8-2", "network", "4x3-95", "query-s3", "milos-aaai97", "network-3-8-20", "refuel-20", "lanes"]
+        posterior_experiment_models = ["drone-4-2", "network", "4x3-95"]
+        longer_experiment_models = ["milos-aaai97", "query-s3"]
+
+        options = "--storm-pomdp --iterative-storm 900 60 10 --storm-exploration-heuristic gap"
+        logs_string = "saynt-gap"
+        timeout = 1200
+        run_experiment(options, logs_string, experiment_models, timeout)
+
+        options = "--storm-pomdp --iterative-storm 900 60 10 --storm-exploration-heuristic gap --posterior-aware"
+        logs_string = "saynt-gap-posterior"
+        timeout = 1200
+        run_experiment(options, logs_string, posterior_experiment_models, timeout)
+
+        options = "--storm-pomdp --iterative-storm 900 90 10 --storm-exploration-heuristic gap"
+        logs_string = "saynt-gap-paynt90"
+        timeout = 1200
+        run_experiment(options, logs_string, longer_experiment_models, timeout)
+
+        options = "--storm-pomdp --iterative-storm 900 60 10 --storm-exploration-heuristic reachability"
+        logs_string = "saynt-reachability"
+        timeout = 1200
+        run_experiment(options, logs_string, experiment_models, timeout)
+
+        options = "--storm-pomdp --iterative-storm 900 60 10 --storm-exploration-heuristic reachability --posterior-aware"
+        logs_string = "saynt-reachability-posterior"
+        timeout = 1200
+        run_experiment(options, logs_string, posterior_experiment_models, timeout)
+
+        options = "--storm-pomdp --iterative-storm 900 90 10 --storm-exploration-heuristic reachability"
+        logs_string = "saynt-reachability-paynt90"
+        timeout = 1200
+        run_experiment(options, logs_string, longer_experiment_models, timeout)
+
+        print("\n EXPERIMENT COMPLETE\n")
+
+    elif "sarsop":
+        experiment_models = ["drone-4-1-80.pomdp", "drone-4-1-95.pomdp", "drone-4-2-80.pomdp", "drone-4-2-95.pomdp", "drone-8-2-80.pomdp", "drone-8-2-95.pomdp", "grid-av-4-01-80.pomdp", "grid-av-4-01-95.pomdp", "refuel-06-80.pomdp", "refuel-06-95.pomdp", "refuel-08-80.pomdp", "refuel-08-95.pomdp", "refuel-20-80.pomdp", "refuel-20-95.pomdp"]
+
+        options = ""
+        logs_string = "sarsop"
+        timeout = 900
+        run_sarsop(options, logs_string, experiment_models, timeout)
 
         print("\n EXPERIMENT COMPLETE\n")
 
