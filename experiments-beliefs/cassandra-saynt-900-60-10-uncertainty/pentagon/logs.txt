@@ -1,0 +1,59 @@
+2024-04-02 21:07:56,195 - cli.py - This is Paynt version 0.1.0.
+2024-04-02 21:07:56,195 - sketch.py - loading sketch from models/cassandra/pomdp/pentagon.pomdp ...
+2024-04-02 21:07:56,195 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 1:1:  expecting <model type>, here:
+	discount: 0.990000
+	^
+
+2024-04-02 21:07:56,205 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line 'discount: 0.990000'.
+2024-04-02 21:07:56,205 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-02 21:07:56,697 - sketch.py - applying discount factor transformation...
+2024-04-02 21:07:57,197 - sketch.py - sketch parsing OK
+2024-04-02 21:07:57,197 - sketch.py - constructed explicit quotient having 5645 states and 22577 actions
+2024-04-02 21:07:57,198 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [C{99/100}] 
+2024-04-02 21:07:57,223 - pomdp.py - constructed POMDP having 30 observations.
+2024-04-02 21:07:57,467 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-02 21:07:57,530 - pomdp.py - constructed quotient MDP having 5645 states and 22577 actions.
+2024-04-02 21:07:57,530 - pomdp.py - creating coloring ...
+2024-04-02 21:07:57,564 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-02 21:07:57,564 - synthesizer_pomdp.py - Storm settings: iterative - (900, 60, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-02 21:07:57,564 - synthesizer.py - synthesis initiated, design space: 1e16
+2024-04-02 21:07:57,564 - synthesizer_pomdp.py - Timeout for PAYNT started
+> progress 0.0%, elapsed 3 s, estimated 3854731 s (44 days), iters = {MDP: 5}
+> progress 0.0%, elapsed 7 s, estimated 7091267 s (82 days), iters = {MDP: 8}
+> progress 0.0%, elapsed 10 s, estimated 10292213 s (119 days), iters = {MDP: 11}
+> progress 0.0%, elapsed 13 s, estimated 13312535 s (154 days), iters = {MDP: 14}
+> progress 0.0%, elapsed 16 s, estimated 16797321 s (194 days), iters = {MDP: 18}
+> progress 0.0%, elapsed 20 s, estimated 20189317 s (233 days), iters = {MDP: 22}
+> progress 0.0%, elapsed 23 s, estimated 23389612 s (270 days), iters = {MDP: 26}
+-----------PAYNT-----------                     
+Value = -1.8037992280933997 | Time elapsed = 25.5s | FSC size = 60
+
+-----------PAYNT-----------                     
+Value = -1.713085477109247 | Time elapsed = 26.1s | FSC size = 60
+
+> progress 0.0%, elapsed 26 s, estimated 158599626178210464 s (5029161154 years), iters = {MDP: 31}, opt = -1.713
+-----------PAYNT-----------                     
+Value = -1.665514504919356 | Time elapsed = 28.3s | FSC size = 60
+
+> progress 0.0%, elapsed 29 s, estimated 33216372034754560 s (1053284247 years), iters = {MDP: 39}, opt = -1.666
+> progress 0.0%, elapsed 32 s, estimated 29572036252881716 s (937723118 years), iters = {MDP: 46}, opt = -1.666
+> progress 0.0%, elapsed 35 s, estimated 10094918289927680 s (320107759 years), iters = {MDP: 55}, opt = -1.666
+> progress 0.0%, elapsed 39 s, estimated 10403982537191664 s (329908122 years), iters = {MDP: 62}, opt = -1.666
+-----------PAYNT-----------                     
+Value = -1.6524893839533805 | Time elapsed = 40.1s | FSC size = 60
+
+> progress 0.0%, elapsed 42 s, estimated 9606492172913460 s (304619868 years), iters = {MDP: 70}, opt = -1.652
+> progress 0.0%, elapsed 45 s, estimated 8966216587616256 s (284316862 years), iters = {MDP: 80}, opt = -1.652
+> progress 0.0%, elapsed 48 s, estimated 3434878469398656 s (108919281 years), iters = {MDP: 87}, opt = -1.652
+> progress 0.0%, elapsed 51 s, estimated 3337559005736960 s (105833301 years), iters = {MDP: 95}, opt = -1.652
+> progress 0.0%, elapsed 55 s, estimated 3023789345387894 s (95883731 years), iters = {MDP: 103}, opt = -1.652
+> progress 0.0%, elapsed 58 s, estimated 2348332725547812 s (74465142 years), iters = {MDP: 113}, opt = -1.652
+2024-04-02 21:08:58,466 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-02 21:08:58,481 - storm_pomdp_control.py - Interactive Storm started
+2024-04-02 21:08:58,481 - storm_pomdp_control.py - starting Storm POMDP analysis
+Finished exploring under-approximation MDP.
+Start analysis...

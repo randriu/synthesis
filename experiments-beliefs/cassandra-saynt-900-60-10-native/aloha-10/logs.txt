@@ -1,0 +1,30 @@
+2024-04-02 21:39:49,324 - cli.py - This is Paynt version 0.1.0.
+2024-04-02 21:39:49,324 - sketch.py - loading sketch from models/cassandra/pomdp/aloha.10.pomdp ...
+2024-04-02 21:39:49,324 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 1:1:  expecting <model type>, here:
+	discount: 0.999000
+	^
+
+2024-04-02 21:39:49,326 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line 'discount: 0.999000'.
+2024-04-02 21:39:49,326 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+ERROR: MultiAgentDecisionProcessDiscrete::SanityCheck failed: transition does not sum to 1 but to:
+1.0000010000
+ for (s,a)==(undefined[0],JA0_a0[0])
+MADP: parsing success
+MADP: trying to parse as dec-POMDP...
+stopped at: 
+File:	models/cassandra/pomdp/aloha.10.pomdp
+Line:	1
+Col:	1
+-> unparsed : "discount: 0.999000
+values: reward
+states: 30
+actions: 9
+observations: 3
+start: 1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.0"
+partial match? hit: "0"
+consumed chars - length: "18446744073709551615"
+ERROR: Parsing failed
+MADP: parsing failure

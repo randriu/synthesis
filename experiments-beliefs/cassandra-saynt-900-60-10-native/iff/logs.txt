@@ -1,0 +1,226 @@
+2024-04-02 21:55:45,348 - cli.py - This is Paynt version 0.1.0.
+2024-04-02 21:55:45,348 - sketch.py - loading sketch from models/cassandra/pomdp/iff.pomdp ...
+2024-04-02 21:55:45,348 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 1:1:  expecting <model type>, here:
+	discount: 0.999000
+	^
+
+2024-04-02 21:55:45,350 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line 'discount: 0.999000'.
+2024-04-02 21:55:45,350 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-02 21:55:45,409 - sketch.py - applying discount factor transformation...
+2024-04-02 21:55:45,413 - sketch.py - sketch parsing OK
+2024-04-02 21:55:45,413 - sketch.py - constructed explicit quotient having 667 states and 2665 actions
+2024-04-02 21:55:45,413 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [C{999/1000}] 
+2024-04-02 21:55:45,414 - pomdp.py - constructed POMDP having 24 observations.
+2024-04-02 21:55:45,418 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-02 21:55:45,420 - pomdp.py - constructed quotient MDP having 667 states and 2665 actions.
+2024-04-02 21:55:45,420 - pomdp.py - creating coloring ...
+2024-04-02 21:55:45,424 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-02 21:55:45,424 - synthesizer_pomdp.py - Storm settings: iterative - (900, 60, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-02 21:55:45,424 - synthesizer.py - synthesis initiated, design space: 1e13
+2024-04-02 21:55:45,431 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = -4.972794367929275 | Time elapsed = 0.1s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -4.831421551830065 | Time elapsed = 0.1s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -4.519271378494551 | Time elapsed = 0.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -4.5099837378156025 | Time elapsed = 0.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -4.225519640694632 | Time elapsed = 0.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.939033440150123 | Time elapsed = 0.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.938368369538498 | Time elapsed = 0.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.925251830206676 | Time elapsed = 0.4s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.9172233971730686 | Time elapsed = 0.4s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.460869565301918 | Time elapsed = 0.5s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.4509493498662547 | Time elapsed = 0.5s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.4361746245735834 | Time elapsed = 0.5s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.2099127002023877 | Time elapsed = 0.6s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.0791174777454113 | Time elapsed = 0.9s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -3.0725273648544142 | Time elapsed = 0.9s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -2.7580824219830653 | Time elapsed = 0.9s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -2.2601098052919637 | Time elapsed = 1.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -2.2413725472250183 | Time elapsed = 1.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.959150868993321 | Time elapsed = 1.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.7199826771473523 | Time elapsed = 1.7s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.717746841602815 | Time elapsed = 1.7s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.7170875785106867 | Time elapsed = 1.8s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.7017945820358618 | Time elapsed = 1.8s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.6503297411450975 | Time elapsed = 1.8s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.1963500814922554 | Time elapsed = 2.0s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.1229494718789104 | Time elapsed = 2.0s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -1.0042382231048403 | Time elapsed = 2.1s | FSC size = 48
+
+> progress 0.0%, elapsed 3 s, estimated 379056936 s (12 years), iters = {MDP: 1403}, opt = -1.004
+-----------PAYNT-----------                     
+Value = -0.9934005397782188 | Time elapsed = 3.4s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.8267870653975171 | Time elapsed = 4.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.613187704990704 | Time elapsed = 4.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.6091589676627818 | Time elapsed = 4.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.6053756757568705 | Time elapsed = 4.4s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.5879442019427836 | Time elapsed = 4.4s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.42194289760347736 | Time elapsed = 4.4s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = -0.16866982551561716 | Time elapsed = 4.6s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.022461112852752763 | Time elapsed = 4.7s | FSC size = 48
+
+> progress 0.0%, elapsed 6 s, estimated 267286331 s (8 years), iters = {MDP: 2770}, opt = 0.022
+-----------PAYNT-----------                     
+Value = 0.0348890749952151 | Time elapsed = 9.0s | FSC size = 48
+
+> progress 0.0%, elapsed 9 s, estimated 184163239 s (5 years), iters = {MDP: 4124}, opt = 0.035
+-----------PAYNT-----------                     
+Value = 0.04056312819178931 | Time elapsed = 9.1s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.05214106747811886 | Time elapsed = 10.1s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.05529697202586714 | Time elapsed = 10.1s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.4155779128474313 | Time elapsed = 10.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.5515986768122607 | Time elapsed = 10.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.6543550375871741 | Time elapsed = 10.8s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 0.9206410541762082 | Time elapsed = 10.9s | FSC size = 48
+
+> progress 0.0%, elapsed 12 s, estimated 194575093 s (6 years), iters = {MDP: 5488}, opt = 0.921
+-----------PAYNT-----------                     
+Value = 1.0650237355761973 | Time elapsed = 13.3s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.1014451074045395 | Time elapsed = 13.5s | FSC size = 48
+
+> progress 0.0%, elapsed 15 s, estimated 141311569 s (4 years), iters = {MDP: 6836}, opt = 1.101
+-----------PAYNT-----------                     
+Value = 1.2680466567517623 | Time elapsed = 15.6s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.3053740147076351 | Time elapsed = 15.6s | FSC size = 48
+
+> progress 0.0%, elapsed 18 s, estimated 82627948 s (2 years), iters = {MDP: 8123}, opt = 1.305
+-----------PAYNT-----------                     
+Value = 1.3720836504369478 | Time elapsed = 18.8s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.4886827479811702 | Time elapsed = 18.9s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.5072546240453941 | Time elapsed = 20.0s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.6256904050515892 | Time elapsed = 20.0s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.6522036555293296 | Time elapsed = 20.2s | FSC size = 48
+
+> progress 0.0%, elapsed 21 s, estimated 86797614 s (2 years), iters = {MDP: 9540}, opt = 1.652
+-----------PAYNT-----------                     
+Value = 1.8537913661242977 | Time elapsed = 22.0s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 1.8824571833261672 | Time elapsed = 22.1s | FSC size = 48
+
+> progress 0.0%, elapsed 24 s, estimated 82563184 s (2 years), iters = {MDP: 10928}, opt = 1.882
+-----------PAYNT-----------                     
+Value = 2.034589423051573 | Time elapsed = 24.1s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 2.0649173150787896 | Time elapsed = 24.2s | FSC size = 48
+
+> progress 0.0%, elapsed 27 s, estimated 58473794 s (1 year), iters = {MDP: 12248}, opt = 2.065
+-----------PAYNT-----------                     
+Value = 2.1642218626809884 | Time elapsed = 27.2s | FSC size = 48
+
+-----------PAYNT-----------                     
+Value = 2.195648784642461 | Time elapsed = 27.2s | FSC size = 48
+
+> progress 0.0%, elapsed 30 s, estimated 36006309 s (1 year), iters = {MDP: 13475}, opt = 2.196
+> progress 0.0%, elapsed 33 s, estimated 15718724 s (181 days), iters = {MDP: 14725}, opt = 2.196
+> progress 0.0%, elapsed 36 s, estimated 12696416 s (146 days), iters = {MDP: 15872}, opt = 2.196
+> progress 0.0%, elapsed 39 s, estimated 11778939 s (136 days), iters = {MDP: 17154}, opt = 2.196
+> progress 0.0%, elapsed 42 s, estimated 5439289 s (62 days), iters = {MDP: 18419}, opt = 2.196
+> progress 0.0%, elapsed 45 s, estimated 5657375 s (65 days), iters = {MDP: 19731}, opt = 2.196
+> progress 0.0%, elapsed 48 s, estimated 5442661 s (62 days), iters = {MDP: 21007}, opt = 2.196
+> progress 0.0%, elapsed 51 s, estimated 5661350 s (65 days), iters = {MDP: 22351}, opt = 2.196
+> progress 0.0%, elapsed 54 s, estimated 5694279 s (65 days), iters = {MDP: 23570}, opt = 2.196
+> progress 0.001%, elapsed 57 s, estimated 4829635 s (55 days), iters = {MDP: 24754}, opt = 2.196
+> progress 0.001%, elapsed 60 s, estimated 4494089 s (52 days), iters = {MDP: 25959}, opt = 2.196
+2024-04-02 21:56:45,507 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-02 21:56:45,602 - storm_pomdp_control.py - Interactive Storm started
+2024-04-02 21:56:45,602 - storm_pomdp_control.py - starting Storm POMDP analysis
+Finished exploring under-approximation MDP.
+Start analysis...
