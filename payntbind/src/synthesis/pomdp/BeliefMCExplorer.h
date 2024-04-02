@@ -34,21 +34,22 @@ namespace synthesis {
         typedef storm::storage::BeliefManager<PomdpModelType, BeliefValueType> BeliefManagerType;
         typedef storm::builder::BeliefMdpExplorer<PomdpModelType, BeliefValueType> ExplorerType;
         typedef typename PomdpModelType::ValueType PomdpValueType;
+        typedef typename storm::pomdp::modelchecker::BeliefExplorationPomdpModelChecker<PomdpModelType>::Result Result;
 
         public:
 
             BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp);
 
-            double checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet);
+            Result checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, uint64_t const& sizeThreshold=1000000);
 
-            double checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env);
+            Result checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env, uint64_t const& sizeThreshold=1000000);
 
             PomdpModelType const& pomdp() const;
 
         private:
 
             bool exploreMC(std::set<uint32_t> const &targetObservations, bool min, bool computeRewards, std::shared_ptr<BeliefManagerType>& beliefManager, std::shared_ptr<ExplorerType>& beliefExplorer, std::vector<typename PomdpModelType::ValueType> const &cutoffVec, AlphaVectorSet const& alphaVectorSet,
-            storm::Environment const& env);
+            storm::Environment const& env, uint64_t const& sizeThreshold=1000000);
 
             uint64_t getBestActionInBelief(uint64_t beliefId, std::shared_ptr<BeliefManagerType> &beliefManager, std::shared_ptr<ExplorerType> &beliefExplorer, AlphaVectorSet const& alphaVectorSet);
 
@@ -56,6 +57,8 @@ namespace synthesis {
             std::shared_ptr<PomdpModelType> preprocessedPomdp;
 
             double precision;
+
+            Result MCExplorationResult = Result(-storm::utility::infinity<BeliefValueType>(), storm::utility::infinity<BeliefValueType>());
 
             storm::pomdp::modelchecker::POMDPValueBounds<BeliefValueType> pomdpValueBounds;
 

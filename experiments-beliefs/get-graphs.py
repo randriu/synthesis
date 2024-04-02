@@ -88,6 +88,46 @@ def get_drone42_header():
         anchor=north west, draw=black, \n\
         fill=white,align=left},\n]\n"
 
+def get_drone41_header():
+    return "\\begin{tikzpicture}\n\\begin{axis}[\n\
+    title={Drone-4-2},\n\
+    xlabel={Time [min]},\n\
+    ylabel={Value [Pmax]},\n\
+    xmin=0, xmax=15,\n\
+    ymin=0.5, ymax=1.0,\n\
+    xtick={0,2,4,6,8,10,12,14},\n\
+    ytick={0.5,0.6,0.7,0.8,0.9,1.0},\n\
+    xtick pos=left,\n\
+    ytick pos=left,\n\
+    restrict y to domain=0.0:1.0,\n\
+    ymajorgrids=true,\n\
+    grid style=dashed,\n\
+    height=8cm,\n\
+    width=12cm,\n\
+    legend style ={ at={(1.03,1)},\n\
+        anchor=north west, draw=black, \n\
+        fill=white,align=left},\n]\n"
+
+def get_drone82_header():
+    return "\\begin{tikzpicture}\n\\begin{axis}[\n\
+    title={Drone-4-2},\n\
+    xlabel={Time [min]},\n\
+    ylabel={Value [Pmax]},\n\
+    xmin=0, xmax=15,\n\
+    ymin=0.5, ymax=1.0,\n\
+    xtick={0,2,4,6,8,10,12,14},\n\
+    ytick={0.5,0.6,0.7,0.8,0.9,1.0},\n\
+    xtick pos=left,\n\
+    ytick pos=left,\n\
+    restrict y to domain=0.0:1.0,\n\
+    ymajorgrids=true,\n\
+    grid style=dashed,\n\
+    height=8cm,\n\
+    width=12cm,\n\
+    legend style ={ at={(1.03,1)},\n\
+        anchor=north west, draw=black, \n\
+        fill=white,align=left},\n]\n"
+
 def get_refuel08_header():
     return "\\begin{tikzpicture}\n\\begin{axis}[\n\
     title={Refuel-08},\n\
@@ -392,6 +432,12 @@ def get_graphs(enhanced_saynt_experiment):
             elif model_name == "drone-4-2":
                 header = get_drone42_header()
                 output_file_name = "source-drone-4-2.tex"
+            elif model_name == "drone-4-1":
+                header = get_drone41_header()
+                output_file_name = "source-drone-4-1.tex"
+            elif model_name == "drone-8-2":
+                header = get_drone82_header()
+                output_file_name = "source-drone-8-2.tex"
             else:
                 continue
 

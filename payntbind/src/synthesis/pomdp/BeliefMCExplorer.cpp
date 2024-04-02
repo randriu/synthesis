@@ -17,13 +17,13 @@ namespace synthesis {
     }
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    double BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet) {
+    typename BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::Result BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, uint64_t const& sizeThreshold) {
         storm::Environment env;
-        return checkAlphaVectors(formula, alphaVectorSet, env);
+        return checkAlphaVectors(formula, alphaVectorSet, env, sizeThreshold);
     }
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    double BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env) {
+    typename BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::Result BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env, uint64_t const& sizeThreshold) {
         STORM_PRINT_AND_LOG("Start checking the MC induced by the alpha vector policy...\n")
         auto formulaInfo = storm::pomdp::analysis::getFormulaInformation(pomdp(), formula);
         std::optional<std::string> rewardModelName;
@@ -100,24 +100,27 @@ namespace synthesis {
         }
 
         auto explorer = std::make_shared<ExplorerType>(manager, pomdpValueBounds.trivialPomdpValueBounds);
-        exploreMC(targetObservations, formulaInfo.minimize(), rewardModelName.has_value(), manager, explorer, cutoffVec, alphaVectorSet, env);
+        exploreMC(targetObservations, formulaInfo.minimize(), rewardModelName.has_value(), manager, explorer, cutoffVec, alphaVectorSet, env, sizeThreshold);
 
         STORM_LOG_ASSERT(explorer->hasComputedValues(), "Values for MC were not computed");
 
-        return explorer->getComputedValueAtInitialState();
+        double mcValue = explorer->getComputedValueAtInitialState();
+        MCExplorationResult.updateUpperBound(mcValue);
+        MCExplorationResult.updateLowerBound(mcValue);
+        MCExplorationResult.schedulerAsMarkovChain = explorer->getExploredMdp();
+
+        return MCExplorationResult;
     }
 
 
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    bool BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::exploreMC(const std::set<uint32_t> &targetObservations, bool min, bool computeRewards, std::shared_ptr<BeliefManagerType> &beliefManager, std::shared_ptr<ExplorerType> &beliefExplorer, std::vector<typename PomdpModelType::ValueType> const &cutoffVec, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env){
+    bool BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::exploreMC(const std::set<uint32_t> &targetObservations, bool min, bool computeRewards, std::shared_ptr<BeliefManagerType> &beliefManager, std::shared_ptr<ExplorerType> &beliefExplorer, std::vector<typename PomdpModelType::ValueType> const &cutoffVec, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env, uint64_t const& sizeThreshold){
         if (computeRewards) {
             beliefExplorer->startNewExploration(storm::utility::zero<BeliefMDPType>());
         } else {
             beliefExplorer->startNewExploration(storm::utility::one<BeliefMDPType>(), storm::utility::zero<BeliefMDPType>());
         }
-
-        uint64_t sizeThreshold = 1000000;
 
         //TODO use timelimit
         bool fixPoint = true;
@@ -168,10 +171,20 @@ namespace synthesis {
                     // if action is not in the model, treat it as a self loop action
                     if(chosenLocalActionIndex >= numberOfLocalChoices){
                         // std::cout << "adding self loop " << currId << std::endl;
-                        beliefExplorer->addSelfloopTransition();
-                        beliefExplorer->addChoiceLabelToCurrentState(0, "loop");
-                    }
-                    else {
+                        // if we are computing rewards apply cut-offs, otherwise add self-loop
+                        if (computeRewards) {
+                            auto cutOffValue = beliefManager->getWeightedSum(currId, cutoffVec);
+                            beliefExplorer->addTransitionsToExtraStates(0, storm::utility::one<PomdpValueType>());
+                            beliefExplorer->addRewardToCurrentState(0, cutOffValue);
+                            if(pomdp().hasChoiceLabeling()){
+                                beliefExplorer->addChoiceLabelToCurrentState(0, "cutoff");
+                            }
+                        } else {
+                            beliefExplorer->addSelfloopTransition();
+                            beliefExplorer->addChoiceLabelToCurrentState(0, "loop");
+                        }
+                        
+                    } else {
                         // Add successor transitions for the chosen action
                         auto truncationProbability = storm::utility::zero<typename PomdpModelType::ValueType>();
                         auto truncationValueBound = storm::utility::zero<typename PomdpModelType::ValueType>();\
