@@ -182,6 +182,16 @@ if __name__ == '__main__':
 
         print("\n EXPERIMENT COMPLETE\n")
 
+    elif experiment == 'saynt':
+        experiment_models = ["problem-saynt"]
+
+        options = "--storm-pomdp --iterative-storm 900 60 10 --enhanced-saynt 6"
+        logs_string = "saynt-enhanced"
+        timeout = 1200
+        run_experiment(options, logs_string, experiment_models, timeout)
+
+        print("\n EXPERIMENT COMPLETE\n")
+
     elif experiment == 'posterior':
         experiment_models = ["drone-4-2", "network", "4x3-95"]
 
