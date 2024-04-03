@@ -1,0 +1,1 @@
+ERROR: Bounds::writeToFile: couldn't open ../output/hallway.out for writing 

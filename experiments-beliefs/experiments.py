@@ -230,10 +230,11 @@ if __name__ == '__main__':
         print("\n EXPERIMENT COMPLETE\n")
 
     elif "sarsop":
-        experiment_models = ["drone-4-1-80.pomdp", "drone-4-1-95.pomdp", "drone-4-2-80.pomdp", "drone-4-2-95.pomdp", "drone-8-2-80.pomdp", "drone-8-2-95.pomdp", "grid-av-4-01-80.pomdp", "grid-av-4-01-95.pomdp", "refuel-06-80.pomdp", "refuel-06-95.pomdp", "refuel-08-80.pomdp", "refuel-08-95.pomdp", "refuel-20-80.pomdp", "refuel-20-95.pomdp"]
+        # experiment_models = ["drone-4-1-80.pomdp", "drone-4-1-95.pomdp", "drone-4-2-80.pomdp", "drone-4-2-95.pomdp", "drone-8-2-80.pomdp", "drone-8-2-95.pomdp", "grid-av-4-01-80.pomdp", "grid-av-4-01-95.pomdp", "refuel-06-80.pomdp", "refuel-06-95.pomdp", "refuel-08-80.pomdp", "refuel-08-95.pomdp", "refuel-20-80.pomdp", "refuel-20-95.pomdp"]
+        experiment_models = ["iff.pomdp", "hallway.pomdp", "learning.c3.pomdp", "learning.c4.pomdp", "milos-aaai97.pomdp", "mit.pomdp", "network.pomdp", "pentagon.pomdp", "query.s3.pomdp", "query.s4.pomdp", "tiger-grid.pomdp"]
 
         options = ""
-        logs_string = "sarsop"
+        logs_string = "sarsop-main"
         timeout = 900
         run_sarsop(options, logs_string, experiment_models, timeout)
 
