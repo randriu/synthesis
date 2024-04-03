@@ -109,10 +109,16 @@ class Sketch:
                 explicit_quotient = decpomdp_manager.construct_pomdp()
                 if native_discount:
                     paynt.quotient.quotient.Quotient.discounted_expected_visits = decpomdp_manager.discount_factor
-                    optimality = paynt.verification.property.construct_discount_property(
-                        decpomdp_manager.reward_model_name, 
-                        decpomdp_manager.reward_minimizing, 
-                        decpomdp_manager.discount_factor)
+                    if discount_factor < 1:
+                        optimality = paynt.verification.property.construct_discount_property(
+                            decpomdp_manager.reward_model_name, 
+                            decpomdp_manager.reward_minimizing, 
+                            discount_factor)
+                    else:
+                        optimality = paynt.verification.property.construct_discount_property(
+                            decpomdp_manager.reward_model_name, 
+                            decpomdp_manager.reward_minimizing, 
+                            decpomdp_manager.discount_factor)
                     specification = paynt.verification.property.Specification([optimality])
                 elif constraint_bound is not None:
                     specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
