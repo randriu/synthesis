@@ -32,6 +32,9 @@ public:
     BitVector selectCompatibleChoices(Family const& subfamily) const;
     /** For each hole, collect options (colors) involved in any of the given choices. */
     std::vector<std::vector<uint64_t>> collectHoleOptions(BitVector const& choices) const;
+
+    /** Check if the two choices have the same color. */
+    bool haveSameColor(uint64_t choice1, uint64_t choice2) const;
     
 protected:
 

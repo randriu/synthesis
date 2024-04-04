@@ -255,6 +255,160 @@ storm::storage::BitVector policyToChoicesForFamily(
     return std::make_pair(policy_fixed,choice_mask);
 }*/
 
+
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
+    storm::models::sparse::Mdp<ValueType> const& mdp
+) {
+    storm::storage::sparse::ModelComponents<ValueType> components;
+    auto num_states = mdp.getNumberOfStates();
+    auto num_choices = mdp.getNumberOfChoices();
+    auto const& tm = mdp.getTransitionMatrix();
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(num_choices, num_states, 0, true, true, num_states);
+    std::map<std::string,std::vector<ValueType>> rewards;
+    for(auto const& [reward_name,reward_model]: mdp.getRewardModels()) {
+        rewards[reward_name] = std::vector<ValueType>(num_choices,0);
+    }
+
+    uint64_t self_loops_removed = 0;
+
+    for(uint64_t state = 0; state < num_states; ++state) {
+        if(state == 0) {
+            builder.newRowGroup(builder.getLastRow());
+        } else {
+            builder.newRowGroup(builder.getLastRow()+1);
+        }
+
+        for(auto const& choice: tm.getRowGroupIndices(state)) {
+
+            // preemptively load rewards
+            for(auto const& [reward_name,reward_model]: mdp.getRewardModels()) {
+                rewards[reward_name][choice] += reward_model.getStateActionReward(choice);
+            }
+
+            // get self-loop probability
+            ValueType self_loop_prob = 0;
+            for(auto const& entry: tm.getRow(choice)) {
+                if(entry.getColumn() == state) {
+                    self_loop_prob = entry.getValue();
+                    break;
+                }
+            }
+            if(self_loop_prob == 1) {
+                // keep this choice absorbing
+                builder.addNextValue(choice,state,1);
+                continue;
+            }
+
+            // non-unit self-loop
+            if(self_loop_prob > 0) {
+                self_loops_removed += 1;
+            }
+            ValueType factor = 1-self_loop_prob;
+            for(auto const& entry: tm.getRow(choice)) {
+                uint64_t dst = entry.getColumn();
+                if(dst == state) {
+                    continue;
+                }
+                builder.addNextValue(choice, dst, entry.getValue() / factor);
+                for(auto [reward_name,choice_rewards]: rewards) {
+                    choice_rewards[choice] /= factor;
+                }
+            }
+        }
+    }
+
+    // std::cout << "self-loops simplified: " << self_loops_removed << std::endl;
+    components.transitionMatrix =  builder.build();
+    components.stateLabeling = mdp.getStateLabeling();
+    components.choiceLabeling = mdp.getOptionalChoiceLabeling();
+    for(auto const& [reward_name,choice_rewards]: rewards) {
+        std::optional<std::vector<ValueType>> state_rewards;
+        auto reward_model = storm::models::sparse::StandardRewardModel<ValueType>(std::move(state_rewards), std::move(choice_rewards));
+        components.rewardModels.emplace(reward_name,reward_model);
+    }
+    return std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
+}
+
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mergeChoices(
+    storm::models::sparse::Mdp<ValueType> const& mdp,
+    synthesis::Coloring const& coloring
+) {
+
+    BitVector const& uncolored_choices = coloring.getUncoloredChoices();
+
+    storm::storage::sparse::ModelComponents<ValueType> components;
+    auto num_states = mdp.getNumberOfStates();
+    auto num_choices = mdp.getNumberOfChoices();
+    auto const& tm = mdp.getTransitionMatrix();
+
+    storm::storage::SparseMatrixBuilder<ValueType> builder(num_choices, num_states, 0, true, true, num_states);
+    std::map<std::string,std::vector<ValueType>> rewards;
+    for(auto const& [reward_name,reward_model]: mdp.getRewardModels()) {
+        rewards[reward_name] = std::vector<ValueType>(num_choices);
+    }
+
+    uint64_t choices_bypassed = 0;
+    for(uint64_t state = 0; state < num_states; ++state) {
+        if(state == 0) {
+            builder.newRowGroup(builder.getLastRow());
+        } else {
+            builder.newRowGroup(builder.getLastRow()+1);
+        }
+
+        for(auto const& choice1: tm.getRowGroupIndices(state)) {
+
+            for(auto const& [reward_name,reward_model]: mdp.getRewardModels()) {
+                rewards[reward_name][choice1] += reward_model.getStateActionReward(choice1);
+            }
+
+            for(auto const& entry: tm.getRow(choice1)) {
+                uint64_t dst = entry.getColumn();
+                ValueType dst_prob = entry.getValue();
+                bool have_matching_choice = false;
+                uint64_t matching_choice;
+
+                if(state != dst) {
+                    for(auto const& choice2: tm.getRowGroupIndices(dst)) {
+                        if(not uncolored_choices[choice1] and coloring.haveSameColor(choice1,choice2)) {
+                            have_matching_choice = true;
+                            matching_choice = choice2;
+                            choices_bypassed += 1;
+                            break;
+                        }
+                    }
+                }
+                if(not have_matching_choice) {
+                    builder.addNextValue(choice1,dst,dst_prob);
+                } else {
+                    for(auto const& entry2: tm.getRow(matching_choice)) {
+                        builder.addNextValue(choice1,entry2.getColumn(),dst_prob*entry2.getValue());
+                    }
+                    for(auto const& [reward_name,reward_model]: mdp.getRewardModels()) {
+                        rewards[reward_name][choice1] += dst_prob * reward_model.getStateActionReward(matching_choice);
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    // std::cout << "choices bypassed: " << choices_bypassed << std::endl;
+    components.transitionMatrix =  builder.build();
+    components.stateLabeling = mdp.getStateLabeling();
+    components.choiceLabeling = mdp.getOptionalChoiceLabeling();
+    for(auto const& [reward_name,choice_rewards]: rewards) {
+        std::optional<std::vector<ValueType>> state_rewards;
+        auto reward_model = storm::models::sparse::StandardRewardModel<ValueType>(std::move(state_rewards), std::move(choice_rewards));
+        components.rewardModels.emplace(reward_name,reward_model);
+    }
+    return std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
+}
+
+
 }
 
 
@@ -270,6 +424,8 @@ void bindings_coloring(py::module& m) {
     
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 
+    m.def("removeSelfLoops", &synthesis::removeSelfLoops<double>);
+    m.def("mergeChoices", &synthesis::mergeChoices<double>);
 
     py::class_<synthesis::Family>(m, "Family")
         .def(py::init<>(), "Constructor.")

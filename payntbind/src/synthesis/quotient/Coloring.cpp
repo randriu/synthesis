@@ -100,4 +100,19 @@ std::vector<std::vector<uint64_t>> Coloring::collectHoleOptions(BitVector const&
     return hole_options;
 }
 
+
+bool Coloring::haveSameColor(uint64_t choice1, uint64_t choice2) const {
+    auto const& assignment1 = choice_to_assignment[choice1];
+    auto const& assignment2 = choice_to_assignment[choice2];
+    if(assignment1.size() != assignment2.size()) {
+        return false;
+    }
+    for(uint64_t index = 0; index < assignment1.size(); ++index) {
+        if(assignment1[index] != assignment2[index]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 }
