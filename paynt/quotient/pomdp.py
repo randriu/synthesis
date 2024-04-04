@@ -326,7 +326,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         return family, choice_to_hole_options
 
-    
+
     def unfold_memory(self):
         
         # reset attributes
@@ -344,8 +344,11 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         family, choice_to_hole_options = self.create_coloring()
-
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
+
+        # self.quotient_mdp = payntbind.synthesis.removeSelfLoops(self.quotient_mdp)
+        # self.quotient_mdp = payntbind.synthesis.mergeChoices(self.quotient_mdp,self.coloring)
+        # self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
         # to each hole-option pair a list of actions colored by this combination
         self.hole_option_to_actions = [[] for hole in range(family.num_holes)]

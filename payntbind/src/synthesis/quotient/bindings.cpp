@@ -319,7 +319,7 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
         }
     }
 
-    // std::cout << "self-loops simplified: " << self_loops_removed << std::endl;
+    std::cout << "self-loops simplified: " << self_loops_removed << std::endl;
     components.transitionMatrix =  builder.build();
     components.stateLabeling = mdp.getStateLabeling();
     components.choiceLabeling = mdp.getOptionalChoiceLabeling();
@@ -396,7 +396,7 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mergeChoices(
 
     }
 
-    // std::cout << "choices bypassed: " << choices_bypassed << std::endl;
+    std::cout << "choices bypassed: " << choices_bypassed << std::endl;
     components.transitionMatrix =  builder.build();
     components.stateLabeling = mdp.getStateLabeling();
     components.choiceLabeling = mdp.getOptionalChoiceLabeling();
@@ -426,6 +426,7 @@ void bindings_coloring(py::module& m) {
 
     m.def("removeSelfLoops", &synthesis::removeSelfLoops<double>);
     m.def("mergeChoices", &synthesis::mergeChoices<double>);
+
 
     py::class_<synthesis::Family>(m, "Family")
         .def(py::init<>(), "Constructor.")
