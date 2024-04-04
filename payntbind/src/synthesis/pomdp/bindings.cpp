@@ -41,8 +41,8 @@ void bindings_pomdp(py::module& m) {
         ;
 
     py::class_<synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>>(m, "BeliefMCExplorer")
-        .def(py::init<std::shared_ptr<storm::models::sparse::Pomdp<double>>>(), py::arg("pomdp"))
-        .def("check_alpha_vectors", py::overload_cast<storm::logic::Formula const&, synthesis::AlphaVectorSet const&, uint64_t const&>(&synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>::checkAlphaVectors), py::arg("formula"), py::arg("alpha_vector_set"), py::arg("size_threshold"))
+        .def(py::init<std::shared_ptr<storm::models::sparse::Pomdp<double>>, uint64_t, double>(), py::arg("pomdp"), py::arg("size_threshold") = 1000000, py::arg("dummy_cutoff_value") = std::numeric_limits<double>::infinity())
+        .def("check_alpha_vectors", py::overload_cast<storm::logic::Formula const&, synthesis::AlphaVectorSet const&>(&synthesis::BeliefMCExplorer<storm::models::sparse::Pomdp<double>>::checkAlphaVectors), py::arg("formula"), py::arg("alpha_vector_set"))
         ;
 
     py::class_<synthesis::AlphaVectorSet>(m, "AlphaVectorsSet" , "Alpha vectors class")

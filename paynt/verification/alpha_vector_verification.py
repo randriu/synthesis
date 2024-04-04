@@ -14,12 +14,15 @@ class AlphaVectorVerification:
 
 
     def verify_alpha_vectors(self, alpha_vector_set):
+
+        number_of_belief_threshold = 100000
+        dummy_value = 1000
         
         alpha_vector_bind = payntbind.synthesis.AlphaVectorsSet(alpha_vector_set.alpha_vectors, alpha_vector_set.alpha_vector_actions)
 
-        alpha_vector_explorer = payntbind.synthesis.BeliefMCExplorer(self.quotient.pomdp)
+        alpha_vector_explorer = payntbind.synthesis.BeliefMCExplorer(self.quotient.pomdp, number_of_belief_threshold)
 
-        result = alpha_vector_explorer.check_alpha_vectors(self.quotient.specification.stormpy_formulae()[0], alpha_vector_bind, 1000000)
+        result = alpha_vector_explorer.check_alpha_vectors(self.quotient.specification.stormpy_formulae()[0], alpha_vector_bind)
 
         logger.info(f"Alpha vector verified value: {result.upper_bound}")
         logger.info(f"explored MC number of states: {result.induced_mc_from_scheduler.nr_states}")

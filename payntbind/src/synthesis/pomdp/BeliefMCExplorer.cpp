@@ -11,19 +11,21 @@
 namespace synthesis {
     
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp)
+    BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp, uint64_t const& sizeThreshold, double const& dummyCutoffValue)
     : inputPomdp(pomdp) {
-        precision = 1e-12;
+        this->precision = 1e-12;
+        this->sizeThreshold = sizeThreshold;
+        this->dummyCutoffValue = dummyCutoffValue;
     }
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    typename BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::Result BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, uint64_t const& sizeThreshold) {
+    typename BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::Result BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet) {
         storm::Environment env;
-        return checkAlphaVectors(formula, alphaVectorSet, env, sizeThreshold);
+        return checkAlphaVectors(formula, alphaVectorSet, env);
     }
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    typename BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::Result BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env, uint64_t const& sizeThreshold) {
+    typename BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::Result BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env) {
         STORM_PRINT_AND_LOG("Start checking the MC induced by the alpha vector policy...\n")
         auto formulaInfo = storm::pomdp::analysis::getFormulaInformation(pomdp(), formula);
         std::optional<std::string> rewardModelName;
@@ -100,7 +102,7 @@ namespace synthesis {
         }
 
         auto explorer = std::make_shared<ExplorerType>(manager, pomdpValueBounds.trivialPomdpValueBounds);
-        exploreMC(targetObservations, formulaInfo.minimize(), rewardModelName.has_value(), manager, explorer, cutoffVec, alphaVectorSet, env, sizeThreshold);
+        exploreMC(targetObservations, formulaInfo.minimize(), rewardModelName.has_value(), manager, explorer, cutoffVec, alphaVectorSet, env);
 
         STORM_LOG_ASSERT(explorer->hasComputedValues(), "Values for MC were not computed");
 
@@ -115,11 +117,16 @@ namespace synthesis {
 
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    bool BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::exploreMC(const std::set<uint32_t> &targetObservations, bool min, bool computeRewards, std::shared_ptr<BeliefManagerType> &beliefManager, std::shared_ptr<ExplorerType> &beliefExplorer, std::vector<typename PomdpModelType::ValueType> const &cutoffVec, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env, uint64_t const& sizeThreshold){
+    bool BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::exploreMC(const std::set<uint32_t> &targetObservations, bool min, bool computeRewards, std::shared_ptr<BeliefManagerType> &beliefManager, std::shared_ptr<ExplorerType> &beliefExplorer, std::vector<typename PomdpModelType::ValueType> const &cutoffVec, AlphaVectorSet const& alphaVectorSet, storm::Environment const& env){
         if (computeRewards) {
             beliefExplorer->startNewExploration(storm::utility::zero<BeliefMDPType>());
         } else {
             beliefExplorer->startNewExploration(storm::utility::one<BeliefMDPType>(), storm::utility::zero<BeliefMDPType>());
+        }
+
+        bool useDummyValues = false;
+        if (dummyCutoffValue != std::numeric_limits<double>::infinity()) {
+            useDummyValues = true;
         }
 
         //TODO use timelimit
@@ -175,7 +182,11 @@ namespace synthesis {
                         if (computeRewards) {
                             auto cutOffValue = beliefManager->getWeightedSum(currId, cutoffVec);
                             beliefExplorer->addTransitionsToExtraStates(0, storm::utility::one<PomdpValueType>());
-                            beliefExplorer->addRewardToCurrentState(0, cutOffValue);
+                            if (useDummyValues) {
+                                beliefExplorer->addRewardToCurrentState(0, dummyCutoffValue);
+                            } else {
+                                beliefExplorer->addRewardToCurrentState(0, cutOffValue);
+                            }
                             if(pomdp().hasChoiceLabeling()){
                                 beliefExplorer->addChoiceLabelToCurrentState(0, "cutoff");
                             }
@@ -210,7 +221,11 @@ namespace synthesis {
                     auto cutOffValue = beliefManager->getWeightedSum(currId, cutoffVec);
                     if (computeRewards) {
                         beliefExplorer->addTransitionsToExtraStates(0, storm::utility::one<PomdpValueType>());
-                        beliefExplorer->addRewardToCurrentState(0, cutOffValue);
+                        if (useDummyValues) {
+                            beliefExplorer->addRewardToCurrentState(0, dummyCutoffValue);
+                        } else {
+                            beliefExplorer->addRewardToCurrentState(0, cutOffValue);
+                        }
                     } else {
                         beliefExplorer->addTransitionsToExtraStates(0, cutOffValue,storm::utility::one<PomdpValueType>() - cutOffValue);
                     }
