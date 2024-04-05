@@ -1,0 +1,6 @@
+
+Loading the model ...
+  input file   : ../models/network-2-8-20-99.pomdp
+  loading time : 0.21s 
+
+SARSOP initializing ...
