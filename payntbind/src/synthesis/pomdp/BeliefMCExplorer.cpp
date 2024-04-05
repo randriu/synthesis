@@ -175,46 +175,45 @@ namespace synthesis {
                     // determine the best action from the alpha vectors
                     auto chosenLocalActionIndex = getBestActionInBelief(currId, beliefManager, beliefExplorer, alphaVectorSet);
                     // std::cout << "chosen action index " << chosenLocalActionIndex << std::endl;
-                    // if action is not in the model, treat it as a self loop action
+                    // if action is not in the model, choose the first action
                     if(chosenLocalActionIndex >= numberOfLocalChoices){
-                        // std::cout << "adding self loop " << currId << std::endl;
+                        // std::cout << "changing action to 0" << std::endl;
                         // if we are computing rewards apply cut-offs, otherwise add self-loop
-                        if (computeRewards) {
-                            auto cutOffValue = beliefManager->getWeightedSum(currId, cutoffVec);
-                            beliefExplorer->addTransitionsToExtraStates(0, storm::utility::one<PomdpValueType>());
-                            if (useDummyValues) {
-                                beliefExplorer->addRewardToCurrentState(0, dummyCutoffValue);
-                            } else {
-                                beliefExplorer->addRewardToCurrentState(0, cutOffValue);
-                            }
-                            if(pomdp().hasChoiceLabeling()){
-                                beliefExplorer->addChoiceLabelToCurrentState(0, "cutoff");
-                            }
-                        } else {
-                            beliefExplorer->addSelfloopTransition();
-                            beliefExplorer->addChoiceLabelToCurrentState(0, "loop");
+                        // if (computeRewards) {
+                        //     auto cutOffValue = beliefManager->getWeightedSum(currId, cutoffVec);
+                        //     beliefExplorer->addTransitionsToExtraStates(0, storm::utility::one<PomdpValueType>());
+                        //     if (useDummyValues) {
+                        //         beliefExplorer->addRewardToCurrentState(0, dummyCutoffValue);
+                        //     } else {
+                        //         beliefExplorer->addRewardToCurrentState(0, cutOffValue);
+                        //     }
+                        //     if(pomdp().hasChoiceLabeling()){
+                        //         beliefExplorer->addChoiceLabelToCurrentState(0, "cutoff");
+                        //     }
+                        // } else {
+                        //     beliefExplorer->addSelfloopTransition();
+                        //     beliefExplorer->addChoiceLabelToCurrentState(0, "loop");
+                        // }
+                        chosenLocalActionIndex = 0;
+                    }
+                    // Add successor transitions for the chosen action
+                    auto truncationProbability = storm::utility::zero<typename PomdpModelType::ValueType>();
+                    auto truncationValueBound = storm::utility::zero<typename PomdpModelType::ValueType>();\
+                    auto successors = beliefManager->expand(currId, chosenLocalActionIndex);
+                    for (auto const &successor : successors) {
+                        // std::cout << "adding successor " << successor.first << " with probability " << successor.second << std::endl;
+                        bool added = beliefExplorer->addTransitionToBelief(0, successor.first, successor.second, stopExploration);
+                        if (!added) {
+                            STORM_LOG_ASSERT(stopExploration, "Didn't add a transition although exploration shouldn't be stopped.");
+                            // We did not explore this successor state. Get a bound on the "missing" value
+                            truncationProbability += successor.second;
+                            truncationValueBound += successor.second * (min ? beliefExplorer->computeUpperValueBoundAtBelief(successor.first)
+                                                                            : beliefExplorer->computeLowerValueBoundAtBelief(successor.first));
                         }
-                        
-                    } else {
-                        // Add successor transitions for the chosen action
-                        auto truncationProbability = storm::utility::zero<typename PomdpModelType::ValueType>();
-                        auto truncationValueBound = storm::utility::zero<typename PomdpModelType::ValueType>();\
-                        auto successors = beliefManager->expand(currId, chosenLocalActionIndex);
-                        for (auto const &successor : successors) {
-                            // std::cout << "adding successor " << successor.first << " with probability " << successor.second << std::endl;
-                            bool added = beliefExplorer->addTransitionToBelief(0, successor.first, successor.second, stopExploration);
-                            if (!added) {
-                                STORM_LOG_ASSERT(stopExploration, "Didn't add a transition although exploration shouldn't be stopped.");
-                                // We did not explore this successor state. Get a bound on the "missing" value
-                                truncationProbability += successor.second;
-                                truncationValueBound += successor.second * (min ? beliefExplorer->computeUpperValueBoundAtBelief(successor.first)
-                                                                                : beliefExplorer->computeLowerValueBoundAtBelief(successor.first));
-                            }
-                        }
-                        if (computeRewards) {
-                            // The truncationValueBound will be added on top of the reward introduced by the current belief state.
-                            beliefExplorer->addRewardToCurrentState(0, beliefManager->getBeliefActionReward(currId, chosenLocalActionIndex) + truncationValueBound);
-                        }
+                    }
+                    if (computeRewards) {
+                        // The truncationValueBound will be added on top of the reward introduced by the current belief state.
+                        beliefExplorer->addRewardToCurrentState(0, beliefManager->getBeliefActionReward(currId, chosenLocalActionIndex) + truncationValueBound);
                     }
                 } else {
                     //When we stop, we apply simple cut-offs

@@ -127,7 +127,7 @@ def run_sarsop(options, logs_string, experiment_models, timeout):
         model_name = model_name.replace(".", "-")
 
         # THE REST OF THE MODELS
-        command = "./pomdpsol ../models/09999/{} -p 1e-4 -o ../../synthesis/experiments-beliefs/sarsop/output-idk/{}.out".format(model, model_name)
+        command = "./pomdpsol ../models/{} -p 1e-4 -o ../../../../synthesis-playground/experiments-beliefs/sarsop/output/{}.out".format(model, model_name)
 
         if not overwrite_logs:
             if os.path.isfile(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt"):
@@ -241,11 +241,11 @@ if __name__ == '__main__':
 
     elif "sarsop":
         # experiment_models = ["drone-4-1-80.pomdp", "drone-4-1-95.pomdp", "drone-4-2-80.pomdp", "drone-4-2-95.pomdp", "drone-8-2-80.pomdp", "drone-8-2-95.pomdp", "grid-av-4-01-80.pomdp", "grid-av-4-01-95.pomdp", "refuel-06-80.pomdp", "refuel-06-95.pomdp", "refuel-08-80.pomdp", "refuel-08-95.pomdp", "refuel-20-80.pomdp", "refuel-20-95.pomdp"]
-        experiment_models = ["milos-aaai97.pomdp", "network.pomdp", "query.s3.pomdp", "query.s4.pomdp", "learning.c3.pomdp", "learning.c4.pomdp", "4x5x2.95.pomdp", "hanks.95.pomdp"]
-        # experiment_models = ["drone-4-1-99.pomdp"]
+        # experiment_models = ["milos-aaai97.pomdp", "network.pomdp", "query.s3.pomdp", "query.s4.pomdp", "learning.c3.pomdp", "learning.c4.pomdp", "4x5x2.95.pomdp", "hanks.95.pomdp"]
+        experiment_models = ["network-3-8-20-80.pomdp", "network-3-8-20-95.pomdp"]
 
         options = ""
-        logs_string = "sarsop-09999"
+        logs_string = "sarsop"
         timeout = 900
         run_sarsop(options, logs_string, experiment_models, timeout)
 

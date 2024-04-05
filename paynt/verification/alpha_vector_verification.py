@@ -15,7 +15,7 @@ class AlphaVectorVerification:
 
     def verify_alpha_vectors(self, alpha_vector_set):
 
-        number_of_belief_threshold = 100000
+        number_of_belief_threshold = 1000000
         dummy_value = 1000
         
         alpha_vector_bind = payntbind.synthesis.AlphaVectorsSet(alpha_vector_set.alpha_vectors, alpha_vector_set.alpha_vector_actions)
