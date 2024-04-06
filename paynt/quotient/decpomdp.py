@@ -25,7 +25,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.decpomdp_manager = decpomdp_manager
 
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        # print("self.agent_observation_labels",self.agent_observation_labels)
+        print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
         # print("self.agent_action_labels",self.agent_action_labels)
@@ -146,7 +146,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        # print("transition matrix: ", self.quotient_mdp.transition_matrix)
+        print(self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         
@@ -185,13 +185,13 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             # print("paynt.quotient.pomdp.PomdpQuotient.sketch_path ",paynt.quotient.pomdp.PomdpQuotient.sketch_path )
             sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
             props_path = self.substitute_suffix(sketch_path, '.', 'target')
-            print("props_path",props_path)
             h = open(props_path, 'r')
             content = h.readlines()
-            for i in content[0]:
+            for i in content[0].split(' '):
                 if i.isdigit() == True: 
-                    assert int(i) < self.nr_states
+                    assert int(i) <= self.nr_states
                     self.decpomdp_manager.set_target_state(int(i))
+                    print("set_target_state",int(i))
 
 
             # for state in range(self.nr_states):

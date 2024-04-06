@@ -116,8 +116,6 @@ class Sketch:
                         decpomdp_manager.reward_minimizing,
                         decpomdp_manager.discount_sink_label)
                     specification = paynt.verification.property.Specification([optimality])
-                
-
                 filetype = "cassandra"
             except SyntaxError:
                 pass

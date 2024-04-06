@@ -263,16 +263,17 @@ namespace synthesis {
             discount_sink_flags.set(this->prototype_duplicates[this->discount_sink_state][0]);
             labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
         }
-        else{//TODO delete
+        else{
             storm::storage::BitVector target_flags(this->num_quotient_states, false);
+            std::cout << "this->target_states o " << this->target_states<< std::endl;
             for (uint64_t prototype = 0; prototype < this->num_states() ; prototype++){
-                std::cout << "this->target_states o " << this->target_states<< std::endl;
                 if (not this->target_states[prototype])
                 {
                     continue;
                 }
                 for(auto duplicate: this->prototype_duplicates[prototype]) {
                     target_flags.set(duplicate);
+                    std::cout << "duplicateo " << duplicate<< std::endl;
                 }
             }
             

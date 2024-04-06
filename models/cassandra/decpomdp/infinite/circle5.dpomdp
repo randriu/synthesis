@@ -1,0 +1,166 @@
+agents: 2 
+#
+discount: 0.9
+#
+values: reward
+#
+states: s1 s2 s3 s4 a1 a2 a3 a4 end
+#  
+start: 
+0.0 0.5 0.0 0.0 0.0 0.5 0.0 0.0 0.0
+#
+actions: 
+f b
+f b
+#
+observations: 
+o
+o
+#
+T : f f : s1 : s1 : 0.9025
+T : f f : s1 : s4 : 0.04875
+T : f f : s1 : s3 : 0.04875
+#
+T : f b : s1 : s3 : 0.9
+T : f b : s1 : s1 : 0.0975
+T : f b : s1 : s4 : 0.0025
+#
+T : b f : s1 : s4 : 0.9
+T : b f : s1 : s1 : 0.0975
+T : b f : s1 : s3 : 0.0025
+#
+T : b b : s1 : s1 : 0.9025
+T : b b : s1 : s3 : 0.04875
+T : b b : s1 : s4 : 0.04875
+#
+#
+T : f f : s2 : s2 : 0.9025
+T : f f : s2 : end : 0.04875
+T : f f : s2 : s4 : 0.04875
+#
+T : f b : s2 : s4 : 0.9
+T : f b : s2 : s2 : 0.0975
+T : f b : s2 : end : 0.0025
+#
+T : b f : s2 : end : 0.9
+T : b f : s2 : s2 : 0.0975
+T : b f : s2 : s4 : 0.0025
+#
+T : b b : s2 : s2 : 0.9025
+T : b b : s2 : s4 : 0.04875
+T : b b : s2 : end : 0.04875
+#
+#
+T : f f : s3 : s3 : 0.9025
+T : f f : s3 : s1 : 0.04875
+T : f f : s3 : end : 0.04875
+#
+T : f b : s3 : end : 0.9
+T : f b : s3 : s3 : 0.0975
+T : f b : s3 : s1 : 0.0025
+#
+T : b f : s3 : s1 : 0.9
+T : b f : s3 : s3 : 0.0975
+T : b f : s3 : end : 0.0025
+#
+T : b b : s3 : s3 : 0.9025
+T : b b : s3 : end : 0.04875
+T : b b : s3 : s1 : 0.04875
+#
+#
+T : f f : s4 : s4 : 0.9025
+T : f f : s4 : s2 : 0.04875
+T : f f : s4 : s1 : 0.04875
+#
+T : f b : s4 : s1 : 0.9
+T : f b : s4 : s4 : 0.0975
+T : f b : s4 : s2 : 0.0025
+#
+T : b f : s4 : s2 : 0.9
+T : b f : s4 : s4 : 0.0975
+T : b f : s4 : s1 : 0.0025
+#
+T : b b : s4 : s4 : 0.9025
+T : b b : s4 : s1 : 0.04875
+T : b b : s4 : s2 : 0.04875
+#
+#
+T : f f : a1 : a3 : 0.9
+T : f f : a1 : a1 : 0.0975
+T : f f : a1 : a4 : 0.0025
+#
+T : f b : a1 : a1 : 0.9025
+T : f b : a1 : a4 : 0.04875
+T : f b : a1 : a3 : 0.04875
+#
+T : b f : a1 : a1 : 0.9025
+T : b f : a1 : a3 : 0.04875
+T : b f : a1 : a4 : 0.04875
+#
+T : b b : a1 : a4 : 0.9
+T : b b : a1 : a1 : 0.0975
+T : b b : a1 : a3 : 0.0025
+#
+#
+T : f f : a2 : a4 : 0.9
+T : f f : a2 : a2 : 0.0975
+T : f f : a2 : end : 0.0025
+#
+T : f b : a2 : a2 : 0.9025
+T : f b : a2 : end : 0.04875
+T : f b : a2 : a4 : 0.04875
+#
+T : b f : a2 : a2 : 0.9025
+T : b f : a2 : a4 : 0.04875
+T : b f : a2 : end : 0.04875
+#
+T : b b : a2 : end : 0.9
+T : b b : a2 : a2 : 0.0975
+T : b b : a2 : a4 : 0.0025
+#
+#
+T : f f : a3 : end : 0.9
+T : f f : a3 : a3 : 0.0975
+T : f f : a3 : a1 : 0.0025
+#
+T : f b : a3 : a3 : 0.9025
+T : f b : a3 : a1 : 0.04875
+T : f b : a3 : end : 0.04875
+#
+T : b f : a3 : a3 : 0.9025
+T : b f : a3 : end : 0.04875
+T : b f : a3 : a1 : 0.04875
+#
+T : b b : a3 : a1 : 0.9
+T : b b : a3 : a3 : 0.0975
+T : b b : a3 : end : 0.0025
+#
+#
+T : f f : a4 : a1 : 0.9
+T : f f : a4 : a4 : 0.0975
+T : f f : a4 : a2 : 0.0025
+#
+T : f b : a4 : a4 : 0.9025
+T : f b : a4 : a2 : 0.04875
+T : f b : a4 : a1 : 0.04875
+#
+T : b f : a4 : a4 : 0.9025
+T : b f : a4 : a1 : 0.04875
+T : b f : a4 : a2 : 0.04875
+#
+T : b b : a4 : a2 : 0.9
+T : b b : a4 : a4 : 0.0975
+T : b b : a4 : a1 : 0.0025
+#
+#
+T : f f : end : end : 1.0
+T : f b : end : end : 1.0
+T : b f : end : end : 1.0
+T : b b : end : end : 1.0
+#
+#
+O : * * : * : o o : 1.0
+#
+R: * *: * : * : * : 1
+R: f b: * : * : * : 10
+R: b f: * : * : * : 10
