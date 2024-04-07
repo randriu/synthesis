@@ -1,29 +1,6 @@
 
 Loading the model ...
-  input file   : ../models/drone-8-2-80.pomdp
-  loading time : 0.29s 
+  input file   : ../models/prism-translated/drone-8-2-80.pomdp
+  loading time : 0.34s 
 
 SARSOP initializing ...
-  initialization time : 852.36s
-
--------------------------------------------------------------------------------
- Time   |#Trial |#Backup |LBound    |UBound    |Precision  |#Alphas |#Beliefs  
--------------------------------------------------------------------------------
- 852.36  0       0        0          7.25949e-05 7.25949e-05 4        1        
- 856.38  0       1        0          7.25729e-05 7.25729e-05 5        2        
--------------------------------------------------------------------------------
-
-SARSOP finishing ...
-  target precision reached
-  target precision  : 0.000100
-  precision reached : 0.000073 
-
--------------------------------------------------------------------------------
- Time   |#Trial |#Backup |LBound    |UBound    |Precision  |#Alphas |#Beliefs  
--------------------------------------------------------------------------------
- 856.38  0       1        0          7.25729e-05 7.25729e-05 2        2        
--------------------------------------------------------------------------------
-
-Writing out policy ...
-  output file : ../output/drone-8-2-80.out
-

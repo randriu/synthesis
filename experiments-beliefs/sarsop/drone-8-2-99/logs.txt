@@ -1,0 +1,6 @@
+
+Loading the model ...
+  input file   : ../models/prism-translated/drone-8-2-99.pomdp
+  loading time : 0.36s 
+
+SARSOP initializing ...

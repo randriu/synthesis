@@ -1,6 +1,6 @@
 
 Loading the model ...
-  input file   : ../models/network-3-8-20-95.pomdp
-  loading time : 4.90s 
+  input file   : ../models/prism-translated/network-3-8-20-95.pomdp
+  loading time : 1.28s 
 
 SARSOP initializing ...
