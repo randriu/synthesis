@@ -96,17 +96,18 @@ observations: {}
                 action_index = 0
                 group_start = tm.get_row_group_start(state)
                 group_end = tm.get_row_group_end(state)
-                first_action_column = None
-                first_action_value = None
+                first_action_columns = []
+                first_action_values = []
                 for row_index in range(group_start, group_end):
                     for entry in tm.get_row(row_index):
                         desc += f"T: {action_index} : {state} : {entry.column} {entry.value()}\n"
                         if action_index == 0:
-                            first_action_column = entry.column
-                            first_action_value = entry.value()
+                            first_action_columns.append(entry.column)
+                            first_action_values.append(entry.value())
                     action_index += 1
                 while action_index < max_num_choices:
-                    desc += f"T: {action_index} : {state} : {first_action_column} {first_action_value}\n"
+                    for index in range(len(first_action_columns)):
+                        desc += f"T: {action_index} : {state} : {first_action_columns[index]} {first_action_values[index]}\n"
                     action_index += 1
         # add self loops for the new 'after target' state
         action_index = 0
@@ -152,10 +153,6 @@ observations: {}
                             desc += f"R: * : {state} : * : * {rew}\n"
             elif rewards.has_state_action_rewards:
                 state_action_rewards = list(rewards.state_action_rewards)
-                if property_minimizing:
-                    extremum_reward = max(state_action_rewards)
-                else:
-                    extremum_reward = min(state_action_rewards)
                 state_action_index = 0
                 for state in range(num_states):
                     action_index = 0
@@ -166,17 +163,18 @@ observations: {}
                         if state_action_rewards[state_action_index] != 0:
                             if property_minimizing:
                                 desc += f"R: {action_index} : {state} : * : * {state_action_rewards[state_action_index]*-1}\n"
-                                if action_index == 0:
+                                if first_action_reward is None:
                                     first_action_reward = state_action_rewards[state_action_index]*-1
                             else:
                                 desc += f"R: {action_index} : {state} : * : * {state_action_rewards[state_action_index]}\n"
-                                if action_index == 0:
+                                if first_action_reward is None:
                                     first_action_reward = state_action_rewards[state_action_index]
                         action_index += 1
                         state_action_index += 1
-                    while action_index < max_num_choices:
-                        desc += f"R: {action_index} : {state} : * : * {first_action_reward}\n"
-                        action_index += 1
+                    if first_action_reward is not None:
+                        while action_index < max_num_choices:
+                            desc += f"R: {action_index} : {state} : * : * {first_action_reward}\n"
+                            action_index += 1
         else:
             desc += "\n# rewards from reachability\n\n"
             for state in target_states:
