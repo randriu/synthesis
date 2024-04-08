@@ -38,7 +38,7 @@ namespace synthesis {
 
         public:
 
-            BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp, uint64_t const& sizeThreshold=1000000, double const& dummyCutoffValue=std::numeric_limits<double>::infinity());
+            BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp, uint64_t const& sizeThreshold=1000000, double const& dummyCutoffValue=std::numeric_limits<double>::infinity(), bool trivialCutOff=false);
 
             Result checkAlphaVectors(storm::logic::Formula const& formula, AlphaVectorSet const& alphaVectorSet);
 
@@ -59,6 +59,7 @@ namespace synthesis {
             double precision;
             uint64_t sizeThreshold;
             double dummyCutoffValue;
+            bool trivialCutOff;
 
             Result MCExplorationResult = Result(-storm::utility::infinity<BeliefValueType>(), storm::utility::infinity<BeliefValueType>());
 

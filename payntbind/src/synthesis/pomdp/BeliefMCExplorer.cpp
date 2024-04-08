@@ -11,11 +11,12 @@
 namespace synthesis {
     
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
-    BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp, uint64_t const& sizeThreshold, double const& dummyCutoffValue)
+    BeliefMCExplorer<PomdpModelType, BeliefValueType, BeliefMDPType>::BeliefMCExplorer(std::shared_ptr<PomdpModelType> pomdp, uint64_t const& sizeThreshold, double const& dummyCutoffValue, bool trivialCutOff)
     : inputPomdp(pomdp) {
         this->precision = 1e-12;
         this->sizeThreshold = sizeThreshold;
         this->dummyCutoffValue = dummyCutoffValue;
+        this->trivialCutOff = trivialCutOff;
     }
 
     template<typename PomdpModelType, typename BeliefValueType, typename BeliefMDPType>
@@ -226,6 +227,9 @@ namespace synthesis {
                             beliefExplorer->addRewardToCurrentState(0, cutOffValue);
                         }
                     } else {
+                        if (trivialCutOff) {
+                            cutOffValue = 1;
+                        }
                         beliefExplorer->addTransitionsToExtraStates(0, cutOffValue,storm::utility::one<PomdpValueType>() - cutOffValue);
                     }
                     if(pomdp().hasChoiceLabeling()){
