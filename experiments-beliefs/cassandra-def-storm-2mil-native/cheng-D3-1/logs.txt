@@ -1,0 +1,29 @@
+2024-04-09 23:29:10,322 - cli.py - This is Paynt version 0.1.0.
+2024-04-09 23:29:10,323 - sketch.py - loading sketch from ../sarsop/models/cheng.D3-1.pomdp ...
+2024-04-09 23:29:10,323 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 1:1:  expecting <model type>, here:
+	# Data Set D3.1
+	^
+
+2024-04-09 23:29:10,323 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line '# Data Set D3.1'.
+2024-04-09 23:29:10,323 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-09 23:29:10,324 - sketch.py - applying discount factor transformation...
+2024-04-09 23:29:10,324 - sketch.py - sketch parsing OK
+2024-04-09 23:29:10,324 - sketch.py - constructed explicit quotient having 13 states and 37 actions
+2024-04-09 23:29:10,324 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [C{99999/100000}] 
+2024-04-09 23:29:10,325 - pomdp.py - constructed POMDP having 5 observations.
+2024-04-09 23:29:10,325 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-09 23:29:10,325 - pomdp.py - constructed quotient MDP having 13 states and 37 actions.
+2024-04-09 23:29:10,325 - pomdp.py - creating coloring ...
+2024-04-09 23:29:10,327 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-09 23:29:10,327 - synthesizer_pomdp.py - Storm settings: iterative - (None, None, None), get_storm_result - 0, storm_options - 2mil, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-09 23:29:10,327 - storm_pomdp_control.py - starting Storm POMDP analysis
+Finished exploring under-approximation MDP.
+Start analysis...
+2024-04-09 23:29:18,644 - storm_pomdp_control.py - Storm POMDP analysis completed
+-----------Storm-----------                 
+Value = 512864.22484315204 | Time elapsed = 8.3s | FSC size = 2228
+

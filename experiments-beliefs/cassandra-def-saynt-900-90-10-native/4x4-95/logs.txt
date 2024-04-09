@@ -1,0 +1,632 @@
+2024-04-09 20:43:20,858 - cli.py - This is Paynt version 0.1.0.
+2024-04-09 20:43:20,858 - sketch.py - loading sketch from ../sarsop/models/4x4.95.pomdp ...
+2024-04-09 20:43:20,858 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:27): Parsing error at 1:1:  expecting <model type>, here:
+	discount: 0.95
+	^
+
+2024-04-09 20:43:20,859 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line 'discount: 0.95'.
+2024-04-09 20:43:20,859 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-09 20:43:20,861 - sketch.py - applying discount factor transformation...
+2024-04-09 20:43:20,861 - sketch.py - sketch parsing OK
+2024-04-09 20:43:20,861 - sketch.py - constructed explicit quotient having 32 states and 125 actions
+2024-04-09 20:43:20,861 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [C{9500000000000001/10000000000000000}] 
+2024-04-09 20:43:20,862 - pomdp.py - constructed POMDP having 4 observations.
+2024-04-09 20:43:20,862 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-09 20:43:20,862 - pomdp.py - constructed quotient MDP having 32 states and 125 actions.
+2024-04-09 20:43:20,862 - pomdp.py - creating coloring ...
+2024-04-09 20:43:20,864 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-09 20:43:20,864 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-09 20:43:20,864 - synthesizer.py - synthesis initiated, design space: 64
+-----------PAYNT-----------                     
+Value = 0.2295674049322658 | Time elapsed = 0.0s | FSC size = 8
+
+2024-04-09 20:43:20,864 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = 0.5166573943732964 | Time elapsed = 0.0s | FSC size = 8
+
+2024-04-09 20:43:20,868 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-09 20:43:20,868 - synthesizer.py - A(nothing,0)=(E0), A(goal,0)=(N0), A(__no_obs__,0)=(S0)
+2024-04-09 20:43:20,868 - synthesizer.py - double-checking specification satisfiability:  : 0.5166573943732964
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{9500000000000001/10000000000000000}] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 3, family size: 64, quotient: 32 states / 125 actions
+explored: 100 %
+MDP stats: avg MDP size: 32, iterations: 12
+
+optimum: 0.516657
+--------------------
+2024-04-09 20:43:20,868 - synthesizer_pomdp.py - Terminate: False
+2024-04-09 20:43:20,868 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-09 20:43:20,868 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-04-09 20:43:20,869 - pomdp.py - constructed quotient MDP having 62 states and 490 actions.
+2024-04-09 20:43:20,869 - pomdp.py - creating coloring ...
+2024-04-09 20:43:20,869 - synthesizer.py - synthesis initiated, design space: 65536
+-----------PAYNT-----------                     
+Value = 0.6973307020306785 | Time elapsed = 0.0s | FSC size = 12
+
+-----------PAYNT-----------                     
+Value = 1.0507234580103597 | Time elapsed = 0.0s | FSC size = 12
+
+-----------PAYNT-----------                     
+Value = 3.732235361706705 | Time elapsed = 0.0s | FSC size = 12
+
+2024-04-09 20:43:20,906 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-09 20:43:20,906 - synthesizer.py - A(nothing,0)=(E0), A(nothing,1)=(S0), M(nothing,0)=1, M(nothing,1)=0, A(goal,0)=(W0), M(goal,0)=0, M(init,0)=0, A(__no_obs__,0)=(E0), A(__no_obs__,1)=(E0), M(__no_obs__,0)=1, M(__no_obs__,1)=1
+2024-04-09 20:43:20,906 - synthesizer.py - double-checking specification satisfiability:  : 3.732235361706705
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{9500000000000001/10000000000000000}] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 11, family size: 65536, quotient: 62 states / 490 actions
+explored: 100 %
+MDP stats: avg MDP size: 62, iterations: 108
+
+optimum: 3.732235
+--------------------
+2024-04-09 20:43:20,907 - synthesizer_pomdp.py - Terminate: False
+2024-04-09 20:43:20,907 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-09 20:43:20,907 - pomdp.py - unfolding 3-FSC template into POMDP ...
+2024-04-09 20:43:20,907 - pomdp.py - constructed quotient MDP having 92 states and 1095 actions.
+2024-04-09 20:43:20,907 - pomdp.py - creating coloring ...
+2024-04-09 20:43:20,908 - synthesizer.py - synthesis initiated, design space: 1e8
+2024-04-09 20:43:23,884 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-09 20:43:23,884 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{9500000000000001/10000000000000000}] 
+
+method: AR, synthesis time: 2.98 s
+number of holes: 15, family size: 1e8, quotient: 92 states / 1095 actions
+explored: 100 %
+MDP stats: avg MDP size: 92, iterations: 7072
+
+optimum: 3.732235
+--------------------
+2024-04-09 20:43:23,884 - synthesizer_pomdp.py - Terminate: False
+2024-04-09 20:43:23,884 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-09 20:43:23,884 - pomdp.py - unfolding 4-FSC template into POMDP ...
+2024-04-09 20:43:23,886 - pomdp.py - constructed quotient MDP having 122 states and 1940 actions.
+2024-04-09 20:43:23,887 - pomdp.py - creating coloring ...
+2024-04-09 20:43:23,889 - synthesizer.py - synthesis initiated, design space: 1e11
+> progress 0.493%, elapsed 3 s, estimated 608 s, iters = {MDP: 6166}, opt = 3.732
+> progress 0.498%, elapsed 6 s, estimated 1205 s, iters = {MDP: 12632}, opt = 3.732
+> progress 0.505%, elapsed 9 s, estimated 1781 s, iters = {MDP: 19624}, opt = 3.732
+> progress 0.511%, elapsed 12 s, estimated 2348 s, iters = {MDP: 26326}, opt = 3.732
+> progress 0.592%, elapsed 15 s, estimated 2531 s, iters = {MDP: 32907}, opt = 3.732
+> progress 0.6%, elapsed 18 s, estimated 2999 s, iters = {MDP: 38784}, opt = 3.732
+> progress 0.613%, elapsed 21 s, estimated 3423 s, iters = {MDP: 44860}, opt = 3.732
+> progress 0.62%, elapsed 24 s, estimated 3868 s, iters = {MDP: 51685}, opt = 3.732
+> progress 0.637%, elapsed 27 s, estimated 4233 s, iters = {MDP: 58691}, opt = 3.732
+> progress 0.684%, elapsed 30 s, estimated 4383 s, iters = {MDP: 64529}, opt = 3.732
+> progress 0.688%, elapsed 33 s, estimated 4794 s, iters = {MDP: 70010}, opt = 3.732
+> progress 0.691%, elapsed 36 s, estimated 5205 s, iters = {MDP: 75998}, opt = 3.732
+> progress 1.615%, elapsed 39 s, estimated 2414 s, iters = {MDP: 81833}, opt = 3.732
+> progress 1.633%, elapsed 42 s, estimated 2571 s, iters = {MDP: 88364}, opt = 3.732
+> progress 1.677%, elapsed 45 s, estimated 2683 s, iters = {MDP: 94933}, opt = 3.732
+> progress 1.907%, elapsed 48 s, estimated 2516 s, iters = {MDP: 101061}, opt = 3.732
+> progress 1.954%, elapsed 51 s, estimated 2610 s, iters = {MDP: 107090}, opt = 3.732
+> progress 1.96%, elapsed 54 s, estimated 2755 s, iters = {MDP: 113438}, opt = 3.732
+> progress 1.964%, elapsed 57 s, estimated 2902 s, iters = {MDP: 119660}, opt = 3.732
+> progress 1.971%, elapsed 60 s, estimated 3043 s, iters = {MDP: 126354}, opt = 3.732
+> progress 2.005%, elapsed 63 s, estimated 3142 s, iters = {MDP: 132969}, opt = 3.732
+> progress 2.062%, elapsed 66 s, estimated 3200 s, iters = {MDP: 139537}, opt = 3.732
+> progress 2.08%, elapsed 69 s, estimated 3316 s, iters = {MDP: 146285}, opt = 3.732
+> progress 2.085%, elapsed 72 s, estimated 3452 s, iters = {MDP: 153221}, opt = 3.732
+> progress 2.086%, elapsed 75 s, estimated 3594 s, iters = {MDP: 160129}, opt = 3.732
+> progress 2.099%, elapsed 78 s, estimated 3715 s, iters = {MDP: 166699}, opt = 3.732
+> progress 2.108%, elapsed 81 s, estimated 3843 s, iters = {MDP: 173298}, opt = 3.732
+> progress 2.131%, elapsed 84 s, estimated 3941 s, iters = {MDP: 180016}, opt = 3.732
+> progress 2.174%, elapsed 87 s, estimated 4001 s, iters = {MDP: 186289}, opt = 3.732
+2024-04-09 20:44:50,963 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:44:51,062 - storm_pomdp_control.py - Interactive Storm started
+2024-04-09 20:44:51,062 - storm_pomdp_control.py - starting Storm POMDP analysis
+Finished exploring under-approximation MDP.
+Start analysis...
+2024-04-09 20:45:01,082 - storm_pomdp_control.py - Pausing Storm
+-----------Storm-----------               
+Value = 3.7322769782076186 | Time elapsed = 100.2s | FSC size = 38
+
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:45:01,083 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:45:01,474 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:45:01,475 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:45:01,475 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 68719476736 to 8388608
+2024-04-09 20:45:01,475 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 17179869184 to 4194304
+2024-04-09 20:45:01,475 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 2147483648 to 1048576
+2024-04-09 20:45:01,476 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 3, Subfamilies - 37
+> progress 2.175%, elapsed 90 s, estimated 4138 s, iters = {MDP: 192436}, opt = 3.732
+> progress 2.175%, elapsed 93 s, estimated 4275 s, iters = {MDP: 199345}, opt = 3.732
+> progress 2.176%, elapsed 96 s, estimated 4411 s, iters = {MDP: 205711}, opt = 3.732
+> progress 2.177%, elapsed 99 s, estimated 4546 s, iters = {MDP: 212531}, opt = 3.732
+> progress 2.177%, elapsed 102 s, estimated 4684 s, iters = {MDP: 219301}, opt = 3.732
+> progress 2.178%, elapsed 105 s, estimated 4821 s, iters = {MDP: 225857}, opt = 3.732
+> progress 2.178%, elapsed 108 s, estimated 4958 s, iters = {MDP: 232067}, opt = 3.732
+> progress 2.179%, elapsed 111 s, estimated 5093 s, iters = {MDP: 238874}, opt = 3.732
+2024-04-09 20:45:26,342 - synthesizer_ar_storm.py - Main family synthesis done
+2024-04-09 20:45:26,342 - synthesizer_ar_storm.py - Subfamilies buffer contains: 37 families
+> progress 2.193%, elapsed 114 s, estimated 5198 s, iters = {MDP: 244222}, opt = 3.732
+> progress 2.351%, elapsed 117 s, estimated 4975 s, iters = {MDP: 250158}, opt = 3.732
+> progress 2.354%, elapsed 120 s, estimated 5096 s, iters = {MDP: 256669}, opt = 3.732
+> progress 2.36%, elapsed 123 s, estimated 5212 s, iters = {MDP: 263524}, opt = 3.732
+> progress 2.362%, elapsed 126 s, estimated 5334 s, iters = {MDP: 271374}, opt = 3.732
+> progress 2.363%, elapsed 129 s, estimated 5458 s, iters = {MDP: 278655}, opt = 3.732
+> progress 2.368%, elapsed 132 s, estimated 5573 s, iters = {MDP: 285473}, opt = 3.732
+> progress 2.369%, elapsed 135 s, estimated 5697 s, iters = {MDP: 292811}, opt = 3.732
+> progress 2.37%, elapsed 138 s, estimated 5822 s, iters = {MDP: 298630}, opt = 3.732
+> progress 2.372%, elapsed 141 s, estimated 5943 s, iters = {MDP: 304822}, opt = 3.732
+> progress 2.373%, elapsed 144 s, estimated 6068 s, iters = {MDP: 311116}, opt = 3.732
+> progress 2.373%, elapsed 147 s, estimated 6193 s, iters = {MDP: 316876}, opt = 3.732
+> progress 2.374%, elapsed 150 s, estimated 6318 s, iters = {MDP: 323862}, opt = 3.732
+> progress 2.375%, elapsed 153 s, estimated 6443 s, iters = {MDP: 331085}, opt = 3.732
+> progress 2.376%, elapsed 156 s, estimated 6566 s, iters = {MDP: 337370}, opt = 3.732
+> progress 2.396%, elapsed 159 s, estimated 6635 s, iters = {MDP: 344252}, opt = 3.732
+> progress 2.399%, elapsed 162 s, estimated 6753 s, iters = {MDP: 351223}, opt = 3.732
+> progress 2.405%, elapsed 165 s, estimated 6859 s, iters = {MDP: 357954}, opt = 3.732
+> progress 2.408%, elapsed 168 s, estimated 6977 s, iters = {MDP: 364326}, opt = 3.732
+> progress 2.409%, elapsed 171 s, estimated 7097 s, iters = {MDP: 370498}, opt = 3.732
+> progress 2.41%, elapsed 174 s, estimated 7219 s (2 hours), iters = {MDP: 377139}, opt = 3.732
+2024-04-09 20:46:31,179 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:46:31,279 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:46:31,279 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:46:31,279 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:46:31,680 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:46:31,680 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:46:31,681 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 39
+> progress 2.41%, elapsed 177 s, estimated 7342 s (2 hours), iters = {MDP: 383641}, opt = 3.732
+> progress 2.411%, elapsed 180 s, estimated 7466 s (2 hours), iters = {MDP: 389337}, opt = 3.732
+> progress 2.412%, elapsed 183 s, estimated 7585 s (2 hours), iters = {MDP: 395020}, opt = 3.732
+> progress 2.429%, elapsed 186 s, estimated 7658 s (2 hours), iters = {MDP: 400737}, opt = 3.732
+> progress 2.434%, elapsed 189 s, estimated 7765 s (2 hours), iters = {MDP: 406576}, opt = 3.732
+> progress 2.434%, elapsed 192 s, estimated 7886 s (2 hours), iters = {MDP: 411912}, opt = 3.732
+> progress 2.436%, elapsed 195 s, estimated 8005 s (2 hours), iters = {MDP: 417915}, opt = 3.732
+> progress 2.437%, elapsed 198 s, estimated 8123 s (2 hours), iters = {MDP: 424242}, opt = 3.732
+> progress 2.439%, elapsed 201 s, estimated 8242 s (2 hours), iters = {MDP: 430581}, opt = 3.732
+> progress 2.442%, elapsed 204 s, estimated 8354 s (2 hours), iters = {MDP: 437114}, opt = 3.732
+> progress 2.444%, elapsed 207 s, estimated 8471 s (2 hours), iters = {MDP: 443683}, opt = 3.732
+> progress 2.448%, elapsed 210 s, estimated 8578 s (2 hours), iters = {MDP: 450119}, opt = 3.732
+> progress 2.451%, elapsed 213 s, estimated 8689 s (2 hours), iters = {MDP: 455973}, opt = 3.732
+> progress 2.454%, elapsed 216 s, estimated 8800 s (2 hours), iters = {MDP: 461500}, opt = 3.732
+> progress 2.46%, elapsed 219 s, estimated 8902 s (2 hours), iters = {MDP: 467528}, opt = 3.732
+> progress 2.462%, elapsed 222 s, estimated 9015 s (2 hours), iters = {MDP: 472924}, opt = 3.732
+> progress 2.54%, elapsed 225 s, estimated 8858 s (2 hours), iters = {MDP: 478757}, opt = 3.732
+> progress 2.541%, elapsed 228 s, estimated 8972 s (2 hours), iters = {MDP: 484719}, opt = 3.732
+> progress 2.545%, elapsed 231 s, estimated 9075 s (2 hours), iters = {MDP: 490204}, opt = 3.732
+> progress 2.552%, elapsed 234 s, estimated 9168 s (2 hours), iters = {MDP: 496063}, opt = 3.732
+> progress 2.578%, elapsed 237 s, estimated 9192 s (2 hours), iters = {MDP: 502683}, opt = 3.732
+> progress 2.583%, elapsed 240 s, estimated 9290 s (2 hours), iters = {MDP: 508811}, opt = 3.732
+> progress 2.588%, elapsed 243 s, estimated 9388 s (2 hours), iters = {MDP: 515126}, opt = 3.732
+> progress 2.592%, elapsed 246 s, estimated 9489 s (2 hours), iters = {MDP: 521443}, opt = 3.732
+> progress 2.597%, elapsed 249 s, estimated 9589 s (2 hours), iters = {MDP: 527489}, opt = 3.732
+> progress 2.598%, elapsed 252 s, estimated 9698 s (2 hours), iters = {MDP: 533426}, opt = 3.732
+> progress 2.604%, elapsed 255 s, estimated 9792 s (2 hours), iters = {MDP: 539430}, opt = 3.732
+> progress 2.608%, elapsed 258 s, estimated 9892 s (2 hours), iters = {MDP: 545472}, opt = 3.732
+> progress 2.671%, elapsed 261 s, estimated 9769 s (2 hours), iters = {MDP: 551238}, opt = 3.732
+> progress 2.685%, elapsed 264 s, estimated 9832 s (2 hours), iters = {MDP: 557324}, opt = 3.732
+2024-04-09 20:48:01,287 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:48:01,388 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:48:01,388 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:48:01,388 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:48:01,788 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:48:01,788 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:48:01,789 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 35
+> progress 2.692%, elapsed 267 s, estimated 9916 s (2 hours), iters = {MDP: 563793}, opt = 3.732
+> progress 2.698%, elapsed 270 s, estimated 10008 s (2 hours), iters = {MDP: 570075}, opt = 3.732
+> progress 2.699%, elapsed 273 s, estimated 10116 s (2 hours), iters = {MDP: 576324}, opt = 3.732
+> progress 2.704%, elapsed 276 s, estimated 10206 s (2 hours), iters = {MDP: 582560}, opt = 3.732
+> progress 2.71%, elapsed 279 s, estimated 10295 s (2 hours), iters = {MDP: 588922}, opt = 3.732
+> progress 2.723%, elapsed 282 s, estimated 10356 s (2 hours), iters = {MDP: 595402}, opt = 3.732
+> progress 2.732%, elapsed 285 s, estimated 10433 s (2 hours), iters = {MDP: 601810}, opt = 3.732
+> progress 2.818%, elapsed 288 s, estimated 10220 s (2 hours), iters = {MDP: 607058}, opt = 3.732
+> progress 4.135%, elapsed 291 s, estimated 7037 s, iters = {MDP: 612375}, opt = 3.732
+> progress 4.375%, elapsed 294 s, estimated 6720 s, iters = {MDP: 617751}, opt = 3.732
+> progress 6.254%, elapsed 297 s, estimated 4749 s, iters = {MDP: 624061}, opt = 3.732
+> progress 6.255%, elapsed 300 s, estimated 4796 s, iters = {MDP: 630410}, opt = 3.732
+> progress 6.256%, elapsed 303 s, estimated 4843 s, iters = {MDP: 636385}, opt = 3.732
+> progress 6.259%, elapsed 306 s, estimated 4889 s, iters = {MDP: 642549}, opt = 3.732
+> progress 6.263%, elapsed 309 s, estimated 4934 s, iters = {MDP: 648637}, opt = 3.732
+> progress 6.266%, elapsed 312 s, estimated 4979 s, iters = {MDP: 655218}, opt = 3.732
+> progress 6.268%, elapsed 315 s, estimated 5026 s, iters = {MDP: 662067}, opt = 3.732
+> progress 6.27%, elapsed 318 s, estimated 5071 s, iters = {MDP: 668348}, opt = 3.732
+> progress 6.274%, elapsed 321 s, estimated 5116 s, iters = {MDP: 674687}, opt = 3.732
+> progress 6.279%, elapsed 324 s, estimated 5160 s, iters = {MDP: 681276}, opt = 3.732
+> progress 6.28%, elapsed 327 s, estimated 5207 s, iters = {MDP: 687986}, opt = 3.732
+> progress 6.285%, elapsed 330 s, estimated 5250 s, iters = {MDP: 694801}, opt = 3.732
+> progress 6.293%, elapsed 333 s, estimated 5292 s, iters = {MDP: 701346}, opt = 3.732
+> progress 6.294%, elapsed 336 s, estimated 5338 s, iters = {MDP: 708349}, opt = 3.732
+> progress 6.296%, elapsed 339 s, estimated 5384 s, iters = {MDP: 714554}, opt = 3.732
+> progress 6.301%, elapsed 342 s, estimated 5428 s, iters = {MDP: 721231}, opt = 3.732
+> progress 6.302%, elapsed 345 s, estimated 5475 s, iters = {MDP: 728544}, opt = 3.732
+> progress 6.305%, elapsed 348 s, estimated 5520 s, iters = {MDP: 734599}, opt = 3.732
+> progress 6.305%, elapsed 351 s, estimated 5567 s, iters = {MDP: 741656}, opt = 3.732
+> progress 6.307%, elapsed 354 s, estimated 5613 s, iters = {MDP: 748221}, opt = 3.732
+2024-04-09 20:49:31,483 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:49:31,583 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:49:31,584 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:49:31,584 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:49:31,984 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:49:31,984 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:49:31,984 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 32
+> progress 6.307%, elapsed 357 s, estimated 5660 s, iters = {MDP: 755431}, opt = 3.732
+> progress 6.308%, elapsed 360 s, estimated 5707 s, iters = {MDP: 761579}, opt = 3.732
+> progress 6.308%, elapsed 363 s, estimated 5755 s, iters = {MDP: 768141}, opt = 3.732
+> progress 6.308%, elapsed 366 s, estimated 5802 s, iters = {MDP: 775400}, opt = 3.732
+> progress 6.309%, elapsed 369 s, estimated 5849 s, iters = {MDP: 782794}, opt = 3.732
+> progress 6.313%, elapsed 372 s, estimated 5893 s, iters = {MDP: 789908}, opt = 3.732
+> progress 6.314%, elapsed 375 s, estimated 5939 s, iters = {MDP: 795959}, opt = 3.732
+> progress 6.32%, elapsed 378 s, estimated 5981 s, iters = {MDP: 802697}, opt = 3.732
+> progress 6.322%, elapsed 381 s, estimated 6027 s, iters = {MDP: 809797}, opt = 3.732
+> progress 6.323%, elapsed 384 s, estimated 6073 s, iters = {MDP: 817113}, opt = 3.732
+> progress 6.328%, elapsed 387 s, estimated 6116 s, iters = {MDP: 823255}, opt = 3.732
+> progress 6.329%, elapsed 390 s, estimated 6162 s, iters = {MDP: 830523}, opt = 3.732
+> progress 6.331%, elapsed 393 s, estimated 6208 s, iters = {MDP: 837569}, opt = 3.732
+> progress 6.333%, elapsed 396 s, estimated 6253 s, iters = {MDP: 844186}, opt = 3.732
+> progress 6.334%, elapsed 399 s, estimated 6299 s, iters = {MDP: 851640}, opt = 3.732
+> progress 6.338%, elapsed 402 s, estimated 6343 s, iters = {MDP: 858713}, opt = 3.732
+> progress 6.342%, elapsed 405 s, estimated 6386 s, iters = {MDP: 866212}, opt = 3.732
+> progress 6.343%, elapsed 408 s, estimated 6432 s, iters = {MDP: 873759}, opt = 3.732
+> progress 6.346%, elapsed 411 s, estimated 6476 s, iters = {MDP: 880795}, opt = 3.732
+> progress 6.349%, elapsed 414 s, estimated 6520 s, iters = {MDP: 888085}, opt = 3.732
+> progress 6.36%, elapsed 417 s, estimated 6557 s, iters = {MDP: 894946}, opt = 3.732
+> progress 6.362%, elapsed 420 s, estimated 6602 s, iters = {MDP: 901432}, opt = 3.732
+> progress 6.364%, elapsed 423 s, estimated 6647 s, iters = {MDP: 908234}, opt = 3.732
+> progress 6.373%, elapsed 426 s, estimated 6685 s, iters = {MDP: 914627}, opt = 3.732
+> progress 6.408%, elapsed 429 s, estimated 6695 s, iters = {MDP: 920558}, opt = 3.732
+> progress 6.41%, elapsed 432 s, estimated 6740 s, iters = {MDP: 926963}, opt = 3.732
+> progress 6.417%, elapsed 435 s, estimated 6779 s, iters = {MDP: 932772}, opt = 3.732
+> progress 6.419%, elapsed 438 s, estimated 6824 s, iters = {MDP: 939459}, opt = 3.732
+> progress 6.424%, elapsed 441 s, estimated 6865 s, iters = {MDP: 946020}, opt = 3.732
+> progress 6.424%, elapsed 444 s, estimated 6911 s, iters = {MDP: 953151}, opt = 3.732
+2024-04-09 20:51:01,679 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:51:01,779 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:51:01,780 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:51:01,780 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:51:02,180 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:51:02,180 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:51:02,180 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 31
+> progress 6.425%, elapsed 447 s, estimated 6958 s, iters = {MDP: 959803}, opt = 3.732
+> progress 6.426%, elapsed 450 s, estimated 7003 s, iters = {MDP: 966640}, opt = 3.732
+> progress 6.427%, elapsed 453 s, estimated 7048 s, iters = {MDP: 973204}, opt = 3.732
+> progress 6.428%, elapsed 456 s, estimated 7094 s, iters = {MDP: 980181}, opt = 3.732
+> progress 6.444%, elapsed 459 s, estimated 7123 s, iters = {MDP: 986914}, opt = 3.732
+> progress 6.448%, elapsed 462 s, estimated 7165 s, iters = {MDP: 993628}, opt = 3.732
+> progress 6.45%, elapsed 465 s, estimated 7209 s (2 hours), iters = {MDP: 1000305}, opt = 3.732
+> progress 6.451%, elapsed 468 s, estimated 7255 s (2 hours), iters = {MDP: 1006743}, opt = 3.732
+> progress 6.452%, elapsed 471 s, estimated 7301 s (2 hours), iters = {MDP: 1013576}, opt = 3.732
+> progress 6.456%, elapsed 474 s, estimated 7342 s (2 hours), iters = {MDP: 1020267}, opt = 3.732
+> progress 6.458%, elapsed 477 s, estimated 7387 s (2 hours), iters = {MDP: 1027329}, opt = 3.732
+> progress 6.462%, elapsed 480 s, estimated 7428 s (2 hours), iters = {MDP: 1033788}, opt = 3.732
+> progress 6.463%, elapsed 483 s, estimated 7474 s (2 hours), iters = {MDP: 1040066}, opt = 3.732
+> progress 6.465%, elapsed 486 s, estimated 7517 s (2 hours), iters = {MDP: 1046983}, opt = 3.732
+> progress 6.469%, elapsed 489 s, estimated 7559 s (2 hours), iters = {MDP: 1053475}, opt = 3.732
+> progress 6.47%, elapsed 492 s, estimated 7604 s (2 hours), iters = {MDP: 1060312}, opt = 3.732
+> progress 6.471%, elapsed 495 s, estimated 7650 s (2 hours), iters = {MDP: 1067226}, opt = 3.732
+> progress 6.472%, elapsed 498 s, estimated 7695 s (2 hours), iters = {MDP: 1073867}, opt = 3.732
+> progress 6.474%, elapsed 501 s, estimated 7739 s (2 hours), iters = {MDP: 1080226}, opt = 3.732
+> progress 6.475%, elapsed 504 s, estimated 7784 s (2 hours), iters = {MDP: 1086871}, opt = 3.732
+> progress 6.477%, elapsed 507 s, estimated 7828 s (2 hours), iters = {MDP: 1093569}, opt = 3.732
+> progress 6.478%, elapsed 510 s, estimated 7874 s (2 hours), iters = {MDP: 1100711}, opt = 3.732
+> progress 6.489%, elapsed 513 s, estimated 7905 s (2 hours), iters = {MDP: 1106847}, opt = 3.732
+> progress 6.49%, elapsed 516 s, estimated 7950 s (2 hours), iters = {MDP: 1112519}, opt = 3.732
+> progress 6.495%, elapsed 519 s, estimated 7991 s (2 hours), iters = {MDP: 1119400}, opt = 3.732
+> progress 6.497%, elapsed 522 s, estimated 8035 s (2 hours), iters = {MDP: 1126089}, opt = 3.732
+> progress 6.498%, elapsed 525 s, estimated 8079 s (2 hours), iters = {MDP: 1132611}, opt = 3.732
+> progress 6.498%, elapsed 528 s, estimated 8125 s (2 hours), iters = {MDP: 1138583}, opt = 3.732
+> progress 6.499%, elapsed 531 s, estimated 8171 s (2 hours), iters = {MDP: 1144876}, opt = 3.732
+> progress 6.5%, elapsed 534 s, estimated 8216 s (2 hours), iters = {MDP: 1151580}, opt = 3.732
+2024-04-09 20:52:31,822 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:52:31,922 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:52:31,922 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:52:31,922 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:52:32,322 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:52:32,322 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:52:32,323 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 24
+> progress 6.52%, elapsed 537 s, estimated 8236 s (2 hours), iters = {MDP: 1158218}, opt = 3.732
+> progress 6.523%, elapsed 540 s, estimated 8279 s (2 hours), iters = {MDP: 1164685}, opt = 3.732
+> progress 6.53%, elapsed 543 s, estimated 8316 s (2 hours), iters = {MDP: 1171086}, opt = 3.732
+> progress 6.531%, elapsed 546 s, estimated 8360 s (2 hours), iters = {MDP: 1177368}, opt = 3.732
+> progress 6.533%, elapsed 549 s, estimated 8404 s (2 hours), iters = {MDP: 1183647}, opt = 3.732
+> progress 6.534%, elapsed 552 s, estimated 8448 s (2 hours), iters = {MDP: 1190265}, opt = 3.732
+> progress 6.535%, elapsed 555 s, estimated 8493 s (2 hours), iters = {MDP: 1197021}, opt = 3.732
+> progress 6.535%, elapsed 558 s, estimated 8539 s (2 hours), iters = {MDP: 1203416}, opt = 3.732
+> progress 6.535%, elapsed 561 s, estimated 8584 s (2 hours), iters = {MDP: 1209897}, opt = 3.732
+> progress 6.537%, elapsed 564 s, estimated 8627 s (2 hours), iters = {MDP: 1216475}, opt = 3.732
+> progress 6.554%, elapsed 567 s, estimated 8652 s (2 hours), iters = {MDP: 1223176}, opt = 3.732
+> progress 6.558%, elapsed 570 s, estimated 8691 s (2 hours), iters = {MDP: 1229570}, opt = 3.732
+> progress 6.56%, elapsed 573 s, estimated 8735 s (2 hours), iters = {MDP: 1236455}, opt = 3.732
+> progress 6.562%, elapsed 576 s, estimated 8778 s (2 hours), iters = {MDP: 1243062}, opt = 3.732
+> progress 6.563%, elapsed 579 s, estimated 8823 s (2 hours), iters = {MDP: 1249449}, opt = 3.732
+> progress 6.566%, elapsed 582 s, estimated 8865 s (2 hours), iters = {MDP: 1255799}, opt = 3.732
+> progress 6.567%, elapsed 585 s, estimated 8908 s (2 hours), iters = {MDP: 1262839}, opt = 3.732
+> progress 6.572%, elapsed 588 s, estimated 8948 s (2 hours), iters = {MDP: 1269180}, opt = 3.732
+> progress 6.577%, elapsed 591 s, estimated 8987 s (2 hours), iters = {MDP: 1275666}, opt = 3.732
+> progress 6.578%, elapsed 594 s, estimated 9031 s (2 hours), iters = {MDP: 1282429}, opt = 3.732
+> progress 6.579%, elapsed 597 s, estimated 9074 s (2 hours), iters = {MDP: 1288702}, opt = 3.732
+> progress 6.583%, elapsed 600 s, estimated 9115 s (2 hours), iters = {MDP: 1294975}, opt = 3.732
+> progress 6.584%, elapsed 603 s, estimated 9158 s (2 hours), iters = {MDP: 1301448}, opt = 3.732
+> progress 6.586%, elapsed 606 s, estimated 9202 s (2 hours), iters = {MDP: 1308307}, opt = 3.732
+> progress 6.588%, elapsed 609 s, estimated 9245 s (2 hours), iters = {MDP: 1314876}, opt = 3.732
+> progress 6.593%, elapsed 612 s, estimated 9283 s (2 hours), iters = {MDP: 1321097}, opt = 3.732
+> progress 6.599%, elapsed 615 s, estimated 9320 s (2 hours), iters = {MDP: 1326864}, opt = 3.732
+> progress 6.611%, elapsed 618 s, estimated 9348 s (2 hours), iters = {MDP: 1332723}, opt = 3.732
+> progress 6.614%, elapsed 621 s, estimated 9389 s (2 hours), iters = {MDP: 1338597}, opt = 3.732
+> progress 6.623%, elapsed 624 s, estimated 9423 s (2 hours), iters = {MDP: 1345237}, opt = 3.732
+2024-04-09 20:54:02,018 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:54:02,118 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:54:02,118 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:54:02,118 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:54:02,519 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:54:02,519 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:54:02,519 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 25
+> progress 6.634%, elapsed 627 s, estimated 9452 s (2 hours), iters = {MDP: 1351776}, opt = 3.732
+> progress 6.636%, elapsed 630 s, estimated 9494 s (2 hours), iters = {MDP: 1358077}, opt = 3.732
+> progress 6.64%, elapsed 633 s, estimated 9533 s (2 hours), iters = {MDP: 1364565}, opt = 3.732
+> progress 6.684%, elapsed 636 s, estimated 9516 s (2 hours), iters = {MDP: 1370512}, opt = 3.732
+> progress 6.686%, elapsed 639 s, estimated 9557 s (2 hours), iters = {MDP: 1376067}, opt = 3.732
+> progress 6.696%, elapsed 642 s, estimated 9588 s (2 hours), iters = {MDP: 1382170}, opt = 3.732
+> progress 6.699%, elapsed 645 s, estimated 9629 s (2 hours), iters = {MDP: 1388253}, opt = 3.732
+> progress 6.707%, elapsed 648 s, estimated 9661 s (2 hours), iters = {MDP: 1394137}, opt = 3.732
+> progress 6.813%, elapsed 651 s, estimated 9556 s (2 hours), iters = {MDP: 1399867}, opt = 3.732
+> progress 6.877%, elapsed 654 s, estimated 9510 s (2 hours), iters = {MDP: 1405688}, opt = 3.732
+> progress 6.902%, elapsed 657 s, estimated 9520 s (2 hours), iters = {MDP: 1412146}, opt = 3.732
+> progress 6.911%, elapsed 660 s, estimated 9550 s (2 hours), iters = {MDP: 1418507}, opt = 3.732
+> progress 6.914%, elapsed 663 s, estimated 9589 s (2 hours), iters = {MDP: 1425163}, opt = 3.732
+> progress 6.937%, elapsed 666 s, estimated 9602 s (2 hours), iters = {MDP: 1430732}, opt = 3.732
+> progress 6.939%, elapsed 669 s, estimated 9642 s (2 hours), iters = {MDP: 1436969}, opt = 3.732
+> progress 6.942%, elapsed 672 s, estimated 9681 s (2 hours), iters = {MDP: 1443186}, opt = 3.732
+> progress 6.949%, elapsed 675 s, estimated 9714 s (2 hours), iters = {MDP: 1450501}, opt = 3.732
+> progress 6.953%, elapsed 678 s, estimated 9752 s (2 hours), iters = {MDP: 1457260}, opt = 3.732
+> progress 7.017%, elapsed 681 s, estimated 9706 s (2 hours), iters = {MDP: 1463695}, opt = 3.732
+> progress 7.032%, elapsed 684 s, estimated 9728 s (2 hours), iters = {MDP: 1470270}, opt = 3.732
+> progress 7.034%, elapsed 687 s, estimated 9767 s (2 hours), iters = {MDP: 1477124}, opt = 3.732
+> progress 7.036%, elapsed 690 s, estimated 9807 s (2 hours), iters = {MDP: 1484135}, opt = 3.732
+> progress 7.044%, elapsed 693 s, estimated 9838 s (2 hours), iters = {MDP: 1490521}, opt = 3.732
+> progress 7.048%, elapsed 696 s, estimated 9875 s (2 hours), iters = {MDP: 1496990}, opt = 3.732
+> progress 7.067%, elapsed 699 s, estimated 9892 s (2 hours), iters = {MDP: 1503529}, opt = 3.732
+> progress 7.076%, elapsed 702 s, estimated 9921 s (2 hours), iters = {MDP: 1510177}, opt = 3.732
+> progress 7.093%, elapsed 705 s, estimated 9940 s (2 hours), iters = {MDP: 1517026}, opt = 3.732
+> progress 7.096%, elapsed 708 s, estimated 9977 s (2 hours), iters = {MDP: 1523526}, opt = 3.732
+> progress 7.104%, elapsed 711 s, estimated 10009 s (2 hours), iters = {MDP: 1530089}, opt = 3.732
+> progress 7.122%, elapsed 714 s, estimated 10026 s (2 hours), iters = {MDP: 1536231}, opt = 3.732
+2024-04-09 20:55:32,214 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:55:32,314 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:55:32,314 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:55:32,314 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:55:32,714 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:55:32,714 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:55:32,715 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 27
+> progress 7.125%, elapsed 717 s, estimated 10063 s (2 hours), iters = {MDP: 1542756}, opt = 3.732
+> progress 7.13%, elapsed 720 s, estimated 10098 s (2 hours), iters = {MDP: 1549643}, opt = 3.732
+> progress 7.136%, elapsed 723 s, estimated 10133 s (2 hours), iters = {MDP: 1556393}, opt = 3.732
+> progress 7.14%, elapsed 726 s, estimated 10168 s (2 hours), iters = {MDP: 1563168}, opt = 3.732
+> progress 7.142%, elapsed 729 s, estimated 10207 s (2 hours), iters = {MDP: 1569488}, opt = 3.732
+> progress 7.146%, elapsed 732 s, estimated 10244 s (2 hours), iters = {MDP: 1576109}, opt = 3.732
+> progress 7.149%, elapsed 735 s, estimated 10281 s (2 hours), iters = {MDP: 1582749}, opt = 3.732
+> progress 7.15%, elapsed 738 s, estimated 10322 s (2 hours), iters = {MDP: 1589464}, opt = 3.732
+> progress 7.155%, elapsed 741 s, estimated 10357 s (2 hours), iters = {MDP: 1596262}, opt = 3.732
+> progress 7.2%, elapsed 744 s, estimated 10334 s (2 hours), iters = {MDP: 1602346}, opt = 3.732
+> progress 7.221%, elapsed 747 s, estimated 10345 s (2 hours), iters = {MDP: 1608848}, opt = 3.732
+> progress 7.23%, elapsed 750 s, estimated 10373 s (2 hours), iters = {MDP: 1615670}, opt = 3.732
+> progress 7.235%, elapsed 753 s, estimated 10408 s (2 hours), iters = {MDP: 1622415}, opt = 3.732
+> progress 7.239%, elapsed 756 s, estimated 10444 s (2 hours), iters = {MDP: 1629024}, opt = 3.732
+> progress 7.245%, elapsed 759 s, estimated 10476 s (2 hours), iters = {MDP: 1635763}, opt = 3.732
+> progress 7.322%, elapsed 762 s, estimated 10407 s (2 hours), iters = {MDP: 1642106}, opt = 3.732
+> progress 7.325%, elapsed 765 s, estimated 10445 s (2 hours), iters = {MDP: 1649111}, opt = 3.732
+> progress 7.329%, elapsed 768 s, estimated 10480 s (2 hours), iters = {MDP: 1655687}, opt = 3.732
+> progress 7.337%, elapsed 771 s, estimated 10509 s (2 hours), iters = {MDP: 1662283}, opt = 3.732
+> progress 7.362%, elapsed 774 s, estimated 10514 s (2 hours), iters = {MDP: 1668930}, opt = 3.732
+> progress 7.371%, elapsed 777 s, estimated 10542 s (2 hours), iters = {MDP: 1675773}, opt = 3.732
+> progress 7.372%, elapsed 780 s, estimated 10581 s (2 hours), iters = {MDP: 1682701}, opt = 3.732
+> progress 7.376%, elapsed 783 s, estimated 10615 s (2 hours), iters = {MDP: 1689336}, opt = 3.732
+> progress 7.381%, elapsed 786 s, estimated 10650 s (2 hours), iters = {MDP: 1696130}, opt = 3.732
+> progress 7.385%, elapsed 789 s, estimated 10685 s (2 hours), iters = {MDP: 1702617}, opt = 3.732
+> progress 7.39%, elapsed 792 s, estimated 10718 s (2 hours), iters = {MDP: 1709029}, opt = 3.732
+> progress 7.456%, elapsed 795 s, estimated 10663 s (2 hours), iters = {MDP: 1715305}, opt = 3.732
+> progress 7.466%, elapsed 798 s, estimated 10689 s (2 hours), iters = {MDP: 1721630}, opt = 3.732
+> progress 7.474%, elapsed 801 s, estimated 10717 s (2 hours), iters = {MDP: 1728560}, opt = 3.732
+> progress 7.479%, elapsed 804 s, estimated 10750 s (2 hours), iters = {MDP: 1734753}, opt = 3.732
+2024-04-09 20:57:02,410 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:57:02,509 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:57:02,510 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:57:02,510 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-09 20:57:02,911 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-09 20:57:02,911 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-09 20:57:02,911 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 0, Subfamilies - 21
+> progress 7.483%, elapsed 807 s, estimated 10784 s (2 hours), iters = {MDP: 1741547}, opt = 3.732
+> progress 7.486%, elapsed 810 s, estimated 10820 s (3 hours), iters = {MDP: 1748480}, opt = 3.732
+> progress 7.492%, elapsed 813 s, estimated 10851 s (3 hours), iters = {MDP: 1755043}, opt = 3.732
+> progress 7.506%, elapsed 816 s, estimated 10871 s (3 hours), iters = {MDP: 1761903}, opt = 3.732
+> progress 7.512%, elapsed 819 s, estimated 10903 s (3 hours), iters = {MDP: 1768758}, opt = 3.732
+> progress 7.53%, elapsed 822 s, estimated 10917 s (3 hours), iters = {MDP: 1775363}, opt = 3.732
+> progress 7.544%, elapsed 825 s, estimated 10936 s (3 hours), iters = {MDP: 1782098}, opt = 3.732
+> progress 7.549%, elapsed 828 s, estimated 10968 s (3 hours), iters = {MDP: 1788698}, opt = 3.732
+> progress 7.556%, elapsed 831 s, estimated 10998 s (3 hours), iters = {MDP: 1795328}, opt = 3.732
+> progress 7.557%, elapsed 834 s, estimated 11036 s (3 hours), iters = {MDP: 1802053}, opt = 3.732
+> progress 7.566%, elapsed 837 s, estimated 11062 s (3 hours), iters = {MDP: 1809195}, opt = 3.732
+> progress 7.581%, elapsed 840 s, estimated 11081 s (3 hours), iters = {MDP: 1815974}, opt = 3.732
+> progress 7.593%, elapsed 843 s, estimated 11102 s (3 hours), iters = {MDP: 1822650}, opt = 3.732
+> progress 7.623%, elapsed 846 s, estimated 11099 s (3 hours), iters = {MDP: 1829395}, opt = 3.732
+> progress 7.637%, elapsed 849 s, estimated 11118 s (3 hours), iters = {MDP: 1835870}, opt = 3.732
+> progress 7.688%, elapsed 852 s, estimated 11083 s (3 hours), iters = {MDP: 1842171}, opt = 3.732
+> progress 7.694%, elapsed 855 s, estimated 11113 s (3 hours), iters = {MDP: 1849579}, opt = 3.732
+> progress 7.695%, elapsed 858 s, estimated 11151 s (3 hours), iters = {MDP: 1856338}, opt = 3.732
+> progress 7.704%, elapsed 861 s, estimated 11177 s (3 hours), iters = {MDP: 1863338}, opt = 3.732
+> progress 7.738%, elapsed 864 s, estimated 11167 s (3 hours), iters = {MDP: 1870467}, opt = 3.732
+> progress 7.752%, elapsed 867 s, estimated 11184 s (3 hours), iters = {MDP: 1876972}, opt = 3.732
+> progress 7.779%, elapsed 870 s, estimated 11184 s (3 hours), iters = {MDP: 1883705}, opt = 3.732
+> progress 7.791%, elapsed 873 s, estimated 11206 s (3 hours), iters = {MDP: 1890331}, opt = 3.732
+> progress 7.804%, elapsed 876 s, estimated 11226 s (3 hours), iters = {MDP: 1897055}, opt = 3.732
+> progress 7.934%, elapsed 879 s, estimated 11080 s (3 hours), iters = {MDP: 1903352}, opt = 3.732
+> progress 8.235%, elapsed 882 s, estimated 10711 s (2 hours), iters = {MDP: 1909104}, opt = 3.732
+> progress 8.468%, elapsed 885 s, estimated 10452 s (2 hours), iters = {MDP: 1914874}, opt = 3.732
+> progress 8.667%, elapsed 888 s, estimated 10246 s (2 hours), iters = {MDP: 1919984}, opt = 3.732
+> progress 9.096%, elapsed 891 s, estimated 9796 s (2 hours), iters = {MDP: 1925462}, opt = 3.732
+> progress 10.176%, elapsed 894 s, estimated 8786 s (2 hours), iters = {MDP: 1931208}, opt = 3.732
+2024-04-09 20:58:32,576 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-09 20:58:32,676 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-09 20:58:32,676 - storm_pomdp_control.py - Storm already terminated.
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+
+2024-04-09 20:58:33,077 - synthesizer_ar_storm.py - Terminating controller synthesis
+2024-04-09 20:58:33,077 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-09 20:58:33,077 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{9500000000000001/10000000000000000}] 
+
+method: AR, synthesis time: 894.17 s
+number of holes: 19, family size: 1e11, quotient: 122 states / 1940 actions
+explored: 10 %
+MDP stats: avg MDP size: 122, iterations: 1931235
+
+optimum: 3.732235
+--------------------
+2024-04-09 20:58:33,077 - synthesizer_pomdp.py - Terminate: True
+2024-04-09 20:58:33,078 - storm_pomdp_control.py - Storm POMDP analysis completed
+
+------------------------------------
+
+PAYNT results: 
+3.732235361706705
+controller size: 12
+
+Storm results: 
+3.7322769782076186
+controller size: 38
+
+------------------------------------
+

@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "paynt.py", line 4, in <module>
+    paynt.cli.main()
+  File "/home/fpmk/research/synthesis/paynt/cli.py", line 249, in main
+    paynt_run()
+  File "/home/fpmk/research/synthesis/prerequisites/venv/lib/python3.8/site-packages/click/core.py", line 1157, in __call__
+    return self.main(*args, **kwargs)
+  File "/home/fpmk/research/synthesis/prerequisites/venv/lib/python3.8/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+  File "/home/fpmk/research/synthesis/prerequisites/venv/lib/python3.8/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/home/fpmk/research/synthesis/prerequisites/venv/lib/python3.8/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+  File "/home/fpmk/research/synthesis/paynt/cli.py", line 219, in paynt_run
+    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound, native_discount)
+  File "/home/fpmk/research/synthesis/paynt/parser/sketch.py", line 135, in load_sketch
+    if specification.has_optimality:
+AttributeError: 'NoneType' object has no attribute 'has_optimality'
