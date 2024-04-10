@@ -1,0 +1,31 @@
+
+Loading the model ...
+  input file   : ../models/08/hanks.95.pomdp
+  loading time : 0.00s 
+
+SARSOP initializing ...
+  initialization time : 0.00s
+
+-------------------------------------------------------------------------------
+ Time   |#Trial |#Backup |LBound    |UBound    |Precision  |#Alphas |#Beliefs  
+-------------------------------------------------------------------------------
+ 0       0       0        0          1.93397    1.93397     4        1        
+ 0       7       51       0.702062   0.826241   0.124179    13       12       
+ 0       14      100      0.735372   0.738457   0.00308545  18       14       
+ 0.01    19      143      0.735836   0.73592    8.38451e-05 15       14       
+-------------------------------------------------------------------------------
+
+SARSOP finishing ...
+  target precision reached
+  target precision  : 0.000100
+  precision reached : 0.000084 
+
+-------------------------------------------------------------------------------
+ Time   |#Trial |#Backup |LBound    |UBound    |Precision  |#Alphas |#Beliefs  
+-------------------------------------------------------------------------------
+ 0.01    19      143      0.735836   0.73592    8.38451e-05 8        14       
+-------------------------------------------------------------------------------
+
+Writing out policy ...
+  output file : ../../../../synthesis-playground/experiments-beliefs/sarsop/output/hanks-95.out
+

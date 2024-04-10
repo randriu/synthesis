@@ -1,0 +1,80 @@
+2024-04-10 20:36:58,077 - cli.py - This is Paynt version 0.1.0.
+2024-04-10 20:36:58,077 - sketch.py - loading sketch from ../sarsop/models/cheng.D3-1.pomdp ...
+2024-04-10 20:36:58,077 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:26): Parsing error at 1:1:  expecting <model type>, here:
+	# Data Set D3.1
+	^
+
+2024-04-10 20:36:58,078 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line '# Data Set D3.1'.
+2024-04-10 20:36:58,078 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-10 20:36:58,079 - sketch.py - applying discount factor transformation...
+2024-04-10 20:36:58,079 - sketch.py - sketch parsing OK
+2024-04-10 20:36:58,079 - sketch.py - constructed explicit quotient having 13 states and 37 actions
+2024-04-10 20:36:58,079 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [C{99999/100000}] 
+2024-04-10 20:36:58,079 - pomdp.py - constructed POMDP having 5 observations.
+2024-04-10 20:36:58,080 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-10 20:36:58,080 - pomdp.py - constructed quotient MDP having 13 states and 37 actions.
+2024-04-10 20:36:58,080 - pomdp.py - creating coloring ...
+2024-04-10 20:36:58,082 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-10 20:36:58,082 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-10 20:36:58,083 - synthesizer.py - synthesis initiated, design space: 81
+2024-04-10 20:36:58,083 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = 608408.0620063387 | Time elapsed = 1.9s | FSC size = 10
+
+> progress 22.222%, elapsed 3 s, estimated 14 s, iters = {MDP: 11}, opt = 608408.062
+-----------PAYNT-----------                     
+Value = 641693.3237196727 | Time elapsed = 5.2s | FSC size = 10
+
+> progress 55.555%, elapsed 6 s, estimated 11 s, iters = {MDP: 21}, opt = 641693.324
+2024-04-10 20:37:05,172 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 20:37:05,172 - synthesizer.py - A(o0,0)=(a2), A(o1,0)=(a2), A(o2,0)=(a1), A(__no_obs__,0)=(a2)
+2024-04-10 20:37:05,343 - synthesizer.py - double-checking specification satisfiability:  : 641693.3237196727
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{99999/100000}] 
+
+method: AR, synthesis time: 7.09 s
+number of holes: 4, family size: 81, quotient: 13 states / 37 actions
+explored: 100 %
+MDP stats: avg MDP size: 13, iterations: 22
+
+optimum: 641693.32372
+--------------------
+2024-04-10 20:37:05,517 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 20:37:05,517 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 20:37:05,517 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-04-10 20:37:05,518 - pomdp.py - constructed quotient MDP having 25 states and 146 actions.
+2024-04-10 20:37:05,518 - pomdp.py - creating coloring ...
+2024-04-10 20:37:05,518 - synthesizer.py - synthesis initiated, design space: 1e6
+> progress 0.0%, elapsed 4 s, estimated 4097107 s (47 days), iters = {MDP: 3}, opt = 641693.324
+> progress 1.234%, elapsed 8 s, estimated 676 s, iters = {MDP: 6}, opt = 641693.324
+> progress 3.703%, elapsed 12 s, estimated 334 s, iters = {MDP: 9}, opt = 641693.324
+> progress 7.407%, elapsed 16 s, estimated 221 s, iters = {MDP: 12}, opt = 641693.324
+> progress 9.876%, elapsed 20 s, estimated 207 s, iters = {MDP: 15}, opt = 641693.324
+> progress 11.111%, elapsed 23 s, estimated 211 s, iters = {MDP: 17}, opt = 641693.324
+> progress 11.111%, elapsed 27 s, estimated 245 s, iters = {MDP: 20}, opt = 641693.324
+> progress 11.156%, elapsed 30 s, estimated 274 s, iters = {MDP: 24}, opt = 641693.324
+> progress 11.294%, elapsed 33 s, estimated 301 s, iters = {MDP: 28}, opt = 641693.324
+> progress 11.431%, elapsed 37 s, estimated 325 s, iters = {MDP: 32}, opt = 641693.324
+> progress 11.659%, elapsed 40 s, estimated 350 s, iters = {MDP: 36}, opt = 641693.324
+> progress 11.934%, elapsed 44 s, estimated 376 s, iters = {MDP: 40}, opt = 641693.324
+> progress 12.345%, elapsed 48 s, estimated 395 s, iters = {MDP: 44}, opt = 641693.324
+> progress 13.168%, elapsed 52 s, estimated 397 s, iters = {MDP: 47}, opt = 641693.324
+> progress 13.991%, elapsed 55 s, estimated 398 s, iters = {MDP: 50}, opt = 641693.324
+> progress 14.814%, elapsed 59 s, estimated 400 s, iters = {MDP: 53}, opt = 641693.324
+> progress 14.951%, elapsed 62 s, estimated 417 s, iters = {MDP: 56}, opt = 641693.324
+> progress 16.049%, elapsed 66 s, estimated 414 s, iters = {MDP: 60}, opt = 641693.324
+> progress 16.872%, elapsed 69 s, estimated 413 s, iters = {MDP: 63}, opt = 641693.324
+> progress 18.518%, elapsed 73 s, estimated 396 s, iters = {MDP: 66}, opt = 641693.324
+> progress 22.222%, elapsed 77 s, estimated 346 s, iters = {MDP: 69}, opt = 641693.324
+> progress 25.925%, elapsed 80 s, estimated 309 s, iters = {MDP: 71}, opt = 641693.324
+2024-04-10 20:38:30,232 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-10 20:38:30,325 - storm_pomdp_control.py - Interactive Storm started
+2024-04-10 20:38:30,326 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-04-10 20:38:42,619 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...

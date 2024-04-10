@@ -1,0 +1,29 @@
+
+Loading the model ...
+  input file   : ../models/08/ejs1.pomdp
+  loading time : 0.00s 
+
+SARSOP initializing ...
+  initialization time : 0.00s
+
+-------------------------------------------------------------------------------
+ Time   |#Trial |#Backup |LBound    |UBound    |Precision  |#Alphas |#Beliefs  
+-------------------------------------------------------------------------------
+ 0       0       0        2.24533    2.24533    1.14008e-06 4        1        
+ 0       0       1        2.24533    2.24533    8.20579e-07 5        2        
+-------------------------------------------------------------------------------
+
+SARSOP finishing ...
+  target precision reached
+  target precision  : 0.000100
+  precision reached : 0.000001 
+
+-------------------------------------------------------------------------------
+ Time   |#Trial |#Backup |LBound    |UBound    |Precision  |#Alphas |#Beliefs  
+-------------------------------------------------------------------------------
+ 0       0       1        2.24533    2.24533    8.20579e-07 1        2        
+-------------------------------------------------------------------------------
+
+Writing out policy ...
+  output file : ../../synthesis/experiments-beliefs/sarsop/output/ejs1.out
+

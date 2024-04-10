@@ -113,7 +113,7 @@ def run_experiment(options, logs_string, experiment_models, timeout, special={})
     print(f'\nExperiment {logs_string} completed. The logs are saved in folder {logs_dir.decode("utf-8")}')
 
 
-def run_sarsop(options, logs_string, experiment_models, timeout):
+def run_sarsop(options, logs_string, experiment_models, timeout, fld=""):
     logs_dir = os.fsencode(dir_path + "/{}/".format(logs_string))
 
     print(f'\nRunning experiment {logs_string}. The logs will be saved in folder {logs_dir.decode("utf-8")}')
@@ -127,11 +127,7 @@ def run_sarsop(options, logs_string, experiment_models, timeout):
         model_name = model_name.replace(".", "-")
 
         # THE REST OF THE MODELS
-<<<<<<< HEAD
-        command = "./pomdpsol ../models/08/{} -p 1e-4 -o ../../../../synthesis-playground/experiments-beliefs/sarsop/output/{}.out".format(model, model_name)
-=======
-        command = "./pomdpsol ../models/prism-translated/{} -p 1e-4 -o ../../synthesis/experiments-beliefs/sarsop/output/{}.out".format(model, model_name)
->>>>>>> origin/belief-exploration
+        command = "./pomdpsol ../models/{}/{} -p 1e-4 -o ../../synthesis/experiments-beliefs/sarsop/output/{}.out".format(fld, model, model_name)
 
         if not overwrite_logs:
             if os.path.isfile(logs_dir.decode("utf-8") + model_name + "/" + "logs.txt"):
@@ -244,15 +240,16 @@ if __name__ == '__main__':
         print("\n EXPERIMENT COMPLETE\n")
 
     elif "sarsop":
-        experiment_models = ["drone-4-1-80.pomdp", "drone-4-1-95.pomdp", "drone-4-1-99.pomdp", "drone-8-2-80.pomdp", "drone-8-2-95.pomdp", "drone-8-2-99.pomdp", "refuel-06-80.pomdp", "refuel-06-95.pomdp", "refuel-06-99.pomdp", "refuel-20-80.pomdp", "refuel-20-95.pomdp", "refuel-20-99.pomdp"]
+        # experiment_models = ["drone-4-1-80.pomdp", "drone-4-1-95.pomdp", "drone-4-1-99.pomdp", "drone-8-2-80.pomdp", "drone-8-2-95.pomdp", "drone-8-2-99.pomdp", "refuel-06-80.pomdp", "refuel-06-95.pomdp", "refuel-06-99.pomdp", "refuel-20-80.pomdp", "refuel-20-95.pomdp", "refuel-20-99.pomdp"]
         # experiment_models = ["network-3-8-20-80.pomdp", "network-3-8-20-95.pomdp", "network-3-8-20-99.pomdp", "network-2-8-20-80.pomdp", "network-2-8-20-95.pomdp", "network-2-8-20-99.pomdp", "rocks-12-80.pomdp", "rocks-12-95.pomdp", "rocks-12-99.pomdp", "rocks-16-80.pomdp", "rocks-16-95.pomdp", "rocks-16.pomdp"]
         # experiment_models = ["milos-aaai97.pomdp", "network.pomdp", "query.s3.pomdp", "query.s4.pomdp", "learning.c3.pomdp", "learning.c4.pomdp", "4x5x2.95.pomdp", "hanks.95.pomdp"]
         # experiment_models = ["network-3-8-20-80.pomdp", "network-3-8-20-95.pomdp"]
+        experiment_models = ["cheng.D3-1.pomdp", "cheng.D4-1.pomdp", "ejs1.pomdp"]
 
         options = ""
-        logs_string = "sarsop-08"
+        logs_string = "sarsop-main"
         timeout = 900
-        run_sarsop(options, logs_string, experiment_models, timeout)
+        run_sarsop(options, logs_string, experiment_models, timeout, fld="")
 
         print("\n EXPERIMENT COMPLETE\n")
 

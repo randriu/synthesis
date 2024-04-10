@@ -1,0 +1,1 @@
+ERROR: Bounds::writeToFile: couldn't open ../output/query-s4.out for writing 

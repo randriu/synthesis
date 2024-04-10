@@ -1,0 +1,3164 @@
+2024-04-10 22:08:34,911 - cli.py - This is Paynt version 0.1.0.
+2024-04-10 22:08:34,911 - sketch.py - loading sketch from ../sarsop/models/08/ejs1.pomdp ...
+2024-04-10 22:08:34,911 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:26): Parsing error at 1:1:  expecting <model type>, here:
+	discount: 0.8
+	^
+
+2024-04-10 22:08:34,926 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line 'discount: 0.8'.
+2024-04-10 22:08:34,926 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-10 22:08:34,932 - sketch.py - applying discount factor transformation...
+2024-04-10 22:08:34,940 - sketch.py - sketch parsing OK
+2024-04-10 22:08:34,942 - sketch.py - constructed explicit quotient having 10 states and 34 actions
+2024-04-10 22:08:34,942 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-04-10 22:08:34,944 - pomdp.py - constructed POMDP having 5 observations.
+2024-04-10 22:08:34,944 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-10 22:08:34,944 - pomdp.py - constructed quotient MDP having 10 states and 34 actions.
+2024-04-10 22:08:34,944 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,953 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-10 22:08:34,953 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-10 22:08:34,954 - synthesizer.py - synthesis initiated, design space: 64
+2024-04-10 22:08:34,964 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = 2.2453327922077926 | Time elapsed = 0.0s | FSC size = 10
+
+2024-04-10 22:08:34,965 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,965 - synthesizer.py - A(good,0)=(Manufacture), A(defective,0)=(Manufacture), A(__no_obs__,0)=(Manufacture)
+2024-04-10 22:08:34,965 - synthesizer.py - double-checking specification satisfiability:  : 2.2453327922077926
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 3, family size: 64, quotient: 10 states / 34 actions
+explored: 100 %
+MDP stats: avg MDP size: 10, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,966 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,966 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,966 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-04-10 22:08:34,966 - pomdp.py - constructed quotient MDP having 18 states and 131 actions.
+2024-04-10 22:08:34,966 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,966 - synthesizer.py - synthesis initiated, design space: 524288
+2024-04-10 22:08:34,966 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,966 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 13, family size: 524288, quotient: 18 states / 131 actions
+explored: 100 %
+MDP stats: avg MDP size: 18, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,966 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,966 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,966 - pomdp.py - unfolding 3-FSC template into POMDP ...
+2024-04-10 22:08:34,967 - pomdp.py - constructed quotient MDP having 26 states and 292 actions.
+2024-04-10 22:08:34,967 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,967 - synthesizer.py - synthesis initiated, design space: 1e10
+2024-04-10 22:08:34,967 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,967 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 19, family size: 1e10, quotient: 26 states / 292 actions
+explored: 100 %
+MDP stats: avg MDP size: 26, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,967 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,967 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,967 - pomdp.py - unfolding 4-FSC template into POMDP ...
+2024-04-10 22:08:34,967 - pomdp.py - constructed quotient MDP having 34 states and 517 actions.
+2024-04-10 22:08:34,967 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,968 - synthesizer.py - synthesis initiated, design space: 1e15
+2024-04-10 22:08:34,969 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,969 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 25, family size: 1e15, quotient: 34 states / 517 actions
+explored: 100 %
+MDP stats: avg MDP size: 34, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,969 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,969 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,969 - pomdp.py - unfolding 5-FSC template into POMDP ...
+2024-04-10 22:08:34,969 - pomdp.py - constructed quotient MDP having 42 states and 806 actions.
+2024-04-10 22:08:34,969 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,970 - synthesizer.py - synthesis initiated, design space: 1e20
+2024-04-10 22:08:34,970 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,970 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 31, family size: 1e20, quotient: 42 states / 806 actions
+explored: 100 %
+MDP stats: avg MDP size: 42, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,970 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,970 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,970 - pomdp.py - unfolding 6-FSC template into POMDP ...
+2024-04-10 22:08:34,971 - pomdp.py - constructed quotient MDP having 50 states and 1159 actions.
+2024-04-10 22:08:34,971 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,971 - synthesizer.py - synthesis initiated, design space: 1e25
+2024-04-10 22:08:34,972 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,972 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 37, family size: 1e25, quotient: 50 states / 1159 actions
+explored: 100 %
+MDP stats: avg MDP size: 50, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,972 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,972 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,972 - pomdp.py - unfolding 7-FSC template into POMDP ...
+2024-04-10 22:08:34,972 - pomdp.py - constructed quotient MDP having 58 states and 1576 actions.
+2024-04-10 22:08:34,972 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,973 - synthesizer.py - synthesis initiated, design space: 1e31
+2024-04-10 22:08:34,974 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,974 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 43, family size: 1e31, quotient: 58 states / 1576 actions
+explored: 100 %
+MDP stats: avg MDP size: 58, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,974 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,974 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,975 - pomdp.py - unfolding 8-FSC template into POMDP ...
+2024-04-10 22:08:34,975 - pomdp.py - constructed quotient MDP having 66 states and 2057 actions.
+2024-04-10 22:08:34,975 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,976 - synthesizer.py - synthesis initiated, design space: 1e37
+2024-04-10 22:08:34,977 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,977 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 49, family size: 1e37, quotient: 66 states / 2057 actions
+explored: 100 %
+MDP stats: avg MDP size: 66, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,977 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,977 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,977 - pomdp.py - unfolding 9-FSC template into POMDP ...
+2024-04-10 22:08:34,978 - pomdp.py - constructed quotient MDP having 74 states and 2602 actions.
+2024-04-10 22:08:34,978 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,979 - synthesizer.py - synthesis initiated, design space: 1e42
+2024-04-10 22:08:34,981 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,981 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 55, family size: 1e42, quotient: 74 states / 2602 actions
+explored: 100 %
+MDP stats: avg MDP size: 74, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,981 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,981 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,981 - pomdp.py - unfolding 10-FSC template into POMDP ...
+2024-04-10 22:08:34,982 - pomdp.py - constructed quotient MDP having 82 states and 3211 actions.
+2024-04-10 22:08:34,982 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,991 - synthesizer.py - synthesis initiated, design space: 1e49
+2024-04-10 22:08:34,992 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,992 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 61, family size: 1e49, quotient: 82 states / 3211 actions
+explored: 100 %
+MDP stats: avg MDP size: 82, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,992 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,992 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,993 - pomdp.py - unfolding 11-FSC template into POMDP ...
+2024-04-10 22:08:34,994 - pomdp.py - constructed quotient MDP having 90 states and 3884 actions.
+2024-04-10 22:08:34,994 - pomdp.py - creating coloring ...
+2024-04-10 22:08:34,996 - synthesizer.py - synthesis initiated, design space: 1e55
+2024-04-10 22:08:34,998 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:34,998 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 67, family size: 1e55, quotient: 90 states / 3884 actions
+explored: 100 %
+MDP stats: avg MDP size: 90, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:34,998 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:34,998 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:34,998 - pomdp.py - unfolding 12-FSC template into POMDP ...
+2024-04-10 22:08:34,999 - pomdp.py - constructed quotient MDP having 98 states and 4621 actions.
+2024-04-10 22:08:34,999 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,002 - synthesizer.py - synthesis initiated, design space: 1e61
+2024-04-10 22:08:35,004 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,004 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 73, family size: 1e61, quotient: 98 states / 4621 actions
+explored: 100 %
+MDP stats: avg MDP size: 98, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,004 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,004 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,004 - pomdp.py - unfolding 13-FSC template into POMDP ...
+2024-04-10 22:08:35,006 - pomdp.py - constructed quotient MDP having 106 states and 5422 actions.
+2024-04-10 22:08:35,006 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,009 - synthesizer.py - synthesis initiated, design space: 1e68
+2024-04-10 22:08:35,012 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,012 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 79, family size: 1e68, quotient: 106 states / 5422 actions
+explored: 100 %
+MDP stats: avg MDP size: 106, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,012 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,012 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,012 - pomdp.py - unfolding 14-FSC template into POMDP ...
+2024-04-10 22:08:35,014 - pomdp.py - constructed quotient MDP having 114 states and 6287 actions.
+2024-04-10 22:08:35,014 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,018 - synthesizer.py - synthesis initiated, design space: 1e74
+2024-04-10 22:08:35,020 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,020 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 85, family size: 1e74, quotient: 114 states / 6287 actions
+explored: 100 %
+MDP stats: avg MDP size: 114, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,020 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,020 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,020 - pomdp.py - unfolding 15-FSC template into POMDP ...
+2024-04-10 22:08:35,022 - pomdp.py - constructed quotient MDP having 122 states and 7216 actions.
+2024-04-10 22:08:35,022 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,034 - synthesizer.py - synthesis initiated, design space: 1e81
+2024-04-10 22:08:35,037 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,037 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 91, family size: 1e81, quotient: 122 states / 7216 actions
+explored: 100 %
+MDP stats: avg MDP size: 122, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,037 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,037 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,037 - pomdp.py - unfolding 16-FSC template into POMDP ...
+2024-04-10 22:08:35,039 - pomdp.py - constructed quotient MDP having 130 states and 8209 actions.
+2024-04-10 22:08:35,039 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,044 - synthesizer.py - synthesis initiated, design space: 1e87
+2024-04-10 22:08:35,048 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,048 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 97, family size: 1e87, quotient: 130 states / 8209 actions
+explored: 100 %
+MDP stats: avg MDP size: 130, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,048 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,048 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,048 - pomdp.py - unfolding 17-FSC template into POMDP ...
+2024-04-10 22:08:35,050 - pomdp.py - constructed quotient MDP having 138 states and 9266 actions.
+2024-04-10 22:08:35,050 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,056 - synthesizer.py - synthesis initiated, design space: 1e94
+2024-04-10 22:08:35,059 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,059 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 103, family size: 1e94, quotient: 138 states / 9266 actions
+explored: 100 %
+MDP stats: avg MDP size: 138, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,060 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,060 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,060 - pomdp.py - unfolding 18-FSC template into POMDP ...
+2024-04-10 22:08:35,062 - pomdp.py - constructed quotient MDP having 146 states and 10387 actions.
+2024-04-10 22:08:35,062 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,075 - synthesizer.py - synthesis initiated, design space: 1e101
+2024-04-10 22:08:35,079 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,079 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 109, family size: 1e101, quotient: 146 states / 10387 actions
+explored: 100 %
+MDP stats: avg MDP size: 146, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,079 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,079 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,079 - pomdp.py - unfolding 19-FSC template into POMDP ...
+2024-04-10 22:08:35,082 - pomdp.py - constructed quotient MDP having 154 states and 11572 actions.
+2024-04-10 22:08:35,082 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,091 - synthesizer.py - synthesis initiated, design space: 1e108
+2024-04-10 22:08:35,095 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,095 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 115, family size: 1e108, quotient: 154 states / 11572 actions
+explored: 100 %
+MDP stats: avg MDP size: 154, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,095 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,095 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,096 - pomdp.py - unfolding 20-FSC template into POMDP ...
+2024-04-10 22:08:35,098 - pomdp.py - constructed quotient MDP having 162 states and 12821 actions.
+2024-04-10 22:08:35,098 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,114 - synthesizer.py - synthesis initiated, design space: 1e115
+2024-04-10 22:08:35,118 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,118 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 121, family size: 1e115, quotient: 162 states / 12821 actions
+explored: 100 %
+MDP stats: avg MDP size: 162, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,118 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,118 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,119 - pomdp.py - unfolding 21-FSC template into POMDP ...
+2024-04-10 22:08:35,122 - pomdp.py - constructed quotient MDP having 170 states and 14134 actions.
+2024-04-10 22:08:35,122 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,130 - synthesizer.py - synthesis initiated, design space: 1e122
+2024-04-10 22:08:35,136 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,137 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 127, family size: 1e122, quotient: 170 states / 14134 actions
+explored: 100 %
+MDP stats: avg MDP size: 170, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,137 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,137 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,138 - pomdp.py - unfolding 22-FSC template into POMDP ...
+2024-04-10 22:08:35,150 - pomdp.py - constructed quotient MDP having 178 states and 15511 actions.
+2024-04-10 22:08:35,151 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,160 - synthesizer.py - synthesis initiated, design space: 1e129
+2024-04-10 22:08:35,165 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,165 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.0 s
+number of holes: 133, family size: 1e129, quotient: 178 states / 15511 actions
+explored: 100 %
+MDP stats: avg MDP size: 178, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,165 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,165 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,166 - pomdp.py - unfolding 23-FSC template into POMDP ...
+2024-04-10 22:08:35,170 - pomdp.py - constructed quotient MDP having 186 states and 16952 actions.
+2024-04-10 22:08:35,170 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,196 - synthesizer.py - synthesis initiated, design space: 1e136
+2024-04-10 22:08:35,203 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,203 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 139, family size: 1e136, quotient: 186 states / 16952 actions
+explored: 100 %
+MDP stats: avg MDP size: 186, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,203 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,203 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,205 - pomdp.py - unfolding 24-FSC template into POMDP ...
+2024-04-10 22:08:35,210 - pomdp.py - constructed quotient MDP having 194 states and 18457 actions.
+2024-04-10 22:08:35,210 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,235 - synthesizer.py - synthesis initiated, design space: 1e144
+2024-04-10 22:08:35,241 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,242 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 145, family size: 1e144, quotient: 194 states / 18457 actions
+explored: 100 %
+MDP stats: avg MDP size: 194, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,242 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,242 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,242 - pomdp.py - unfolding 25-FSC template into POMDP ...
+2024-04-10 22:08:35,246 - pomdp.py - constructed quotient MDP having 202 states and 20026 actions.
+2024-04-10 22:08:35,246 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,259 - synthesizer.py - synthesis initiated, design space: 1e151
+2024-04-10 22:08:35,266 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,266 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 151, family size: 1e151, quotient: 202 states / 20026 actions
+explored: 100 %
+MDP stats: avg MDP size: 202, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,266 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,266 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,267 - pomdp.py - unfolding 26-FSC template into POMDP ...
+2024-04-10 22:08:35,281 - pomdp.py - constructed quotient MDP having 210 states and 21659 actions.
+2024-04-10 22:08:35,282 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,295 - synthesizer.py - synthesis initiated, design space: 1e158
+2024-04-10 22:08:35,303 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,303 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 157, family size: 1e158, quotient: 210 states / 21659 actions
+explored: 100 %
+MDP stats: avg MDP size: 210, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,303 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,303 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,304 - pomdp.py - unfolding 27-FSC template into POMDP ...
+2024-04-10 22:08:35,319 - pomdp.py - constructed quotient MDP having 218 states and 23356 actions.
+2024-04-10 22:08:35,319 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,334 - synthesizer.py - synthesis initiated, design space: 1e166
+2024-04-10 22:08:35,345 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,345 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 163, family size: 1e166, quotient: 218 states / 23356 actions
+explored: 100 %
+MDP stats: avg MDP size: 218, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,345 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,345 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,346 - pomdp.py - unfolding 28-FSC template into POMDP ...
+2024-04-10 22:08:35,366 - pomdp.py - constructed quotient MDP having 226 states and 25117 actions.
+2024-04-10 22:08:35,366 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,396 - synthesizer.py - synthesis initiated, design space: 1e173
+2024-04-10 22:08:35,404 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,404 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 169, family size: 1e173, quotient: 226 states / 25117 actions
+explored: 100 %
+MDP stats: avg MDP size: 226, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,404 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,404 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,406 - pomdp.py - unfolding 29-FSC template into POMDP ...
+2024-04-10 22:08:35,412 - pomdp.py - constructed quotient MDP having 234 states and 26942 actions.
+2024-04-10 22:08:35,412 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,443 - synthesizer.py - synthesis initiated, design space: 1e181
+2024-04-10 22:08:35,451 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,451 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 175, family size: 1e181, quotient: 234 states / 26942 actions
+explored: 100 %
+MDP stats: avg MDP size: 234, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,451 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,451 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,452 - pomdp.py - unfolding 30-FSC template into POMDP ...
+2024-04-10 22:08:35,458 - pomdp.py - constructed quotient MDP having 242 states and 28831 actions.
+2024-04-10 22:08:35,458 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,498 - synthesizer.py - synthesis initiated, design space: 1e188
+2024-04-10 22:08:35,510 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,510 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 181, family size: 1e188, quotient: 242 states / 28831 actions
+explored: 100 %
+MDP stats: avg MDP size: 242, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,510 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,510 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,511 - pomdp.py - unfolding 31-FSC template into POMDP ...
+2024-04-10 22:08:35,519 - pomdp.py - constructed quotient MDP having 250 states and 30784 actions.
+2024-04-10 22:08:35,519 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,559 - synthesizer.py - synthesis initiated, design space: 1e196
+2024-04-10 22:08:35,573 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,573 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 187, family size: 1e196, quotient: 250 states / 30784 actions
+explored: 100 %
+MDP stats: avg MDP size: 250, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,573 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,574 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,575 - pomdp.py - unfolding 32-FSC template into POMDP ...
+2024-04-10 22:08:35,595 - pomdp.py - constructed quotient MDP having 258 states and 32801 actions.
+2024-04-10 22:08:35,595 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,635 - synthesizer.py - synthesis initiated, design space: 1e203
+2024-04-10 22:08:35,645 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,645 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 193, family size: 1e203, quotient: 258 states / 32801 actions
+explored: 100 %
+MDP stats: avg MDP size: 258, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,645 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,645 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,647 - pomdp.py - unfolding 33-FSC template into POMDP ...
+2024-04-10 22:08:35,656 - pomdp.py - constructed quotient MDP having 266 states and 34882 actions.
+2024-04-10 22:08:35,656 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,690 - synthesizer.py - synthesis initiated, design space: 1e211
+2024-04-10 22:08:35,702 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,702 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 199, family size: 1e211, quotient: 266 states / 34882 actions
+explored: 100 %
+MDP stats: avg MDP size: 266, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,703 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,703 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,704 - pomdp.py - unfolding 34-FSC template into POMDP ...
+2024-04-10 22:08:35,726 - pomdp.py - constructed quotient MDP having 274 states and 37027 actions.
+2024-04-10 22:08:35,726 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,765 - synthesizer.py - synthesis initiated, design space: 1e219
+2024-04-10 22:08:35,776 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,777 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 205, family size: 1e219, quotient: 274 states / 37027 actions
+explored: 100 %
+MDP stats: avg MDP size: 274, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,777 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,777 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,778 - pomdp.py - unfolding 35-FSC template into POMDP ...
+2024-04-10 22:08:35,786 - pomdp.py - constructed quotient MDP having 282 states and 39236 actions.
+2024-04-10 22:08:35,786 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,837 - synthesizer.py - synthesis initiated, design space: 1e226
+2024-04-10 22:08:35,851 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,851 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 211, family size: 1e226, quotient: 282 states / 39236 actions
+explored: 100 %
+MDP stats: avg MDP size: 282, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,851 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,851 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,852 - pomdp.py - unfolding 36-FSC template into POMDP ...
+2024-04-10 22:08:35,861 - pomdp.py - constructed quotient MDP having 290 states and 41509 actions.
+2024-04-10 22:08:35,861 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,895 - synthesizer.py - synthesis initiated, design space: 1e234
+2024-04-10 22:08:35,908 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,908 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 217, family size: 1e234, quotient: 290 states / 41509 actions
+explored: 100 %
+MDP stats: avg MDP size: 290, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,909 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,909 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,911 - pomdp.py - unfolding 37-FSC template into POMDP ...
+2024-04-10 22:08:35,935 - pomdp.py - constructed quotient MDP having 298 states and 43846 actions.
+2024-04-10 22:08:35,935 - pomdp.py - creating coloring ...
+2024-04-10 22:08:35,975 - synthesizer.py - synthesis initiated, design space: 1e242
+2024-04-10 22:08:35,989 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:35,989 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 223, family size: 1e242, quotient: 298 states / 43846 actions
+explored: 100 %
+MDP stats: avg MDP size: 298, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:35,989 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:35,989 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:35,990 - pomdp.py - unfolding 38-FSC template into POMDP ...
+2024-04-10 22:08:36,013 - pomdp.py - constructed quotient MDP having 306 states and 46247 actions.
+2024-04-10 22:08:36,013 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,055 - synthesizer.py - synthesis initiated, design space: 1e250
+2024-04-10 22:08:36,070 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,070 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 229, family size: 1e250, quotient: 306 states / 46247 actions
+explored: 100 %
+MDP stats: avg MDP size: 306, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,070 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,070 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,071 - pomdp.py - unfolding 39-FSC template into POMDP ...
+2024-04-10 22:08:36,094 - pomdp.py - constructed quotient MDP having 314 states and 48712 actions.
+2024-04-10 22:08:36,094 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,137 - synthesizer.py - synthesis initiated, design space: 1e258
+2024-04-10 22:08:36,153 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,153 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 235, family size: 1e258, quotient: 314 states / 48712 actions
+explored: 100 %
+MDP stats: avg MDP size: 314, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,153 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,153 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,155 - pomdp.py - unfolding 40-FSC template into POMDP ...
+2024-04-10 22:08:36,183 - pomdp.py - constructed quotient MDP having 322 states and 51241 actions.
+2024-04-10 22:08:36,184 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,251 - synthesizer.py - synthesis initiated, design space: 1e266
+2024-04-10 22:08:36,266 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,266 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 241, family size: 1e266, quotient: 322 states / 51241 actions
+explored: 100 %
+MDP stats: avg MDP size: 322, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,266 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,266 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,268 - pomdp.py - unfolding 41-FSC template into POMDP ...
+2024-04-10 22:08:36,279 - pomdp.py - constructed quotient MDP having 330 states and 53834 actions.
+2024-04-10 22:08:36,279 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,335 - synthesizer.py - synthesis initiated, design space: 1e274
+2024-04-10 22:08:36,350 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,350 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.01 s
+number of holes: 247, family size: 1e274, quotient: 330 states / 53834 actions
+explored: 100 %
+MDP stats: avg MDP size: 330, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,350 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,350 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,352 - pomdp.py - unfolding 42-FSC template into POMDP ...
+2024-04-10 22:08:36,376 - pomdp.py - constructed quotient MDP having 338 states and 56491 actions.
+2024-04-10 22:08:36,376 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,432 - synthesizer.py - synthesis initiated, design space: 1e282
+2024-04-10 22:08:36,453 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,453 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 253, family size: 1e282, quotient: 338 states / 56491 actions
+explored: 100 %
+MDP stats: avg MDP size: 338, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,454 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,454 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,456 - pomdp.py - unfolding 43-FSC template into POMDP ...
+2024-04-10 22:08:36,481 - pomdp.py - constructed quotient MDP having 346 states and 59212 actions.
+2024-04-10 22:08:36,481 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,547 - synthesizer.py - synthesis initiated, design space: 1e290
+2024-04-10 22:08:36,566 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,566 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 259, family size: 1e290, quotient: 346 states / 59212 actions
+explored: 100 %
+MDP stats: avg MDP size: 346, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,566 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,566 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,569 - pomdp.py - unfolding 44-FSC template into POMDP ...
+2024-04-10 22:08:36,596 - pomdp.py - constructed quotient MDP having 354 states and 61997 actions.
+2024-04-10 22:08:36,596 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,662 - synthesizer.py - synthesis initiated, design space: 1e298
+2024-04-10 22:08:36,681 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,681 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 265, family size: 1e298, quotient: 354 states / 61997 actions
+explored: 100 %
+MDP stats: avg MDP size: 354, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,681 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,682 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,684 - pomdp.py - unfolding 45-FSC template into POMDP ...
+2024-04-10 22:08:36,696 - pomdp.py - constructed quotient MDP having 362 states and 64846 actions.
+2024-04-10 22:08:36,696 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,762 - synthesizer.py - synthesis initiated, design space: 1e306
+2024-04-10 22:08:36,781 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,781 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 271, family size: 1e306, quotient: 362 states / 64846 actions
+explored: 100 %
+MDP stats: avg MDP size: 362, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,781 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,781 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,783 - pomdp.py - unfolding 46-FSC template into POMDP ...
+2024-04-10 22:08:36,809 - pomdp.py - constructed quotient MDP having 370 states and 67759 actions.
+2024-04-10 22:08:36,809 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,874 - synthesizer.py - synthesis initiated, design space: 1e314
+2024-04-10 22:08:36,894 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:36,894 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 277, family size: 1e314, quotient: 370 states / 67759 actions
+explored: 100 %
+MDP stats: avg MDP size: 370, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:36,894 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:36,894 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:36,896 - pomdp.py - unfolding 47-FSC template into POMDP ...
+2024-04-10 22:08:36,922 - pomdp.py - constructed quotient MDP having 378 states and 70736 actions.
+2024-04-10 22:08:36,922 - pomdp.py - creating coloring ...
+2024-04-10 22:08:36,999 - synthesizer.py - synthesis initiated, design space: 1e322
+2024-04-10 22:08:37,021 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,021 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 283, family size: 1e322, quotient: 378 states / 70736 actions
+explored: 100 %
+MDP stats: avg MDP size: 378, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,021 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,021 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,024 - pomdp.py - unfolding 48-FSC template into POMDP ...
+2024-04-10 22:08:37,053 - pomdp.py - constructed quotient MDP having 386 states and 73777 actions.
+2024-04-10 22:08:37,053 - pomdp.py - creating coloring ...
+2024-04-10 22:08:37,128 - synthesizer.py - synthesis initiated, design space: 1e330
+2024-04-10 22:08:37,151 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,151 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 289, family size: 1e330, quotient: 386 states / 73777 actions
+explored: 100 %
+MDP stats: avg MDP size: 386, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,151 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,151 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,154 - pomdp.py - unfolding 49-FSC template into POMDP ...
+2024-04-10 22:08:37,182 - pomdp.py - constructed quotient MDP having 394 states and 76882 actions.
+2024-04-10 22:08:37,183 - pomdp.py - creating coloring ...
+2024-04-10 22:08:37,276 - synthesizer.py - synthesis initiated, design space: 1e338
+2024-04-10 22:08:37,298 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,298 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 295, family size: 1e338, quotient: 394 states / 76882 actions
+explored: 100 %
+MDP stats: avg MDP size: 394, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,298 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,298 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,301 - pomdp.py - unfolding 50-FSC template into POMDP ...
+2024-04-10 22:08:37,318 - pomdp.py - constructed quotient MDP having 402 states and 80051 actions.
+2024-04-10 22:08:37,318 - pomdp.py - creating coloring ...
+2024-04-10 22:08:37,417 - synthesizer.py - synthesis initiated, design space: 1e346
+2024-04-10 22:08:37,441 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,441 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 301, family size: 1e346, quotient: 402 states / 80051 actions
+explored: 100 %
+MDP stats: avg MDP size: 402, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,441 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,441 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,444 - pomdp.py - unfolding 51-FSC template into POMDP ...
+2024-04-10 22:08:37,463 - pomdp.py - constructed quotient MDP having 410 states and 83284 actions.
+2024-04-10 22:08:37,463 - pomdp.py - creating coloring ...
+2024-04-10 22:08:37,562 - synthesizer.py - synthesis initiated, design space: 1e355
+2024-04-10 22:08:37,586 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,586 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.02 s
+number of holes: 307, family size: 1e355, quotient: 410 states / 83284 actions
+explored: 100 %
+MDP stats: avg MDP size: 410, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,586 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,586 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,589 - pomdp.py - unfolding 52-FSC template into POMDP ...
+2024-04-10 22:08:37,623 - pomdp.py - constructed quotient MDP having 418 states and 86581 actions.
+2024-04-10 22:08:37,623 - pomdp.py - creating coloring ...
+2024-04-10 22:08:37,711 - synthesizer.py - synthesis initiated, design space: 1e363
+2024-04-10 22:08:37,738 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,738 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.03 s
+number of holes: 313, family size: 1e363, quotient: 418 states / 86581 actions
+explored: 100 %
+MDP stats: avg MDP size: 418, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,738 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,738 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,742 - pomdp.py - unfolding 53-FSC template into POMDP ...
+2024-04-10 22:08:37,779 - pomdp.py - constructed quotient MDP having 426 states and 89942 actions.
+2024-04-10 22:08:37,779 - pomdp.py - creating coloring ...
+2024-04-10 22:08:37,864 - synthesizer.py - synthesis initiated, design space: 1e371
+2024-04-10 22:08:37,891 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:37,891 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.03 s
+number of holes: 319, family size: 1e371, quotient: 426 states / 89942 actions
+explored: 100 %
+MDP stats: avg MDP size: 426, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:37,891 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:37,891 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:37,894 - pomdp.py - unfolding 54-FSC template into POMDP ...
+2024-04-10 22:08:37,928 - pomdp.py - constructed quotient MDP having 434 states and 93367 actions.
+2024-04-10 22:08:37,929 - pomdp.py - creating coloring ...
+2024-04-10 22:08:38,036 - synthesizer.py - synthesis initiated, design space: 1e379
+2024-04-10 22:08:38,064 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:38,064 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.03 s
+number of holes: 325, family size: 1e379, quotient: 434 states / 93367 actions
+explored: 100 %
+MDP stats: avg MDP size: 434, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:38,064 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:38,064 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:38,067 - pomdp.py - unfolding 55-FSC template into POMDP ...
+2024-04-10 22:08:38,104 - pomdp.py - constructed quotient MDP having 442 states and 96856 actions.
+2024-04-10 22:08:38,104 - pomdp.py - creating coloring ...
+2024-04-10 22:08:38,198 - synthesizer.py - synthesis initiated, design space: 1e388
+2024-04-10 22:08:38,226 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:38,226 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.03 s
+number of holes: 331, family size: 1e388, quotient: 442 states / 96856 actions
+explored: 100 %
+MDP stats: avg MDP size: 442, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:38,226 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:38,226 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:38,230 - pomdp.py - unfolding 56-FSC template into POMDP ...
+2024-04-10 22:08:38,265 - pomdp.py - constructed quotient MDP having 450 states and 100409 actions.
+2024-04-10 22:08:38,265 - pomdp.py - creating coloring ...
+2024-04-10 22:08:38,377 - synthesizer.py - synthesis initiated, design space: 1e396
+2024-04-10 22:08:38,407 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:38,408 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.03 s
+number of holes: 337, family size: 1e396, quotient: 450 states / 100409 actions
+explored: 100 %
+MDP stats: avg MDP size: 450, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:38,408 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:38,408 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:38,411 - pomdp.py - unfolding 57-FSC template into POMDP ...
+2024-04-10 22:08:38,451 - pomdp.py - constructed quotient MDP having 458 states and 104026 actions.
+2024-04-10 22:08:38,451 - pomdp.py - creating coloring ...
+2024-04-10 22:08:38,588 - synthesizer.py - synthesis initiated, design space: 1e404
+2024-04-10 22:08:38,624 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:38,624 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 343, family size: 1e404, quotient: 458 states / 104026 actions
+explored: 100 %
+MDP stats: avg MDP size: 458, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:38,624 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:38,624 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:38,629 - pomdp.py - unfolding 58-FSC template into POMDP ...
+2024-04-10 22:08:38,670 - pomdp.py - constructed quotient MDP having 466 states and 107707 actions.
+2024-04-10 22:08:38,670 - pomdp.py - creating coloring ...
+2024-04-10 22:08:38,795 - synthesizer.py - synthesis initiated, design space: 1e413
+2024-04-10 22:08:38,826 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:38,826 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.03 s
+number of holes: 349, family size: 1e413, quotient: 466 states / 107707 actions
+explored: 100 %
+MDP stats: avg MDP size: 466, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:38,827 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:38,827 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:38,831 - pomdp.py - unfolding 59-FSC template into POMDP ...
+2024-04-10 22:08:38,875 - pomdp.py - constructed quotient MDP having 474 states and 111452 actions.
+2024-04-10 22:08:38,875 - pomdp.py - creating coloring ...
+2024-04-10 22:08:38,987 - synthesizer.py - synthesis initiated, design space: 1e421
+2024-04-10 22:08:39,022 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:39,022 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 355, family size: 1e421, quotient: 474 states / 111452 actions
+explored: 100 %
+MDP stats: avg MDP size: 474, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:39,023 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:39,023 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:39,029 - pomdp.py - unfolding 60-FSC template into POMDP ...
+2024-04-10 22:08:39,090 - pomdp.py - constructed quotient MDP having 482 states and 115261 actions.
+2024-04-10 22:08:39,090 - pomdp.py - creating coloring ...
+2024-04-10 22:08:39,279 - synthesizer.py - synthesis initiated, design space: 1e430
+2024-04-10 22:08:39,319 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:39,320 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 361, family size: 1e430, quotient: 482 states / 115261 actions
+explored: 100 %
+MDP stats: avg MDP size: 482, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:39,320 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:39,320 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:39,325 - pomdp.py - unfolding 61-FSC template into POMDP ...
+2024-04-10 22:08:39,374 - pomdp.py - constructed quotient MDP having 490 states and 119134 actions.
+2024-04-10 22:08:39,374 - pomdp.py - creating coloring ...
+2024-04-10 22:08:39,508 - synthesizer.py - synthesis initiated, design space: 1e438
+2024-04-10 22:08:39,544 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:39,544 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 367, family size: 1e438, quotient: 490 states / 119134 actions
+explored: 100 %
+MDP stats: avg MDP size: 490, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:39,544 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:39,545 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:39,549 - pomdp.py - unfolding 62-FSC template into POMDP ...
+2024-04-10 22:08:39,599 - pomdp.py - constructed quotient MDP having 498 states and 123071 actions.
+2024-04-10 22:08:39,599 - pomdp.py - creating coloring ...
+2024-04-10 22:08:39,746 - synthesizer.py - synthesis initiated, design space: 1e447
+2024-04-10 22:08:39,783 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:39,783 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 373, family size: 1e447, quotient: 498 states / 123071 actions
+explored: 100 %
+MDP stats: avg MDP size: 498, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:39,784 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:39,784 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:39,789 - pomdp.py - unfolding 63-FSC template into POMDP ...
+2024-04-10 22:08:39,837 - pomdp.py - constructed quotient MDP having 506 states and 127072 actions.
+2024-04-10 22:08:39,837 - pomdp.py - creating coloring ...
+2024-04-10 22:08:39,986 - synthesizer.py - synthesis initiated, design space: 1e455
+2024-04-10 22:08:40,026 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:40,026 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 379, family size: 1e455, quotient: 506 states / 127072 actions
+explored: 100 %
+MDP stats: avg MDP size: 506, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:40,026 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:40,026 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:40,031 - pomdp.py - unfolding 64-FSC template into POMDP ...
+2024-04-10 22:08:40,080 - pomdp.py - constructed quotient MDP having 514 states and 131137 actions.
+2024-04-10 22:08:40,080 - pomdp.py - creating coloring ...
+2024-04-10 22:08:40,230 - synthesizer.py - synthesis initiated, design space: 1e464
+2024-04-10 22:08:40,269 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:40,269 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 385, family size: 1e464, quotient: 514 states / 131137 actions
+explored: 100 %
+MDP stats: avg MDP size: 514, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:40,269 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:40,269 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:40,274 - pomdp.py - unfolding 65-FSC template into POMDP ...
+2024-04-10 22:08:40,351 - pomdp.py - constructed quotient MDP having 522 states and 135266 actions.
+2024-04-10 22:08:40,352 - pomdp.py - creating coloring ...
+2024-04-10 22:08:40,490 - synthesizer.py - synthesis initiated, design space: 1e472
+2024-04-10 22:08:40,560 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:40,560 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 391, family size: 1e472, quotient: 522 states / 135266 actions
+explored: 100 %
+MDP stats: avg MDP size: 522, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:40,560 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:40,560 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:40,570 - pomdp.py - unfolding 66-FSC template into POMDP ...
+2024-04-10 22:08:40,664 - pomdp.py - constructed quotient MDP having 530 states and 139459 actions.
+2024-04-10 22:08:40,665 - pomdp.py - creating coloring ...
+2024-04-10 22:08:40,881 - synthesizer.py - synthesis initiated, design space: 1e481
+2024-04-10 22:08:40,921 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:40,921 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 397, family size: 1e481, quotient: 530 states / 139459 actions
+explored: 100 %
+MDP stats: avg MDP size: 530, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:40,921 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:40,921 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:40,927 - pomdp.py - unfolding 67-FSC template into POMDP ...
+2024-04-10 22:08:41,007 - pomdp.py - constructed quotient MDP having 538 states and 143716 actions.
+2024-04-10 22:08:41,008 - pomdp.py - creating coloring ...
+2024-04-10 22:08:41,171 - synthesizer.py - synthesis initiated, design space: 1e489
+2024-04-10 22:08:41,213 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:41,213 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 403, family size: 1e489, quotient: 538 states / 143716 actions
+explored: 100 %
+MDP stats: avg MDP size: 538, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:41,214 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:41,214 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:41,219 - pomdp.py - unfolding 68-FSC template into POMDP ...
+2024-04-10 22:08:41,280 - pomdp.py - constructed quotient MDP having 546 states and 148037 actions.
+2024-04-10 22:08:41,280 - pomdp.py - creating coloring ...
+2024-04-10 22:08:41,470 - synthesizer.py - synthesis initiated, design space: 1e498
+2024-04-10 22:08:41,515 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:41,515 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.04 s
+number of holes: 409, family size: 1e498, quotient: 546 states / 148037 actions
+explored: 100 %
+MDP stats: avg MDP size: 546, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:41,516 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:41,516 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:41,521 - pomdp.py - unfolding 69-FSC template into POMDP ...
+2024-04-10 22:08:41,612 - pomdp.py - constructed quotient MDP having 554 states and 152422 actions.
+2024-04-10 22:08:41,612 - pomdp.py - creating coloring ...
+2024-04-10 22:08:41,784 - synthesizer.py - synthesis initiated, design space: 1e507
+2024-04-10 22:08:41,839 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:41,839 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 415, family size: 1e507, quotient: 554 states / 152422 actions
+explored: 100 %
+MDP stats: avg MDP size: 554, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:41,839 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:41,839 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:41,846 - pomdp.py - unfolding 70-FSC template into POMDP ...
+2024-04-10 22:08:41,948 - pomdp.py - constructed quotient MDP having 562 states and 156871 actions.
+2024-04-10 22:08:41,948 - pomdp.py - creating coloring ...
+2024-04-10 22:08:42,132 - synthesizer.py - synthesis initiated, design space: 1e515
+2024-04-10 22:08:42,192 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:42,193 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.06 s
+number of holes: 421, family size: 1e515, quotient: 562 states / 156871 actions
+explored: 100 %
+MDP stats: avg MDP size: 562, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:42,193 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:42,193 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:42,199 - pomdp.py - unfolding 71-FSC template into POMDP ...
+2024-04-10 22:08:42,261 - pomdp.py - constructed quotient MDP having 570 states and 161384 actions.
+2024-04-10 22:08:42,261 - pomdp.py - creating coloring ...
+2024-04-10 22:08:42,446 - synthesizer.py - synthesis initiated, design space: 1e524
+2024-04-10 22:08:42,496 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:42,496 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 427, family size: 1e524, quotient: 570 states / 161384 actions
+explored: 100 %
+MDP stats: avg MDP size: 570, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:42,496 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:42,496 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:42,502 - pomdp.py - unfolding 72-FSC template into POMDP ...
+2024-04-10 22:08:42,590 - pomdp.py - constructed quotient MDP having 578 states and 165961 actions.
+2024-04-10 22:08:42,590 - pomdp.py - creating coloring ...
+2024-04-10 22:08:42,750 - synthesizer.py - synthesis initiated, design space: 1e533
+2024-04-10 22:08:42,803 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:42,803 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 433, family size: 1e533, quotient: 578 states / 165961 actions
+explored: 100 %
+MDP stats: avg MDP size: 578, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:42,804 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:42,804 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:42,810 - pomdp.py - unfolding 73-FSC template into POMDP ...
+2024-04-10 22:08:42,917 - pomdp.py - constructed quotient MDP having 586 states and 170602 actions.
+2024-04-10 22:08:42,917 - pomdp.py - creating coloring ...
+2024-04-10 22:08:43,131 - synthesizer.py - synthesis initiated, design space: 1e541
+2024-04-10 22:08:43,178 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:43,179 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 439, family size: 1e541, quotient: 586 states / 170602 actions
+explored: 100 %
+MDP stats: avg MDP size: 586, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:43,179 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:43,179 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:43,185 - pomdp.py - unfolding 74-FSC template into POMDP ...
+2024-04-10 22:08:43,251 - pomdp.py - constructed quotient MDP having 594 states and 175307 actions.
+2024-04-10 22:08:43,251 - pomdp.py - creating coloring ...
+2024-04-10 22:08:43,448 - synthesizer.py - synthesis initiated, design space: 1e550
+2024-04-10 22:08:43,501 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:43,501 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 445, family size: 1e550, quotient: 594 states / 175307 actions
+explored: 100 %
+MDP stats: avg MDP size: 594, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:43,502 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:43,502 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:43,508 - pomdp.py - unfolding 75-FSC template into POMDP ...
+2024-04-10 22:08:43,600 - pomdp.py - constructed quotient MDP having 602 states and 180076 actions.
+2024-04-10 22:08:43,600 - pomdp.py - creating coloring ...
+2024-04-10 22:08:43,813 - synthesizer.py - synthesis initiated, design space: 1e559
+2024-04-10 22:08:43,867 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:43,867 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 451, family size: 1e559, quotient: 602 states / 180076 actions
+explored: 100 %
+MDP stats: avg MDP size: 602, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:43,867 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:43,867 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:43,875 - pomdp.py - unfolding 76-FSC template into POMDP ...
+2024-04-10 22:08:43,985 - pomdp.py - constructed quotient MDP having 610 states and 184909 actions.
+2024-04-10 22:08:43,985 - pomdp.py - creating coloring ...
+2024-04-10 22:08:44,167 - synthesizer.py - synthesis initiated, design space: 1e567
+2024-04-10 22:08:44,222 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:44,222 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.05 s
+number of holes: 457, family size: 1e567, quotient: 610 states / 184909 actions
+explored: 100 %
+MDP stats: avg MDP size: 610, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:44,222 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:44,222 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:44,229 - pomdp.py - unfolding 77-FSC template into POMDP ...
+2024-04-10 22:08:44,328 - pomdp.py - constructed quotient MDP having 618 states and 189806 actions.
+2024-04-10 22:08:44,328 - pomdp.py - creating coloring ...
+2024-04-10 22:08:44,531 - synthesizer.py - synthesis initiated, design space: 1e576
+2024-04-10 22:08:44,592 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:44,592 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.06 s
+number of holes: 463, family size: 1e576, quotient: 618 states / 189806 actions
+explored: 100 %
+MDP stats: avg MDP size: 618, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:44,592 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:44,592 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:44,600 - pomdp.py - unfolding 78-FSC template into POMDP ...
+2024-04-10 22:08:44,714 - pomdp.py - constructed quotient MDP having 626 states and 194767 actions.
+2024-04-10 22:08:44,715 - pomdp.py - creating coloring ...
+2024-04-10 22:08:44,928 - synthesizer.py - synthesis initiated, design space: 1e585
+2024-04-10 22:08:44,991 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:44,991 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.06 s
+number of holes: 469, family size: 1e585, quotient: 626 states / 194767 actions
+explored: 100 %
+MDP stats: avg MDP size: 626, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:44,991 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:44,991 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:44,999 - pomdp.py - unfolding 79-FSC template into POMDP ...
+2024-04-10 22:08:45,111 - pomdp.py - constructed quotient MDP having 634 states and 199792 actions.
+2024-04-10 22:08:45,111 - pomdp.py - creating coloring ...
+2024-04-10 22:08:45,343 - synthesizer.py - synthesis initiated, design space: 1e594
+2024-04-10 22:08:45,406 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:45,406 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.06 s
+number of holes: 475, family size: 1e594, quotient: 634 states / 199792 actions
+explored: 100 %
+MDP stats: avg MDP size: 634, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:45,406 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:45,406 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:45,414 - pomdp.py - unfolding 80-FSC template into POMDP ...
+2024-04-10 22:08:45,519 - pomdp.py - constructed quotient MDP having 642 states and 204881 actions.
+2024-04-10 22:08:45,519 - pomdp.py - creating coloring ...
+2024-04-10 22:08:45,784 - synthesizer.py - synthesis initiated, design space: 1e603
+2024-04-10 22:08:45,853 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:45,853 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 481, family size: 1e603, quotient: 642 states / 204881 actions
+explored: 100 %
+MDP stats: avg MDP size: 642, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:45,854 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:45,854 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:45,863 - pomdp.py - unfolding 81-FSC template into POMDP ...
+2024-04-10 22:08:45,983 - pomdp.py - constructed quotient MDP having 650 states and 210034 actions.
+2024-04-10 22:08:45,983 - pomdp.py - creating coloring ...
+2024-04-10 22:08:46,186 - synthesizer.py - synthesis initiated, design space: 1e611
+2024-04-10 22:08:46,249 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:46,249 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.06 s
+number of holes: 487, family size: 1e611, quotient: 650 states / 210034 actions
+explored: 100 %
+MDP stats: avg MDP size: 650, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:46,250 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:46,250 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:46,258 - pomdp.py - unfolding 82-FSC template into POMDP ...
+2024-04-10 22:08:46,363 - pomdp.py - constructed quotient MDP having 658 states and 215251 actions.
+2024-04-10 22:08:46,363 - pomdp.py - creating coloring ...
+2024-04-10 22:08:46,626 - synthesizer.py - synthesis initiated, design space: 1e620
+2024-04-10 22:08:46,695 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:46,695 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 493, family size: 1e620, quotient: 658 states / 215251 actions
+explored: 100 %
+MDP stats: avg MDP size: 658, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:46,696 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:46,696 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:46,706 - pomdp.py - unfolding 83-FSC template into POMDP ...
+2024-04-10 22:08:46,832 - pomdp.py - constructed quotient MDP having 666 states and 220532 actions.
+2024-04-10 22:08:46,833 - pomdp.py - creating coloring ...
+2024-04-10 22:08:47,086 - synthesizer.py - synthesis initiated, design space: 1e629
+2024-04-10 22:08:47,164 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:47,164 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.08 s
+number of holes: 499, family size: 1e629, quotient: 666 states / 220532 actions
+explored: 100 %
+MDP stats: avg MDP size: 666, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:47,164 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:47,164 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:47,175 - pomdp.py - unfolding 84-FSC template into POMDP ...
+2024-04-10 22:08:47,295 - pomdp.py - constructed quotient MDP having 674 states and 225877 actions.
+2024-04-10 22:08:47,295 - pomdp.py - creating coloring ...
+2024-04-10 22:08:47,512 - synthesizer.py - synthesis initiated, design space: 1e638
+2024-04-10 22:08:47,582 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:47,582 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 505, family size: 1e638, quotient: 674 states / 225877 actions
+explored: 100 %
+MDP stats: avg MDP size: 674, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:47,582 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:47,582 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:47,594 - pomdp.py - unfolding 85-FSC template into POMDP ...
+2024-04-10 22:08:47,773 - pomdp.py - constructed quotient MDP having 682 states and 231286 actions.
+2024-04-10 22:08:47,773 - pomdp.py - creating coloring ...
+2024-04-10 22:08:48,019 - synthesizer.py - synthesis initiated, design space: 1e647
+2024-04-10 22:08:48,088 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:48,088 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 511, family size: 1e647, quotient: 682 states / 231286 actions
+explored: 100 %
+MDP stats: avg MDP size: 682, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:48,088 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:48,088 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:48,098 - pomdp.py - unfolding 86-FSC template into POMDP ...
+2024-04-10 22:08:48,237 - pomdp.py - constructed quotient MDP having 690 states and 236759 actions.
+2024-04-10 22:08:48,237 - pomdp.py - creating coloring ...
+2024-04-10 22:08:48,451 - synthesizer.py - synthesis initiated, design space: 1e656
+2024-04-10 22:08:48,516 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:48,516 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.06 s
+number of holes: 517, family size: 1e656, quotient: 690 states / 236759 actions
+explored: 100 %
+MDP stats: avg MDP size: 690, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:48,516 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:48,516 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:48,525 - pomdp.py - unfolding 87-FSC template into POMDP ...
+2024-04-10 22:08:48,639 - pomdp.py - constructed quotient MDP having 698 states and 242296 actions.
+2024-04-10 22:08:48,639 - pomdp.py - creating coloring ...
+2024-04-10 22:08:48,891 - synthesizer.py - synthesis initiated, design space: 1e665
+2024-04-10 22:08:48,959 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:48,959 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 523, family size: 1e665, quotient: 698 states / 242296 actions
+explored: 100 %
+MDP stats: avg MDP size: 698, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:48,959 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:48,960 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:48,968 - pomdp.py - unfolding 88-FSC template into POMDP ...
+2024-04-10 22:08:49,093 - pomdp.py - constructed quotient MDP having 706 states and 247897 actions.
+2024-04-10 22:08:49,093 - pomdp.py - creating coloring ...
+2024-04-10 22:08:49,338 - synthesizer.py - synthesis initiated, design space: 1e674
+2024-04-10 22:08:49,425 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:49,425 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.09 s
+number of holes: 529, family size: 1e674, quotient: 706 states / 247897 actions
+explored: 100 %
+MDP stats: avg MDP size: 706, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:49,425 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:49,425 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:49,435 - pomdp.py - unfolding 89-FSC template into POMDP ...
+2024-04-10 22:08:49,558 - pomdp.py - constructed quotient MDP having 714 states and 253562 actions.
+2024-04-10 22:08:49,558 - pomdp.py - creating coloring ...
+2024-04-10 22:08:49,818 - synthesizer.py - synthesis initiated, design space: 1e683
+2024-04-10 22:08:49,893 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:49,893 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.07 s
+number of holes: 535, family size: 1e683, quotient: 714 states / 253562 actions
+explored: 100 %
+MDP stats: avg MDP size: 714, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:49,893 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:49,893 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:49,903 - pomdp.py - unfolding 90-FSC template into POMDP ...
+2024-04-10 22:08:50,030 - pomdp.py - constructed quotient MDP having 722 states and 259291 actions.
+2024-04-10 22:08:50,031 - pomdp.py - creating coloring ...
+2024-04-10 22:08:50,303 - synthesizer.py - synthesis initiated, design space: 1e692
+2024-04-10 22:08:50,382 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:50,382 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.08 s
+number of holes: 541, family size: 1e692, quotient: 722 states / 259291 actions
+explored: 100 %
+MDP stats: avg MDP size: 722, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:50,382 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:50,382 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:50,392 - pomdp.py - unfolding 91-FSC template into POMDP ...
+2024-04-10 22:08:50,547 - pomdp.py - constructed quotient MDP having 730 states and 265084 actions.
+2024-04-10 22:08:50,547 - pomdp.py - creating coloring ...
+2024-04-10 22:08:50,805 - synthesizer.py - synthesis initiated, design space: 1e701
+2024-04-10 22:08:50,889 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:50,889 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.08 s
+number of holes: 547, family size: 1e701, quotient: 730 states / 265084 actions
+explored: 100 %
+MDP stats: avg MDP size: 730, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:50,890 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:50,890 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:50,901 - pomdp.py - unfolding 92-FSC template into POMDP ...
+2024-04-10 22:08:51,026 - pomdp.py - constructed quotient MDP having 738 states and 270941 actions.
+2024-04-10 22:08:51,026 - pomdp.py - creating coloring ...
+2024-04-10 22:08:51,294 - synthesizer.py - synthesis initiated, design space: 1e710
+2024-04-10 22:08:51,373 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:51,373 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.08 s
+number of holes: 553, family size: 1e710, quotient: 738 states / 270941 actions
+explored: 100 %
+MDP stats: avg MDP size: 738, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:51,373 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:51,373 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:51,383 - pomdp.py - unfolding 93-FSC template into POMDP ...
+2024-04-10 22:08:51,543 - pomdp.py - constructed quotient MDP having 746 states and 276862 actions.
+2024-04-10 22:08:51,544 - pomdp.py - creating coloring ...
+2024-04-10 22:08:51,804 - synthesizer.py - synthesis initiated, design space: 1e719
+2024-04-10 22:08:51,881 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:51,881 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.08 s
+number of holes: 559, family size: 1e719, quotient: 746 states / 276862 actions
+explored: 100 %
+MDP stats: avg MDP size: 746, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:51,881 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:51,881 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:51,892 - pomdp.py - unfolding 94-FSC template into POMDP ...
+2024-04-10 22:08:52,104 - pomdp.py - constructed quotient MDP having 754 states and 282847 actions.
+2024-04-10 22:08:52,105 - pomdp.py - creating coloring ...
+2024-04-10 22:08:52,479 - synthesizer.py - synthesis initiated, design space: 1e728
+2024-04-10 22:08:52,566 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:52,566 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.09 s
+number of holes: 565, family size: 1e728, quotient: 754 states / 282847 actions
+explored: 100 %
+MDP stats: avg MDP size: 754, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:52,567 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:52,567 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:52,577 - pomdp.py - unfolding 95-FSC template into POMDP ...
+2024-04-10 22:08:52,728 - pomdp.py - constructed quotient MDP having 762 states and 288896 actions.
+2024-04-10 22:08:52,729 - pomdp.py - creating coloring ...
+2024-04-10 22:08:52,996 - synthesizer.py - synthesis initiated, design space: 1e737
+2024-04-10 22:08:53,077 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:53,077 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.08 s
+number of holes: 571, family size: 1e737, quotient: 762 states / 288896 actions
+explored: 100 %
+MDP stats: avg MDP size: 762, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:53,078 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:53,078 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:53,088 - pomdp.py - unfolding 96-FSC template into POMDP ...
+2024-04-10 22:08:53,225 - pomdp.py - constructed quotient MDP having 770 states and 295009 actions.
+2024-04-10 22:08:53,225 - pomdp.py - creating coloring ...
+2024-04-10 22:08:53,540 - synthesizer.py - synthesis initiated, design space: 1e746
+2024-04-10 22:08:53,627 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:53,627 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.09 s
+number of holes: 577, family size: 1e746, quotient: 770 states / 295009 actions
+explored: 100 %
+MDP stats: avg MDP size: 770, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:53,627 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:53,627 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:53,639 - pomdp.py - unfolding 97-FSC template into POMDP ...
+2024-04-10 22:08:53,786 - pomdp.py - constructed quotient MDP having 778 states and 301186 actions.
+2024-04-10 22:08:53,786 - pomdp.py - creating coloring ...
+2024-04-10 22:08:54,146 - synthesizer.py - synthesis initiated, design space: 1e755
+2024-04-10 22:08:54,235 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:54,235 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.09 s
+number of holes: 583, family size: 1e755, quotient: 778 states / 301186 actions
+explored: 100 %
+MDP stats: avg MDP size: 778, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:54,235 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:54,235 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:54,247 - pomdp.py - unfolding 98-FSC template into POMDP ...
+2024-04-10 22:08:54,409 - pomdp.py - constructed quotient MDP having 786 states and 307427 actions.
+2024-04-10 22:08:54,409 - pomdp.py - creating coloring ...
+2024-04-10 22:08:54,720 - synthesizer.py - synthesis initiated, design space: 1e764
+2024-04-10 22:08:54,822 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:54,822 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.1 s
+number of holes: 589, family size: 1e764, quotient: 786 states / 307427 actions
+explored: 100 %
+MDP stats: avg MDP size: 786, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:54,823 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:54,823 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:54,835 - pomdp.py - unfolding 99-FSC template into POMDP ...
+2024-04-10 22:08:54,990 - pomdp.py - constructed quotient MDP having 794 states and 313732 actions.
+2024-04-10 22:08:54,990 - pomdp.py - creating coloring ...
+2024-04-10 22:08:55,320 - synthesizer.py - synthesis initiated, design space: 1e773
+2024-04-10 22:08:55,422 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:55,423 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.1 s
+number of holes: 595, family size: 1e773, quotient: 794 states / 313732 actions
+explored: 100 %
+MDP stats: avg MDP size: 794, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:55,423 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:55,423 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:55,438 - pomdp.py - unfolding 100-FSC template into POMDP ...
+2024-04-10 22:08:55,640 - pomdp.py - constructed quotient MDP having 802 states and 320101 actions.
+2024-04-10 22:08:55,640 - pomdp.py - creating coloring ...
+2024-04-10 22:08:55,999 - synthesizer.py - synthesis initiated, design space: 1e782
+2024-04-10 22:08:56,097 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:56,097 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.1 s
+number of holes: 601, family size: 1e782, quotient: 802 states / 320101 actions
+explored: 100 %
+MDP stats: avg MDP size: 802, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:56,098 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:56,098 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:56,114 - pomdp.py - unfolding 101-FSC template into POMDP ...
+2024-04-10 22:08:56,330 - pomdp.py - constructed quotient MDP having 810 states and 326534 actions.
+2024-04-10 22:08:56,330 - pomdp.py - creating coloring ...
+2024-04-10 22:08:56,714 - synthesizer.py - synthesis initiated, design space: 1e791
+2024-04-10 22:08:56,810 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:56,811 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.1 s
+number of holes: 607, family size: 1e791, quotient: 810 states / 326534 actions
+explored: 100 %
+MDP stats: avg MDP size: 810, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:56,811 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:56,811 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:56,825 - pomdp.py - unfolding 102-FSC template into POMDP ...
+2024-04-10 22:08:57,004 - pomdp.py - constructed quotient MDP having 818 states and 333031 actions.
+2024-04-10 22:08:57,005 - pomdp.py - creating coloring ...
+2024-04-10 22:08:57,415 - synthesizer.py - synthesis initiated, design space: 1e800
+2024-04-10 22:08:57,525 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:57,525 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 613, family size: 1e800, quotient: 818 states / 333031 actions
+explored: 100 %
+MDP stats: avg MDP size: 818, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:57,525 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:57,525 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:57,541 - pomdp.py - unfolding 103-FSC template into POMDP ...
+2024-04-10 22:08:57,728 - pomdp.py - constructed quotient MDP having 826 states and 339592 actions.
+2024-04-10 22:08:57,728 - pomdp.py - creating coloring ...
+2024-04-10 22:08:58,116 - synthesizer.py - synthesis initiated, design space: 1e810
+2024-04-10 22:08:58,229 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:58,229 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 619, family size: 1e810, quotient: 826 states / 339592 actions
+explored: 100 %
+MDP stats: avg MDP size: 826, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:58,230 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:58,230 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:58,248 - pomdp.py - unfolding 104-FSC template into POMDP ...
+2024-04-10 22:08:58,444 - pomdp.py - constructed quotient MDP having 834 states and 346217 actions.
+2024-04-10 22:08:58,445 - pomdp.py - creating coloring ...
+2024-04-10 22:08:58,913 - synthesizer.py - synthesis initiated, design space: 1e819
+2024-04-10 22:08:59,027 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:59,027 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 625, family size: 1e819, quotient: 834 states / 346217 actions
+explored: 100 %
+MDP stats: avg MDP size: 834, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:59,027 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:59,027 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:59,043 - pomdp.py - unfolding 105-FSC template into POMDP ...
+2024-04-10 22:08:59,225 - pomdp.py - constructed quotient MDP having 842 states and 352906 actions.
+2024-04-10 22:08:59,225 - pomdp.py - creating coloring ...
+2024-04-10 22:08:59,641 - synthesizer.py - synthesis initiated, design space: 1e828
+2024-04-10 22:08:59,748 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:08:59,748 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 631, family size: 1e828, quotient: 842 states / 352906 actions
+explored: 100 %
+MDP stats: avg MDP size: 842, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:08:59,748 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:08:59,748 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:08:59,763 - pomdp.py - unfolding 106-FSC template into POMDP ...
+2024-04-10 22:08:59,967 - pomdp.py - constructed quotient MDP having 850 states and 359659 actions.
+2024-04-10 22:08:59,967 - pomdp.py - creating coloring ...
+2024-04-10 22:09:00,384 - synthesizer.py - synthesis initiated, design space: 1e837
+2024-04-10 22:09:00,494 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:00,494 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 637, family size: 1e837, quotient: 850 states / 359659 actions
+explored: 100 %
+MDP stats: avg MDP size: 850, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:00,494 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:00,494 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:00,509 - pomdp.py - unfolding 107-FSC template into POMDP ...
+2024-04-10 22:09:00,699 - pomdp.py - constructed quotient MDP having 858 states and 366476 actions.
+2024-04-10 22:09:00,700 - pomdp.py - creating coloring ...
+2024-04-10 22:09:01,062 - synthesizer.py - synthesis initiated, design space: 1e846
+2024-04-10 22:09:01,228 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:01,228 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.17 s
+number of holes: 643, family size: 1e846, quotient: 858 states / 366476 actions
+explored: 100 %
+MDP stats: avg MDP size: 858, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:01,229 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:01,229 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:01,253 - pomdp.py - unfolding 108-FSC template into POMDP ...
+2024-04-10 22:09:01,489 - pomdp.py - constructed quotient MDP having 866 states and 373357 actions.
+2024-04-10 22:09:01,490 - pomdp.py - creating coloring ...
+2024-04-10 22:09:01,887 - synthesizer.py - synthesis initiated, design space: 1e855
+2024-04-10 22:09:01,999 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:01,999 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 649, family size: 1e855, quotient: 866 states / 373357 actions
+explored: 100 %
+MDP stats: avg MDP size: 866, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:01,999 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:01,999 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:02,015 - pomdp.py - unfolding 109-FSC template into POMDP ...
+2024-04-10 22:09:02,241 - pomdp.py - constructed quotient MDP having 874 states and 380302 actions.
+2024-04-10 22:09:02,241 - pomdp.py - creating coloring ...
+2024-04-10 22:09:02,576 - synthesizer.py - synthesis initiated, design space: 1e865
+2024-04-10 22:09:02,689 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:02,689 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.11 s
+number of holes: 655, family size: 1e865, quotient: 874 states / 380302 actions
+explored: 100 %
+MDP stats: avg MDP size: 874, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:02,689 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:02,689 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:02,706 - pomdp.py - unfolding 110-FSC template into POMDP ...
+2024-04-10 22:09:02,946 - pomdp.py - constructed quotient MDP having 882 states and 387311 actions.
+2024-04-10 22:09:02,947 - pomdp.py - creating coloring ...
+2024-04-10 22:09:03,432 - synthesizer.py - synthesis initiated, design space: 1e874
+2024-04-10 22:09:03,556 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:03,557 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.12 s
+number of holes: 661, family size: 1e874, quotient: 882 states / 387311 actions
+explored: 100 %
+MDP stats: avg MDP size: 882, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:03,557 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:03,557 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:03,575 - pomdp.py - unfolding 111-FSC template into POMDP ...
+2024-04-10 22:09:03,860 - pomdp.py - constructed quotient MDP having 890 states and 394384 actions.
+2024-04-10 22:09:03,861 - pomdp.py - creating coloring ...
+2024-04-10 22:09:04,267 - synthesizer.py - synthesis initiated, design space: 1e883
+2024-04-10 22:09:04,384 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:04,384 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.12 s
+number of holes: 667, family size: 1e883, quotient: 890 states / 394384 actions
+explored: 100 %
+MDP stats: avg MDP size: 890, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:04,384 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:04,384 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:04,402 - pomdp.py - unfolding 112-FSC template into POMDP ...
+2024-04-10 22:09:04,600 - pomdp.py - constructed quotient MDP having 898 states and 401521 actions.
+2024-04-10 22:09:04,600 - pomdp.py - creating coloring ...
+2024-04-10 22:09:05,032 - synthesizer.py - synthesis initiated, design space: 1e892
+2024-04-10 22:09:05,155 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:05,155 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.12 s
+number of holes: 673, family size: 1e892, quotient: 898 states / 401521 actions
+explored: 100 %
+MDP stats: avg MDP size: 898, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:05,155 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:05,155 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:05,171 - pomdp.py - unfolding 113-FSC template into POMDP ...
+2024-04-10 22:09:05,407 - pomdp.py - constructed quotient MDP having 906 states and 408722 actions.
+2024-04-10 22:09:05,407 - pomdp.py - creating coloring ...
+2024-04-10 22:09:05,772 - synthesizer.py - synthesis initiated, design space: 1e902
+2024-04-10 22:09:05,908 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:05,908 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.13 s
+number of holes: 679, family size: 1e902, quotient: 906 states / 408722 actions
+explored: 100 %
+MDP stats: avg MDP size: 906, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:05,908 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:05,908 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:05,925 - pomdp.py - unfolding 114-FSC template into POMDP ...
+2024-04-10 22:09:06,119 - pomdp.py - constructed quotient MDP having 914 states and 415987 actions.
+2024-04-10 22:09:06,120 - pomdp.py - creating coloring ...
+2024-04-10 22:09:06,528 - synthesizer.py - synthesis initiated, design space: 1e911
+2024-04-10 22:09:06,647 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:06,647 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.12 s
+number of holes: 685, family size: 1e911, quotient: 914 states / 415987 actions
+explored: 100 %
+MDP stats: avg MDP size: 914, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:06,647 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:06,647 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:06,664 - pomdp.py - unfolding 115-FSC template into POMDP ...
+2024-04-10 22:09:06,892 - pomdp.py - constructed quotient MDP having 922 states and 423316 actions.
+2024-04-10 22:09:06,893 - pomdp.py - creating coloring ...
+2024-04-10 22:09:07,360 - synthesizer.py - synthesis initiated, design space: 1e920
+2024-04-10 22:09:07,490 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:07,490 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.13 s
+number of holes: 691, family size: 1e920, quotient: 922 states / 423316 actions
+explored: 100 %
+MDP stats: avg MDP size: 922, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:07,491 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:07,491 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:07,508 - pomdp.py - unfolding 116-FSC template into POMDP ...
+2024-04-10 22:09:07,754 - pomdp.py - constructed quotient MDP having 930 states and 430709 actions.
+2024-04-10 22:09:07,755 - pomdp.py - creating coloring ...
+2024-04-10 22:09:08,148 - synthesizer.py - synthesis initiated, design space: 1e930
+2024-04-10 22:09:08,285 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:08,285 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.14 s
+number of holes: 697, family size: 1e930, quotient: 930 states / 430709 actions
+explored: 100 %
+MDP stats: avg MDP size: 930, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:08,285 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:08,285 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:08,302 - pomdp.py - unfolding 117-FSC template into POMDP ...
+2024-04-10 22:09:08,562 - pomdp.py - constructed quotient MDP having 938 states and 438166 actions.
+2024-04-10 22:09:08,562 - pomdp.py - creating coloring ...
+2024-04-10 22:09:09,062 - synthesizer.py - synthesis initiated, design space: 1e939
+2024-04-10 22:09:09,209 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:09,209 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.15 s
+number of holes: 703, family size: 1e939, quotient: 938 states / 438166 actions
+explored: 100 %
+MDP stats: avg MDP size: 938, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:09,210 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:09,210 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:09,227 - pomdp.py - unfolding 118-FSC template into POMDP ...
+2024-04-10 22:09:09,456 - pomdp.py - constructed quotient MDP having 946 states and 445687 actions.
+2024-04-10 22:09:09,457 - pomdp.py - creating coloring ...
+2024-04-10 22:09:09,906 - synthesizer.py - synthesis initiated, design space: 1e948
+2024-04-10 22:09:10,049 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:10,049 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.14 s
+number of holes: 709, family size: 1e948, quotient: 946 states / 445687 actions
+explored: 100 %
+MDP stats: avg MDP size: 946, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:10,049 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:10,049 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:10,067 - pomdp.py - unfolding 119-FSC template into POMDP ...
+2024-04-10 22:09:10,269 - pomdp.py - constructed quotient MDP having 954 states and 453272 actions.
+2024-04-10 22:09:10,269 - pomdp.py - creating coloring ...
+2024-04-10 22:09:10,743 - synthesizer.py - synthesis initiated, design space: 1e957
+2024-04-10 22:09:10,881 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:10,881 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.14 s
+number of holes: 715, family size: 1e957, quotient: 954 states / 453272 actions
+explored: 100 %
+MDP stats: avg MDP size: 954, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:10,881 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:10,881 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:10,900 - pomdp.py - unfolding 120-FSC template into POMDP ...
+2024-04-10 22:09:11,176 - pomdp.py - constructed quotient MDP having 962 states and 460921 actions.
+2024-04-10 22:09:11,177 - pomdp.py - creating coloring ...
+2024-04-10 22:09:11,615 - synthesizer.py - synthesis initiated, design space: 1e967
+2024-04-10 22:09:11,750 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:11,750 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.14 s
+number of holes: 721, family size: 1e967, quotient: 962 states / 460921 actions
+explored: 100 %
+MDP stats: avg MDP size: 962, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:11,751 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:11,751 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:11,770 - pomdp.py - unfolding 121-FSC template into POMDP ...
+2024-04-10 22:09:12,026 - pomdp.py - constructed quotient MDP having 970 states and 468634 actions.
+2024-04-10 22:09:12,026 - pomdp.py - creating coloring ...
+2024-04-10 22:09:12,522 - synthesizer.py - synthesis initiated, design space: 1e976
+2024-04-10 22:09:12,670 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:12,670 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.15 s
+number of holes: 727, family size: 1e976, quotient: 970 states / 468634 actions
+explored: 100 %
+MDP stats: avg MDP size: 970, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:12,671 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:12,671 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:12,693 - pomdp.py - unfolding 122-FSC template into POMDP ...
+2024-04-10 22:09:12,977 - pomdp.py - constructed quotient MDP having 978 states and 476411 actions.
+2024-04-10 22:09:12,977 - pomdp.py - creating coloring ...
+2024-04-10 22:09:13,438 - synthesizer.py - synthesis initiated, design space: 1e986
+2024-04-10 22:09:13,599 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:13,599 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.16 s
+number of holes: 733, family size: 1e986, quotient: 978 states / 476411 actions
+explored: 100 %
+MDP stats: avg MDP size: 978, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:13,600 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:13,600 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:13,629 - pomdp.py - unfolding 123-FSC template into POMDP ...
+2024-04-10 22:09:13,926 - pomdp.py - constructed quotient MDP having 986 states and 484252 actions.
+2024-04-10 22:09:13,926 - pomdp.py - creating coloring ...
+2024-04-10 22:09:14,369 - synthesizer.py - synthesis initiated, design space: 1e995
+2024-04-10 22:09:14,519 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:14,519 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.15 s
+number of holes: 739, family size: 1e995, quotient: 986 states / 484252 actions
+explored: 100 %
+MDP stats: avg MDP size: 986, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:14,519 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:14,519 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:14,539 - pomdp.py - unfolding 124-FSC template into POMDP ...
+2024-04-10 22:09:14,815 - pomdp.py - constructed quotient MDP having 994 states and 492157 actions.
+2024-04-10 22:09:14,815 - pomdp.py - creating coloring ...
+2024-04-10 22:09:15,321 - synthesizer.py - synthesis initiated, design space: 1e1004
+2024-04-10 22:09:15,473 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:15,473 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.15 s
+number of holes: 745, family size: 1e1004, quotient: 994 states / 492157 actions
+explored: 100 %
+MDP stats: avg MDP size: 994, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:15,474 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:15,474 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:15,496 - pomdp.py - unfolding 125-FSC template into POMDP ...
+2024-04-10 22:09:15,759 - pomdp.py - constructed quotient MDP having 1002 states and 500126 actions.
+2024-04-10 22:09:15,759 - pomdp.py - creating coloring ...
+2024-04-10 22:09:16,218 - synthesizer.py - synthesis initiated, design space: 1e1014
+2024-04-10 22:09:16,365 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:16,366 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.15 s
+number of holes: 751, family size: 1e1014, quotient: 1002 states / 500126 actions
+explored: 100 %
+MDP stats: avg MDP size: 1002, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:16,366 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:16,366 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:16,386 - pomdp.py - unfolding 126-FSC template into POMDP ...
+2024-04-10 22:09:16,696 - pomdp.py - constructed quotient MDP having 1010 states and 508159 actions.
+2024-04-10 22:09:16,696 - pomdp.py - creating coloring ...
+2024-04-10 22:09:17,214 - synthesizer.py - synthesis initiated, design space: 1e1023
+2024-04-10 22:09:17,369 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:17,369 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.15 s
+number of holes: 757, family size: 1e1023, quotient: 1010 states / 508159 actions
+explored: 100 %
+MDP stats: avg MDP size: 1010, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:17,369 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:17,369 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:17,390 - pomdp.py - unfolding 127-FSC template into POMDP ...
+2024-04-10 22:09:17,684 - pomdp.py - constructed quotient MDP having 1018 states and 516256 actions.
+2024-04-10 22:09:17,684 - pomdp.py - creating coloring ...
+2024-04-10 22:09:18,151 - synthesizer.py - synthesis initiated, design space: 1e1033
+2024-04-10 22:09:18,313 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:18,313 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.16 s
+number of holes: 763, family size: 1e1033, quotient: 1018 states / 516256 actions
+explored: 100 %
+MDP stats: avg MDP size: 1018, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:18,313 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:18,314 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:18,338 - pomdp.py - unfolding 128-FSC template into POMDP ...
+2024-04-10 22:09:18,564 - pomdp.py - constructed quotient MDP having 1026 states and 524417 actions.
+2024-04-10 22:09:18,564 - pomdp.py - creating coloring ...
+2024-04-10 22:09:19,147 - synthesizer.py - synthesis initiated, design space: 1e1042
+2024-04-10 22:09:19,306 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:19,306 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.16 s
+number of holes: 769, family size: 1e1042, quotient: 1026 states / 524417 actions
+explored: 100 %
+MDP stats: avg MDP size: 1026, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:19,307 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:19,307 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:19,330 - pomdp.py - unfolding 129-FSC template into POMDP ...
+2024-04-10 22:09:19,580 - pomdp.py - constructed quotient MDP having 1034 states and 532642 actions.
+2024-04-10 22:09:19,581 - pomdp.py - creating coloring ...
+2024-04-10 22:09:20,047 - synthesizer.py - synthesis initiated, design space: 1e1051
+2024-04-10 22:09:20,225 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:20,225 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.18 s
+number of holes: 775, family size: 1e1051, quotient: 1034 states / 532642 actions
+explored: 100 %
+MDP stats: avg MDP size: 1034, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:20,225 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:20,225 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:20,249 - pomdp.py - unfolding 130-FSC template into POMDP ...
+2024-04-10 22:09:20,559 - pomdp.py - constructed quotient MDP having 1042 states and 540931 actions.
+2024-04-10 22:09:20,560 - pomdp.py - creating coloring ...
+2024-04-10 22:09:21,066 - synthesizer.py - synthesis initiated, design space: 1e1061
+2024-04-10 22:09:21,231 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:21,231 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.17 s
+number of holes: 781, family size: 1e1061, quotient: 1042 states / 540931 actions
+explored: 100 %
+MDP stats: avg MDP size: 1042, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:21,231 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:21,231 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:21,253 - pomdp.py - unfolding 131-FSC template into POMDP ...
+2024-04-10 22:09:21,588 - pomdp.py - constructed quotient MDP having 1050 states and 549284 actions.
+2024-04-10 22:09:21,588 - pomdp.py - creating coloring ...
+2024-04-10 22:09:22,128 - synthesizer.py - synthesis initiated, design space: 1e1070
+2024-04-10 22:09:22,292 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:22,292 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.16 s
+number of holes: 787, family size: 1e1070, quotient: 1050 states / 549284 actions
+explored: 100 %
+MDP stats: avg MDP size: 1050, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:22,292 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:22,292 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:22,317 - pomdp.py - unfolding 132-FSC template into POMDP ...
+2024-04-10 22:09:22,557 - pomdp.py - constructed quotient MDP having 1058 states and 557701 actions.
+2024-04-10 22:09:22,557 - pomdp.py - creating coloring ...
+2024-04-10 22:09:23,205 - synthesizer.py - synthesis initiated, design space: 1e1080
+2024-04-10 22:09:23,393 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:23,393 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.19 s
+number of holes: 793, family size: 1e1080, quotient: 1058 states / 557701 actions
+explored: 100 %
+MDP stats: avg MDP size: 1058, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:23,394 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:23,394 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:23,418 - pomdp.py - unfolding 133-FSC template into POMDP ...
+2024-04-10 22:09:23,705 - pomdp.py - constructed quotient MDP having 1066 states and 566182 actions.
+2024-04-10 22:09:23,706 - pomdp.py - creating coloring ...
+2024-04-10 22:09:24,251 - synthesizer.py - synthesis initiated, design space: 1e1089
+2024-04-10 22:09:24,437 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:24,437 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.19 s
+number of holes: 799, family size: 1e1089, quotient: 1066 states / 566182 actions
+explored: 100 %
+MDP stats: avg MDP size: 1066, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:24,437 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:24,437 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:24,462 - pomdp.py - unfolding 134-FSC template into POMDP ...
+2024-04-10 22:09:24,777 - pomdp.py - constructed quotient MDP having 1074 states and 574727 actions.
+2024-04-10 22:09:24,777 - pomdp.py - creating coloring ...
+2024-04-10 22:09:25,388 - synthesizer.py - synthesis initiated, design space: 1e1099
+2024-04-10 22:09:25,577 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:25,577 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.19 s
+number of holes: 805, family size: 1e1099, quotient: 1074 states / 574727 actions
+explored: 100 %
+MDP stats: avg MDP size: 1074, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:25,577 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:25,577 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:25,604 - pomdp.py - unfolding 135-FSC template into POMDP ...
+2024-04-10 22:09:25,948 - pomdp.py - constructed quotient MDP having 1082 states and 583336 actions.
+2024-04-10 22:09:25,948 - pomdp.py - creating coloring ...
+2024-04-10 22:09:26,606 - synthesizer.py - synthesis initiated, design space: 1e1108
+2024-04-10 22:09:26,788 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:26,788 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.18 s
+number of holes: 811, family size: 1e1108, quotient: 1082 states / 583336 actions
+explored: 100 %
+MDP stats: avg MDP size: 1082, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:26,788 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:26,788 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:26,815 - pomdp.py - unfolding 136-FSC template into POMDP ...
+2024-04-10 22:09:27,122 - pomdp.py - constructed quotient MDP having 1090 states and 592009 actions.
+2024-04-10 22:09:27,123 - pomdp.py - creating coloring ...
+2024-04-10 22:09:27,712 - synthesizer.py - synthesis initiated, design space: 1e1118
+2024-04-10 22:09:27,922 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:27,922 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.21 s
+number of holes: 817, family size: 1e1118, quotient: 1090 states / 592009 actions
+explored: 100 %
+MDP stats: avg MDP size: 1090, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:27,922 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:27,922 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:27,952 - pomdp.py - unfolding 137-FSC template into POMDP ...
+2024-04-10 22:09:28,402 - pomdp.py - constructed quotient MDP having 1098 states and 600746 actions.
+2024-04-10 22:09:28,402 - pomdp.py - creating coloring ...
+2024-04-10 22:09:29,029 - synthesizer.py - synthesis initiated, design space: 1e1127
+2024-04-10 22:09:29,214 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:29,214 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.18 s
+number of holes: 823, family size: 1e1127, quotient: 1098 states / 600746 actions
+explored: 100 %
+MDP stats: avg MDP size: 1098, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:29,214 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:29,214 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:29,239 - pomdp.py - unfolding 138-FSC template into POMDP ...
+2024-04-10 22:09:29,564 - pomdp.py - constructed quotient MDP having 1106 states and 609547 actions.
+2024-04-10 22:09:29,564 - pomdp.py - creating coloring ...
+2024-04-10 22:09:30,195 - synthesizer.py - synthesis initiated, design space: 1e1137
+2024-04-10 22:09:30,388 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:30,389 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.19 s
+number of holes: 829, family size: 1e1137, quotient: 1106 states / 609547 actions
+explored: 100 %
+MDP stats: avg MDP size: 1106, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:30,389 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:30,389 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:30,414 - pomdp.py - unfolding 139-FSC template into POMDP ...
+2024-04-10 22:09:30,690 - pomdp.py - constructed quotient MDP having 1114 states and 618412 actions.
+2024-04-10 22:09:30,690 - pomdp.py - creating coloring ...
+2024-04-10 22:09:31,320 - synthesizer.py - synthesis initiated, design space: 1e1146
+2024-04-10 22:09:31,534 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:31,534 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.21 s
+number of holes: 835, family size: 1e1146, quotient: 1114 states / 618412 actions
+explored: 100 %
+MDP stats: avg MDP size: 1114, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:31,534 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:31,535 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:31,561 - pomdp.py - unfolding 140-FSC template into POMDP ...
+2024-04-10 22:09:31,827 - pomdp.py - constructed quotient MDP having 1122 states and 627341 actions.
+2024-04-10 22:09:31,827 - pomdp.py - creating coloring ...
+2024-04-10 22:09:32,475 - synthesizer.py - synthesis initiated, design space: 1e1156
+2024-04-10 22:09:32,681 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:32,681 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.21 s
+number of holes: 841, family size: 1e1156, quotient: 1122 states / 627341 actions
+explored: 100 %
+MDP stats: avg MDP size: 1122, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:32,681 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:32,681 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:32,708 - pomdp.py - unfolding 141-FSC template into POMDP ...
+2024-04-10 22:09:33,056 - pomdp.py - constructed quotient MDP having 1130 states and 636334 actions.
+2024-04-10 22:09:33,056 - pomdp.py - creating coloring ...
+2024-04-10 22:09:33,698 - synthesizer.py - synthesis initiated, design space: 1e1165
+2024-04-10 22:09:33,903 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:33,903 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.2 s
+number of holes: 847, family size: 1e1165, quotient: 1130 states / 636334 actions
+explored: 100 %
+MDP stats: avg MDP size: 1130, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:33,904 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:33,904 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:33,934 - pomdp.py - unfolding 142-FSC template into POMDP ...
+2024-04-10 22:09:34,300 - pomdp.py - constructed quotient MDP having 1138 states and 645391 actions.
+2024-04-10 22:09:34,300 - pomdp.py - creating coloring ...
+2024-04-10 22:09:35,003 - synthesizer.py - synthesis initiated, design space: 1e1175
+2024-04-10 22:09:35,190 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:35,190 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.19 s
+number of holes: 853, family size: 1e1175, quotient: 1138 states / 645391 actions
+explored: 100 %
+MDP stats: avg MDP size: 1138, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:35,190 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:35,191 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:35,217 - pomdp.py - unfolding 143-FSC template into POMDP ...
+2024-04-10 22:09:35,524 - pomdp.py - constructed quotient MDP having 1146 states and 654512 actions.
+2024-04-10 22:09:35,524 - pomdp.py - creating coloring ...
+2024-04-10 22:09:36,141 - synthesizer.py - synthesis initiated, design space: 1e1185
+2024-04-10 22:09:36,341 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:36,341 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.2 s
+number of holes: 859, family size: 1e1185, quotient: 1146 states / 654512 actions
+explored: 100 %
+MDP stats: avg MDP size: 1146, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:36,341 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:36,341 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:36,369 - pomdp.py - unfolding 144-FSC template into POMDP ...
+2024-04-10 22:09:36,723 - pomdp.py - constructed quotient MDP having 1154 states and 663697 actions.
+2024-04-10 22:09:36,723 - pomdp.py - creating coloring ...
+2024-04-10 22:09:37,417 - synthesizer.py - synthesis initiated, design space: 1e1194
+2024-04-10 22:09:37,619 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:37,619 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.2 s
+number of holes: 865, family size: 1e1194, quotient: 1154 states / 663697 actions
+explored: 100 %
+MDP stats: avg MDP size: 1154, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:37,620 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:37,620 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:37,653 - pomdp.py - unfolding 145-FSC template into POMDP ...
+2024-04-10 22:09:37,987 - pomdp.py - constructed quotient MDP having 1162 states and 672946 actions.
+2024-04-10 22:09:37,987 - pomdp.py - creating coloring ...
+2024-04-10 22:09:38,606 - synthesizer.py - synthesis initiated, design space: 1e1204
+2024-04-10 22:09:38,810 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:38,810 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.2 s
+number of holes: 871, family size: 1e1204, quotient: 1162 states / 672946 actions
+explored: 100 %
+MDP stats: avg MDP size: 1162, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:38,810 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:38,810 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:38,840 - pomdp.py - unfolding 146-FSC template into POMDP ...
+2024-04-10 22:09:39,208 - pomdp.py - constructed quotient MDP having 1170 states and 682259 actions.
+2024-04-10 22:09:39,208 - pomdp.py - creating coloring ...
+2024-04-10 22:09:39,829 - synthesizer.py - synthesis initiated, design space: 1e1213
+2024-04-10 22:09:40,029 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:40,029 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.2 s
+number of holes: 877, family size: 1e1213, quotient: 1170 states / 682259 actions
+explored: 100 %
+MDP stats: avg MDP size: 1170, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:40,030 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:40,030 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:40,061 - pomdp.py - unfolding 147-FSC template into POMDP ...
+2024-04-10 22:09:40,425 - pomdp.py - constructed quotient MDP having 1178 states and 691636 actions.
+2024-04-10 22:09:40,425 - pomdp.py - creating coloring ...
+2024-04-10 22:09:41,059 - synthesizer.py - synthesis initiated, design space: 1e1223
+2024-04-10 22:09:41,269 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:41,269 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.21 s
+number of holes: 883, family size: 1e1223, quotient: 1178 states / 691636 actions
+explored: 100 %
+MDP stats: avg MDP size: 1178, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:41,269 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:41,269 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:41,298 - pomdp.py - unfolding 148-FSC template into POMDP ...
+2024-04-10 22:09:41,691 - pomdp.py - constructed quotient MDP having 1186 states and 701077 actions.
+2024-04-10 22:09:41,691 - pomdp.py - creating coloring ...
+2024-04-10 22:09:42,418 - synthesizer.py - synthesis initiated, design space: 1e1233
+2024-04-10 22:09:42,629 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:42,629 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.21 s
+number of holes: 889, family size: 1e1233, quotient: 1186 states / 701077 actions
+explored: 100 %
+MDP stats: avg MDP size: 1186, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:42,629 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:42,629 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:42,660 - pomdp.py - unfolding 149-FSC template into POMDP ...
+2024-04-10 22:09:43,028 - pomdp.py - constructed quotient MDP having 1194 states and 710582 actions.
+2024-04-10 22:09:43,028 - pomdp.py - creating coloring ...
+2024-04-10 22:09:43,740 - synthesizer.py - synthesis initiated, design space: 1e1242
+2024-04-10 22:09:43,953 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:43,953 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.21 s
+number of holes: 895, family size: 1e1242, quotient: 1194 states / 710582 actions
+explored: 100 %
+MDP stats: avg MDP size: 1194, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:43,954 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:43,954 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:43,985 - pomdp.py - unfolding 150-FSC template into POMDP ...
+2024-04-10 22:09:44,317 - pomdp.py - constructed quotient MDP having 1202 states and 720151 actions.
+2024-04-10 22:09:44,317 - pomdp.py - creating coloring ...
+2024-04-10 22:09:45,039 - synthesizer.py - synthesis initiated, design space: 1e1252
+2024-04-10 22:09:45,258 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:45,258 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.22 s
+number of holes: 901, family size: 1e1252, quotient: 1202 states / 720151 actions
+explored: 100 %
+MDP stats: avg MDP size: 1202, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:45,259 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:45,259 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:45,291 - pomdp.py - unfolding 151-FSC template into POMDP ...
+2024-04-10 22:09:45,707 - pomdp.py - constructed quotient MDP having 1210 states and 729784 actions.
+2024-04-10 22:09:45,707 - pomdp.py - creating coloring ...
+2024-04-10 22:09:46,435 - synthesizer.py - synthesis initiated, design space: 1e1261
+2024-04-10 22:09:46,658 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:46,658 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.22 s
+number of holes: 907, family size: 1e1261, quotient: 1210 states / 729784 actions
+explored: 100 %
+MDP stats: avg MDP size: 1210, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:46,659 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:46,659 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:46,692 - pomdp.py - unfolding 152-FSC template into POMDP ...
+2024-04-10 22:09:47,107 - pomdp.py - constructed quotient MDP having 1218 states and 739481 actions.
+2024-04-10 22:09:47,107 - pomdp.py - creating coloring ...
+2024-04-10 22:09:47,817 - synthesizer.py - synthesis initiated, design space: 1e1271
+2024-04-10 22:09:48,045 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:48,045 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.23 s
+number of holes: 913, family size: 1e1271, quotient: 1218 states / 739481 actions
+explored: 100 %
+MDP stats: avg MDP size: 1218, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:48,046 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:48,046 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:48,075 - pomdp.py - unfolding 153-FSC template into POMDP ...
+2024-04-10 22:09:48,473 - pomdp.py - constructed quotient MDP having 1226 states and 749242 actions.
+2024-04-10 22:09:48,473 - pomdp.py - creating coloring ...
+2024-04-10 22:09:49,218 - synthesizer.py - synthesis initiated, design space: 1e1281
+2024-04-10 22:09:49,441 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:49,441 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.22 s
+number of holes: 919, family size: 1e1281, quotient: 1226 states / 749242 actions
+explored: 100 %
+MDP stats: avg MDP size: 1226, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:49,442 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:49,442 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:49,474 - pomdp.py - unfolding 154-FSC template into POMDP ...
+2024-04-10 22:09:49,859 - pomdp.py - constructed quotient MDP having 1234 states and 759067 actions.
+2024-04-10 22:09:49,860 - pomdp.py - creating coloring ...
+2024-04-10 22:09:50,611 - synthesizer.py - synthesis initiated, design space: 1e1290
+2024-04-10 22:09:50,839 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:50,839 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.23 s
+number of holes: 925, family size: 1e1290, quotient: 1234 states / 759067 actions
+explored: 100 %
+MDP stats: avg MDP size: 1234, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:50,840 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:50,840 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:50,871 - pomdp.py - unfolding 155-FSC template into POMDP ...
+2024-04-10 22:09:51,291 - pomdp.py - constructed quotient MDP having 1242 states and 768956 actions.
+2024-04-10 22:09:51,291 - pomdp.py - creating coloring ...
+2024-04-10 22:09:52,103 - synthesizer.py - synthesis initiated, design space: 1e1300
+2024-04-10 22:09:52,349 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:52,349 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.25 s
+number of holes: 931, family size: 1e1300, quotient: 1242 states / 768956 actions
+explored: 100 %
+MDP stats: avg MDP size: 1242, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:52,350 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:52,350 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:52,382 - pomdp.py - unfolding 156-FSC template into POMDP ...
+2024-04-10 22:09:52,752 - pomdp.py - constructed quotient MDP having 1250 states and 778909 actions.
+2024-04-10 22:09:52,753 - pomdp.py - creating coloring ...
+2024-04-10 22:09:53,547 - synthesizer.py - synthesis initiated, design space: 1e1310
+2024-04-10 22:09:53,809 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:53,809 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.26 s
+number of holes: 937, family size: 1e1310, quotient: 1250 states / 778909 actions
+explored: 100 %
+MDP stats: avg MDP size: 1250, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:53,809 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:53,809 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:53,848 - pomdp.py - unfolding 157-FSC template into POMDP ...
+2024-04-10 22:09:54,218 - pomdp.py - constructed quotient MDP having 1258 states and 788926 actions.
+2024-04-10 22:09:54,218 - pomdp.py - creating coloring ...
+2024-04-10 22:09:55,165 - synthesizer.py - synthesis initiated, design space: 1e1320
+2024-04-10 22:09:55,414 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:55,415 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.25 s
+number of holes: 943, family size: 1e1320, quotient: 1258 states / 788926 actions
+explored: 100 %
+MDP stats: avg MDP size: 1258, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:55,415 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:55,415 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:55,453 - pomdp.py - unfolding 158-FSC template into POMDP ...
+2024-04-10 22:09:55,890 - pomdp.py - constructed quotient MDP having 1266 states and 799007 actions.
+2024-04-10 22:09:55,890 - pomdp.py - creating coloring ...
+2024-04-10 22:09:56,647 - synthesizer.py - synthesis initiated, design space: 1e1329
+2024-04-10 22:09:56,896 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:56,897 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.25 s
+number of holes: 949, family size: 1e1329, quotient: 1266 states / 799007 actions
+explored: 100 %
+MDP stats: avg MDP size: 1266, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:56,897 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:56,897 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:56,940 - pomdp.py - unfolding 159-FSC template into POMDP ...
+2024-04-10 22:09:57,576 - pomdp.py - constructed quotient MDP having 1274 states and 809152 actions.
+2024-04-10 22:09:57,576 - pomdp.py - creating coloring ...
+2024-04-10 22:09:58,473 - synthesizer.py - synthesis initiated, design space: 1e1339
+2024-04-10 22:09:58,743 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:09:58,743 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.27 s
+number of holes: 955, family size: 1e1339, quotient: 1274 states / 809152 actions
+explored: 100 %
+MDP stats: avg MDP size: 1274, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:09:58,743 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:09:58,743 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:09:58,782 - pomdp.py - unfolding 160-FSC template into POMDP ...
+2024-04-10 22:09:59,408 - pomdp.py - constructed quotient MDP having 1282 states and 819361 actions.
+2024-04-10 22:09:59,408 - pomdp.py - creating coloring ...
+2024-04-10 22:10:00,234 - synthesizer.py - synthesis initiated, design space: 1e1349
+2024-04-10 22:10:00,493 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:10:00,493 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.26 s
+number of holes: 961, family size: 1e1349, quotient: 1282 states / 819361 actions
+explored: 100 %
+MDP stats: avg MDP size: 1282, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:10:00,493 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:10:00,493 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:10:00,530 - pomdp.py - unfolding 161-FSC template into POMDP ...
+2024-04-10 22:10:01,014 - pomdp.py - constructed quotient MDP having 1290 states and 829634 actions.
+2024-04-10 22:10:01,014 - pomdp.py - creating coloring ...
+2024-04-10 22:10:01,893 - synthesizer.py - synthesis initiated, design space: 1e1358
+2024-04-10 22:10:02,149 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:10:02,149 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.26 s
+number of holes: 967, family size: 1e1358, quotient: 1290 states / 829634 actions
+explored: 100 %
+MDP stats: avg MDP size: 1290, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:10:02,150 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:10:02,150 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:10:02,185 - pomdp.py - unfolding 162-FSC template into POMDP ...
+2024-04-10 22:10:02,572 - pomdp.py - constructed quotient MDP having 1298 states and 839971 actions.
+2024-04-10 22:10:02,573 - pomdp.py - creating coloring ...
+2024-04-10 22:10:03,514 - synthesizer.py - synthesis initiated, design space: 1e1368
+2024-04-10 22:10:03,792 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-10 22:10:03,792 - synthesizer.py - None
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
+
+method: AR, synthesis time: 0.28 s
+number of holes: 973, family size: 1e1368, quotient: 1298 states / 839971 actions
+explored: 100 %
+MDP stats: avg MDP size: 1298, iterations: 1
+
+optimum: 2.245333
+--------------------
+2024-04-10 22:10:03,792 - synthesizer_pomdp.py - Terminate: False
+2024-04-10 22:10:03,792 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-10 22:10:03,831 - pomdp.py - unfolding 163-FSC template into POMDP ...
+2024-04-10 22:10:04,256 - pomdp.py - constructed quotient MDP having 1306 states and 850372 actions.
+2024-04-10 22:10:04,257 - pomdp.py - creating coloring ...
+2024-04-10 22:10:05,248 - synthesizer.py - synthesis initiated, design space: 1e1378
+2024-04-10 22:10:05,248 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-10 22:10:05,300 - storm_pomdp_control.py - Interactive Storm started
+2024-04-10 22:10:05,301 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-04-10 22:10:15,311 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
+-----------Storm-----------               
+Value = 2.245332792207793 | Time elapsed = 109.4s | FSC size = 61
+
+
+------------------------------------
+
+PAYNT results: 
+2.2453327922077926
+controller size: 10
+
+Storm results: 
+2.245332792207793
+controller size: 61
+
+------------------------------------
+
+2024-04-10 22:10:24,322 - synthesizer_pomdp.py - Timeout for PAYNT started
+2024-04-10 22:10:24,771 - synthesizer_ar_storm.py - Resuming synthesis
+2024-04-10 22:10:24,771 - synthesizer_ar_storm.py - Applying family split according to Storm results
+2024-04-10 22:10:24,772 - storm_pomdp_control.py - Main family based on data from Storm: reduced design space from 23947595691150064220314108708740005142758774454444690406815863276044032120874014153678016793780539362669367944265302041751045677359991684570712404407895596861811998195717533732210942445523307082421743675268533056927600075321020711046981238918387764113417075722091582819255356801546005315781362970664322675619289198053267987363000243740110566287062964596376912678891862874977049836022078932648177278697590759789837805401207903688762400440021937023882056934682942713147105700063686903539913250957026091991906905355182206831881770743620040162087132511968612176442232339880003511087704347349029160350994491757945483890972859617643662595833988045308695863900592060438593328935230374442990291518209186671236564719955762240455727829063397199352453987376434764930200609181811679784604251847231803849976443652198681298154908972636502590015490611354639273623116443733317792744227584422545513078393838599594698566468555274049126406487875906652582580079079767984294992598591451001774846843633843358376427013793814026141334222294910549815159497362365296285426340428834865185563762112903923876860038199787056775623106207631021246572315523814303659440420234847836714301847417308293907436548235321672945021715134728208714347801147168469372150592229331750327367799814364559544537737840760395851461535411696192532770958078168249112538616846942622608478482535966149153616194633929029906121732653056 to 9374026090330110777734150237084913810377451612143521728718049941328176832199872875092199409868033053926381055144426130727499669610832740721529469300065399970651702379372914717749788112789698655497194630577729382262628820404099013701338685922884140706612491630271126009854464675720382794370187798053268055198580254980022329626607758114520559374750427001448852046542698368619673793825467877812442007370739383493859179782400393392101288324869923286318280276741886718019263435724916868166259622359474811038193336463222775857138405386751657645446476514333996910616682126690198465659540579663744588223810022837897986971165092839396473921861250126089028357715071262071220393473976766537680390255074108011147523511127786138552213336588260309845369815359507971115860318941209093903201861947259499722258365698546000914090206808670864270812221513190936161418013355644800532474216620141979554395011507337286815401541942825278744420220468920472491866353958775209898981606735375703707673951242566464564418174791571460872450189694857962237363485601478313450545427598330153476077623417899420223868649
+2024-04-10 22:10:24,912 - synthesizer_ar_storm.py - State after Storm splitting: Main families - 1, Subfamilies - 326
+2024-04-10 22:10:24,989 - synthesizer_ar_storm.py - Main family synthesis done
+2024-04-10 22:10:24,989 - synthesizer_ar_storm.py - Subfamilies buffer contains: 326 families
+> progress 0.0%, elapsed 3 s, estimated 12830128091435527770201025320344487315178091706103448662525102086079519094151844723552785689092967356258661932671179877303286841577206026969409970343456099539501012792359341069053198336 s (406840692904475208309620908075133507247498844998176626173951485829481417906185778966968220042512683578497293454918319429451811960774466530135898476504883367038259234111016140800 years), iters = {MDP: 23}, opt = 2.245
+> progress 0.0%, elapsed 6 s, estimated 5970477523570845041768845074814752874736779407953943140954697746680308911864220132478450694490610638984954209504544055907257916732000599557993312833799132256360498945064960 s (189322600316173415602760366682921345048560691253740196452107869119190781010272746515405146473888499031362345003913123501897823995211298268303474426057450634950475776 years), iters = {MDP: 44}, opt = 2.245
+> progress 0.0%, elapsed 15 s, estimated 3676613637474173095310969108245017890947356217653843234670104306690094674889643261316084526050078445760582094161430724665463433705494617727404895499310964092607600221224960 s (116584653648978075679006269801216306878800741720708933016632957380229086616102092761652049340152794609829679477141389106603127522637815707684339619504098257720573952 years), iters = {MDP: 45}, opt = 2.245
+> progress 0.0%, elapsed 19 s, estimated 1124934480344845555337024470219162816642841228475956564128296121840676288329297781649076712064963353735575424705899289771194044356683517956029206134122820252205056000 s (35671438367099362033800791413526527273567735523123425784641252587180717496193916018461600972140163630439685160680836207082694020349196702931793331781084643328 years), iters = {MDP: 56}, opt = 2.245
+> progress 0.0%, elapsed 22 s, estimated 1181472735996784898859779795762406871558873956250426545452880125343877532113474582885259456991752054581316157777610596646341843570122872243778864950542336 s (37464254692947262328560166636732732391033514259483059810832689956672396964677934834113929636130575837871006350130625931556197240500776810491936768 years), iters = {MDP: 76}, opt = 2.245
+> progress 0.0%, elapsed 25 s, estimated 1219003990677322387178761700544639153357177252036964695764820633454407158993995515233823494673183517186340769492096457963975390944452954554368 s (38654362971756799780361850175888780615239169101981665797996092030622880609002410034240791796924462523957963758490688886150002001313792 years), iters = {MDP: 96}, opt = 2.245
+> progress 0.0%, elapsed 28 s, estimated 1282070344760073196072153334170481723847605068252583567123101988234472138833564475450780275268128355096636479987000312161762363310080 s (40654183940895261974459101271091697697897660355481876283845078412350078607343013748321017736276706422843855959979047971192832 years), iters = {MDP: 111}, opt = 2.245
+> progress 0.0%, elapsed 31 s, estimated 86531923461401911383125658403151293945775625506008686153887387516363477379925361222347237829053859322888718961724939185657217024 s (2743909292916092869847228852063610779703443471206057922197198802445765566545388550524822352293140017617284631950333575168 years), iters = {MDP: 118}, opt = 2.245
+> progress 0.0%, elapsed 35 s, estimated 5843599587910601443458526224445106499988868654662307404177494545502373686899840359383824127676613335296508139541641509732352 s (185299327369057630892362664326720861940473307242822071853071409630754407054953676054708608978169928237520849075175424 years), iters = {MDP: 125}, opt = 2.245
+> progress 0.0%, elapsed 39 s, estimated 6280808971437964252474080775254442476985688211360297927486270702585002567340919747025634996669835832798547231838830592 s (199163145974060222494751987512030734883067446328204408264232129240165384550216838528543153182630514669987561472 years), iters = {MDP: 135}, opt = 2.245
+> progress 0.0%, elapsed 46 s, estimated 6973263424810385498623295447088277720212642054926761487333916442832094948418481975966550866299412265601305935872 s (221120732648731145150539836274398686417520888123346082494134164922917739030937331918907896052652359811072 years), iters = {MDP: 145}, opt = 2.245
+> progress 0.0%, elapsed 50 s, estimated 1892716317809290610145374010163632157012451522950252537274671081032069924567791846585004720234386330919668547584 s (60017640722009466393485275300556440461365815543846278747888078793955819011502493630098960119921536663552 years), iters = {MDP: 146}, opt = 2.245
+> progress 0.0%, elapsed 53 s, estimated 1870866963143862392883249620524593975636051241835685802398447195935400271668067029724339896256246579200 s (59324802230589242508967286779658398179609576940588792625573305984341486560469416938273845018624 years), iters = {MDP: 161}, opt = 2.245
+> progress 0.0%, elapsed 56 s, estimated 29473544022300441793080043063283272211794786680438646618454439774348158129313300281482786373632 s (934599949971475199696247152209878114680978348693418612472571251416945099044028919316480 years), iters = {MDP: 174}, opt = 2.245
+> progress 0.0%, elapsed 59 s, estimated 29024447305977413795894648748221483807514204178494733592097981098537973756646578454528 s (920359186516280184754180609585412841519007831842997036230400278910957537722368 years), iters = {MDP: 189}, opt = 2.245
+> progress 0.0%, elapsed 62 s, estimated 113907266778224870784048551153200849721364189190103793976774207726731420237824 s (3611975734976689270665312334402694792955678940920754866265348062052352 years), iters = {MDP: 203}, opt = 2.245
+> progress 0.0%, elapsed 66 s, estimated 446021070571497828256781698903465719564181393319697443350256778477568 s (14143235368198179737901269236790252889936713585734698429054976 years), iters = {MDP: 217}, opt = 2.245
+> progress 0.0%, elapsed 69 s, estimated 6948265851435741413998487377984496686815346959808681438347264 s (220328064796922320096701815360301790130468807533133824 years), iters = {MDP: 230}, opt = 2.245
+> progress 0.0%, elapsed 72 s, estimated 108171777496277798910762160445350224184535395021619200 s (3430104562921035994042338467800374558981095424 years), iters = {MDP: 243}, opt = 2.245
+> progress 0.0%, elapsed 75 s, estimated 1681942495168674701332884096185037000380776448 s (53334046650452643907491549690988593152 years), iters = {MDP: 256}, opt = 2.245
+> progress 0.0%, elapsed 78 s, estimated 26694131514668332815967133417516702892032 s (846465357517387538439283425673216 years), iters = {MDP: 264}, opt = 2.245
+> progress 0.0%, elapsed 81 s, estimated 423689934521283156169133447924678656 s (13435119689284728017765007360 years), iters = {MDP: 272}, opt = 2.245
+> progress 0.0%, elapsed 85 s, estimated 6754098478086283285149257826304 s (214171057777977025626112 years), iters = {MDP: 280}, opt = 2.245
+> progress 0.0%, elapsed 89 s, estimated 110283367985672517636249878528 s (3497062658094638039040 years), iters = {MDP: 283}, opt = 2.245
+> progress 0.0%, elapsed 95 s, estimated 29638650825120118917065342976 s (939835452343991533568 years), iters = {MDP: 284}, opt = 2.245
+2024-04-10 22:12:01,035 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-10 22:12:01,388 - storm_pomdp_control.py - Interactive Storm resumed
+2024-04-10 22:12:01,443 - storm_pomdp_control.py - Updating FSC values in Storm
+2024-04-10 22:12:11,467 - storm_pomdp_control.py - Pausing Storm

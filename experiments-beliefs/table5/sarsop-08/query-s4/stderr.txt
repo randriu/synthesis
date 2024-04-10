@@ -1,0 +1,1 @@
+ERROR: Bounds::writeToFile: couldn't open ../../synthesis/experiments-beliefs/sarsop/output-idk/query-s4.out for writing 
