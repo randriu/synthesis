@@ -132,12 +132,12 @@ class Sketch:
             except SyntaxError:
                 pass
 
+        assert filetype is not None, "unknow format of input file"
+        logger.info("sketch parsing OK")
+
         if specification.has_optimality:
             optimality_subformula = specification.optimality.formula.subformula
             paynt.quotient.models.MarkovChain.native_cassandra = (optimality_subformula.is_discounted_total_reward_formula or optimality_subformula.is_discounted_cumulative_reward_formula)
-
-        assert filetype is not None, "unknow format of input file"
-        logger.info("sketch parsing OK")
              
         paynt.quotient.models.MarkovChain.initialize(specification)
         paynt.verification.property.Property.initialize()
