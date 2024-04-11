@@ -25,7 +25,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.decpomdp_manager = decpomdp_manager
 
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        print("self.agent_observation_labels",self.agent_observation_labels)
+        # print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
         # print("self.agent_action_labels",self.agent_action_labels)

@@ -32,6 +32,7 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.policy_tree
 
+
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
