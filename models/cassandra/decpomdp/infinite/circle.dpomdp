@@ -1,0 +1,48 @@
+agents: 2 
+#
+discount: 0.9
+#
+values: reward
+#
+states: s a end
+#  
+start: 
+0.5 0.5 0.0
+#
+actions: 
+f b
+f b
+#
+observations: 
+o
+o
+#
+T : f f : s : s : 0.9025 
+T : f f : s : end : 0.0975
+T : f b : s : end : 0.9025
+T : f b : s : s : 0.0975
+T : b f : s : end : 0.9025
+T : b f : s : s : 0.0975
+T : b b : s : s : 0.9025
+T : b b : s : end : 0.0975
+#
+T : f f : a : a : 0.9025 
+T : f f : a : end : 0.0975
+T : f b : a : end : 0.9025
+T : f b : a : a : 0.0975
+T : b f : a : end : 0.9025
+T : b f : a : a : 0.0975
+T : b b : a : a : 0.9025
+T : b b : a : end : 0.0975
+#
+T : f f : end : end : 1.0
+T : f b : end : end : 1.0
+T : b f : end : end : 1.0
+T : b b : end : end : 1.0
+#
+#
+O : * * : * : o o : 1.0
+#
+R: * *: * : * : * : 1
+#R: f b: * : * : * : 10
+#R: b f: * : * : * : 10

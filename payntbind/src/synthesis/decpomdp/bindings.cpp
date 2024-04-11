@@ -19,6 +19,7 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("reward_model_name", [](synthesis::DecPomdp& decpomdp) {return decpomdp.reward_model_name;})
         .def_property_readonly("reward_minimizing", [](synthesis::DecPomdp& decpomdp) {return decpomdp.reward_minimizing;})
         .def_property_readonly("discount_factor", [](synthesis::DecPomdp& decpomdp) {return decpomdp.discount_factor;})
+        .def_property_readonly("discounted", [](synthesis::DecPomdp& decpomdp) {return decpomdp.discounted;})
         
         .def("apply_discount_factor_transformation", &synthesis::DecPomdp::applyDiscountFactorTransformation)
         .def_property_readonly("discount_sink_label", [](synthesis::DecPomdp& decpomdp) {return decpomdp.discount_sink_label;})
@@ -41,7 +42,8 @@ void bindings_decpomdp(py::module& m) {
         .def_property_readonly("action_to_memory_joint_observation", [](synthesis::DecPomdp& decpomdp) {return decpomdp.action_to_memory_joint_observation;})
         .def_property_readonly("state_to_memory_joint_observation", [](synthesis::DecPomdp& decpomdp) {return decpomdp.state_to_memory_joint_observation;})
         .def_property_readonly("nr_memory_joint_observations", [](synthesis::DecPomdp& decpomdp) {return decpomdp.nr_memory_joint_observations;})
-
+        .def("set_target_state", &synthesis::DecPomdp::setTargetState, py::arg("state"))
+        .def_property_readonly("target_label", [](synthesis::DecPomdp& decpomdp) {return decpomdp.target_label;})
         
         
 

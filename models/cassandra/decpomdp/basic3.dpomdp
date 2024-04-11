@@ -27,7 +27,8 @@ T : a b : s2 : s2 : 1.0
 #
 O : * * : s0 : o o1 : 1.0
 O : a a : s1 : o o1 : 1.0
-O : a b : s1 : o o2 : 1.0
+O : a b : s1 : o o1 : 0.5
+O : a b : s1 : o o2 : 0.5
 O : a a : s2 : o o1 : 1.0
 O : a b : s2 : o o1 : 1.0
 #

@@ -97,12 +97,16 @@ class Sketch:
                     raise SyntaxError
                 print("paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation",paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation)
                 if paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation:
+                    properties_path = substitute_suffix(sketch_path, '.', 'props')
+                    print("properties_path",properties_path)
+
                     explicit_quotient = decpomdp_manager.construct_pomdp()
                     optimality = paynt.verification.property.construct_reward_property(
                         decpomdp_manager.reward_model_name,
                         decpomdp_manager.reward_minimizing,
-                        decpomdp_manager.discount_sink_label)
-                    specification = paynt.verification.property.Specification([optimality])
+                        decpomdp_manager.target_label)
+                    # specification = paynt.verification.property.Specification([optimality])
+                    specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
                 else:
                     logger.info("applying discount factor transformation...")
                     decpomdp_manager.apply_discount_factor_transformation()
@@ -112,8 +116,6 @@ class Sketch:
                         decpomdp_manager.reward_minimizing,
                         decpomdp_manager.discount_sink_label)
                     specification = paynt.verification.property.Specification([optimality])
-                    
-
                 filetype = "cassandra"
             except SyntaxError:
                 pass
@@ -152,6 +154,9 @@ class Sketch:
             logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
         specification.transform_until_to_eventually()
         logger.info(f"found the following specification {specification}")
+
+
+        print("specification",specification)
 
         if export is not None:
             Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)

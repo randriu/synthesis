@@ -13,6 +13,9 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
 
+        
+
+
         self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
         # self.initial_memory_size = 1;
         # print("self.initial_memory_size",self.initial_memory_size)
@@ -22,7 +25,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.decpomdp_manager = decpomdp_manager
 
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        # print("self.agent_observation_labels",self.agent_observation_labels)
+        print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
         # print("self.agent_action_labels",self.agent_action_labels)
@@ -54,7 +57,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("self.nr_joint_observations",self.nr_joint_observations)
 
         self.state_joint_observation = decpomdp_manager.state_joint_observation
-        # # print("self.state_joint_observation",self.state_joint_observation)
+        # print("self.state_joint_observation",self.state_joint_observation)
 
         self.nr_agent_observations = [len(observation) for observation in self.agent_observation_labels]
         # # print("self.nr_agent_observations",self.nr_agent_observations)
@@ -143,7 +146,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        # print("transition matrix: ", self.quotient_mdp.transition_matrix)
+        print(self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         
@@ -160,17 +163,46 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.agent_observation_memory_size = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
             agent_obs_mem_size = [memory_size for obs in range(self.nr_agent_observations[agent])]
-            agent_obs_mem_size[-1:] = [1] # this is for discount state
+            if self.decpomdp_manager.discounted:
+                agent_obs_mem_size[-1:] = [1] # this is for discount state
+            
             self.agent_observation_memory_size[agent] = agent_obs_mem_size
         # print("self.observation_memory_size",self.observation_memory_size)
 
         self.set_manager_memory_vector()
+        self.set_target_states()
         self.unfold_memory()
 
     def set_manager_memory_vector(self):
         mem = pow( self.initial_memory_size , self.nr_agents) 
         # logger.debug(f"memory of every state of quotient mdp was set to  {mem}.")
         self.decpomdp_manager.set_global_memory_size(mem)
+
+    # TODO not completed
+    def set_target_states(self): 
+        if paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation:
+
+            # print("paynt.quotient.pomdp.PomdpQuotient.sketch_path ",paynt.quotient.pomdp.PomdpQuotient.sketch_path )
+            sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
+            props_path = self.substitute_suffix(sketch_path, '.', 'target')
+            h = open(props_path, 'r')
+            content = h.readlines()
+            for i in content[0].split(' '):
+                if i.isdigit() == True: 
+                    assert int(i) <= self.nr_states
+                    self.decpomdp_manager.set_target_state(int(i))
+                    print("set_target_state",int(i))
+
+
+            # for state in range(self.nr_states):
+            
+
+    def substitute_suffix(self, string, delimiter, replacer):
+        '''Subsitute the suffix behind the last delimiter.'''
+        output_string = string.split(delimiter)
+        output_string[-1] = str(replacer)
+        output_string = delimiter.join(output_string)
+        return output_string
 
     def unfold_memory(self):
         

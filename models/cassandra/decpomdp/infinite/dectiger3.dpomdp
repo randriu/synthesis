@@ -1,0 +1,186 @@
+#
+agents: 3 
+#
+discount: 0.9 
+#
+values: reward
+#
+states: tiger-left tiger-right tiger-open    
+#
+start: 
+0.5 0.5 0.0
+#
+actions: 
+listen open-left open-right
+listen open-left open-right
+listen open-left open-right
+#
+observations: 
+hear-left hear-right
+hear-left hear-right
+hear-left hear-right
+#
+T: open-right open-right listen : tiger-right : tiger-open : 1.0
+T: open-right open-left listen : tiger-right : tiger-open : 1.0
+T: open-right listen listen : tiger-right : tiger-open : 1.0
+T: open-left open-right listen : tiger-right : tiger-open : 1.0
+T: listen open-right listen : tiger-right : tiger-open : 1.0
+#
+T: open-right open-right open-left : tiger-right : tiger-open : 1.0
+T: open-right open-left open-left : tiger-right : tiger-open : 1.0
+T: open-right listen open-left : tiger-right : tiger-open : 1.0
+T: open-left open-right open-left : tiger-right : tiger-open : 1.0
+T: listen open-right open-left : tiger-right : tiger-open : 1.0
+#
+T: open-right open-right open-right : tiger-right : tiger-open : 1.0
+T: open-right open-left open-right : tiger-right : tiger-open : 1.0
+T: open-right listen open-right : tiger-right : tiger-open : 1.0
+T: open-left open-right open-right : tiger-right : tiger-open : 1.0
+T: listen open-right open-right : tiger-right : tiger-open : 1.0
+#
+T: open-left open-left open-right : tiger-right : tiger-open : 1.0
+T: open-left listen open-right : tiger-right : tiger-open : 1.0
+T: listen open-left open-right : tiger-right : tiger-open : 1.0
+#
+T: open-left open-left open-left : tiger-right : tiger-left : 0.5
+T: open-left open-left open-left : tiger-right : tiger-right : 0.5
+T: open-left listen open-left : tiger-right : tiger-left : 0.5
+T: open-left listen open-left : tiger-right : tiger-right : 0.5
+T: listen open-left open-left : tiger-right : tiger-left : 0.5
+T: listen open-left open-left : tiger-right : tiger-right : 0.5
+#
+T: open-left open-left listen : tiger-right : tiger-left : 0.5
+T: open-left open-left listen : tiger-right : tiger-right : 0.5
+T: open-left listen listen : tiger-right : tiger-left : 0.5
+T: open-left listen listen : tiger-right : tiger-right : 0.5
+T: listen open-left listen : tiger-right : tiger-left : 0.5
+T: listen open-left listen : tiger-right : tiger-right : 0.5
+#
+T: listen listen open-left: tiger-right : tiger-left : 0.5
+T: listen listen open-left: tiger-right : tiger-right : 0.5
+T: listen listen open-right: tiger-right : tiger-open : 1.0
+#
+T: open-left open-right listen : tiger-left : tiger-open : 1.0
+T: open-left open-left listen : tiger-left : tiger-open : 1.0
+T: open-left listen listen : tiger-left : tiger-open : 1.0
+T: open-right open-left listen : tiger-left : tiger-open : 1.0
+T: listen open-left listen : tiger-left : tiger-open : 1.0
+#
+T: open-left open-right open-right : tiger-left : tiger-open : 1.0
+T: open-left open-left open-right : tiger-left : tiger-open : 1.0
+T: open-left listen open-right : tiger-left : tiger-open : 1.0
+T: open-right open-left open-right : tiger-left : tiger-open : 1.0
+T: listen open-left open-right : tiger-left : tiger-open : 1.0
+#
+T: open-left open-right open-left : tiger-left : tiger-open : 1.0
+T: open-left open-left open-left : tiger-left : tiger-open : 1.0
+T: open-left listen open-left : tiger-left : tiger-open : 1.0
+T: open-right open-left open-left : tiger-left : tiger-open : 1.0
+T: listen open-left open-left : tiger-left : tiger-open : 1.0
+#
+T: open-right open-right open-left : tiger-left : tiger-open : 1.0
+T: open-right listen open-left : tiger-left : tiger-open : 1.0
+T: listen open-right open-left : tiger-left : tiger-open : 1.0
+#
+T: open-right open-right open-right : tiger-left : tiger-left : 0.5
+T: open-right open-right open-right : tiger-left : tiger-right : 0.5
+T: open-right listen open-right : tiger-left : tiger-left : 0.5
+T: open-right listen open-right : tiger-left : tiger-right : 0.5
+T: listen open-right open-right : tiger-left : tiger-left : 0.5
+T: listen open-right open-right : tiger-left : tiger-right : 0.5
+#
+T: open-right open-right listen : tiger-left : tiger-left : 0.5
+T: open-right open-right listen : tiger-left : tiger-right : 0.5
+T: open-right listen listen : tiger-left : tiger-left : 0.5
+T: open-right listen listen : tiger-left : tiger-right : 0.5
+T: listen open-right listen : tiger-left : tiger-left : 0.5
+T: listen open-right listen : tiger-left : tiger-right : 0.5
+#
+T: listen listen open-right: tiger-left : tiger-left : 0.5
+T: listen listen open-right: tiger-left : tiger-right : 0.5
+T: listen listen open-left: tiger-left : tiger-open : 1.0
+#
+T: listen listen listen : tiger-left : tiger-left : 0.99
+T: listen listen listen : tiger-left : tiger-open : 0.01
+T: listen listen listen : tiger-right : tiger-right : 0.99
+T: listen listen listen : tiger-right : tiger-open : 0.01
+#
+T: * : tiger-open : tiger-open : 1.0
+#
+O: * :
+uniform
+O: listen listen listen : tiger-left : hear-left hear-left hear-left : 0.614125
+O: listen listen listen : tiger-left : hear-left hear-right hear-left : 0.108375
+O: listen listen listen : tiger-left : hear-right hear-left hear-left : 0.108375
+O: listen listen listen : tiger-left : hear-right hear-right hear-left : 0.019125
+#
+O: listen listen listen : tiger-left : hear-left hear-left hear-right : 0.108375
+O: listen listen listen : tiger-left : hear-left hear-right hear-right : 0.019125
+O: listen listen listen : tiger-left : hear-right hear-left hear-right : 0.019125
+O: listen listen listen : tiger-left : hear-right hear-right hear-right : 0.003375
+#
+O: listen listen listen : tiger-right : hear-right hear-right hear-right : 0.614125
+O: listen listen listen : tiger-right : hear-left hear-right hear-right : 0.108375
+O: listen listen listen : tiger-right : hear-right hear-left hear-right : 0.108375
+O: listen listen listen : tiger-right : hear-left hear-left hear-right : 0.019125
+#
+O: listen listen listen : tiger-right : hear-right hear-right hear-left : 0.108375
+O: listen listen listen : tiger-right : hear-left hear-right hear-left : 0.019125
+O: listen listen listen : tiger-right : hear-right hear-left hear-left : 0.019125
+O: listen listen listen : tiger-right : hear-left hear-left hear-left : 0.003375
+#
+R: listen listen listen: * : * : * : -2
+R: open-left open-left listen : tiger-left : * : * : -101
+R: open-right open-right listen : tiger-right : * : * : -101
+R: open-left open-left listen : tiger-right : * : * : 9
+R: open-right open-right listen : tiger-left : * : * : 9
+R: open-left open-right listen : tiger-left : * : * : -101
+R: open-left open-right listen : tiger-right : * : * : -101
+R: open-right open-left listen : tiger-left : * : * : -101
+R: open-right open-left listen : tiger-right : * : * : -101
+R: open-left listen listen : tiger-left : * : * : -101
+R: listen open-right listen : tiger-right : * : * : -101
+R: listen open-left listen : tiger-left : * : * : -101
+R: open-right listen listen : tiger-right : * : * : -101
+R: listen open-right listen : tiger-left : * : * : 9
+R: listen open-left listen : tiger-right : * : * : 9
+R: open-right listen listen : tiger-left : * : * : 9
+R: open-left listen listen : tiger-right : * : * : 9
+#
+R: listen listen open-left : tiger-left : * : * : -101
+R: listen listen open-left : tiger-right : * : * : 9
+R: open-left open-left open-left : tiger-left : * : * : -50
+R: open-right open-right open-left : tiger-right : * : * : -101
+R: open-left open-left open-left : tiger-right : * : * : 20
+R: open-right open-right open-left : tiger-left : * : * : -100
+R: open-left open-right open-left : tiger-left : * : * : -100
+R: open-left open-right open-left : tiger-right : * : * : -100
+R: open-right open-left open-left : tiger-left : * : * : -100
+R: open-right open-left open-left : tiger-right : * : * : -100
+R: open-left listen open-left : tiger-left : * : * : -101
+R: listen open-right open-left : tiger-right : * : * : -101
+R: listen open-left open-left : tiger-left : * : * : -101
+R: open-right listen open-left : tiger-right : * : * : -101
+R: listen open-right open-left : tiger-left : * : * : -101
+R: listen open-left open-left : tiger-right : * : * : 9
+R: open-right listen open-left : tiger-left : * : * : -101
+R: open-left listen open-left : tiger-right : * : * : 9
+#
+R: listen listen open-right : tiger-left : * : * : 9
+R: listen listen open-right : tiger-right : * : * : -101
+R: open-left open-left open-right : tiger-left : * : * : -100
+R: open-right open-right open-right : tiger-right : * : * : -50
+R: open-left open-left open-right : tiger-right : * : * : -100
+R: open-right open-right open-right : tiger-left : * : * : 20
+R: open-left open-right open-right : tiger-left : * : * : -100
+R: open-left open-right open-right : tiger-right : * : * : -100
+R: open-right open-left open-right : tiger-left : * : * : -100
+R: open-right open-left open-right : tiger-right : * : * : -100
+R: open-left listen open-right : tiger-left : * : * : -101
+R: listen open-right open-right : tiger-right : * : * : -101
+R: listen open-left open-right : tiger-left : * : * : -101
+R: open-right listen open-right : tiger-right : * : * : -101
+R: listen open-right open-right : tiger-left : * : * : 9
+R: listen open-left open-right : tiger-right : * : * : -101
+R: open-right listen open-right : tiger-left : * : * : 9
+R: open-left listen open-right : tiger-right : * : * : -101
