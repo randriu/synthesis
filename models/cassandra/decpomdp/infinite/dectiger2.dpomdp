@@ -5,10 +5,10 @@ discount: 0.9
 #
 values: reward
 #
-states: tiger-left tiger-right tiger-open    
+states: tiger-left tiger-right tiger-open sink   
 #
 start: 
-0.5 0.5 0.0
+0.5 0.5 0.0 0.0
 #
 actions: 
 listen open-left open-right
@@ -49,7 +49,8 @@ T: listen listen : tiger-left : tiger-open : 0.01
 T: listen listen : tiger-right : tiger-right : 0.99
 T: listen listen : tiger-right : tiger-open : 0.01
 #
-T: * : tiger-open : tiger-open : 1.0
+T: * : tiger-open : sink : 1.0
+T: * : sink : sink : 1.0
 #
 O: * :
 uniform
@@ -62,11 +63,12 @@ O: listen listen : tiger-right : hear-left hear-right : 0.1275
 O: listen listen : tiger-right : hear-right hear-left : 0.1275
 O: listen listen : tiger-right : hear-left hear-left : 0.0225
 #
-R: *: * : * : * : 0
-R: listen listen: * : * : * : 0
+#
+R: * : * : * : * : 0
+R: listen listen: * : * : * : -2
 R: open-left open-left : tiger-left : * : * : -50
 R: open-right open-right : tiger-right : * : * : -50
-R: open-left open-left : tiger-right : * : * : 20
+R: open-left open-left : tiger-right : * : * : +20
 R: open-right open-right : tiger-left : * : * : 20
 R: open-left open-right: tiger-left : * : * : -100
 R: open-left open-right: tiger-right : * : * : -100
