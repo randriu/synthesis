@@ -156,6 +156,6 @@ class Synthesizer:
     
     def run(self, optimum_threshold=None, export_evaluation=None):
         if isinstance(self.quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
-            self.evaluate(export_filename_base=export_evaluation)
+            return self.evaluate(export_filename_base=export_evaluation)
         else:
-            self.synthesize(optimum_threshold=optimum_threshold)
+            return self.synthesize(optimum_threshold=optimum_threshold)
