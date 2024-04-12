@@ -215,7 +215,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     
     def create_coloring(self):
-        logger.debug("creating coloring ...")
         if PomdpQuotient.posterior_aware:
             return self.create_coloring_aposteriori()
 
