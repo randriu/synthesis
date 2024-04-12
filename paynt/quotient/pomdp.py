@@ -346,6 +346,19 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         family, choice_to_hole_options = self.create_coloring()
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
 
+        decomposition = stormpy.get_maximal_end_components(self.quotient_mdp)
+        print(decomposition)
+        print(type(decomposition))
+        print(dir(decomposition))
+        print(decomposition.size)
+        for mec in decomposition:
+            print(mec.size)
+            for s in mec:
+                print(s)
+                for x in s:
+                    print(x)
+            # exit()
+        exit()
         # self.quotient_mdp = payntbind.synthesis.removeSelfLoops(self.quotient_mdp)
         # self.quotient_mdp = payntbind.synthesis.mergeChoices(self.quotient_mdp,self.coloring)
         # self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
