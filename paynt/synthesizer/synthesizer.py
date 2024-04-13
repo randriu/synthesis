@@ -29,6 +29,7 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_cegis
         import paynt.synthesizer.synthesizer_hybrid
         import paynt.synthesizer.synthesizer_multicore_ar
+        import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.policy_tree
 
@@ -45,6 +46,8 @@ class Synthesizer:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
         if method == "onebyone":
             return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
+        if method == "ar" and fsc_synthesis:
+            return paynt.synthesizer.synthesizer_decpomdp.SynthesizerDECPOMDP(quotient)
         if method == "ar":
             return paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
         if method == "cegis":
