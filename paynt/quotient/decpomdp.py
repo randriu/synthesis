@@ -159,6 +159,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         return "{}({},{},{})".format(category,agent,obs_label,mem)
 
     def set_imperfect_memory_size(self, memory_size):
+        print("IMPERFECT++++++++++++++++++++++++++++++++++++++++++++++++++",memory_size)
         ''' Set given memory size only to imperfect observations. '''
         self.agent_observation_memory_size = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
@@ -169,12 +170,13 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             self.agent_observation_memory_size[agent] = agent_obs_mem_size
         # print("self.observation_memory_size",self.observation_memory_size)
 
-        self.set_manager_memory_vector()
+        self.set_manager_memory_vector(memory_size)
         self.set_target_states()
         self.unfold_memory()
+        # print(self.quotient_mdp.transition_matrix)
 
-    def set_manager_memory_vector(self):
-        mem = pow( self.initial_memory_size , self.nr_agents) 
+    def set_manager_memory_vector(self,memory_size):
+        mem = pow( memory_size, self.nr_agents) 
         # logger.debug(f"memory of every state of quotient mdp was set to  {mem}.")
         self.decpomdp_manager.set_global_memory_size(mem)
 
