@@ -1,0 +1,146 @@
+2024-04-13 12:45:17,954 - cli.py - This is Paynt version 0.1.0.
+2024-04-13 12:45:17,954 - sketch.py - loading sketch from ../sarsop/models/ejs1.pomdp ...
+2024-04-13 12:45:17,954 - sketch.py - assuming sketch in PRISM format...
+ERROR (SpiritErrorHandler.h:26): Parsing error at 1:1:  expecting <model type>, here:
+	discount: 0.99999
+	^
+
+2024-04-13 12:45:17,959 - sketch.py - assuming sketch in DRN format...
+ERROR (DirectEncodingParser.cpp:124): Could not parse line 'discount: 0.99999'.
+2024-04-13 12:45:17,960 - sketch.py - assuming sketch in Cassandra format...
+MADP: trying to parse as POMDP...
+MADP: parsing success
+2024-04-13 12:45:17,965 - sketch.py - applying discount factor transformation...
+2024-04-13 12:45:17,965 - sketch.py - sketch parsing OK
+2024-04-13 12:45:17,966 - sketch.py - constructed explicit quotient having 9 states and 33 actions
+2024-04-13 12:45:17,966 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [C{99999/100000}] 
+2024-04-13 12:45:17,967 - pomdp.py - constructed POMDP having 4 observations.
+2024-04-13 12:45:17,967 - pomdp.py - unfolding 1-FSC template into POMDP ...
+2024-04-13 12:45:17,967 - pomdp.py - constructed quotient MDP having 9 states and 33 actions.
+2024-04-13 12:45:17,967 - pomdp.py - creating coloring ...
+2024-04-13 12:45:17,974 - synthesizer_pomdp.py - Storm POMDP option enabled
+2024-04-13 12:45:17,974 - synthesizer_pomdp.py - Storm settings: iterative - (900, 90, 10), get_storm_result - None, storm_options - cutoff, prune_storm - False, unfold_strategy - (True, False), use_storm_cutoffs - False, enhanced_saynt - None, saynt_overapprox - False
+2024-04-13 12:45:17,974 - synthesizer.py - synthesis initiated, design space: 64
+2024-04-13 12:45:17,974 - synthesizer_pomdp.py - Timeout for PAYNT started
+-----------PAYNT-----------                     
+Value = -199984.56402657958 | Time elapsed = 0.2s | FSC size = 8
+
+-----------PAYNT-----------                     
+Value = -49996.99904329546 | Time elapsed = 0.4s | FSC size = 8
+
+-----------PAYNT-----------                     
+Value = 25002.065372554454 | Time elapsed = 0.7s | FSC size = 8
+
+-----------PAYNT-----------                     
+Value = 25002.565372554454 | Time elapsed = 0.8s | FSC size = 8
+
+-----------PAYNT-----------                     
+Value = 27738.489361349166 | Time elapsed = 1.2s | FSC size = 8
+
+-----------PAYNT-----------                     
+Value = 27738.98936134917 | Time elapsed = 1.2s | FSC size = 8
+
+-----------PAYNT-----------                     
+Value = 27739.121725261793 | Time elapsed = 1.3s | FSC size = 8
+
+2024-04-13 12:45:19,350 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-13 12:45:19,350 - synthesizer.py - A(good,0)=(Examine), A(defective,0)=(Inspect), A(__no_obs__,0)=(Manufacture)
+2024-04-13 12:45:19,380 - synthesizer.py - double-checking specification satisfiability:  : 27739.121725261793
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{99999/100000}] 
+
+method: AR, synthesis time: 1.38 s
+number of holes: 3, family size: 64, quotient: 9 states / 33 actions
+explored: 100 %
+MDP stats: avg MDP size: 9, iterations: 19
+
+optimum: 27739.121725
+--------------------
+2024-04-13 12:45:19,410 - synthesizer_pomdp.py - Terminate: False
+2024-04-13 12:45:19,410 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-13 12:45:19,410 - pomdp.py - unfolding 2-FSC template into POMDP ...
+2024-04-13 12:45:19,410 - pomdp.py - constructed quotient MDP having 17 states and 130 actions.
+2024-04-13 12:45:19,410 - pomdp.py - creating coloring ...
+2024-04-13 12:45:19,411 - synthesizer.py - synthesis initiated, design space: 524288
+> progress 19.726%, elapsed 3 s, estimated 15 s, iters = {MDP: 13}, opt = 27739.122
+> progress 20.227%, elapsed 6 s, estimated 29 s, iters = {MDP: 37}, opt = 27739.122
+> progress 43.75%, elapsed 9 s, estimated 20 s, iters = {MDP: 53}, opt = 27739.122
+-----------PAYNT-----------                     
+Value = 28720.667234488123 | Time elapsed = 11.6s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 28721.290587720883 | Time elapsed = 12.4s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 28721.32251864623 | Time elapsed = 12.5s | FSC size = 14
+
+> progress 44.921%, elapsed 12 s, estimated 27 s, iters = {MDP: 72}, opt = 28721.323
+> progress 45.214%, elapsed 15 s, estimated 33 s, iters = {MDP: 100}, opt = 28721.323
+> progress 62.5%, elapsed 18 s, estimated 29 s, iters = {MDP: 120}, opt = 28721.323
+-----------PAYNT-----------                     
+Value = 33104.67088309029 | Time elapsed = 21.0s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 33105.17088309029 | Time elapsed = 21.3s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 33105.25875662826 | Time elapsed = 21.6s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 33105.30194409584 | Time elapsed = 21.7s | FSC size = 14
+
+> progress 69.094%, elapsed 21 s, estimated 30 s, iters = {MDP: 159}, opt = 33105.302
+-----------PAYNT-----------                     
+Value = 36075.903586376444 | Time elapsed = 25.2s | FSC size = 14
+
+-----------PAYNT-----------                     
+Value = 36076.403586376444 | Time elapsed = 25.5s | FSC size = 14
+
+> progress 69.702%, elapsed 24 s, estimated 35 s, iters = {MDP: 204}, opt = 36076.404
+> progress 87.5%, elapsed 27 s, estimated 31 s, iters = {MDP: 235}, opt = 36076.404
+> progress 92.187%, elapsed 30 s, estimated 33 s, iters = {MDP: 259}, opt = 36076.404
+2024-04-13 12:45:50,866 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-13 12:45:50,866 - synthesizer.py - A(good,0)=(Manufacture), A(good,1)=(Examine), M(good,0)=1, M(good,1)=0, A(defective,0)=(Inspect), A(defective,1)=(Replace), M(defective,0)=0, M(defective,1)=0, M(init,0)=0, A(__no_obs__,0)=(Inspect), A(__no_obs__,1)=(Replace), M(__no_obs__,0)=0, M(__no_obs__,1)=0
+2024-04-13 12:45:50,892 - synthesizer.py - double-checking specification satisfiability:  : 36076.403586376444
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"reward"}max=? [C{99999/100000}] 
+
+method: AR, synthesis time: 31.46 s
+number of holes: 13, family size: 524288, quotient: 17 states / 130 actions
+explored: 100 %
+MDP stats: avg MDP size: 17, iterations: 263
+
+optimum: 36076.403586
+--------------------
+2024-04-13 12:45:50,919 - synthesizer_pomdp.py - Terminate: False
+2024-04-13 12:45:50,919 - synthesizer_pomdp.py - Increase memory in all imperfect observation
+2024-04-13 12:45:50,919 - pomdp.py - unfolding 3-FSC template into POMDP ...
+2024-04-13 12:45:50,919 - pomdp.py - constructed quotient MDP having 25 states and 291 actions.
+2024-04-13 12:45:50,919 - pomdp.py - creating coloring ...
+2024-04-13 12:45:50,919 - synthesizer.py - synthesis initiated, design space: 1e10
+> progress 3.125%, elapsed 3 s, estimated 110 s, iters = {MDP: 7}, opt = 36076.404
+> progress 7.812%, elapsed 6 s, estimated 86 s, iters = {MDP: 13}, opt = 36076.404
+> progress 12.5%, elapsed 10 s, estimated 82 s, iters = {MDP: 19}, opt = 36076.404
+> progress 14.583%, elapsed 13 s, estimated 93 s, iters = {MDP: 26}, opt = 36076.404
+> progress 15.798%, elapsed 16 s, estimated 105 s, iters = {MDP: 31}, opt = 36076.404
+> progress 16.666%, elapsed 20 s, estimated 120 s, iters = {MDP: 37}, opt = 36076.404
+> progress 17.708%, elapsed 23 s, estimated 130 s, iters = {MDP: 43}, opt = 36076.404
+> progress 18.294%, elapsed 26 s, estimated 143 s, iters = {MDP: 56}, opt = 36076.404
+> progress 18.298%, elapsed 29 s, estimated 160 s, iters = {MDP: 78}, opt = 36076.404
+> progress 18.301%, elapsed 32 s, estimated 176 s, iters = {MDP: 99}, opt = 36076.404
+> progress 18.305%, elapsed 35 s, estimated 193 s, iters = {MDP: 120}, opt = 36076.404
+> progress 18.306%, elapsed 38 s, estimated 210 s, iters = {MDP: 143}, opt = 36076.404
+> progress 18.307%, elapsed 41 s, estimated 226 s, iters = {MDP: 168}, opt = 36076.404
+> progress 18.309%, elapsed 44 s, estimated 243 s, iters = {MDP: 192}, opt = 36076.404
+> progress 18.31%, elapsed 47 s, estimated 260 s, iters = {MDP: 217}, opt = 36076.404
+> progress 18.31%, elapsed 50 s, estimated 277 s, iters = {MDP: 242}, opt = 36076.404
+> progress 18.311%, elapsed 53 s, estimated 293 s, iters = {MDP: 267}, opt = 36076.404
+> progress 18.312%, elapsed 56 s, estimated 310 s, iters = {MDP: 293}, opt = 36076.404
+2024-04-13 12:46:48,335 - synthesizer_ar_storm.py - Pausing synthesis
+2024-04-13 12:46:48,435 - storm_pomdp_control.py - Interactive Storm started
+2024-04-13 12:46:48,436 - storm_pomdp_control.py - starting Storm POMDP analysis
+2024-04-13 12:46:58,992 - storm_pomdp_control.py - Pausing Storm
+Finished exploring under-approximation MDP.
+Start analysis...
