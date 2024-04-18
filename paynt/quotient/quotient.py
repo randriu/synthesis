@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Quotient:
 
     # if True, expected visits will not be computed for hole scoring
-    disable_expected_visits = False
+    disable_expected_visits = None
 
     @staticmethod
     def make_vector_defined(vector):
@@ -183,10 +183,7 @@ class Quotient:
         # if the associated reward model has state-action rewards, then these must be added to choice values
         if prop.reward:
             reward_name = prop.formula.reward_name
-            rm = mdp.reward_models.get(reward_name)
-            assert rm.has_state_action_rewards
-            choice_rewards = list(rm.state_action_rewards)
-            assert mdp.nr_choices == len(choice_rewards)
+            choice_rewards = mdp.reward_models.get(reward_name).state_action_rewards
             for choice in range(mdp.nr_choices):
                 choice_values[choice] += choice_rewards[choice]
 
@@ -221,7 +218,7 @@ class Quotient:
         return expected_visits
 
 
-    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, quotient_state_map, inconsistent_assignments, choice_values, expected_visits):
         hole_variance = payntbind.synthesis.computeInconsistentHoleVariance(
             self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
             self.coloring, inconsistent_assignments, expected_visits)
@@ -261,7 +258,7 @@ class Quotient:
         choice_values = self.choice_values(mdp.model, prop, result.get_values())
         choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         expected_visits = self.compute_expected_visits(mdp.model, prop, choices)
-        inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+        inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, mdp.quotient_state_map, inconsistent_assignments, choice_values, expected_visits)
         return choice_values, expected_visits, inconsistent_differences
 
 

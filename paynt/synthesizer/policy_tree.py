@@ -674,11 +674,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def compute_scores(self, prop, scheduler_choices, state_values, inconsistent_assignments):
         mdp = self.quotient.quotient_mdp
         choice_values = self.quotient.choice_values(mdp, prop, state_values)
-        expected_visits = None
-        if self.quotient.compute_expected_visits:
-            expected_visits = self.quotient.compute_expected_visits(mdp, prop, scheduler_choices)
+        expected_visits = self.quotient.compute_expected_visits(mdp, prop, scheduler_choices)
         quotient_choice_map = [choice for choice in range(self.quotient.quotient_mdp.nr_choices)]
-        scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+        quotient_state_map = [state for state in range(self.quotient.quotient_mdp.nr_states)]
+        scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, quotient_state_map, inconsistent_assignments, choice_values, expected_visits)
         return scores
 
     def assign_candidate_policy(self, subfamilies, hole_selection, splitter, policy):

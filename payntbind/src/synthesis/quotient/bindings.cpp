@@ -295,26 +295,27 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
                     break;
                 }
             }
-            if(self_loop_prob == 1) {
-                // keep this choice absorbing
-                builder.addNextValue(choice,state,1);
+            if(self_loop_prob == 0 or self_loop_prob == 1) {
+                // nothing to simplify
+                for(auto const& entry: tm.getRow(choice)) {
+                    builder.addNextValue(choice, entry.getColumn(), entry.getValue());
+                }
                 continue;
             }
 
-            // non-unit self-loop
-            if(self_loop_prob > 0) {
-                self_loops_removed += 1;
-            }
+            self_loops_removed += 1;
+
             ValueType factor = 1-self_loop_prob;
+
             for(auto const& entry: tm.getRow(choice)) {
                 uint64_t dst = entry.getColumn();
                 if(dst == state) {
                     continue;
                 }
                 builder.addNextValue(choice, dst, entry.getValue() / factor);
-                for(auto [reward_name,choice_rewards]: rewards) {
-                    choice_rewards[choice] /= factor;
-                }
+            }
+            for(auto & [_,choice_rewards]: rewards) {
+                choice_rewards[choice] /= factor;
             }
         }
     }

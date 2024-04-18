@@ -345,22 +345,23 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         family, choice_to_hole_options = self.create_coloring()
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
 
-        decomposition = stormpy.get_maximal_end_components(self.quotient_mdp)
-        print(decomposition)
-        print(type(decomposition))
-        print(dir(decomposition))
-        print(decomposition.size)
-        for mec in decomposition:
-            print(mec.size)
-            for s in mec:
-                print(s)
-                for x in s:
-                    print(x)
+        # decomposition = stormpy.get_maximal_end_components(self.quotient_mdp)
+        # print(decomposition)
+        # print(type(decomposition))
+        # print(dir(decomposition))
+        # print(decomposition.size)
+        # for mec in decomposition:
+        #     print(mec.size)
+        #     for s in mec:
+        #         print(s)
+        #         for x in s:
+        #             print(x)
             # exit()
-        exit()
+        # exit()
+        
         # self.quotient_mdp = payntbind.synthesis.removeSelfLoops(self.quotient_mdp)
         # self.quotient_mdp = payntbind.synthesis.mergeChoices(self.quotient_mdp,self.coloring)
-        # self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
+        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
         # to each hole-option pair a list of actions colored by this combination
         self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
@@ -370,15 +371,70 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             for hole,option in choice_to_hole_options[choice]:
                 self.hole_option_to_actions[hole][option].append(choice)
 
+        # map choices to their origin states
+        self.quotient_choice_to_state = []
+        tm = self.quotient_mdp.transition_matrix
+        for state in range(self.quotient_mdp.nr_states):
+            for choice in tm.get_rows_for_group(state):
+                self.quotient_choice_to_state.append(state)
+
         self.design_space = paynt.family.family.DesignSpace(family)
 
     
 
     
-    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, quotient_state_map, inconsistent_assignments, choice_values, expected_visits):
 
         if PomdpQuotient.posterior_aware:
-            return super().estimate_scheduler_difference(mdp,quotient_choice_map,inconsistent_assignments,choice_values,expected_visits)
+            return super().estimate_scheduler_difference(mdp,quotient_choice_map,quotient_state_map,inconsistent_assignments,choice_values,expected_visits)
+
+        # translate choice_values and expected_visits for the quotient
+        choice_global_values = [None] * self.quotient_mdp.nr_choices
+        for choice,choice_global in enumerate(quotient_choice_map):
+            choice_global_values[choice_global] = choice_values[choice]
+        expected_visits_global = [None] * self.quotient_mdp.nr_states
+        for state,value in enumerate(expected_visits):
+            expected_visits_global[quotient_state_map[state]] = value
+
+        # for each hole, compute its difference sum and a number of affected states
+        inconsistent_differences = {}
+        for hole,options in inconsistent_assignments.items():
+            score_sum = 0
+            states_affected = 0
+            for choice_index,choice_0_global in enumerate(self.hole_option_to_actions[hole][options[0]]):
+                # assert (choice_global_values[choice_0_global] is None) == (source_state_visits is None)
+                if choice_global_values[choice_0_global] is None:
+                    # choice is not in the family or is unreachable
+                    continue
+
+                source_state = self.quotient_choice_to_state[choice_0_global]
+                source_state_visits = expected_visits_global[source_state]
+                if source_state_visits == 0:
+                    # state is unreachable
+                    continue
+
+                min_value = None
+                max_value = None
+                for option in options:
+                    choice_global = self.hole_option_to_actions[hole][option][choice_index]
+                    choice_value = choice_global_values[choice_global]
+                    min_value = choice_value if min_value is None else min(min_value,choice_value)
+                    max_value = choice_value if max_value is None else max(max_value,choice_value)
+
+                score = (max_value - min_value) * source_state_visits
+                score_sum += score
+                states_affected += 1
+            
+            if states_affected == 0:
+                hole_score = 0
+            else:
+                hole_score = score_sum / states_affected
+            inconsistent_differences[hole] = hole_score
+
+        return inconsistent_differences
+
+
+    def estimate_scheduler_difference_old(self, mdp, quotient_choice_map, quotient_state_map, inconsistent_assignments, choice_values, expected_visits):
 
         # note: the code below is optimized for posterior-unaware unfolding
 
@@ -417,8 +473,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
                 state_values = []
                 for option in options:
-
-                    assert len(self.hole_option_to_actions[hole_index][option]) > choice_index
                     choice_global = self.hole_option_to_actions[hole_index][option][choice_index]
                     choice = quotient_to_restricted_action_map[choice_global]
                     choice_value = choice_values[choice]

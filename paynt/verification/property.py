@@ -31,7 +31,7 @@ class Property:
     # model checking environment (method & precision)
     environment = None
     # model checking precision
-    model_checking_precision = 1e-4
+    model_checking_precision = None
     
     @classmethod
     def set_model_checking_precision(cls, precision):
@@ -50,10 +50,10 @@ class Property:
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
 
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     @classmethod
