@@ -1,1 +1,0 @@
-ERROR: Bounds::writeToFile: couldn't open ../output/milos-aaai97.out for writing 

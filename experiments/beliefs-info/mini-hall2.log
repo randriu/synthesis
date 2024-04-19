@@ -1,6 +1,0 @@
-ERROR (SpiritErrorHandler.h:27): Parsing error at 3:1:  expecting <model type>, here:
-	@type: POMDP
-	^
-
-Finished exploring under-approximation MDP.
-Start analysis...

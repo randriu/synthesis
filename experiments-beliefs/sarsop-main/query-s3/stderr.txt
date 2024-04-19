@@ -1,1 +1,0 @@
-ERROR: Bounds::writeToFile: couldn't open ../output/query-s3.out for writing 

@@ -1,3 +1,0 @@
-
-Loading the model ...
-  Cannot open file: ../models/prism-translated/rocks-16.pomdp

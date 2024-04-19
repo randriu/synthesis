@@ -1,9 +1,0 @@
-Exception in thread Thread-2:
-Traceback (most recent call last):
-  File "/usr/lib/python3.8/threading.py", line 932, in _bootstrap_inner
-    self.run()
-  File "/usr/lib/python3.8/threading.py", line 870, in run
-    self._target(*self._args, **self._kwargs)
-  File "/home/fpmk/research/synthesis/paynt/quotient/storm_pomdp_control.py", line 229, in interactive_run
-    result = belmc.check(self.spec_formulas[0], self.paynt_export)   # calls Storm
-IndexError: vector::_M_range_check: __n (which is 735) >= this->size() (which is 0)

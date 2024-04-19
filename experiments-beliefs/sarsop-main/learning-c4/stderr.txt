@@ -1,1 +1,0 @@
-ERROR: Bounds::writeToFile: couldn't open ../output/learning-c4.out for writing 
