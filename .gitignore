@@ -2,7 +2,3 @@ __pycache__/
 *.egg-info/
 
 prerequisites/
-
-experiments-beliefs/output/
-
-*.out

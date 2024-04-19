@@ -321,7 +321,7 @@ class StormPOMDPControl:
     # Different options for Storm below (would be nice to make this more succint)
 
     def get_base_options(self, options):
-        if paynt.quotient.models.MarkovChain.native_cassandra:
+        if paynt.quotient.models.Mdp.native_cassandra:
             options.recompute_initial_value_without_discounting = True
         options.exploration_heuristic = self.get_exploration_heuristic()
         return options
@@ -791,11 +791,7 @@ class StormPOMDPControl:
                 continue
             name = name.strip('A()')
             obs = name.split(',')[0]
-            if obs.isdigit():
-                observation = int(obs)
-            else:
-                assert obs in self.quotient.observation_labels, f"observation labels {self.quotient.observation_labels} don't contain {obs} even though it's used in hole name {name}"
-                observation = self.quotient.observation_labels.index(obs)
+            observation = self.quotient.observation_labels.index(obs)
 
             option = self.latest_paynt_result.hole_options(hole)[0]
             if option not in result[observation]:
