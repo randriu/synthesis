@@ -110,8 +110,7 @@ class Statistic:
     
     def status(self):
         ret_str = "> "
-        discarded = self.quotient.discarded
-        fraction_explored = (self.synthesizer.explored + discarded) / self.family_size
+        fraction_explored = self.synthesizer.explored / self.family_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
         ret_str += f"progress {percentage_explored}%"

@@ -161,7 +161,7 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             if family_explored:
                 continue
         
-            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family)
             families = families + subfamilies
 
         return satisfying_assignment

@@ -40,16 +40,23 @@ class Quotient:
         # for each choice of the quotient, a list of its state-destinations
         self.choice_destinations = None
         if self.quotient_mdp is not None:
-            self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
-
-        # (optional) counter of discarded assignments
-        self.discarded = 0
+            self.compute_choice_destinations()
 
 
     def export_result(self, dtmc):
         ''' to be overridden '''
         pass
-    
+
+
+    def compute_choice_destinations(self):
+        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
+
+    def quotient_add_fresh_state(self):
+        self.quotient_mdp = payntbind.synthesis.mdpAddFreshState(self.quotient_mdp)
+        self.compute_choice_destinations()
+        if self.coloring is not None:
+            self.coloring.addFreshState()
+
 
     def restrict_mdp(self, mdp, choices):
         '''
@@ -59,10 +66,9 @@ class Quotient:
         :return (2) sub- to full state mapping
         :return (3) sub- to full action mapping
         '''
-        keep_unreachable_states = False # TODO investigate this
         all_states = stormpy.BitVector(mdp.nr_states, True)
         submodel_construction = stormpy.construct_submodel(
-            mdp, all_states, choices, keep_unreachable_states, self.subsystem_builder_options
+            mdp, all_states, choices, keep_unreachable_states=False, options=self.subsystem_builder_options
         )
         model = submodel_construction.model
         state_map = submodel_construction.new_to_old_state_mapping.copy()
@@ -154,18 +160,14 @@ class Quotient:
                 choices.set(choice,True)
         return choices
     
-    def scheduler_selection(self, mdp, scheduler, coloring=None):
+    def scheduler_selection(self, mdp, scheduler):
         ''' Get hole options involved in the scheduler selection. '''
-        assert scheduler.memoryless and scheduler.deterministic
         state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
         choices = self.state_to_choice_to_choices(state_to_choice)
-        if coloring is None:
-            coloring = self.coloring
-        hole_selection = coloring.collectHoleOptions(choices)
+        hole_selection = self.coloring.collectHoleOptions(choices)
         return hole_selection
 
-    
-    
+
     def choice_values(self, mdp, prop, state_values):
         '''
         Get choice values after model checking MDP against a property.
@@ -239,8 +241,11 @@ class Quotient:
 
         # get qualitative scheduler selection, filter inconsistent assignments
         selection = self.scheduler_selection(mdp, result.scheduler)
-        inconsistent_assignments = {hole:options for hole,options in enumerate(selection) if len(options) > 1 }
-        scheduler_is_consistent = len(inconsistent_assignments) == 0
+        scheduler_is_consistent = True
+        for options in selection:
+            if len(options) > 1:
+                scheduler_is_consistent = False
+                break
         for hole,options in enumerate(selection):
             if len(options) == 0:
                 # if some hole options are not involved in the selection, we can fix an arbitrary value
@@ -262,29 +267,29 @@ class Quotient:
         return choice_values, expected_visits, inconsistent_differences
 
 
-    def suboptions_half(self, mdp, splitter):
+    def suboptions_half(self, family, splitter):
         ''' Split options of a splitter into two halves. '''
-        options = mdp.design_space.hole_options(splitter)
+        options = family.hole_options(splitter)
         half = len(options) // 2
         suboptions = [options[:half], options[half:]]
         return suboptions
 
-    def suboptions_unique(self, mdp, splitter, used_options):
+    def suboptions_unique(self, family, splitter, used_options):
         ''' Distribute used options of a splitter into different suboptions. '''
         assert len(used_options) > 1
         suboptions = [[option] for option in used_options]
         index = 0
-        for option in mdp.design_space.hole_options(splitter):
+        for option in family.hole_options(splitter):
             if option in used_options:
                 continue
             suboptions[index].append(option)
             index = (index + 1) % len(suboptions)
         return suboptions
 
-    def suboptions_enumerate(self, mdp, splitter, used_options):
+    def suboptions_enumerate(self, family, splitter, used_options):
         assert len(used_options) > 1
         core_suboptions = [[option] for option in used_options]
-        other_suboptions = [option for option in mdp.design_space.hole_options(splitter) if option not in used_options]
+        other_suboptions = [option for option in family.hole_options(splitter) if option not in used_options]
         return core_suboptions, other_suboptions
 
     def holes_with_max_score(self, hole_score):
@@ -297,45 +302,10 @@ class Quotient:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    def discard(self, mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search):
-
-        # default result
-        reduced_design_space = mdp.design_space.copy()
-        if len(other_suboptions) == 0:
-            suboptions = core_suboptions
-        else:
-            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
-
-        if not incomplete_search:
-            return reduced_design_space, suboptions
-
-        # reduce simple holes
-        ds_before = reduced_design_space.size
-
-        hole_to_states = [0] * self.design_space.num_holes
-        state_to_holes = self.coloring.getStateToHoles().copy()
-        for state in range(mdp.model.nr_states):
-            quotient_state = mdp.quotient_state_map[state]
-            for hole in state_to_holes[quotient_state]:
-                hole_to_states[hole] += 1
-
-        for hole in range(reduced_design_space.num_holes):
-            if hole_to_states[hole] <= 1:
-                reduced_design_space.hole_set_options(hole, hole_assignments[hole])
-        ds_after = reduced_design_space.size
-        self.discarded += ds_before - ds_after
-
-        # discard other suboptions
-        suboptions = core_suboptions
-        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
-
-        return reduced_design_space, suboptions
-
-
-    def split(self, family, incomplete_search):
-
-        mdp = family.mdp
-        assert not mdp.is_deterministic
+    use_choice_pair_difference = False
+    
+    def split(self, family):
+        assert not family.mdp.is_deterministic
 
         # split family wrt last undecided result
         result = family.analysis_result.undecided_result()
@@ -343,20 +313,68 @@ class Quotient:
         hole_assignments = result.primary_selection
         scores = result.primary_scores
         if scores is None:
-            scores = {hole:0 for hole in range(mdp.design_space.num_holes) if mdp.design_space.hole_num_options(hole) > 1}
+            assert False, "when can this happen?"
+            scores = {hole:0 for hole in range(family.num_holes) if family.hole_num_options(hole) > 1}
         
-        splitters = self.holes_with_max_score(scores)
-        splitter = splitters[0]
-        if len(hole_assignments[splitter]) > 1:
-            core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
-        else:
-            assert mdp.design_space.hole_num_options(splitter) > 1
-            core_suboptions = self.suboptions_half(mdp, splitter)
-            other_suboptions = []
-        # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
+        other_suboptions = []
+        if self.use_choice_pair_difference:
+            max_score = None
+            for hole,opt1_opt2_score in scores.items():
+                options = hole_assignments[hole]
+                for index1,_ in enumerate(options):
+                    for index2 in range(index1+1,len(options)):
+                        score = opt1_opt2_score[index1][index2]
+                        if max_score is None or score > max_score:
+                            max_key = (hole,index1,index2)
+                            max_score = score
+            splitter,index1,index2 = max_key
+            option1 = hole_assignments[splitter][index1]
+            option2 = hole_assignments[splitter][index2]
+            core_suboptions = self.suboptions_unique(family, splitter, [option1,option2])
+            
+            if False:
+                splitter_scores = scores[splitter]
+                splitter_used_options = hole_assignments[splitter]
+                for index1,_ in enumerate(splitter_used_options):
+                    for index2 in range(0,index1):
+                        splitter_scores[index1][index2] = splitter_scores[index2][index1]
+                suboptions1 = [option1]
+                suboptions2 = [option2]
+                turn = 0
+                for option in family.hole_options(splitter):
+                    if option == option1 or option == option2:
+                        continue
+                    if option not in splitter_used_options:
+                        if turn == 0:
+                            suboptions1.append(option)
+                        else:
+                            suboptions2.append(option)
+                        turn = (turn+1) % 2
+                    else:
+                        index = hole_assignments[splitter].index(option)
+                        if splitter_scores[index1][index] > splitter_scores[index2][index]:
+                            suboptions2.append(option)
+                        else:
+                            suboptions1.append(option)
+                core_suboptions = [suboptions1,suboptions2]
 
-        new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
-        
+        else:
+            splitters = self.holes_with_max_score(scores)
+            splitter = splitters[0]
+            if len(hole_assignments[splitter]) > 1:
+                core_suboptions,other_suboptions = self.suboptions_enumerate(family, splitter, hole_assignments[splitter])
+                # core_suboptions = self.suboptions_unique(family, splitter, hole_assignments[splitter])
+            else:
+                assert family.hole_num_options(splitter) > 1
+                core_suboptions = self.suboptions_half(family, splitter)
+                other_suboptions = []
+
+        new_design_space = family.copy()
+        if len(other_suboptions) == 0:
+            suboptions = core_suboptions
+        else:
+            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
+
         # construct corresponding design subspaces
         design_subspaces = []
         

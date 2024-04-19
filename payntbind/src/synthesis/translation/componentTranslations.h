@@ -43,8 +43,8 @@ namespace synthesis {
         storm::models::sparse::Model<ValueType> const& model,
         storm::storage::SparseMatrixBuilder<ValueType> & builder,
         std::vector<uint64_t> const& original_to_translated_state,
-        std::vector<uint64_t> const& original_to_translated_choice,
-        uint64_t choice
+        uint64_t choice,
+        uint64_t translated_choice
     );
     template<typename ValueType>
     void translateTransitionMatrixRowGroup(

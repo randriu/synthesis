@@ -503,9 +503,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         
         DOUBLE_CHECK_PRECISION = 1e-6
         default_precision = Property.model_checking_precision
-        Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)
+        Property.set_environment_precision(Property.environment, DOUBLE_CHECK_PRECISION)
         policy_result = mdp.model_check_property(prop, alt=True)
-        Property.set_model_checking_precision(default_precision)
+        Property.set_environment_precision(Property.environment, default_precision)
         if not policy_result.sat:
             logger.warning("policy should be SAT but (most likely due to model checking precision) has value {}".format(policy_result.value))
         return

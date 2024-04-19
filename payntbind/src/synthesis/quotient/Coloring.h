@@ -35,16 +35,18 @@ public:
 
     /** Check if the two choices have the same color. */
     bool haveSameColor(uint64_t choice1, uint64_t choice2) const;
+    /** Add new state with uncolored choice. */
+    void addFreshState();
     
 protected:
 
     /** Reference to the unrefined family. */
     Family family;
     /** For each choice, a list of hole-option pairs (colors). */
-    const std::vector<std::vector<std::pair<uint64_t,uint64_t>>> choice_to_assignment;
+    std::vector<std::vector<std::pair<uint64_t,uint64_t>>> choice_to_assignment;
 
     /** Number of choices in the quotient. */
-    const uint64_t numChoices() const;
+    uint64_t numChoices() const;
     
     /** For each state, identification of holes associated with its choices. */
     std::vector<BitVector> choice_to_holes;

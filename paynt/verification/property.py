@@ -28,33 +28,44 @@ def construct_reward_property(reward_name, minimizing, target_label):
 class Property:
     ''' Wrapper over a stormpy property. '''
     
-    # model checking environment (method & precision)
-    environment = None
     # model checking precision
     model_checking_precision = None
+    # model checking environment
+    environment = None
+    # environment for computing expected visits
+    environment_ev = None
     
     @classmethod
-    def set_model_checking_precision(cls, precision):
-        cls.model_checking_precision = precision
-        payntbind.synthesis.set_precision_native(cls.environment.solver_environment.native_solver_environment, precision)
-        payntbind.synthesis.set_precision_minmax(cls.environment.solver_environment.minmax_solver_environment, precision)
+    def set_environment_precision(cls, env, precision):
+        payntbind.synthesis.set_precision_native(env.solver_environment.native_solver_environment, precision)
+        payntbind.synthesis.set_precision_minmax(env.solver_environment.minmax_solver_environment, precision)
 
     @classmethod
     def initialize(cls):
+        cls.initialize_environment_mc()
+        cls.initialize_environment_ev()
+
+    @classmethod
+    def initialize_environment_mc(cls):
         cls.environment = stormpy.Environment()
-        cls.set_model_checking_precision(cls.model_checking_precision)
+        cls.set_environment_precision(cls.environment,cls.model_checking_precision)
 
         se = cls.environment.solver_environment
         se.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
-        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
-        # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
-
+        
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
         se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
+    
+    @classmethod
+    def initialize_environment_ev(cls):
+        cls.environment_ev = stormpy.Environment()
+        cls.set_environment_precision(cls.environment_ev,cls.model_checking_precision*1e2)
+        cls.environment_ev.solver_environment.set_linear_equation_solver_type(stormpy.EquationSolverType.native)
+
 
     @classmethod
     def model_check(cls, model, formula):
@@ -62,7 +73,7 @@ class Property:
 
     @classmethod
     def compute_expected_visits(cls, model):
-        result = stormpy.compute_expected_number_of_visits(cls.environment, model)
+        result = stormpy.compute_expected_number_of_visits(cls.environment_ev, model)
         values = list(result.get_values())
         return values
 

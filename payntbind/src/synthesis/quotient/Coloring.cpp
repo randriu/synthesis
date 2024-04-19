@@ -46,7 +46,7 @@ Coloring::Coloring(
     }
 }
 
-const uint64_t Coloring::numChoices() const {
+uint64_t Coloring::numChoices() const {
     return choice_to_assignment.size();
 }
 
@@ -113,6 +113,14 @@ bool Coloring::haveSameColor(uint64_t choice1, uint64_t choice2) const {
         }
     }
     return true;
+}
+
+void Coloring::addFreshState() {
+    choice_to_assignment.resize(numChoices()+1);
+    choice_to_holes.push_back(BitVector(family.numHoles(),false));
+    state_to_holes.push_back(BitVector(family.numHoles(),false));
+    uncolored_choices.resize(numChoices(),true);
+    colored_choices.resize(numChoices(),false);
 }
 
 }

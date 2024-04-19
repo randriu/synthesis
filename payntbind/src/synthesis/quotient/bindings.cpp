@@ -4,12 +4,15 @@
 #include "Family.h"
 #include "Coloring.h"
 
+#include "src/synthesis/translation/componentTranslations.h"
+
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/BitVector.h>
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/sparse/JaniChoiceOrigins.h>
 
 #include <storm/storage/Scheduler.h>
+#include <storm/utility/macros.h>
 
 namespace synthesis {
 
@@ -255,14 +258,67 @@ storm::storage::BitVector policyToChoicesForFamily(
     return std::make_pair(policy_fixed,choice_mask);
 }*/
 
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdpAddFreshState(
+    storm::models::sparse::Mdp<ValueType> const& mdp
+) {
+    uint64_t num_states = mdp.getNumberOfStates();
+    uint64_t num_choices = mdp.getNumberOfChoices();
+
+    std::vector<uint64_t> original_to_translated_state(num_states);
+    for(uint64_t state = 0; state < num_states; ++state) {
+        original_to_translated_state[state] = state;
+    }
+    std::vector<uint64_t> original_to_translated_choice(num_choices);
+    for(uint64_t choice = 0; choice < num_choices; ++choice) {
+        original_to_translated_choice[choice] = choice;
+    }
+
+    uint64_t new_state = num_states++;
+    uint64_t new_choice = num_choices++;
+
+    std::vector<uint64_t> translated_to_original_state(num_states,num_states);
+    for(uint64_t state = 0; state < num_states; ++state) {
+        translated_to_original_state[state] = state;
+    }
+    uint64_t translated_initial_state = *(mdp.getInitialStates().begin());
+
+    std::vector<uint64_t> translated_to_original_choice(num_choices,num_choices);
+    for(uint64_t choice = 0; choice < num_choices; ++choice) {
+        translated_to_original_choice[choice] = choice;
+    }
+    storm::storage::BitVector translated_choice_mask(num_choices,true);
+    translated_choice_mask.set(new_choice,false);
+    
+    storm::storage::sparse::ModelComponents<ValueType> components;
+    storm::storage::SparseMatrixBuilder<ValueType> builder(num_choices, num_states, 0, true, true, num_states);
+    for(uint64_t state = 0; state < num_states-1; ++state) {
+        synthesis::translateTransitionMatrixRowGroup(mdp,builder,original_to_translated_state,original_to_translated_choice,state);
+    }
+    builder.newRowGroup(new_choice);
+    builder.addNextValue(new_choice,new_state,1);
+
+    components.transitionMatrix =  builder.build();
+    components.stateLabeling = synthesis::translateStateLabeling(mdp,translated_to_original_state,translated_initial_state);
+    if(mdp.hasChoiceLabeling()) {
+        components.choiceLabeling = synthesis::translateChoiceLabeling(mdp,translated_to_original_choice,translated_choice_mask);
+    }
+    for (auto const& reward_model : mdp.getRewardModels()) {
+        auto new_reward_model = synthesis::translateRewardModel(reward_model.second,translated_to_original_choice,translated_choice_mask);
+        components.rewardModels.emplace(reward_model.first, new_reward_model);
+    }
+    return std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
+}
+
 
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
-    storm::models::sparse::Mdp<ValueType> const& mdp
+    storm::models::sparse::Mdp<ValueType> const& mdp,
+    uint64_t sink_state
 ) {
-    storm::storage::sparse::ModelComponents<ValueType> components;
-    auto num_states = mdp.getNumberOfStates();
-    auto num_choices = mdp.getNumberOfChoices();
+
+    uint64_t num_states = mdp.getNumberOfStates();
+    uint64_t num_choices = mdp.getNumberOfChoices();
     auto const& tm = mdp.getTransitionMatrix();
 
     storm::storage::SparseMatrixBuilder<ValueType> builder(num_choices, num_states, 0, true, true, num_states);
@@ -279,7 +335,6 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
         } else {
             builder.newRowGroup(builder.getLastRow()+1);
         }
-
         for(auto const& choice: tm.getRowGroupIndices(state)) {
 
             // preemptively load rewards
@@ -295,7 +350,7 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
                     break;
                 }
             }
-            if(self_loop_prob == 0 or self_loop_prob == 1) {
+            if(state == sink_state or self_loop_prob == 0) {
                 // nothing to simplify
                 for(auto const& entry: tm.getRow(choice)) {
                     builder.addNextValue(choice, entry.getColumn(), entry.getValue());
@@ -304,7 +359,13 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
             }
 
             self_loops_removed += 1;
+            if(self_loop_prob == 1) {
+                // redirect to fresh sink
+                builder.addNextValue(choice, sink_state, 1);
+                continue;
+            }
 
+            // 0 < self_loop_prob < 1
             ValueType factor = 1-self_loop_prob;
 
             for(auto const& entry: tm.getRow(choice)) {
@@ -321,7 +382,8 @@ std::shared_ptr<storm::models::sparse::Mdp<ValueType>> removeSelfLoops(
     }
 
     std::cout << "self-loops simplified: " << self_loops_removed << std::endl;
-    components.transitionMatrix =  builder.build();
+    storm::storage::sparse::ModelComponents<ValueType> components;
+    components.transitionMatrix = builder.build();
     components.stateLabeling = mdp.getStateLabeling();
     components.choiceLabeling = mdp.getOptionalChoiceLabeling();
     for(auto const& [reward_name,choice_rewards]: rewards) {
@@ -425,6 +487,7 @@ void bindings_coloring(py::module& m) {
     
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 
+    m.def("mdpAddFreshState", &synthesis::mdpAddFreshState<double>);
     m.def("removeSelfLoops", &synthesis::removeSelfLoops<double>);
     m.def("mergeChoices", &synthesis::mergeChoices<double>);
 
@@ -451,6 +514,7 @@ void bindings_coloring(py::module& m) {
         .def("getUncoloredChoices", &synthesis::Coloring::getUncoloredChoices)
         .def("selectCompatibleChoices", &synthesis::Coloring::selectCompatibleChoices)
         .def("collectHoleOptions", &synthesis::Coloring::collectHoleOptions)
+        .def("addFreshState", &synthesis::Coloring::addFreshState)
         ;
 
 }

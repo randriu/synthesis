@@ -76,7 +76,6 @@ namespace synthesis {
             }
             
             auto state = state_translator.retrieve(translated_state);
-            builder.newRowGroup(builder.getLastRow()+1);
             synthesis::translateTransitionMatrixRowGroup(
                 pomdp, builder, state_translator.itemToTranslation(), choice_translator.itemToTranslation(), state
             );

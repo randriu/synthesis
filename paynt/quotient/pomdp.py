@@ -339,34 +339,26 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         
         logger.debug("unfolding {}-FSC template into POMDP ...".format(max(self.observation_memory_size)))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         family, choice_to_hole_options = self.create_coloring()
         self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
 
-        # decomposition = stormpy.get_maximal_end_components(self.quotient_mdp)
-        # print(decomposition)
-        # print(type(decomposition))
-        # print(dir(decomposition))
-        # print(decomposition.size)
-        # for mec in decomposition:
-        #     print(mec.size)
-        #     for s in mec:
-        #         print(s)
-        #         for x in s:
-        #             print(x)
-            # exit()
-        # exit()
-        
-        # self.quotient_mdp = payntbind.synthesis.removeSelfLoops(self.quotient_mdp)
-        # self.quotient_mdp = payntbind.synthesis.mergeChoices(self.quotient_mdp,self.coloring)
-        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
+        if False:
+            self.quotient_add_fresh_state()
+            sink_state = self.quotient_mdp.nr_states-1
+            self.quotient_mdp = payntbind.synthesis.removeSelfLoops(self.quotient_mdp,sink_state)
+
+            for _ in range(2):
+                self.quotient_mdp = payntbind.synthesis.mergeChoices(self.quotient_mdp,self.coloring)
+                self.quotient_mdp = payntbind.synthesis.removeSelfLoops(self.quotient_mdp,sink_state)
+        self.compute_choice_destinations()
 
         # to each hole-option pair a list of actions colored by this combination
         self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
         for hole in range(family.num_holes):
             self.hole_option_to_actions[hole] = [[] for option in family.hole_options(hole)]
+        choice_to_hole_options = self.coloring.getChoiceToAssignment()
         for choice in range(self.quotient_mdp.nr_choices):
             for hole,option in choice_to_hole_options[choice]:
                 self.hole_option_to_actions[hole][option].append(choice)
@@ -379,7 +371,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.quotient_choice_to_state.append(state)
 
         self.design_space = paynt.family.family.DesignSpace(family)
-
     
 
     
@@ -387,6 +378,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         if PomdpQuotient.posterior_aware:
             return super().estimate_scheduler_difference(mdp,quotient_choice_map,quotient_state_map,inconsistent_assignments,choice_values,expected_visits)
+
+        if self.use_choice_pair_difference:
+            return self.estimate_choice_pair_difference(mdp,quotient_choice_map,quotient_state_map,inconsistent_assignments,choice_values,expected_visits)
 
         # translate choice_values and expected_visits for the quotient
         choice_global_values = [None] * self.quotient_mdp.nr_choices
@@ -432,70 +426,55 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             inconsistent_differences[hole] = hole_score
 
         return inconsistent_differences
+    
+    def estimate_choice_pair_difference(self, mdp, quotient_choice_map, quotient_state_map, inconsistent_assignments, choice_values, expected_visits):
 
+        if PomdpQuotient.posterior_aware:
+            return super().estimate_scheduler_difference(mdp,quotient_choice_map,quotient_state_map,inconsistent_assignments,choice_values,expected_visits)
 
-    def estimate_scheduler_difference_old(self, mdp, quotient_choice_map, quotient_state_map, inconsistent_assignments, choice_values, expected_visits):
-
-        # note: the code below is optimized for posterior-unaware unfolding
-
-        # create inverse quotient-choice-to-mdp-choice map
-        # TODO optimize this for multiple properties
-        quotient_to_restricted_action_map = [None] * self.quotient_mdp.nr_choices
-        for choice in range(mdp.nr_choices):
-            quotient_to_restricted_action_map[quotient_choice_map[choice]] = choice
-
-        # map choices to their origin states
-        choice_to_state = []
-        tm = mdp.transition_matrix
-        for state in range(mdp.nr_states):
-            for choice in tm.get_rows_for_group(state):
-                choice_to_state.append(state)
+        # translate choice_values and expected_visits for the quotient
+        choice_global_values = [None] * self.quotient_mdp.nr_choices
+        for choice,choice_global in enumerate(quotient_choice_map):
+            choice_global_values[choice_global] = choice_values[choice]
+        expected_visits_global = [None] * self.quotient_mdp.nr_states
+        for state,value in enumerate(expected_visits):
+            expected_visits_global[quotient_state_map[state]] = value
 
         # for each hole, compute its difference sum and a number of affected states
         inconsistent_differences = {}
-        for hole_index,options in inconsistent_assignments.items():
-            difference_sum = 0
+        for hole,options in inconsistent_assignments.items():
+            score_sum = 0
+            opt1_opt2_sum = [[0]*len(options) for _ in options]
             states_affected = 0
-            edges_0 = self.hole_option_to_actions[hole_index][options[0]]
-            for choice_index,_ in enumerate(edges_0):
-
-                choice_0_global = edges_0[choice_index]
-                choice_0 = quotient_to_restricted_action_map[choice_0_global]
-                if choice_0 is None:
+            for choice_index,choice_0_global in enumerate(self.hole_option_to_actions[hole][options[0]]):
+                if choice_global_values[choice_0_global] is None:
+                    # choice is not in the family or is unreachable
                     continue
-                
-                source_state = choice_to_state[choice_0]
-                source_state_visits = expected_visits[source_state]
 
-                # assert source_state_visits != 0
+                source_state = self.quotient_choice_to_state[choice_0_global]
+                source_state_visits = expected_visits_global[source_state]
                 if source_state_visits == 0:
+                    # state is unreachable
                     continue
 
-                state_values = []
+                option_value = []
                 for option in options:
-                    choice_global = self.hole_option_to_actions[hole_index][option][choice_index]
-                    choice = quotient_to_restricted_action_map[choice_global]
-                    choice_value = choice_values[choice]
-                    state_values.append(choice_value)
+                    choice_global = self.hole_option_to_actions[hole][option][choice_index]
+                    choice_value = choice_global_values[choice_global]
+                    option_value.append(choice_value)
 
-                min_value = min(state_values)
-                max_value = max(state_values)
-                difference = (max_value - min_value) * source_state_visits
-                assert not math.isnan(difference)
-                difference_sum += difference
+                for option1,value1 in enumerate(option_value):
+                    for option2 in range(option1+1,len(option_value)):
+                        value2 = option_value[option2]
+                        score = abs(value1-value2) * source_state_visits
+                        opt1_opt2_sum[option1][option2] += score
+
                 states_affected += 1
             
-            if states_affected == 0:
-                hole_score = 0
-            else:
-                hole_score = difference_sum / states_affected
-            inconsistent_differences[hole_index] = hole_score
+            inconsistent_differences[hole] = opt1_opt2_sum
 
         return inconsistent_differences
 
-
-    
-    
     def sift_actions_and_updates(self, obs, hole, options):
         actions = set()
         updates = set()

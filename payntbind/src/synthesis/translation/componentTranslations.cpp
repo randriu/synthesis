@@ -100,10 +100,9 @@ namespace synthesis {
         storm::models::sparse::Model<ValueType> const& model,
         storm::storage::SparseMatrixBuilder<ValueType> & builder,
         std::vector<uint64_t> const& original_to_translated_state,
-        std::vector<uint64_t> const& original_to_translated_choice,
-        uint64_t choice
+        uint64_t choice,
+        uint64_t translated_choice
     ) {
-        auto translated_choice = original_to_translated_choice[choice];
         for(auto entry: model.getTransitionMatrix().getRow(choice)) {
             auto translated_dst = original_to_translated_state[entry.getColumn()];
             builder.addNextValue(translated_choice, translated_dst, entry.getValue());
@@ -118,9 +117,15 @@ namespace synthesis {
         std::vector<uint64_t> const& original_to_translated_choice,
         uint64_t state
     ) {
+        bool row_group_added = false;
         for(auto const& choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
+            auto translated_choice = original_to_translated_choice[choice];
+            if(not row_group_added) {
+                builder.newRowGroup(translated_choice);
+                row_group_added = true;
+            }
             synthesis::translateTransitionMatrixRow(
-                model, builder, original_to_translated_state, original_to_translated_choice, choice
+                model, builder, original_to_translated_state, choice, translated_choice
             );
         }
     }
@@ -135,8 +140,8 @@ namespace synthesis {
         storm::models::sparse::Model<double> const& model,
         storm::storage::SparseMatrixBuilder<double> & builder,
         std::vector<uint64_t> const& original_to_translated_state,
-        std::vector<uint64_t> const& original_to_translated_choice,
-        uint64_t choice);
+        uint64_t choice,
+        uint64_t translated_choice);
     template void translateTransitionMatrixRowGroup<double>(
         storm::models::sparse::Model<double> const& model,
         storm::storage::SparseMatrixBuilder<double> & builder,
