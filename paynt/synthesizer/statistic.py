@@ -152,7 +152,7 @@ class Statistic:
     def print_status(self):
         if not self.synthesis_timer.read() > self.status_horizon:
             return
-        # return
+
         print(self.status(), flush=True)
         self.status_horizon = self.synthesis_timer.read() + Statistic.status_period_seconds
 
