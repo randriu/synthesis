@@ -302,7 +302,7 @@ class Quotient:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    use_choice_pair_difference = False
+    use_choice_pair_difference = True
     
     def split(self, family):
         assert not family.mdp.is_deterministic
@@ -362,8 +362,8 @@ class Quotient:
             splitters = self.holes_with_max_score(scores)
             splitter = splitters[0]
             if len(hole_assignments[splitter]) > 1:
-                core_suboptions,other_suboptions = self.suboptions_enumerate(family, splitter, hole_assignments[splitter])
-                # core_suboptions = self.suboptions_unique(family, splitter, hole_assignments[splitter])
+                # core_suboptions,other_suboptions = self.suboptions_enumerate(family, splitter, hole_assignments[splitter])
+                core_suboptions = self.suboptions_unique(family, splitter, hole_assignments[splitter])
             else:
                 assert family.hole_num_options(splitter) > 1
                 core_suboptions = self.suboptions_half(family, splitter)
