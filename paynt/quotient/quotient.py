@@ -345,38 +345,6 @@ class Quotient:
         # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
 
         return reduced_design_space, suboptions
-    
-    def discard_new(self, mdp, hole_assignments, core_suboptions, other_suboptions, splitters, incomplete_search):
-
-        splitters_count = len(splitters)
-        # default result
-        reduced_design_space = mdp.design_space.copy()
-
-        core = []
-        other = []
-
-        for combined_options in itertools.product(*core_suboptions):
-            core_options = {splitters[index]:[option] for index, option in enumerate(combined_options)}
-            core.append(core_options)
-
-        for i in range(splitters_count):
-            if len(other_suboptions[i]) > 0:
-                other_options = {splitters[i]:other_suboptions[i]}
-                for j in range(i):
-                    other_options[splitters[j]] = core_suboptions[j]
-                other.append(other_options)
-
-        if len(other) == 0:
-            suboptions = core
-        else:
-            suboptions = other + core  # DFS solves core first
-
-        if not incomplete_search:
-            return reduced_design_space, suboptions
-
-        # not important for now
-
-        return reduced_design_space, suboptions
 
     def split(self, family, incomplete_search):
 
@@ -415,86 +383,6 @@ class Quotient:
             design_subspaces.append(design_subspace)
 
         return design_subspaces
-    
-    def split_new(self, family, incomplete_search, splitters_max=10):
-
-        mdp = family.mdp
-        assert not mdp.is_deterministic
-
-        # split family wrt last undecided result
-        result = family.analysis_result.undecided_result()
-
-        hole_assignments = result.primary_selection
-        scores = result.primary_scores
-        if scores is None:
-            scores = {hole:0 for hole in range(mdp.design_space.num_holes) if mdp.design_space.hole_num_options(hole) > 1}
-
-        scores_sorted = {k: v for k, v in sorted(scores.items(), key=lambda item: item[1])}
-        
-        splitters = list(scores_sorted.keys())
-
-        if len(splitters) == 1:
-            splitter = splitters[0]
-            if len(hole_assignments[splitter]) > 1:
-                core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
-            else:
-                assert mdp.design_space.hole_num_options(splitter) > 1
-                core_suboptions = self.suboptions_half(mdp, splitter)
-                other_suboptions = []
-            # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
-
-            new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
-            
-            # construct corresponding design subspaces
-            design_subspaces = []
-            
-            family.splitter = splitter
-            parent_info = family.collect_parent_info(self.specification)
-            for suboption in suboptions:
-                subholes = new_design_space.subholes(splitter, suboption)
-                design_subspace = paynt.family.family.DesignSpace(subholes, parent_info)
-                design_subspace.hole_set_options(splitter, suboption)
-                design_subspaces.append(design_subspace)
-
-            return design_subspaces
-        
-        else:
-
-            splitters = splitters[:splitters_max]
-
-            core_options_for_splitter = []
-            other_options_for_splitter = []
-
-            for splitter in splitters:
-                if len(hole_assignments[splitter]) > 1:
-                    core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
-                else:
-                    assert mdp.design_space.hole_num_options(splitter) > 1
-                    core_suboptions = self.suboptions_half(mdp, splitter)
-                    other_suboptions = []
-
-                core_suboptions = [x[0] for x in core_suboptions]
-                core_options_for_splitter.append(core_suboptions)
-                other_options_for_splitter.append(other_suboptions)
-
-            new_design_space, suboptions = self.discard_new(mdp, hole_assignments, core_options_for_splitter, other_options_for_splitter, splitters, incomplete_search)
-            
-            # construct corresponding design subspaces
-            design_subspaces = []
-            
-            #TODO not sure how this is used rn?
-            family.splitter = splitters[0]
-            parent_info = family.collect_parent_info(self.specification)
-
-            for suboption in suboptions:
-                design_subspace = paynt.family.family.DesignSpace(new_design_space.copy(), parent_info)
-                for splitter, option in suboption.items():
-                    design_subspace.hole_set_options(splitter, option)
-                design_subspaces.append(design_subspace)
-
-            return design_subspaces
-            
-
 
     def double_check_assignment(self, assignment):
         '''
