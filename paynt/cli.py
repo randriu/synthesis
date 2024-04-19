@@ -59,8 +59,6 @@ def setup_logger(log_path = None):
     help="name of the properties file in the project")
 @click.option("--relative-error", type=click.FLOAT, default="0", show_default=True,
     help="relative error for optimal synthesis")
-@click.option("--discount-factor", type=click.FLOAT, default="1", show_default=True,
-    help="discount factor")
 @click.option("--optimum-threshold", type=click.FLOAT,
     help="known optimum bound")
 @click.option("--precision", type=click.FLOAT, default=1e-4,
@@ -161,7 +159,7 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, discount_factor, optimum_threshold, precision,
+    project, sketch, props, relative_error, optimum_threshold, precision,
     export,
     method,
     incomplete_search, disable_expected_visits,
@@ -185,7 +183,7 @@ def paynt_run(
 
     # set CLI parameters
     paynt.synthesizer.synthesizer.Synthesizer.incomplete_search = incomplete_search
-    paynt.quotient.quotient.Quotient.compute_expected_visits = not disable_expected_visits
+    paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
@@ -206,7 +204,7 @@ def paynt_run(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
     if alpha_vector_analysis is not None:
-        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound, native_discount)
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, native_discount)
         assert isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient), "expected POMDP input for alpha vector analysis"
         alpha_vector_set = paynt.parser.alpha_vector_parser.AlphaVectorParser.parse_sarsop_xml(alpha_vector_analysis)
         alpha_vector_verifier = paynt.verification.alpha_vector_verification.AlphaVectorVerification(quotient)
@@ -216,7 +214,7 @@ def paynt_run(
         all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, family)
         all_in_one_analysis.run()
     else:
-        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, discount_factor, precision, constraint_bound, native_discount)
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, native_discount)
         synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
         synthesizer.run(optimum_threshold, export_evaluation)
     if profiling:

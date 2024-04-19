@@ -15,9 +15,9 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
         for hole_combination in family.all_combinations():
             
             assignment = family.construct_assignment(hole_combination)
-            model = self.quotient.build_assignment(assignment)
-            self.stat.iteration(model)
-            result = model.check_specification(self.quotient.specification, short_evaluation = True)
+            dtmc = self.quotient.build_assignment(assignment)
+            self.stat.iteration(dtmc)
+            result = self.quotient.check_specification_for_dtmc(dtmc, short_evaluation=True)
             self.explore(assignment)
 
             accepting,improving_value = result.accepting_dtmc(self.quotient.specification)

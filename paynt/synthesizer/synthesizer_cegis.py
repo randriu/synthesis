@@ -68,9 +68,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
 
         dtmc = self.quotient.build_assignment(assignment)
         self.stat.iteration_dtmc(dtmc.states)
-        mc_result = dtmc.check_specification(self.quotient.specification,
-            constraint_indices = family.constraint_indices, short_evaluation = False)
-
+        mc_result = self.quotient.check_specification_for_dtmc(dtmc, family.constraint_indices, short_evaluation=True)
         # analyze model checking results
         accepting_assignment = None
         accepting,improving_value = mc_result.accepting_dtmc(self.quotient.specification)

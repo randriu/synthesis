@@ -6,8 +6,6 @@ import paynt.family.family
 import paynt.quotient.quotient
 import paynt.quotient.fsc
 
-from .models import MarkovChain,MDP,DTMC
-
 import math
 import re
 
@@ -217,7 +215,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     
     def create_coloring(self):
-        logger.debug("creating coloring ...")
         if PomdpQuotient.posterior_aware:
             return self.create_coloring_aposteriori()
 
@@ -362,7 +359,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     
 
     
-    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):
+    def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
 
         if PomdpQuotient.posterior_aware:
             return super().estimate_scheduler_difference(mdp,quotient_choice_map,inconsistent_assignments,choice_values,expected_visits)
@@ -396,9 +393,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                     continue
                 
                 source_state = choice_to_state[choice_0]
-                source_state_visits = 1
-                if expected_visits is not None:
-                    source_state_visits = expected_visits[source_state]
+                source_state_visits = expected_visits[source_state]
 
                 assert source_state_visits != math.inf, f"state visits for state {source_state} is inf"
                 if source_state_visits == 0:
@@ -512,7 +507,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # label states with a pomdp_state:memory_node pair
         # label choices with a pomdp_choice:memory_update pair
         state_labeling = dtmc.model.labeling
-        choice_labeling = stormpy.storage.ChoiceLabeling(dtmc.choices)
+        choice_labeling = stormpy.storage.ChoiceLabeling(dtmc.model.nr_choices)
         for state in range(dtmc.states):
             mdp_state = dtmc.quotient_state_map[state]
             mdp_choice = dtmc.quotient_choice_map[state]
@@ -603,7 +598,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     def extract_policy(self, assignment):
         dtmc = self.build_assignment(assignment)
-        mc_result = dtmc.check_specification(self.specification)
+        mc_result = self.check_specification_for_dtmc(dtmc)
         policy = self.collect_policy(dtmc, mc_result)
         return policy
 
@@ -674,7 +669,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             for mem in range(self.observation_memory_size[obs]):
                 full_observ_list.append(obs + mem * no_obs)
 
-        choice_labeling = stormpy.storage.ChoiceLabeling(mdp.choices)
+        choice_labeling = stormpy.storage.ChoiceLabeling(mdp.model.nr_choices)
 
         # assign observations to states
         observ_list = []
@@ -690,7 +685,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         labels = list(set(labels_list))
         for label in labels:
             choice_labeling.add_label(str(label))
-        for choice in range(mdp.choices):
+        for choice in range(mdp.model.nr_choices):
             choice_labeling.add_label_to_choice(str(labels_list[choice]), choice)
 
         components.choice_labeling = choice_labeling

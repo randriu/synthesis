@@ -550,14 +550,14 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def try_randomized_abstraction(self, family, prop):
         # build randomized abstraction
         choice_to_action = []
-        for choice in range(family.mdp.choices):
+        for choice in range(family.mdp.model.nr_choices):
             action = self.quotient.choice_to_action[family.mdp.quotient_choice_map[choice]]
             choice_to_action.append(action)
         state_action_choices = self.quotient.map_state_action_to_choices(family.mdp.model,self.quotient.num_actions,choice_to_action)
         model,choice_to_action = payntbind.synthesis.randomize_action_variant(family.mdp.model, state_action_choices)
 
         # model check
-        result = stormpy.model_checking(model, prop.formula, extract_scheduler=True, environment=Property.environment)
+        result = Property.model_check(model, prop.formula)
         self.stat.iteration(model)
         value = result.at(model.initial_states[0])
         policy_sat = prop.satisfies_threshold(value) # does this value matter?
@@ -676,7 +676,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         choice_values = self.quotient.choice_values(mdp, prop, state_values)
         expected_visits = None
         if self.quotient.compute_expected_visits:
-            expected_visits = self.quotient.expected_visits(mdp, prop, scheduler_choices)
+            expected_visits = self.quotient.compute_expected_visits(mdp, prop, scheduler_choices)
         quotient_choice_map = [choice for choice in range(self.quotient.quotient_mdp.nr_choices)]
         scores = self.quotient.estimate_scheduler_difference(self.quotient.quotient_mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
         return scores

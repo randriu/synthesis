@@ -2,12 +2,10 @@ import stormpy
 import payntbind
 
 from .statistic import Statistic
-from .synthesizer_ar import SynthesizerAR
+import paynt.synthesizer.synthesizer_ar
 from .synthesizer_ar_storm import SynthesizerARStorm
 from .synthesizer_hybrid import SynthesizerHybrid
 from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
-
-from ..quotient.models import MarkovChain, DTMC, MDP
 
 import paynt.quotient.quotient
 import paynt.quotient.pomdp
@@ -26,41 +24,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class HoleTree:
-
-    def __init__(self, options):
-        self.nodes = [options]
-
-    def __str__(self):
-        return ",".join([str(x) for x in self.nodes])
-
-    def split(self, mem, inconsistent_options):
-
-        old_options = self.nodes[mem]
-        
-        # create child holes
-        children = []
-        for option in inconsistent_options:
-            child_options = old_options.copy()
-            child_options.remove(option)
-            children.append(child_options)
-
-        # store child nodes
-        self.nodes[mem] = children[0]
-        new_indices = []
-        for child in children[1:]:
-            new_indices.append(len(self.nodes))
-            self.nodes.append(child)
-
-        return new_indices
-
-    def update_memory_updates(self, mem, new_indices):
-        for index,options in enumerate(self.nodes):
-            if mem in options:
-                options.extend(new_indices)
-
-
-
 class SynthesizerPOMDP:
 
     # If true explore only the main family
@@ -71,7 +34,7 @@ class SynthesizerPOMDP:
         self.use_storm = False
         self.synthesizer = None
         if method == "ar":
-            self.synthesizer = SynthesizerAR
+            self.synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR
         elif method == "ar_multicore":
             self.synthesizer = SynthesizerMultiCoreAR
         elif method == "hybrid":
@@ -571,12 +534,11 @@ class SynthesizerPOMDP:
 
         # solve quotient MDP
         self.quotient.build(family)
-        mdp = family.mdp
-        spec = mdp.check_specification(self.quotient.specification, short_evaluation=True)
+        spec = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
 
         # nothing more to do if optimality cannot be improved
         if not spec.optimality_result.can_improve:
-            return mdp, spec, None, None, None, None
+            return family.mdp, spec, None, None, None, None
 
         # hole scores = sum of scores wrt individual formulae
         hole_scores = {}
@@ -596,7 +558,7 @@ class SynthesizerPOMDP:
         # scores = result.primary_scores
         scores = hole_scores
 
-        return mdp, spec, selection, choice_values, expected_visits, scores
+        return family.mdp, spec, selection, choice_values, expected_visits, scores
 
     
     def strategy_expected_uai(self):
@@ -704,8 +666,7 @@ class SynthesizerPOMDP:
                 dtmc = self.quotient.build_assignment(synthesized_assignment)
 
                 # compute expected visits for this dtmc
-                dtmc_visits = stormpy.compute_expected_number_of_visits(paynt.verification.property.Property.environment, dtmc.model).get_values()
-                dtmc_visits = list(dtmc_visits)
+                dtmc_visits = paynt.verification.property.Property.compute_expected_visits(dtmc)
 
                 # handle infinity- and zero-visits
                 if self.quotient.specification.optimality.minimizing:
