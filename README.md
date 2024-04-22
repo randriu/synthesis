@@ -75,13 +75,20 @@ Options associated with the synthesis of finite-state controllers (FSCs) for a P
 - ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
 - ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
 - ``--posterior-aware``: enables the synthesis of posterior aware FSCs
+- ``--native-discount``: runs synthesis with discounted model checking instead of performing model transformation
 
-SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy are needed):
+SAYNT [6] and New SAYNT [CAV23SI] basic options:
+- ``--saynt``: run SAYNT with default options (15min timeout, to adjust look at advanced SAYNT options)
+- ``--new-saynt``: run SAYNT with computing multiple cut-off FSCs (15min timeout)
+
+Advanced SAYNT [6] and Storm associated options:
 - ``--storm-pomdp``: enables the use of Storm features, this flag is necessary for the other options in this section to work
 - ``--iterative-storm INTEGER INTEGER INTEGER``: runs the SAYNT algorithm, the parameters represent overall timeout, paynt timeout, storm timeout respectivelly. The recommended parameters for 15 minute runtime are 900 60 10
 - ``--get-storm-result INTEGER``: runs PAYNT for specified amount of seconds and then runs Storm using the computed FSC at cut-offs
 - ``--storm-options [cutoff|clip2|clip4|overapp|5mil|10mil|20mil|refine]``: sets the options for Storm [default: ``cutoff``]
 - ``--prune-storm``: if enabled Storm results are used to prune the family of FSCs
+- ``--saynt-threads INTEGER``: specifies the number of cut-off FSCs SAYNT should compute in one iteration, if set to 0 the number is chosen automatically based on the belief exploration
+- ``--saynt-overapprox``: enables the use of overapproximations in choosing from what beliefs FSCs should be computed
 - ``--unfold-strategy-storm [paynt|storm|cutoff]``: sets how the memory is unfolded [default: ``storm``]
 - ``--use-storm-cutoffs``: if enabled the actions from cut-offs are considered in the prioritization and unfolding
 - ``--export-fsc-paynt PATH``: stores the best found FSC from PAYNT to specified file
@@ -91,18 +98,19 @@ Other options:
 - ``--help``: shows the help message of the PAYNT and aborts
 - ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
 - ``--incomplete-search``:  uses incomplete search during synthesis
+- ``--alpha_vector_analysis PATH``: takes alpha vector set from specified file and performs unrolling on the given POMDP using these alpha vectors to analyse their quality 
 
 
 Here are various PAYNT calls:
 ```shell
-python3 paynt.py --project models/cav21/maze --props hard.props
-python3 paynt.py --project models/cav21/maze --props hard.props --method hybrid
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
-timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
-python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
-python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
+python3 paynt.py --project models/archive/cav21-paynt/maze --props hard.props
+python3 paynt.py --project models/archive/cav21-paynt/maze --props hard.props --method hybrid
+python3 paynt.py --project models/archive/uai22-pomdp/grid-avoid-4-0
+python3 paynt.py --project models/archive/uai22-pomdp/grid-avoid-4-0 --pomdp-memory-size 2
+python3 paynt.py --project models/archive/uai22-pomdp/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
+timeout 10s python3 paynt.py --project models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
+python3 paynt.py --project models/archive/cav23-saynt/4x3-95 --saynt --iterative-storm 180 60 10
+python3 paynt.py --project models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The Python environment can be deactivated by runnning

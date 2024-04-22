@@ -114,10 +114,14 @@ def setup_logger(log_path = None):
     type=click.Choice(["storm", "paynt", "cutoff"]),
     show_default=True,
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
-@click.option("--enhanced-saynt", default=None, type=int,
+@click.option("--saynt-threads", default=None, type=int,
     help="run SAYNT with FSCs for non-initial beliefs. 0 - for dynamic number of different beliefs, N > 0 - set number of different beliefs")
 @click.option("--saynt-overapprox", is_flag=True, default=False,
     help="run Storm to obtain belief value overapproximations that can be used to better choose from what beliefs FSCs should be computed")
+@click.option("--saynt", is_flag=True, default=False,
+    help="run default SAYNT")
+@click.option("--new-saynt", is_flag=True, default=False,
+    help="run SAYNT with multiple cut-offs FSCs")
 
 @click.option("--export-fsc-storm", type=click.Path(), default=None,
     help="path to output file for SAYNT belief FSC")
@@ -165,7 +169,7 @@ def paynt_run(
     incomplete_search, disable_expected_visits,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, storm_exploration_heuristic, prune_storm,
-    use_storm_cutoffs, unfold_strategy_storm, enhanced_saynt, saynt_overapprox,
+    use_storm_cutoffs, unfold_strategy_storm, saynt_threads, saynt_overapprox, saynt, new_saynt,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
@@ -192,12 +196,26 @@ def paynt_run(
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_randomized_abstraction = mdp_use_randomized_abstraction
 
+    # QoL change for calling SAYNT, TODO discuss the default values because this is what we use for 15min timeout
+    if saynt:
+        fsc_synthesis = True
+        storm_pomdp = True
+        if iterative_storm is None:
+            iterative_storm = (900, 60, 10)
+    elif new_saynt:
+        fsc_synthesis = True
+        storm_pomdp = True
+        if iterative_storm is None:
+            iterative_storm = (900, 90, 2)
+        if saynt_threads is None:
+            saynt_threads = 0
+
     storm_control = None
     if storm_pomdp:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, enhanced_saynt, saynt_overapprox,
+            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, saynt_threads, saynt_overapprox,
             storm_exploration_heuristic
         )
 
