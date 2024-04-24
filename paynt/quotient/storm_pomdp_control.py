@@ -990,8 +990,6 @@ class StormPOMDPControl:
         for state in belief_mc.states:
             if 'cutoff' not in state.labels:
                 non_frontier_states += 1
-            elif 'finite_mem' in state.labels and not uses_fsc:
-                uses_fsc = True
             else:
                 for label in state.labels:
                     if 'sched_' in label:
@@ -999,11 +997,18 @@ class StormPOMDPControl:
                         if int(scheduler_index) in used_randomized_schedulers:
                             continue
                         used_randomized_schedulers.append(int(scheduler_index))
+                    if 'finite_mem' in label:
+                        uses_fsc = True
 
         if uses_fsc:
             # Compute the size of FSC
             if paynt_fsc_size:
                 fsc_size = paynt_fsc_size
+            for fsc_index in self.storm_fsc_usage.keys():
+                if fsc_index == 0:
+                    continue
+                fsc_size += self.enhanced_saynt_threads[fsc_index-1]["synthesizer"].storm_control.paynt_fsc_size
+
 
         for index in used_randomized_schedulers:
             observation_actions = {x:[] for x in range(self.quotient.observations)}
