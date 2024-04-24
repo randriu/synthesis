@@ -1022,6 +1022,6 @@ class StormPOMDPControl:
                         observation_actions[observation].append(action)
             randomized_schedulers_size += sum(list([len(support) for support in observation_actions.values()])) * 3
 
-        result_size = non_frontier_states + belief_mc.nr_transitions + fsc_size + randomized_schedulers_size
+        result_size = non_frontier_states + 2*belief_mc.nr_transitions + fsc_size + randomized_schedulers_size
 
         return result_size
