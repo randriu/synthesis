@@ -25,6 +25,7 @@ def construct_reward_property(reward_name, minimizing, target_label):
     optimality = OptimalityProperty(formula, 0)
     return optimality
 
+# discounted reward property supported by Storm
 def construct_discount_property(reward_name, minimizing, discount_factor):
     direction = "min" if minimizing else "max"
     formula_str = 'R{"' + reward_name + '"}' + direction + '=? [C{' + str(discount_factor) + '}]'

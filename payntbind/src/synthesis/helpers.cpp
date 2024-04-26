@@ -44,7 +44,8 @@ void removeRewardModel(storm::models::sparse::Model<ValueType> & model, std::str
     model.removeRewardModel(reward_name);
 }
 
-
+// applies discount model transformation to a given DTMC
+// currently used for discounted expected visits
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> applyDiscountTransformationToDtmc(storm::models::sparse::Dtmc<ValueType> &model, double discount_factor) {
     storm::storage::sparse::ModelComponents<ValueType> components;
@@ -85,9 +86,6 @@ std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> applyDiscountTransformat
     }
     builder.addNextValue(dtmcNumberOfStates, dtmcNumberOfStates, 1);
     components.transitionMatrix = builder.build();
-
-    // reward model
-    //components.rewardModels.emplace(this->reward_model_name, this->constructRewardModel());
     
     return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
 }

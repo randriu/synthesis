@@ -12,11 +12,12 @@ class AlphaVectorVerification:
     def __init__(self, pomdp_quotient):
         self.quotient = pomdp_quotient
 
-
+    # calls belief unrolling in Storm with the given set of alpha vectors and verifies them with respect to the undiscounted property
+    # this verification assumes the alpha vectors were obtained on a cassandra pomdp generated from the model using the --export pomdp functionality
     def verify_alpha_vectors(self, alpha_vector_set):
 
-        number_of_belief_threshold = 10
-        dummy_value = 20
+        number_of_belief_threshold = 1000000 # number of beliefs to be unfolded before cut-offs are applied
+        dummy_value = 20 # for reward specifications BeliefMCExplorer uses this value instead of Storm cut-offs, can be useful when getting inf/-inf
         
         alpha_vector_bind = payntbind.synthesis.AlphaVectorsSet(alpha_vector_set.alpha_vectors, alpha_vector_set.alpha_vector_actions)
 
