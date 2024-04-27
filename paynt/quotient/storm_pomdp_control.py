@@ -700,6 +700,8 @@ class StormPOMDPControl:
                 analysed_beliefs += 1
                 belief_obs = self.quotient.pomdp.get_observation(list(belief.keys())[0])
                 belief_value = self.compute_belief_value(belief, belief_obs, export_values)
+                if belief_value is None:
+                    continue
                 belief_values_dif[belief_id] = abs(self.belief_overapp_values[belief_id] - belief_value)
 
                 if belief_obs not in obs_differences.keys():
@@ -790,7 +792,10 @@ class StormPOMDPControl:
             if name.startswith('M'):
                 continue
             name = name.strip('A()')
-            obs = name.split(',')[0]
+            if not paynt.quotient.pomdp.PomdpQuotient.posterior_aware:
+                obs = name.split(',')[0]
+            else:
+                obs = name.split(',')[1]
             observation = self.quotient.observation_labels.index(obs)
 
             option = self.latest_paynt_result.hole_options(hole)[0]
