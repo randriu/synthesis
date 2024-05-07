@@ -10,17 +10,17 @@ import itertools
 import logging
 logger = logging.getLogger(__name__)
 
-# import inspect
-
-# def print_caller_info():
-#     caller_frame = inspect.stack()[2]
-#     print(f"Called from file: {caller_frame.filename} at line: {caller_frame.lineno}")
-
 
 class Quotient:
 
     # if True, hole scores in the state will be multiplied with the number of expected visits of this state
     compute_expected_visits = True
+    #------------xshevc01----------------
+    use_inheritance = False
+    use_inheritance_extended = False
+    use_smart_inheritance = False
+    #------------------------------------
+    
 
     @staticmethod
     def make_vector_defined(vector):
@@ -88,187 +88,175 @@ class Quotient:
         mdp = paynt.quotient.models.MDP(mdp, self, state_map, choice_map, None)
         return mdp
 
-    
-    use_inheritance_build = False
-    
+    #------------xshevc01----------------    
+    def find_all_predecessors(self):
+        """ Find all predecessors for each state in the quotient MDP """
+        self.predecessors_list = payntbind.synthesis.findAllPredecessors(self.quotient_mdp)
 
-    def mine_scheduler_to_state_to_choice(self, family, parent_mdp, scheduler, compatible_choices, discard_unreachable_choices=True):
+
+    def idar_get_parents_scheduler(self, family, compatible_choices):
+        """ Use parent's scheduler to find the affected states """
+
+        parent_mdp = family.parent_info.mdp
+        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
+        scheduler = parent_result.scheduler
+        return self.idar_get_parent_scheduler_choices(parent_mdp, scheduler, compatible_choices)
+    
+    
+    def idar_get_parent_scheduler_choices(self, parent_mdp, scheduler, compatible_choices):
+        """ Get parent's optimal choices and if they are not
+            compatible with the family, mark the corresponding states as affected """
+
         state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, parent_mdp.model, parent_mdp.quotient_choice_map)
         parent_state_choice = [-1] * self.quotient_mdp.nr_states
         states_affected = [False for state in range(self.quotient_mdp.nr_states)]
-        parent_mdp = family.parent_info.mdp
         for state in range(parent_mdp.model.nr_states):
             qchoice = state_to_quotient_choice[state]
             qstate = parent_mdp.quotient_state_map[state]
             parent_state_choice[qstate] = qchoice
-            if not compatible_choices[qchoice]:
+            if not compatible_choices.get(qchoice):
                 states_affected[qstate] = True
-     
-        if discard_unreachable_choices:
-            parent_state_choice = self.discard_unreachable_choices(parent_state_choice)
         return parent_state_choice, states_affected
-
-    def find_all_predecessors(self, family):
-        predecessors = [set() for s in range(self.quotient_mdp.nr_states)]
-        tm = family.mdp.model.transition_matrix
-        for s in range(self.quotient_mdp.nr_states):
-            for choice in range(tm.get_row_group_start(s),tm.get_row_group_end(s)):
-                for entry in tm.get_row(choice):
-                    predecessors[entry.column].add(s)
-        self.predecessors_list = predecessors
-
-    def get_parents_scheduler(self, family, compatible_choices):
-        parent_mdp = family.parent_info.mdp
-        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
-        scheduler = parent_result.scheduler
-        return self.mine_scheduler_to_state_to_choice(family, parent_mdp, scheduler, compatible_choices, discard_unreachable_choices=False)
     
-    def find_affected_reachable(self, states_affected):
+
+    def find_reachable_affected_states(self, states_affected, parent_state_choice):
+        """ Mark all predecessors of affected states as affected """
+
         state_queue = [s for s in range(self.quotient_mdp.nr_states) if states_affected[s]]
         while state_queue:
             state = state_queue.pop()
             for pred in self.predecessors_list[state]:
-                if not states_affected[pred]:
+                qchoice = parent_state_choice[pred]
+                if not states_affected[pred] and qchoice != -1:
                     state_queue.append(pred)
                     states_affected[pred] = True
 
-        num_affected = sum(states_affected)
-        perc_affected = round(num_affected / self.quotient_mdp.nr_states  * 100)
-        self.perc_affected_sum += perc_affected
-        self.perc_affected_entries += 1
     
-    def affected_to_choices(self, family, states_affected, parent_state_choice, compatible_choices):        
-        
-        parent_mdp = family.parent_info.mdp
-        tm = parent_mdp.model.transition_matrix
-        # qndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
-        ndi = parent_mdp.model.nondeterministic_choice_indices.copy()
+    def convert_to_bitvector(self, states_affected):
+        """ Converts a list of affected states to a bit vector"""
 
-                
-        ###################################### WORKS
-        # for state in range(parent_mdp.model.nr_states):
-        #     qstate = parent_mdp.quotient_state_map[state]
-        #     if states_affected[qstate]:
-        #         continue
-        #     for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-        #         # print("hm")
-        #         qchoice = parent_mdp.quotient_choice_map[choice]
-        #         if not qchoice in parent_state_choice:
-        #             compatible_choices.set(qchoice, False)
-        #             # print("HAHA!")
-        
-        # return compatible_choices
-        ######################################
-
-
-        ###################################### WORKS TOO
-        # qstate_compatible_choices = []
-        # for qstate in range(self.quotient_mdp.nr_states):
-        #     qstate_choices = []
-        #     for qchoice in range(qndi[qstate],qndi[qstate+1]):
-        #         if compatible_choices[qchoice]:
-        #             qstate_choices.append(qchoice)
-        #         qstate_compatible_choices.append(qstate_choices)
-        
-        # affected_states = []
-        # for state,qstate in enumerate(parent_mdp.quotient_state_map):
-        #     if states_affected[qstate]:
-        #         affected_states.append( (state,qstate) )
-        
-        
-        # all_true = stormpy.BitVector(self.quotient_mdp.nr_choices, True)
-        # for state,qstate in enumerate(parent_mdp.quotient_state_map):
-        #     if states_affected[qstate]:
-        #         continue
-        #     for choice in range(ndi[state],ndi[state+1]):
-        #         qchoice = parent_mdp.quotient_choice_map[choice]
-        #         all_true.set(qchoice, False)
-            
-        #     parent_choice = parent_state_choice[qstate]
-        #     all_true.set(parent_choice, True)
-        
-        # return all_true & compatible_choices    
-        ######################################
-
-        states_affected_to_vector = stormpy.BitVector(self.quotient_mdp.nr_states,False)
+        states_affected_bit_vector = stormpy.BitVector(self.quotient_mdp.nr_states,False)
         for state in range(self.quotient_mdp.nr_states):
             if states_affected[state]:
-                states_affected_to_vector.set(state, True)
-        
-        # print(states_affected_to_vector)
-        # exit()
-    
-        return payntbind.synthesis.affectedToChoices(parent_mdp.quotient_choice_map, parent_mdp.quotient_state_map, parent_mdp.model, states_affected_to_vector, ndi, parent_state_choice, compatible_choices)
+                states_affected_bit_vector.set(state, True)
+        return states_affected_bit_vector
 
-        ######################################
     
+    def affected_states_to_mask(self, family, states_affected_bit_vector, parent_state_choice, compatible_choices):
+        """ Compute the result choices for the family """
+        
+        parent_mdp = family.parent_info.mdp
+        return payntbind.synthesis.affectedStatesToMask(parent_mdp.quotient_choice_map, parent_mdp.quotient_state_map, parent_mdp.model, states_affected_bit_vector, parent_state_choice, compatible_choices)
     
-        ###################################### COULD WORK
-        # num_choices = self.quotient_mdp.nr_choices
-        # choices = stormpy.BitVector(num_choices,False)
-        # for state in range(parent_mdp.model.nr_states): 
-        #     qstate = parent_mdp.quotient_state_map[state]
-        #     # if qstate == 159:
-        #     #     print("HEY", states_affected[qstate])
-        #     if states_affected[qstate]: 
-        #         # if qstate == 159:
-        #         #     print("EHM")
-        #         # for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-        #         #     qchoice = parent_mdp.quotient_choice_map[choice]
-        #         #     choices.set(qchoice, compatible_choices.get(qchoice))
-                
 
-        #         at_least_one = False
-        #         for choice in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
-        #             qchoice = parent_mdp.quotient_choice_map[choice]
-        #             choices.set(qchoice, compatible_choices.get(qchoice))
-        #             if choices.get(qchoice):
-        #                 at_least_one = True
-        #         if not at_least_one:
-        #             # print("WE WERE HERE")
-        #             for choice in range(self.tm.get_row_group_start(qstate),self.tm.get_row_group_end(qstate)):
-        #                 # qchoice = parent_mdp.quotient_choice_map[choice]
-        #                 choices.set(choice, family.parent_info.selected_choices.get(choice))
-        #     else:
-        #         qchoice = parent_state_choice[qstate]
-        #         choices.set(qchoice, True)
-        
-        # return choices
-        ######################################
-        
+    def idar_build_inheritance(self, family, compatible_choices):
+        """ Construct the quotient MDP for the family using inheritance dependencies (IDAR) """
 
-    def build_inheritance(self, family, compatible_choices):
         if family.parent_info is None:
             self.perc_affected_sum = 0
             self.perc_affected_entries = 0
+            self.choices_per_affected_sum = 0
             return compatible_choices
-        
-        num_choices = self.quotient_mdp.nr_choices
-        choices = stormpy.BitVector(num_choices,False)
-        parent_state_choice, states_affected = self.get_parents_scheduler(family, compatible_choices)
-        self.find_affected_reachable(states_affected)
-        choices = self.affected_to_choices(family, states_affected, parent_state_choice, compatible_choices)
-        return choices
+        parent_state_choice, states_affected = self.idar_get_parents_scheduler(family, compatible_choices)
+        self.find_reachable_affected_states(states_affected, parent_state_choice)
+        states_affected_bit_vector = self.convert_to_bitvector(states_affected)
+        result_choices = self.affected_states_to_mask(family, states_affected_bit_vector, parent_state_choice, compatible_choices)
+        self.count_affected_states(states_affected_bit_vector, family, result_choices)
+        return result_choices
+
+
+    def map_choices_to_states(self):
+        """ Map choices to states in the quotient MDP (EIDAR) """
+
+        self.choices_to_states = payntbind.synthesis.mapChoicesToStates(self.quotient_mdp)
+
+
+    def eidar_get_parents_scheduler(self, family):
+        """ Use parent's scheduler to find the affected choices (EIDAR) """
+
+        parent_mdp = family.parent_info.mdp
+        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
+        scheduler = parent_result.scheduler
+        return self.eidar_get_parent_scheduler_choices(parent_mdp, scheduler)
+    
+
+    def eidar_get_parent_scheduler_choices(self, parent_mdp, scheduler):
+        """ Get parent's optimal choices and if they are not
+            compatible with the family, mark the corresponding choices as affected (EIDAR) """
+
+        state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, parent_mdp.model, parent_mdp.quotient_choice_map)
+        parent_state_choice = [-1] * self.quotient_mdp.nr_states
+        optimal_choices = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
+        for state in range(parent_mdp.model.nr_states):
+            qchoice = state_to_quotient_choice[state]
+            optimal_choices.set(qchoice, True)
+            qstate = parent_mdp.quotient_state_map[state]
+            parent_state_choice[qstate] = qchoice
+        return parent_state_choice, optimal_choices
+
+
+    def find_optimal_leading_choices(self, parent_state_choice):
+        """ Find the optimal leading choices (EIDAR) """
+
+        return payntbind.synthesis.findOptimalLeadingChoices(self.quotient_mdp, parent_state_choice)
+    
+
+    def optimal_choices_to_affected_states(self, optimal_choices, compatible_choices, leading_optimals_to_state):
+        """ Compute the affected states from the optimal choices (EIDAR) """
+
+        return payntbind.synthesis.optimalChoicesToAffectedStates(self.quotient_mdp, self.choices_to_states, optimal_choices, compatible_choices, leading_optimals_to_state)
+
+
+    def eidar_build_inheritance(self, family, compatible_choices):
+        """ Construct the quotient MDP for the family using extended inheritance dependencies (EIDAR)"""
+
+        if family.parent_info is None:
+            self.perc_affected_sum = 0
+            self.perc_affected_entries = 0
+            self.choices_per_affected_sum = 0
+            return compatible_choices
+        parent_state_choice, optimal_choices = self.eidar_get_parents_scheduler(family)
+        leading_optimals_to_state = self.find_optimal_leading_choices(parent_state_choice)
+        affected_states = self.optimal_choices_to_affected_states(optimal_choices, compatible_choices, leading_optimals_to_state)
+        result_choices = self.affected_states_to_mask(family, affected_states, parent_state_choice, compatible_choices)
+        self.count_affected_states(affected_states, family, result_choices)
+        return result_choices
+    
+
+    def count_affected_states(self, states_affected_bit_vector, family, choices):
+        """ Count statistics """
+
+        num_affected = states_affected_bit_vector.number_of_set_bits()
+        perc_affected = round(num_affected / family.parent_info.mdp.model.nr_states  * 100)
+        choices_per_affected = (choices.number_of_set_bits() - family.parent_info.mdp.model.nr_states + num_affected) / num_affected
+        self.perc_affected_sum += perc_affected
+        self.perc_affected_entries += 1
+        self.choices_per_affected_sum += choices_per_affected
+    
 
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
 
         compatible_choices = self.coloring.selectCompatibleChoices(family.family)
 
-        if self.use_inheritance_build:
-            result_choices = self.build_inheritance(family, compatible_choices)
+        if self.use_inheritance:
+            result_choices = self.idar_build_inheritance(family, compatible_choices)
+        elif self.use_inheritance_extended or self.use_smart_inheritance:
+            result_choices = self.eidar_build_inheritance(family, compatible_choices)
         else:
             result_choices = compatible_choices
-        # print(len(self.coloring.selectCompatibleChoices(family.family)), self.coloring.selectCompatibleChoices(family.family).number_of_set_bits(), len(result_choices), result_choices.number_of_set_bits())
-        # print("COLORING - CHOICES: ", set(self.coloring.selectCompatibleChoices(family.family)).difference(set(compatible_choices)))
-        # print("CHOICES - COLORING: ", set(compatible_choices).difference(set(self.coloring.selectCompatibleChoices(family.family))))
-        
+
         family.selected_choices = result_choices
         family.mdp = self.build_from_choice_mask(result_choices)
-        if self.use_inheritance_build and family.parent_info is None:
-            self.find_all_predecessors(family)
-            self.tm = family.mdp.model.transition_matrix
+        if self.use_inheritance and family.parent_info is None:
+            self.find_all_predecessors()
+        if (self.use_inheritance_extended or self.use_smart_inheritance) and family.parent_info is None:
+            self.map_choices_to_states()
+        if self.use_smart_inheritance and family.parent_info is None and math.log10(family.size) <= 15:
+            self.use_smart_inheritance = False
+            print("SWITCHING TO AR DUE TO THE SIZE OF THE FAMILY")
         family.mdp.design_space = family
+    #------------------------------------
 
 
     def build_with_second_coloring(self, family, main_coloring, main_family):
@@ -523,8 +511,6 @@ class Quotient:
 
 
     def split(self, family, incomplete_search):
-        # if not self.use_inheritance_build:
-        #     self.check_scheduler_inheritance(family)
 
         mdp = family.mdp
         assert not mdp.is_deterministic
@@ -560,6 +546,7 @@ class Quotient:
             design_subspace.hole_set_options(splitter, suboption)
             design_subspaces.append(design_subspace)
 
+        # print(splitter, suboptions)
         return design_subspaces
 
 
@@ -615,85 +602,6 @@ class Quotient:
             print(output_json, end="", file=f)
         logger.info("done")
 
-
-    def check_scheduler_inheritance(self, family):
-        # print("VYZVALSYA CHECK SCHEDULER INHERITANCE")
-        # family --- DesignSpace!
-
-        # if the family does not have a parent, then it is a super-family
-        # no need to check scheduler inheritance
-        if family.parent_info is None:
-            # print("SELECTED:", set(family.selected_choices))
-            # print()
-            self.perc_affected_sum = 0
-            self.perc_affected_entries = 0
-            return
-
-        # which choices were removed in the child family
-        choice_diff = set(family.parent_info.selected_choices).difference(set(family.selected_choices))
-        # choice_diff = set(family.selected_choices).difference(set(family.selected_choices))
-        # print("PARENT CHOICES: ", set(family.parent_info.selected_choices))
-        # print()
-        # print("FAMILY CHOICES:", set(family.selected_choices))
-        # print()
-        # print("CHOICE DIFF:", choice_diff)
-        # print()
-
-        # get parent's scheduler for optimality
-        parent_mdp = family.parent_info.mdp
-        # parent_result = family.parent_info.analysis_result.optimality_result.primary.result
-        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
-        assert not parent_result.scheduler.partial
-
-        # get info from parent's scheduler
-        # print("NR STATES: ",self.quotient_mdp.nr_states)
-        # print()
-        parent_state_choice = [None for state in range(self.quotient_mdp.nr_states)]
-        for state in range(parent_mdp.states):
-            qstate = parent_mdp.quotient_state_map[state]
-            sched_choice = parent_result.scheduler.get_choice(state).get_deterministic_choice()
-            choice = parent_mdp.model.get_choice_index(state,sched_choice)
-            qchoice = parent_mdp.quotient_choice_map[choice]
-            parent_state_choice[qstate] = qchoice
-        # print("PARENT STATE CHOICE:", parent_state_choice)
-        # print(family)
-        # print(family.parent_info.splitter) # hole used for splitting
-
-        # mark states in the sub-sub-MDP affected by the removal
-        state_affected = [False for state in range(family.mdp.states)]
-        for state in range(family.mdp.states):
-            qstate = family.mdp.quotient_state_map[state]
-            if parent_state_choice[qstate] in choice_diff:
-                state_affected[state] = True
-
-        # for each state, a list of its predecessors
-        predecessors = [set() for s in range(family.mdp.states)]
-        tm = family.mdp.model.transition_matrix
-        for s in range(family.mdp.states):
-            for choice in range(tm.get_row_group_start(s),tm.get_row_group_end(s)):
-                for entry in tm.get_row(choice):
-                    predecessors[entry.column].add(s)
-
-        # find all states from which affected states are reachable
-        # queue of affected states
-        state_queue = [s for s in range(family.mdp.states) if state_affected[s]]
-        # print(tm)
-        while state_queue:
-            state = state_queue.pop()
-            # for each affected state, add its predecessors to the queue
-            for pred in predecessors[state]:
-                if not state_affected[pred]:
-                    state_queue.append(pred)
-                    state_affected[pred] = True
-
-        # print("affected", state_affected[self.monitored_state])
-        # print("parent has ", parent_result.at(self.monitored_state))
-
-        num_affected = len([x for x in state_affected if x])
-        perc_affected = round(num_affected / family.mdp.states  * 100)
-        self.perc_affected_sum += perc_affected
-        self.perc_affected_entries += 1
-        # print("% affected states average: ", self.perc_affected_sum/self.perc_affected_entries)
 
     def identify_absorbing_states(self, model):
         state_is_absorbing = [True] * model.nr_states

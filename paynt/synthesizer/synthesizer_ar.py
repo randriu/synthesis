@@ -6,6 +6,10 @@ logger = logging.getLogger(__name__)
 
 class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
+    #------------xshevc01----------------  
+    iterations = 0
+    #------------------------------------
+
     @property
     def method_name(self):
         return "AR"
@@ -13,7 +17,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     
     def verify_family(self, family):
         self.quotient.build(family)
-        self.stat.iteration_mdp(family.mdp.states)
+        self.stat.iteration_mdp(family.mdp.states, self.quotient.use_smart_inheritance)
         res = family.mdp.check_specification(
             self.quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
         if res.improving_assignment == "any":
@@ -41,14 +45,24 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         satisfying_assignment = None
         families = [family]
 
-        iteration_limit = 500
         iteration_count = 0
 
         while families:
-
+            #------------xshevc01----------------
             iteration_count += 1
-            if iteration_count > iteration_limit:
-                break
+            if self.iterations != 0 and iteration_count > self.iterations:
+                 break
+            
+            if self.quotient.use_smart_inheritance and (self.iterations != 0 and iteration_count > self.iterations / 5.0 or iteration_count > 100 or self.stat.stop):
+                    self.quotient.use_smart_inheritance = False
+                    affected_states_average = self.quotient.perc_affected_sum/self.quotient.perc_affected_entries
+                    choices_per_affected_state = self.quotient.choices_per_affected_sum/self.quotient.perc_affected_entries
+                    if affected_states_average > 85 or choices_per_affected_state < 5.5:
+                        print("SWITCHING TO AR DUE TO AFFECTED STATES")
+                    else:
+                        self.quotient.use_inheritance_extended = True
+                        print("SWITCHING TO EIDAR")
+            #------------------------------------
 
             family = families.pop(-1)
 

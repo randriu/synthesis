@@ -30,6 +30,9 @@ class Statistic:
     synthesis_timer_total = paynt.utils.profiler.Timer()
     
     def __init__(self, synthesizer):
+        #------------xshevc01---------------- 
+        self.stop = False
+        #------------------------------------
         
         self.synthesizer = synthesizer
         self.quotient = self.synthesizer.quotient
@@ -86,7 +89,15 @@ class Statistic:
         self.acc_size_dtmc += size_dtmc
         self.print_status()
 
-    def iteration_mdp(self, size_mdp):
+    def iteration_mdp(self, size_mdp, use_smart_inheritance):
+        #------------xshevc01---------------- 
+        if use_smart_inheritance and not self.stop:
+            discarded = self.quotient.discarded
+            fraction_explored = (self.synthesizer.explored + discarded) / self.family_size
+            percentage_explored = int(fraction_explored * 100000) / 1000.0
+            if percentage_explored > 20:
+                self.stop = True
+        #------------------------------------
         if self.iterations_mdp is None:
             self.iterations_mdp = 0
         self.iterations_mdp += 1
@@ -211,11 +222,12 @@ class Statistic:
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
     
+    #------------xshevc01---------------- 
     def get_summary_affected(self):
-        if not self.quotient.use_inheritance_build or self.quotient.perc_affected_entries == 0:
+        if not self.quotient.use_inheritance and not self.quotient.use_inheritance_extended and not self.quotient.use_smart_inheritance or self.quotient.perc_affected_entries == 0:
             return ""
-        return f"\naffected states average: {self.quotient.perc_affected_sum/self.quotient.perc_affected_entries} %"
-
+        return f"\n\naffected states average: {self.quotient.perc_affected_sum/self.quotient.perc_affected_entries:.2f} %\nchoices per affected state average: {self.quotient.choices_per_affected_sum/self.quotient.perc_affected_entries:.2f}"
+    #------------------------------------
     
     def get_summary(self):
         specification = self.get_summary_specification()

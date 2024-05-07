@@ -1,0 +1,97 @@
+pomdp
+
+observables
+started, x, y, m1taken, m1lastobs, m2taken, m2lastobs, m3taken, m3lastobs, finish
+endobservables
+
+const int N = 8;
+const int xMx = N;
+const int yMx = N;
+const int xMIN = 0;
+const int yMIN = 0;
+const double slippery = 0.0;
+
+const m1x = N/2;
+const m1y = N/2;
+
+const m2x = 1;
+const m2y = 1;
+
+const m3x = 1;
+const m3y = N;
+
+
+const double goodmineral = 0.6;
+
+formula done = x = xMx & y = yMx;
+
+formula maxdist = xMx-xMIN+yMx-yMIN;
+
+formula m1dist = max(m1x-x,x-m1x) + max(m1y-y,y-m1y);
+formula m2dist = max(m2x-x,x-m2x) + max(m2y-y,y-m2y);
+formula m3dist = max(m3x-x,x-m3x) + max(m3y-y,y-m3y);
+
+formula normdistrm1 = 1+(m1dist/maxdist);
+formula normdistrm2 = 1+(m2dist/maxdist);
+formula normdistrm3 = 1+(m3dist/maxdist);
+
+
+module master
+    started : bool init false;
+    finish : bool init false;
+
+    [placement] !started -> (started'=true);
+    [north] started & !done -> true;
+    [south] started  & !done -> true;
+    [east] started  & !done-> true;
+    [west] started & !done -> true;
+    [finish] done & !finish -> 1:(finish'=true);
+endmodule
+
+module mineral1
+    m1qual : bool init false;
+    m1taken : bool init false;
+    m1lastobs : bool init false;
+    [placement] true -> goodmineral : (m1qual'=true) + (1-goodmineral) : (m1qual'=false);
+
+    [m1collect] started & (x = m1x & y = m1y & !m1taken) -> 1:(m1taken'=true);
+    [m1sense] started & !m1taken -> (1/normdistrm1): (m1lastobs'=m1qual) +  (1-(1/normdistrm1)): (m1lastobs'=!m1qual);
+    [north] true -> (m1lastobs'=false);
+    [south] true -> (m1lastobs'=false);
+    [east] true -> (m1lastobs'=false);
+    [west] true -> (m1lastobs'=false);
+endmodule
+
+module mineral2 = mineral1[m1collect=m2collect, m1sense=m2sense, m1x = m2x, m1y = m2y, m1qual=m2qual,m1taken=m2taken,m1lastobs=m2lastobs,normdistrm1=normdistrm2] endmodule
+module mineral3 = mineral1[m1collect=m3collect, m1sense=m3sense, m1x = m3x, m1y = m3y, m1qual=m3qual,m1taken=m3taken,m1lastobs=m3lastobs,normdistrm1=normdistrm3] endmodule
+
+module lrv
+    x : [xMIN..xMx] init 0;
+    y : [yMIN..yMx] init 0;
+
+    [west] true -> (1-slippery): (x'=max(x-1,xMIN)) + slippery: (x'=max(x,xMIN));
+    [east] true -> (1-slippery): (x'=min(x+1,xMx)) + slippery: (x'=min(x,xMx));
+    [south]  true -> (1-slippery): (y'=min(y+1,yMx)) + slippery: (y'=min(y,yMx));
+    [north]  true -> (1-slippery): (y'=max(y-1,yMIN)) + slippery: (y'=max(y,yMIN));
+endmodule
+
+rewards "cost"
+    [m1sense] true : 1;
+    [m2sense] true : 1;
+    [m3sense] true : 1;
+
+    [m1collect] true : 2;
+    [m2collect] true : 2;
+    [m3collect] true : 2;
+
+    [north] true : 1;
+    [south] true : 1;
+    [west] true : 1;
+    [east] true : 1;
+    [finish] true : (m1taken & !m1qual ? 4 : 0) + (m2taken & !m2qual ? 4 : 0) +
+                    (m3taken & !m3qual ? 4 : 0) +
+                    ((m1taken & m2taken & m1qual & m2qual) | (m1taken & m3taken & m1qual & m3qual) |
+                    (m2taken & m3taken & m2qual & m3qual) ? 0 : 18);
+endrewards
+
+label "goal" = finish;
