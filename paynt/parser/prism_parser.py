@@ -4,9 +4,7 @@ import payntbind
 import paynt.family.family
 import paynt.verification.property
 import paynt.parser.jani
-
-from ..quotient.models import MarkovChain
-
+import paynt.quotient.models
 
 import os
 import re
@@ -19,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PrismParser:
 
     @classmethod
-    def read_prism(cls, sketch_path, properties_path, relative_error, discount_factor):
+    def read_prism(cls, sketch_path, properties_path, relative_error):
 
         # parse the program
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
@@ -42,7 +40,7 @@ class PrismParser:
             logger.info("processing hole definitions...")
             prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
 
-        specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor, prism)
+        specification = PrismParser.parse_specification(properties_path, relative_error, prism)
 
         # construct the quotient
         coloring = None
@@ -55,13 +53,13 @@ class PrismParser:
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
             coloring = payntbind.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_hole_options)
-            MarkovChain.initialize(specification)
+            paynt.quotient.models.Mdp.initialize(specification)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = payntbind.synthesis.ObservationEvaluator(prism, quotient_mdp)
             quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJani(quotient_mdp)
         else:
-            MarkovChain.initialize(specification)
-            quotient_mdp = MarkovChain.from_prism(prism)
+            paynt.quotient.models.Mdp.initialize(specification)
+            quotient_mdp = paynt.quotient.models.Mdp.from_prism(prism)
 
         return prism, quotient_mdp, specification, family, coloring, jani_unfolder, obs_evaluator
 
@@ -195,17 +193,14 @@ class PrismParser:
         return props[0]
 
     @classmethod
-    def parse_specification(cls, properties_path, relative_error, discount_factor, prism=None, family=None):
+    def parse_specification(cls, properties_path, relative_error=0, prism=None):
         '''
         Expecting one property per line. The line may be terminated with a semicolon.
         Empty lines or comments are allowed.
         '''
-        
         if not os.path.isfile(properties_path):
             raise ValueError(f"the properties file {properties_path} does not exist")
         logger.info(f"loading properties from {properties_path} ...")
-
-        mdp_spec = re.compile(r'^\s*(min|max)\s+(.*)$')
 
         lines = ""
         with open(properties_path) as file:
@@ -214,30 +209,12 @@ class PrismParser:
         properties = []
 
         for line in lines:
-            minmax = None
-            match = mdp_spec.search(line)
-            if match is not None:
-                minmax = match.group(1)
-                line = match.group(2)
-            prop = PrismParser.parse_property(line,prism)
-            if prop is None:
+            formula = PrismParser.parse_property(line,prism)
+            if formula is None:
                 continue
-
-            rf = prop.raw_formula
-            assert rf.has_bound != rf.has_optimality_type, \
-                "optimizing formula contains a bound or a comparison formula does not"
-            if minmax is None:
-                if rf.has_bound:
-                    prop = paynt.verification.property.Property(prop,discount_factor)
-                else:
-                    prop = paynt.verification.property.OptimalityProperty(prop, discount_factor, relative_error)
-            else:
-                assert not rf.has_bound, "double-optimality objective cannot contain a bound"
-                dminimizing = (minmax=="min")
-                prop = paynt.verification.property.DoubleOptimalityProperty(prop, dminimizing, discount_factor, relative_error)
+            prop = paynt.verification.property.construct_property(formula, relative_error)
             properties.append(prop)
 
         specification = paynt.verification.property.Specification(properties)
         logger.info(f"found the following specification: {specification}")
-        assert not specification.has_double_optimality, "did not expect double-optimality property"
         return specification

@@ -46,8 +46,7 @@ def solve_family(args):
             quotient.specification.optimality.optimum = optimum
 
         quotient.build(family)
-
-        res = family.mdp.check_specification(quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
+        res = quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
         family.analysis_result = res
         improving_value = res.improving_value
         improving_assignment = res.improving_assignment

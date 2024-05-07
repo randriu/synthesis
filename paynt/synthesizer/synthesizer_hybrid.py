@@ -127,10 +127,10 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
 
             # construct priority subfamily that corresponds to primary scheduler
             if family.analysis_result.optimality_result is not None:
-                scheduler_selection = family.analysis_result.optimality_result.primary_selection
+                result = family.analysis_result.optimality_result
             else:
-                scheduler_selection = family.analysis_result.constraints_result.results[0].primary_selection
-            priority_subfamily = family.assume_options_copy(scheduler_selection)
+                result = family.analysis_result.constraints_result.results[0]
+            priority_subfamily = family.assume_options_copy(result.primary_selection)
 
             # explore family assignments
             family_explored = False

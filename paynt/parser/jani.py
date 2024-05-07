@@ -2,7 +2,7 @@ import stormpy
 import payntbind
 
 import paynt.verification.property
-from ..quotient.models import MarkovChain
+import paynt.quotient.models
 
 import itertools
 from collections import defaultdict
@@ -49,19 +49,14 @@ class JaniUnfolder:
         properties_unpacked = []
         for index,prop_old in enumerate(properties_old):
             prop_new = properties[index]
-            discount_factor = prop_old.discount_factor
             if type(prop_old) == paynt.verification.property.Property:
-                p = paynt.verification.property.Property(prop_new,discount_factor)
+                p = paynt.verification.property.Property(prop_new)
             else:
                 epsilon = prop_old.epsilon
-                if type(prop_old) == paynt.verification.property.OptimalityProperty:
-                    p = paynt.verification.property.OptimalityProperty(prop_new,discount_factor,epsilon)
-                else:
-                    dminimizing = prop_old.dminimizing
-                    p = paynt.verification.property.DoubleOptimalityProperty(prop_new,dminimizing,discount_factor,epsilon)
+                p = paynt.verification.property.OptimalityProperty(prop_new,epsilon)
             properties_unpacked.append(p)
         self.specification = paynt.verification.property.Specification(properties_unpacked)
-        MarkovChain.initialize(self.specification)
+        paynt.quotient.models.Mdp.initialize(self.specification)
 
         # unfold holes in the program
         self.hole_expressions = hole_expressions
@@ -71,7 +66,7 @@ class JaniUnfolder:
         logger.debug("constructing the quotient...")
 
         # construct the explicit quotient
-        quotient_mdp = stormpy.build_sparse_model_with_options(self.jani_unfolded, MarkovChain.builder_options)
+        quotient_mdp = stormpy.build_sparse_model_with_options(self.jani_unfolded, paynt.quotient.models.Mdp.builder_options)
 
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins

@@ -57,11 +57,7 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, discount_factor=1, precision=1e-4, constraint_bound=None):
-
-        assert discount_factor>0 and discount_factor<=1, "discount factor must be in the interval (0,1]"
-        if discount_factor < 1:
-            logger.warning("ignoring non-trivial discount factor")
+        export=None, relative_error=0, precision=1e-4, constraint_bound=None):
 
         prism = None
         explicit_quotient = None
@@ -83,7 +79,7 @@ class Sketch:
         try:
             logger.info(f"assuming sketch in PRISM format...")
             prism, explicit_quotient, specification, family, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
-                        sketch_path, properties_path, relative_error, discount_factor)
+                        sketch_path, properties_path, relative_error)
             filetype = "prism"
         except SyntaxError:
             pass
@@ -91,7 +87,7 @@ class Sketch:
             try:
                 logger.info(f"assuming sketch in DRN format...")
                 explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
-                specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
+                specification = PrismParser.parse_specification(properties_path, relative_error)
                 filetype = "drn"
             except:
                 pass
@@ -107,7 +103,7 @@ class Sketch:
                 decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
                 if constraint_bound is not None:
-                    specification = PrismParser.parse_specification(properties_path, relative_error, discount_factor)
+                    specification = PrismParser.parse_specification(properties_path, relative_error)
                 else:
                     optimality = paynt.verification.property.construct_reward_property(
                         decpomdp_manager.reward_model_name,
@@ -121,7 +117,7 @@ class Sketch:
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
              
-        paynt.quotient.models.MarkovChain.initialize(specification)
+        paynt.quotient.models.Mdp.initialize(specification)
         paynt.verification.property.Property.initialize()
         
         make_rewards_action_based(explicit_quotient)
@@ -165,7 +161,7 @@ class Sketch:
                 logger.info("processing hole definitions...")
                 prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
 
-            specification = PrismParser.parse_specification(properties_path, 0, 1, prism)
+            specification = PrismParser.parse_specification(properties_path, prism=prism)
 
             prism = prism.replace_variable_initialization_by_init_expression()
             expression_manager = prism.expression_manager

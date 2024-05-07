@@ -8,13 +8,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def construct_property(prop, relative_error):
+    rf = prop.raw_formula
+    assert rf.has_bound != rf.has_optimality_type, \
+        "optimizing formula contains a bound or a comparison formula does not"
+    if rf.has_bound:
+        prop = Property(prop)
+    else:
+        prop = OptimalityProperty(prop, relative_error)
+    return prop
+
 def construct_reward_property(reward_name, minimizing, target_label):
     direction = "min" if minimizing else "max"
     formula_str = 'R{"' + reward_name + '"}' + '{}=? [F "{}"]'.format(direction, target_label)
     formula = stormpy.parse_properties_without_context(formula_str)[0]
     optimality = OptimalityProperty(formula, 0)
     return optimality
-
 
 class Property:
     ''' Wrapper over a stormpy property. '''
@@ -47,14 +56,24 @@ class Property:
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
+    @classmethod
+    def model_check(cls, model, formula):
+        return stormpy.model_checking(model, formula, extract_scheduler=True, environment=cls.environment)
+
+    @classmethod
+    def compute_expected_visits(cls, model):
+        result = stormpy.compute_expected_number_of_visits(cls.environment, model)
+        values = list(result.get_values())
+        return values
+
     @staticmethod
     def above_model_checking_precision(a, b):
         return abs(a-b) > Property.model_checking_precision
 
     
-    def __init__(self, prop, discount_factor=1):
+    def __init__(self, prop):
         self.property = prop
-        self.discount_factor = discount_factor
+        self.name = prop.name
         rf = prop.raw_formula
 
         # use comparison type to deduce optimizing direction
@@ -99,7 +118,7 @@ class Property:
         return formula_alt
     
     def __str__(self):
-        return str(self.property.raw_formula)
+        return str(self.formula)
 
     @property
     def reward(self):
@@ -117,17 +136,17 @@ class Property:
         if not self.is_until:
             return
         logger.info("converting until formula to eventually...")
-        formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
+        formula = payntbind.synthesis.transform_until_to_eventually(self.formula)
         prop = stormpy.core.Property("", formula)
-        self.__init__(prop, self.discount_factor)
+        self.__init__(prop)
 
     def property_copy(self):
-        formula_copy = self.property.raw_formula.clone()
-        property_copy = stormpy.core.Property(self.property.name, formula_copy)
+        formula_copy = self.formula.clone()
+        property_copy = stormpy.core.Property(self.name, formula_copy)
         return property_copy
 
     def copy(self):
-        return Property(self.property_copy(), self.discount_factor)
+        return Property(self.property_copy())
 
     def result_valid(self, value):
         return not self.reward or value != math.inf
@@ -143,15 +162,15 @@ class Property:
         return False
 
     def negate(self):
-        negated_formula = self.property.raw_formula.clone()
+        negated_formula = self.formula.clone()
         negated_formula.comparison_type = {
             stormpy.ComparisonType.LESS:    stormpy.ComparisonType.GEQ,
             stormpy.ComparisonType.LEQ:     stormpy.ComparisonType.GREATER,
             stormpy.ComparisonType.GREATER: stormpy.ComparisonType.LEQ,
             stormpy.ComparisonType.GEQ:     stormpy.ComparisonType.LESS
         }[negated_formula.comparison_type]
-        stormpy_property_negated = stormpy.core.Property(self.property.name, negated_formula)
-        property_negated = Property(stormpy_property_negated,self.discount_factor)
+        stormpy_property_negated = stormpy.core.Property(self.name, negated_formula)
+        property_negated = Property(stormpy_property_negated)
         return property_negated
 
     def get_target_label(self):
@@ -190,9 +209,9 @@ class OptimalityProperty(Property):
     Optimality property can remember current optimal value and adapt the
     corresponding threshold wrt epsilon.
     '''
-    def __init__(self, prop, discount_factor=1, epsilon=0):
+    def __init__(self, prop, epsilon=0):
         self.property = prop
-        self.discount_factor = discount_factor
+        self.name = prop.name
         rf = prop.raw_formula
 
         # use comparison type to deduce optimizing direction
@@ -216,10 +235,10 @@ class OptimalityProperty(Property):
 
     def __str__(self):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
-        return f"{str(self.property.raw_formula)} {eps}"
+        return f"{str(self.formula)} {eps}"
 
     def copy(self):
-        return OptimalityProperty(self.property_copy(), self.discount_factor, self.epsilon)
+        return OptimalityProperty(self.property_copy(), self.epsilon)
 
     def reset(self):
         self.optimum = None
@@ -257,46 +276,24 @@ class OptimalityProperty(Property):
         if not self.is_until:
             return
         logger.info("converting until formula to eventually...")
-        formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
+        formula = payntbind.synthesis.transform_until_to_eventually(self.formula)
         prop = stormpy.core.Property("", formula)
-        self.__init__(prop, self.discount_factor, self.epsilon)
+        self.__init__(prop, self.epsilon)
 
     @property
     def can_be_improved(self):
         return not( not self.reward and self.minimizing and self.threshold == 0 )
 
     def negate(self):
-        negated_formula = self.property.raw_formula.clone()
+        negated_formula = self.formula.clone()
         negate_optimality_type = {
             stormpy.OptimizationDirection.Minimize:    stormpy.OptimizationDirection.Maximize,
             stormpy.OptimizationDirection.Maximize:    stormpy.OptimizationDirection.Minimize
         }[negated_formula.optimality_type]
         negated_formula.set_optimality_type(negate_optimality_type)
-        stormpy_property_negated = stormpy.core.Property(self.property.name, negated_formula)
-        property_negated = OptimalityProperty(stormpy_property_negated,self.discount_factor,self.epsilon)
+        stormpy_property_negated = stormpy.core.Property(self.name, negated_formula)
+        property_negated = OptimalityProperty(stormpy_property_negated,self.epsilon)
         return property_negated
-
-
-class DoubleOptimalityProperty(OptimalityProperty):
-    '''
-    D-optimality property considers minimizing or maximizing the minimizing/maximizing objective function.
-    :note TODO come up with a better term for the outer optimization than 'dminimizing'
-    '''
-    def __init__(self, prop, dminimizing, discount_factor=1, epsilon=0):
-        super().__init__(prop,discount_factor,epsilon)
-        self.dminimizing = dminimizing
-        
-    def __str__(self):
-        s = ""
-        if self.dminimizing:
-            s += "min"
-        else:
-            s += "max"
-        s += " " + super().__str__()
-        return s
-
-    def copy(self):
-        return DoubleOptimalityProperty(self.property_copy(), self.dminimizing, self.discount_factor, self.epsilon)
 
 
 class Specification:
@@ -307,19 +304,14 @@ class Specification:
         
         # sort the properties
         optimalities = []
-        double_optimalities = []
         for p in properties:
             if type(p) == Property:
                 self.constraints.append(p)
             if type(p) == OptimalityProperty:
                 optimalities.append(p)
-            if type(p) == DoubleOptimalityProperty:
-                double_optimalities.append(p)
-        assert len(optimalities)+len(double_optimalities) <=1, "multiple optimality objectives were specified"
+        assert len(optimalities) <=1, "multiple optimality objectives were specified"
         if optimalities:
             self.optimality = optimalities[0]
-        if double_optimalities:
-            self.optimality = double_optimalities[0]
 
     def __str__(self):
         s = ""
@@ -340,10 +332,6 @@ class Specification:
     @property
     def has_optimality(self):
         return self.optimality is not None
-
-    @property
-    def has_double_optimality(self):
-        return type(self.optimality) == DoubleOptimalityProperty
 
     @property
     def num_properties(self):

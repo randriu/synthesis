@@ -1,5 +1,6 @@
 import paynt.synthesizer.synthesizer
 import paynt.quotient.pomdp
+import paynt.verification.property_result
 
 import logging
 logger = logging.getLogger(__name__)
@@ -13,17 +14,14 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     @property
     def method_name(self):
         return "AR"
-
     
     def verify_family(self, family):
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states, self.quotient.use_smart_inheritance)
-        res = family.mdp.check_specification(
-            self.quotient.specification, constraint_indices = family.constraint_indices, short_evaluation = True)
+        res = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
         if res.improving_assignment == "any":
             res.improving_assignment = family
         family.analysis_result = res
-
     
     def update_optimum(self, family):
         ia = family.analysis_result.improving_assignment
@@ -32,8 +30,8 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             # print values for constraints, TODO discuss some nice way of doing this naturally
             if False:
                 print(ia)
-                model = self.quotient.build_assignment(ia)
-                mc_result = model.check_specification(self.quotient.specification)
+                dtmc = self.quotient.build_assignment(ia)
+                mc_result = self.quotient.check_specification_for_dtmc(dtmc)
                 print(mc_result)
             if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
                 self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
