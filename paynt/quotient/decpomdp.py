@@ -146,7 +146,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        print(self.quotient_mdp.transition_matrix)
+        # print(self.quotient_mdp.transition_matrix)
         # logger.debug("nothing to do, aborting.....")
         # exit()
         

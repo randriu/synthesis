@@ -1,13 +1,13 @@
-2024-04-12 17:13:52,990 - cli.py - This is Paynt version 0.1.0.
-2024-04-12 17:13:52,990 - sketch.py - loading sketch from experiment-models/Mars.dpomdp ...
-2024-04-12 17:13:52,991 - sketch.py - assuming sketch in PRISM format...
+2024-04-17 22:54:11,968 - cli.py - This is Paynt version 0.1.0.
+2024-04-17 22:54:11,968 - sketch.py - loading sketch from experiment-models/Mars.dpomdp ...
+2024-04-17 22:54:11,968 - sketch.py - assuming sketch in PRISM format...
 ERROR (SpiritErrorHandler.h:27): Parsing error at 1:1:  expecting <model type>, here:
 	# Mars rovers
 	^
 
-2024-04-12 17:13:53,056 - sketch.py - assuming sketch in DRN format...
+2024-04-17 22:54:12,030 - sketch.py - assuming sketch in DRN format...
 ERROR (DirectEncodingParser.cpp:124): Could not parse line '# Mars rovers'.
-2024-04-12 17:13:53,056 - sketch.py - assuming sketch in Cassandra format...
+2024-04-17 22:54:12,030 - sketch.py - assuming sketch in Cassandra format...
 MADP: trying to parse as POMDP...
 stopped at: 
 File:	experiment-models/Mars.dpomdp
@@ -26,32 +26,32 @@ MADP: parsing success
 MADP: trying to parse as dec-POMDP...
 MADP: parsing success
 paynt.quotient.pomdp.PomdpQuotient.dont_use_discount_transformation False
-2024-04-12 17:13:54,787 - sketch.py - applying discount factor transformation...
-2024-04-12 17:13:54,800 - sketch.py - sketch parsing OK
-2024-04-12 17:13:54,801 - sketch.py - constructed explicit quotient having 243 states and 8678 actions
-2024-04-12 17:13:54,801 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
+2024-04-17 22:54:13,749 - sketch.py - applying discount factor transformation...
+2024-04-17 22:54:13,763 - sketch.py - sketch parsing OK
+2024-04-17 22:54:13,763 - sketch.py - constructed explicit quotient having 243 states and 8678 actions
+2024-04-17 22:54:13,763 - sketch.py - found the following specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
 specification optimality: R[exp]{"reward"}max=? [F "discount_sink"] 
 IMPERFECT++++++++++++++++++++++++++++++++++++++++++++++++++ 1
-2024-04-12 17:14:06,394 - synthesizer_decpomdp.py - Synthesizing optimal k=1 controller ...
+2024-04-17 22:54:24,606 - synthesizer_decpomdp.py - Synthesizing optimal k=1 controller ...
 IMPERFECT++++++++++++++++++++++++++++++++++++++++++++++++++ 1
-2024-04-12 17:14:17,303 - synthesizer.py - synthesis initiated, design space: 101559956668416
-> Progress 0.929%, elapsed 3 s, estimated 323 s, iters = {MDP: 461}, opt = 23.814
-> Progress 3.335%, elapsed 6 s, estimated 179 s, iters = {MDP: 881}, opt = 23.814
-> Progress 10.033%, elapsed 9 s, estimated 89 s, iters = {MDP: 1254}, opt = 23.82
-> Progress 17.143%, elapsed 12 s, estimated 70 s, iters = {MDP: 1625}, opt = 23.82
-> Progress 33.333%, elapsed 15 s, estimated 45 s, iters = {MDP: 2021}, opt = 23.82
-2024-04-12 17:14:34,099 - synthesizer.py - synthesis finished, printing synthesized assignment below:
-2024-04-12 17:14:34,099 - synthesizer.py - A(0,s0notSampled,0)=drill, A(0,s1notSampled,0)=sample, A(0,s2notSampled,0)=sample, A(0,s3notSampled,0)=sample, A(0,s0sampled,0)=left, A(0,s1sampled,0)=up, A(0,s2sampled,0)=right, A(0,s3sampled,0)=down, A(0,__no_obs__,0)=drill, A(1,s0notSampled,0)=drill, A(1,s1notSampled,0)=sample, A(1,s2notSampled,0)=drill, A(1,s3notSampled,0)=up, A(1,s0sampled,0)=right, A(1,s1sampled,0)=left, A(1,s2sampled,0)=right, A(1,s3sampled,0)=up, A(1,__no_obs__,0)=drill
-2024-04-12 17:14:34,101 - synthesizer.py - double-checking specification satisfiability:  : 23.81950874071013
+2024-04-17 22:54:35,333 - synthesizer.py - synthesis initiated, design space: 101559956668416
+> Progress 0.93%, elapsed 3 s, estimated 322 s, iters = {MDP: 485}, opt = 23.814
+> Progress 3.397%, elapsed 6 s, estimated 176 s, iters = {MDP: 918}, opt = 23.814
+> Progress 10.135%, elapsed 9 s, estimated 88 s, iters = {MDP: 1313}, opt = 23.82
+> Progress 17.22%, elapsed 12 s, estimated 69 s, iters = {MDP: 1712}, opt = 23.82
+> Progress 35.185%, elapsed 15 s, estimated 42 s, iters = {MDP: 2093}, opt = 23.82
+2024-04-17 22:54:51,289 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-04-17 22:54:51,289 - synthesizer.py - A(0,s0notSampled,0)=left, A(0,s1notSampled,0)=up, A(0,s2notSampled,0)=up, A(0,s3notSampled,0)=up, A(0,s0sampled,0)=right, A(0,s1sampled,0)=down, A(0,s2sampled,0)=drill, A(0,s3sampled,0)=sample, A(0,__no_obs__,0)=left, A(1,s0notSampled,0)=left, A(1,s1notSampled,0)=up, A(1,s2notSampled,0)=left, A(1,s3notSampled,0)=down, A(1,s0sampled,0)=drill, A(1,s1sampled,0)=right, A(1,s2sampled,0)=drill, A(1,s3sampled,0)=down, A(1,__no_obs__,0)=left
+2024-04-17 22:54:51,290 - synthesizer.py - double-checking specification satisfiability:  : 23.81950874071013
 --------------------
 Synthesis summary:
 optimality objective: R[exp]{"reward"}max=? [F "discount_sink"] 
 
-method: AR, synthesis time: 16.8 s
+method: AR, synthesis time: 15.96 s
 number of holes: 18, family size: 101559956668416, quotient: 243 states / 8678 actions
 explored: 100 %
 MDP stats: avg MDP size: 194, iterations: 2188
 
 optimum: 23.819509
 --------------------
-2024-04-12 17:14:34,101 - synthesizer_decpomdp.py - Synthesizing optimal k=2 controller ...
+2024-04-17 22:54:51,290 - synthesizer_decpomdp.py - Synthesizing optimal k=2 controller ...

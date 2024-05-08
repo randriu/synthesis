@@ -251,7 +251,7 @@ std::map<uint64_t,double> alternativeComputeInconsistentHoleVariance(
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
                     continue;
                 }
-                if( not option_used_in_concrete_observation[id][hole][option]) {
+                if( option_used_in_concrete_observation[id][hole][option]) {
                     continue;
                 }
 
