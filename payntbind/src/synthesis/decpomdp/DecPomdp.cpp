@@ -273,7 +273,7 @@ namespace synthesis {
                 }
                 for(auto duplicate: this->prototype_duplicates[prototype]) {
                     target_flags.set(duplicate);
-                    std::cout << "duplicateo " << duplicate<< std::endl;
+                    // std::cout << "duplicateo " << duplicate<< std::endl;
                 }
             }
             

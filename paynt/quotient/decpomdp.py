@@ -42,7 +42,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-        # print("self.joint_observations",self.joint_observations)
+        print("self.joint_observations",self.joint_observations)
 
         self.row_joint_action = decpomdp_manager.row_joint_action
         # print("self.row_joint_action",self.row_joint_action)
@@ -194,6 +194,15 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                     assert int(i) <= self.nr_states
                     self.decpomdp_manager.set_target_state(int(i))
                     print("set_target_state",int(i))
+
+            # for agent in range(self.nr_agents): 
+            #     for state in range(self.nr_states):
+            #         observation = self.agent_state_observation[agent][state]
+            #         obs_label = self.agent_observation_labels[agent][observation]
+            #         if obs_label == "target":
+            #             self.decpomdp_manager.set_target_state(state)
+            #         # print(f"obs_label {obs_label} agent {agent} state {state}")
+
 
 
             # for state in range(self.nr_states):
