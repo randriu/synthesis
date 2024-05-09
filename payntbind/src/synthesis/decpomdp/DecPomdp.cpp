@@ -703,7 +703,7 @@ namespace synthesis {
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
                 // std::cout << "this->joint_observations[obs][0] " << this->joint_observations[obs][1]  << std::endl;
                 // std::cout << "obs " << obs << std::endl;
-                uint64_t max_mem_size = 4; //TODO there was 0
+                uint64_t max_mem_size = 0; //TODO there was 0
                 for(auto dst_state: this->observation_successors[obs]) {
                     auto dst_obs = this->state_joint_observation[dst_state];
                     // std::cout << "this->joint_observations[dst_obs][0] " << this->joint_observations[dst_obs][1]  << std::endl;
@@ -733,7 +733,7 @@ namespace synthesis {
                     uint64_t obs = this->joint_observations[joint_obs][agent];
                 
                     // std::cout << "obs " << obs << std::endl;
-                    uint64_t max_mem_size = 4; //TODO there was 0
+                    uint64_t max_mem_size = 0; //TODO there was 0
                     for(auto dst_state: this->observation_successors[joint_obs]) {
                         auto dst_obs = this->state_joint_observation[dst_state];
                         // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
