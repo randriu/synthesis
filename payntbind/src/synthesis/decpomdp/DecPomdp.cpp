@@ -695,6 +695,8 @@ namespace synthesis {
         }
     }
 
+
+
     void DecPomdp::buildTransitionMatrixSpurious() {
             this->max_successor_memory_size.resize(this->num_joint_observations());
             // for each observation, define the maximum successor memory size
@@ -703,7 +705,7 @@ namespace synthesis {
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
                 // std::cout << "this->joint_observations[obs][0] " << this->joint_observations[obs][1]  << std::endl;
                 // std::cout << "obs " << obs << std::endl;
-                uint64_t max_mem_size = 0; //TODO there was 0
+                uint64_t max_mem_size = 1; //TODO there was 0
                 for(auto dst_state: this->observation_successors[obs]) {
                     auto dst_obs = this->state_joint_observation[dst_state];
                     // std::cout << "this->joint_observations[dst_obs][0] " << this->joint_observations[dst_obs][1]  << std::endl;
@@ -716,8 +718,11 @@ namespace synthesis {
                 this->max_successor_memory_size[obs] = max_mem_size;
                 // std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
             }
-            // std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
-
+            std::cout << "this->joint_observations" << this->joint_observations<< std::endl;
+            std::cout << "this->agent_observation_labels" << this->agent_observation_labels<< std::endl;
+            // std::cout << "this->observation_successors " << this->observation_successors<< std::endl;
+            std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
+            std::cout << "this->observation_memory_size " << this->observation_memory_size << std::endl;
 
             //collect max succesor memory for each agent
 
@@ -733,7 +738,7 @@ namespace synthesis {
                     uint64_t obs = this->joint_observations[joint_obs][agent];
                 
                     // std::cout << "obs " << obs << std::endl;
-                    uint64_t max_mem_size = 0; //TODO there was 0
+                    uint64_t max_mem_size = 1; //TODO there was 0
                     for(auto dst_state: this->observation_successors[joint_obs]) {
                         auto dst_obs = this->state_joint_observation[dst_state];
                         // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
@@ -747,7 +752,7 @@ namespace synthesis {
                 }
                 
             }
-            // std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
+            std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
 
 
 
