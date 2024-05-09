@@ -703,7 +703,7 @@ namespace synthesis {
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
                 // std::cout << "this->joint_observations[obs][0] " << this->joint_observations[obs][1]  << std::endl;
                 // std::cout << "obs " << obs << std::endl;
-                uint64_t max_mem_size = 0; //TODO there was 0
+                uint64_t max_mem_size = 4; //TODO there was 0
                 for(auto dst_state: this->observation_successors[obs]) {
                     auto dst_obs = this->state_joint_observation[dst_state];
                     // std::cout << "this->joint_observations[dst_obs][0] " << this->joint_observations[dst_obs][1]  << std::endl;
@@ -733,7 +733,7 @@ namespace synthesis {
                     uint64_t obs = this->joint_observations[joint_obs][agent];
                 
                     // std::cout << "obs " << obs << std::endl;
-                    uint64_t max_mem_size = 0; //TODO there was 0
+                    uint64_t max_mem_size = 4; //TODO there was 0
                     for(auto dst_state: this->observation_successors[joint_obs]) {
                         auto dst_obs = this->state_joint_observation[dst_state];
                         // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
@@ -745,9 +745,11 @@ namespace synthesis {
                     // std::cout << "max_mem_size " << max_mem_size << std::endl;
                     this->agent_max_successor_memory_size[agent][obs] = max_mem_size;
                 }
+
                 
             }
             // std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
+            std::cout << "this->observation_memory_size " << this->observation_memory_size << std::endl;
 
 
 
@@ -998,6 +1000,8 @@ namespace synthesis {
                     }
                 }
             }
+            std::cout << "this->max_successor_memory_size" << this->max_successor_memory_size << std::endl;
+            std::cout << "this->agent_max_successor_memory_size" << this->agent_max_successor_memory_size << std::endl;
             // std::cout << "this->action_holes" << this->action_holes << std::endl;
 
             uint64_t row = 0;
@@ -1046,8 +1050,8 @@ namespace synthesis {
                             if(this->max_successor_memory_size[joint_observation] > 1) {
                                 // std::cout << "check  1" << std::endl;
                                 // there is a memory hole that corresponds to this state
-                                std::cout << "this->memory_holes " <<this->memory_holes << std::endl;
-                                std::cout << "agent " << agent << "obs " << obs << "mem " << mem << std::endl;
+                                // std::cout << "this->memory_holes " <<this->memory_holes << std::endl;
+                                // std::cout << "agent " << agent << "obs " << obs << "mem " << mem << std::endl;
                                 auto memory_hole = this->memory_holes[agent][obs][mem];
                                 // std::cout << "check  2" << std::endl;
                                 this->row_memory_hole[agent][row] = memory_hole;

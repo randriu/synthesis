@@ -165,6 +165,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         for agent in range(self.nr_agents): 
             agent_obs_mem_size = [memory_size for obs in range(self.nr_agent_observations[agent])]
             if self.decpomdp_manager.discounted:
+                print("++++++++++++++++++++++++++++++++++++++++++++++++++++")
                 agent_obs_mem_size[-1:] = [1] # this is for discount state
             
             self.agent_observation_memory_size[agent] = agent_obs_mem_size
