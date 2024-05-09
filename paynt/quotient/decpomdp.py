@@ -199,9 +199,9 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             #     for state in range(self.nr_states):
             #         observation = self.agent_state_observation[agent][state]
             #         obs_label = self.agent_observation_labels[agent][observation]
-            #         if obs_label == "target":
+            #         if obs_label == "targe":
             #             self.decpomdp_manager.set_target_state(state)
-            #         # print(f"obs_label {obs_label} agent {agent} state {state}")
+                    # print(f"obs_label {obs_label} agent {agent} state {state}")
 
 
 

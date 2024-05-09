@@ -14,8 +14,8 @@ f b
 f b
 #
 observations: 
-o target
-o target
+o targe
+o targe
 #
 T : f f : s1 : s1 : 0.9025
 T : f f : s1 : s4 : 0.04875
@@ -167,7 +167,7 @@ O : * * : s1 : o o : 1.0
 O : * * : s2 : o o : 1.0
 O : * * : s3 : o o : 1.0
 O : * * : s4 : o o : 1.0
-O : * * : end : target target : 1.0
+O : * * : end : targe targe : 1.0
 #
 R: * *: * : * : * : 1
 #R: f b: * : * : * : 10

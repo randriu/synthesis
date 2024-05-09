@@ -479,17 +479,26 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
+        // std::cout << "check 1 " << std::endl;
         this->countSuccessors();
+        // std::cout << "check 2 " << std::endl;
         this->buildTransitionMatrixSpurious();
+        // std::cout << "check 3 " << std::endl;
 
         storm::storage::sparse::ModelComponents<double> components;
         components.stateLabeling = this->constructQuotientStateLabeling();
+        // std::cout << "check 4 " << std::endl;
         components.choiceLabeling = this->constructQuotientChoiceLabeling();
+        // std::cout << "check 5 " << std::endl;
         components.transitionMatrix = this->constructQuotientTransitionMatrix();
+        // std::cout << "check 6 " << std::endl;
         // std::cout << "this->row_reward " << this->row_reward<< std::endl;
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
+        // std::cout << "check 7 " << std::endl;
         this->resetDesignSpace();
+        // std::cout << "check 8 " << std::endl;
         this->buildDesignSpaceSpurious(); 
+        // std::cout << "check 9 " << std::endl;
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
@@ -995,7 +1004,6 @@ namespace synthesis {
             uint64_t old_state = 0;
             uint64_t row_group = 0;
 
-
              // map each row to some action (memory) hole (if applicable) and its value
             for(uint64_t state = 0; state < this->num_quotient_states; state++) {
                 auto prototype = this->state_prototype[state];
@@ -1009,7 +1017,7 @@ namespace synthesis {
                     }
                     row = row_group;
                     auto obs = this->joint_observations[joint_observation][agent];
-                    uint64_t mem_index = (uint64_t)std::pow(std::pow(this->observation_memory_size[joint_observation], 1.0 / this->num_agents), this->num_agents - 1 - agent);
+                    uint64_t mem_index = (uint64_t)std::pow(std::pow(this->max_successor_memory_size[joint_observation], 1.0 / this->num_agents), this->num_agents - 1 - agent);
                     auto mem = unprocessed_mem /  mem_index; //TODO work only with same memory for each agent
                     // std::cout << "agent " << agent << "mem_index " << mem_index << "unprocessed_mem " << unprocessed_mem << "mem " << mem << std::endl;
                     unprocessed_mem = (uint64_t)unprocessed_mem %  mem_index;
@@ -1036,10 +1044,16 @@ namespace synthesis {
                                 // std::cout << "a joint_observation " << joint_observation << std::endl;
                             }
                             if(this->max_successor_memory_size[joint_observation] > 1) {
+                                // std::cout << "check  1" << std::endl;
                                 // there is a memory hole that corresponds to this state
+                                std::cout << "this->memory_holes " <<this->memory_holes << std::endl;
+                                std::cout << "agent " << agent << "obs " << obs << "mem " << mem << std::endl;
                                 auto memory_hole = this->memory_holes[agent][obs][mem];
+                                // std::cout << "check  2" << std::endl;
                                 this->row_memory_hole[agent][row] = memory_hole;
+                                // std::cout << "check  3" << std::endl;
                                 this->row_memory_option[agent][row] = mem;
+                                // std::cout << "check  4" << std::endl;
                             } else {
                                 this->row_memory_hole[agent][row] = this->num_holes;
                                 // std::cout << "state " << state << std::endl;
@@ -1052,8 +1066,6 @@ namespace synthesis {
                 }
             }
             
-            
-
 
             // fill row_memory_option
             row = 0;
