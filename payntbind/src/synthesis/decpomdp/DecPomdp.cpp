@@ -479,26 +479,26 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
-        // std::cout << "check 1 " << std::endl;
+        std::cout << "check 1 " << std::endl;
         this->countSuccessors();
-        // std::cout << "check 2 " << std::endl;
+        std::cout << "check 2 " << std::endl;
         this->buildTransitionMatrixSpurious();
-        // std::cout << "check 3 " << std::endl;
+        std::cout << "check 3 " << std::endl;
 
         storm::storage::sparse::ModelComponents<double> components;
         components.stateLabeling = this->constructQuotientStateLabeling();
-        // std::cout << "check 4 " << std::endl;
+        std::cout << "check 4 " << std::endl;
         components.choiceLabeling = this->constructQuotientChoiceLabeling();
-        // std::cout << "check 5 " << std::endl;
+        std::cout << "check 5 " << std::endl;
         components.transitionMatrix = this->constructQuotientTransitionMatrix();
-        // std::cout << "check 6 " << std::endl;
+        std::cout << "check 6 " << std::endl;
         // std::cout << "this->row_reward " << this->row_reward<< std::endl;
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
-        // std::cout << "check 7 " << std::endl;
+        std::cout << "check 7 " << std::endl;
         this->resetDesignSpace();
-        // std::cout << "check 8 " << std::endl;
+        std::cout << "check 8 " << std::endl;
         this->buildDesignSpaceSpurious(); 
-        // std::cout << "check 9 " << std::endl;
+        std::cout << "check 9 " << std::endl;
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
@@ -703,7 +703,7 @@ namespace synthesis {
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
                 // std::cout << "this->joint_observations[obs][0] " << this->joint_observations[obs][1]  << std::endl;
                 // std::cout << "obs " << obs << std::endl;
-                uint64_t max_mem_size = 0; //TODO there was 0
+                uint64_t max_mem_size = 4; //TODO there was 0
                 for(auto dst_state: this->observation_successors[obs]) {
                     auto dst_obs = this->state_joint_observation[dst_state];
                     // std::cout << "this->joint_observations[dst_obs][0] " << this->joint_observations[dst_obs][1]  << std::endl;
@@ -733,7 +733,7 @@ namespace synthesis {
                     uint64_t obs = this->joint_observations[joint_obs][agent];
                 
                     // std::cout << "obs " << obs << std::endl;
-                    uint64_t max_mem_size = 0; //TODO there was 0
+                    uint64_t max_mem_size = 4; //TODO there was 0
                     for(auto dst_state: this->observation_successors[joint_obs]) {
                         auto dst_obs = this->state_joint_observation[dst_state];
                         // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
@@ -1046,8 +1046,8 @@ namespace synthesis {
                             if(this->max_successor_memory_size[joint_observation] > 1) {
                                 // std::cout << "check  1" << std::endl;
                                 // there is a memory hole that corresponds to this state
-                                std::cout << "this->memory_holes " <<this->memory_holes << std::endl;
-                                std::cout << "agent " << agent << "obs " << obs << "mem " << mem << std::endl;
+                                // std::cout << "this->memory_holes " <<this->memory_holes << std::endl;
+                                // std::cout << "agent " << agent << "obs " << obs << "mem " << mem << std::endl;
                                 auto memory_hole = this->memory_holes[agent][obs][mem];
                                 // std::cout << "check  2" << std::endl;
                                 this->row_memory_hole[agent][row] = memory_hole;
