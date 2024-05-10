@@ -42,7 +42,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-        print("self.joint_observations",self.joint_observations)
+        # print("self.joint_observations",self.joint_observations)
 
         self.row_joint_action = decpomdp_manager.row_joint_action
         # print("self.row_joint_action",self.row_joint_action)
@@ -146,7 +146,21 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        # print(self.quotient_mdp.transition_matrix)
+        # for state in range(self.nr_states):
+        #     action_index = 0
+        #     group_start = self.quotient_mdp.transition_matrix.get_row_group_start(state)
+        #     group_end = self.quotient_mdp.transition_matrix.get_row_group_end(state)
+        #     is_target = True
+        #     for row_index in range(group_start, group_end):
+        #         # print("state =",state)
+        #         for entry in self.quotient_mdp.transition_matrix.get_row(row_index):
+        #             if entry.column != state:
+        #                 is_target = False
+        #             # print("entry ", entry)
+        #     if is_target:
+        #         print(f"{state}", end =" ")
+        # print(group_end - group_start)
+
         # logger.debug("nothing to do, aborting.....")
         # exit()
         
@@ -187,21 +201,21 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             # print("paynt.quotient.pomdp.PomdpQuotient.sketch_path ",paynt.quotient.pomdp.PomdpQuotient.sketch_path )
             sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
             props_path = self.substitute_suffix(sketch_path, '.', 'target')
-            # h = open(props_path, 'r')
-            # content = h.readlines()
-            # for i in content[0].split(' '):
-            #     if i.isdigit() == True: 
-            #         assert int(i) <= self.nr_states
-            #         self.decpomdp_manager.set_target_state(int(i))
-            #         print("set_target_state",int(i))
+            h = open(props_path, 'r')
+            content = h.readlines()
+            for i in content[0].split(' '):
+                if i.isdigit() == True: 
+                    assert int(i) <= self.nr_states
+                    self.decpomdp_manager.set_target_state(int(i))
+                    # print("set_target_state",int(i))
 
-            for agent in range(self.nr_agents): 
-                for state in range(self.nr_states):
-                    observation = self.agent_state_observation[agent][state]
-                    obs_label = self.agent_observation_labels[agent][observation]
-                    if obs_label == "target":
-                        self.decpomdp_manager.set_target_state(state)
-                    # print(f"obs_label {obs_label} agent {agent} state {state}")
+            # for agent in range(self.nr_agents): 
+            #     for state in range(self.nr_states):
+            #         observation = self.agent_state_observation[agent][state]
+            #         obs_label = self.agent_observation_labels[agent][observation]
+            #         if obs_label == "target":
+            #             self.decpomdp_manager.set_target_state(state)
+            #         # print(f"obs_label {obs_label} agent {agent} state {state}")
 
 
 
@@ -251,7 +265,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.hole_option_to_actions[hole][option].append(choice)
 
         self.design_space = paynt.family.family.DesignSpace(family)
-        print("self.design_space ",self.design_space )
+        # print("self.design_space ",self.design_space )
 
     def create_coloring(self):
 
@@ -264,7 +278,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.observation_action_holes = []
         self.observation_memory_holes = []
         self.is_action_hole = []
-        print("CHECK 1")
         for agent in range(self.nr_agents): 
             for obs in range(self.nr_agent_observations[agent]):
                 
@@ -293,7 +306,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                         self.is_action_hole.append(False)
                 self.observation_memory_holes.append(hole_indices)
 
-        print("CHECK 2")
 
         row_action_hole = pm.row_action_hole
         num_holes = pm.num_holes
@@ -302,7 +314,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         row_memory_option = pm.row_memory_option
         # create the coloring
         choice_to_hole_options = []
-        print("range(mdp.nr_choices)",range(mdp.nr_choices))
+        # print("range(mdp.nr_choices)",range(mdp.nr_choices))
         for action in range(mdp.nr_choices):
             hole_options = []
             for agent in range(self.nr_agents): 
@@ -318,7 +330,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("pm.num_holes",pm.num_holes)
         # print("all_holes",all_holes)
         # print("choice_to_hole_options",choice_to_hole_options)
-        print("CHECK 3")
         return all_holes, choice_to_hole_options
 
     def new_scores(self,scores):

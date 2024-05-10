@@ -1,3 +1,12 @@
+# Contributions of MASTER'S THESIS 
+# INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+# by Vojtech Hranicka
+# TODO
+# added command line options for PAYNT in regards to running Storm from PAYNT and running SAYNT
+# also added options for exporting FSCs
+#
+# added options: --storm-pomdp, --storm-options, --iterative-storm, --get-storm-result,
+#                --prune-storm, --use-storm-cutoffs, --unfold-strategy-storm, --export-fsc-storm, --export-fsc-paynt
 from . import version
 
 import paynt.parser.sketch
