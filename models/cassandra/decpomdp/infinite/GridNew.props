@@ -1,1 +1,3 @@
 Pmax=? [F "target"]
+
+//R{"reward"}max=? [F "target"]

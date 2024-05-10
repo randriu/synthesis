@@ -265,7 +265,7 @@ namespace synthesis {
         }
         else{
             storm::storage::BitVector target_flags(this->num_quotient_states, false);
-            std::cout << "this->target_states o " << this->target_states<< std::endl;
+            // std::cout << "this->target_states o " << this->target_states<< std::endl;
             for (uint64_t prototype = 0; prototype < this->num_states() ; prototype++){
                 if (not this->target_states[prototype])
                 {
@@ -479,26 +479,26 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
-        std::cout << "check 1 " << std::endl;
+        // std::cout << "check 1 " << std::endl;
         this->countSuccessors();
-        std::cout << "check 2 " << std::endl;
+        // std::cout << "check 2 " << std::endl;
         this->buildTransitionMatrixSpurious();
-        std::cout << "check 3 " << std::endl;
+        // std::cout << "check 3 " << std::endl;
 
         storm::storage::sparse::ModelComponents<double> components;
         components.stateLabeling = this->constructQuotientStateLabeling();
-        std::cout << "check 4 " << std::endl;
+        // std::cout << "check 4 " << std::endl;
         components.choiceLabeling = this->constructQuotientChoiceLabeling();
-        std::cout << "check 5 " << std::endl;
+        // std::cout << "check 5 " << std::endl;
         components.transitionMatrix = this->constructQuotientTransitionMatrix();
-        std::cout << "check 6 " << std::endl;
+        // std::cout << "check 6 " << std::endl;
         // std::cout << "this->row_reward " << this->row_reward<< std::endl;
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
-        std::cout << "check 7 " << std::endl;
+        // std::cout << "check 7 " << std::endl;
         this->resetDesignSpace();
-        std::cout << "check 8 " << std::endl;
+        // std::cout << "check 8 " << std::endl;
         this->buildDesignSpaceSpurious(); 
-        std::cout << "check 9 " << std::endl;
+        // std::cout << "check 9 " << std::endl;
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
@@ -718,11 +718,11 @@ namespace synthesis {
                 this->max_successor_memory_size[obs] = max_mem_size;
                 // std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
             }
-            std::cout << "this->joint_observations" << this->joint_observations<< std::endl;
-            std::cout << "this->agent_observation_labels" << this->agent_observation_labels<< std::endl;
-            // std::cout << "this->observation_successors " << this->observation_successors<< std::endl;
-            std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
-            std::cout << "this->observation_memory_size " << this->observation_memory_size << std::endl;
+            // std::cout << "this->joint_observations" << this->joint_observations<< std::endl;
+            // std::cout << "this->agent_observation_labels" << this->agent_observation_labels<< std::endl;
+            // // std::cout << "this->observation_successors " << this->observation_successors<< std::endl;
+            // std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
+            // std::cout << "this->observation_memory_size " << this->observation_memory_size << std::endl;
 
             //collect max succesor memory for each agent
 
