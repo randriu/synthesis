@@ -286,6 +286,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 num_actions = self.nr_agent_actions_at_observation[agent][obs]
                 if num_actions > 1:
                     option_labels = [str(labels) for labels in self.agent_labels_actions_at_observation[agent][obs]]
+                    print("option_labels",option_labels)
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         hole_indices.append(all_holes.num_holes)
                         name = self.create_hole_name(agent,obs,mem,True)

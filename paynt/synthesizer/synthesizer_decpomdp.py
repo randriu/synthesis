@@ -1,3 +1,10 @@
+# Contributions of MASTER'S THESIS 
+# INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+# by Vojtech Hranicka
+# 
+# This whole file was created by me. It contains the iterative loop of FSC synthesis
+#
+
 import stormpy
 
 from .statistic import Statistic
@@ -36,19 +43,10 @@ class SynthesizerDECPOMDP(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         '''
         @param unfold_imperfect_only if True, only imperfect observations will be unfolded
         '''
-        # self.quotient.set_imperfect_memory_size(1)
-        # self.synthesize(self.quotient.design_space,optimum_threshold=optimum_threshold)
-        # print("OPTIMUM/////////////////////////////////1",self.quotient.specification.optimality.optimum)
-        # self.quotient.set_imperfect_memory_size(2)
-        # self.synthesize(self.quotient.design_space,optimum_threshold=optimum_threshold)
-        # print("OPTIMUM/////////////////////////////////2",self.quotient.specification.optimality.optimum)
-        # self.quotient.set_imperfect_memory_size(3)
-        # self.synthesize(self.quotient.design_space,optimum_threshold=optimum_threshold)
             
         mem_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size
         opt = self.quotient.specification.optimality.optimum
         while True:
-            # print("MEM SIZE>>>>>>>>>>>>>>>>>>>>>>>>>",mem_size)
             
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             if unfold_imperfect_only:
@@ -61,7 +59,4 @@ class SynthesizerDECPOMDP(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             opt_old = opt
             opt = self.quotient.specification.optimality.optimum
 
-            # finish if optimum has not been improved
-            # if opt_old == opt and opt is not None:
-            #     break
             mem_size += 1

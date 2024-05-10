@@ -1,3 +1,8 @@
+// Contributions of MASTER'S THESIS 
+// INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+// by Vojtech Hranicka
+
+// Added majority of bindings
 #include "../synthesis.h"
 
 #include "DecPomdp.h"

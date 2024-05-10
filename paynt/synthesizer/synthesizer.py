@@ -1,3 +1,10 @@
+# Contributions of MASTER'S THESIS 
+# INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+# by Vojtech Hranicka
+# 
+# added possibility for PAYNT to use iterative FSC synthesis for Dec-POMDP
+#
+
 import paynt.synthesizer.statistic
 
 import logging
