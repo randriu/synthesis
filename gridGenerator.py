@@ -7,21 +7,26 @@ def main():
 
     f = open("gridGeneratedTransactions.txt", "w")
 
-    # for x1 in range(8):
-    #     for y1 in range(8):
-    #         for x2 in range(8):
-    #             for y2 in range(8):
-    #                 if x1 == 2 and y1 == 5 and x2 == 6 and y2 == 2:
-    #                     f.write(f"1.0 ")
-    #                 else:
-    #                     f.write(f"0.0 ")
+    
 
-    # for x1 in range(8):
-    #     for y1 in range(8):
-    #         for x2 in range(8):
-    #             for y2 in range(8):
-    #                 f.write(f"s{x1}{y1}{x2}{y2} ")
+    
+    f.write(f"# Meeting in a gridn\nagents: 2\ndiscount: 0.9\nvalues: reward\nstates: ")
+    for x1 in range(8):
+        for y1 in range(8):
+            for x2 in range(8):
+                for y2 in range(8):
+                    f.write(f"s{x1}{y1}{x2}{y2} ")
+    f.write(f"\nstart:\n")
 
+    for x1 in range(8):
+        for y1 in range(8):
+            for x2 in range(8):
+                for y2 in range(8):
+                    if x1 == 2 and y1 == 5 and x2 == 6 and y2 == 2:
+                        f.write(f"1.0 ")
+                    else:
+                        f.write(f"0.0 ")
+    f.write(f"\nactions:\na0 a1 a2 a3\na0 a1 a2 a3\nobservations:\no0 o1\no0 o1\n")
     for a1 in range(4):
         for a2 in range(4):
             for x1 in range(8):
@@ -68,7 +73,11 @@ def main():
                                 if not(x2 == 7 or (x2 == 2 and y2 <7 and y2 >2) or (x2 == 4 and y2 <4)) :
                                     ox2 = x2 +1
                                     agent_2_changed = True
-                            if (x1 == x2 and y1 == y2):
+                            # if (x1 == x2 and y1 == y2):
+                            #     f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
+                            if (x1  == 2 and y1 == 4 and x2  == 7 and y2 == 2):
+                                f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
+                            elif (x1  == 2 and y1 == 4 and x2  == 7 and y2 == 7):
                                 f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
                             elif not(agent_1_changed) and not(agent_2_changed) :
                                 f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
@@ -120,6 +129,7 @@ def main():
                             #     f.write(f"O: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : target target : 1.0\n")
                             # else:
                             f.write(f"O: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : o{o1} o{o2} : 1.0\n")
+    f.write(f"#\nR: * *: * : * : * : -1 \n#")
     f.close()
 
 if __name__ == "__main__":
