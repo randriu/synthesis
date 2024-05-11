@@ -1,7 +1,7 @@
 # Contributions of MASTER'S THESIS 
 # INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
 # by Vojtech Hranicka
-# 
+
 # This whole file was created by me. It contains the iterative loop of FSC synthesis
 #
 

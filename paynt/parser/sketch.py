@@ -1,3 +1,9 @@
+# Contributions of MASTER'S THESIS 
+# INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+# by Vojtech Hranicka
+# 
+# added path to specification for undiscounted Dec-POMDP in load_sketch
+#
 import stormpy
 import payntbind
 
@@ -155,8 +161,6 @@ class Sketch:
         specification.transform_until_to_eventually()
         logger.info(f"found the following specification {specification}")
 
-
-        print("specification",specification)
 
         if export is not None:
             Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)

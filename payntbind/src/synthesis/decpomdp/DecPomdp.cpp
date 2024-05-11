@@ -1,3 +1,11 @@
+// Contributions of MASTER'S THESIS 
+// INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+// by Vojtech Hranicka
+
+// This file contains construction of Quotient MDP
+// added functions: setObservationMemorySize, setGlobalMemorySize, constructQuotientStateLabeling, constructQuotientChoiceLabeling, constructQuotientTransitionMatrix,
+// constructQuotientRewardModel, resetDesignSpace, construct_memory_joint_observation, construct_acton_to_memory_joint_observation, construct_state_to_memory_joint_observation, buildDesignSpaceSpurious
+// Some unction in this file are inspirated by functions in PomdpManager.cpp
 #include "DecPomdp.h"
 
 #include "madp/src/base/Globals.h"

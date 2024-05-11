@@ -1,3 +1,8 @@
+// Contributions of MASTER'S THESIS 
+// INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+// by Vojtech Hranicka
+
+// Added function alternativeComputeInconsistentHoleVariance inspirated by ComputeInconsistentHoleVariance
 #include "../synthesis.h"
 
 #include "JaniChoices.h"

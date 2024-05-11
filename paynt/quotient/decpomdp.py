@@ -1,3 +1,10 @@
+# Contributions of MASTER'S THESIS 
+# INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+# by Vojtech Hranicka
+
+# This whole file was created by me. It contains coloring of Quotient MDP. 
+# Functions in this file are inspirated by pomdp.py
+#
 import stormpy
 import payntbind
 
@@ -123,16 +130,21 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("self.nr_agent_actions_at_observation",self.nr_agent_actions_at_observation)
 
         # get labels of actions available at each observation for each agent 
-        self.agent_labels_actions_at_observation = [0] * self.nr_agents
+        self.agent_labels_actions= [0] * self.nr_agents
         for agent in range(self.nr_agents): 
-            labels = [0] * self.nr_agent_observations[agent]
-            for state in range(self.nr_states):
-                obs = self.agent_state_observation[agent][state]
-                if labels[obs] != 0:
-                    continue
-                actions = self.row_joint_action[state]
-                labels[obs] = list(set(map(lambda x: self.agent_action_labels[agent][self.joint_actions[x][agent]] , actions)))
-            self.agent_labels_actions_at_observation[agent] = labels
+            if self.decpomdp_manager.discounted:
+                self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-2]]
+            else:
+                self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-1]]
+        # for agent in range(self.nr_agents): 
+        #     labels = [0] * self.nr_agent_observations[agent]
+        #     for state in range(self.nr_states):
+        #         obs = self.agent_state_observation[agent][state]
+        #         if labels[obs] != 0:
+        #             continue
+        #         actions = self.row_joint_action[state]
+        #         labels[obs] = list(set(map(lambda x: self.agent_action_labels[agent][self.joint_actions[x][agent]] , actions)))
+        # self.agent_labels_actions_at_observation[agent] = labels
 
         # print("self.agent_labels_actions_at_observation",self.agent_labels_actions_at_observation)
 
@@ -146,19 +158,22 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        # for state in range(self.nr_states):
-        #     action_index = 0
-        #     group_start = self.quotient_mdp.transition_matrix.get_row_group_start(state)
-        #     group_end = self.quotient_mdp.transition_matrix.get_row_group_end(state)
-        #     is_target = True
-        #     for row_index in range(group_start, group_end):
-        #         # print("state =",state)
-        #         for entry in self.quotient_mdp.transition_matrix.get_row(row_index):
-        #             if entry.column != state:
-        #                 is_target = False
-        #             # print("entry ", entry)
-        #     if is_target:
-        #         print(f"{state}", end =" ")
+        for state in range(self.nr_states):
+            action_index = 0
+            group_start = self.quotient_mdp.transition_matrix.get_row_group_start(state)
+            group_end = self.quotient_mdp.transition_matrix.get_row_group_end(state)
+            is_target = True
+            for row_index in range(group_start, group_end):
+                # print("state =",state)
+                for entry in self.quotient_mdp.transition_matrix.get_row(row_index):
+                    if entry.column != state:
+                        is_target = False
+                    # print("entry ", entry)
+            if is_target:
+                print(f"{state}", end =" ")
+        print("************")
+        # 131 134 135 407 410 421 424 441 570 576 642 654 702 708 855 858 863 887 896 930 936 1497 1501 1522 1524 1757 1761 1764 1768 1869 1881 1882 1888 2047 2050 2055 2103 2110 2113 2133 2219 2223 2240 2241 2269 2299 2301 2302 
+
         # print(group_end - group_start)
 
         # logger.debug("nothing to do, aborting.....")
@@ -285,7 +300,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 hole_indices = []
                 num_actions = self.nr_agent_actions_at_observation[agent][obs]
                 if num_actions > 1:
-                    option_labels = [str(labels) for labels in self.agent_labels_actions_at_observation[agent][obs]]
+                    option_labels = self.agent_labels_actions[agent] #TODO only for undiscounted else [:-2] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     print("option_labels",option_labels)
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         hole_indices.append(all_holes.num_holes)
