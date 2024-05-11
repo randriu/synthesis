@@ -130,16 +130,21 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print("self.nr_agent_actions_at_observation",self.nr_agent_actions_at_observation)
 
         # get labels of actions available at each observation for each agent 
-        self.agent_labels_actions_at_observation = [0] * self.nr_agents
+        self.agent_labels_actions= [0] * self.nr_agents
         for agent in range(self.nr_agents): 
-            labels = [0] * self.nr_agent_observations[agent]
-            for state in range(self.nr_states):
-                obs = self.agent_state_observation[agent][state]
-                if labels[obs] != 0:
-                    continue
-                actions = self.row_joint_action[state]
-                labels[obs] = list(set(map(lambda x: self.agent_action_labels[agent][self.joint_actions[x][agent]] , actions)))
-            self.agent_labels_actions_at_observation[agent] = labels
+            if self.decpomdp_manager.discounted:
+                self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-2]]
+            else:
+                self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-1]]
+        # for agent in range(self.nr_agents): 
+        #     labels = [0] * self.nr_agent_observations[agent]
+        #     for state in range(self.nr_states):
+        #         obs = self.agent_state_observation[agent][state]
+        #         if labels[obs] != 0:
+        #             continue
+        #         actions = self.row_joint_action[state]
+        #         labels[obs] = list(set(map(lambda x: self.agent_action_labels[agent][self.joint_actions[x][agent]] , actions)))
+        # self.agent_labels_actions_at_observation[agent] = labels
 
         # print("self.agent_labels_actions_at_observation",self.agent_labels_actions_at_observation)
 
@@ -295,7 +300,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 hole_indices = []
                 num_actions = self.nr_agent_actions_at_observation[agent][obs]
                 if num_actions > 1:
-                    option_labels = [str(labels) for labels in self.agent_action_labels[agent][:-1]] #TODO only for undiscounted else [:-2] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    option_labels = self.agent_labels_actions[agent] #TODO only for undiscounted else [:-2] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     print("option_labels",option_labels)
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         hole_indices.append(all_holes.num_holes)
