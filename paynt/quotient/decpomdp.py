@@ -1,3 +1,10 @@
+# Contributions of MASTER'S THESIS 
+# INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
+# by Vojtech Hranicka
+
+# This whole file was created by me. It contains coloring of Quotient MDP. 
+# Functions in this file are inspirated by pomdp.py
+#
 import stormpy
 import payntbind
 

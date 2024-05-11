@@ -2,10 +2,11 @@
 # INDUCTIVE SYNTHESIS OF FINITE STATE CONTROLLERS FOR DECENTRALIZED POMDPS
 # by Vojtech Hranicka
 # TODO
-# added command line options for PAYNT in regards to running iterative FSC synthesis
+# added command line options for PAYNT to use alternative splitting method
 # also added options for working without discount factorisation
 #
-# added options: --fsc-synthesis
+# added path to project sketch
+# added otions: --dont-use-discount-transformation, --use-new-split-method
 from . import version
 
 import paynt.parser.sketch
