@@ -216,21 +216,21 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             # print("paynt.quotient.pomdp.PomdpQuotient.sketch_path ",paynt.quotient.pomdp.PomdpQuotient.sketch_path )
             sketch_path = paynt.quotient.pomdp.PomdpQuotient.sketch_path
             props_path = self.substitute_suffix(sketch_path, '.', 'target')
-            h = open(props_path, 'r')
-            content = h.readlines()
-            for i in content[0].split(' '):
-                if i.isdigit() == True: 
-                    assert int(i) <= self.nr_states
-                    self.decpomdp_manager.set_target_state(int(i))
-                    # print("set_target_state",int(i))
+            # h = open(props_path, 'r')
+            # content = h.readlines()
+            # for i in content[0].split(' '):
+            #     if i.isdigit() == True: 
+            #         assert int(i) <= self.nr_states
+            #         self.decpomdp_manager.set_target_state(int(i))
+            #         # print("set_target_state",int(i))
 
-            # for agent in range(self.nr_agents): 
-            #     for state in range(self.nr_states):
-            #         observation = self.agent_state_observation[agent][state]
-            #         obs_label = self.agent_observation_labels[agent][observation]
-            #         if obs_label == "target":
-            #             self.decpomdp_manager.set_target_state(state)
-            #         # print(f"obs_label {obs_label} agent {agent} state {state}")
+            for agent in range(self.nr_agents): 
+                for state in range(self.nr_states):
+                    observation = self.agent_state_observation[agent][state]
+                    obs_label = self.agent_observation_labels[agent][observation]
+                    if obs_label == "target":
+                        self.decpomdp_manager.set_target_state(state)
+                    # print(f"obs_label {obs_label} agent {agent} state {state}")
 
 
 
@@ -315,6 +315,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 num_updates = pow(pm.agent_max_successor_memory_size[agent][obs], 1 / self.nr_agents)
                 if pm.agent_max_successor_memory_size[agent][obs] > 1:
                     option_labels = [str(x) for x in range(int(num_updates))]
+                    print("option_labels",option_labels)
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         name = self.create_hole_name(agent,obs,mem,False)
                         hole_indices.append(all_holes.num_holes)

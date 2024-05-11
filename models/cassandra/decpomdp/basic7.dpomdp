@@ -1,0 +1,38 @@
+agents: 2 
+#
+discount: 0.9
+#
+values: reward
+#
+states: s0 s1 s2   
+#  
+start include: s0
+#
+actions: 
+a b
+a b
+#
+observations: 
+o0 o1
+o0 o1
+#
+T : * * : s0 : s1 : 1.0
+#
+T : a a : s1 : s1 : 1.0
+T : a b : s1 : s1 : 1.0
+T : b a : s1 : s1 : 1.0
+T : b b : s1 : s2 : 1.0
+T : a a : s2 : s2 : 1.0
+T : a b : s2 : s2 : 1.0
+T : b a : s2 : s2 : 1.0
+T : b b : s2 : s2 : 1.0
+#
+O: * * : s0 : o0 o1 : 0.25
+O: * * : s0 : o1 o0 : 0.25
+O: * * : s0 : o1 o1 : 0.25
+O: * * : s0 : o0 o0 : 0.25
+O: * * : s1 : o0 o1 : 1.0
+O: * * : s2 : o0 o0 : 1.0
+#
+R: * *: * : * : * : 0
+R: a a: s2 : * : * : 1

@@ -73,9 +73,9 @@ def main():
                                 if not(x2 == 7 or (x2 == 2 and y2 <7 and y2 >2) or (x2 == 4 and y2 <4)) :
                                     ox2 = x2 +1
                                     agent_2_changed = True
-                            # if (x1 == x2 and y1 == y2):
+                            # if (x1  == 4 and y1 == 4 and x2  == 4 and y2 == 4):
                             #     f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
-                            if (x1  == 2 and y1 == 4 and x2  == 7 and y2 == 2):
+                            if ((x1 == x2) and (y1 == y2)):
                                 f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
                             elif (x1  == 2 and y1 == 4 and x2  == 7 and y2 == 7):
                                 f.write(f"T: a{a1} a{a2} : s{x1}{y1}{x2}{y2} : s{x1}{y1}{x2}{y2} : 1.0\n")
