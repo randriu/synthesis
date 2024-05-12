@@ -1,3 +1,3 @@
-Pmax=? [F "target"]
+//Pmax=? [F "target"]
 
-//R{"reward"}max=? [F "target"]
+R{"reward"}min=? [F "target"]
