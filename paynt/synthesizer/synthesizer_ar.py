@@ -44,6 +44,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             self.update_optimum(family)
             if family.analysis_result.improving_assignment is not None:
                 satisfying_assignment = family.analysis_result.improving_assignment
+                print(satisfying_assignment)
             if family.analysis_result.can_improve == False:
                 self.explore(family)
                 continue
