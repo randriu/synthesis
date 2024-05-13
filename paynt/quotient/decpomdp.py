@@ -70,18 +70,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # # print("self.nr_agent_observations",self.nr_agent_observations)
 
 
-        # self.num_rows = decpomdp_manager.num_rows()
-        # # print("self.num_rows",self.num_rows)
-
-        # self. = decpomdp_manager.
-        # print("self.",self.)
-
-        # self. = decpomdp_manager.
-        # print("self.",self.)
-
-        # self.transition_matrix_dpomdp = decpomdp_manager.transition_matrix
-        # print("self.transition_matrix_dpomdp",self.transition_matrix_dpomdp)
-
 
         # for each aget: for each state contains observation
         self.agent_state_observation = [0] * self.nr_agents
@@ -93,14 +81,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
             self.agent_state_observation[agent] = observations_for_state
         # print("self.agent_state_observation",self.agent_state_observation)
 
-        # # # compute joint actions available at each observation
-        # # self.joint_actions_at_observation = [0] * len(self.joint_observations)
-        # # for state in range(self.nr_states):
-        # #     obs = self.state_joint_observation[state]
-        # #     if self.joint_actions_at_observation[obs] != 0:
-        # #         continue
-        # #     self.joint_actions_at_observation[obs] = len(self.row_joint_action[state])
-        # # print("self.joint_actions_at_observation",self.joint_actions_at_observation)
 
         # # assign joint observations to agent observations
         self.joint_observations_to_agent_observation = [0] * self.nr_agents
@@ -136,19 +116,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-2]]
             else:
                 self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-1]]
-        # for agent in range(self.nr_agents): 
-        #     labels = [0] * self.nr_agent_observations[agent]
-        #     for state in range(self.nr_states):
-        #         obs = self.agent_state_observation[agent][state]
-        #         if labels[obs] != 0:
-        #             continue
-        #         actions = self.row_joint_action[state]
-        #         labels[obs] = list(set(map(lambda x: self.agent_action_labels[agent][self.joint_actions[x][agent]] , actions)))
-        # self.agent_labels_actions_at_observation[agent] = labels
-
-        # print("self.agent_labels_actions_at_observation",self.agent_labels_actions_at_observation)
-
-
         # do initial unfolding
         
         self.set_imperfect_memory_size(self.initial_memory_size)
@@ -158,22 +125,20 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # self.decpomdp_manager.set_global_memory_size(1) #must be power of the number n and exponent must be number of egents
         # self.quotient = self.decpomdp_manager.construct_quotient_mdp()
         # print("MDP has {} states".format(self.quotient.nr_states))
-        for state in range(self.nr_states):
-            action_index = 0
-            group_start = self.quotient_mdp.transition_matrix.get_row_group_start(state)
-            group_end = self.quotient_mdp.transition_matrix.get_row_group_end(state)
-            is_target = True
-            for row_index in range(group_start, group_end):
-                # print("state =",state)
-                for entry in self.quotient_mdp.transition_matrix.get_row(row_index):
-                    if entry.column != state:
-                        is_target = False
-                    # print("entry ", entry)
-            if is_target:
-                print(f"{state}", end =" ")
-        print("************")
-        # 131 134 135 407 410 421 424 441 570 576 642 654 702 708 855 858 863 887 896 930 936 1497 1501 1522 1524 1757 1761 1764 1768 1869 1881 1882 1888 2047 2050 2055 2103 2110 2113 2133 2219 2223 2240 2241 2269 2299 2301 2302 
-
+        # for state in range(self.nr_states):
+        #     action_index = 0
+        #     group_start = self.quotient_mdp.transition_matrix.get_row_group_start(state)
+        #     group_end = self.quotient_mdp.transition_matrix.get_row_group_end(state)
+        #     is_target = True
+        #     for row_index in range(group_start, group_end):
+        #         # print("state =",state)
+        #         for entry in self.quotient_mdp.transition_matrix.get_row(row_index):
+        #             if entry.column != state:
+        #                 is_target = False
+        #             # print("entry ", entry)
+        #     if is_target:
+        #         print(f"{state}", end =" ")
+        # print("************")
         # print(group_end - group_start)
 
         # logger.debug("nothing to do, aborting.....")
@@ -188,7 +153,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         return "{}({},{},{})".format(category,agent,obs_label,mem)
 
     def set_imperfect_memory_size(self, memory_size):
-        print("IMPERFECT++++++++++++++++++++++++++++++++++++++++++++++++++",memory_size)
+        # print("IMPERFECT++++++++++++++++++++++++++++++++++++++++++++++++++",memory_size)
         ''' Set given memory size only to imperfect observations. '''
         self.agent_observation_memory_size = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
@@ -223,18 +188,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                     assert int(i) <= self.nr_states
                     self.decpomdp_manager.set_target_state(int(i))
                     # print("set_target_state",int(i))
-
-            # for agent in range(self.nr_agents): 
-            #     for state in range(self.nr_states):
-            #         observation = self.agent_state_observation[agent][state]
-            #         obs_label = self.agent_observation_labels[agent][observation]
-            #         if obs_label == "target":
-            #             self.decpomdp_manager.set_target_state(state)
-                    # print(f"obs_label {obs_label} agent {agent} state {state}")
-
-
-
-            # for state in range(self.nr_states):
             
 
     def substitute_suffix(self, string, delimiter, replacer):
@@ -301,13 +254,11 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 num_actions = self.nr_agent_actions_at_observation[agent][obs]
                 if num_actions > 1:
                     option_labels = self.agent_labels_actions[agent] #TODO only for undiscounted else [:-2] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                    print("option_labels",option_labels)
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         hole_indices.append(all_holes.num_holes)
                         name = self.create_hole_name(agent,obs,mem,True)
                         all_holes.add_hole(name,option_labels)
                         self.is_action_hole.append(True)
-                    # print("a self.agent_observation_labels[agent][obs]",self.agent_observation_labels[agent][obs])
                 self.observation_action_holes.append(hole_indices)
 
                 # memory holes
@@ -315,7 +266,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 num_updates = pow(pm.agent_max_successor_memory_size[agent][obs], 1 / self.nr_agents)
                 if pm.agent_max_successor_memory_size[agent][obs] > 1:
                     option_labels = [str(x) for x in range(int(num_updates))]
-                    print("option_labels",option_labels)
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         name = self.create_hole_name(agent,obs,mem,False)
                         hole_indices.append(all_holes.num_holes)
@@ -358,7 +308,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
     def scheduler_selection(self, mdp, scheduler, coloring=None):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
-# TODO delete this return
         return super().scheduler_selection(mdp,scheduler,coloring) 
 
         if paynt.quotient.pomdp.PomdpQuotient.use_new_split_method == False :
@@ -390,8 +339,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                     set_choices = set(choices)
                     list1 = list(set1.intersection(set_choices))
                     list2 = list(set2.intersection(set_choices))
-                    # print("list1",list1)
-                    # print("list2",list2)
 
                     obs1  = set(map(lambda x: self.action_to_memory_joint_observation[x], list1))
                     # print("\n obs1",obs1)
@@ -410,13 +357,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         if exist_inconsistency:
             hole_selection = new_hole_selection.copy()
 
-
-            # only for testing
-        # print("scheduler",scheduler)
-        # print("state_to_choice",state_to_choice)
-        # print("choices",choices)
-        # print("coloring",coloring)
-        # print("hole_selection",hole_selection)
         return hole_selection
 
     def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits=None):

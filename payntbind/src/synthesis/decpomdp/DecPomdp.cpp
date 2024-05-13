@@ -273,7 +273,6 @@ namespace synthesis {
         }
         else{
             storm::storage::BitVector target_flags(this->num_quotient_states, false);
-            // std::cout << "this->target_states o " << this->target_states<< std::endl;
             for (uint64_t prototype = 0; prototype < this->num_states() ; prototype++){
                 if (not this->target_states[prototype])
                 {
@@ -281,7 +280,6 @@ namespace synthesis {
                 }
                 for(auto duplicate: this->prototype_duplicates[prototype]) {
                     target_flags.set(duplicate);
-                    // std::cout << "duplicateo " << duplicate<< std::endl;
                 }
             }
             
@@ -319,8 +317,6 @@ namespace synthesis {
                 current_row++;
             }
         }
-        // std::cout << "row_label o " << row_label<< std::endl;
-        // std::cout << "all_labels o" << all_labels<< std::endl;
         for(auto label: all_labels) {
             storm::storage::BitVector flags(num_rows, false);
             labeling.addLabel(label, flags);
@@ -334,9 +330,6 @@ namespace synthesis {
 
     storm::models::sparse::ChoiceLabeling DecPomdp::constructQuotientChoiceLabeling() {
         uint_fast64_t num_rows = this->num_quotient_rows;
-        // std::cout << "this->row_joint_action " << this->row_joint_action<< std::endl;
-        // std::cout << "num_rows " << num_rows<< std::endl;
-        // std::cout << "num_rows() " << this->num_rows() << std::endl;
 
         storm::models::sparse::ChoiceLabeling labeling(num_rows);
         uint_fast64_t current_row = 0;
@@ -366,22 +359,18 @@ namespace synthesis {
                     std::string label = sb.str();
                     all_labels.insert(label);
                     row_label[current_row] = label;
-                    // std::cout << "current_row " << current_row<< std::endl;
                     current_row++;
                 }
                 row_counter++;
             }
         }
-        // std::cout << "all_labels " << all_labels<< std::endl;
         for(auto label: all_labels) {
             storm::storage::BitVector flags(num_rows, false);
             labeling.addLabel(label, flags);
         }
-        // std::cout << "row_label " << row_label<< std::endl;
         for(uint64_t row = 0; row < num_rows; row++) {
             labeling.addLabelToChoice(row_label[row], row);
         }
-        // std::cout << "labeling " << labeling<< std::endl;
         return labeling ;
     }
 
@@ -413,10 +402,8 @@ namespace synthesis {
         for(uint64_t state = 0; state < this->num_quotient_states; state++) {
             auto prototype_state = this->state_prototype[state];
             auto observation = this->state_joint_observation[prototype_state];
-            // std::cout << "this->row_groups[state] " << this->row_groups[state]<< std::endl;
             builder2.newRowGroup(this->row_groups[state]);
             for(auto row: this->transition_matrix[prototype_state]) {
-                // std::cout << "B1: row: " << std::endl;
                 for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observation]; dst_mem++) {
                     for(auto entry: row) {
 
@@ -425,20 +412,16 @@ namespace synthesis {
                         {
                            dst = this->prototype_duplicates[entry.first][0];
                         }
-
-                        // std::cout << "B2: state: " << state << " row_index: " << row_index << "dst: " << dst << "entry.second: " << entry.second << " mem " << dst_mem << std::endl;
                         builder2.addNextValue(row_index, dst, entry.second);
                         
                     }
                     row_index++;
                 }
-                // std::cout << "B2: max_successor_memory_size[observation]: " << max_successor_memory_size[observation]<< std::endl;
                 
             }
         
         }
         return builder2.build();
-        // return this->constructTransitionMatrix();
     }
 
     storm::models::sparse::StandardRewardModel<double> DecPomdp::constructRewardModel() {
@@ -470,7 +453,6 @@ namespace synthesis {
                 row_index++;
             }
         } 
-        // std::cout << "action_rewards " << action_rewards<< std::endl;
         return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
     }
 
@@ -487,26 +469,16 @@ namespace synthesis {
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> DecPomdp::constructQuotientMdp() { 
         this->buildStateSpace();
-        // std::cout << "check 1 " << std::endl;
         this->countSuccessors();
-        // std::cout << "check 2 " << std::endl;
         this->buildTransitionMatrixSpurious();
-        // std::cout << "check 3 " << std::endl;
 
         storm::storage::sparse::ModelComponents<double> components;
         components.stateLabeling = this->constructQuotientStateLabeling();
-        // std::cout << "check 4 " << std::endl;
         components.choiceLabeling = this->constructQuotientChoiceLabeling();
-        // std::cout << "check 5 " << std::endl;
         components.transitionMatrix = this->constructQuotientTransitionMatrix();
-        // std::cout << "check 6 " << std::endl;
-        // std::cout << "this->row_reward " << this->row_reward<< std::endl;
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
-        // std::cout << "check 7 " << std::endl;
         this->resetDesignSpace();
-        // std::cout << "check 8 " << std::endl;
         this->buildDesignSpaceSpurious(); 
-        // std::cout << "check 9 " << std::endl;
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
     }
 
@@ -594,8 +566,6 @@ namespace synthesis {
 
     
     void DecPomdp::applyDiscountFactorTransformation() {
-        // std::cout << "this->discounted  "<< this->discounted    << std::endl;
-        // std::cout << "this->discount_factor  "<< this->discount_factor    << std::endl;
 
         if(this->discounted || this->discount_factor == 1) {
             return;
@@ -629,8 +599,6 @@ namespace synthesis {
                 auto obs = this->state_joint_observation[this->discount_sink_state];
                 this->observation_memory_size[obs] = 1;
             }
-            // auto obs = this->state_joint_observation[this->initial_state];
-            // this->observation_memory_size[obs] = 1;
         }
 
     void DecPomdp::setTargetState(uint64_t state) {
@@ -681,7 +649,6 @@ namespace synthesis {
                     
 
                 }
-                // std::cout << "B2: max_successor_memory_size[observation]: " << max_successor_memory_size[observation]<< std::endl;
                 this->prototype_row_index[row_index] = group_index;
                 group_index++;
                 row_index++;
@@ -690,9 +657,6 @@ namespace synthesis {
             group_index = 0;
         
         }
-        // std::cout << "this->num_rows() " << this->prototype_row_index << std::endl;
-
-        // std::cout << "this->prototype_row_index " << this->num_rows()  << std::endl;
         
         for(uint64_t obs = 0; obs < num_observations; obs++) {
             this->observation_successors[obs] = std::vector<uint64_t>(
@@ -709,28 +673,17 @@ namespace synthesis {
             this->max_successor_memory_size.resize(this->num_joint_observations());
             // for each observation, define the maximum successor memory size
             // this will define the number of copies we need to make of each row
-            // std::cout << "this->num_joint_observations() " << this->num_joint_observations() << std::endl;
             for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
-                // std::cout << "this->joint_observations[obs][0] " << this->joint_observations[obs][1]  << std::endl;
-                // std::cout << "obs " << obs << std::endl;
                 uint64_t max_mem_size = 1; //TODO there was 0
                 for(auto dst_state: this->observation_successors[obs]) {
                     auto dst_obs = this->state_joint_observation[dst_state];
-                    // std::cout << "this->joint_observations[dst_obs][0] " << this->joint_observations[dst_obs][1]  << std::endl;
-                    // std::cout << "dst_obs " << dst_obs << std::endl;
                     if(max_mem_size < this->observation_memory_size[dst_obs]) {
                         max_mem_size = this->observation_memory_size[dst_obs];
                     }
                 }
-                // std::cout << "max_mem_size " << max_mem_size << std::endl;
                 this->max_successor_memory_size[obs] = max_mem_size;
                 // std::cout << "this->observation_memory_size[obs] " << this->observation_memory_size[obs] << std::endl;
             }
-            // std::cout << "this->joint_observations" << this->joint_observations<< std::endl;
-            // std::cout << "this->agent_observation_labels" << this->agent_observation_labels<< std::endl;
-            // // std::cout << "this->observation_successors " << this->observation_successors<< std::endl;
-            // std::cout << "this->max_successor_memory_size " << this->max_successor_memory_size<< std::endl;
-            // std::cout << "this->observation_memory_size " << this->observation_memory_size << std::endl;
 
             //collect max succesor memory for each agent
 
@@ -744,23 +697,17 @@ namespace synthesis {
             for(uint64_t joint_obs = 0; joint_obs < this->num_joint_observations(); joint_obs++) { //TODO can be optimalize
                 for (int agent = 0; agent < this->num_agents; agent++){
                     uint64_t obs = this->joint_observations[joint_obs][agent];
-                
-                    // std::cout << "obs " << obs << std::endl;
                     uint64_t max_mem_size = 1; //TODO there was 0
                     for(auto dst_state: this->observation_successors[joint_obs]) {
                         auto dst_obs = this->state_joint_observation[dst_state];
-                        // std::cout << "this->observation_memory_size[dst_obs] " << this->observation_memory_size[dst_obs] << std::endl;
-                        // std::cout << "dst_obs " << dst_obs << std::endl;
                         if(max_mem_size < this->observation_memory_size[dst_obs]) {
                             max_mem_size = this->observation_memory_size[dst_obs];
                         }
                     }
-                    // std::cout << "max_mem_size " << max_mem_size << std::endl;
                     this->agent_max_successor_memory_size[agent][obs] = max_mem_size;
                 }
                 
             }
-            std::cout << "this->agent_max_successor_memory_size " << this->agent_max_successor_memory_size << std::endl;
 
 
 
@@ -783,8 +730,6 @@ namespace synthesis {
                 prototype_row = prototype_row_group;
                 auto observ = this->state_joint_observation[prototype_state];
                 for(auto row: this->transition_matrix[prototype_state]) {
-                    // std::cout << "max_successor_memory_size[observation] " << max_successor_memory_size[observation] << std::endl;
-                    // std::cout << "2 " << std::endl;
                     for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[observ]; dst_mem++) {
                         // std::cout << "3 " << std::endl;
                         this->row_prototype.push_back(prototype_row);
@@ -799,7 +744,6 @@ namespace synthesis {
                 }
                 old_prototype_state = prototype_state;
             }
-            // std::cout << "this->row_ prototype " << this->row_prototype<< std::endl;
             this->num_quotient_rows = this->row_prototype.size();
            
         }
@@ -898,9 +842,6 @@ namespace synthesis {
                     agent_actions_indexes.clear();
                     counter = 0;
                     for(auto row: this->row_joint_action[state]) {
-                        // std::cout << "this->joint_actions[row][agent] " << this->joint_actions[row][agent]<< std::endl;
-                        // std::cout << "agent_actions_indexes" << agent_actions_indexes<< std::endl;
-                        // std::cout << "this->joint_actions[row][agent]" << this->joint_actions[row][agent]<< std::endl;
 
                         it = std::find(agent_actions_indexes.begin(), agent_actions_indexes.end(), this->joint_actions[row][agent]);
                         if (it != agent_actions_indexes.end()) 
@@ -941,7 +882,6 @@ namespace synthesis {
                 }
             }
         this->nr_memory_joint_observations = id;
-        // std::cout << "this->nr_memory_joint_observations" << this->nr_memory_joint_observations  << std::endl;
     }
 
     void DecPomdp::construct_acton_to_memory_joint_observation() {
@@ -962,8 +902,6 @@ namespace synthesis {
                 }               
             }
         }
-
-        // std::cout << "this->action_to_memory_joint_observation" << this->action_to_memory_joint_observation  << std::endl;
     }
 
     void DecPomdp::construct_state_to_memory_joint_observation() {
@@ -1038,14 +976,9 @@ namespace synthesis {
                         for(uint64_t dst_mem = 0; dst_mem < max_successor_memory_size[joint_observation]; dst_mem++) {
                             auto prototype_row = this->row_prototype[row];
                             auto row_index = this->agent_prototype_row_index[agent][prototype_row];
-                            // std::cout << "prototype_row" << prototype_row << std::endl;
-                            // std::cout << "row_index" << row_index << std::endl;
                             auto row_mem = this->row_memory[row];
                             if(this->nr_agent_actions_at_observation[agent][obs] > 1) {
                                 // there is an action hole that corresponds to this state
-                                // std::cout << "agent" << agent << std::endl;
-                                // std::cout << "obs" << obs << std::endl;
-                                // std::cout << "mem" << mem << std::endl; 
                                 auto action_hole = this->action_holes[agent][obs][mem];
                                                              
                                 // std::cout << "action_hole " << action_hole << std::endl;
@@ -1057,10 +990,7 @@ namespace synthesis {
                                 // std::cout << "a joint_observation " << joint_observation << std::endl;
                             }
                             if(this->max_successor_memory_size[joint_observation] > 1) {
-                                // std::cout << "check  1" << std::endl;
                                 // there is a memory hole that corresponds to this state
-                                // std::cout << "this->memory_holes " <<this->memory_holes << std::endl;
-                                // std::cout << "agent " << agent << "obs " << obs << "mem " << mem << std::endl;
                                 auto memory_hole = this->memory_holes[agent][obs][mem];
                                 // std::cout << "check  2" << std::endl;
                                 this->row_memory_hole[agent][row] = memory_hole;
@@ -1073,7 +1003,6 @@ namespace synthesis {
                             }
                             row++;
                         }
-                        // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
                     } 
                     
                 }
@@ -1101,17 +1030,8 @@ namespace synthesis {
                         }
                         row++;
                     }
-                    // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;    
                 }
             }
-
-            // std::cout << "this->row_memory_hole " << this->row_memory_hole << std::endl;
-            // std::cout << "this->row_memory_option " << this->row_memory_option << std::endl; 
-            // std::cout << "this->row_action_hole " << this->row_action_hole << std::endl; 
-            // std::cout << "this->row_action_option " << this->row_action_option << std::endl; 
-
-
-            // std::cout << "this->discount_sink_state " << this->discount_sink_state << std::endl; 
         
     }
 
