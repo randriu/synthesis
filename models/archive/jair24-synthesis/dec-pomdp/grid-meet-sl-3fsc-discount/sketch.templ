@@ -178,7 +178,7 @@ endmodule
 
 // reward
 rewards "moves"
-	!sink: -1;
+	!sink & !meet: -1;
 endrewards
 
 formula meet = (xa1=xa2) & (ya1=ya2);
