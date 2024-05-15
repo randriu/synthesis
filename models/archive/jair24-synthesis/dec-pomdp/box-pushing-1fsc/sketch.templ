@@ -16,17 +16,17 @@ formula small2 = (x2=3 & d2=0);
 formula large2 = ((x2=1 & d2=0) | (x2=2 & d2=0));
 
 // agent 1 holes
-hole int M1_0_e in {0,1};
-hole int M1_0_w in {0,1};
-hole int M1_0_o in {0,1};
-hole int M1_0_s in {0,1};
-hole int M1_0_l in {0,1};
+hole int M1_0_e in {0};
+hole int M1_0_w in {0};
+hole int M1_0_o in {0};
+hole int M1_0_s in {0};
+hole int M1_0_l in {0};
 
-hole int M1_1_e in {0,1};
-hole int M1_1_w in {0,1};
-hole int M1_1_o in {0,1};
-hole int M1_1_s in {0,1};
-hole int M1_1_l in {0,1};
+hole int M1_1_e in {0};
+hole int M1_1_w in {0};
+hole int M1_1_o in {0};
+hole int M1_1_s in {0};
+hole int M1_1_l in {0};
 
 hole int P1_0_e in {0,1,2,3};
 hole int P1_0_w in {0,1,2,3};
@@ -34,24 +34,24 @@ hole int P1_0_o in {0,1,2,3};
 hole int P1_0_s in {0,1,2,3};
 hole int P1_0_l in {0,1,2,3};
 
-hole int P1_1_e in {0,1,2,3};
-hole int P1_1_w in {0,1,2,3};
-hole int P1_1_o in {0,1,2,3};
-hole int P1_1_s in {0,1,2,3};
-hole int P1_1_l in {0,1,2,3};
+hole int P1_1_e in {3};
+hole int P1_1_w in {3};
+hole int P1_1_o in {3};
+hole int P1_1_s in {3};
+hole int P1_1_l in {3};
 
 // agent 2 holes
-hole int M2_0_e in {0,1};
-hole int M2_0_w in {0,1};
-hole int M2_0_o in {0,1};
-hole int M2_0_s in {0,1};
-hole int M2_0_l in {0,1};
+hole int M2_0_e in {0};
+hole int M2_0_w in {0};
+hole int M2_0_o in {0};
+hole int M2_0_s in {0};
+hole int M2_0_l in {0};
 
-hole int M2_1_e in {0,1};
-hole int M2_1_w in {0,1};
-hole int M2_1_o in {0,1};
-hole int M2_1_s in {0,1};
-hole int M2_1_l in {0,1};
+hole int M2_1_e in {0};
+hole int M2_1_w in {0};
+hole int M2_1_o in {0};
+hole int M2_1_s in {0};
+hole int M2_1_l in {0};
 
 hole int P2_0_e in {0,1,2,3};
 hole int P2_0_w in {0,1,2,3};
@@ -59,11 +59,11 @@ hole int P2_0_o in {0,1,2,3};
 hole int P2_0_s in {0,1,2,3};
 hole int P2_0_l in {0,1,2,3};
 
-hole int P2_1_e in {0,1,2,3};
-hole int P2_1_w in {0,1,2,3};
-hole int P2_1_o in {0,1,2,3};
-hole int P2_1_s in {0,1,2,3};
-hole int P2_1_l in {0,1,2,3};
+hole int P2_1_e in {3};
+hole int P2_1_w in {3};
+hole int P2_1_o in {3};
+hole int P2_1_s in {3};
+hole int P2_1_l in {3};
 
 module strategy1
 	mem : [0..1] init 0;
