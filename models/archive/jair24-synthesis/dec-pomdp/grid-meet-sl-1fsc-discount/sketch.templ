@@ -12,7 +12,6 @@ dtmc
 // y _________________
 //   x 0 1 2 3 4 5 6 7
 
-
 const double discount = 0.9;
 
 
@@ -45,42 +44,32 @@ formula x2l = l2 ? (xa2-1) : xa2;
 const double sl=0.1;
 
 // agent 1 holes
-hole int M1_0_1 in {0,1,2};
-hole int M1_0_0 in {0,1,2};
-hole int M1_1_1 in {0,1,2};
-hole int M1_1_0 in {0,1,2};
-hole int M1_2_0 in {0,1,2};
-hole int M1_2_1 in {0,1,2};
+hole int M1_0_1 in {0};
+hole int M1_0_0 in {0};
+hole int M1_1_1 in {0};
+hole int M1_1_0 in {0};
 hole int P1_0_1 in {1,2,3,4};
 hole int P1_0_0 in {1,2,3,4};
-hole int P1_1_1 in {1,2,3,4};
-hole int P1_1_0 in {1,2,3,4};
-hole int P1_2_1 in {1,2,3,4};
-hole int P1_2_0 in {1,2,3,4};
+hole int P1_1_1 in {1};
+hole int P1_1_0 in {1};
 
 // agent 2 holes
-hole int M2_0_1 in {0,1,2};
-hole int M2_0_0 in {0,1,2};
-hole int M2_1_1 in {0,1,2};
-hole int M2_1_0 in {0,1,2};
-hole int M2_2_1 in {0,1,2};
-hole int M2_2_0 in {0,1,2};
+hole int M2_0_1 in {0};
+hole int M2_0_0 in {0};
+hole int M2_1_1 in {0};
+hole int M2_1_0 in {0};
 hole int P2_0_1 in {1,2,3,4};
 hole int P2_0_0 in {1,2,3,4};
-hole int P2_1_1 in {1,2,3,4};
-hole int P2_1_0 in {1,2,3,4};
-hole int P2_2_1 in {1,2,3,4};
-hole int P2_2_0 in {1,2,3,4};
+hole int P2_1_1 in {1};
+hole int P2_1_0 in {1};
 
 module strategy1
-	mem : [0..2] init 0;
+	mem : [0..1] init 0;
 
 	[move]  mem=0 & r1  -> (mem'=M1_0_1);
 	[move]  mem=0 & !r1 -> (mem'=M1_0_0);
 	[move]  mem=1 & r1  -> (mem'=M1_1_1);
 	[move]  mem=1 & !r1 -> (mem'=M1_1_0);
-	[move]  mem=2 & r1  -> (mem'=M1_2_1);
-	[move]  mem=2 & !r1 -> (mem'=M1_2_0);
 endmodule
 
 module grid1
@@ -109,28 +98,16 @@ module grid1
     [move]   mem=1 & !r1 & P1_1_0=3 -> 1-sl: (ya1'=y1d) + sl: true;
     [move]   mem=1 & !r1 & P1_1_0=4 -> 1-sl: (xa1'=x1l) + sl: true;
 	
-    [move]   mem=2 & r1 &  P1_2_1=1 -> 1-sl: (ya1'=y1u) + sl: true;
-    [move]   mem=2 & r1 &  P1_2_1=2 -> 1-sl: (xa1'=x1r) + sl: true;
-    [move]   mem=2 & r1 &  P1_2_1=3 -> 1-sl: (ya1'=y1d) + sl: true;
-    [move]   mem=2 & r1 &  P1_2_1=4 -> 1-sl: (xa1'=x1l) + sl: true;
-	
-	[move]   mem=2 & !r1 & P1_2_0=1 -> 1-sl: (ya1'=y1u) + sl: true;
-    [move]   mem=2 & !r1 & P1_2_0=2 -> 1-sl: (xa1'=x1r) + sl: true;
-    [move]   mem=2 & !r1 & P1_2_0=3 -> 1-sl: (ya1'=y1d) + sl: true;
-    [move]   mem=2 & !r1 & P1_2_0=4 -> 1-sl: (xa1'=x1l) + sl: true;
-	
 endmodule
 
 
 module strategy2
-	mem2 : [0..2] init 0;
+	mem2 : [0..1] init 0;
 
 	[move]  mem2=0 & l2  -> (mem2'=M2_0_1);
 	[move]  mem2=0 & !l2 -> (mem2'=M2_0_0);
 	[move]  mem2=1 & l2  -> (mem2'=M2_1_1);
 	[move]  mem2=1 & !l2 -> (mem2'=M2_1_0);
-	[move]  mem2=2 & l2  -> (mem2'=M2_2_1);
-	[move]  mem2=2 & !l2 -> (mem2'=M2_2_0);
 endmodule
 
 
@@ -158,18 +135,7 @@ module grid2
     [move]   mem2=1 & !l2 & P2_1_0=2 -> 1-sl: (xa2'=x2r) + sl: true;
     [move]   mem2=1 & !l2 & P2_1_0=3 -> 1-sl: (ya2'=y2d) + sl: true;
     [move]   mem2=1 & !l2 & P2_1_0=4 -> 1-sl: (xa2'=x2l) + sl: true;
-	
-    [move]   mem2=2 & l2 &  P2_2_1=1 -> 1-sl: (ya2'=y2u) + sl: true;
-    [move]   mem2=2 & l2 &  P2_2_1=2 -> 1-sl: (xa2'=x2r) + sl: true;
-    [move]   mem2=2 & l2 &  P2_2_1=3 -> 1-sl: (ya2'=y2d) + sl: true;
-    [move]   mem2=2 & l2 &  P2_2_1=4 -> 1-sl: (xa2'=x2l) + sl: true;
-	
-	[move]   mem2=2 & !l2 & P2_2_0=1 -> 1-sl: (ya2'=y2u) + sl: true;
-    [move]   mem2=2 & !l2 & P2_2_0=2 -> 1-sl: (xa2'=x2r) + sl: true;
-    [move]   mem2=2 & !l2 & P2_2_0=3 -> 1-sl: (ya2'=y2d) + sl: true;
-    [move]   mem2=2 & !l2 & P2_2_0=4 -> 1-sl: (xa2'=x2l) + sl: true;
 endmodule
-	
 
 
 module df
@@ -187,3 +153,4 @@ formula meet = (xa1=xa2) & (ya1=ya2);
 
 // target
 label "goal" = sink=true;
+

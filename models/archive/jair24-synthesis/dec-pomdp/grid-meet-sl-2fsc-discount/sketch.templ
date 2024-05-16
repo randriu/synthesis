@@ -12,6 +12,8 @@ dtmc
 // y _________________
 //   x 0 1 2 3 4 5 6 7
 
+const double discount = 0.9;
+
 
 // agent1 can go in this direction
 formula u1 = ya1<7 & !(xa1=3 & ya1=2) & !(ya1=5 & xa1>3);
@@ -134,8 +136,7 @@ module grid2
     [move]   mem2=1 & !l2 & P2_1_0=3 -> 1-sl: (ya2'=y2d) + sl: true;
     [move]   mem2=1 & !l2 & P2_1_0=4 -> 1-sl: (xa2'=x2l) + sl: true;
 endmodule
-	
-const double discount = 0.99;
+
 
 module df
     sink : bool init false;

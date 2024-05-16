@@ -1,6 +1,7 @@
 
 dtmc
 
+const double discount = 0.9;
 
 //obs: empty, wall, other, small, large
 formula empty1 = ((x1=0 & d1=1 & x2!=1) | (x1=1 & d1=3) | (x1=1 & d1=1 & x2=3) | (x1=2 & d1=3));
@@ -3226,7 +3227,6 @@ module clk
     [act] c=1 -> 1: (c'=0);
 endmodule
 	
-const double discount = 0.9;
 
 module df
     sink : bool init false;
