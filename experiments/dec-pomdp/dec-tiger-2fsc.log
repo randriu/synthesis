@@ -1,0 +1,31 @@
+2024-05-16 22:56:20,926 - cli.py - This is Paynt version 0.1.0.
+2024-05-16 22:56:20,926 - sketch.py - loading sketch from models/archive/jair24-synthesis/dec-pomdp/dec-tiger-2fsc/sketch.templ ...
+2024-05-16 22:56:20,926 - sketch.py - assuming sketch in PRISM format...
+2024-05-16 22:56:20,932 - prism_parser.py - PRISM model type: DTMC
+2024-05-16 22:56:20,932 - prism_parser.py - processing hole definitions...
+2024-05-16 22:56:20,932 - prism_parser.py - loading properties from models/archive/jair24-synthesis/dec-pomdp/dec-tiger-2fsc/sketch.props ...
+2024-05-16 22:56:20,933 - prism_parser.py - found the following specification: optimality: R[exp]{"rew"}max=? [C{9/10}] 
+2024-05-16 22:56:20,933 - jani.py - constructing JANI program...
+2024-05-16 22:56:20,937 - jani.py - constructing the quotient...
+2024-05-16 22:56:20,970 - jani.py - associating choices of the quotient with hole assignments...
+2024-05-16 22:56:20,975 - sketch.py - sketch parsing OK
+2024-05-16 22:56:20,975 - sketch.py - converting state rewards 'rew' to state-action rewards
+2024-05-16 22:56:20,976 - sketch.py - constructed explicit quotient having 1153 states and 6625 actions
+2024-05-16 22:56:20,976 - sketch.py - found the following specification optimality: R[exp]{"rew"}max=? [C{9/10}] 
+2024-05-16 22:56:20,980 - synthesizer.py - synthesis initiated, design space: 1e6
+> progress 43.938%, elapsed 3 s, estimated 6 s, iters = {MDP: 1966}, opt = -5.444
+> progress 99.308%, elapsed 6 s, estimated 6 s, iters = {MDP: 3996}, opt = -5.444
+2024-05-16 22:56:27,202 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-05-16 22:56:27,202 - synthesizer.py - M1_0_0=1, M1_0_1=1, M1_1_0=0, M1_1_1=1, P1_0_0=2, P1_0_1=0, P1_1_0=0, P1_1_1=0, M2_0_1=1, M2_0_0=1, M2_1_1=0, M2_1_0=1, P2_0_1=0, P2_0_0=1, P2_1_1=0, P2_1_0=0
+2024-05-16 22:56:27,202 - synthesizer.py - double-checking specification satisfiability:  : -5.444422577042064
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"rew"}max=? [C{9/10}] 
+
+method: AR, synthesis time: 6.22 s
+number of holes: 16, family size: 1e6, quotient: 1153 states / 6625 actions
+explored: 100 %
+MDP stats: avg MDP size: 506, iterations: 4232
+
+optimum: -5.444423
+--------------------

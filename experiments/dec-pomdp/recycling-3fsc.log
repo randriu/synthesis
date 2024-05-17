@@ -1,0 +1,30 @@
+2024-05-16 22:59:21,556 - cli.py - This is Paynt version 0.1.0.
+2024-05-16 22:59:21,556 - sketch.py - loading sketch from models/archive/jair24-synthesis/dec-pomdp/recycling-3fsc/sketch.templ ...
+2024-05-16 22:59:21,556 - sketch.py - assuming sketch in PRISM format...
+2024-05-16 22:59:21,559 - prism_parser.py - PRISM model type: DTMC
+2024-05-16 22:59:21,559 - prism_parser.py - processing hole definitions...
+2024-05-16 22:59:21,559 - prism_parser.py - loading properties from models/archive/jair24-synthesis/dec-pomdp/recycling-3fsc/sketch.props ...
+2024-05-16 22:59:21,560 - prism_parser.py - found the following specification: optimality: R[exp]{"rew"}max=? [F "goal"] 
+2024-05-16 22:59:21,560 - jani.py - constructing JANI program...
+2024-05-16 22:59:21,564 - jani.py - constructing the quotient...
+2024-05-16 22:59:21,594 - jani.py - associating choices of the quotient with hole assignments...
+2024-05-16 22:59:21,598 - sketch.py - sketch parsing OK
+2024-05-16 22:59:21,598 - sketch.py - converting state rewards 'rew' to state-action rewards
+2024-05-16 22:59:21,599 - sketch.py - constructed explicit quotient having 774 states and 5166 actions
+2024-05-16 22:59:21,599 - sketch.py - found the following specification optimality: R[exp]{"rew"}max=? [F "goal"] 
+2024-05-16 22:59:21,602 - synthesizer.py - optimality threshold set to 31.903
+2024-05-16 22:59:21,602 - synthesizer.py - synthesis initiated, design space: 1e11
+2024-05-16 22:59:24,059 - synthesizer.py - synthesis finished, printing synthesized assignment below:
+2024-05-16 22:59:24,059 - synthesizer.py - M1_0_0=2, M1_0_1=0, M1_1_0=0, M1_1_1=1, M1_2_0=2, M1_2_1=2, P1_0_0=2, P1_0_1=0, P1_1_0=2, P1_1_1=0, P1_2_0=1, P1_2_1=0, M2_0_1=0, M2_0_0=2, M2_1_1=0, M2_1_0=0, M2_2_1=2, M2_2_0=2, P2_0_1=0, P2_0_0=2, P2_1_1=0, P2_1_0=2, P2_2_1=0, P2_2_0=1
+2024-05-16 22:59:24,059 - synthesizer.py - double-checking specification satisfiability:  : 31.903547071778284
+--------------------
+Synthesis summary:
+optimality objective: R[exp]{"rew"}max=? [F "goal"] 
+
+method: AR, synthesis time: 2.46 s
+number of holes: 24, family size: 1e11, quotient: 774 states / 5166 actions
+explored: 100 %
+MDP stats: avg MDP size: 614, iterations: 1060
+
+optimum: 31.903547
+--------------------
