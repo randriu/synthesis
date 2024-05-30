@@ -1,0 +1,365 @@
+
+dtmc
+
+// 2 | A x M
+// 1 | x x x
+// 0 | M x A
+// y _______
+//   x 0 1 2
+
+
+const double discount = 0.9;
+
+
+// agent1 can go in this direction
+formula u1 = ya1<2;
+formula r1 = xa1<2;
+formula d1 = ya1>0;
+formula l1 = xa1>0;
+
+// updates of coordinates (if possible)
+formula y1u = u1 ? (ya1+1) : ya1;
+formula x1r = r1 ? (xa1+1) : xa1;
+formula y1d = d1 ? (ya1-1) : ya1;
+formula x1l = l1 ? (xa1-1) : xa1;
+
+
+// agent2 can go in this direction
+formula u2 = ya2<2;
+formula r2 = xa2<2;
+formula d2 = ya2>0;
+formula l2 = xa2>0;
+
+// updates of coordinates (if possible)
+formula y2u = u2 ? (ya2+1) : ya2;
+formula x2r = r2 ? (xa2+1) : xa2;
+formula y2d = d2 ? (ya2-1) : ya2;
+formula x2l = l2 ? (xa2-1) : xa2;
+
+
+const double sl=0.1;
+
+// agent 1 holes
+hole int M1_0_0_0 in {0,1};
+hole int M1_0_0_1 in {0,1};
+hole int M1_0_0_2 in {0,1};
+hole int M1_0_1_0 in {0,1};
+hole int M1_0_1_1 in {0,1};
+hole int M1_0_1_2 in {0,1};
+hole int M1_0_2_0 in {0,1};
+hole int M1_0_2_1 in {0,1};
+hole int M1_0_2_2 in {0,1};
+
+hole int M1_1_0_0 in {0,1};
+hole int M1_1_0_1 in {0,1};
+hole int M1_1_0_2 in {0,1};
+hole int M1_1_1_0 in {0,1};
+hole int M1_1_1_1 in {0,1};
+hole int M1_1_1_2 in {0,1};
+hole int M1_1_2_0 in {0,1};
+hole int M1_1_2_1 in {0,1};
+hole int M1_1_2_2 in {0,1};
+
+hole int P1_0_0_0 in {0,1,2,3,4};
+hole int P1_0_0_1 in {0,1,2,3,4};
+hole int P1_0_0_2 in {0,1,2,3,4};
+hole int P1_0_1_0 in {0,1,2,3,4};
+hole int P1_0_1_1 in {0,1,2,3,4};
+hole int P1_0_1_2 in {0,1,2,3,4};
+hole int P1_0_2_0 in {0,1,2,3,4};
+hole int P1_0_2_1 in {0,1,2,3,4};
+hole int P1_0_2_2 in {0,1,2,3,4};
+
+hole int P1_1_0_0 in {0,1,2,3,4};
+hole int P1_1_0_1 in {0,1,2,3,4};
+hole int P1_1_0_2 in {0,1,2,3,4};
+hole int P1_1_1_0 in {0,1,2,3,4};
+hole int P1_1_1_1 in {0,1,2,3,4};
+hole int P1_1_1_2 in {0,1,2,3,4};
+hole int P1_1_2_0 in {0,1,2,3,4};
+hole int P1_1_2_1 in {0,1,2,3,4};
+hole int P1_1_2_2 in {0,1,2,3,4};
+
+// agent 2 holes
+hole int M2_0_0_0 in {0,1};
+hole int M2_0_0_1 in {0,1};
+hole int M2_0_0_2 in {0,1};
+hole int M2_0_1_0 in {0,1};
+hole int M2_0_1_1 in {0,1};
+hole int M2_0_1_2 in {0,1};
+hole int M2_0_2_0 in {0,1};
+hole int M2_0_2_1 in {0,1};
+hole int M2_0_2_2 in {0,1};
+
+hole int M2_1_0_0 in {0,1};
+hole int M2_1_0_1 in {0,1};
+hole int M2_1_0_2 in {0,1};
+hole int M2_1_1_0 in {0,1};
+hole int M2_1_1_1 in {0,1};
+hole int M2_1_1_2 in {0,1};
+hole int M2_1_2_0 in {0,1};
+hole int M2_1_2_1 in {0,1};
+hole int M2_1_2_2 in {0,1};
+
+hole int P2_0_0_0 in {0,1,2,3,4};
+hole int P2_0_0_1 in {0,1,2,3,4};
+hole int P2_0_0_2 in {0,1,2,3,4};
+hole int P2_0_1_0 in {0,1,2,3,4};
+hole int P2_0_1_1 in {0,1,2,3,4};
+hole int P2_0_1_2 in {0,1,2,3,4};
+hole int P2_0_2_0 in {0,1,2,3,4};
+hole int P2_0_2_1 in {0,1,2,3,4};
+hole int P2_0_2_2 in {0,1,2,3,4};
+
+hole int P2_1_0_0 in {0,1,2,3,4};
+hole int P2_1_0_1 in {0,1,2,3,4};
+hole int P2_1_0_2 in {0,1,2,3,4};
+hole int P2_1_1_0 in {0,1,2,3,4};
+hole int P2_1_1_1 in {0,1,2,3,4};
+hole int P2_1_1_2 in {0,1,2,3,4};
+hole int P2_1_2_0 in {0,1,2,3,4};
+hole int P2_1_2_1 in {0,1,2,3,4};
+hole int P2_1_2_2 in {0,1,2,3,4};
+
+
+// 0 - up, 1 - right, 2 - down, 3 - left, 4 - stay
+
+
+module strategy1
+	mem : [0..1] init 0;
+    act : [0..4] init 0;
+
+    [choose]  mem=0 & xa1=0 & ya1=0 -> (act'=P1_0_0_0);
+    [choose]  mem=0 & xa1=0 & ya1=1 -> (act'=P1_0_0_1);
+    [choose]  mem=0 & xa1=0 & ya1=2 -> (act'=P1_0_0_2);
+    [choose]  mem=0 & xa1=1 & ya1=0 -> (act'=P1_0_1_0);
+    [choose]  mem=0 & xa1=1 & ya1=1 -> (act'=P1_0_1_1);
+    [choose]  mem=0 & xa1=1 & ya1=2 -> (act'=P1_0_1_2);
+    [choose]  mem=0 & xa1=2 & ya1=0 -> (act'=P1_0_2_0);
+    [choose]  mem=0 & xa1=2 & ya1=1 -> (act'=P1_0_2_1);
+    [choose]  mem=0 & xa1=2 & ya1=2 -> (act'=P1_0_2_2);
+
+    [choose]  mem=1 & xa1=0 & ya1=0 -> (act'=P1_1_0_0);
+    [choose]  mem=1 & xa1=0 & ya1=1 -> (act'=P1_1_0_1);
+    [choose]  mem=1 & xa1=0 & ya1=2 -> (act'=P1_1_0_2);
+    [choose]  mem=1 & xa1=1 & ya1=0 -> (act'=P1_1_1_0);
+    [choose]  mem=1 & xa1=1 & ya1=1 -> (act'=P1_1_1_1);
+    [choose]  mem=1 & xa1=1 & ya1=2 -> (act'=P1_1_1_2);
+    [choose]  mem=1 & xa1=2 & ya1=0 -> (act'=P1_1_2_0);
+    [choose]  mem=1 & xa1=2 & ya1=1 -> (act'=P1_1_2_1);
+    [choose]  mem=1 & xa1=2 & ya1=2 -> (act'=P1_1_2_2);
+
+	[move]  mem=0 & xa1=0 & ya1=0 -> (mem'=M1_0_0_0);
+    [move]  mem=0 & xa1=0 & ya1=1 -> (mem'=M1_0_0_1);
+    [move]  mem=0 & xa1=0 & ya1=2 -> (mem'=M1_0_0_2);
+    [move]  mem=0 & xa1=1 & ya1=0 -> (mem'=M1_0_1_0);
+    [move]  mem=0 & xa1=1 & ya1=1 -> (mem'=M1_0_1_1);
+    [move]  mem=0 & xa1=1 & ya1=2 -> (mem'=M1_0_1_2);
+    [move]  mem=0 & xa1=2 & ya1=0 -> (mem'=M1_0_2_0);
+    [move]  mem=0 & xa1=2 & ya1=1 -> (mem'=M1_0_2_1);
+    [move]  mem=0 & xa1=2 & ya1=2 -> (mem'=M1_0_2_2);
+
+    [move]  mem=1 & xa1=0 & ya1=0 -> (mem'=M1_1_0_0);
+    [move]  mem=1 & xa1=0 & ya1=1 -> (mem'=M1_1_0_1);
+    [move]  mem=1 & xa1=0 & ya1=2 -> (mem'=M1_1_0_2);
+    [move]  mem=1 & xa1=1 & ya1=0 -> (mem'=M1_1_1_0);
+    [move]  mem=1 & xa1=1 & ya1=1 -> (mem'=M1_1_1_1);
+    [move]  mem=1 & xa1=1 & ya1=2 -> (mem'=M1_1_1_2);
+    [move]  mem=1 & xa1=2 & ya1=0 -> (mem'=M1_1_2_0);
+    [move]  mem=1 & xa1=2 & ya1=1 -> (mem'=M1_1_2_1);
+    [move]  mem=1 & xa1=2 & ya1=2 -> (mem'=M1_1_2_2);
+endmodule
+
+module grid1
+
+	xa1 : [0..2] init 0; // agent1 x coordinate
+	ya1 : [0..2] init 2; // agent1 y coordinate
+
+	
+	[move]   xa1=0 & ya1=0 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=0 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=0 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=0 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=0 & act=4 -> 1: true;
+
+    [move]   xa1=0 & ya1=1 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=1 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=1 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=1 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=1 & act=4 -> 1: true;
+
+    [move]   xa1=0 & ya1=2 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=2 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=2 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=2 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=0 & ya1=2 & act=4 -> 1: true;
+
+
+    [move]   xa1=1 & ya1=0 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=0 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=0 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=0 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=0 & act=4 -> 1: true;
+
+    [move]   xa1=1 & ya1=1 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=1 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=1 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=1 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=1 & act=4 -> 1: true;
+
+    [move]   xa1=1 & ya1=2 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=2 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=2 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=2 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=1 & ya1=2 & act=4 -> 1: true;
+
+
+    [move]   xa1=2 & ya1=0 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=0 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=0 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=0 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=0 & act=4 -> 1: true;
+
+    [move]   xa1=2 & ya1=1 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=1 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=1 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=1 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=1 & act=4 -> 1: true;
+
+    [move]   xa1=2 & ya1=2 & act=0 -> 1-4*sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=2 & act=1 -> sl: (ya1'=y1u) + 1-4*sl: (xa1'=x1r) + sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=2 & act=2 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + 1-4*sl: (ya1'=y1d) + sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=2 & act=3 -> sl: (ya1'=y1u) + sl: (xa1'=x1r) + sl: (ya1'=y1d) + 1-4*sl: (xa1'=x1l) + sl: true;
+    [move]   xa1=2 & ya1=2 & act=4 -> 1: true;
+	
+endmodule
+
+
+module strategy2
+	mem2 : [0..1] init 0;
+    act2 : [0..4] init 0;
+
+    [choose]  mem2=0 & xa2=0 & ya2=0 -> (act2'=P2_0_0_0);
+    [choose]  mem2=0 & xa2=0 & ya2=1 -> (act2'=P2_0_0_1);
+    [choose]  mem2=0 & xa2=0 & ya2=2 -> (act2'=P2_0_0_2);
+    [choose]  mem2=0 & xa2=1 & ya2=0 -> (act2'=P2_0_1_0);
+    [choose]  mem2=0 & xa2=1 & ya2=1 -> (act2'=P2_0_1_1);
+    [choose]  mem2=0 & xa2=1 & ya2=2 -> (act2'=P2_0_1_2);
+    [choose]  mem2=0 & xa2=2 & ya2=0 -> (act2'=P2_0_2_0);
+    [choose]  mem2=0 & xa2=2 & ya2=1 -> (act2'=P2_0_2_1);
+    [choose]  mem2=0 & xa2=2 & ya2=2 -> (act2'=P2_0_2_2);
+
+    [choose]  mem2=1 & xa2=0 & ya2=0 -> (act2'=P2_1_0_0);
+    [choose]  mem2=1 & xa2=0 & ya2=1 -> (act2'=P2_1_0_1);
+    [choose]  mem2=1 & xa2=0 & ya2=2 -> (act2'=P2_1_0_2);
+    [choose]  mem2=1 & xa2=1 & ya2=0 -> (act2'=P2_1_1_0);
+    [choose]  mem2=1 & xa2=1 & ya2=1 -> (act2'=P2_1_1_1);
+    [choose]  mem2=1 & xa2=1 & ya2=2 -> (act2'=P2_1_1_2);
+    [choose]  mem2=1 & xa2=2 & ya2=0 -> (act2'=P2_1_2_0);
+    [choose]  mem2=1 & xa2=2 & ya2=1 -> (act2'=P2_1_2_1);
+    [choose]  mem2=1 & xa2=2 & ya2=2 -> (act2'=P2_1_2_2);
+
+	[move]  mem2=0 & xa2=0 & ya2=0 -> (mem2'=M2_0_0_0);
+    [move]  mem2=0 & xa2=0 & ya2=1 -> (mem2'=M2_0_0_1);
+    [move]  mem2=0 & xa2=0 & ya2=2 -> (mem2'=M2_0_0_2);
+    [move]  mem2=0 & xa2=1 & ya2=0 -> (mem2'=M2_0_1_0);
+    [move]  mem2=0 & xa2=1 & ya2=1 -> (mem2'=M2_0_1_1);
+    [move]  mem2=0 & xa2=1 & ya2=2 -> (mem2'=M2_0_1_2);
+    [move]  mem2=0 & xa2=2 & ya2=0 -> (mem2'=M2_0_2_0);
+    [move]  mem2=0 & xa2=2 & ya2=1 -> (mem2'=M2_0_2_1);
+    [move]  mem2=0 & xa2=2 & ya2=2 -> (mem2'=M2_0_2_2);
+
+    [move]  mem2=1 & xa2=0 & ya2=0 -> (mem2'=M2_1_0_0);
+    [move]  mem2=1 & xa2=0 & ya2=1 -> (mem2'=M2_1_0_1);
+    [move]  mem2=1 & xa2=0 & ya2=2 -> (mem2'=M2_1_0_2);
+    [move]  mem2=1 & xa2=1 & ya2=0 -> (mem2'=M2_1_1_0);
+    [move]  mem2=1 & xa2=1 & ya2=1 -> (mem2'=M2_1_1_1);
+    [move]  mem2=1 & xa2=1 & ya2=2 -> (mem2'=M2_1_1_2);
+    [move]  mem2=1 & xa2=2 & ya2=0 -> (mem2'=M2_1_2_0);
+    [move]  mem2=1 & xa2=2 & ya2=1 -> (mem2'=M2_1_2_1);
+    [move]  mem2=1 & xa2=2 & ya2=2 -> (mem2'=M2_1_2_2);
+endmodule
+
+module grid2
+
+	xa2 : [0..2] init 2; // agent2 x coordinate
+	ya2 : [0..2] init 0; // agent2 y coordinate
+
+	[move]   xa2=0 & ya2=0 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=0 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=0 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=0 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=0 & act2=4 -> 1: true;
+
+    [move]   xa2=0 & ya2=1 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=1 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=1 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=1 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=1 & act2=4 -> 1: true;
+
+    [move]   xa2=0 & ya2=2 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=2 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=2 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=2 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=0 & ya2=2 & act2=4 -> 1: true;
+
+
+    [move]   xa2=1 & ya2=0 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=0 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=0 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=0 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=0 & act2=4 -> 1: true;
+
+    [move]   xa2=1 & ya2=1 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=1 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=1 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=1 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=1 & act2=4 -> 1: true;
+
+    [move]   xa2=1 & ya2=2 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=2 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=2 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=2 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=1 & ya2=2 & act2=4 -> 1: true;
+
+
+    [move]   xa2=2 & ya2=0 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=0 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=0 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=0 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=0 & act2=4 -> 1: true;
+
+    [move]   xa2=2 & ya2=1 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=1 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=1 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=1 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=1 & act2=4 -> 1: true;
+
+    [move]   xa2=2 & ya2=2 & act2=0 -> 1-4*sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=2 & act2=1 -> sl: (ya2'=y2u) + 1-4*sl: (xa2'=x2r) + sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=2 & act2=2 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + 1-4*sl: (ya2'=y2d) + sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=2 & act2=3 -> sl: (ya2'=y2u) + sl: (xa2'=x2r) + sl: (ya2'=y2d) + 1-4*sl: (xa2'=x2l) + sl: true;
+    [move]   xa2=2 & ya2=2 & act2=4 -> 1: true;
+endmodule
+	
+module df
+    sink : bool init false;
+    [move] !sink -> discount: true + 1-discount: (sink'=true);
+endmodule
+
+module clk
+    c : [0..1] init 0;
+    [choose] c=0 -> 1: (c'=1);
+    [move] c=1 -> 1: (c'=0);
+endmodule
+
+// reward
+rewards "rew"
+	!sink & c=1 & meet: 1;
+endrewards
+
+formula meet = (xa1=xa2) & (ya1=ya2) & (((xa1=0) & (ya1=0)) | ((xa1=2) & (ya1=2)));
+
+// target
+label "goal" = sink=true;
+
