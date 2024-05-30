@@ -3,9 +3,10 @@
 #include "madp/src/base/POMDPDiscrete.h"
 #include "madp/src/base/DecPOMDPDiscrete.h"
 
-#include "storm/models/sparse/Mdp.h"
-#include "storm/models/sparse/Pomdp.h"
-#include "storm/models/sparse/StandardRewardModel.h"
+#include <storm/adapters/RationalNumberAdapter.h>
+#include <storm/models/sparse/Mdp.h>
+#include <storm/models/sparse/Pomdp.h>
+#include <storm/models/sparse/StandardRewardModel.h>
 
 #include <string>
 
@@ -19,6 +20,7 @@ namespace synthesis {
     class DecPomdp {
 
     public:
+
         DecPomdp(DecPOMDPDiscrete *model);
 
         /** Number of agents. */
