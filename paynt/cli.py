@@ -1,3 +1,4 @@
+import paynt.synthesizer.synthesizer_ar
 from . import version
 
 import paynt.parser.sketch
@@ -129,6 +130,17 @@ def setup_logger(log_path = None):
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for cassandra models",
 )
 
+#------------xshevc01---------------- 
+@click.option("--use-inheritance", is_flag=True, default=False,
+    help="# if set, inheritance dependencies (IDAR) will be used for the synthesis of FSCs")
+@click.option("--use-inheritance-extended", is_flag=True, default=False,
+    help="# if set, extended inheritance dependencies (EIDAR) will be used for the synthesis of FSCs")
+@click.option("--use-smart-inheritance", is_flag=True, default=False,
+    help="# if set, combines classic AR with EIDAR (SEIDAR) for more efficient synthesis of FSCs")
+@click.option("--iterations", default=0, show_default=True,
+    help=" experimental purposes: implicit number of iterations for the synthesis of FSCs")
+#------------------------------------
+
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
     help="counterexample generator",
@@ -148,13 +160,19 @@ def paynt_run(
     all_in_one,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
     constraint_bound,
+    #------------xshevc01---------------- 
+    use_inheritance,
+    use_inheritance_extended,
+    use_smart_inheritance,
+    iterations,
+    #------------------------------------
     ce_generator,
     profiling
 ):
     profiler = None
     if profiling:
         profiler = cProfile.Profile()
-        profiler.enable()
+        # profiler.enable()
 
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -169,6 +187,14 @@ def paynt_run(
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_randomized_abstraction = mdp_use_randomized_abstraction
 
+    #------------xshevc01---------------- 
+    paynt.quotient.quotient.Quotient.use_inheritance = use_inheritance
+    paynt.quotient.quotient.Quotient.use_inheritance_extended = use_inheritance_extended
+    paynt.quotient.quotient.Quotient.use_smart_inheritance = use_smart_inheritance
+    paynt.synthesizer.synthesizer_ar.SynthesizerAR.iterations = iterations
+    #------------------------------------
+
+    
     storm_control = None
     if storm_pomdp:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
@@ -182,7 +208,10 @@ def paynt_run(
     if all_in_one is None:
         quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound)
         synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
+        if profiling:
+            profiler.enable()
         synthesizer.run(optimum_threshold, export_evaluation)
+
     else:
         all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
         all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, family)

@@ -15,6 +15,12 @@ class Quotient:
 
     # if True, expected visits will not be computed for hole scoring
     disable_expected_visits = False
+    #------------xshevc01----------------
+    use_inheritance = False
+    use_inheritance_extended = False
+    use_smart_inheritance = False
+    #------------------------------------
+    
 
     @staticmethod
     def make_vector_defined(vector):
@@ -77,13 +83,176 @@ class Quotient:
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         return paynt.quotient.models.SubMdp(mdp, state_map, choice_map)
     
+
+    #------------xshevc01----------------    
+    def find_all_predecessors(self):
+        """ Find all predecessors for each state in the quotient MDP """
+        self.predecessors_list = payntbind.synthesis.findAllPredecessors(self.quotient_mdp)
+
+
+    def idar_get_parents_scheduler(self, family, compatible_choices):
+        """ Use parent's scheduler to find the affected states """
+
+        parent_mdp = family.parent_info.mdp
+        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
+        scheduler = parent_result.scheduler
+        return self.idar_get_parent_scheduler_choices(parent_mdp, scheduler, compatible_choices)
+    
+    
+    def idar_get_parent_scheduler_choices(self, parent_mdp, scheduler, compatible_choices):
+        """ Get parent's optimal choices and if they are not
+            compatible with the family, mark the corresponding states as affected """
+
+        state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, parent_mdp.model, parent_mdp.quotient_choice_map)
+        parent_state_choice = [-1] * self.quotient_mdp.nr_states
+        states_affected = [False for state in range(self.quotient_mdp.nr_states)]
+        for state in range(parent_mdp.model.nr_states):
+            qchoice = state_to_quotient_choice[state]
+            qstate = parent_mdp.quotient_state_map[state]
+            parent_state_choice[qstate] = qchoice
+            if not compatible_choices.get(qchoice):
+                states_affected[qstate] = True
+        return parent_state_choice, states_affected
+    
+
+    def find_reachable_affected_states(self, states_affected, parent_state_choice):
+        """ Mark all predecessors of affected states as affected """
+
+        state_queue = [s for s in range(self.quotient_mdp.nr_states) if states_affected[s]]
+        while state_queue:
+            state = state_queue.pop()
+            for pred in self.predecessors_list[state]:
+                qchoice = parent_state_choice[pred]
+                if not states_affected[pred] and qchoice != -1:
+                    state_queue.append(pred)
+                    states_affected[pred] = True
+
+    
+    def convert_to_bitvector(self, states_affected):
+        """ Converts a list of affected states to a bit vector"""
+
+        states_affected_bit_vector = stormpy.BitVector(self.quotient_mdp.nr_states,False)
+        for state in range(self.quotient_mdp.nr_states):
+            if states_affected[state]:
+                states_affected_bit_vector.set(state, True)
+        return states_affected_bit_vector
+
+    
+    def affected_states_to_mask(self, family, states_affected_bit_vector, parent_state_choice, compatible_choices):
+        """ Compute the result choices for the family """
+        
+        parent_mdp = family.parent_info.mdp
+        return payntbind.synthesis.affectedStatesToMask(parent_mdp.quotient_choice_map, parent_mdp.quotient_state_map, parent_mdp.model, states_affected_bit_vector, parent_state_choice, compatible_choices)
+    
+
+    def idar_build_inheritance(self, family, compatible_choices):
+        """ Construct the quotient MDP for the family using inheritance dependencies (IDAR) """
+
+        if family.parent_info is None:
+            self.perc_affected_sum = 0
+            self.perc_affected_entries = 0
+            self.choices_per_affected_sum = 0
+            return compatible_choices
+        parent_state_choice, states_affected = self.idar_get_parents_scheduler(family, compatible_choices)
+        self.find_reachable_affected_states(states_affected, parent_state_choice)
+        states_affected_bit_vector = self.convert_to_bitvector(states_affected)
+        result_choices = self.affected_states_to_mask(family, states_affected_bit_vector, parent_state_choice, compatible_choices)
+        self.count_affected_states(states_affected_bit_vector, family, result_choices)
+        return result_choices
+
+
+    def map_choices_to_states(self):
+        """ Map choices to states in the quotient MDP (EIDAR) """
+
+        self.choices_to_states = payntbind.synthesis.mapChoicesToStates(self.quotient_mdp)
+
+
+    def eidar_get_parents_scheduler(self, family):
+        """ Use parent's scheduler to find the affected choices (EIDAR) """
+
+        parent_mdp = family.parent_info.mdp
+        parent_result = family.parent_info.analysis_result.optimality_result.primary.result
+        scheduler = parent_result.scheduler
+        return self.eidar_get_parent_scheduler_choices(parent_mdp, scheduler)
+    
+
+    def eidar_get_parent_scheduler_choices(self, parent_mdp, scheduler):
+        """ Get parent's optimal choices and if they are not
+            compatible with the family, mark the corresponding choices as affected (EIDAR) """
+
+        state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, parent_mdp.model, parent_mdp.quotient_choice_map)
+        parent_state_choice = [-1] * self.quotient_mdp.nr_states
+        optimal_choices = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
+        for state in range(parent_mdp.model.nr_states):
+            qchoice = state_to_quotient_choice[state]
+            optimal_choices.set(qchoice, True)
+            qstate = parent_mdp.quotient_state_map[state]
+            parent_state_choice[qstate] = qchoice
+        return parent_state_choice, optimal_choices
+
+
+    def find_optimal_leading_choices(self, parent_state_choice):
+        """ Find the optimal leading choices (EIDAR) """
+
+        return payntbind.synthesis.findOptimalLeadingChoices(self.quotient_mdp, parent_state_choice)
+    
+
+    def optimal_choices_to_affected_states(self, optimal_choices, compatible_choices, leading_optimals_to_state):
+        """ Compute the affected states from the optimal choices (EIDAR) """
+
+        return payntbind.synthesis.optimalChoicesToAffectedStates(self.quotient_mdp, self.choices_to_states, optimal_choices, compatible_choices, leading_optimals_to_state)
+
+
+    def eidar_build_inheritance(self, family, compatible_choices):
+        """ Construct the quotient MDP for the family using extended inheritance dependencies (EIDAR)"""
+
+        if family.parent_info is None:
+            self.perc_affected_sum = 0
+            self.perc_affected_entries = 0
+            self.choices_per_affected_sum = 0
+            return compatible_choices
+        parent_state_choice, optimal_choices = self.eidar_get_parents_scheduler(family)
+        leading_optimals_to_state = self.find_optimal_leading_choices(parent_state_choice)
+        affected_states = self.optimal_choices_to_affected_states(optimal_choices, compatible_choices, leading_optimals_to_state)
+        result_choices = self.affected_states_to_mask(family, affected_states, parent_state_choice, compatible_choices)
+        self.count_affected_states(affected_states, family, result_choices)
+        return result_choices
+    
+
+    def count_affected_states(self, states_affected_bit_vector, family, choices):
+        """ Count statistics """
+
+        num_affected = states_affected_bit_vector.number_of_set_bits()
+        perc_affected = round(num_affected / family.parent_info.mdp.model.nr_states  * 100)
+        choices_per_affected = (choices.number_of_set_bits() - family.parent_info.mdp.model.nr_states + num_affected) / num_affected
+        self.perc_affected_sum += perc_affected
+        self.perc_affected_entries += 1
+        self.choices_per_affected_sum += choices_per_affected
+    
+
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
-        # select actions compatible with the family and restrict the quotient
-        choices = self.coloring.selectCompatibleChoices(family.family)
-        family.mdp = self.build_from_choice_mask(choices)
-        family.selected_choices = choices
+
+        compatible_choices = self.coloring.selectCompatibleChoices(family.family)
+
+        if self.use_inheritance:
+            result_choices = self.idar_build_inheritance(family, compatible_choices)
+        elif self.use_inheritance_extended or self.use_smart_inheritance:
+            result_choices = self.eidar_build_inheritance(family, compatible_choices)
+        else:
+            result_choices = compatible_choices
+
+        family.selected_choices = result_choices
+        family.mdp = self.build_from_choice_mask(result_choices)
+        if self.use_inheritance and family.parent_info is None:
+            self.find_all_predecessors()
+        if (self.use_inheritance_extended or self.use_smart_inheritance) and family.parent_info is None:
+            self.map_choices_to_states()
+        if self.use_smart_inheritance and family.parent_info is None and math.log10(family.size) <= 15:
+            self.use_smart_inheritance = False
+            print("SWITCHING TO AR DUE TO THE SIZE OF THE FAMILY")
         family.mdp.design_space = family
+    #------------------------------------
 
 
     def build_with_second_coloring(self, family, main_coloring, main_family):
@@ -371,6 +540,7 @@ class Quotient:
             design_subspace.hole_set_options(splitter, suboption)
             design_subspaces.append(design_subspace)
 
+        # print(splitter, suboptions)
         return design_subspaces
 
 
