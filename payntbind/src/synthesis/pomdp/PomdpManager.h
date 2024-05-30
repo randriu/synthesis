@@ -1,7 +1,8 @@
 #pragma once
 
-#include "storm/models/sparse/Mdp.h"
-#include "storm/models/sparse/Pomdp.h"
+#include <storm/adapters/RationalNumberAdapter.h>
+#include <storm/models/sparse/Mdp.h>
+#include <storm/models/sparse/Pomdp.h>
 
 namespace synthesis {
 

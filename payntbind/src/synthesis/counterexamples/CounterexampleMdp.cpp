@@ -1,7 +1,9 @@
 #include "CounterexampleMdp.h"
 
 #include <storm/storage/BitVector.h>
-#include <storm/exceptions/UnexpectedException.h>
+#include <storm/exceptions/InvalidArgumentException.h>
+#include <storm/exceptions/NotImplementedException.h>
+
 #include <storm/storage/sparse/JaniChoiceOrigins.h>
 #include <storm/storage/sparse/StateValuations.h>
 #include <storm/utility/builder.h>
