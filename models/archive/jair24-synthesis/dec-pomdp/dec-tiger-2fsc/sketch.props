@@ -1,6 +1,4 @@
-R[exp]{"rew"}max=? [C{0.9}]
-
-//R{"rew"}max=? [F "goal"]
+R{"rew"}max=? [F "goal"]
 
 //R{"steps"}min=? [F "goal"]
 
