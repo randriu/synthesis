@@ -46,6 +46,9 @@ namespace synthesis {
         std::vector<uint_fast64_t> state_joint_observation;
         /** For each state (row group), a mapping of a row to its reward. */
         std::vector<std::vector<double>> row_reward;
+        /** For each row of a POMDP contains its index in its row group */
+        std::vector<uint64_t> prototype_row_index;
+
         
         
         
@@ -70,8 +73,12 @@ namespace synthesis {
 
         /** Retrieve the underlying MDP. */
         std::shared_ptr<storm::models::sparse::Mdp<double>> constructMdp();
+
+        std::shared_ptr<storm::models::sparse::Mdp<double>> constructQuotientMdp(); // TODO make this consistent with how POMDPs are treated
         /** Retrieve the underlying POMDP. */
         std::shared_ptr<storm::models::sparse::Pomdp<double>> constructPomdp();
+        /** Count succesors for every observation and get prototype row index for every row index */
+        void countSuccessors();
 
         /** If true, the rewards are interpreted as costs. */
         bool reward_minimizing;
@@ -100,7 +107,76 @@ namespace synthesis {
         /** Label associated with the sink. */
         std::string discount_sink_label = "discount_sink";
 
+        /** For each observation contains the number of allocated memory states (initially 1) */
+        std::vector<uint64_t> observation_memory_size;
+
+        /** Set memory size to a selected observation */
+        void setObservationMemorySize(uint64_t obs, uint64_t memory_size);
+        /** Set memory size to all observations */
+        void setGlobalMemorySize(uint64_t memory_size);
+
+        /** For each state contains its prototype state (reverse of prototype_duplicates) */
+        std::vector<uint64_t> state_prototype;
+        /** For each state contains its memory index */
+        std::vector<uint64_t> state_memory;
+
+        /** Number of states of quotient mdp. */
+        uint_fast64_t num_quotient_states;
+
+        /** Number of rows of the quotient mdp */
+        uint_fast64_t num_quotient_rows;
+
+        /** For each observation, a list of successor observations */
+        std::vector<std::vector<uint64_t>> observation_successors;
+
+        /** For each observation contains the maximum memory size of a destination
+            across all rows of a prototype state having this observation */
+        std::vector<uint64_t> max_successor_memory_size;
+
+        /** Total number of holes */
+        uint64_t num_holes;
+        /** For each observation, a list of action holes */
+        std::vector<std::vector<std::vector<uint64_t>>> action_holes;
+        /** For each observation, a list of memory holes */
+        std::vector<std::vector<std::vector<uint64_t>>> memory_holes;
+
+        /** For each hole, its size */
+        std::vector<uint64_t> hole_options;
+
+        /** For each row, the corresponding action hole */
+        std::vector<std::vector<uint64_t>> row_action_hole;
+        /** For each row, the corresponding option of the action hole */
+        std::vector<std::vector<uint64_t>> row_action_option;
+        /** For each row, the corresponding memory hole */
+        std::vector<std::vector<uint64_t>> row_memory_hole;
+        /** For each row, the corresponding option of the memory hole */
+        std::vector<std::vector<uint64_t>> row_memory_option;
+
+        /** For each agent observation contains the maximum memory size of a destination
+            across all rows of a prototype state having this observation */
+        std::vector<std::vector<uint64_t>> agent_max_successor_memory_size;
+
+        /** For each combination of memory and joint observation, the coresponding unique number */
+        std::vector<std::vector<uint64_t>> memory_joint_observation;
+        /** For each action, set of memory_joint_observation */
+        std::vector<uint64_t> action_to_memory_joint_observation;
+        /** For each state, set of memory_joint_observation */
+        std::vector<uint64_t> state_to_memory_joint_observation;
+        /** Total number of combinations of observations and memory */
+        uint64_t nr_memory_joint_observations;
+
+
     private:
+
+        /**
+         * Build the state space:
+         * - compute total number of states (@num_states)
+         * - associate prototype states with their duplicates (@prototype_duplicates)
+         * - for each state, remember its prototype (@state_prototype)
+         * - for each state, remember its memory (@state_memory)
+         */
+        void buildStateSpace();
+        void buildTransitionMatrixSpurious();
 
         /** Madp to Storm state map. */
         std::map<MadpState, uint_fast64_t> madp_to_storm_states;
@@ -135,8 +211,29 @@ namespace synthesis {
         storm::models::sparse::StandardRewardModel<double> constructConstraintRewardModel();
         std::vector<uint32_t> constructObservabilityClasses();
 
-        
+        storm::models::sparse::StateLabeling constructQuotientStateLabeling();
+        storm::models::sparse::ChoiceLabeling constructQuotientChoiceLabeling();
+        storm::storage::SparseMatrix<double> constructQuotientTransitionMatrix();
+        storm::models::sparse::StandardRewardModel<double> constructQuotientRewardModel();
 
+        void resetDesignSpace();
+        void construct_memory_joint_observation();
+        void construct_acton_to_memory_joint_observation();
+        void construct_state_to_memory_joint_observation();
+        void buildDesignSpaceSpurious();
+
+        /** For each prototype state contains a list of its duplicates (including itself) */
+        std::vector<std::vector<uint64_t>> prototype_duplicates;
+
+        /** Row groups of the resulting transition matrix */
+        std::vector<uint64_t> row_groups;
+        /** For each row contains index of the prototype row */
+        std::vector<uint64_t> row_prototype;
+        /** For each row contains a memory update associated with it */
+        std::vector<uint64_t> row_memory;
+
+        std::vector<std::vector<uint_fast64_t>> nr_agent_actions_at_observation;
+        std::vector<std::vector<uint_fast64_t>> agent_prototype_row_index;
         
     };
 
