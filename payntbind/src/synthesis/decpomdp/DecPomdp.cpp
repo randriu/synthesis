@@ -708,9 +708,9 @@ namespace synthesis {
                 this->row_groups[state] = this->row_prototype.size();
                 auto prototype_state = this->state_prototype[state];
                 if (prototype_state != old_prototype_state)
-                    {
-                        prototype_row_group = prototype_row;
-                    }
+                {
+                    prototype_row_group = prototype_row;
+                }
                 prototype_row = prototype_row_group;
                 auto observ = this->state_joint_observation[prototype_state];
                 for(auto row: this->transition_matrix[prototype_state]) {

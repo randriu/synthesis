@@ -11,55 +11,41 @@ logger = logging.getLogger(__name__)
 
 class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
+    # implicit initial FSC size
+    initial_memory_size = 1
+
     def __init__(self, decpomdp_manager, specification):
         super().__init__(specification = specification)
-
-        self.initial_memory_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size ; #TODO Must take this from paynt
-        # self.initial_memory_size = 1;
-        # print("self.initial_memory_size",self.initial_memory_size)
 
         assert decpomdp_manager.num_agents > 1
 
         self.decpomdp_manager = decpomdp_manager
 
+        # for each agent a (simplified) label for each observation
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-        # print("self.agent_observation_labels",self.agent_observation_labels)
 
         self.agent_action_labels = decpomdp_manager.agent_action_labels
-        # print("self.agent_action_labels",self.agent_action_labels)
 
         self.joint_actions = decpomdp_manager.joint_actions
-        # print("self.joint_actions",self.joint_actions)
 
         self.transition_matrix = decpomdp_manager.transition_matrix
-        # print("self.transition_matrix",self.transition_matrix)
 
         self.nr_agents = decpomdp_manager.num_agents
-        # # print("self.nr_agents",self.nr_agents)
 
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-        # print("self.joint_observations",self.joint_observations)
 
         self.row_joint_action = decpomdp_manager.row_joint_action
-        # print("self.row_joint_action",self.row_joint_action)
 
         self.nr_states = len(self.row_joint_action)
-        # # print("self.nr_states",self.nr_states)
-
-        # self.nr_joint_actions = len(self.joint_actions)
-        # # print("self.nr_joint_actions",self.nr_joint_actions)
 
         self.nr_joint_observations = len(self.joint_observations)
-        # print("self.nr_joint_observations",self.nr_joint_observations)
 
         self.state_joint_observation = decpomdp_manager.state_joint_observation
-        # print("self.state_joint_observation",self.state_joint_observation)
 
         self.nr_agent_observations = [len(observation) for observation in self.agent_observation_labels]
-        # # print("self.nr_agent_observations",self.nr_agent_observations)
 
-        # for each aget: for each state contains observation
+        # for each agent and for each state contains observation
         self.agent_state_observation = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
             observations_for_state = [0] * self.nr_states
@@ -67,10 +53,8 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 observation = self.state_joint_observation[state]
                 observations_for_state[state] = self.joint_observations[observation][agent]
             self.agent_state_observation[agent] = observations_for_state
-        # print("self.agent_state_observation",self.agent_state_observation)
 
-
-        # # assign joint observations to agent observations
+        # assign joint observations to agent observations
         self.joint_observations_to_agent_observation = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
             agent_observations = [0] * len(self.joint_observations)
@@ -80,33 +64,28 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                     continue
                 agent_observations[obs] = self.agent_state_observation[agent][state]
             self.joint_observations_to_agent_observation[agent] = agent_observations
-        # print("self.joint_observations_to_agent_observation",self.joint_observations_to_agent_observation)
 
-
-        # # compute number of actions available at each agent observation for each agent 
+        # compute number of actions available at each agent observation for each agent 
         self.nr_agent_actions_at_observation = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
             labels = [0] * self.nr_agent_observations[agent]
             for state in range(self.nr_states):
                 obs = self.agent_state_observation[agent][state]
-                # print("obs",obs)
                 if labels[obs] != 0:
                     continue
                 actions = self.row_joint_action[state]
                 labels[obs] = len(list(set(map(lambda x: self.joint_actions[x][agent] , actions))))
             self.nr_agent_actions_at_observation[agent] = labels
-        # print("self.nr_agent_actions_at_observation",self.nr_agent_actions_at_observation)
 
         # get labels of actions available at each observation for each agent 
-        self.agent_labels_actions= [0] * self.nr_agents
-        for agent in range(self.nr_agents): 
+        self.agent_labels_actions = [0] * self.nr_agents
+        for agent in range(self.nr_agents):
             if self.decpomdp_manager.discounted:
                 self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-2]]
             else:
                 self.agent_labels_actions[agent] = [str(labels) for labels in self.agent_action_labels[agent][:-1]]
         # do initial unfolding
-        
-        self.set_imperfect_memory_size(self.initial_memory_size)
+        self.set_imperfect_memory_size(DecPomdpQuotient.initial_memory_size)
         
 
     def create_hole_name(self,agent, obs, mem, is_action_hole):
@@ -115,7 +94,6 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         return "{}({},{},{})".format(category,agent,obs_label,mem)
 
     def set_imperfect_memory_size(self, memory_size):
-        # print("IMPERFECT++++++++++++++++++++++++++++++++++++++++++++++++++",memory_size)
         ''' Set given memory size only to imperfect observations. '''
         self.agent_observation_memory_size = [0] * self.nr_agents
         for agent in range(self.nr_agents): 
@@ -131,7 +109,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         # print(self.quotient_mdp.transition_matrix)
 
     def set_manager_memory_vector(self,memory_size):
-        mem = pow( memory_size, self.nr_agents) 
+        mem = pow(memory_size, self.nr_agents) 
         # logger.debug(f"memory of every state of quotient mdp was set to  {mem}.")
         self.decpomdp_manager.set_global_memory_size(mem)
             
