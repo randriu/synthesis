@@ -12,9 +12,9 @@
 
 namespace synthesis {
 
-    using MadpState = std::pair<uint_fast64_t,uint_fast64_t>;   // state + observation
+    using MadpState = std::pair<uint64_t,uint64_t>;   // state + observation
     using MadpRow = std::vector<std::pair<MadpState,double>>;
-    using StormRow = std::vector<std::pair<uint_fast64_t,double>>;
+    using StormRow = std::vector<std::pair<uint64_t,double>>;
 
     
     class DecPomdp {
@@ -24,26 +24,26 @@ namespace synthesis {
         DecPomdp(DecPOMDPDiscrete *model);
 
         /** Number of agents. */
-        uint_fast64_t num_agents;
+        uint64_t num_agents;
         
         /** For each agent, a list of its action labels. */
         std::vector<std::vector<std::string>> agent_action_labels;
         /** A list of tuples of actions. */
-        std::vector<std::vector<uint_fast64_t>> joint_actions;
+        std::vector<std::vector<uint64_t>> joint_actions;
 
         /** For each agent, a list of its observation labels. */
         std::vector<std::vector<std::string>> agent_observation_labels;
         /** A list of tuples of observations. */
-        std::vector<std::vector<uint_fast64_t>> joint_observations;
+        std::vector<std::vector<uint64_t>> joint_observations;
 
         /** The unique initial state. */
-        uint_fast64_t initial_state;
+        uint64_t initial_state;
         /** Storm-esque transition matrix: for each state, a row group. */
         std::vector<std::vector<StormRow>> transition_matrix;
         /** For each state (row group), a mapping of a row to a joint action. */
-        std::vector<std::vector<uint_fast64_t>> row_joint_action;
+        std::vector<std::vector<uint64_t>> row_joint_action;
         /** State to joint observation map. */
-        std::vector<uint_fast64_t> state_joint_observation;
+        std::vector<uint64_t> state_joint_observation;
         /** For each state (row group), a mapping of a row to its reward. */
         std::vector<std::vector<double>> row_reward;
         /** For each row of a POMDP contains its index in its row group */
@@ -52,24 +52,24 @@ namespace synthesis {
         
         
         
-        uint_fast64_t agent_num_actions(uint_fast64_t agent) {
+        uint64_t agent_num_actions(uint64_t agent) {
             return this->agent_action_labels[agent].size();
         }
-        uint_fast64_t num_joint_actions() {
+        uint64_t num_joint_actions() {
             return this->joint_actions.size();
         }
-        uint_fast64_t agent_num_observations(uint_fast64_t agent) {
+        uint64_t agent_num_observations(uint64_t agent) {
             return this->agent_observation_labels[agent].size();
         }
-        uint_fast64_t num_joint_observations() {
+        uint64_t num_joint_observations() {
             return this->joint_observations.size();
         }
 
-        uint_fast64_t num_states() {
+        uint64_t num_states() {
             return this->storm_to_madp_states.size();
         }
 
-        uint_fast64_t num_rows();
+        uint64_t num_rows();
 
         /** Retrieve the underlying MDP. */
         std::shared_ptr<storm::models::sparse::Mdp<double>> constructMdp();
@@ -103,33 +103,36 @@ namespace synthesis {
         /** Whether discounting transformation took place. */
         bool discounted = false;
         /** Index of the sink state. */
-        uint_fast64_t discount_sink_state;
+        uint64_t discount_sink_state;
         /** Label associated with the sink. */
         std::string discount_sink_label = "discount_sink";
 
-        /** For each observation contains the number of allocated memory states (initially 1) */
-        std::vector<uint64_t> observation_memory_size;
+        /** For each agent and each observation contains the number of allocated memory states (initially 1) */
+        std::vector<std::vector<uint64_t>> agent_observation_memory_size;
 
-        /** Set memory size to a selected observation */
-        void setObservationMemorySize(uint64_t obs, uint64_t memory_size);
+        /** Set memory size for selected agent and selected observation */
+        void setAgentObservationMemorySize(uint64_t agent, uint64_t obs, uint64_t memory_size);
         /** Set memory size to all observations */
         void setGlobalMemorySize(uint64_t memory_size);
 
         /** For each state contains its prototype state (reverse of prototype_duplicates) */
         std::vector<uint64_t> state_prototype;
-        /** For each state contains its memory index */
-        std::vector<uint64_t> state_memory;
+        /** For each state and agent contains its memory index */
+        std::vector<std::vector<uint64_t>> state_agent_memory;
 
         /** Number of states of quotient mdp. */
-        uint_fast64_t num_quotient_states;
+        uint64_t num_quotient_states;
 
         /** Number of rows of the quotient mdp */
-        uint_fast64_t num_quotient_rows;
+        uint64_t num_quotient_rows;
 
         /** For each observation, a list of successor observations */
         std::vector<std::vector<uint64_t>> observation_successors;
 
-        /** For each observation contains the maximum memory size of a destination
+        /** For each agent and each of its observations, a list of successor observations */
+        std::vector<std::vector<std::vector<uint64_t>>> agent_observation_successors;
+
+        /** For each joint observation contains the maximum memory size of a destination
             across all rows of a prototype state having this observation */
         std::vector<uint64_t> max_successor_memory_size;
 
@@ -173,13 +176,13 @@ namespace synthesis {
          * - compute total number of states (@num_states)
          * - associate prototype states with their duplicates (@prototype_duplicates)
          * - for each state, remember its prototype (@state_prototype)
-         * - for each state, remember its memory (@state_memory)
+         * - for each state and for each agent remember its memory (@state_memory)
          */
         void buildStateSpace();
         void buildTransitionMatrixSpurious();
 
         /** Madp to Storm state map. */
-        std::map<MadpState, uint_fast64_t> madp_to_storm_states;
+        std::map<MadpState, uint64_t> madp_to_storm_states;
         /** Storm to Madp state map. */
         std::vector<MadpState> storm_to_madp_states;
 
@@ -193,16 +196,16 @@ namespace synthesis {
         /**
          * TODO
          */
-        uint_fast64_t mapMadpState(MadpState madp_state);
+        uint64_t mapMadpState(MadpState madp_state);
 
-        uint_fast64_t freshJointAction(std::string action_label);
-        uint_fast64_t freshJointObservation(std::string observation_label);
+        uint64_t freshJointAction(std::string action_label);
+        uint64_t freshJointObservation(std::string observation_label);
         /**
          * Add new state having fresh observation with its self-loop denoted
          * by a fresh joint action with zero reward.
          * @return index of the created state
          */
-        uint_fast64_t freshSink(std::string label);
+        uint64_t freshSink(std::string label);
 
         storm::models::sparse::StateLabeling constructStateLabeling();
         storm::models::sparse::ChoiceLabeling constructChoiceLabeling();
@@ -216,10 +219,12 @@ namespace synthesis {
         storm::storage::SparseMatrix<double> constructQuotientTransitionMatrix();
         storm::models::sparse::StandardRewardModel<double> constructQuotientRewardModel();
 
+        /** Compute the combined memory for joint observations based on 'agent_observation_memory_size' */
+        void computeJointObservationMemorySize();
+        /** For each joint observation contains the number of combined memory nodes */
+        std::vector<uint64_t> joint_observation_memory_size;
+
         void resetDesignSpace();
-        void construct_memory_joint_observation();
-        void construct_acton_to_memory_joint_observation();
-        void construct_state_to_memory_joint_observation();
         void buildDesignSpaceSpurious();
 
         /** For each prototype state contains a list of its duplicates (including itself) */
@@ -232,8 +237,10 @@ namespace synthesis {
         /** For each row contains a memory update associated with it */
         std::vector<uint64_t> row_memory;
 
-        std::vector<std::vector<uint_fast64_t>> nr_agent_actions_at_observation;
-        std::vector<std::vector<uint_fast64_t>> agent_prototype_row_index;
+        /** For each agent and each of its observations contains number of allowed actions */
+        std::vector<std::vector<uint64_t>> num_agent_actions_at_observation;
+
+        std::vector<std::vector<uint64_t>> agent_prototype_row_index;
         
     };
 
