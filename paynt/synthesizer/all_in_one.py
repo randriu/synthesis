@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class AllInOne:
 
-    def __init__(self, all_in_one_program, specification, approach, family):
+    def __init__(self, all_in_one_program, specification, approach, memory_limit_mb, family):
 
         self.properties = specification.all_properties()
         self.threshold = self.properties[0].threshold
@@ -22,7 +22,7 @@ class AllInOne:
 
         build_timer.start()
         if self.approach == 'bdd':
-            stormpy.set_settings(["--sylvan:maxmem", "16000"]) # set memory usage by the symbolic approach
+            stormpy.set_settings(["--sylvan:maxmem", str(memory_limit_mb)]) # set memory usage by the symbolic approach
             self.model = stormpy.build_symbolic_model(all_in_one_program)
             self.filter = stormpy.create_filter_initial_states_symbolic(self.model)
         elif self.approach == 'sparse':
