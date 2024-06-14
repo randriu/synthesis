@@ -125,6 +125,8 @@ namespace synthesis {
         this->num_agents = model->GetNrAgents();
         this->discount_factor = model->GetDiscount();
         this->reward_minimizing = model->GetRewardType() == COST;
+        this->agent_prototype_row_index.resize(this->num_agents);
+
 
         this->collectActions(model);
         this->collectObservations(model);
@@ -235,30 +237,6 @@ namespace synthesis {
         this->prototype_duplicates.resize(this->num_states());
         this->max_successor_memory_size.resize(this->num_joint_observations());
 
-        // for each agent and each observation compute the number of available actions
-        this->num_agent_actions_at_observation.resize(this->num_agents);
-        for (int agent = 0; agent < this->num_agents; agent++)
-        {
-            this->num_agent_actions_at_observation[agent].resize(this->agent_observation_labels[agent].size()); 
-        }
-        for (int agent = 0; agent < this->num_agents; agent++) {
-            for (int state = 0; state < this->num_states(); state++) {
-                auto joint_observation = this->state_joint_observation[state];
-                auto obs = this->joint_observations[joint_observation][agent];
-                if (this->num_agent_actions_at_observation[agent][obs] != 0) {
-                    continue;
-                } 
-                auto actions = this->row_joint_action[state];
-                std::set<uint64_t> set_of_actions;
-                for (auto action : actions) {
-                    set_of_actions.insert(this->joint_actions[action][agent]);
-                }
-                std::vector<uint64_t> vec_of_actions;
-                vec_of_actions.assign( set_of_actions.begin(), set_of_actions.end() );
-                this->num_agent_actions_at_observation[agent][obs] = vec_of_actions.size();
-            }
-        }
-
         // for each agent and each row assign corresponding action index
         std::vector<uint64_t> agent_actions_indexes;
         std::vector<uint64_t>::iterator it;
@@ -271,18 +249,18 @@ namespace synthesis {
 
                     it = std::find(agent_actions_indexes.begin(), agent_actions_indexes.end(), this->joint_actions[joint_action][agent]);
                     if (it != agent_actions_indexes.end()) {
-                        this->agent_prototype_row_index[agent][row_index] = it - agent_actions_indexes.begin();
+                        this->agent_prototype_row_index[agent].push_back(it - agent_actions_indexes.begin());
                     }
                     else {
                         agent_actions_indexes.push_back(this->joint_actions[joint_action][agent]);
-                        this->agent_prototype_row_index[agent][row_index] = counter;
+                        this->agent_prototype_row_index[agent].push_back(counter);
                         counter++;
                     }
                     row_index++;
                 }
             }
         }
-
+        this->computeAvailableActions();
         this->countSuccessors();
     }
 
@@ -335,9 +313,35 @@ namespace synthesis {
         for (uint64_t agent = 0; agent < this->num_agents; agent++) {
             for (uint64_t agent_obs = 0; agent_obs < this->agent_num_observations(agent); agent_obs++) {
                 this->agent_observation_successors[agent][agent_obs] = std::vector<uint64_t>(
-                    agent_observation_successor_sets[agent_obs].begin(),
-                    agent_observation_successor_sets[agent_obs].end()
+                    agent_observation_successor_sets[agent][agent_obs].begin(),
+                    agent_observation_successor_sets[agent][agent_obs].end()
                 );
+            }
+        }
+    }
+
+    void DecPomdp::computeAvailableActions() {
+        // for each agent and each observation compute the number of available actions
+        this->num_agent_actions_at_observation.resize(this->num_agents);
+        for (int agent = 0; agent < this->num_agents; agent++)
+        {
+            this->num_agent_actions_at_observation[agent].resize(this->agent_observation_labels[agent].size()); 
+        }
+        for (int agent = 0; agent < this->num_agents; agent++) {
+            for (int state = 0; state < this->num_states(); state++) {
+                auto joint_observation = this->state_joint_observation[state];
+                auto obs = this->joint_observations[joint_observation][agent];
+                if (this->num_agent_actions_at_observation[agent][obs] != 0) {
+                    continue;
+                } 
+                auto actions = this->row_joint_action[state];
+                std::set<uint64_t> set_of_actions;
+                for (auto action : actions) {
+                    set_of_actions.insert(this->joint_actions[action][agent]);
+                }
+                std::vector<uint64_t> vec_of_actions;
+                vec_of_actions.assign( set_of_actions.begin(), set_of_actions.end() );
+                this->num_agent_actions_at_observation[agent][obs] = vec_of_actions.size();
             }
         }
     }
@@ -371,14 +375,17 @@ namespace synthesis {
 
     storm::models::sparse::StateLabeling DecPomdp::constructQuotientStateLabeling() {
         storm::models::sparse::StateLabeling labeling(this->num_quotient_states);
+        std::vector<uint64_t> agent_default_memories(this->num_agents, 0);
 
         storm::storage::BitVector init_flags(this->num_quotient_states, false);
-        init_flags.set(this->prototype_duplicates[this->initial_state][0] );
+        init_flags.set(this->prototype_duplicates[this->initial_state].at(agent_default_memories));
         labeling.addLabel("init", std::move(init_flags));
 
         if(this->discounted and this->discount_factor != 1) {
             storm::storage::BitVector discount_sink_flags(this->num_quotient_states, false);
-            discount_sink_flags.set(this->prototype_duplicates[this->discount_sink_state][0]);
+            for (const auto &state_map : this->prototype_duplicates[this->discount_sink_state]) {
+                discount_sink_flags.set(state_map.second);
+            }
             labeling.addLabel(this->discount_sink_label, std::move(discount_sink_flags));
         }
 
@@ -432,6 +439,7 @@ namespace synthesis {
         std::set<std::string> all_labels;
         uint64_t row_counter = 0;
         uint64_t joint_action_index = 0;
+        uint64_t quotient_row_counter = 0;
         for(uint64_t state = 0; state < this->num_quotient_states; state++) {
             auto prototype_state = this->state_prototype[state];
             auto observ = this->state_joint_observation[prototype_state];
@@ -441,21 +449,21 @@ namespace synthesis {
                 joint_action_index = group_joint_actions[row_counter];
                 for(uint64_t mem = 0; mem < this->max_successor_memory_size[observ]; mem++) {
                     std::ostringstream sb;
-                    sb << "(";
+                    sb << "[ ";
                     auto joint_action = this->joint_actions[joint_action_index];
                     for(uint32_t agent = 0; agent < this->num_agents; agent++) {
                         auto agent_action = joint_action[agent];
                         auto agent_action_label = this->agent_action_labels[agent][agent_action];
-                        sb << agent_action_label;
-                        sb << ",";
+                        auto agent_memory = this->row_agent_memory[quotient_row_counter][agent];
+                        sb << "(" << agent_action_label << ", " << agent_memory << ") ";
                     }
-                    sb << mem;
-                    sb << ")";
+                    sb << "]";
                     std::string label = sb.str();
                     all_labels.insert(label);
                     row_label[current_row] = label;
                     current_row++;
                 }
+                quotient_row_counter++;
                 row_counter++;
             }
         }
@@ -489,7 +497,6 @@ namespace synthesis {
 
 
     storm::storage::SparseMatrix<double> DecPomdp::constructQuotientTransitionMatrix() {
-
         storm::storage::SparseMatrixBuilder<double> builder(
                 this->num_quotient_rows, this->num_quotient_states, 0, true, true, this->num_quotient_states
         );
@@ -500,15 +507,16 @@ namespace synthesis {
             builder.newRowGroup(this->row_groups[state]);
             for (uint64_t row = this->row_groups[state]; row < this->row_groups[state+1]; row++) {
                 auto prototype_row = this->row_prototype[row];
-                auto agent_dst_mem = this->row_agent_memory[row];
+                auto agents_dst_mem = this->row_agent_memory[row];
                 for (auto const &entry: this->transition_matrix[prototype_state][prototype_row]) {
                     // TODO not sure if the key will always be there
-                    auto dst = this->prototype_duplicates[entry.first].at(agent_dst_mem);
+                    auto dst = this->prototype_duplicates[entry.first].at(agents_dst_mem);
                     builder.addNextValue(row, dst, entry.second);
                 }
             }
+        }
         return builder.build();
-    } // TODO FIX prototype_duplicates everywhere
+    }
 
     storm::models::sparse::StandardRewardModel<double> DecPomdp::constructRewardModel() {
         std::optional<std::vector<double>> state_rewards;
@@ -676,21 +684,13 @@ namespace synthesis {
             }
         }
         this->discounted = true;
-    }
-
-    void DecPomdp::setAgentObservationMemorySize(uint64_t agent, uint64_t obs, uint64_t memory_size) {
-        this->agent_observation_memory_size[agent][obs] = memory_size;
-    }
-
-    void DecPomdp::setGlobalMemorySize(uint64_t memory_size) {
-        for (uint64_t agent = 0; agent < this->num_agents; agent++) {
-            for (uint64_t obs = 0; obs < this->agent_num_observations(agent); obs++) {
-                this->agent_observation_memory_size[agent][obs] = memory_size;
-            }
-        }
+        this->computeAvailableActions();
+        this->countSuccessors();
     }
 
     void DecPomdp::computeJointObservationMemorySize() {
+        this->joint_observation_memory_size.clear();
+        this->joint_observation_memory_size.resize(this->num_joint_observations());
         for (uint64_t joint_obs = 0; joint_obs < this->num_joint_observations(); joint_obs++) {
             uint64_t joint_obs_memory = 1;
             for (auto agent = 0; agent < this->num_agents; agent++) {
@@ -739,7 +739,7 @@ namespace synthesis {
 
                 // increment iterators accordingly
                 agent_memory_iterator[0]++;
-                for (uint64_t i = 0; (0 < this->num_agents-1) && (agent_memory_iterator[i] == agent_memories[i].end()); i++) {
+                for (uint64_t i = 0; (i < this->num_agents-1) && (agent_memory_iterator[i] == agent_memories[i].end()); i++) {
                     agent_memory_iterator[i] = agent_memories[i].begin();
                     agent_memory_iterator[i+1]++;
                 }
@@ -774,8 +774,8 @@ namespace synthesis {
             for(uint64_t agent_src_obs = 0; agent_src_obs < this->agent_num_observations(agent); agent_src_obs++) {
                 uint64_t max_mem_size = 0; //TODO there was 0
                 for(auto dst_obs: this->agent_observation_successors[agent][agent_src_obs]) {
-                    if(max_mem_size < this->agent_max_successor_memory_size[agent][dst_obs]) {
-                        max_mem_size = this->agent_max_successor_memory_size[agent][dst_obs];
+                    if(max_mem_size < this->agent_observation_memory_size[agent][dst_obs]) {
+                        max_mem_size = this->agent_observation_memory_size[agent][dst_obs];
                     }
                 }
                 this->agent_max_successor_memory_size[agent][agent_src_obs] = max_mem_size;
@@ -819,12 +819,15 @@ namespace synthesis {
                     this->row_agent_memory.push_back(row_memory_vector);
 
                     agent_memory_iterator[0]++;
-                    for (uint64_t i = 0; (0 < this->num_agents-1) && (agent_memory_iterator[i] == agent_max_successor_memories[i].end()); i++) {
+                    for (uint64_t i = 0; (i < this->num_agents-1) && (agent_memory_iterator[i] == agent_max_successor_memories[i].end()); i++) {
                         agent_memory_iterator[i] = agent_max_successor_memories[i].begin();
                         agent_memory_iterator[i+1]++;
                     }
                 }
                 prototype_row++;
+                for (uint64_t agent = 0; agent < this->num_agents; agent++) {
+                    agent_memory_iterator[agent] = agent_max_successor_memories[agent].begin();
+                }
             }
         }
         this->num_quotient_rows = this->row_prototype.size();
@@ -943,6 +946,19 @@ namespace synthesis {
         components.rewardModels.emplace(this->reward_model_name, this->constructQuotientRewardModel());
         this->buildDesignSpaceSpurious();
         return std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
+    }
+
+
+    void DecPomdp::setAgentObservationMemorySize(uint64_t agent, uint64_t obs, uint64_t memory_size) {
+        this->agent_observation_memory_size[agent][obs] = memory_size;
+    }
+
+    void DecPomdp::setGlobalMemorySize(uint64_t memory_size) {
+        for (uint64_t agent = 0; agent < this->num_agents; agent++) {
+            for (uint64_t obs = 0; obs < this->agent_num_observations(agent); obs++) {
+                this->agent_observation_memory_size[agent][obs] = memory_size;
+            }
+        }
     }
 
 }

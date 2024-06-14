@@ -47,6 +47,8 @@ namespace synthesis {
         /** For each state (row group), a mapping of a row to its reward. */
         std::vector<std::vector<double>> row_reward;
 
+        /** For each agent and each of its observations contains number of allowed actions */
+        std::vector<std::vector<uint64_t>> num_agent_actions_at_observation;
         
         
         
@@ -75,8 +77,6 @@ namespace synthesis {
         std::shared_ptr<storm::models::sparse::Mdp<double>> constructQuotientMdp(); // TODO make this consistent with how POMDPs are treated
         /** Retrieve the underlying POMDP. */
         std::shared_ptr<storm::models::sparse::Pomdp<double>> constructPomdp();
-        /** Count succesors for every observation and get prototype row index for every row index */
-        void countSuccessors();
 
         /** If true, the rewards are interpreted as costs. */
         bool reward_minimizing;
@@ -144,13 +144,13 @@ namespace synthesis {
         /** For each hole, its size */
         std::vector<uint64_t> hole_options;
 
-        /** For each row, the corresponding action hole */
+        /** For each agent and each row, the corresponding action hole */
         std::vector<std::vector<uint64_t>> agent_row_action_hole;
-        /** For each row, the corresponding option of the action hole */
+        /** For each agent and each row, the corresponding option of the action hole */
         std::vector<std::vector<uint64_t>> agent_row_action_option;
-        /** For each row, the corresponding memory hole */
+        /** For each agent and each row, the corresponding memory hole */
         std::vector<std::vector<uint64_t>> agent_row_memory_hole;
-        /** For each row, the corresponding option of the memory hole */
+        /** For each agent and each row, the corresponding option of the memory hole */
         std::vector<std::vector<uint64_t>> agent_row_memory_option;
 
         /** For each agent observation contains the maximum memory size of a destination
@@ -163,8 +163,6 @@ namespace synthesis {
         std::vector<uint64_t> action_to_memory_joint_observation;
         /** For each state, set of memory_joint_observation */
         std::vector<uint64_t> state_to_memory_joint_observation;
-        /** Total number of combinations of observations and memory */
-        uint64_t nr_memory_joint_observations;
 
 
     private:
@@ -189,6 +187,11 @@ namespace synthesis {
 
         void collectActions(DecPOMDPDiscrete *model);
         void collectObservations(DecPOMDPDiscrete *model);
+
+        /** Count succesors for every observation and get prototype row index for every row index */
+        void countSuccessors();
+        /** for each agent and each observation compute the number of available actions */
+        void computeAvailableActions();
         
         bool haveMadpState(MadpState madp_state);
         /**
@@ -226,7 +229,7 @@ namespace synthesis {
         void buildDesignSpaceSpurious();
 
         /** For each prototype state contains a list of its duplicates (including itself) */
-        std::vector<std::unordered_map<std::vector<uint64_t>,uint64_t>> prototype_duplicates;
+        std::vector<std::map<std::vector<uint64_t>,uint64_t>> prototype_duplicates;
 
         /** Row groups of the resulting transition matrix */
         std::vector<uint64_t> row_groups;
@@ -234,9 +237,6 @@ namespace synthesis {
         std::vector<uint64_t> row_prototype;
         /** For each row and each agent contains a memory update associated with it */
         std::vector<std::vector<uint64_t>> row_agent_memory;
-
-        /** For each agent and each of its observations contains number of allowed actions */
-        std::vector<std::vector<uint64_t>> num_agent_actions_at_observation;
 
         std::vector<std::vector<uint64_t>> agent_prototype_row_index;
         
