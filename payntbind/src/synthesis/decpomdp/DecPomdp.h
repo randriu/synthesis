@@ -46,8 +46,6 @@ namespace synthesis {
         std::vector<uint64_t> state_joint_observation;
         /** For each state (row group), a mapping of a row to its reward. */
         std::vector<std::vector<double>> row_reward;
-        /** For each row of a POMDP contains its index in its row group */
-        std::vector<uint64_t> prototype_row_index;
 
         
         
@@ -139,21 +137,21 @@ namespace synthesis {
         /** Total number of holes */
         uint64_t num_holes;
         /** For each observation, a list of action holes */
-        std::vector<std::vector<std::vector<uint64_t>>> action_holes;
+        std::vector<std::vector<std::vector<uint64_t>>> agent_action_holes;
         /** For each observation, a list of memory holes */
-        std::vector<std::vector<std::vector<uint64_t>>> memory_holes;
+        std::vector<std::vector<std::vector<uint64_t>>> agent_memory_holes;
 
         /** For each hole, its size */
         std::vector<uint64_t> hole_options;
 
         /** For each row, the corresponding action hole */
-        std::vector<std::vector<uint64_t>> row_action_hole;
+        std::vector<std::vector<uint64_t>> agent_row_action_hole;
         /** For each row, the corresponding option of the action hole */
-        std::vector<std::vector<uint64_t>> row_action_option;
+        std::vector<std::vector<uint64_t>> agent_row_action_option;
         /** For each row, the corresponding memory hole */
-        std::vector<std::vector<uint64_t>> row_memory_hole;
+        std::vector<std::vector<uint64_t>> agent_row_memory_hole;
         /** For each row, the corresponding option of the memory hole */
-        std::vector<std::vector<uint64_t>> row_memory_option;
+        std::vector<std::vector<uint64_t>> agent_row_memory_option;
 
         /** For each agent observation contains the maximum memory size of a destination
             across all rows of a prototype state having this observation */
@@ -228,14 +226,14 @@ namespace synthesis {
         void buildDesignSpaceSpurious();
 
         /** For each prototype state contains a list of its duplicates (including itself) */
-        std::vector<std::vector<uint64_t>> prototype_duplicates;
+        std::vector<std::unordered_map<std::vector<uint64_t>,uint64_t>> prototype_duplicates;
 
         /** Row groups of the resulting transition matrix */
         std::vector<uint64_t> row_groups;
         /** For each row contains index of the prototype row */
         std::vector<uint64_t> row_prototype;
-        /** For each row contains a memory update associated with it */
-        std::vector<uint64_t> row_memory;
+        /** For each row and each agent contains a memory update associated with it */
+        std::vector<std::vector<uint64_t>> row_agent_memory;
 
         /** For each agent and each of its observations contains number of allowed actions */
         std::vector<std::vector<uint64_t>> num_agent_actions_at_observation;
