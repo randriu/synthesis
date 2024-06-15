@@ -32,6 +32,10 @@ class SynthesizerOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
 
     def evaluate_all(self, family, prop, keep_value_only=False):
 
+        if not keep_value_only:
+            logger.debug("forcing keep_value_only=True for the one-by-one evaluation")
+            keep_value_only = True
+
         evaluations = []
         for hole_combination in family.all_combinations():
             assignment = family.construct_assignment(hole_combination)
