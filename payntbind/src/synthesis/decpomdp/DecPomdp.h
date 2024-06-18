@@ -233,11 +233,13 @@ namespace synthesis {
 
         /** Row groups of the resulting transition matrix */
         std::vector<uint64_t> row_groups;
+        /** For each row contains index of the prototype row in the state it belongs to */
+        std::vector<uint64_t> row_prototype_state;
         /** For each row contains index of the prototype row */
         std::vector<uint64_t> row_prototype;
         /** For each row and each agent contains a memory update associated with it */
         std::vector<std::vector<uint64_t>> row_agent_memory;
-
+        /** For each agent and each prototype row, the index of agent's action */
         std::vector<std::vector<uint64_t>> agent_prototype_row_index;
         
     };

@@ -57,6 +57,19 @@ class SynthesizerDECPOMDP:
 
             #break
 
+    # this is to show we can increment agent's memory individually
+    def strategy_iterative_agent(self):
+        mem_size = paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size
+        opt = self.quotient.specification.optimality.optimum
+        agent = 0
+        while True:
+            logger.info("Synthesizing optimal k={} controller for agent {} while the rest of the agents are memoryless.".format(mem_size, agent) )
+            self.quotient.set_agent_imperfect_memory_size(agent, mem_size)
+            self.synthesize(self.quotient.design_space)
+            opt_old = opt
+            opt = self.quotient.specification.optimality.optimum
+
+            mem_size += 1
 
     def run(self, optimum_threshold=None, export_evaluation=None):
         self.strategy_iterative(unfold_imperfect_only=True)

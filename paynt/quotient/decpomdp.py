@@ -78,6 +78,16 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.set_manager_memory_vector()
         self.unfold_memory()
 
+    def set_agent_imperfect_memory_size(self, agent, memory_size):
+        ''' Set given memory size only to imperfect observations of given agent. '''
+        assert agent in range(self.nr_agents), "given agent index is larger than number of agents"
+
+        agent_memory = [memory_size if self.agent_observation_states[agent][obs] > 1 else 1 for obs in range(self.nr_agent_observations[agent])]
+        self.agent_observation_memory_size[agent] = agent_memory
+
+        self.set_manager_memory_vector()
+        self.unfold_memory()
+
     def set_manager_memory_vector(self):
         for agent, agent_memory in enumerate(self.agent_observation_memory_size):
             for obs, memory in enumerate(agent_memory):
@@ -134,7 +144,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 hole_indices = []
                 num_actions = self.num_agent_actions_at_observation[agent][obs]
                 if num_actions > 1:
-                    option_labels = [str(x) for x in range(num_actions)] # TODO adding labels here would be nice in the future
+                    option_labels = ["act_"+str(x) for x in range(num_actions)] # TODO adding labels here would be nice in the future
                     for mem in range(self.agent_observation_memory_size[agent][obs]):
                         hole_indices.append(family.num_holes)
                         name = self.create_hole_name(agent,obs,mem,True)

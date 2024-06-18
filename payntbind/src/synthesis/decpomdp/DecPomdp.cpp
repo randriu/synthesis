@@ -111,6 +111,7 @@ namespace synthesis {
         // resize needed for the added sink state
         for (uint64_t agent = 0; agent < this->num_agents; agent++) {
             this->agent_observation_memory_size[agent].resize(this->agent_num_observations(agent), 1);
+            this->agent_prototype_row_index[agent].push_back(0);
         }
         this->prototype_duplicates.resize(this->num_states());
         this->max_successor_memory_size.resize(this->num_joint_observations());
@@ -238,21 +239,21 @@ namespace synthesis {
         this->max_successor_memory_size.resize(this->num_joint_observations());
 
         // for each agent and each row assign corresponding action index
-        std::vector<uint64_t> agent_actions_indexes;
+        std::vector<uint64_t> agent_actions_indeces;
         std::vector<uint64_t>::iterator it;
         for (int agent = 0; agent < this->num_agents; agent++) {
             uint64_t row_index = 0;
             for(uint64_t state = 0; state < this->num_states(); state++) {
-                agent_actions_indexes.clear();
+                agent_actions_indeces.clear();
                 uint64_t counter = 0;
                 for(auto joint_action: this->row_joint_action[state]) {
 
-                    it = std::find(agent_actions_indexes.begin(), agent_actions_indexes.end(), this->joint_actions[joint_action][agent]);
-                    if (it != agent_actions_indexes.end()) {
-                        this->agent_prototype_row_index[agent].push_back(it - agent_actions_indexes.begin());
+                    it = std::find(agent_actions_indeces.begin(), agent_actions_indeces.end(), this->joint_actions[joint_action][agent]);
+                    if (it != agent_actions_indeces.end()) {
+                        this->agent_prototype_row_index[agent].push_back(it - agent_actions_indeces.begin());
                     }
                     else {
-                        agent_actions_indexes.push_back(this->joint_actions[joint_action][agent]);
+                        agent_actions_indeces.push_back(this->joint_actions[joint_action][agent]);
                         this->agent_prototype_row_index[agent].push_back(counter);
                         counter++;
                     }
@@ -500,17 +501,23 @@ namespace synthesis {
         storm::storage::SparseMatrixBuilder<double> builder(
                 this->num_quotient_rows, this->num_quotient_states, 0, true, true, this->num_quotient_states
         );
+        std::vector<uint64_t> agent_default_memories(this->num_agents, 0);
         uint64_t row_index = 0;
         for(uint64_t state = 0; state < this->num_quotient_states; state++) {
             auto prototype_state = this->state_prototype[state];
             auto observation = this->state_joint_observation[prototype_state];
             builder.newRowGroup(this->row_groups[state]);
             for (uint64_t row = this->row_groups[state]; row < this->row_groups[state+1]; row++) {
-                auto prototype_row = this->row_prototype[row];
+                auto prototype_state_row = this->row_prototype_state[row];
                 auto agents_dst_mem = this->row_agent_memory[row];
-                for (auto const &entry: this->transition_matrix[prototype_state][prototype_row]) {
-                    // TODO not sure if the key will always be there
-                    auto dst = this->prototype_duplicates[entry.first].at(agents_dst_mem);
+                for (auto const &entry: this->transition_matrix[prototype_state][prototype_state_row]) {
+                    uint64_t dst;
+                    auto dst_it = this->prototype_duplicates[entry.first].find(agents_dst_mem);
+                    if (dst_it == this->prototype_duplicates[entry.first].end()) {
+                        dst = this->prototype_duplicates[entry.first].at(agent_default_memories);
+                    } else {
+                        dst = (*dst_it).second;
+                    }
                     builder.addNextValue(row, dst, entry.second);
                 }
             }
@@ -551,17 +558,14 @@ namespace synthesis {
     storm::models::sparse::StandardRewardModel<double> DecPomdp::constructQuotientRewardModel() {
         std::optional<std::vector<double>> state_rewards;
         std::vector<double> action_rewards;
-        uint64_t row_index = 0;
         for(uint64_t state = 0; state < this->num_quotient_states; state++) {
             auto prototype_state = this->state_prototype[state];
             auto observation = this->state_joint_observation[prototype_state];
-            row_index = 0;
-            for(auto row: this->transition_matrix[prototype_state]) {
+            for(uint64_t row = 0; row < this->transition_matrix[prototype_state].size(); row++) {
+                auto reward = this->row_reward[prototype_state][row];
                 for(uint64_t dst_mem = 0; dst_mem < this->max_successor_memory_size[observation]; dst_mem++) {
-                auto reward = this->row_reward[prototype_state][row_index];
-                action_rewards.push_back(reward);
+                    action_rewards.push_back(reward);
                 }
-                row_index++;
             }
         }
         return storm::models::sparse::StandardRewardModel<double>(std::move(state_rewards), std::move(action_rewards));
@@ -784,13 +788,22 @@ namespace synthesis {
 
         this->row_groups.resize(this->num_quotient_states+1);
         this->row_prototype.clear();
+        this->row_prototype_state.clear();
         this->row_agent_memory.clear();
+        uint64_t prototype_row = 0;
+        std::map<uint64_t, uint64_t> prototype_state_to_row;
         
         // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
         for (uint64_t state = 0; state < this->num_quotient_states; state++) {
-            this->row_groups[state] = this->row_prototype.size();
+            this->row_groups[state] = this->row_prototype_state.size();
             auto prototype_state = this->state_prototype[state];
             auto joint_obs = this->state_joint_observation[prototype_state];
+            auto prototype_state_to_row_it = prototype_state_to_row.find(prototype_state);
+            if (prototype_state_to_row_it == prototype_state_to_row.end()) {
+                prototype_state_to_row.insert({prototype_state, prototype_row});
+            } else {
+                prototype_row = (*prototype_state_to_row_it).second;
+            }
 
             std::vector<std::vector<uint64_t>> agent_max_successor_memories;
             std::vector<std::vector<uint64_t>::iterator> agent_memory_iterator;
@@ -806,7 +819,7 @@ namespace synthesis {
                 agent_memory_iterator[agent] = agent_max_successor_memories[agent].begin();
             }
 
-            uint64_t prototype_row = 0;
+            uint64_t prototype_state_row = 0;
             for (auto row: this->transition_matrix[prototype_state]) {
                 // cartesian product over all agent max successor memories from the current state
                 while (agent_memory_iterator[this->num_agents-1] != agent_max_successor_memories[this->num_agents-1].end()) {
@@ -815,6 +828,7 @@ namespace synthesis {
                     for (uint64_t a = 0; a < this->num_agents; a++) {
                         row_memory_vector[a] = *(agent_memory_iterator[a]);
                     }
+                    this->row_prototype_state.push_back(prototype_state_row);
                     this->row_prototype.push_back(prototype_row);
                     this->row_agent_memory.push_back(row_memory_vector);
 
@@ -824,13 +838,14 @@ namespace synthesis {
                         agent_memory_iterator[i+1]++;
                     }
                 }
+                prototype_state_row++;
                 prototype_row++;
                 for (uint64_t agent = 0; agent < this->num_agents; agent++) {
                     agent_memory_iterator[agent] = agent_max_successor_memories[agent].begin();
                 }
             }
         }
-        this->num_quotient_rows = this->row_prototype.size();
+        this->num_quotient_rows = this->row_prototype_state.size();
         this->row_groups[this->num_quotient_states] = this->num_quotient_rows;
     }
 
@@ -904,7 +919,7 @@ namespace synthesis {
         // map each row to the corresponding holes
         for (uint64_t state = 0; state < this->num_quotient_states; state++) {
             auto prototype = this->state_prototype[state];
-            auto joint_obs = this->state_joint_observation[state];
+            auto joint_obs = this->state_joint_observation[prototype];
             for (uint64_t agent = 0; agent < this->num_agents; agent++) {
                 auto agent_obs = this->joint_observations[joint_obs][agent];
                 auto agent_mem = this->state_agent_memory[state][agent];
