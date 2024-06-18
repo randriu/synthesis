@@ -22,5 +22,3 @@ WORKDIR /opt/paynt
 
 # (optional) install paynt
 RUN pip install -e .
-
-# TODO tests
