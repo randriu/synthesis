@@ -20,6 +20,7 @@ class Mdp:
         cls.builder_options.set_build_state_valuations(True)
         cls.builder_options.set_add_overlapping_guards_label()
         cls.builder_options.set_build_observation_valuations(True)
+        cls.builder_options.set_build_all_labels(True)
         # cls.builder_options.set_exploration_checks(True)
 
     @classmethod
