@@ -2,6 +2,7 @@
 
 #include "src/synthesis/translation/ItemKeyTranslator.h"
 
+#include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/models/sparse/Model.h>
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/BitVector.h>

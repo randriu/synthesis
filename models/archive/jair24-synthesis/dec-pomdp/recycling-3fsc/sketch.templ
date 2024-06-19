@@ -1,0 +1,178 @@
+
+dtmc
+
+
+const double discount=0.9;
+
+// agent 1 holes
+hole int M1_0_0 in {0,1,2};
+hole int M1_0_1 in {0,1,2};
+hole int M1_1_0 in {0,1,2};
+hole int M1_1_1 in {0,1,2};
+hole int M1_2_0 in {0,1,2};
+hole int M1_2_1 in {0,1,2};
+hole int P1_0_0 in {0,1,2};
+hole int P1_0_1 in {0,1,2};
+hole int P1_1_0 in {0,1,2};
+hole int P1_1_1 in {0,1,2};
+hole int P1_2_0 in {0,1,2};
+hole int P1_2_1 in {0,1,2};
+
+// agent 2 holes
+hole int M2_0_1 in {0,1,2};
+hole int M2_0_0 in {0,1,2};
+hole int M2_1_1 in {0,1,2};
+hole int M2_1_0 in {0,1,2};
+hole int M2_2_1 in {0,1,2};
+hole int M2_2_0 in {0,1,2};
+hole int P2_0_1 in {0,1,2};
+hole int P2_0_0 in {0,1,2};
+hole int P2_1_1 in {0,1,2};
+hole int P2_1_0 in {0,1,2};
+hole int P2_2_1 in {0,1,2};
+hole int P2_2_0 in {0,1,2};
+
+module strategy1
+	mem : [0..2] init 0;
+
+	[act]  mem=0 & x=0  -> (mem'=M1_0_0);
+	[act]  mem=0 & x=1 -> (mem'=M1_0_1);
+	[act]  mem=1 & x=0  -> (mem'=M1_1_0);
+	[act]  mem=1 & x=1 -> (mem'=M1_1_1);
+    [act]  mem=2 & x=0  -> (mem'=M1_2_0);
+	[act]  mem=2 & x=1 ->  (mem'=M1_2_1);
+endmodule
+
+module rec1
+
+	x : [0..1] init 0; // agent1 battery
+    act1 : [0..2];
+
+    [choose] mem=0 & x=0 -> 1: (act1'=P1_0_0);
+    [choose] mem=0 & x=1 -> 1: (act1'=P1_0_1);
+    [choose] mem=1 & x=0 -> 1: (act1'=P1_1_0);
+    [choose] mem=1 & x=1 -> 1: (act1'=P1_1_1);
+    [choose] mem=2 & x=0 -> 1: (act1'=P1_2_0);
+    [choose] mem=2 & x=1 -> 1: (act1'=P1_2_1);
+
+	[act] x=0 & act1=0 -> 1:   (x'=0);
+    [act] x=0 & act1=1 -> 0.7: (x'=0) + 0.3: (x'=1);
+    [act] x=0 & act1=2 -> 0.5: (x'=0) + 0.5: (x'=1);
+
+    [act] x=1 & act1=0 -> 1:   (x'=0);
+    [act] x=1 & act1=1 -> 0.2: (x'=0) + 0.8: (x'=1);
+    [act] x=1 & act1=2 -> 0.3: (x'=0) + 0.7: (x'=1);
+	
+endmodule
+
+
+module strategy2
+	mem2 : [0..2] init 0;
+
+	[act]  mem2=0 & y=0  -> (mem2'=M2_0_0);
+	[act]  mem2=0 & y=1  -> (mem2'=M2_0_1);
+	[act]  mem2=1 & y=0  -> (mem2'=M2_1_0);
+	[act]  mem2=1 & y=1  -> (mem2'=M2_1_1);
+    [act]  mem2=2 & y=0  -> (mem2'=M2_2_0);
+	[act]  mem2=2 & y=1  -> (mem2'=M2_2_1);
+endmodule
+
+
+module grid2
+
+	y : [0..1] init 0; // agent2 battery
+    act2 : [0..2];
+
+    [choose] mem2=0 & y=0 -> 1: (act2'=P2_0_0);
+    [choose] mem2=0 & y=1 -> 1: (act2'=P2_0_1);
+    [choose] mem2=1 & y=0 -> 1: (act2'=P2_1_0);
+    [choose] mem2=1 & y=1 -> 1: (act2'=P2_1_1);
+    [choose] mem2=2 & y=0 -> 1: (act2'=P2_2_0);
+    [choose] mem2=2 & y=1 -> 1: (act2'=P2_2_1);
+
+	[act] y=0 & act2=0 -> 1:   (y'=0);
+    [act] y=0 & act2=1 -> 0.7: (y'=0) + 0.3: (y'=1);
+    [act] y=0 & act2=2 -> 0.5: (y'=0) + 0.5: (y'=1);
+
+    [act] y=1 & act2=0 -> 1:   (y'=0);
+    [act] y=1 & act2=1 -> 0.2: (y'=0) + 0.8: (y'=1);
+    [act] y=1 & act2=2 -> 0.3: (y'=0) + 0.7: (y'=1);
+endmodule
+	
+
+module df
+    sink : bool init false;
+    [act] !sink -> discount: true + 1-discount: (sink'=true);
+endmodule
+
+module clk
+    c : bool init true;
+    [choose] c -> 1: (c'=false);
+    [act] !c -> 1: (c'=true);
+endmodule
+
+// reward
+rewards "rew"
+	x=0 & y=0 & act1=0 & act2=1 & !c : 2;
+
+    x=0 & y=0 & act1=1 & act2=0 & !c : 2;
+
+    x=0 & y=0 & act1=1 & act2=1 & !c : 4;
+
+    x=0 & y=0 & act1=1 & act2=2 & !c : 2;
+
+    x=0 & y=0 & act1=2 & act2=1 & !c : 2;
+
+    x=0 & y=0 & act1=2 & act2=2 & !c : 5;
+
+
+    x=0 & y=1 & act1=0 & act2=1 & !c : -0.4;
+
+    x=0 & y=1 & act1=0 & act2=2 & !c : -3;
+
+    x=0 & y=1 & act1=1 & act2=0 & !c : 2;
+
+    x=0 & y=1 & act1=1 & act2=1 & !c : 1.2;
+
+    x=0 & y=1 & act1=1 & act2=2 & !c : -1.6;
+
+    x=0 & y=1 & act1=2 & act2=1 & !c : -0.4;
+
+    x=0 & y=1 & act1=2 & act2=2 & !c : 0.5;
+
+
+    x=1 & y=0 & act1=0 & act2=1 & !c : 2;
+
+    x=1 & y=0 & act1=1 & act2=0 & !c : -0.4;
+
+    x=1 & y=0 & act1=1 & act2=1 & !c : 1.2;
+
+    x=1 & y=0 & act1=1 & act2=2 & !c : -0.4;
+
+    x=1 & y=0 & act1=2 & act2=0 & !c : -3;
+
+    x=1 & y=0 & act1=2 & act2=1 & !c : -1.6;
+
+    x=1 & y=0 & act1=2 & act2=2 & !c : 0.5;
+
+
+    x=1 & y=1 & act1=0 & act2=1 & !c : -0.4;
+
+    x=1 & y=1 & act1=0 & act2=2 & !c : -3;
+
+    x=1 & y=1 & act1=1 & act2=0 & !c : -0.4;
+
+    x=1 & y=1 & act1=1 & act2=1 & !c : -1.44;
+
+    x=1 & y=1 & act1=1 & act2=2 & !c : -3.88;
+
+    x=1 & y=1 & act1=2 & act2=0 & !c : -3;
+
+    x=1 & y=1 & act1=2 & act2=1 & !c : -3.88;
+
+    x=1 & y=1 & act1=2 & act2=2 & !c : -3.55;
+endrewards
+
+// target
+label "goal" = sink=true;
+

@@ -33,8 +33,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Build paynt image from Dockerfile
         run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
-      - name: Build paynt image with learner dependencies
-        run: docker build -t ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }} . -f paynt-learner.dockerfile --build-arg paynt_base=${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
       - name: Login into docker
         # Only login if using master on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
@@ -43,7 +41,27 @@ jobs:
         # Only deploy if using master on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
         run: docker push ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
-      - name: Deploy paynt image with learner dependencies
-        # Only deploy if using master on original repo (and not for pull requests or forks)
-        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
-        run: docker push ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }}
+
+  # deploy-learning:
+  #   name: Deploy on latest with learning dependencies (${{ matrix.buildType.name }})
+  #   runs-on: ubuntu-latestx
+  #   strategy:
+  #     matrix:
+  #       buildType:
+  #         - {name: "Release", imageName : "randriu/paynt", dockerTag: "latest", setupArgs: ""}
+  #     fail-fast: false
+  #   steps:
+  #     - name: Git clone
+  #       uses: actions/checkout@v4
+  #     - name: Build paynt image from Dockerfile
+  #       run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+  #     - name: Build paynt image with learner dependencies
+  #       run: docker build -t ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }} . -f paynt-learner.dockerfile --build-arg paynt_base=${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
+  #     - name: Login into docker
+  #       # Only login if using master on original repo (and not for pull requests or forks)
+  #       if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+  #       run: echo '${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}' | docker login -u randriu --password-stdin
+  #     - name: Deploy paynt image with learner dependencies
+  #       # Only deploy if using master on original repo (and not for pull requests or forks)
+  #       if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
+  #       run: docker push ${{ matrix.buildType.imageName }}-learner:${{ matrix.buildType.dockerTag }}
