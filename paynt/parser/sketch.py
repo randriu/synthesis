@@ -9,6 +9,7 @@ import paynt.quotient.models
 import paynt.quotient.quotient
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
+import paynt.quotient.posg
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
@@ -221,6 +222,8 @@ class Sketch:
             assert explicit_quotient.is_nondeterministic_model
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
                 quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
+            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
+                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
             else:
                 quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
         return quotient_container

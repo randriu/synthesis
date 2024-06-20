@@ -1,0 +1,48 @@
+// Simple game with dice and coin. In each round cashier (player2) rolls a 6-sided die,
+// gambler (player1) can either roll a die and if he gets a higher value he wins or
+// he can choose to toss a coin, if its heads he wins and if its tails he loses.
+// There's total of TOTAL_ROUNDS rounds and gambler needs to win more than a half of them to win overall.
+
+// In this version cashier can decide to roll the die again in each round before passing the turn to player1.
+
+pomdp
+
+const int TOTAL_ROUNDS=3;
+
+formula done = round=TOTAL_ROUNDS;
+formula goal = done & (rounds_won>TOTAL_ROUNDS/2);
+
+label "goal" = goal;
+
+observable "small_value" = (value_cashier < 2);
+observable "cashier_ready" = value_cashier > 0;
+observable "gambler_ready" = value_gambler > 0;
+observable "roll_again" = roll_again;
+
+label "__player_1_state__" = value_cashier != 0 & value_gambler = 0 & roll_again;
+
+module cashier
+    value_cashier : [0..6] init 0;
+    round : [0..TOTAL_ROUNDS] init 0;
+    roll_again : bool init false;
+
+    [start] !done & !roll_again & value_cashier = 0 -> 1/6: (value_cashier'=1) + 1/6: (value_cashier'=2) + 1/6: (value_cashier'=3) + 1/6: (value_cashier'=4) + 1/6: (value_cashier'=5) + 1/6: (value_cashier'=6);
+
+    [stay] !done & !roll_again & value_cashier > 0 -> 1: (roll_again'=true);
+    [again] !done & !roll_again & value_cashier > 0 -> 1/6: (value_cashier'=1)&(roll_again'=true) + 1/6: (value_cashier'=2)&(roll_again'=true) + 1/6: (value_cashier'=3)&(roll_again'=true) + 1/6: (value_cashier'=4)&(roll_again'=true) + 1/6: (value_cashier'=5)&(roll_again'=true) + 1/6: (value_cashier'=6)&(roll_again'=true);
+
+    [next] round < TOTAL_ROUNDS -> 1:(value_cashier'=0)&(round'=round+1)&(roll_again'=false);
+endmodule
+
+
+module gambler
+    // 1..6 for dice rolls and 7 if coin toss was good
+    value_gambler : [0..7] init 0;
+    rounds_won : [0..TOTAL_ROUNDS] init 0;
+
+    [dice] value_cashier != 0 & value_gambler = 0 -> 1/6: (value_gambler'=1) + 1/6: (value_gambler'=2) + 1/6: (value_gambler'=3) + 1/6: (value_gambler'=4) + 1/6: (value_gambler'=5) + 1/6: (value_gambler'=6);
+    [coin] value_cashier != 0 & value_gambler = 0 -> 1/2: (value_gambler'=1) + 1/2:(value_gambler'=7);
+
+    [next] value_gambler != 0 & value_gambler > value_cashier -> 1: (value_gambler'=0)&(rounds_won'=rounds_won+1);
+    [next] value_gambler != 0 & value_gambler <= value_cashier -> (value_gambler'=0);
+endmodule
