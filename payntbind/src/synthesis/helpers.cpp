@@ -13,6 +13,8 @@
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
 #include <storm/storage/SparseMatrix.h>
 #include <storm/models/sparse/Model.h>
+#include <storm/models/sparse/Dtmc.h>
+#include <storm/storage/sparse/ModelComponents.h>
 
 namespace synthesis {
 
@@ -42,6 +44,52 @@ void removeRewardModel(storm::models::sparse::Model<ValueType> & model, std::str
     model.removeRewardModel(reward_name);
 }
 
+// applies discount model transformation to a given DTMC
+// currently used for discounted expected visits
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Dtmc<ValueType>> applyDiscountTransformationToDtmc(storm::models::sparse::Dtmc<ValueType> &model, double discount_factor) {
+    storm::storage::sparse::ModelComponents<ValueType> components;
+
+    auto dtmcNumberOfStates = model.getNumberOfStates();
+
+    // labeling
+    storm::models::sparse::StateLabeling stateLabeling(dtmcNumberOfStates+1);
+    storm::storage::BitVector init_flags = model.getInitialStates();
+    init_flags.resize(dtmcNumberOfStates+1, false);
+    stateLabeling.addLabel("init", std::move(init_flags));
+    storm::storage::BitVector discount_flag(dtmcNumberOfStates+1, false);
+    discount_flag.set(dtmcNumberOfStates, true);
+    stateLabeling.addLabel("discount_sink", std::move(discount_flag));
+    components.stateLabeling = stateLabeling;
+
+    // transition matrix
+    storm::storage::SparseMatrix<ValueType> const& transitionMatrix = model.getTransitionMatrix();
+    storm::storage::SparseMatrixBuilder<ValueType> builder;
+    for (uint_fast64_t state = 0; state < dtmcNumberOfStates; state++) {
+        // this function was created for cassandra models where we don't want to discount the first transition
+        // maybe it's not needed? TODO
+        if (state == 0) {
+            for (auto entry: transitionMatrix.getRow(state)) {
+                builder.addNextValue(state, entry.getColumn(), entry.getValue());
+            }
+            builder.addNextValue(state, dtmcNumberOfStates, 0);
+        }
+        else {
+            for (auto entry: transitionMatrix.getRow(state)) {
+                builder.addNextValue(state, entry.getColumn(), entry.getValue() * discount_factor);
+            }
+            builder.addNextValue(state, dtmcNumberOfStates, 1-discount_factor);
+        }
+    }
+    for (uint_fast64_t state = 0; state < dtmcNumberOfStates; state++) {
+        builder.addNextValue(dtmcNumberOfStates, state, 0);
+    }
+    builder.addNextValue(dtmcNumberOfStates, dtmcNumberOfStates, 1);
+    components.transitionMatrix = builder.build();
+    
+    return std::make_shared<storm::models::sparse::Dtmc<ValueType>>(std::move(components));
+}
+
 }
 
 
@@ -58,6 +106,8 @@ void define_helpers(py::module& m) {
 
     m.def("transform_until_to_eventually", &synthesis::transformUntilToEventually<double>, py::arg("formula"));
     m.def("remove_reward_model", &synthesis::removeRewardModel<double>, py::arg("model"), py::arg("reward_name"));
+
+    m.def("apply_discount_transformation_to_dtmc", &synthesis::applyDiscountTransformationToDtmc<double>, py::arg("model"), py::arg("discount_factor"));
 
     m.def("multiply_with_vector", [] (storm::storage::SparseMatrix<double> matrix,std::vector<double> vector) {
         std::vector<double> result(matrix.getRowCount());

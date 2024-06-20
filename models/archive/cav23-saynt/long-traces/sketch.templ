@@ -1,0 +1,30 @@
+pomdp
+
+formula switch_state = x=0;
+formula finish_state = (x=10 & y=0) | (x=100 & y=1);
+formula goal = y=2;
+formula fail = x=101;
+
+observable "switch_state" = switch_state;
+observable "finish_state" = finish_state;
+observable "goal" = goal;
+observable "fail" = fail;
+
+module main
+
+    x : [0..101] init 0;
+    y : [0..3] init 0;
+
+
+    [switch_0] x=0 -> 1: (y'=0)&(x'=1);
+    [switch_1] x=0 -> 1: (y'=1)&(x'=1);
+
+    [up]    x>0 & x<101 -> 1:(x'=min(x+1,101));
+    [down]  x>0 & x<101 -> 1:(x'=max(x-1,0));
+
+    [finish]  (x=10 & y=0) -> 0.1:(y'=2) + 0.9:(x'=101);
+    [finish]  (x=100 & y=1) -> 0.5:(y'=2) + 0.5:(x'=101);
+
+    [loop] x=101 -> 1: true;
+
+endmodule

@@ -10,6 +10,8 @@ import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
+import paynt.parser.alpha_vector_parser
+import paynt.verification.alpha_vector_verification
 
 import click
 import sys
@@ -26,6 +28,9 @@ def setup_logger(log_path = None):
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     # root.setLevel(logging.INFO)
+
+    # disable all logging
+    # logging.disable(logging.CRITICAL)
 
     # formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
     formatter = logging.Formatter('%(asctime)s - %(filename)s - %(message)s')
@@ -89,6 +94,12 @@ def setup_logger(log_path = None):
     type=click.Choice(["cutoff", "clip2", "clip4", "small", "refine", "overapp", "2mil", "5mil", "10mil", "20mil", "30mil", "50mil"]),
     show_default=True,
     help="run Storm using pre-defined settings and use the result to enhance PAYNT. Can only be used together with --storm-pomdp flag")
+@click.option(
+    "--storm-exploration-heuristic",
+    default="bfs",
+    type=click.Choice(["bfs", "gap", "reachability", "uncertainty"]),
+    show_default=True,
+    help="chooses Storm's belief exploration heuristic, Can only be used together with --storm-pomdp flag")
 @click.option("--iterative-storm", nargs=3, type=int, show_default=True, default=None,
     help="runs the iterative PAYNT/Storm integration. Arguments timeout, paynt_timeout, storm_timeout. Can only be used together with --storm-pomdp flag")
 @click.option("--get-storm-result", default=None, type=int,
@@ -103,6 +114,14 @@ def setup_logger(log_path = None):
     type=click.Choice(["storm", "paynt", "cutoff"]),
     show_default=True,
     help="specify memory unfold strategy. Can only be used together with --storm-pomdp flag")
+@click.option("--saynt-threads", default=None, type=int,
+    help="run SAYNT with FSCs for non-initial beliefs. 0 - for dynamic number of different beliefs, N > 0 - set number of different beliefs")
+@click.option("--saynt-overapprox", is_flag=True, default=False,
+    help="run Storm to obtain belief value overapproximations that can be used to better choose from what beliefs FSCs should be computed")
+@click.option("--saynt", is_flag=True, default=False,
+    help="run default SAYNT")
+@click.option("--new-saynt", is_flag=True, default=False,
+    help="run SAYNT with multiple cut-offs FSCs")
 
 @click.option("--export-fsc-storm", type=click.Path(), default=None,
     help="path to output file for SAYNT belief FSC")
@@ -130,6 +149,13 @@ def setup_logger(log_path = None):
 @click.option(
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for cassandra models",
 )
+@click.option(
+    "--native-discount", is_flag=True, default=False,
+    help="# if set, MDP dicount model checking engine is used (expecting cassandra models)"
+)
+
+@click.option("--alpha-vector-analysis", type=click.Path(), default=None,
+    help="filename containing alpha vector policy")
 
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
@@ -144,12 +170,13 @@ def paynt_run(
     method,
     incomplete_search, disable_expected_visits,
     fsc_synthesis, pomdp_memory_size, posterior_aware,
-    storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
-    use_storm_cutoffs, unfold_strategy_storm,
+    storm_pomdp, iterative_storm, get_storm_result, storm_options, storm_exploration_heuristic, prune_storm,
+    use_storm_cutoffs, unfold_strategy_storm, saynt_threads, saynt_overapprox, saynt, new_saynt,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one, all_in_one_maxmem,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
-    constraint_bound,
+    constraint_bound, native_discount,
+    alpha_vector_analysis,
     ce_generator,
     profiling
 ):
@@ -171,24 +198,45 @@ def paynt_run(
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_randomized_abstraction = mdp_use_randomized_abstraction
 
+    # QoL change for calling SAYNT, TODO discuss the default values because this is what we use for 15min timeout
+    if saynt:
+        fsc_synthesis = True
+        storm_pomdp = True
+        if iterative_storm is None:
+            iterative_storm = (900, 60, 10)
+    elif new_saynt:
+        fsc_synthesis = True
+        storm_pomdp = True
+        if iterative_storm is None:
+            iterative_storm = (900, 90, 2)
+        if saynt_threads is None:
+            saynt_threads = 0
+
     storm_control = None
     if storm_pomdp:
         storm_control = paynt.quotient.storm_pomdp_control.StormPOMDPControl()
         storm_control.set_options(
             storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+            unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt, saynt_threads, saynt_overapprox,
+            storm_exploration_heuristic
         )
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    if all_in_one is None:
-        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound)
-        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
-        synthesizer.run(optimum_threshold, export_evaluation)
-    else:
+    if alpha_vector_analysis is not None:
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, native_discount)
+        assert isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient), "expected POMDP input for alpha vector analysis"
+        alpha_vector_set = paynt.parser.alpha_vector_parser.AlphaVectorParser.parse_sarsop_xml(alpha_vector_analysis)
+        alpha_vector_verifier = paynt.verification.alpha_vector_verification.AlphaVectorVerification(quotient)
+        alpha_vector_verifier.verify_alpha_vectors(alpha_vector_set)
+    elif all_in_one is not None:
         all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
         all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, all_in_one_maxmem, family)
         all_in_one_analysis.run()
+    else:
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, native_discount)
+        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
+        synthesizer.run(optimum_threshold, export_evaluation)
     if profiling:
         profiler.disable()
         print_profiler_stats(profiler)

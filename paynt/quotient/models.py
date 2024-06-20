@@ -11,6 +11,9 @@ class Mdp:
     # options for the construction of chains
     builder_options = None
 
+    # flag used when PAYNT calls discounted value iteration on cassandra models
+    native_cassandra = False
+
     @classmethod
     def initialize(cls, specification):
         # builder options
@@ -59,7 +62,12 @@ class Mdp:
     def model_check_property(self, prop, alt=False):
         formula = prop.formula if not alt else prop.formula_alt
         result = paynt.verification.property.Property.model_check(self.model,formula)
-        value = result.at(self.initial_state)
+        if not self.native_cassandra:
+            value = result.at(self.initial_state)
+        else:
+            value = 0
+            for entry in self.model.transition_matrix.get_row(0):
+                value += entry.value() * result.at(entry.column)
         return paynt.verification.property_result.PropertyResult(prop, result, value)
 
 class SubMdp(Mdp):

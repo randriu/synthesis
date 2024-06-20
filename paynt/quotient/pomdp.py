@@ -395,7 +395,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 source_state = choice_to_state[choice_0]
                 source_state_visits = expected_visits[source_state]
 
-                # assert source_state_visits != 0
+                assert source_state_visits != math.inf, f"state visits for state {source_state} is inf"
                 if source_state_visits == 0:
                     continue
 

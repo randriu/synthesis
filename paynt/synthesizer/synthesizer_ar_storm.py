@@ -16,18 +16,20 @@ class SynthesizerARStorm(Synthesizer):
     # family exploration order: True = DFS, False = BFS
     exploration_order_dfs = True
 
-    # buffer containing subfamilies to be checked after the main restricted family
-    subfamilies_buffer = None
-
-    main_family = None
-
     # if True, Storm over-approximation will be run to help with family pruning
     storm_pruning = False
 
-    storm_control = None
-    s_queue = None
 
-    saynt_timer = None
+    def __init__(self, quotient, subfamilies_buffer=None, main_family=None, storm_control=None, s_queue=None, saynt_timer=None, main_thread=True):
+        super().__init__(quotient)
+        # buffer containing subfamilies to be checked after the main restricted family
+        self.subfamilies_buffer = subfamilies_buffer
+        self.main_family = main_family
+        self.storm_control = storm_control
+        self.s_queue = s_queue
+        self.saynt_timer = saynt_timer
+        self.main_thread = main_thread
+        
 
     @property
     def method_name(self):
@@ -80,7 +82,7 @@ class SynthesizerARStorm(Synthesizer):
         family.analysis_result = res
 
         if family.analysis_result.improving_value is not None:
-            if self.saynt_timer is not None:
+            if self.saynt_timer is not None and self.main_thread:
                 print(f'-----------PAYNT----------- \
                     \nValue = {family.analysis_result.improving_value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {self.quotient.policy_size(family.analysis_result.improving_assignment)}\n', flush=True)
                 if self.storm_control.export_fsc_paynt is not None:
@@ -134,13 +136,14 @@ class SynthesizerARStorm(Synthesizer):
                         self.storm_control.paynt_export = self.quotient.extract_policy(satisfying_assignment)
                         self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
                         self.storm_control.paynt_fsc_size = self.quotient.policy_size(self.storm_control.latest_paynt_result)
+                        self.storm_control.parse_paynt_result(self.quotient)
                         self.storm_control.update_data()
                     logger.info("Pausing synthesis")
                     self.s_queue.get()
                     self.stat.synthesis_timer.stop()
                     # check for the signal that PAYNT can be resumed or terminated
                     while self.s_queue.empty():
-                        sleep(1)
+                        sleep(0.5)
                     status = self.s_queue.get()
                     if status == "resume":
                         logger.info("Resuming synthesis")

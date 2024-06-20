@@ -16,6 +16,9 @@ class Quotient:
     # if True, expected visits will not be computed for hole scoring
     disable_expected_visits = False
 
+    # if the value is <1, the dtmc is transformed to discounted version using this value as the discount factor before computing EVTs
+    discounted_expected_visits = 1
+
     @staticmethod
     def make_vector_defined(vector):
         vector_noinf = [ value if value != math.inf else 0 for value in vector]
@@ -203,13 +206,22 @@ class Quotient:
         # extract DTMC induced by this MDP-scheduler
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
         dtmc = Quotient.mdp_to_dtmc(sub_mdp)
-        dtmc_visits = paynt.verification.property.Property.compute_expected_visits(dtmc)
+
+        if self.discounted_expected_visits < 1:
+            # compute discounted visits
+            discounted_dtmc = payntbind.synthesis.apply_discount_transformation_to_dtmc(dtmc, self.discounted_expected_visits)     
+            dtmc_visits = paynt.verification.property.Property.compute_expected_visits(discounted_dtmc)
+            dtmc_visits = dtmc_visits[:-1] # remove expected visits for sink state
+        else:
+            # compute visits
+            dtmc_visits = paynt.verification.property.Property.compute_expected_visits(dtmc)
 
         # handle infinity- and zero-visits
         if prop.minimizing:
             dtmc_visits = Quotient.make_vector_defined(dtmc_visits)
         else:
-            dtmc_visits = [ value if value != math.inf else 0 for value in dtmc_visits]
+            max_without_inf = max([value for value in dtmc_visits if value != math.inf])
+            dtmc_visits = [ value if value != math.inf else max_without_inf*10 for value in dtmc_visits]
 
         # map vector of expected visits onto the state space of the quotient MDP
         expected_visits = [0] * mdp.nr_states
@@ -334,7 +346,6 @@ class Quotient:
 
         return reduced_design_space, suboptions
 
-
     def split(self, family, incomplete_search):
 
         mdp = family.mdp
@@ -372,7 +383,6 @@ class Quotient:
             design_subspaces.append(design_subspace)
 
         return design_subspaces
-
 
     def double_check_assignment(self, assignment):
         '''

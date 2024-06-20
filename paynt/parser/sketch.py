@@ -58,7 +58,7 @@ class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, precision=1e-4, constraint_bound=None):
+        export=None, relative_error=0, precision=1e-4, constraint_bound=None, native_discount=False):
 
         prism = None
         explicit_quotient = None
@@ -101,9 +101,17 @@ class Sketch:
                 if decpomdp_manager is None:
                     raise SyntaxError
                 logger.info("applying discount factor transformation...")
-                decpomdp_manager.apply_discount_factor_transformation()
+                if not native_discount:
+                    decpomdp_manager.apply_discount_factor_transformation()
                 explicit_quotient = decpomdp_manager.construct_pomdp()
-                if constraint_bound is not None:
+                if native_discount:
+                    paynt.quotient.quotient.Quotient.discounted_expected_visits = decpomdp_manager.discount_factor
+                    optimality = paynt.verification.property.construct_discount_property(
+                            decpomdp_manager.reward_model_name, 
+                            decpomdp_manager.reward_minimizing, 
+                            decpomdp_manager.discount_factor)
+                    specification = paynt.verification.property.Specification([optimality])
+                elif constraint_bound is not None:
                     specification = PrismParser.parse_specification(properties_path, relative_error)
                 else:
                     optimality = paynt.verification.property.construct_reward_property(
@@ -117,6 +125,10 @@ class Sketch:
 
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
+
+        if specification.has_optimality:
+            optimality_subformula = specification.optimality.formula.subformula
+            paynt.quotient.models.Mdp.native_cassandra = (optimality_subformula.is_discounted_total_reward_formula or optimality_subformula.is_discounted_cumulative_reward_formula)
              
         paynt.quotient.models.Mdp.initialize(specification)
         paynt.verification.property.Property.initialize()
@@ -132,7 +144,7 @@ class Sketch:
         logger.info(f"found the following specification {specification}")
 
         if export is not None:
-            Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)
+            Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient, specification)
             logger.info("export OK, aborting...")
             exit(0)
 
@@ -193,7 +205,9 @@ class Sketch:
         return prism, specification, family
     
     @classmethod
-    def export(cls, export, sketch_path, jani_unfolder, explicit_quotient):
+    def export(cls, export, sketch_path, jani_unfolder, explicit_quotient, specification=None):
+        if (explicit_quotient.is_nondeterministic_model and explicit_quotient.is_partially_observable):
+            explicit_quotient = stormpy.pomdp.make_canonic(explicit_quotient)
         if export == "jani":
             assert jani_unfolder is not None, "jani unfolder was not used"
             output_path = substitute_suffix(sketch_path, '.', 'jani')
@@ -206,7 +220,7 @@ class Sketch:
                 "cannot '--export pomdp' with non-POMDP sketches"
             output_path = substitute_suffix(sketch_path, '.', 'pomdp')
             property_path = substitute_suffix(sketch_path, '/', 'props.pomdp')
-            PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
+            PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, specification, output_path, property_path)
 
 
     @classmethod
