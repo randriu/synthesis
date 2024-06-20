@@ -72,8 +72,8 @@ where the most important options are:
 - ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
 
 Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
-- ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
-- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
+- ``--fsc-memory-size INTEGER``    implicit memory size for (Dec-)POMDP FSCs [default: 1]
+- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a (Dec-)POMDP using iterative exploration of k-FSCs
 - ``--posterior-aware``: enables the synthesis of posterior aware FSCs
 
 SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy are needed):
