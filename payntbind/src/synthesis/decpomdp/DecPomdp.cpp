@@ -6,8 +6,6 @@
 
 #include <stack>
 
-// TODO this file is a mess!!!!!
-
 namespace synthesis {
     
     
@@ -757,7 +755,7 @@ namespace synthesis {
         // for each observation, define the maximum successor memory size
         // this will define the number of copies we need to make of each row
         for(uint64_t obs = 0; obs < this->num_joint_observations(); obs++) {
-            uint64_t max_mem_size = 0; //TODO there was 0
+            uint64_t max_mem_size = 0;
             for(auto dst_obs: this->observation_successors[obs]) {
                 if(max_mem_size < this->joint_observation_memory_size[dst_obs]) {
                     max_mem_size = this->joint_observation_memory_size[dst_obs];
@@ -776,7 +774,7 @@ namespace synthesis {
 
         for (int agent = 0; agent < this->num_agents; agent++){
             for(uint64_t agent_src_obs = 0; agent_src_obs < this->agent_num_observations(agent); agent_src_obs++) {
-                uint64_t max_mem_size = 0; //TODO there was 0
+                uint64_t max_mem_size = 0;
                 for(auto dst_obs: this->agent_observation_successors[agent][agent_src_obs]) {
                     if(max_mem_size < this->agent_observation_memory_size[agent][dst_obs]) {
                         max_mem_size = this->agent_observation_memory_size[agent][dst_obs];

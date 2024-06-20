@@ -76,9 +76,9 @@ def setup_logger(log_path = None):
     help="do not compute expected visits for the splitting heuristic")
 
 @click.option("--fsc-synthesis", is_flag=True, default=False,
-    help="enable incremental synthesis of FSCs for a POMDP/Dec-POMDP")
+    help="enable incremental synthesis of FSCs for a (Dec-)POMDP")
 @click.option("--fsc-memory-size", default=1, show_default=True,
-    help="implicit memory size for POMDP/Dec-POMDP FSCs")
+    help="implicit memory size for (Dec-)POMDP FSCs")
 @click.option("--posterior-aware", is_flag=True, default=False,
     help="unfold MDP taking posterior observation of into account")
 

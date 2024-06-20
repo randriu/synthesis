@@ -7,8 +7,6 @@ import paynt.quotient.quotient
 import logging
 logger = logging.getLogger(__name__)
 
-#TODO this file is a mess!!!!!!!!
-
 class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
     # implicit initial FSC size
@@ -23,30 +21,23 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # for each agent a (simplified) label for each observation
         self.agent_observation_labels = decpomdp_manager.agent_observation_labels
-
+        # for each agent its action labels
         self.agent_action_labels = decpomdp_manager.agent_action_labels
-
-        self.joint_actions = decpomdp_manager.joint_actions
-
+        # number of agent in the model
         self.nr_agents = decpomdp_manager.num_agents
-
         # for each joint observation contains observation of each agent
         self.joint_observations = decpomdp_manager.joint_observations
-
-        self.row_joint_action = decpomdp_manager.row_joint_action
-
-        self.nr_joint_observations = len(self.joint_observations)
-
+        # for each state its corresponding joint observation index
         self.state_joint_observation = decpomdp_manager.state_joint_observation
-
+        # for each agent the number of its observations
         self.nr_agent_observations = [len(observation) for observation in self.agent_observation_labels]
-        
+        # number of states in the dec-pomdp model
         self.nr_states = decpomdp_manager.num_decpomdp_states()
-
+        # for each agent number of states with the given observation
         self.agent_observation_states = None
-
+        # for each agent and each observation the size of the memory, this is used to set the memory in the quotient
         self.agent_observation_memory_size = [[] for _ in range(self.nr_agents)]
-
+        # for each agent the number of available actions at given observation
         self.num_agent_actions_at_observation = decpomdp_manager.num_agent_actions_at_observation
 
         # for each hole, an indication whether this is an action or a memory hole
