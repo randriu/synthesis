@@ -97,6 +97,7 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
 
     auto num_holes = family.numHoles();
     std::vector<BitVector> hole_to_inconsistent_options_mask(num_holes);
+
     for(uint64_t hole=0; hole<num_holes; ++hole) {
         hole_to_inconsistent_options_mask[hole] = BitVector(family.holeNumOptionsTotal(hole));
     }
@@ -111,7 +112,7 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
     std::vector<double> hole_difference_avg(num_holes,0);
     std::vector<uint64_t> hole_states_affected(num_holes,0);
     auto const& choice_to_assignment = coloring.getChoiceToAssignment();
-    
+
     std::vector<bool> hole_set(num_holes);
     std::vector<double> hole_min(num_holes);
     std::vector<double> hole_max(num_holes);
@@ -122,7 +123,7 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
         for(uint64_t choice=row_groups[state]; choice<row_groups[state+1]; ++choice) {
             auto value = choice_to_value[choice];
             auto choice_global = choice_to_global_choice[choice];
-            
+
             for(auto const& [hole,option]: choice_to_assignment[choice_global]) {
                 if(not  hole_to_inconsistent_options_mask[hole][option]) {
                     continue;
@@ -161,7 +162,6 @@ std::map<uint64_t,double> computeInconsistentHoleVariance(
 
     return inconsistent_hole_variance;
 }
-
 
 
 /*storm::storage::BitVector keepReachableChoices(
@@ -267,7 +267,7 @@ void bindings_coloring(py::module& m) {
 
     m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
-    
+
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 
 

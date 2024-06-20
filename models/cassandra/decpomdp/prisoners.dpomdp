@@ -10,7 +10,7 @@
 #   agents: agent1_name, name-of-agent2, ... 
 agents: 2 
 #   discount: %f 
-discount: 1 
+discount: 0.95 
 #.0
 #   values: [ reward, cost ] 
 values: reward

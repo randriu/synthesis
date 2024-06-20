@@ -4,6 +4,7 @@ import paynt.parser.sketch
 
 import paynt.quotient
 import paynt.quotient.pomdp
+import paynt.quotient.decpomdp
 import paynt.quotient.storm_pomdp_control
 
 import paynt.synthesizer.all_in_one
@@ -75,9 +76,9 @@ def setup_logger(log_path = None):
     help="do not compute expected visits for the splitting heuristic")
 
 @click.option("--fsc-synthesis", is_flag=True, default=False,
-    help="enable incremental synthesis of FSCs for a POMDP")
-@click.option("--pomdp-memory-size", default=1, show_default=True,
-    help="implicit memory size for POMDP FSCs")
+    help="enable incremental synthesis of FSCs for a (Dec-)POMDP")
+@click.option("--fsc-memory-size", default=1, show_default=True,
+    help="implicit memory size for (Dec-)POMDP FSCs")
 @click.option("--posterior-aware", is_flag=True, default=False,
     help="unfold MDP taking posterior observation of into account")
 
@@ -143,7 +144,7 @@ def paynt_run(
     export,
     method,
     incomplete_search, disable_expected_visits,
-    fsc_synthesis, pomdp_memory_size, posterior_aware,
+    fsc_synthesis, fsc_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
@@ -164,8 +165,9 @@ def paynt_run(
     paynt.synthesizer.synthesizer.Synthesizer.incomplete_search = incomplete_search
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
-    paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
+    paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
+    paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.split_wrt_mdp_scheduler = mdp_split_wrt_mdp
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices

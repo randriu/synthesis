@@ -23,6 +23,7 @@ class Synthesizer:
 
         # hiding imports here to avoid mutual top-level imports
         import paynt.quotient.pomdp
+        import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
         import paynt.synthesizer.synthesizer_onebyone
         import paynt.synthesizer.synthesizer_ar
@@ -30,18 +31,27 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_hybrid
         import paynt.synthesizer.synthesizer_multicore_ar
         import paynt.synthesizer.synthesizer_pomdp
+        import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.policy_tree
+
 
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
+        # FSC synthesis for POMDPs
         if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
             return paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(quotient, method, storm_control)
+        # FSC synthesis for Dec-POMDPs
+        if isinstance(quotient, paynt.quotient.decpomdp.DecPomdpQuotient) and fsc_synthesis:
+            return paynt.synthesizer.synthesizer_decpomdp.SynthesizerDecPomdp(quotient)
+        # Policy Tree synthesis for family of MDPs
         if isinstance(quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
             if method == "onebyone":
                 return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
             else:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
+
+        # Synthesis engines
         if method == "onebyone":
             return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
         if method == "ar":
