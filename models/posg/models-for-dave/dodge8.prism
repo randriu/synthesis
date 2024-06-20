@@ -2,7 +2,7 @@
 // player2 starts at (4,4) and wants crash into player1
 // both players have slippery movement
 
-pomdp
+smg
 
 const int N=8;
 const int xMIN = 1;
@@ -10,13 +10,23 @@ const int yMIN = 1;
 const int xMAX = N;
 const int yMAX = N;
 
+player p1
+    player1, [l1], [r1], [d1], [u1]
+endplayer
+
+player p2
+    player2, [l2], [r2], [d2], [u2]
+endplayer
+
+// DEFINING THE OBSERVATIONS
+// player1 only observes its own x coordinate
+observable "x1" = x1;
 
 formula crash = (x1=x2 & y1=y2);
 formula goal = (x1=xMAX & y1=yMAX);
 formula done = goal | crash;
 
-observable "x1" = x1;
-
+// clock to make the game alternating
 formula clk_next = mod(clk+1,2);
 module clk
     clk : [0..1] init 0;
@@ -32,9 +42,8 @@ module clk
     [u2] !done & clk=1 -> (clk'=clk_next);
 endmodule
 
-label "goal" = goal;
-label "__player_1_state__" = clk=0;
 
+label "goal" = goal;
 
 const double slip = 0.1;
 
