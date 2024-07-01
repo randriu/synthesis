@@ -731,6 +731,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 option = assignment.hole_options(hole)[0]
                 fsc.update_function[memory][obs] = option
 
+        # fixing the FSC for not fully unrolled quotients
+        fsc.fill_implicit_actions_and_updates()
+
         fsc.check(observation_to_actions)
 
         return fsc

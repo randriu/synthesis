@@ -20,7 +20,8 @@ class StormPOMDPControl:
     storm_bounds = None             # under-approximation value from Storm
 
     # PAYNT data and FSC export
-    latest_paynt_result = None
+    latest_paynt_result = None      # holds the synthesised assignment
+    latest_paynt_result_fsc = None  # holds the FSC built from assignment
     paynt_bounds = None
     paynt_export = []
 

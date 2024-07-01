@@ -111,3 +111,11 @@ class FSC:
         for node in range(self.num_nodes):
             self.update_function[node] = [0] * self.num_observations
 
+    # this fixes FSCs contructed from not fully unfolded quotients
+    # careful this can be used only when the current state of the FSC is correct
+    def fill_implicit_actions_and_updates(self):
+        for node in range(self.num_nodes):
+            for obs in range(self.num_observations):
+                if self.action_function[node][obs] == None:
+                    self.action_function[node][obs] = self.action_function[0][obs]
+                    self.update_function[node][obs] = self.update_function[0][obs]
