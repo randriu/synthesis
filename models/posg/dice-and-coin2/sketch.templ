@@ -18,6 +18,7 @@ observable "small_value" = (value_cashier < 2);
 observable "cashier_ready" = value_cashier > 0;
 observable "gambler_ready" = value_gambler > 0;
 observable "roll_again" = roll_again;
+observable "game_over" = round = TOTAL_ROUNDS;
 
 label "__player_1_state__" = value_cashier != 0 & value_gambler = 0 & roll_again;
 

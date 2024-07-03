@@ -17,6 +17,8 @@ observable "y1" = y1;
 observable "x21" = x21;
 observable "x22" = x22;
 observable "x23" = x23;
+observable "clk" = clk;
+observable "done" = done;
 
 formula crash = (x1=x21 & y1=y21) | (x1=x22 & y1=y22) | (x1=x23 & y1=y23);
 formula goal = (x1=xMAX & y1=yMAX);

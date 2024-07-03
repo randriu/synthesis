@@ -21,6 +21,8 @@ endplayer
 // DEFINING THE OBSERVATIONS
 // player1 only observes its own x coordinate
 observable "x1" = x1;
+observable "clk" = clk;
+observable "done" = done;
 
 formula crash = (x1=x2 & y1=y2);
 formula goal = (x1=xMAX & y1=yMAX);

@@ -16,6 +16,8 @@ formula goal = (x1=xMAX & y1=yMAX);
 formula done = goal | crash;
 
 observable "x1" = x1;
+observable "clk" = clk;
+observable "done" = done;
 
 formula clk_next = mod(clk+1,2);
 module clk

@@ -26,6 +26,7 @@ label "goal" = goal;
 observable "small_value" = (value_cashier < 2);
 observable "cashier_ready" = value_cashier > 0;
 observable "gambler_ready" = value_gambler > 0;
+observable "game_over" = round = TOTAL_ROUNDS;
 
 module cashier
     value_cashier : [0..6] init 0;
