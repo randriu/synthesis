@@ -10,6 +10,8 @@
 #include <storm/adapters/IntelTbbAdapter.h>
 #include <storm/utility/macros.h>
 
+#include "SynthesisMatrix.h"
+
 namespace synthesis {
 
     // multiplyAndReduceBackward
@@ -18,7 +20,11 @@ namespace synthesis {
         Compare compare;
         auto elementIt = matrix.end() - 1;
         auto rowGroupIt = rowGroupIndices.end() - 2;
-        auto rowIt = matrix.rowIndications.end() - 2;
+
+        // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member!!!
+        synthesis::SynthesisMatrix tempMatrix(matrix);
+
+        auto rowIt = tempMatrix.getRowIndications().end() - 2;
         typename std::vector<double>::const_iterator summandIt;
         if (summand) {
             summandIt = summand->end() - 1;
@@ -121,7 +127,11 @@ namespace synthesis {
         Compare compare;
         auto elementIt = matrix.begin();
         auto rowGroupIt = rowGroupIndices.begin();
-        auto rowIt = matrix.rowIndications.begin();
+
+        // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member!!!
+        synthesis::SynthesisMatrix tempMatrix(matrix);
+
+        auto rowIt = tempMatrix.getRowIndications().begin();
         typename std::vector<double>::const_iterator summandIt;
         if (summand) {
             summandIt = summand->begin();
@@ -209,9 +219,9 @@ namespace synthesis {
     void multiplyAndReduceForward(storm::storage::SparseMatrix<double> const& matrix, storm::solver::OptimizationDirection const& dir, std::vector<uint64_t> const& rowGroupIndices, std::vector<double> const& vector, std::vector<double> const* summand, std::vector<double>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) {
         if(dirOverride && !dirOverride->empty()) {
             if (dir == storm::OptimizationDirection::Minimize) {
-                synthesis::multiplyAndReduceForward<storm::utility::ElementLess<double>>(rowGroupIndices, vector, summand, result, choices, dirOverride);
+                synthesis::multiplyAndReduceForward<storm::utility::ElementLess<double>>(matrix, rowGroupIndices, vector, summand, result, choices, dirOverride);
             } else {
-                synthesis::multiplyAndReduceForward<storm::utility::ElementGreater<double>>(rowGroupIndices, vector, summand, result, choices, dirOverride);
+                synthesis::multiplyAndReduceForward<storm::utility::ElementGreater<double>>(matrix, rowGroupIndices, vector, summand, result, choices, dirOverride);
             }
         } else {
             if (dir == storm::OptimizationDirection::Minimize) {
