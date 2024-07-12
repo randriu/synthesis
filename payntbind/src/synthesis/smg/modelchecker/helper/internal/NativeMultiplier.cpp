@@ -18,12 +18,12 @@ namespace synthesis {
     template<typename Compare>
     void multiplyAndReduceBackward(storm::storage::SparseMatrix<double> const& matrix, std::vector<uint64_t> const& rowGroupIndices, std::vector<double> const& vector, std::vector<double> const* summand, std::vector<double>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) {
         Compare compare;
-        auto elementIt = matrix.end() - 1;
-        auto rowGroupIt = rowGroupIndices.end() - 2;
 
         // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member!!!
         synthesis::SynthesisMatrix tempMatrix(matrix);
 
+        auto elementIt = matrix.end() - 1;
+        auto rowGroupIt = rowGroupIndices.end() - 2;
         auto rowIt = tempMatrix.getRowIndications().end() - 2;
         typename std::vector<double>::const_iterator summandIt;
         if (summand) {
@@ -121,12 +121,12 @@ namespace synthesis {
     template<typename Compare>
     void multiplyAndReduceForward(storm::storage::SparseMatrix<double> const& matrix, std::vector<uint64_t> const& rowGroupIndices, std::vector<double> const& vector, std::vector<double> const* summand, std::vector<double>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) {
         Compare compare;
-        auto elementIt = matrix.begin();
-        auto rowGroupIt = rowGroupIndices.begin();
 
-        // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member!!!
+        // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member rowIndications!!!
         synthesis::SynthesisMatrix tempMatrix(matrix);
 
+        auto elementIt = matrix.begin();
+        auto rowGroupIt = rowGroupIndices.begin();
         auto rowIt = tempMatrix.getRowIndications().begin();
         typename std::vector<double>::const_iterator summandIt;
         if (summand) {

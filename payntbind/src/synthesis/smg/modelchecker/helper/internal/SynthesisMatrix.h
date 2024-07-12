@@ -5,7 +5,7 @@
 namespace synthesis
 {
 
-    class SynthesisMatrix : storm::storage::SparseMatrix<double> {
+    class SynthesisMatrix : public storm::storage::SparseMatrix<double> {
 
        public:
 
@@ -16,4 +16,5 @@ namespace synthesis
         std::vector<index_type> rowIndications;
         
     };
+
 }

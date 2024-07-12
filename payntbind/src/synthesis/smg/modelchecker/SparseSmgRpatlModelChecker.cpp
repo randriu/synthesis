@@ -20,11 +20,35 @@
 #include <storm/exceptions/InvalidPropertyException.h>
 #include <storm/exceptions/InvalidArgumentException.h>
 #include <storm/modelchecker/results/ExplicitParetoCurveCheckResult.h>
+#include <storm/logic/FragmentSpecification.h>
 
 #include "helper/SparseSmgRpatlHelper.h"
 #include "helper/SparseNondeterministicGameInfiniteHorizonHelper.h"
 
 namespace synthesis {
+
+    storm::logic::FragmentSpecification rpatl() {
+        storm::logic::FragmentSpecification rpatl = storm::logic::propositional();
+
+        // TODO: Only allow OperatorFormulas when they are inside of a GameFormula?
+        // TODO: Require that operator formulas are required at the top level of a GameFormula?
+        rpatl.setGameFormulasAllowed(true);
+        rpatl.setRewardOperatorsAllowed(true);
+        rpatl.setLongRunAverageRewardFormulasAllowed(true);
+        rpatl.setLongRunAverageOperatorsAllowed(true);
+
+        rpatl.setProbabilityOperatorsAllowed(true);
+        rpatl.setReachabilityProbabilityFormulasAllowed(true);
+        rpatl.setUntilFormulasAllowed(true);
+        rpatl.setGloballyFormulasAllowed(true);
+        rpatl.setNextFormulasAllowed(true);
+        rpatl.setBoundedUntilFormulasAllowed(true);
+        rpatl.setStepBoundedUntilFormulasAllowed(true);
+        rpatl.setTimeBoundedUntilFormulasAllowed(true);
+
+        return rpatl;
+    }
+
     template<typename SparseSmgModelType>
     SparseSmgRpatlModelChecker<SparseSmgModelType>::SparseSmgRpatlModelChecker(SparseSmgModelType const& model) : storm::modelchecker::SparsePropositionalModelChecker<SparseSmgModelType>(model) {
         // Intentionally left empty.
@@ -33,7 +57,7 @@ namespace synthesis {
     template<typename SparseSmgModelType>
     bool SparseSmgRpatlModelChecker<SparseSmgModelType>::canHandleStatic(storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& checkTask, bool* requiresSingleInitialState) {
         storm::logic::Formula const& formula = checkTask.getFormula();
-        return formula.isInFragment(storm::logic::rpatl());
+        return formula.isInFragment(synthesis::rpatl());
     }
 
     template<typename SparseSmgModelType>
