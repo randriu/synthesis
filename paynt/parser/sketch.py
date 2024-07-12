@@ -117,10 +117,10 @@ class Sketch:
 
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
-             
+
         paynt.quotient.models.Mdp.initialize(specification)
         paynt.verification.property.Property.initialize()
-        
+
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
@@ -137,7 +137,7 @@ class Sketch:
             exit(0)
 
         return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager)
-    
+
 
     @classmethod
     def load_sketch_as_all_in_one(cls, sketch_path, properties_path):
@@ -189,9 +189,9 @@ class Sketch:
         except SyntaxError as e:
             logger.error(f"all in one approach supports only input in PRISM format!")
             raise e
-        
+
         return prism, specification, family
-    
+
     @classmethod
     def export(cls, export, sketch_path, jani_unfolder, explicit_quotient):
         if export == "jani":
@@ -219,10 +219,11 @@ class Sketch:
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
         else:
-            assert explicit_quotient.is_nondeterministic_model
+            # assert explicit_quotient.is_nondeterministic_model
+            # according to storm this ^ is not true for SMGs (viz ModelBase.cpp isNondeterministicModel)
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
                 quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
-            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
+            elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
                 quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
             else:
                 quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
