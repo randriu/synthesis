@@ -8,6 +8,7 @@ void define_synthesis(py::module& m) {
     bindings_decpomdp(m);
     bindings_counterexamples(m);
     bindings_pomdp_family(m);
+    bindings_posmg(m);
 
     bindings_coloring(m);
 }
