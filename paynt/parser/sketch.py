@@ -87,7 +87,7 @@ class Sketch:
         if filetype is None:
             try:
                 logger.info(f"assuming sketch in DRN format...")
-                explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
+                explicit_quotient = PomdpParser.read_drn(sketch_path)
                 specification = PrismParser.parse_specification(properties_path, relative_error)
                 filetype = "drn"
             except:

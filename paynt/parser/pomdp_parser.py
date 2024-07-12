@@ -1,4 +1,5 @@
 import stormpy
+import payntbind
 
 from collections import defaultdict
 
@@ -10,33 +11,107 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# TODO rename class
 class PomdpParser:
 
+    DRN_COMMENT_PREFIX = '//'
+    DRN_TYPE_PREFIX = '@type: '
+    DRN_STATE_PREFIX = 'state '
+    WHITESPACES = ' \t\n\v\f\r'
+
     @classmethod
-    def read_pomdp_drn(cls, sketch_path):
+    def read_drn(cls, sketch_path):
         explicit_model = None
         try:
-            builder_options = stormpy.core.DirectEncodingParserOptions()
-            builder_options.build_choice_labels = True
-            explicit_model = stormpy.core._build_sparse_model_from_drn(
-                sketch_path, builder_options)
+            type = PomdpParser.decide_type_of_drn(sketch_path)
+            if type == 'POSMG':
+                pomdp_path = sketch_path + '.tmp'
+                state_player_indications = PomdpParser.pomdp_from_posmg(sketch_path, pomdp_path)
+                pomdp = PomdpParser.read_pomdp_drn(pomdp_path)
+                explicit_model = payntbind.synthesis.create_posmg(pomdp, state_player_indications)
+                os.remove(pomdp_path)
+            elif type == 'POMDP':
+                explicit_model = PomdpParser.read_pomdp_drn(sketch_path)
+            else:
+                raise ValueError('Unsupported model type in .drn file')
         except:
             raise ValueError('Failed to read sketch file in a .drn format')
         return explicit_model
+
+    @classmethod
+    def decide_type_of_drn(cls, path: str) -> str:
+        # decide type of model in drn file and return it as a string
+        # path - path to drn file
+        # return - string representation of type
+        # ValueError if not valid drn file
+        with open(path) as file:
+            while True:
+                line = file.readline()
+                if line.isspace() or line.lstrip(cls.WHITESPACES).startswith(cls.DRN_COMMENT_PREFIX):
+                    continue
+                if line.startswith(cls.DRN_TYPE_PREFIX):
+                    type = line.removeprefix(cls.DRN_TYPE_PREFIX).removesuffix('\n')
+                    return type
+                raise ValueError
+
+    @classmethod
+    def pomdp_from_posmg(cls, old_path: str, new_path) -> list:
+        # Change type of model in drn file from posmg to pomdp and store it in a new file
+        # old_path - path to drn file with posmg model
+        # new_path - path to drn file to store pomdp model
+        # return - list indicating which states (indices) belongs to which player (values)
+        posmg_file = open(old_path, 'r')
+        pomdp_file = open(new_path, 'w')
+        state_player_indications = []
+
+        for line in posmg_file:
+            if line.startswith(cls.DRN_TYPE_PREFIX):
+                line = line.replace('POSMG', 'POMDP')
+            if line.startswith(cls.DRN_STATE_PREFIX):
+                l_idx = line.index('<')
+                r_idx = line.index('>')
+                player_num = line[l_idx + 1:r_idx]
+                state_player_indications.append(int(player_num))
+                line = cls.str_remove_range(line, l_idx-1, r_idx) # -1 to remove the space before <
+
+            line = line.replace(' []', '') # temporaty fix
+            pomdp_file.write(line)
+
+        posmg_file.close()
+        pomdp_file.close()
+
+        return state_player_indications
+
+    @staticmethod
+    def str_remove_range(string: str, start_idx: int, end_idx: int) -> str:
+        # return string without characters in specified range
+        # both indices will be removed
+        assert 0 <= start_idx < len(string)
+        assert 0 <= end_idx < len(string)
+        assert start_idx <= end_idx
+
+        return string[:start_idx] + string[end_idx+1:]
+    
+    @classmethod
+    def read_pomdp_drn(cls, sketch_path):
+        builder_options = stormpy.core.DirectEncodingParserOptions()
+        builder_options.build_choice_labels = True
+        return stormpy.core._build_sparse_model_from_drn(sketch_path, builder_options)
+
 
     @classmethod
     def read_pomdp_solve(cls, sketch_path):
         # attempt to read in a pomdp-solve format
         drn = PomdpParser.read_pomdp_solve_format(sketch_path)
         assert drn is not None, 'Failed to read sketch file in a .pomdp format'
-        
+
         # success: write drn model to temporary file and try to parse
         explicit_model = None
         drn_path = sketch_path + str(uuid.uuid4())
         with open(drn_path, 'w') as f:
             f.write(drn)
         try:
-            explicit_model = PomdpParser.read_pomdp_drn(drn_path)
+            explicit_model = PomdpParser.read_drn(drn_path)
             os.remove(drn_path)
         except ValueError:
             os.remove(drn_path)
@@ -111,13 +186,13 @@ observations: {}
                     state_rewards.append(state_action_rewards[group_start])
             else:
                 raise TypeError("unknown reward type")
-                    
+
             # print state-based rewards
             for state in range(num_states):
                 rew = state_rewards[state]
                 if rew != 0:
                     desc += f"R: * : {state} : * : * {rew}\n"
-        
+
         # ready to print
         logger.info("Writing POMDP in pomdp-solve format to {} ...".format(output_path))
         with open(output_path, 'w') as f:
@@ -128,7 +203,7 @@ observations: {}
         logger.info("Write OK, aborting ...")
         exit(0)
 
-    
+
     @classmethod
     def read_pomdp_solve_format(cls, path):
 
@@ -193,7 +268,7 @@ observations: {}
         state_to_obs = dict()
         state_to_obs[init_label] = init_label
         state_to_obs[sink_label] = sink_label
-        
+
         # case 1: deterministic observations
         # O: action : dst : obs prob
         # -> O: * : state : obs 1
@@ -227,10 +302,10 @@ observations: {}
                     obs = max(distr, key=distr.get)
                     state_to_obs[state] = obs
                     print("O: * : {} : {} 1".format(state,obs))
-        
+
         # construct transition matrix
         transition_matrix = {state:defaultdict(dict) for state in state_list_expanded}
-        
+
         # initial distribution
         initial_distr = None
         for index,line in enumerate(sketch_lines):
@@ -248,7 +323,7 @@ observations: {}
 
         # other states from file
         # note: in the following, action may be *
-        
+
         # case 1: each transition separately
         # T: action : src : dst prob
         for line in sketch_lines:
@@ -367,6 +442,5 @@ observations: {}
 
 
 
-    
-    
-    
+
+
