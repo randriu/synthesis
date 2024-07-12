@@ -3,7 +3,8 @@
 #include <storm/api/verification.h>
 #include <storm/api/storm.h>
 
-#include "SparseSmgRpatlModelChecker.h"
+#include "modelchecker/SparseSmgRpatlModelChecker.h"
+#include "StochasticGame.h"
 
 
 namespace synthesis {
@@ -34,6 +35,12 @@ namespace synthesis {
 void bindings_smg(py::module& m) {
 
     m.def("smg_model_checking", &synthesis::smgModelChecking<double>, py::arg("smg"), py::arg("formula"), py::arg("only_initial_states") = false, py::arg("set_produce_schedulers") = true, py::arg("env") = storm::Environment() );
+
+    py::class_<synthesis::StochasticGame>(m, "StochasticGame", "test")
+        .def(py::init<storm::models::sparse::Pomdp<double> const&>(), "Constructor.")
+        .def("build_game", &synthesis::StochasticGame::buildGame, "build multiplayer game")
+        .def("check_game", &synthesis::StochasticGame::checkGame, py::arg("game"), "check multiplayer game")
+        ;
 
 }
 

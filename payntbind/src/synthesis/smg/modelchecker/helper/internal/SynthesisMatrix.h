@@ -5,7 +5,7 @@
 namespace synthesis
 {
 
-    class SynthesisMatrix : public storm::storage::SparseMatrix<double> {
+    class SynthesisMatrix : storm::storage::SparseMatrix<double> {
 
        public:
 

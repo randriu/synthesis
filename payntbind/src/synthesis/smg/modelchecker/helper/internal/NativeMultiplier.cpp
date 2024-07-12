@@ -112,11 +112,7 @@ namespace synthesis {
                 synthesis::multiplyAndReduceBackward<storm::utility::ElementGreater<double>>(matrix, rowGroupIndices, vector, summand, result, choices, dirOverride);
             }
         } else {
-            if (dir == storm::OptimizationDirection::Minimize) {
-                matrix.multiplyAndReduceBackward<storm::utility::ElementLess<double>>(rowGroupIndices, vector, summand, result, choices);
-            } else {
-                matrix.multiplyAndReduceBackward<storm::utility::ElementGreater<double>>(rowGroupIndices, vector, summand, result, choices);
-            }
+            matrix.multiplyAndReduceBackward(dir, rowGroupIndices, vector, summand, result, choices);
         }
     }
 
@@ -224,11 +220,7 @@ namespace synthesis {
                 synthesis::multiplyAndReduceForward<storm::utility::ElementGreater<double>>(matrix, rowGroupIndices, vector, summand, result, choices, dirOverride);
             }
         } else {
-            if (dir == storm::OptimizationDirection::Minimize) {
-                matrix.multiplyAndReduceForward<storm::utility::ElementLess<double>>(rowGroupIndices, vector, summand, result, choices);
-            } else {
-                matrix.multiplyAndReduceForward<storm::utility::ElementGreater<double>>(rowGroupIndices, vector, summand, result, choices);
-            }
+            matrix.multiplyAndReduceForward(dir, rowGroupIndices, vector, summand, result, choices);
         }
     }
 

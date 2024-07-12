@@ -147,6 +147,5 @@ namespace synthesis {
 
 
     template class SparseNondeterministicGameInfiniteHorizonHelper<double>;
-    // template class SparseNondeterministicGameInfiniteHorizonHelper<storm::RationalNumber>;
 
 }
