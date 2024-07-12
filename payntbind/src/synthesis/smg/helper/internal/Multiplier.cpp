@@ -86,7 +86,7 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    void Multiplier<ValueType>::reduce(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<storm::storage::SparseMatrix<double>::index_type> const& rowGroupIndices, std::vector<ValueType> const& choiceValues, std::vector<ValueType>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) const {
+    void synthesis::Multiplier<ValueType>::reduce(storm::Environment const& env, storm::solver::OptimizationDirection const& dir, std::vector<storm::storage::SparseMatrix<double>::index_type> const& rowGroupIndices, std::vector<ValueType> const& choiceValues, std::vector<ValueType>& result, std::vector<uint_fast64_t>* choices, storm::storage::BitVector const* dirOverride) const {
         auto choiceValue_it = choiceValues.begin();
         auto optChoice_it = choiceValues.begin();
         for(uint state = 0; state < rowGroupIndices.size(); state++) {

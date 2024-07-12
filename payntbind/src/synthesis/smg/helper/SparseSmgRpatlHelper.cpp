@@ -5,7 +5,6 @@
 
 
 #include <storm/environment/Environment.h>
-#include <storm/environment/solver/MultiplierEnvironment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
 #include <storm/solver/MinMaxLinearEquationSolver.h>
 #include <storm/utility/vector.h>
@@ -53,9 +52,6 @@ namespace synthesis {
                 viHelper.setProduceScheduler(true);
             }
             viHelper.performValueIteration(env, x, b, goal.direction(), constrainedChoiceValues);
-            if(goal.isShieldingTask()) {
-                viHelper.getChoiceValues(env, x, constrainedChoiceValues);
-            }
 
             // Fill up the constrainedChoice Values to full size.
             viHelper.fillChoiceValuesVector(constrainedChoiceValues, relevantStates, transitionMatrix.getRowGroupIndices());
@@ -125,9 +121,6 @@ namespace synthesis {
         auto rowGroupIndices = transitionMatrix.getRowGroupIndices();
         rowGroupIndices.erase(rowGroupIndices.begin());
         multiplier->reduce(env, goal.direction(), rowGroupIndices, b, result, nullptr, &statesOfCoalition);
-        if (goal.isShieldingTask()) {
-            choiceValues = b;
-        }
         return SMGSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(allStates), nullptr, std::move(choiceValues));
     }
 
@@ -234,4 +227,6 @@ namespace synthesis {
         }
         return SMGSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(relevantStates), std::move(scheduler), std::move(constrainedChoiceValues));
     }
+
+    template class SparseSmgRpatlHelper<double>;
 }

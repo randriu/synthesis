@@ -5,7 +5,6 @@
 #include <storm/storage/MaximalEndComponentDecomposition.h>
 #include <storm/storage/Scheduler.h>
 #include <storm/solver/MinMaxLinearEquationSolver.h>
-#include <storm/solver/multiplier/Multiplier.h>
 #include <storm/utility/solver.h>
 #include <storm/utility/vector.h>
 #include <storm/environment/solver/LongRunAverageSolverEnvironment.h>
@@ -148,6 +147,6 @@ namespace synthesis {
 
 
     template class SparseNondeterministicGameInfiniteHorizonHelper<double>;
-    template class SparseNondeterministicGameInfiniteHorizonHelper<storm::RationalNumber>;
+    // template class SparseNondeterministicGameInfiniteHorizonHelper<storm::RationalNumber>;
 
 }

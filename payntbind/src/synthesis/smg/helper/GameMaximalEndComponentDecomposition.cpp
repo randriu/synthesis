@@ -267,5 +267,5 @@ namespace synthesis {
 
     // Explicitly instantiate the MEC decomposition.
     template class GameMaximalEndComponentDecomposition<double>;
-    template GameMaximalEndComponentDecomposition<double>::GameMaximalEndComponentDecomposition(storm::models::sparse::NondeterministicModel<double> const& model);
+    // template GameMaximalEndComponentDecomposition<double>::GameMaximalEndComponentDecomposition(storm::models::sparse::NondeterministicModel<double> const& model);
 }
