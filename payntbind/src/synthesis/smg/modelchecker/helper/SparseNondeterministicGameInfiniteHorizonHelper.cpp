@@ -1,15 +1,12 @@
-#include "SparseNondeterministicGameInfiniteHorizonHelper.h"
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
 
+#include "SparseNondeterministicGameInfiniteHorizonHelper.h"
 
 #include <storm/storage/SparseMatrix.h>
 #include <storm/storage/MaximalEndComponentDecomposition.h>
-#include <storm/storage/Scheduler.h>
-#include <storm/solver/MinMaxLinearEquationSolver.h>
-#include <storm/utility/solver.h>
-#include <storm/utility/vector.h>
 #include <storm/environment/solver/LongRunAverageSolverEnvironment.h>
-#include <storm/environment/solver/MinMaxSolverEnvironment.h>
-#include <storm/exceptions/UnmetRequirementException.h>
 #include <storm/exceptions/InternalException.h>
 
 #include "GameMaximalEndComponentDecomposition.h"

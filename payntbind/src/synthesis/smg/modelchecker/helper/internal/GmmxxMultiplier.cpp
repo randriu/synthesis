@@ -1,16 +1,12 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "GmmxxMultiplier.h"
 
 #include <boost/optional.hpp>
-
-#include <storm/adapters/RationalNumberAdapter.h>
-#include <storm/adapters/RationalFunctionAdapter.h>
-#include <storm/adapters/IntelTbbAdapter.h>
-#include <storm/storage/SparseMatrix.h>
-#include <storm/settings/SettingsManager.h>
 #include <storm/settings/modules/CoreSettings.h>
-#include <storm/utility/constants.h>
 #include <storm/exceptions/NotSupportedException.h>
-#include <storm/exceptions/InternalException.h>
 #include <storm/utility/macros.h>
 
 namespace synthesis {

@@ -3,20 +3,13 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <boost/variant/get.hpp>
 
-#include <storm/utility/macros.h>
 #include <storm/utility/FilteredRewardModel.h>
 #include <storm/modelchecker/results/ExplicitQualitativeCheckResult.h>
 #include <storm/modelchecker/results/ExplicitQuantitativeCheckResult.h>
 #include <storm/modelchecker/helper/utility/SetInformationFromCheckTask.h>
-#include <storm/logic/FragmentSpecification.h>
 #include <storm/logic/PlayerCoalition.h>
-#include <storm/storage/BitVector.h>
 #include <storm/environment/solver/MultiplierEnvironment.h>
-#include <storm/models/sparse/StandardRewardModel.h>
-#include <storm/settings/modules/GeneralSettings.h>
-#include <storm/exceptions/InvalidStateException.h>
 #include <storm/exceptions/InvalidPropertyException.h>
 #include <storm/exceptions/InvalidArgumentException.h>
 #include <storm/modelchecker/results/ExplicitParetoCurveCheckResult.h>
@@ -30,8 +23,6 @@ namespace synthesis {
     storm::logic::FragmentSpecification rpatl() {
         storm::logic::FragmentSpecification rpatl = storm::logic::propositional();
 
-        // TODO: Only allow OperatorFormulas when they are inside of a GameFormula?
-        // TODO: Require that operator formulas are required at the top level of a GameFormula?
         rpatl.setGameFormulasAllowed(true);
         rpatl.setRewardOperatorsAllowed(true);
         rpatl.setLongRunAverageRewardFormulasAllowed(true);

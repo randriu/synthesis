@@ -11,24 +11,6 @@
 
 namespace synthesis {
 
-    // class Environment;
-
-    // namespace storage {
-    //     class BitVector;
-    // }
-
-    // namespace models {
-    //     namespace sparse {
-    //         template <typename ValueType>
-    //         class StandardRewardModel;
-    //     }
-    // }
-
-    // namespace modelchecker {
-    //     class CheckResult;
-
-    //     namespace helper {
-
     template <typename ValueType>
     class SparseSmgRpatlHelper {
     public:

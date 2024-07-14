@@ -1,6 +1,9 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "GameViHelper.h"
 
-#include <storm/environment/Environment.h>
 #include <storm/environment/solver/SolverEnvironment.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
 #include <storm/utility/SignalHandler.h>

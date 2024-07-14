@@ -1,14 +1,13 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "SparseSmgRpatlHelper.h"
 
-#include <storm/utility/graph.h>
 #include <storm/environment/solver/GameSolverEnvironment.h>
-
-
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
-#include <storm/solver/MinMaxLinearEquationSolver.h>
 #include <storm/utility/vector.h>
-#include <storm/utility/graph.h>
 
 #include "internal/GameViHelper.h"
 #include "internal/Multiplier.h"

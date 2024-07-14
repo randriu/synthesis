@@ -1,5 +1,9 @@
 #pragma once
 
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include <storm/storage/Decomposition.h>
 #include <storm/storage/MaximalEndComponent.h>
 #include <storm/models/sparse/NondeterministicModel.h>

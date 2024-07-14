@@ -1,11 +1,15 @@
 #pragma once
 
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "Multiplier.h"
 
 #include <storm/environment/Environment.h>
 #include <storm/storage/BitVector.h>
+#include <storm/storage/SparseMatrix.h>
 #include <storm/adapters/GmmxxAdapter.h>
-#include <storm-config.h>
 
 namespace synthesis {
 

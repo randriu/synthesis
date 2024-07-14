@@ -1,18 +1,28 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "NativeMultiplier.h"
 
-#include <storm-config.h>
-#include <storm/environment/solver/MultiplierEnvironment.h>
-#include <storm/settings/SettingsManager.h>
 #include <storm/settings/modules/CoreSettings.h>
 #include <storm/storage/SparseMatrix.h>
-#include <storm/adapters/RationalNumberAdapter.h>
-#include <storm/adapters/RationalFunctionAdapter.h>
-#include <storm/adapters/IntelTbbAdapter.h>
 #include <storm/utility/macros.h>
 
-#include "SynthesisMatrix.h"
-
 namespace synthesis {
+
+    std::vector<storm::storage::sparse::state_type> getMatrixRowIndications(storm::storage::SparseMatrix<double> const& matrix) {
+        std::vector<storm::storage::sparse::state_type> rowIndications;
+        rowIndications.push_back(0);
+        storm::storage::sparse::state_type indicationCounter = 0;
+        for (storm::storage::sparse::state_type row = 0; row < matrix.getRowCount(); row++) {
+            for (auto const &entry: matrix.getRow(row)) {
+                indicationCounter++;
+            }
+            rowIndications.push_back(indicationCounter);
+        }
+
+        return rowIndications;
+    }
 
     // multiplyAndReduceBackward
     template<typename Compare>
@@ -20,11 +30,13 @@ namespace synthesis {
         Compare compare;
 
         // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member!!!
-        synthesis::SynthesisMatrix tempMatrix(matrix);
+        // synthesis::SynthesisMatrix tempMatrix(matrix);
+
+        auto rowIndications = synthesis::getMatrixRowIndications(matrix);
 
         auto elementIt = matrix.end() - 1;
         auto rowGroupIt = rowGroupIndices.end() - 2;
-        auto rowIt = tempMatrix.getRowIndications().end() - 2;
+        auto rowIt = rowIndications.end() - 2;
         typename std::vector<double>::const_iterator summandIt;
         if (summand) {
             summandIt = summand->end() - 1;
@@ -123,11 +135,13 @@ namespace synthesis {
         Compare compare;
 
         // Using SynthesisMatrix class as I can't modify the SparseMatrix class to access private member rowIndications!!!
-        synthesis::SynthesisMatrix tempMatrix(matrix);
+        // synthesis::SynthesisMatrix tempMatrix(matrix);
+
+        auto rowIndications = synthesis::getMatrixRowIndications(matrix);
 
         auto elementIt = matrix.begin();
         auto rowGroupIt = rowGroupIndices.begin();
-        auto rowIt = tempMatrix.getRowIndications().begin();
+        auto rowIt = rowIndications.begin();
         typename std::vector<double>::const_iterator summandIt;
         if (summand) {
             summandIt = summand->begin();

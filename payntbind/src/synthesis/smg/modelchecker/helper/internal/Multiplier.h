@@ -1,12 +1,13 @@
 #pragma once
 
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include <vector>
-#include <memory>
-#include <boost/optional.hpp>
 
 #include <storm/storage/BitVector.h>
 #include <storm/solver/OptimizationDirection.h>
-#include <storm/solver/MultiplicationStyle.h>
 #include <storm/storage/SparseMatrix.h>
 #include <storm/environment/solver/MultiplierEnvironment.h>
 

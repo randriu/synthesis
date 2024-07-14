@@ -1,11 +1,10 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "Multiplier.h"
 
-#include <storm-config.h>
-#include <storm/storage/SparseMatrix.h>
-#include <storm/adapters/RationalNumberAdapter.h>
-#include <storm/adapters/RationalFunctionAdapter.h>
 #include <storm/utility/macros.h>
-#include <storm/solver/SolverSelectionOptions.h>
 #include <storm/exceptions/IllegalArgumentException.h>
 #include <storm/utility/SignalHandler.h>
 #include <storm/utility/ProgressMeasurement.h>

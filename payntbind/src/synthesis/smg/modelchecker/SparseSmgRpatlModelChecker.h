@@ -1,11 +1,11 @@
 #pragma once
 
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
 
 #include <storm/modelchecker/propositional/SparsePropositionalModelChecker.h>
 #include <storm/models/sparse/Smg.h>
-#include <storm/utility/solver.h>
-#include <storm/solver/LinearEquationSolver.h>
-#include <storm/storage/StronglyConnectedComponent.h>
 #include <storm/storage/BitVector.h>
 
 namespace synthesis {

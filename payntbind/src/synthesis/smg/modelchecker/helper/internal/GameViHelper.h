@@ -1,5 +1,9 @@
 #pragma once
 
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include <storm/storage/SparseMatrix.h>
 #include <storm/solver/LinearEquationSolver.h>
 #include <storm/solver/MinMaxLinearEquationSolver.h>
@@ -8,15 +12,6 @@
 #include "Multiplier.h"
 
 namespace synthesis {
-    // class Environment;
-
-    // namespace storage {
-    //     template <typename VT> class Scheduler;
-    // }
-
-    // namespace modelchecker {
-    //     namespace helper {
-    //         namespace internal {
 
     template <typename ValueType>
     class GameViHelper {

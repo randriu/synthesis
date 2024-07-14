@@ -1,8 +1,10 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include <list>
-#include <queue>
 #include <numeric>
 
-#include <storm/models/sparse/StandardRewardModel.h>
 #include <storm/storage/StronglyConnectedComponentDecomposition.h>
 
 #include "GameMaximalEndComponentDecomposition.h"

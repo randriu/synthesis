@@ -1,16 +1,13 @@
 #pragma once
 
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include <vector>
-#include <memory>
 #include <storm/storage/Scheduler.h>
 
 namespace synthesis {
-    // namespace storage {
-    //     class BitVector;
-    // }
-
-    // namespace modelchecker {
-    //     namespace helper {
     template<typename ValueType>
     struct SMGSparseModelCheckingHelperReturnType {
 

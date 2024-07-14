@@ -1,3 +1,7 @@
+/* 
+ * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ */
+
 #include "LraViHelper.h"
 
 #include <storm/modelchecker/helper/infinitehorizon/internal/ComponentUtility.h>
@@ -7,10 +11,8 @@
 #include <storm/utility/vector.h>
 #include <storm/utility/macros.h>
 #include <storm/utility/SignalHandler.h>
-#include <storm/environment/solver/SolverEnvironment.h>
 #include <storm/environment/solver/LongRunAverageSolverEnvironment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
-#include <storm/environment/solver/MultiplierEnvironment.h>
 #include <storm/exceptions/UnmetRequirementException.h>
 
 
