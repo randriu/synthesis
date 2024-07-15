@@ -1,0 +1,222 @@
+// auto-generated, may contain errors
+
+pomdp
+
+// 10 | .t.. g.        
+//  9 |    . ..        
+//  8 | ..t. t         
+//  7 |   .  .         
+//  6 | ..t.....t ....t
+//  5 | . . .   .     .
+//  4 | i ... t....t  .
+//  3 |     . .        
+//  2 |     .t.        
+//  1 |      .         
+//  0 | ..t...         
+//    -----------------
+//      012345678901234
+
+formula u = (x=5&y=0)|(x=4&y=1)|(x=5&y=1)|(x=6&y=1)|(x=4&y=2)|(x=6&y=2)|(x=0&y=3)|(x=2&y=3)|(x=3&y=3)|(x=4&y=3)|(x=6&y=3)|(x=7&y=3)|(x=8&y=3)|(x=9&y=3)|(x=10&y=3)|(x=11&y=3)|(x=14&y=3)|(x=0&y=4)|(x=2&y=4)|(x=4&y=4)|(x=8&y=4)|(x=14&y=4)|(x=0&y=5)|(x=1&y=5)|(x=2&y=5)|(x=3&y=5)|(x=4&y=5)|(x=5&y=5)|(x=6&y=5)|(x=7&y=5)|(x=8&y=5)|(x=10&y=5)|(x=11&y=5)|(x=12&y=5)|(x=13&y=5)|(x=14&y=5)|(x=2&y=6)|(x=5&y=6)|(x=0&y=7)|(x=1&y=7)|(x=2&y=7)|(x=3&y=7)|(x=5&y=7)|(x=3&y=8)|(x=5&y=8)|(x=6&y=8)|(x=0&y=9)|(x=1&y=9)|(x=2&y=9)|(x=3&y=9)|(x=5&y=9)|(x=6&y=9);
+
+formula r = (x=0&y=0)|(x=1&y=0)|(x=2&y=0)|(x=3&y=0)|(x=4&y=0)|(x=4&y=1)|(x=3&y=2)|(x=4&y=2)|(x=5&y=2)|(x=3&y=3)|(x=5&y=3)|(x=1&y=4)|(x=2&y=4)|(x=3&y=4)|(x=5&y=4)|(x=6&y=4)|(x=7&y=4)|(x=8&y=4)|(x=9&y=4)|(x=10&y=4)|(x=13&y=4)|(x=1&y=5)|(x=3&y=5)|(x=7&y=5)|(x=13&y=5)|(x=0&y=6)|(x=1&y=6)|(x=2&y=6)|(x=3&y=6)|(x=4&y=6)|(x=5&y=6)|(x=6&y=6)|(x=7&y=6)|(x=9&y=6)|(x=10&y=6)|(x=11&y=6)|(x=12&y=6)|(x=13&y=6)|(x=1&y=7)|(x=4&y=7)|(x=0&y=8)|(x=1&y=8)|(x=2&y=8)|(x=4&y=8)|(x=2&y=9)|(x=4&y=9)|(x=5&y=9)|(x=0&y=10)|(x=1&y=10)|(x=2&y=10)|(x=4&y=10)|(x=5&y=10);
+
+formula d = (x=0&y=1)|(x=1&y=1)|(x=2&y=1)|(x=3&y=1)|(x=4&y=1)|(x=5&y=1)|(x=5&y=2)|(x=4&y=3)|(x=5&y=3)|(x=6&y=3)|(x=4&y=4)|(x=6&y=4)|(x=0&y=5)|(x=2&y=5)|(x=3&y=5)|(x=4&y=5)|(x=6&y=5)|(x=7&y=5)|(x=8&y=5)|(x=9&y=5)|(x=10&y=5)|(x=11&y=5)|(x=14&y=5)|(x=0&y=6)|(x=2&y=6)|(x=4&y=6)|(x=8&y=6)|(x=14&y=6)|(x=0&y=7)|(x=1&y=7)|(x=2&y=7)|(x=3&y=7)|(x=4&y=7)|(x=5&y=7)|(x=6&y=7)|(x=7&y=7)|(x=8&y=7)|(x=10&y=7)|(x=11&y=7)|(x=12&y=7)|(x=13&y=7)|(x=14&y=7)|(x=2&y=8)|(x=5&y=8)|(x=0&y=9)|(x=1&y=9)|(x=2&y=9)|(x=3&y=9)|(x=5&y=9)|(x=3&y=10)|(x=5&y=10)|(x=6&y=10);
+
+formula l = (x=1&y=0)|(x=2&y=0)|(x=3&y=0)|(x=4&y=0)|(x=5&y=0)|(x=6&y=0)|(x=6&y=1)|(x=5&y=2)|(x=6&y=2)|(x=7&y=2)|(x=5&y=3)|(x=7&y=3)|(x=1&y=4)|(x=3&y=4)|(x=4&y=4)|(x=5&y=4)|(x=7&y=4)|(x=8&y=4)|(x=9&y=4)|(x=10&y=4)|(x=11&y=4)|(x=12&y=4)|(x=1&y=5)|(x=3&y=5)|(x=5&y=5)|(x=9&y=5)|(x=1&y=6)|(x=2&y=6)|(x=3&y=6)|(x=4&y=6)|(x=5&y=6)|(x=6&y=6)|(x=7&y=6)|(x=8&y=6)|(x=9&y=6)|(x=11&y=6)|(x=12&y=6)|(x=13&y=6)|(x=14&y=6)|(x=3&y=7)|(x=6&y=7)|(x=1&y=8)|(x=2&y=8)|(x=3&y=8)|(x=4&y=8)|(x=6&y=8)|(x=4&y=9)|(x=6&y=9)|(x=7&y=9)|(x=1&y=10)|(x=2&y=10)|(x=3&y=10)|(x=4&y=10)|(x=6&y=10)|(x=7&y=10);
+
+
+const int x_init = 0;
+const int y_init = 4;
+
+formula goal = (x=5&y=10);
+label "goal" = goal;
+
+
+observable "u" = u;
+observable "r" = r;
+observable "d" = d;
+observable "l" = l;
+observable "goal" = goal;
+
+
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+const double slip = 0.3;
+
+module maze
+	 x : [0..14] init x_init;
+	 y : [0..10] init y_init;
+	[u] true -> 1-slip: (y'=yu) + slip/3: (x'=xl) + slip/3: (x'=xr) + slip/3: (y'=yd);
+	[r] true -> 1-slip: (x'=xr) + slip/3: (y'=yu) + slip/3: (y'=yd) + slip/3: (x'=xl);
+	[d] true -> 1-slip: (y'=yd) + slip/3: (x'=xl) + slip/3: (x'=xr) + slip/3: (y'=yu);
+	[l] true -> 1-slip: (x'=xl) + slip/3: (y'=yu) + slip/3: (y'=yd) + slip/3: (x'=xr);
+endmodule
+
+formula at0 = (x=2&y=0);
+observable "at0" = at0;
+
+module treasure0
+	picked0 : bool init false;
+	[u] true -> (picked0'=picked0|at0);
+	[r] true -> (picked0'=picked0|at0);
+	[d] true -> (picked0'=picked0|at0);
+	[l] true -> (picked0'=picked0|at0);
+endmodule
+
+formula at1 = (x=5&y=2);
+observable "at1" = at1;
+
+module treasure1
+	picked1 : bool init false;
+	[u] true -> (picked1'=picked1|at1);
+	[r] true -> (picked1'=picked1|at1);
+	[d] true -> (picked1'=picked1|at1);
+	[l] true -> (picked1'=picked1|at1);
+endmodule
+
+formula at2 = (x=6&y=4);
+observable "at2" = at2;
+
+module treasure2
+	picked2 : bool init false;
+	[u] true -> (picked2'=picked2|at2);
+	[r] true -> (picked2'=picked2|at2);
+	[d] true -> (picked2'=picked2|at2);
+	[l] true -> (picked2'=picked2|at2);
+endmodule
+
+formula at3 = (x=11&y=4);
+observable "at3" = at3;
+
+module treasure3
+	picked3 : bool init false;
+	[u] true -> (picked3'=picked3|at3);
+	[r] true -> (picked3'=picked3|at3);
+	[d] true -> (picked3'=picked3|at3);
+	[l] true -> (picked3'=picked3|at3);
+endmodule
+
+formula at4 = (x=2&y=6);
+observable "at4" = at4;
+
+module treasure4
+	picked4 : bool init false;
+	[u] true -> (picked4'=picked4|at4);
+	[r] true -> (picked4'=picked4|at4);
+	[d] true -> (picked4'=picked4|at4);
+	[l] true -> (picked4'=picked4|at4);
+endmodule
+
+formula at5 = (x=8&y=6);
+observable "at5" = at5;
+
+module treasure5
+	picked5 : bool init false;
+	[u] true -> (picked5'=picked5|at5);
+	[r] true -> (picked5'=picked5|at5);
+	[d] true -> (picked5'=picked5|at5);
+	[l] true -> (picked5'=picked5|at5);
+endmodule
+
+formula at6 = (x=14&y=6);
+observable "at6" = at6;
+
+module treasure6
+	picked6 : bool init false;
+	[u] true -> (picked6'=picked6|at6);
+	[r] true -> (picked6'=picked6|at6);
+	[d] true -> (picked6'=picked6|at6);
+	[l] true -> (picked6'=picked6|at6);
+endmodule
+
+formula at7 = (x=2&y=8);
+observable "at7" = at7;
+
+module treasure7
+	picked7 : bool init false;
+	[u] true -> (picked7'=picked7|at7);
+	[r] true -> (picked7'=picked7|at7);
+	[d] true -> (picked7'=picked7|at7);
+	[l] true -> (picked7'=picked7|at7);
+endmodule
+
+formula at8 = (x=5&y=8);
+observable "at8" = at8;
+
+module treasure8
+	picked8 : bool init false;
+	[u] true -> (picked8'=picked8|at8);
+	[r] true -> (picked8'=picked8|at8);
+	[d] true -> (picked8'=picked8|at8);
+	[l] true -> (picked8'=picked8|at8);
+endmodule
+
+formula at9 = (x=1&y=10);
+observable "at9" = at9;
+
+module treasure9
+	picked9 : bool init false;
+	[u] true -> (picked9'=picked9|at9);
+	[r] true -> (picked9'=picked9|at9);
+	[d] true -> (picked9'=picked9|at9);
+	[l] true -> (picked9'=picked9|at9);
+endmodule
+
+rewards "rew"
+    [u] at0 & !picked0: 1;
+    [r] at0 & !picked0: 1;
+    [d] at0 & !picked0: 1;
+    [l] at0 & !picked0: 1;
+
+    [u] at1 & !picked1: 1;
+    [r] at1 & !picked1: 1;
+    [d] at1 & !picked1: 1;
+    [l] at1 & !picked1: 1;
+
+    [u] at2 & !picked2: 1;
+    [r] at2 & !picked2: 1;
+    [d] at2 & !picked2: 1;
+    [l] at2 & !picked2: 1;
+
+    [u] at3 & !picked3: 1;
+    [r] at3 & !picked3: 1;
+    [d] at3 & !picked3: 1;
+    [l] at3 & !picked3: 1;
+
+    [u] at4 & !picked4: 1;
+    [r] at4 & !picked4: 1;
+    [d] at4 & !picked4: 1;
+    [l] at4 & !picked4: 1;
+
+    [u] at5 & !picked5: 1;
+    [r] at5 & !picked5: 1;
+    [d] at5 & !picked5: 1;
+    [l] at5 & !picked5: 1;
+
+    [u] at6 & !picked6: 1;
+    [r] at6 & !picked6: 1;
+    [d] at6 & !picked6: 1;
+    [l] at6 & !picked6: 1;
+
+    [u] at7 & !picked7: 1;
+    [r] at7 & !picked7: 1;
+    [d] at7 & !picked7: 1;
+    [l] at7 & !picked7: 1;
+
+    [u] at8 & !picked8: 1;
+    [r] at8 & !picked8: 1;
+    [d] at8 & !picked8: 1;
+    [l] at8 & !picked8: 1;
+
+    [u] at9 & !picked9: 1;
+    [r] at9 & !picked9: 1;
+    [d] at9 & !picked9: 1;
+    [l] at9 & !picked9: 1;
+
+endrewards
+
+
+

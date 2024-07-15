@@ -545,7 +545,7 @@ class StormPOMDPControl:
 
                 restricted_family.hole_set_options(hole,selected_actions)
 
-        logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
+        logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size_or_order, restricted_family.size_or_order))
 
         return restricted_family
 

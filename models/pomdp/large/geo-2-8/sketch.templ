@@ -1,0 +1,84 @@
+pomdp
+
+const int N = 6; // grid size NxN
+const int gMIN = 1;
+const int gMAX = N;
+
+formula goal = ax=gMAX & ay=gMAX;
+formula done = goal | crash;
+
+label "notbad" = !crash;
+label "goal" = goal;
+
+
+observable "obsReady" = obsReady;
+observable "done" = done;
+observable "see" = see;
+
+
+
+// geometric variable timer for obstacle placement
+const double probReady = 0.1;
+module clk
+    obsReady : bool init false;
+    [place] !obsReady -> probReady: (obsReady'=true) + 1-probReady: true;
+    [l] obsReady -> true;
+    [r] obsReady -> true;
+    [d] obsReady -> true;
+    [u] obsReady -> true;
+endmodule
+
+
+
+const double slip = 0.2;
+
+formula al = min(max(ax-1,gMIN),gMAX);
+formula ar = min(max(ax+1,gMIN),gMAX);
+formula au = min(max(ay-1,gMIN),gMAX);
+formula ad = min(max(ay+1,gMIN),gMAX);
+
+module agent
+    ax : [gMIN..gMAX] init gMIN;
+    ay : [gMIN..gMAX] init gMIN;
+
+    [l] true -> 1-slip : (ax'=al) + slip : (ay'=ad);
+    [r] true -> 1-slip : (ax'=ar) + slip : (ay'=au);
+    [u] true -> 1-slip : (ay'=au) + slip : (ax'=al);
+    [d] true -> 1-slip : (ay'=ad) + slip : (ax'=ar);
+endmodule
+
+
+
+module obs1
+    o1x : [gMIN..gMAX] init gMAX/2;
+    o1y : [gMIN..gMAX] init gMAX/2;
+    // random walk to place the obstacle
+    [place] true -> 1/4:(o1x'=min(o1x+1,gMAX)) + 1/4:(o1x'=max(o1x-1,gMIN)) + 1/4:(o1y'=min(o1y+1,gMAX)) + 1/4:(o1y'=max(o1y-1,gMIN));
+endmodule
+
+formula crash = at1 | at2;// | at3;// | at4;
+formula see = see1 | see2;// | see3;// | see4;
+
+formula at1 = ax=o1x & ay=o1y;
+formula see1 = max(ax-o1x,o1x-ax) <= 1 & max(ay-o1y,o1y-ay) <= 1;
+
+module obs2 = obs1[o1x=o2x,o1y=o2y] endmodule
+formula at2 = ax=o2x & ay=o2y;
+formula see2 = max(ax-o2x,o2x-ax) <= 1 & max(ay-o2y,o2y-ay) <= 1;
+
+//module obs3 = obs1[o1x=o3x,o1y=o3y] endmodule
+//formula at3 = ax=o3x & ay=o3y;
+//formula see3 = max(ax-o3x,o3x-ax) <= 1 & max(ay-o3y,o3y-ay) <= 1;
+
+//module obs4 = obs1[o1x=o4x,o1y=o4y] endmodule
+//formula at4 = ax=o4x & ay=o4y;
+//formula see4 = max(ax-o4x,o4x-ax) <= 1 & max(ay-o4y,o4y-ay) <= 1;
+
+
+
+rewards "steps"
+    [l] true : 1;
+    [r] true : 1;
+    [d] true : 1;
+    [u] true : 1;
+endrewards
