@@ -1,0 +1,90 @@
+pomdp
+
+const int N = 8; // grid size NxN
+const int gMIN = 1;
+const int gMAX = N;
+const int RAD = 1; // radius within which the agent can see the obstacle
+
+
+formula crash = at1 | at2;
+formula goal = ax=gMAX & ay=gMAX;
+formula done = goal | crash;
+
+formula see1 = max(ax-o1x,o1x-ax) <= RAD & max(ay-o1y,o1y-ay) <= RAD;
+formula see2 = max(ax-o2x,o2x-ax) <= RAD & max(ay-o2y,o2y-ay) <= RAD;
+
+label "notbad" = !crash;
+label "goal" = goal;
+
+
+observable "ax" = ax;
+observable "ay" = ay;
+observable "clk" = clk;
+
+observable "crash" = crash;
+observable "goal" = goal;
+
+observable "see1" = see1;
+observable "see2" = see2;
+
+
+formula clk_next = mod(clk+1,2);
+module clk
+    clk : [0..1] init 0;
+
+    [l] !done & clk=0 -> (clk'=clk_next);
+    [r] !done & clk=0 -> (clk'=clk_next);
+    [d] !done & clk=0 -> (clk'=clk_next);
+    [u] !done & clk=0 -> (clk'=clk_next);
+    [w] !done & clk=0 -> (clk'=clk_next);
+
+    [o] !done & clk=1 -> (clk'=clk_next);
+endmodule
+
+
+const double slip = 0.3;
+
+formula al = min(max(ax-1,gMIN),gMAX);
+formula ar = min(max(ax+1,gMIN),gMAX);
+formula au = min(max(ay-1,gMIN),gMAX);
+formula ad = min(max(ay+1,gMIN),gMAX);
+
+module agent
+    ax : [gMIN..gMAX] init gMIN;
+    ay : [gMIN..gMAX] init gMIN;
+
+    [l] true -> 1-slip : (ax'=al) + slip : true;
+    [r] true -> 1-slip : (ax'=ar) + slip : true;
+    [d] true -> 1-slip : (ay'=ad) + slip : true;
+    [u] true -> 1-slip : (ay'=au) + slip : true;
+    [w] true -> true;
+endmodule
+
+
+
+formula o1l = min(max(o1x-1,gMIN),gMAX);
+formula o1r = min(max(o1x+1,gMIN),gMAX);
+formula o1u = min(max(o1y-1,gMIN),gMAX);
+formula o1d = min(max(o1y+1,gMIN),gMAX);
+
+module obstacle1
+    o1x : [gMIN..gMAX] init gMAX-1;
+    o1y : [gMIN..gMAX] init gMAX;
+    [o]  true -> 1/4:(o1x'=o1l) + 1/4:(o1x'=o1r) + 1/4:(o1y'=o1u) + 1/4:(o1y'=o1d);
+endmodule
+
+formula at1 = (ax=o1x & ay=o1y);
+
+
+formula o2l = min(max(o2x-1,gMIN),gMAX);
+formula o2r = min(max(o2x+1,gMIN),gMAX);
+formula o2u = min(max(o2y-1,gMIN),gMAX);
+formula o2d = min(max(o2y+1,gMIN),gMAX);
+
+module obstacle2
+    o2x : [gMIN..gMAX] init gMAX;
+    o2y : [gMIN..gMAX] init gMAX-1;
+    [o]  true -> 1/4:(o2x'=o2l) + 1/4:(o2x'=o2r) + 1/4:(o2y'=o2u) + 1/4:(o2y'=o2d);
+endmodule
+
+formula at2 = (ax=o2x & ay=o2y);

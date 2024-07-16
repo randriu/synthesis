@@ -62,10 +62,9 @@ source ${VIRTUAL_ENV}/bin/activate
 PAYNT can be executed using the command in the following form:
 
 ```shell
-python3 paynt.py [OPTIONS]
+python3 paynt.py [OPTIONS] PROJECT
 ```
-where the most important options are:
-- ``--project PROJECT``: the path to the benchmark folder [required]
+where ``PROJECT`` is the path to the benchmark folder and the most important options are:
 - ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description or a POMDP program [default: ``sketch.templ``]
 - ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
 - ``--props PROPS``: the file in the ``PROJECT`` folder containing synthesis specification [default: ``sketch.props``]
@@ -139,8 +138,8 @@ For now, we can see that we ask PAYNT to look at the sketch (located in director
 The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
+formula 1: R{"requests_lost"}<=1 [F "finished"]
+optimal setting: formula: R{"power"}min=? [F "finished"]; direction: min; eps: 0.0
 
 method: Hybrid, synthesis time: 12.39 s
 number of holes: 7, family size: 12150
@@ -175,8 +174,8 @@ python3 paynt/paynt.py --project cav21-benchmark/dpm-demo hybrid
 we obtain the following summary:
 
 ```shell
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
+formula 1: R{"requests_lost"}<=1 [F "finished"]
+optimal setting: formula: R{"power"}min=? [F "finished"]; direction: min; eps: 0.0
 
 method: Hybrid, synthesis time: 67.62 s
 number of holes: 7, family size: 12150
@@ -309,8 +308,8 @@ R{"power"}<=9100 [ F "finished" ]
 Running PAYNT again (with hybrid synthesis approach) will produce the following result
 
 ```shell
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-formula 2: R[exp]{"power"}<=9100 [F "finished"]
+formula 1: R{"requests_lost"}<=1 [F "finished"]
+formula 2: R{"power"}<=9100 [F "finished"]
 
 method: Hybrid, synthesis time: 67.52 s
 number of holes: 7, family size: 12150

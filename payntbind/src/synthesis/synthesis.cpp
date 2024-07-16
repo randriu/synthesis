@@ -11,5 +11,7 @@ void define_synthesis(py::module& m) {
     bindings_posmg(m);
 
     bindings_coloring(m);
+
+    bindings_smg(m);
 }
 

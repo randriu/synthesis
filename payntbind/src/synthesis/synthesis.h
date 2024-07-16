@@ -13,3 +13,5 @@ void bindings_pomdp_family(py::module &m);
 void bindings_posmg(py::module &m);
 
 void bindings_coloring(py::module &m);
+
+void bindings_smg(py::module &m);

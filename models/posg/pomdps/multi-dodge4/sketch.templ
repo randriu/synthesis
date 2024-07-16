@@ -2,21 +2,13 @@
 // player2 starts has 3 obstacles he can move (they start at (1,N), (N,1) and (4,4)) and wants crash into player1 with at least one obstacle
 // player2 has slippery movement
 
-smg
+pomdp
 
 const int N=4;
 const int xMIN = 1;
 const int yMIN = 1;
 const int xMAX = N;
 const int yMAX = N;
-
-player p1
-    player1, [l1], [r1], [d1], [u1]
-endplayer
-
-player p2
-    player2, [l21], [r21], [d21], [u21], [l22], [r22], [d22], [u22], [l23], [r23], [d23], [u23]
-endplayer
 
 // DEFINING THE OBSERVATIONS
 // player1 only observes its location in the grid and coordinate x of all obstacles
@@ -58,6 +50,7 @@ endmodule
 
 
 label "goal" = goal;
+label "__player_1_state__" = clk=0;
 
 const double slip = 0.4;
 
