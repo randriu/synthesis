@@ -1,8 +1,6 @@
 import stormpy
 import payntbind
 
-from paynt.parser.prism_parser import PrismParser
-from paynt.parser.pomdp_parser import PomdpParser
 
 import paynt.quotient.models
 
@@ -13,6 +11,8 @@ import paynt.quotient.posg
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
+
+from paynt.parser.prism_parser import PrismParser
 
 import uuid
 
@@ -28,6 +28,7 @@ def substitute_suffix(string, delimiter, replacer):
     output_string[-1] = str(replacer)
     output_string = delimiter.join(output_string)
     return output_string
+
 
 def make_rewards_action_based(model):
     tm = model.transition_matrix
@@ -51,10 +52,13 @@ def make_rewards_action_based(model):
         new_reward_model = stormpy.storage.SparseRewardModel(optional_state_action_reward_vector=action_reward)
         model.add_reward_model(name, new_reward_model)
 
-
-
 class Sketch:
 
+    @classmethod
+    def read_drn(cls, sketch_path):
+        builder_options = stormpy.core.DirectEncodingParserOptions()
+        builder_options.build_choice_labels = True
+        return stormpy.build_model_from_drn(sketch_path, builder_options)
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
@@ -87,7 +91,7 @@ class Sketch:
         if filetype is None:
             try:
                 logger.info(f"assuming sketch in DRN format...")
-                explicit_quotient = PomdpParser.read_pomdp_drn(sketch_path)
+                explicit_quotient = Sketch.read_drn(sketch_path)
                 specification = PrismParser.parse_specification(properties_path, relative_error)
                 filetype = "drn"
             except:
@@ -206,7 +210,7 @@ class Sketch:
                 "cannot '--export pomdp' with non-POMDP sketches"
             output_path = substitute_suffix(sketch_path, '.', 'pomdp')
             property_path = substitute_suffix(sketch_path, '/', 'props.pomdp')
-            PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
+            paynt.parser.pomdp_parser.PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
 
 
     @classmethod

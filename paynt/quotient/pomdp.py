@@ -68,6 +68,8 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         logger.info(f"constructed POMDP having {self.observations} observations.")
         
+        state_obs = self.pomdp.observations.copy()
+        
         # extract observation labels
         if self.pomdp.has_observation_valuations():
             ov = self.pomdp.observation_valuations
@@ -83,12 +85,11 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                     agent_obs = decpomdp_manager.joint_observations[obs][0]
                     agent_obs_label = decpomdp_manager.agent_observation_labels[0][agent_obs]
                     self.observation_labels.append(agent_obs_label)
-        # logger.debug(f"Observation labels: {self.observation_labels}")
 
         # compute actions available at each observation
         self.actions_at_observation = [0] * self.observations
         for state in range(self.pomdp.nr_states):
-            obs = self.pomdp.observations[state]
+            obs = state_obs[state]
             if self.actions_at_observation[obs] != 0:
                 continue
             self.actions_at_observation[obs] = self.pomdp.get_nr_available_actions(state)
@@ -96,7 +97,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # collect labels of actions available at each observation
         self.action_labels_at_observation = [[] for obs in range(self.observations)]
         for state in range(self.pomdp.nr_states):
-            obs = self.pomdp.observations[state]
+            obs = state_obs[state]
             if self.action_labels_at_observation[obs] != []:
                 continue
             actions = self.pomdp.get_nr_available_actions(state)
@@ -113,8 +114,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # mark perfect observations
         self.observation_states = [0 for obs in range(self.observations)]
         for state in range(self.pomdp.nr_states):
-            obs = self.pomdp.observations[state]
-            self.observation_states[obs] += 1
+            self.observation_states[state_obs[state]] += 1
 
         # initialize POMDP manager
         if not PomdpQuotient.posterior_aware:
@@ -337,7 +337,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.observation_memory_holes = None
         self.is_action_hole = None
         
-        logger.debug("unfolding {}-FSC template into POMDP ...".format(max(self.observation_memory_size)))
+        logger.debug("unfolding {}-FSC template into POMDP...".format(max(self.observation_memory_size)))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")

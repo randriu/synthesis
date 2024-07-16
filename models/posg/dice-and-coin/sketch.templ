@@ -1,42 +1,1224 @@
-// Simple game with dice and coin. In each round cashier (player2) rolls a 6-sided die,
-// gambler (player1) can either roll a die and if he gets a higher value he wins or
-// he can choose to toss a coin, if its heads he wins and if its tails he loses.
-// There's total of TOTAL_ROUNDS rounds and gambler needs to win more than a half of them to win overall.
+// Exported by prism
+// Original model type: POSMG
+@type: POSMG
+@parameters
 
-pomdp
+@reward_models
 
-const int TOTAL_ROUNDS=3;
-
-formula done = round=TOTAL_ROUNDS;
-formula goal = done & (rounds_won>TOTAL_ROUNDS/2);
-
-label "goal" = goal;
-
-observable "small_value" = (value_cashier < 2);
-observable "cashier_ready" = value_cashier > 0;
-observable "gambler_ready" = value_gambler > 0;
-observable "game_over" = round = TOTAL_ROUNDS;
-
-label "__player_1_state__" = value_cashier != 0 & value_gambler = 0;
-
-module cashier
-    value_cashier : [0..6] init 0;
-    round : [0..TOTAL_ROUNDS] init 0;
-
-    [start] !done & value_cashier = 0 -> 1/6: (value_cashier'=1) + 1/6: (value_cashier'=2) + 1/6: (value_cashier'=3) + 1/6: (value_cashier'=4) + 1/6: (value_cashier'=5) + 1/6: (value_cashier'=6);
-
-    [next] round < TOTAL_ROUNDS -> 1:(value_cashier'=0)&(round'=round+1);
-endmodule
-
-
-module gambler
-    // 1..6 for dice rolls and 7 if coin toss was good
-    value_gambler : [0..7] init 0;
-    rounds_won : [0..TOTAL_ROUNDS] init 0;
-
-    [dice] value_cashier != 0 & value_gambler = 0 -> 1/6: (value_gambler'=1) + 1/6: (value_gambler'=2) + 1/6: (value_gambler'=3) + 1/6: (value_gambler'=4) + 1/6: (value_gambler'=5) + 1/6: (value_gambler'=6);
-    [coin] value_cashier != 0 & value_gambler = 0 -> 1/2: (value_gambler'=1) + 1/2:(value_gambler'=7);
-
-    [next] value_gambler != 0 & value_gambler > value_cashier -> 1: (value_gambler'=0)&(rounds_won'=rounds_won+1);
-    [next] value_gambler != 0 & value_gambler <= value_cashier -> (value_gambler'=0);
-endmodule
+@nr_states
+298
+@nr_choices
+334
+@model
+state 0 {0} <1> init
+	action start
+		10 : 0.1666666666666667
+		58 : 0.1666666666666667
+		106 : 0.1666666666666667
+		154 : 0.1666666666666667
+		202 : 0.1666666666666667
+		250 : 0.1666666666666667
+state 1 {0} <1>
+	action start
+		18 : 0.1666666666666667
+		66 : 0.1666666666666667
+		114 : 0.1666666666666667
+		162 : 0.1666666666666667
+		210 : 0.1666666666666667
+		258 : 0.1666666666666667
+state 2 {0} <1>
+	action start
+		19 : 0.1666666666666667
+		67 : 0.1666666666666667
+		115 : 0.1666666666666667
+		163 : 0.1666666666666667
+		211 : 0.1666666666666667
+		259 : 0.1666666666666667
+state 3 {0} <1>
+	action start
+		34 : 0.1666666666666667
+		82 : 0.1666666666666667
+		130 : 0.1666666666666667
+		178 : 0.1666666666666667
+		226 : 0.1666666666666667
+		274 : 0.1666666666666667
+state 4 {0} <1>
+	action start
+		35 : 0.1666666666666667
+		83 : 0.1666666666666667
+		131 : 0.1666666666666667
+		179 : 0.1666666666666667
+		227 : 0.1666666666666667
+		275 : 0.1666666666666667
+state 5 {0} <1>
+	action start
+		36 : 0.1666666666666667
+		84 : 0.1666666666666667
+		132 : 0.1666666666666667
+		180 : 0.1666666666666667
+		228 : 0.1666666666666667
+		276 : 0.1666666666666667
+state 6 {5} <0> deadlock
+	action __NOLABEL__
+		6 : 1
+state 7 {5} <0> deadlock
+	action __NOLABEL__
+		7 : 1
+state 8 {5} <0> deadlock goal
+	action __NOLABEL__
+		8 : 1
+state 9 {5} <0> deadlock goal
+	action __NOLABEL__
+		9 : 1
+state 10 {1} <0>
+	action dice
+		11 : 0.1666666666666667
+		12 : 0.1666666666666667
+		13 : 0.1666666666666667
+		14 : 0.1666666666666667
+		15 : 0.1666666666666667
+		16 : 0.1666666666666667
+	action coin
+		11 : 0.5
+		17 : 0.5
+state 11 {3} <1>
+	action next
+		1 : 1
+state 12 {3} <1>
+	action next
+		2 : 1
+state 13 {3} <1>
+	action next
+		2 : 1
+state 14 {3} <1>
+	action next
+		2 : 1
+state 15 {3} <1>
+	action next
+		2 : 1
+state 16 {3} <1>
+	action next
+		2 : 1
+state 17 {3} <1>
+	action next
+		2 : 1
+state 18 {1} <0>
+	action dice
+		20 : 0.1666666666666667
+		22 : 0.1666666666666667
+		24 : 0.1666666666666667
+		26 : 0.1666666666666667
+		28 : 0.1666666666666667
+		30 : 0.1666666666666667
+	action coin
+		20 : 0.5
+		32 : 0.5
+state 19 {1} <0>
+	action dice
+		21 : 0.1666666666666667
+		23 : 0.1666666666666667
+		25 : 0.1666666666666667
+		27 : 0.1666666666666667
+		29 : 0.1666666666666667
+		31 : 0.1666666666666667
+	action coin
+		21 : 0.5
+		33 : 0.5
+state 20 {3} <1>
+	action next
+		3 : 1
+state 21 {3} <1>
+	action next
+		4 : 1
+state 22 {3} <1>
+	action next
+		4 : 1
+state 23 {3} <1>
+	action next
+		5 : 1
+state 24 {3} <1>
+	action next
+		4 : 1
+state 25 {3} <1>
+	action next
+		5 : 1
+state 26 {3} <1>
+	action next
+		4 : 1
+state 27 {3} <1>
+	action next
+		5 : 1
+state 28 {3} <1>
+	action next
+		4 : 1
+state 29 {3} <1>
+	action next
+		5 : 1
+state 30 {3} <1>
+	action next
+		4 : 1
+state 31 {3} <1>
+	action next
+		5 : 1
+state 32 {3} <1>
+	action next
+		4 : 1
+state 33 {3} <1>
+	action next
+		5 : 1
+state 34 {1} <0>
+	action dice
+		37 : 0.1666666666666667
+		40 : 0.1666666666666667
+		43 : 0.1666666666666667
+		46 : 0.1666666666666667
+		49 : 0.1666666666666667
+		52 : 0.1666666666666667
+	action coin
+		37 : 0.5
+		55 : 0.5
+state 35 {1} <0>
+	action dice
+		38 : 0.1666666666666667
+		41 : 0.1666666666666667
+		44 : 0.1666666666666667
+		47 : 0.1666666666666667
+		50 : 0.1666666666666667
+		53 : 0.1666666666666667
+	action coin
+		38 : 0.5
+		56 : 0.5
+state 36 {1} <0>
+	action dice
+		39 : 0.1666666666666667
+		42 : 0.1666666666666667
+		45 : 0.1666666666666667
+		48 : 0.1666666666666667
+		51 : 0.1666666666666667
+		54 : 0.1666666666666667
+	action coin
+		39 : 0.5
+		57 : 0.5
+state 37 {3} <1>
+	action next
+		6 : 1
+state 38 {3} <1>
+	action next
+		7 : 1
+state 39 {3} <1>
+	action next
+		8 : 1
+state 40 {3} <1>
+	action next
+		7 : 1
+state 41 {3} <1>
+	action next
+		8 : 1
+state 42 {3} <1>
+	action next
+		9 : 1
+state 43 {3} <1>
+	action next
+		7 : 1
+state 44 {3} <1>
+	action next
+		8 : 1
+state 45 {3} <1>
+	action next
+		9 : 1
+state 46 {3} <1>
+	action next
+		7 : 1
+state 47 {3} <1>
+	action next
+		8 : 1
+state 48 {3} <1>
+	action next
+		9 : 1
+state 49 {3} <1>
+	action next
+		7 : 1
+state 50 {3} <1>
+	action next
+		8 : 1
+state 51 {3} <1>
+	action next
+		9 : 1
+state 52 {3} <1>
+	action next
+		7 : 1
+state 53 {3} <1>
+	action next
+		8 : 1
+state 54 {3} <1>
+	action next
+		9 : 1
+state 55 {3} <1>
+	action next
+		7 : 1
+state 56 {3} <1>
+	action next
+		8 : 1
+state 57 {3} <1>
+	action next
+		9 : 1
+state 58 {2} <0>
+	action dice
+		59 : 0.1666666666666667
+		60 : 0.1666666666666667
+		61 : 0.1666666666666667
+		62 : 0.1666666666666667
+		63 : 0.1666666666666667
+		64 : 0.1666666666666667
+	action coin
+		59 : 0.5
+		65 : 0.5
+state 59 {4} <1>
+	action next
+		1 : 1
+state 60 {4} <1>
+	action next
+		1 : 1
+state 61 {4} <1>
+	action next
+		2 : 1
+state 62 {4} <1>
+	action next
+		2 : 1
+state 63 {4} <1>
+	action next
+		2 : 1
+state 64 {4} <1>
+	action next
+		2 : 1
+state 65 {4} <1>
+	action next
+		2 : 1
+state 66 {2} <0>
+	action dice
+		68 : 0.1666666666666667
+		70 : 0.1666666666666667
+		72 : 0.1666666666666667
+		74 : 0.1666666666666667
+		76 : 0.1666666666666667
+		78 : 0.1666666666666667
+	action coin
+		68 : 0.5
+		80 : 0.5
+state 67 {2} <0>
+	action dice
+		69 : 0.1666666666666667
+		71 : 0.1666666666666667
+		73 : 0.1666666666666667
+		75 : 0.1666666666666667
+		77 : 0.1666666666666667
+		79 : 0.1666666666666667
+	action coin
+		69 : 0.5
+		81 : 0.5
+state 68 {4} <1>
+	action next
+		3 : 1
+state 69 {4} <1>
+	action next
+		4 : 1
+state 70 {4} <1>
+	action next
+		3 : 1
+state 71 {4} <1>
+	action next
+		4 : 1
+state 72 {4} <1>
+	action next
+		4 : 1
+state 73 {4} <1>
+	action next
+		5 : 1
+state 74 {4} <1>
+	action next
+		4 : 1
+state 75 {4} <1>
+	action next
+		5 : 1
+state 76 {4} <1>
+	action next
+		4 : 1
+state 77 {4} <1>
+	action next
+		5 : 1
+state 78 {4} <1>
+	action next
+		4 : 1
+state 79 {4} <1>
+	action next
+		5 : 1
+state 80 {4} <1>
+	action next
+		4 : 1
+state 81 {4} <1>
+	action next
+		5 : 1
+state 82 {2} <0>
+	action dice
+		85 : 0.1666666666666667
+		88 : 0.1666666666666667
+		91 : 0.1666666666666667
+		94 : 0.1666666666666667
+		97 : 0.1666666666666667
+		100 : 0.1666666666666667
+	action coin
+		85 : 0.5
+		103 : 0.5
+state 83 {2} <0>
+	action dice
+		86 : 0.1666666666666667
+		89 : 0.1666666666666667
+		92 : 0.1666666666666667
+		95 : 0.1666666666666667
+		98 : 0.1666666666666667
+		101 : 0.1666666666666667
+	action coin
+		86 : 0.5
+		104 : 0.5
+state 84 {2} <0>
+	action dice
+		87 : 0.1666666666666667
+		90 : 0.1666666666666667
+		93 : 0.1666666666666667
+		96 : 0.1666666666666667
+		99 : 0.1666666666666667
+		102 : 0.1666666666666667
+	action coin
+		87 : 0.5
+		105 : 0.5
+state 85 {4} <1>
+	action next
+		6 : 1
+state 86 {4} <1>
+	action next
+		7 : 1
+state 87 {4} <1>
+	action next
+		8 : 1
+state 88 {4} <1>
+	action next
+		6 : 1
+state 89 {4} <1>
+	action next
+		7 : 1
+state 90 {4} <1>
+	action next
+		8 : 1
+state 91 {4} <1>
+	action next
+		7 : 1
+state 92 {4} <1>
+	action next
+		8 : 1
+state 93 {4} <1>
+	action next
+		9 : 1
+state 94 {4} <1>
+	action next
+		7 : 1
+state 95 {4} <1>
+	action next
+		8 : 1
+state 96 {4} <1>
+	action next
+		9 : 1
+state 97 {4} <1>
+	action next
+		7 : 1
+state 98 {4} <1>
+	action next
+		8 : 1
+state 99 {4} <1>
+	action next
+		9 : 1
+state 100 {4} <1>
+	action next
+		7 : 1
+state 101 {4} <1>
+	action next
+		8 : 1
+state 102 {4} <1>
+	action next
+		9 : 1
+state 103 {4} <1>
+	action next
+		7 : 1
+state 104 {4} <1>
+	action next
+		8 : 1
+state 105 {4} <1>
+	action next
+		9 : 1
+state 106 {2} <0>
+	action dice
+		107 : 0.1666666666666667
+		108 : 0.1666666666666667
+		109 : 0.1666666666666667
+		110 : 0.1666666666666667
+		111 : 0.1666666666666667
+		112 : 0.1666666666666667
+	action coin
+		107 : 0.5
+		113 : 0.5
+state 107 {4} <1>
+	action next
+		1 : 1
+state 108 {4} <1>
+	action next
+		1 : 1
+state 109 {4} <1>
+	action next
+		1 : 1
+state 110 {4} <1>
+	action next
+		2 : 1
+state 111 {4} <1>
+	action next
+		2 : 1
+state 112 {4} <1>
+	action next
+		2 : 1
+state 113 {4} <1>
+	action next
+		2 : 1
+state 114 {2} <0>
+	action dice
+		116 : 0.1666666666666667
+		118 : 0.1666666666666667
+		120 : 0.1666666666666667
+		122 : 0.1666666666666667
+		124 : 0.1666666666666667
+		126 : 0.1666666666666667
+	action coin
+		116 : 0.5
+		128 : 0.5
+state 115 {2} <0>
+	action dice
+		117 : 0.1666666666666667
+		119 : 0.1666666666666667
+		121 : 0.1666666666666667
+		123 : 0.1666666666666667
+		125 : 0.1666666666666667
+		127 : 0.1666666666666667
+	action coin
+		117 : 0.5
+		129 : 0.5
+state 116 {4} <1>
+	action next
+		3 : 1
+state 117 {4} <1>
+	action next
+		4 : 1
+state 118 {4} <1>
+	action next
+		3 : 1
+state 119 {4} <1>
+	action next
+		4 : 1
+state 120 {4} <1>
+	action next
+		3 : 1
+state 121 {4} <1>
+	action next
+		4 : 1
+state 122 {4} <1>
+	action next
+		4 : 1
+state 123 {4} <1>
+	action next
+		5 : 1
+state 124 {4} <1>
+	action next
+		4 : 1
+state 125 {4} <1>
+	action next
+		5 : 1
+state 126 {4} <1>
+	action next
+		4 : 1
+state 127 {4} <1>
+	action next
+		5 : 1
+state 128 {4} <1>
+	action next
+		4 : 1
+state 129 {4} <1>
+	action next
+		5 : 1
+state 130 {2} <0>
+	action dice
+		133 : 0.1666666666666667
+		136 : 0.1666666666666667
+		139 : 0.1666666666666667
+		142 : 0.1666666666666667
+		145 : 0.1666666666666667
+		148 : 0.1666666666666667
+	action coin
+		133 : 0.5
+		151 : 0.5
+state 131 {2} <0>
+	action dice
+		134 : 0.1666666666666667
+		137 : 0.1666666666666667
+		140 : 0.1666666666666667
+		143 : 0.1666666666666667
+		146 : 0.1666666666666667
+		149 : 0.1666666666666667
+	action coin
+		134 : 0.5
+		152 : 0.5
+state 132 {2} <0>
+	action dice
+		135 : 0.1666666666666667
+		138 : 0.1666666666666667
+		141 : 0.1666666666666667
+		144 : 0.1666666666666667
+		147 : 0.1666666666666667
+		150 : 0.1666666666666667
+	action coin
+		135 : 0.5
+		153 : 0.5
+state 133 {4} <1>
+	action next
+		6 : 1
+state 134 {4} <1>
+	action next
+		7 : 1
+state 135 {4} <1>
+	action next
+		8 : 1
+state 136 {4} <1>
+	action next
+		6 : 1
+state 137 {4} <1>
+	action next
+		7 : 1
+state 138 {4} <1>
+	action next
+		8 : 1
+state 139 {4} <1>
+	action next
+		6 : 1
+state 140 {4} <1>
+	action next
+		7 : 1
+state 141 {4} <1>
+	action next
+		8 : 1
+state 142 {4} <1>
+	action next
+		7 : 1
+state 143 {4} <1>
+	action next
+		8 : 1
+state 144 {4} <1>
+	action next
+		9 : 1
+state 145 {4} <1>
+	action next
+		7 : 1
+state 146 {4} <1>
+	action next
+		8 : 1
+state 147 {4} <1>
+	action next
+		9 : 1
+state 148 {4} <1>
+	action next
+		7 : 1
+state 149 {4} <1>
+	action next
+		8 : 1
+state 150 {4} <1>
+	action next
+		9 : 1
+state 151 {4} <1>
+	action next
+		7 : 1
+state 152 {4} <1>
+	action next
+		8 : 1
+state 153 {4} <1>
+	action next
+		9 : 1
+state 154 {2} <0>
+	action dice
+		155 : 0.1666666666666667
+		156 : 0.1666666666666667
+		157 : 0.1666666666666667
+		158 : 0.1666666666666667
+		159 : 0.1666666666666667
+		160 : 0.1666666666666667
+	action coin
+		155 : 0.5
+		161 : 0.5
+state 155 {4} <1>
+	action next
+		1 : 1
+state 156 {4} <1>
+	action next
+		1 : 1
+state 157 {4} <1>
+	action next
+		1 : 1
+state 158 {4} <1>
+	action next
+		1 : 1
+state 159 {4} <1>
+	action next
+		2 : 1
+state 160 {4} <1>
+	action next
+		2 : 1
+state 161 {4} <1>
+	action next
+		2 : 1
+state 162 {2} <0>
+	action dice
+		164 : 0.1666666666666667
+		166 : 0.1666666666666667
+		168 : 0.1666666666666667
+		170 : 0.1666666666666667
+		172 : 0.1666666666666667
+		174 : 0.1666666666666667
+	action coin
+		164 : 0.5
+		176 : 0.5
+state 163 {2} <0>
+	action dice
+		165 : 0.1666666666666667
+		167 : 0.1666666666666667
+		169 : 0.1666666666666667
+		171 : 0.1666666666666667
+		173 : 0.1666666666666667
+		175 : 0.1666666666666667
+	action coin
+		165 : 0.5
+		177 : 0.5
+state 164 {4} <1>
+	action next
+		3 : 1
+state 165 {4} <1>
+	action next
+		4 : 1
+state 166 {4} <1>
+	action next
+		3 : 1
+state 167 {4} <1>
+	action next
+		4 : 1
+state 168 {4} <1>
+	action next
+		3 : 1
+state 169 {4} <1>
+	action next
+		4 : 1
+state 170 {4} <1>
+	action next
+		3 : 1
+state 171 {4} <1>
+	action next
+		4 : 1
+state 172 {4} <1>
+	action next
+		4 : 1
+state 173 {4} <1>
+	action next
+		5 : 1
+state 174 {4} <1>
+	action next
+		4 : 1
+state 175 {4} <1>
+	action next
+		5 : 1
+state 176 {4} <1>
+	action next
+		4 : 1
+state 177 {4} <1>
+	action next
+		5 : 1
+state 178 {2} <0>
+	action dice
+		181 : 0.1666666666666667
+		184 : 0.1666666666666667
+		187 : 0.1666666666666667
+		190 : 0.1666666666666667
+		193 : 0.1666666666666667
+		196 : 0.1666666666666667
+	action coin
+		181 : 0.5
+		199 : 0.5
+state 179 {2} <0>
+	action dice
+		182 : 0.1666666666666667
+		185 : 0.1666666666666667
+		188 : 0.1666666666666667
+		191 : 0.1666666666666667
+		194 : 0.1666666666666667
+		197 : 0.1666666666666667
+	action coin
+		182 : 0.5
+		200 : 0.5
+state 180 {2} <0>
+	action dice
+		183 : 0.1666666666666667
+		186 : 0.1666666666666667
+		189 : 0.1666666666666667
+		192 : 0.1666666666666667
+		195 : 0.1666666666666667
+		198 : 0.1666666666666667
+	action coin
+		183 : 0.5
+		201 : 0.5
+state 181 {4} <1>
+	action next
+		6 : 1
+state 182 {4} <1>
+	action next
+		7 : 1
+state 183 {4} <1>
+	action next
+		8 : 1
+state 184 {4} <1>
+	action next
+		6 : 1
+state 185 {4} <1>
+	action next
+		7 : 1
+state 186 {4} <1>
+	action next
+		8 : 1
+state 187 {4} <1>
+	action next
+		6 : 1
+state 188 {4} <1>
+	action next
+		7 : 1
+state 189 {4} <1>
+	action next
+		8 : 1
+state 190 {4} <1>
+	action next
+		6 : 1
+state 191 {4} <1>
+	action next
+		7 : 1
+state 192 {4} <1>
+	action next
+		8 : 1
+state 193 {4} <1>
+	action next
+		7 : 1
+state 194 {4} <1>
+	action next
+		8 : 1
+state 195 {4} <1>
+	action next
+		9 : 1
+state 196 {4} <1>
+	action next
+		7 : 1
+state 197 {4} <1>
+	action next
+		8 : 1
+state 198 {4} <1>
+	action next
+		9 : 1
+state 199 {4} <1>
+	action next
+		7 : 1
+state 200 {4} <1>
+	action next
+		8 : 1
+state 201 {4} <1>
+	action next
+		9 : 1
+state 202 {2} <0>
+	action dice
+		203 : 0.1666666666666667
+		204 : 0.1666666666666667
+		205 : 0.1666666666666667
+		206 : 0.1666666666666667
+		207 : 0.1666666666666667
+		208 : 0.1666666666666667
+	action coin
+		203 : 0.5
+		209 : 0.5
+state 203 {4} <1>
+	action next
+		1 : 1
+state 204 {4} <1>
+	action next
+		1 : 1
+state 205 {4} <1>
+	action next
+		1 : 1
+state 206 {4} <1>
+	action next
+		1 : 1
+state 207 {4} <1>
+	action next
+		1 : 1
+state 208 {4} <1>
+	action next
+		2 : 1
+state 209 {4} <1>
+	action next
+		2 : 1
+state 210 {2} <0>
+	action dice
+		212 : 0.1666666666666667
+		214 : 0.1666666666666667
+		216 : 0.1666666666666667
+		218 : 0.1666666666666667
+		220 : 0.1666666666666667
+		222 : 0.1666666666666667
+	action coin
+		212 : 0.5
+		224 : 0.5
+state 211 {2} <0>
+	action dice
+		213 : 0.1666666666666667
+		215 : 0.1666666666666667
+		217 : 0.1666666666666667
+		219 : 0.1666666666666667
+		221 : 0.1666666666666667
+		223 : 0.1666666666666667
+	action coin
+		213 : 0.5
+		225 : 0.5
+state 212 {4} <1>
+	action next
+		3 : 1
+state 213 {4} <1>
+	action next
+		4 : 1
+state 214 {4} <1>
+	action next
+		3 : 1
+state 215 {4} <1>
+	action next
+		4 : 1
+state 216 {4} <1>
+	action next
+		3 : 1
+state 217 {4} <1>
+	action next
+		4 : 1
+state 218 {4} <1>
+	action next
+		3 : 1
+state 219 {4} <1>
+	action next
+		4 : 1
+state 220 {4} <1>
+	action next
+		3 : 1
+state 221 {4} <1>
+	action next
+		4 : 1
+state 222 {4} <1>
+	action next
+		4 : 1
+state 223 {4} <1>
+	action next
+		5 : 1
+state 224 {4} <1>
+	action next
+		4 : 1
+state 225 {4} <1>
+	action next
+		5 : 1
+state 226 {2} <0>
+	action dice
+		229 : 0.1666666666666667
+		232 : 0.1666666666666667
+		235 : 0.1666666666666667
+		238 : 0.1666666666666667
+		241 : 0.1666666666666667
+		244 : 0.1666666666666667
+	action coin
+		229 : 0.5
+		247 : 0.5
+state 227 {2} <0>
+	action dice
+		230 : 0.1666666666666667
+		233 : 0.1666666666666667
+		236 : 0.1666666666666667
+		239 : 0.1666666666666667
+		242 : 0.1666666666666667
+		245 : 0.1666666666666667
+	action coin
+		230 : 0.5
+		248 : 0.5
+state 228 {2} <0>
+	action dice
+		231 : 0.1666666666666667
+		234 : 0.1666666666666667
+		237 : 0.1666666666666667
+		240 : 0.1666666666666667
+		243 : 0.1666666666666667
+		246 : 0.1666666666666667
+	action coin
+		231 : 0.5
+		249 : 0.5
+state 229 {4} <1>
+	action next
+		6 : 1
+state 230 {4} <1>
+	action next
+		7 : 1
+state 231 {4} <1>
+	action next
+		8 : 1
+state 232 {4} <1>
+	action next
+		6 : 1
+state 233 {4} <1>
+	action next
+		7 : 1
+state 234 {4} <1>
+	action next
+		8 : 1
+state 235 {4} <1>
+	action next
+		6 : 1
+state 236 {4} <1>
+	action next
+		7 : 1
+state 237 {4} <1>
+	action next
+		8 : 1
+state 238 {4} <1>
+	action next
+		6 : 1
+state 239 {4} <1>
+	action next
+		7 : 1
+state 240 {4} <1>
+	action next
+		8 : 1
+state 241 {4} <1>
+	action next
+		6 : 1
+state 242 {4} <1>
+	action next
+		7 : 1
+state 243 {4} <1>
+	action next
+		8 : 1
+state 244 {4} <1>
+	action next
+		7 : 1
+state 245 {4} <1>
+	action next
+		8 : 1
+state 246 {4} <1>
+	action next
+		9 : 1
+state 247 {4} <1>
+	action next
+		7 : 1
+state 248 {4} <1>
+	action next
+		8 : 1
+state 249 {4} <1>
+	action next
+		9 : 1
+state 250 {2} <0>
+	action dice
+		251 : 0.1666666666666667
+		252 : 0.1666666666666667
+		253 : 0.1666666666666667
+		254 : 0.1666666666666667
+		255 : 0.1666666666666667
+		256 : 0.1666666666666667
+	action coin
+		251 : 0.5
+		257 : 0.5
+state 251 {4} <1>
+	action next
+		1 : 1
+state 252 {4} <1>
+	action next
+		1 : 1
+state 253 {4} <1>
+	action next
+		1 : 1
+state 254 {4} <1>
+	action next
+		1 : 1
+state 255 {4} <1>
+	action next
+		1 : 1
+state 256 {4} <1>
+	action next
+		1 : 1
+state 257 {4} <1>
+	action next
+		2 : 1
+state 258 {2} <0>
+	action dice
+		260 : 0.1666666666666667
+		262 : 0.1666666666666667
+		264 : 0.1666666666666667
+		266 : 0.1666666666666667
+		268 : 0.1666666666666667
+		270 : 0.1666666666666667
+	action coin
+		260 : 0.5
+		272 : 0.5
+state 259 {2} <0>
+	action dice
+		261 : 0.1666666666666667
+		263 : 0.1666666666666667
+		265 : 0.1666666666666667
+		267 : 0.1666666666666667
+		269 : 0.1666666666666667
+		271 : 0.1666666666666667
+	action coin
+		261 : 0.5
+		273 : 0.5
+state 260 {4} <1>
+	action next
+		3 : 1
+state 261 {4} <1>
+	action next
+		4 : 1
+state 262 {4} <1>
+	action next
+		3 : 1
+state 263 {4} <1>
+	action next
+		4 : 1
+state 264 {4} <1>
+	action next
+		3 : 1
+state 265 {4} <1>
+	action next
+		4 : 1
+state 266 {4} <1>
+	action next
+		3 : 1
+state 267 {4} <1>
+	action next
+		4 : 1
+state 268 {4} <1>
+	action next
+		3 : 1
+state 269 {4} <1>
+	action next
+		4 : 1
+state 270 {4} <1>
+	action next
+		3 : 1
+state 271 {4} <1>
+	action next
+		4 : 1
+state 272 {4} <1>
+	action next
+		4 : 1
+state 273 {4} <1>
+	action next
+		5 : 1
+state 274 {2} <0>
+	action dice
+		277 : 0.1666666666666667
+		280 : 0.1666666666666667
+		283 : 0.1666666666666667
+		286 : 0.1666666666666667
+		289 : 0.1666666666666667
+		292 : 0.1666666666666667
+	action coin
+		277 : 0.5
+		295 : 0.5
+state 275 {2} <0>
+	action dice
+		278 : 0.1666666666666667
+		281 : 0.1666666666666667
+		284 : 0.1666666666666667
+		287 : 0.1666666666666667
+		290 : 0.1666666666666667
+		293 : 0.1666666666666667
+	action coin
+		278 : 0.5
+		296 : 0.5
+state 276 {2} <0>
+	action dice
+		279 : 0.1666666666666667
+		282 : 0.1666666666666667
+		285 : 0.1666666666666667
+		288 : 0.1666666666666667
+		291 : 0.1666666666666667
+		294 : 0.1666666666666667
+	action coin
+		279 : 0.5
+		297 : 0.5
+state 277 {4} <1>
+	action next
+		6 : 1
+state 278 {4} <1>
+	action next
+		7 : 1
+state 279 {4} <1>
+	action next
+		8 : 1
+state 280 {4} <1>
+	action next
+		6 : 1
+state 281 {4} <1>
+	action next
+		7 : 1
+state 282 {4} <1>
+	action next
+		8 : 1
+state 283 {4} <1>
+	action next
+		6 : 1
+state 284 {4} <1>
+	action next
+		7 : 1
+state 285 {4} <1>
+	action next
+		8 : 1
+state 286 {4} <1>
+	action next
+		6 : 1
+state 287 {4} <1>
+	action next
+		7 : 1
+state 288 {4} <1>
+	action next
+		8 : 1
+state 289 {4} <1>
+	action next
+		6 : 1
+state 290 {4} <1>
+	action next
+		7 : 1
+state 291 {4} <1>
+	action next
+		8 : 1
+state 292 {4} <1>
+	action next
+		6 : 1
+state 293 {4} <1>
+	action next
+		7 : 1
+state 294 {4} <1>
+	action next
+		8 : 1
+state 295 {4} <1>
+	action next
+		7 : 1
+state 296 {4} <1>
+	action next
+		8 : 1
+state 297 {4} <1>
+	action next
+		9 : 1

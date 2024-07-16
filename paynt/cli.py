@@ -47,8 +47,7 @@ def setup_logger(log_path = None):
 
 
 @click.command()
-@click.option("--project", required=True, type=click.Path(exists=True),
-    help="project path")
+@click.argument('project', type=click.Path(exists=True))
 @click.option("--sketch", default="sketch.templ", show_default=True,
     help="name of the sketch file in the project")
 @click.option("--props", default="sketch.props", show_default=True,
@@ -83,7 +82,7 @@ def setup_logger(log_path = None):
     help="unfold MDP taking posterior observation of into account")
 
 @click.option("--storm-pomdp", is_flag=True, default=False,
-    help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
+    help="enable running belief analysis in STorm to enhance FSC synthesis for POMDPs (AR only)")
 @click.option(
     "--storm-options",
     default="cutoff",
