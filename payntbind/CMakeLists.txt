@@ -87,8 +87,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINAR
 payntbind_module(synthesis) 
 target_include_directories(synthesis
   PRIVATE
-  src/synthesis/decpomdp/madp/src/base/
-  src/synthesis/decpomdp/madp/src/include/
-  src/synthesis/decpomdp/madp/src/parser/
+  src/synthesis/decpomdp/madp/base/
+  src/synthesis/decpomdp/madp/include/
+  src/synthesis/decpomdp/madp/parser/
 )
 target_link_libraries(synthesis PUBLIC storm storm-pomdp)
