@@ -88,6 +88,7 @@ class Sketch:
                 logger.info(f"assuming sketch in DRN format...")
                 explicit_quotient = DrnParser.read_drn(sketch_path)
                 if isinstance(explicit_quotient, payntbind.synthesis.Posmg):
+                    specification = DrnParser.parse_posmg_specification(properties_path)
                     filetype = "drn-game"
                 else:
                     specification = PrismParser.parse_specification(properties_path, relative_error)

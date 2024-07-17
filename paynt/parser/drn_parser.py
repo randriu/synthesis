@@ -97,6 +97,17 @@ class DrnParser:
         builder_options.build_choice_labels = True
         return stormpy.core._build_sparse_model_from_drn(sketch_path, builder_options)
 
+    @staticmethod
+    def parse_posmg_specification(properties_path):
+        if not os.path.isfile(properties_path):
+            raise ValueError(f"the properties file {properties_path} does not exist")
+        logger.info(f"loading properties from {properties_path} ...")
+
+        with open(properties_path) as file:
+            line = file.readline()
+
+            return stormpy.parse_properties(line)
+
     @classmethod
     def write_model_in_pomdp_solve_format(cls, pomdp, output_path, property_path):
 
