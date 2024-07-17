@@ -20,6 +20,20 @@ class Posmg : public storm::models::sparse::Smg<double> {
     Posmg(storm::storage::sparse::ModelComponents<double> const& components);
     Posmg(storm::storage::sparse::ModelComponents<double> &&components);
 
+    /**
+     * @brief Get the underlying MDP
+     *
+     * @return storm::models::sparse::Mdp<double>
+     */
+    storm::models::sparse::Mdp<double> getMdp();
+
+    /**
+     * @brief Get the underlying POMDP
+     *
+     * @return storm::models::sparse::Pomdp<double>
+     */
+    storm::models::sparse::Pomdp<double> getPomdp();
+
     private:
     std::vector<uint32_t> observations;
 };
@@ -33,5 +47,14 @@ class Posmg : public storm::models::sparse::Smg<double> {
  */
 Posmg createPosmg(storm::models::sparse::Pomdp<double> pomdp,
             std::vector<storm::storage::PlayerIndex> statePlayerIndications);
+
+/**
+ * @brief Create and return a Components object based on the provided model
+ *
+ * @param model Properites to create the ModelComponents are taken from this model.
+ * @return storm::storage::sparse::ModelComponents<double>
+ */
+storm::storage::sparse::ModelComponents<double> createComponents(
+        storm::models::sparse::NondeterministicModel<double> const& model);
 
 } // namespace synthesis

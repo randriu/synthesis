@@ -13,27 +13,25 @@ namespace synthesis {
 
     }
 
+    storm::models::sparse::Mdp<double> Posmg::getMdp()
+    {
+        auto components = createComponents(*this);
+
+        return storm::models::sparse::Mdp<double>(std::move(components));
+    }
+
+    storm::models::sparse::Pomdp<double> Posmg::getPomdp()
+    {
+        auto components = createComponents(*this);
+        components.observabilityClasses = this->observations;
+
+        return storm::models::sparse::Pomdp<double>(std::move(components));
+    }
+
     Posmg createPosmg(storm::models::sparse::Pomdp<double> pomdp,
                       std::vector<storm::storage::PlayerIndex> statePlayerIndications)
     {
-        // Model components
-        storm::storage::sparse::ModelComponents<double> components(
-            std::move(pomdp.getTransitionMatrix()),
-            std::move(pomdp.getStateLabeling()),
-            std::move(pomdp.getRewardModels())
-        );
-        if (pomdp.hasChoiceLabeling())
-        {
-            components.choiceLabeling = pomdp.getChoiceLabeling();
-        }
-        if (pomdp.hasStateValuations())
-        {
-            components.stateValuations = pomdp.getStateValuations();
-        }
-        if (pomdp.hasChoiceOrigins())
-        {
-            components.choiceOrigins = pomdp.getChoiceOrigins();
-        }
+        auto components = createComponents(pomdp);
 
         // Smg components
         components.statePlayerIndications = statePlayerIndications;
@@ -47,6 +45,27 @@ namespace synthesis {
         }
 
         return Posmg(components);
+    }
+
+    storm::storage::sparse::ModelComponents<double> createComponents(
+            storm::models::sparse::NondeterministicModel<double> const& model)
+    {
+        storm::storage::sparse::ModelComponents<double> components(
+            model.getTransitionMatrix(),
+            model.getStateLabeling(),
+            model.getRewardModels()
+        );
+        if (model.hasChoiceLabeling()) {
+            components.choiceLabeling = model.getChoiceLabeling();
+        }
+        if (model.hasStateValuations()) {
+            components.stateValuations = model.getStateValuations();
+        }
+        if (model.hasChoiceOrigins()) {
+            components.choiceOrigins = model.getChoiceOrigins();
+        }
+
+        return components;
     }
 
 } // namespace synthesis
