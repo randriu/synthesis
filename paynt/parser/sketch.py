@@ -13,7 +13,7 @@ import paynt.quotient.pomdp_family
 import paynt.verification.property
 
 from paynt.parser.prism_parser import PrismParser
-from paynt.parser.pomdp_parser import PomdpParser
+from paynt.parser.drn_parser import DrnParser
 
 import uuid
 
@@ -56,12 +56,6 @@ def make_rewards_action_based(model):
 class Sketch:
 
     @classmethod
-    def read_drn(cls, sketch_path):
-        builder_options = stormpy.core.DirectEncodingParserOptions()
-        builder_options.build_choice_labels = True
-        return stormpy.build_model_from_drn(sketch_path, builder_options)
-
-    @classmethod
     def load_sketch(cls, sketch_path, properties_path,
         export=None, relative_error=0, precision=1e-4, constraint_bound=None):
 
@@ -92,9 +86,12 @@ class Sketch:
         if filetype is None:
             try:
                 logger.info(f"assuming sketch in DRN format...")
-                explicit_quotient = PomdpParser.read_drn(sketch_path)
-                specification = PrismParser.parse_specification(properties_path, relative_error)
-                filetype = "drn"
+                explicit_quotient = DrnParser.read_drn(sketch_path)
+                if isinstance(explicit_quotient, payntbind.synthesis.Posmg):
+                    filetype = "drn-game"
+                else:
+                    specification = PrismParser.parse_specification(properties_path, relative_error)
+                    filetype = "drn-pomdp"
             except:
                 pass
         if filetype is None:
@@ -123,18 +120,22 @@ class Sketch:
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
 
-        paynt.quotient.models.Mdp.initialize(specification)
+        if  filetype == "drn-game":
+            paynt.quotient.models.Smg.initialize(specification)
+        else:
+            paynt.quotient.models.Mdp.initialize(specification)
+            specification.check()
+            if specification.contains_until_properties() and filetype != "prism":
+                logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
+            specification.transform_until_to_eventually()
+            logger.info(f"found the following specification {specification}")
+
         paynt.verification.property.Property.initialize()
 
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
-        specification.check()
-        if specification.contains_until_properties() and filetype != "prism":
-            logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
-        specification.transform_until_to_eventually()
-        logger.info(f"found the following specification {specification}")
 
         if export is not None:
             Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)

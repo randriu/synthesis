@@ -4,34 +4,33 @@ import payntbind
 from collections import defaultdict
 
 import os
-import re
-import uuid
 
 import logging
 logger = logging.getLogger(__name__)
 
 
-# TODO rename class
-class PomdpParser:
+class DrnParser:
 
-    DRN_COMMENT_PREFIX = '//'
-    DRN_TYPE_PREFIX = '@type: '
-    DRN_STATE_PREFIX = 'state '
+    COMMENT_PREFIX = '//'
+    TYPE_PREFIX = '@type: '
+    STATE_PREFIX = 'state '
     WHITESPACES = ' \t\n\v\f\r'
 
     @classmethod
     def read_drn(cls, sketch_path):
+        # try to read a drn file and return POSMG or POMDP based on the type
+        # ValueError if file is not dnr or the model is of unsupported type
         explicit_model = None
         try:
-            type = PomdpParser.decide_type_of_drn(sketch_path)
+            type = DrnParser.decide_type_of_drn(sketch_path)
             if type == 'POSMG':
                 pomdp_path = sketch_path + '.tmp'
-                state_player_indications = PomdpParser.pomdp_from_posmg(sketch_path, pomdp_path)
-                pomdp = PomdpParser.read_pomdp_drn(pomdp_path)
+                state_player_indications = DrnParser.pomdp_from_posmg(sketch_path, pomdp_path)
+                pomdp = DrnParser.read_pomdp_drn(pomdp_path)
                 explicit_model = payntbind.synthesis.create_posmg(pomdp, state_player_indications)
                 os.remove(pomdp_path)
             elif type == 'POMDP':
-                explicit_model = PomdpParser.read_pomdp_drn(sketch_path)
+                explicit_model = DrnParser.read_pomdp_drn(sketch_path)
             else:
                 raise ValueError('Unsupported model type in .drn file')
         except:
@@ -42,15 +41,15 @@ class PomdpParser:
     def decide_type_of_drn(cls, path: str) -> str:
         # decide type of model in drn file and return it as a string
         # path - path to drn file
-        # return - string representation of type
+        # return - string representation of type (e.g. 'POMDP')
         # ValueError if not valid drn file
         with open(path) as file:
             while True:
                 line = file.readline()
-                if line.isspace() or line.lstrip(cls.WHITESPACES).startswith(cls.DRN_COMMENT_PREFIX):
+                if line.isspace() or line.lstrip(cls.WHITESPACES).startswith(cls.COMMENT_PREFIX):
                     continue
-                if line.startswith(cls.DRN_TYPE_PREFIX):
-                    type = line.removeprefix(cls.DRN_TYPE_PREFIX).removesuffix('\n')
+                if line.startswith(cls.TYPE_PREFIX):
+                    type = line.removeprefix(cls.TYPE_PREFIX).removesuffix('\n')
                     return type
                 raise ValueError
 
@@ -65,9 +64,9 @@ class PomdpParser:
         state_player_indications = []
 
         for line in posmg_file:
-            if line.startswith(cls.DRN_TYPE_PREFIX):
+            if line.startswith(cls.TYPE_PREFIX):
                 line = line.replace('POSMG', 'POMDP')
-            if line.startswith(cls.DRN_STATE_PREFIX):
+            if line.startswith(cls.STATE_PREFIX):
                 l_idx = line.index('<')
                 r_idx = line.index('>')
                 player_num = line[l_idx + 1:r_idx]
