@@ -7,7 +7,7 @@ import paynt.quotient.models
 import paynt.quotient.quotient
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
-import paynt.quotient.posg
+import paynt.quotient.posmg
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
@@ -231,7 +231,7 @@ class Sketch:
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
                 quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
             elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
-                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
+                quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
             else:
                 quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
         return quotient_container
