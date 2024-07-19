@@ -40,7 +40,7 @@ class Synthesizer:
             exit(0)
         # FSC synthesis for POMDPs
         if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
-            return paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(quotient, method, storm_control)
+            return paynt.synthesizer.synthesizer_pomdp.SynthesizerPomdp(quotient, method, storm_control)
         # FSC synthesis for Dec-POMDPs
         if isinstance(quotient, paynt.quotient.decpomdp.DecPomdpQuotient) and fsc_synthesis:
             return paynt.synthesizer.synthesizer_decpomdp.SynthesizerDecPomdp(quotient)

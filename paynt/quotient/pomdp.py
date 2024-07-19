@@ -737,3 +737,46 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         fsc.check(observation_to_actions)
 
         return fsc
+
+
+    def compute_qvalues(self, assignment):
+        '''
+        Given an MDP obtained after applying an FSC to a POMDP, compute for each state s, (reachable) memory node n
+        the Q-value Q(s,n).
+        :param assignment hole assignment encoding an FSC; it is assumed the assignment is the one obtained
+            for the current unfolding
+        :note Q(s,n) may be None if (s,n) exists in the unfolded POMDP but is not reachable in the induced DTMC
+        '''
+        # model check
+        submdp = self.build_assignment(assignment)
+        prop = self.get_property()
+        result = submdp.model_check_property(prop)
+        state_submdp_to_value = result.result.get_values()
+
+        # map states of a sub-MDP to the states of the quotient MDP to the state-memory pairs of the POMDPxFSC
+        import collections
+        state_memory_value = collections.defaultdict(lambda: None)
+        for submdp_state,value in enumerate(state_submdp_to_value):
+            mdp_state = submdp.quotient_state_map[submdp_state]
+            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
+            memory_node = self.pomdp_manager.state_memory[mdp_state]
+            state_memory_value[ (pomdp_state,memory_node) ] = value
+
+        # make this mapping total
+        memory_size = 1 + max([memory for state,memory in state_memory_value.keys()])
+        state_memory_value_total = [[None for memory in range(memory_size)] for state in range(self.pomdp.nr_states)]
+        for state in range(self.pomdp.nr_states):
+            for memory in range(memory_size):
+                value = state_memory_value[(state,memory)]
+                if value is None:
+                    obs = self.pomdp.observations[state]
+                    if memory < self.observation_memory_size[obs]:
+                        # case 1: (s,n) exists but is not reachable in the induced DTMC
+                        value = None
+                    else:
+                        # case 2: (s,n) does not exist because n memory was not allocated for s
+                        # i.e. (s,n) has the same value as (s,0)
+                        value = state_memory_value[(state,0)]
+                state_memory_value_total[state][memory] = value
+
+        return state_memory_value_total
