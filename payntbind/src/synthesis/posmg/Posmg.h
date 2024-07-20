@@ -21,6 +21,28 @@ class Posmg : public storm::models::sparse::Smg<double> {
     Posmg(storm::storage::sparse::ModelComponents<double> &&components);
 
     /**
+     * @brief Return a vector of observatinos
+     *
+     * @return std::vector<uint32_t> const&
+     */
+    std::vector<uint32_t> const &getObservations() const;
+
+    /**
+     * @brief Return the observation of a given state
+     *
+     * @param state Specifies the state
+     * @return uint32_t Return the observation of a given state
+     */
+    uint32_t getObservation(uint64_t state) const;
+
+    /**
+     * @brief Return number of observations corresponding to player 0 states.
+     *
+     * @return uint64_t
+     */
+    uint64_t getP0ObservationCount() const;
+
+    /**
      * @brief Get the underlying MDP
      *
      * @return storm::models::sparse::Mdp<double>
@@ -35,7 +57,16 @@ class Posmg : public storm::models::sparse::Smg<double> {
     storm::models::sparse::Pomdp<double> getPomdp();
 
     private:
+    /**
+     * @brief Calculate number of player 0 observations and store it in p0ObservationCount
+     */
+    void calculateP0ObservationCount();
+
+    /** Vector of observations. Observation (value) at index i is the observation of state i */
     std::vector<uint32_t> observations;
+
+    /** Number of observations corresponding to player 0 states */
+    uint64_t p0ObservationCount;
 };
 
 /**
