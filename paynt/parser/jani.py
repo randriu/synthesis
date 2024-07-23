@@ -217,7 +217,7 @@ class JaniUnfolder:
         for templ_edge_dest in edge.template_edge.destinations:
             assignments = templ_edge_dest.assignments.clone()
             if substitution is not None:
-                assignments.substitute(substitution)
+                assignments.substitute(substitution,substitute_transcendental_numbers=False)
             templ_edge.add_destination(stormpy.storage.JaniTemplateEdgeDestination(assignments))
 
         new_edge = stormpy.storage.JaniEdge(
