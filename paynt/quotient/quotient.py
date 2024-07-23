@@ -16,6 +16,9 @@ class Quotient:
     # if True, expected visits will not be computed for hole scoring
     disable_expected_visits = False
 
+    # label associated with un-labelled choices
+    EMPTY_LABEL = "__no_label__"
+
     @staticmethod
     def make_vector_defined(vector):
         vector_noinf = [ value if value != math.inf else 0 for value in vector]
@@ -23,9 +26,9 @@ class Quotient:
         vector_valid = [ value if value != math.inf else default_value for value in vector]
         return vector_valid
 
-    
+
     def __init__(self, quotient_mdp = None, family = None, coloring = None, specification = None):
-        
+
         # colored qoutient MDP for the super-family
         self.quotient_mdp = quotient_mdp
         self.family = family
@@ -49,7 +52,7 @@ class Quotient:
     def export_result(self, dtmc):
         ''' to be overridden '''
         pass
-    
+
 
     def restrict_mdp(self, mdp, choices):
         '''
@@ -69,14 +72,14 @@ class Quotient:
         choice_map = submodel_construction.new_to_old_action_mapping.copy()
         return model,state_map,choice_map
 
- 
+
     def restrict_quotient(self, choices):
-        return self.restrict_mdp(self.quotient_mdp, choices)        
-    
+        return self.restrict_mdp(self.quotient_mdp, choices)
+
     def build_from_choice_mask(self, choices):
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         return paynt.quotient.models.SubMdp(mdp, state_map, choice_map)
-    
+
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
         # select actions compatible with the family and restrict the quotient
@@ -99,7 +102,7 @@ class Quotient:
         family.mdp = self.build_from_choice_mask(choices)
         family.mdp.design_space = family
 
-    
+
     @staticmethod
     def mdp_to_dtmc(mdp):
         tm = mdp.transition_matrix
@@ -115,7 +118,7 @@ class Quotient:
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         model = Quotient.mdp_to_dtmc(mdp)
         return paynt.quotient.models.SubMdp(model,state_map,choice_map)
-    
+
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states
 
@@ -153,7 +156,7 @@ class Quotient:
             if choice is not None and choice < num_choices:
                 choices.set(choice,True)
         return choices
-    
+
     def scheduler_selection(self, mdp, scheduler, coloring=None):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
@@ -164,8 +167,8 @@ class Quotient:
         hole_selection = coloring.collectHoleOptions(choices)
         return hole_selection
 
-    
-    
+
+
     def choice_values(self, mdp, prop, state_values):
         '''
         Get choice values after model checking MDP against a property.
@@ -227,7 +230,7 @@ class Quotient:
             self.coloring, inconsistent_assignments, expected_visits)
         return hole_variance
 
-    
+
     def scheduler_is_consistent(self, mdp, prop, result):
         '''
         Get hole assignment induced by this scheduler and fill undefined
@@ -297,7 +300,7 @@ class Quotient:
 
     def most_inconsistent_holes(self, scheduler_assignment):
         num_definitions = [len(options) for options in scheduler_assignment]
-        most_inconsistent = self.holes_with_max_score(num_definitions) 
+        most_inconsistent = self.holes_with_max_score(num_definitions)
         return most_inconsistent
 
     def discard(self, mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search):
@@ -347,7 +350,7 @@ class Quotient:
         scores = result.primary_scores
         if scores is None:
             scores = {hole:0 for hole in range(mdp.design_space.num_holes) if mdp.design_space.hole_num_options(hole) > 1}
-        
+
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
         if len(hole_assignments[splitter]) > 1:
@@ -359,10 +362,10 @@ class Quotient:
         # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
 
         new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
-        
+
         # construct corresponding design subspaces
         design_subspaces = []
-        
+
         family.splitter = splitter
         parent_info = family.collect_parent_info(self.specification)
         for suboption in suboptions:
@@ -386,9 +389,9 @@ class Quotient:
         else:
             return None, None
 
-    
+
     def sample(self):
-        
+
         # parameters
         path_length = 1000
         num_paths = 100
@@ -401,12 +404,12 @@ class Quotient:
         opt = self.specification.optimality
         assert opt.reward
         reward_name = opt.formula.reward_name
-        
+
         # build the mdp
         self.build(self.design_space)
         mdp = self.design_space.mdp
         state_row_group = mdp.prepare_sampling()
-        
+
         paths = []
         for _ in range(num_paths):
             path = mdp.random_path(path_length,state_row_group)
@@ -414,13 +417,13 @@ class Quotient:
             paths.append( {"path":path,"reward":path_reward} )
 
         path_json = [json.dumps(path) for path in paths]
-        
+
         output_json = "[\n" + ",\n".join(path_json) + "\n]\n"
 
         # logger.debug("attempting to reconstruct samples from JSON ...")
         # json.loads(output_json)
         # logger.debug("OK")
-        
+
         logger.info("writing generated samples to {} ...".format(output_path))
         with open(output_path, 'w') as f:
             print(output_json, end="", file=f)
@@ -447,7 +450,7 @@ class Quotient:
 
 
     def check_specification_for_dtmc(self, dtmc, constraint_indices=None, short_evaluation=False):
-        
+
         # check constraints
         if constraint_indices is None:
             constraint_indices = range(len(self.specification.constraints))
@@ -526,7 +529,7 @@ class Quotient:
                 result.primary_selection,consistent = self.scheduler_is_consistent(mdp, opt, result.primary.result)
                 if not consistent:
                     result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
-                        self.scheduler_get_quantitative_values(mdp, opt, result.primary.result, result.primary_selection)                        
+                        self.scheduler_get_quantitative_values(mdp, opt, result.primary.result, result.primary_selection)
                 if consistent:
                     # LB is tight and LB < OPT
                     result.improving_assignment = mdp.design_space.assume_options_copy(result.primary_selection)
@@ -541,7 +544,7 @@ class Quotient:
 
 
 class DtmcFamilyQuotient(Quotient):
-    
+
     def __init__(self, quotient_mdp, family, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
         self.design_space = paynt.family.family.DesignSpace(family)

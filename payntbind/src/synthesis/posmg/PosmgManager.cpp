@@ -7,9 +7,11 @@ namespace synthesis {
     {
         this->calculateObservationMap();
         this->calculateObservationSuccesors();
+        this->calculateObservationActions();
+        this->calculatePrototypeRowIndex();
 
 
-        this->optPlayerObservationMemorySize.resize(posmg.getP0ObservationCount(), 1);
+        //this->optPlayerObservationMemorySize.resize(posmg.getP0ObservationCount(), 1);
         this->prototypeDuplicates.resize(posmg.getNumberOfStates());
     }
 
@@ -21,6 +23,25 @@ namespace synthesis {
     void PosmgManager::setObservationMemorySize(uint64_t observation, uint64_t memorySize)
     {
         this->optPlayerObservationMemorySize[observation] = memorySize;
+    }
+
+    std::vector<uint64_t> PosmgManager::getStatePlayerIndications()
+    {
+        std::vector<uint64_t> statePlayerIndications(this->stateCount);
+        for (uint64_t state = 0; state < this->stateCount; state++)
+        {
+            auto prototype = this->statePrototype[state];
+            if (isOptPlayerState(prototype))
+            {
+                statePlayerIndications[state] = this->optimizingPlayer;
+            }
+            else
+            {
+                statePlayerIndications[state] = this->otherPlayer;
+            }
+        }
+
+        return statePlayerIndications;
     }
 
 
@@ -81,6 +102,23 @@ namespace synthesis {
         }
     }
 
+    void PosmgManager::calculatePrototypeRowIndex()
+    {
+        this->prototypeRowIndex.resize(this->posmg.getTransitionMatrix().getRowCount());
+
+        auto prototypeCount = this->posmg.getNumberOfStates();
+        auto rowGroupIndices = this->posmg.getTransitionMatrix().getRowGroupIndices();
+        for (uint64_t state = 0; state < prototypeCount; state++)
+        {
+            uint64_t index = 0;
+            for (uint64_t row = rowGroupIndices[state]; row < rowGroupIndices[state+1]; row++)
+            {
+                this->prototypeRowIndex[row] = index;
+                index++;
+            }
+        }
+    }
+
 
 
     void PosmgManager::buildStateSpace()
@@ -95,10 +133,11 @@ namespace synthesis {
             if (isOptPlayerState(prototype)) {
                 auto observation = this->posmg.getObservation(prototype);
                 // retreive index of observation in optPlayerObservationMap
-                auto optPlayerObservation = std::find(this->optPlayerObservationMap.begin(),
-                                                      this->optPlayerObservationMap.end(),
-                                                      observation) - this->optPlayerObservationMap.begin();
-                auto memory = this->optPlayerObservationMemorySize[optPlayerObservation];
+                // auto optPlayerObservation = std::find(this->optPlayerObservationMap.begin(),
+                //                                       this->optPlayerObservationMap.end(),
+                //                                       observation) - this->optPlayerObservationMap.begin();
+                // auto memory = this->optPlayerObservationMemorySize[optPlayerObservation];
+                auto memory = this->optPlayerObservationMemorySize.at(observation);
                 this->stateDuplicateCount[prototype] = memory;
 
                 // DFS to compute the needed memory for states of non-optimizing player
@@ -173,7 +212,7 @@ namespace synthesis {
             {
                 if (isOptPlayerState(prototype))
                 {
-                    auto maxDuplicateCount = this->maxSuccesorDuplicateCount[observation];
+                    auto maxDuplicateCount = this->maxSuccesorDuplicateCount.at(observation);
                     for (uint64_t dstMem = 0; dstMem < maxDuplicateCount; dstMem++)
                     {
                         this->rowPrototype.push_back(prototypeRow);
@@ -255,26 +294,87 @@ namespace synthesis {
 
     void PosmgManager::resetDesignSpace()
     {
-        // todo
+        this->holeCount = 0;
+        this->actionHoles.clear();
+        this->memoryHoles.clear();
+        this->holeOptionCount.clear();
+
+        this->rowActionHole.clear();
+        this->rowActionHole.resize(this->rowCount);
+        this->rowActionOption.clear();
+        this->rowActionOption.resize(this->rowCount);
+
+        this->rowMemoryHole.clear();
+        this->rowMemoryHole.resize(this->rowCount);
+        this->rowMemoryOption.clear();
+        this->rowMemoryOption.resize(this->rowCount);
     }
 
     void PosmgManager::buildDesignSpaceSpurious()
     {
         // todo
-        // this->resetDesignSpace();
+        this->resetDesignSpace();
 
-        // for (auto observation : this->optPlayerObservationMap)
-        // {
-        //     if (this->optPlayerObservationActions[observation] > 1)
-        //     {
-        //         for (uint64_t memory = 0; memory < this->optPlayerObservationMemorySize; memory++)
-        //         {
-        //             /* code */
-        //         }
 
-        //     }
+        // create action and memory holes for each optimizing player observation
+        // store number of available options at each hole
+        for (auto observation : this->optPlayerObservationMap)
+        {
+            if (this->optPlayerObservationActions.at(observation) > 1)
+            {
+                for (uint64_t memory = 0; memory < this->optPlayerObservationMemorySize.at(observation); memory++)
+                {
+                    this->actionHoles[observation].push_back(this->holeCount);
+                    this->holeOptionCount.push_back(this->optPlayerObservationActions.at(observation));
+                    this->holeCount++;
+                }
+            }
+            if (this->maxSuccesorDuplicateCount.at(observation) > 1)
+            {
+                for (uint64_t memory = 0; memory < this->optPlayerObservationMemorySize.at(observation); memory++)
+                {
+                    this->memoryHoles[observation].push_back(this->holeCount);
+                    this->holeOptionCount.push_back(this->optPlayerObservationActions.at(observation));
+                    this->holeCount++;
+                }
+            }
+        }
 
-        // }
+        for (uint64_t state = 0; state < this->stateCount; state++)
+        {
+            auto prototype = this->statePrototype[state];
+            auto observation = this->posmg.getObservation(prototype);
+            auto memory = this->stateMemory[state];
+            for (uint64_t row = this->rowGroups[state]; row < this->rowGroups[state+1]; row++)
+            {
+                if (isOptPlayerState(prototype) && this->optPlayerObservationActions.at(observation) > 1)
+                {
+                    auto actionHole = this->actionHoles.at(observation).at(memory);
+                    this->rowActionHole[row] = actionHole;
+
+                    auto prototypeRow = this->rowPrototype[row];
+                    auto rowIndex = this->prototypeRowIndex[prototypeRow];
+                    this->rowActionOption[row] = rowIndex;
+                }
+                else // other player or only one action
+                {
+                    this->rowActionHole[row] = this->holeCount;
+                }
+                if (isOptPlayerState(prototype) && this->maxSuccesorDuplicateCount.at(observation) > 1)
+                {
+                    auto memoryHole = this->memoryHoles.at(observation).at(memory);
+                    rowMemoryHole[row] = memoryHole;
+
+                    auto rowMem = rowMemory[row];
+                    this->rowMemoryOption[row] = rowMem;
+                }
+                else // other player or successor has only one memory
+                {
+                    this->rowMemoryHole[row] = this->holeCount;
+                }
+            }
+        }
+
     }
 
     std::shared_ptr<storm::models::sparse::Mdp<double>> PosmgManager::constructMdp()

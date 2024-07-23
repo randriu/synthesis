@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Posmg.h"
+#include <set>
 
 namespace synthesis {
 
@@ -18,6 +19,61 @@ class PosmgManager {
 
         void setObservationMemorySize(uint64_t observation, uint64_t memorySize);
 
+        /**
+         * @brief Construct and return the state player indications of quotient mdp
+         *
+         * @return std::vector<uint64_t>
+         */
+        std::vector<uint64_t> getStatePlayerIndications();
+
+
+        // For each state contains its prototype state (reverse of prototypeDuplicates)
+        std::vector<uint64_t> statePrototype;
+
+        // For each state contains its memory index
+        std::vector<uint64_t> stateMemory;
+
+        // For each optimizing player observation contains the number of allocated memory states (initially 1)
+        //std::vector<uint64_t> optPlayerObservationMemorySize;
+        std::unordered_map<uint32_t, uint64_t> optPlayerObservationMemorySize;
+
+        // For each optimizing player observation contains set of succesor states
+        std::unordered_map<uint32_t, std::set<uint64_t>> succesors;
+
+        // For each optimizing player observation contains maximum number of duplicates from all succesors
+        std::unordered_map<uint32_t, uint64_t> maxSuccesorDuplicateCount;
+
+        // For each optimizing player observation contains number of available actions
+        std::unordered_map<uint32_t, uint64_t> optPlayerObservationActions;
+
+        // Total number of holes
+        uint64_t holeCount;
+
+        // For each optimizing player observation a vector of action holes
+        std::unordered_map<uint32_t, std::vector<uint64_t>> actionHoles;
+
+        // For each optimizing player observation a vector of memory holes
+        std::unordered_map<uint32_t, std::vector<uint64_t>> memoryHoles;
+
+        // For each hole, its size
+        std::vector<uint64_t> holeOptionCount;
+
+        // For each row contains the corresponding action hole
+        std::vector<uint64_t> rowActionHole;
+        //std::unordered_map<uint64_t, uint64_t> rowActionHole;
+
+        // For eac row contains the corresponding option of action hole
+        std::vector<uint64_t> rowActionOption;
+        //std::unordered_map<uint64_t, uint64_t> rowActionOption;
+
+        // For each row contains the correspodning memory hole
+        std::vector<uint64_t> rowMemoryHole;
+        //std::unordered_map<uint64_t, uint64_t> rowMemoryHole;
+
+        // For each row contains the corresponding option of memory hole
+        std::vector<uint64_t> rowMemoryOption;
+        //std::unordered_map<uint64_t, uint64_t> rowMemoryOption;
+
     private:
 
         /**
@@ -34,6 +90,11 @@ class PosmgManager {
          * @brief For each optimizing player observation calculate number of available actions.
          */
         void calculateObservationActions();
+
+        /**
+         * @brief For each prototype row store its index within its row group
+         */
+        void calculatePrototypeRowIndex();
 
 
         /**
@@ -65,7 +126,7 @@ class PosmgManager {
 
 
         /**
-         * @brief Determine if state belonsgs to optimizing player (specified by optimizingPlayer property).
+         * @brief Determine if prototype state belongs to optimizing player (specified by optimizingPlayer property).
          *
          * @param state State to determine
          * @return true state belongs to optimizing player
@@ -88,6 +149,7 @@ class PosmgManager {
 
         /** For now, optimizing player is hard coded to 0 */
         uint64_t optimizingPlayer = 0;
+        uint64_t otherPlayer = 1;
 
         /** Mapping from optimizing player observations (index) to global observation (value)
          * @details Because we solve games, where one player (optimizing player) has partial
@@ -96,32 +158,17 @@ class PosmgManager {
          */
         std::vector<u_int64_t> optPlayerObservationMap;
 
+        // For each row in original posmg contains its index withing its row group
+        std::vector<uint64_t> prototypeRowIndex;
+
         /** Number of states in unfolded smg */
         uint64_t stateCount;
-
-        // For each optimizing player observation contains the number of allocated memory states (initially 1)
-        std::vector<uint64_t> optPlayerObservationMemorySize;
 
         // For each prototype state contains a list of its duplicates (including itself)
         std::vector<std::vector<uint64_t>> prototypeDuplicates;
 
         // For each state contains number of his duplicates (including itself)
         std::vector<uint64_t> stateDuplicateCount;
-
-        // For each optimizing player observation contains maximum number of duplicates from all succesors
-        std::map<uint64_t, uint64_t> maxSuccesorDuplicateCount;
-
-        // For each state contains its prototype state (reverse of prototypeDuplicates)
-        std::vector<uint64_t> statePrototype;
-
-        // For each state contains its memory index
-        std::vector<uint64_t> stateMemory;
-
-        // For each optimizing player observation contains set of succesor states
-        std::map<uint64_t, std::set<uint64_t>> succesors;
-
-        // For each optimizing player observation contains number of available actions
-        std::unordered_map<uint64_t, uint64_t> optPlayerObservationActions;
 
         // Number of rows in unfolded MDP
         uint64_t rowCount;

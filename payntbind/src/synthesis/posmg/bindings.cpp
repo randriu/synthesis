@@ -29,5 +29,22 @@ void bindings_posmg(py::module &m) {
         .def("construct_mdp", &synthesis::PosmgManager::constructMdp)
         .def("get_observation_mapping", &synthesis::PosmgManager::getObservationMapping)
         .def("set_observation_memory_size", &synthesis::PosmgManager::setObservationMemorySize,
-            py::arg("observation"), py::arg("memory_size"));
+            py::arg("observation"), py::arg("memory_size"))
+        .def("get_state_player_indications", &synthesis::PosmgManager::getStatePlayerIndications)
+        .def_property_readonly("state_prototype", [](synthesis::PosmgManager& manager) {return manager.statePrototype;})
+        .def_property_readonly("state_memory", [](synthesis::PosmgManager& manager) {return manager.stateMemory;})
+        .def_property_readonly("observation_memory_size", [](synthesis::PosmgManager& manager) {return manager.optPlayerObservationMemorySize;})
+        .def_property_readonly("observation_actions", [](synthesis::PosmgManager& manager) {return manager.optPlayerObservationActions;})
+        .def_property_readonly("observation_successors", [](synthesis::PosmgManager& manager) {return manager.succesors;})
+        .def_property_readonly("max_successor_memory_size", [](synthesis::PosmgManager& manager) {return manager.maxSuccesorDuplicateCount;})
+        .def_property_readonly("num_holes", [](synthesis::PosmgManager& manager) {return manager.holeCount;})
+        .def_property_readonly("action_holes", [](synthesis::PosmgManager& manager) {return manager.actionHoles;})
+        .def_property_readonly("memory_holes", [](synthesis::PosmgManager& manager) {return manager.memoryHoles;})
+        .def_property_readonly("hole_options", [](synthesis::PosmgManager& manager) {return manager.holeOptionCount;})
+        .def_property_readonly("row_action_hole", [](synthesis::PosmgManager& manager) {return manager.rowActionHole;})
+        .def_property_readonly("row_action_option", [](synthesis::PosmgManager& manager) {return manager.rowActionOption;})
+        .def_property_readonly("row_memory_hole", [](synthesis::PosmgManager& manager) {return manager.rowMemoryHole;})
+        .def_property_readonly("row_memory_option", [](synthesis::PosmgManager& manager) {return manager.rowMemoryOption;})
+        ;
+
 }
