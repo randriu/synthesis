@@ -87,12 +87,8 @@ class Sketch:
             try:
                 logger.info(f"assuming sketch in DRN format...")
                 explicit_quotient = DrnParser.read_drn(sketch_path)
-                if isinstance(explicit_quotient, payntbind.synthesis.Posmg):
-                    specification = DrnParser.parse_posmg_specification(properties_path)
-                    filetype = "drn-game"
-                else:
-                    specification = PrismParser.parse_specification(properties_path, relative_error)
-                    filetype = "drn-pomdp"
+                specification = PrismParser.parse_specification(properties_path, relative_error)
+                filetype = "drn"
             except:
                 pass
         if filetype is None:
@@ -119,17 +115,18 @@ class Sketch:
                 pass
 
         assert filetype is not None, "unknow format of input file"
+
         logger.info("sketch parsing OK")
 
-        if  filetype == "drn-game":
-            paynt.quotient.models.Smg.initialize(specification)
-        else:
-            paynt.quotient.models.Mdp.initialize(specification)
-            specification.check()
-            if specification.contains_until_properties() and filetype != "prism":
-                logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
-            specification.transform_until_to_eventually()
-            logger.info(f"found the following specification {specification}")
+        paynt.quotient.models.Mdp.initialize(specification)
+
+        specification.check()
+
+        if specification.contains_until_properties() and filetype != "prism":
+            logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
+        specification.transform_until_to_eventually()
+
+        logger.info(f"found the following specification {specification}")
 
         paynt.verification.property.Property.initialize()
 

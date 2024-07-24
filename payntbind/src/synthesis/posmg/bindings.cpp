@@ -25,7 +25,7 @@ void bindings_posmg(py::module &m) {
     m.def("create_posmg", &synthesis::createPosmg, py::arg("pomdp"), py::arg("state_player_indications"));
 
     py::class_<synthesis::PosmgManager, std::shared_ptr<synthesis::PosmgManager>>(m, "PosmgManager")
-        .def(py::init<synthesis::Posmg const&>(), py::arg("posmg"))
+        .def(py::init<synthesis::Posmg const&, uint64_t>(), py::arg("posmg"), py::arg("optimizing_player"))
         .def("construct_mdp", &synthesis::PosmgManager::constructMdp)
         .def("get_observation_mapping", &synthesis::PosmgManager::getObservationMapping)
         .def("set_observation_memory_size", &synthesis::PosmgManager::setObservationMemorySize,

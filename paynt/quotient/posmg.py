@@ -15,11 +15,12 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
     # implicit size for POSMG unfolding
     initial_memory_size = 1
 
-    def __init__(self, posmg, specification):
-        #super().__init__(quotient_mdp = quotient_mdp, specification = specification)
+    # the index of optimizing player
+    optimizing_player = 0
 
-        # get the optimizing player (For now we are considering player 0 to be the optimizing one)
-        self.optimizing_player = 0
+    def __init__(self, posmg, specification):
+        super().__init__(specification = specification)
+
 
         # defualt POSMG model
         self.posmg = posmg
@@ -56,7 +57,7 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
 
 
         # initialize posmg manager
-        self.posmg_manager = payntbind.synthesis.PosmgManager(self.posmg)
+        self.posmg_manager = payntbind.synthesis.PosmgManager(self.posmg, self.optimizing_player)
 
         # optimizing player observations
         self.opt_player_observations = self.posmg_manager.get_observation_mapping()
@@ -100,10 +101,6 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
 
         #self.set_imperfect_memory_size(PosmgQuotient.initial_memory_size)
         self.set_imperfect_memory_size(2)
-
-
-        # mdp = smg.get_mdp()
-        # pomdp = smg.get_pomdp()
 
         # result = payntbind.synthesis.smg_model_checking(smg, specification[0].raw_formula,
                                                         # only_initial_states=False, set_produce_schedulers=True,
@@ -218,8 +215,3 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
                 self.hole_option_to_actions[hole][option].append(choice)
 
         self.design_space = paynt.family.family.DesignSpace(family)
-
-        #ah = self.posmg_manager.action_holes
-        #print(type(ah))
-
-        # exit()

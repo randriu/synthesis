@@ -2,8 +2,8 @@
 
 namespace synthesis {
 
-    PosmgManager::PosmgManager(Posmg const& posmg)
-        : posmg(posmg)
+    PosmgManager::PosmgManager(Posmg const& posmg, uint64_t optimizingPlayer)
+        : posmg(posmg), optimizingPlayer(optimizingPlayer)
     {
         this->calculateObservationMap();
         this->calculateObservationSuccesors();
@@ -31,14 +31,7 @@ namespace synthesis {
         for (uint64_t state = 0; state < this->stateCount; state++)
         {
             auto prototype = this->statePrototype[state];
-            if (isOptPlayerState(prototype))
-            {
-                statePlayerIndications[state] = this->optimizingPlayer;
-            }
-            else
-            {
-                statePlayerIndications[state] = this->otherPlayer;
-            }
+            statePlayerIndications[state] = this->posmg.getStatePlayerIndications()[prototype];
         }
 
         return statePlayerIndications;

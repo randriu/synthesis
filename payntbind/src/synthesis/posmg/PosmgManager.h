@@ -8,7 +8,7 @@ namespace synthesis {
 class PosmgManager {
     public:
 
-        PosmgManager(Posmg const& posmg);
+        PosmgManager(Posmg const& posmg, uint64_t optimizingPlayer);
 
         /**
          * @brief unfold memory
@@ -147,9 +147,8 @@ class PosmgManager {
         /** original POSMG */
         Posmg const& posmg;
 
-        /** For now, optimizing player is hard coded to 0 */
-        uint64_t optimizingPlayer = 0;
-        uint64_t otherPlayer = 1;
+        /** index of optimizing player */
+        uint64_t optimizingPlayer;
 
         /** Mapping from optimizing player observations (index) to global observation (value)
          * @details Because we solve games, where one player (optimizing player) has partial
