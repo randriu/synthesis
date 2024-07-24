@@ -4,7 +4,7 @@ import payntbind
 import paynt.family.family
 import paynt.verification.property
 import paynt.parser.jani
-import paynt.quotient.models
+import paynt.models.model_builder
 
 import os
 import re
@@ -53,13 +53,11 @@ class PrismParser:
             specification = jani_unfolder.specification
             quotient_mdp = jani_unfolder.quotient_mdp
             coloring = payntbind.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices, jani_unfolder.choice_to_hole_options)
-            paynt.quotient.models.Mdp.initialize(specification)
             if prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 obs_evaluator = payntbind.synthesis.ObservationEvaluator(prism, quotient_mdp)
             quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJani(quotient_mdp)
         else:
-            paynt.quotient.models.Mdp.initialize(specification)
-            quotient_mdp = paynt.quotient.models.Mdp.from_prism(prism)
+            quotient_mdp = paynt.models.model_builder.ModelBuilder.from_prism(prism, specification)
 
         return prism, quotient_mdp, specification, family, coloring, jani_unfolder, obs_evaluator
 

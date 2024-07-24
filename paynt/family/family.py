@@ -44,9 +44,7 @@ class Family:
         return self.family.holeNumOptionsTotal(hole)
 
     def hole_set_options(self, hole, options):
-        assert len(options)>0
         self.family.holeSetOptions(hole,options)
-        assert self.family.holeNumOptions(hole) == len(options)
 
     @property
     def size(self):
@@ -63,7 +61,7 @@ class Family:
 
     def hole_options_to_string(self, hole, options):
         name = self.hole_name(hole)
-        labels = [self.hole_to_option_labels[hole][option] for option in options]
+        labels = [str(self.hole_to_option_labels[hole][option]) for option in options]
         if len(labels) == 1:
             return f"{name}={labels[0]}"
         else:
@@ -159,6 +157,7 @@ class DesignSpace(Family):
         super().__init__(family)
 
         self.mdp = None
+        self.selected_choices = None
         
         # SMT encoding
         self.encoding = None
@@ -179,11 +178,11 @@ class DesignSpace(Family):
     
     def collect_parent_info(self, specification):
         pi = ParentInfo()
+        pi.selected_choices = self.selected_choices
         pi.refinement_depth = self.refinement_depth
         cr = self.analysis_result.constraints_result
         pi.constraint_indices = cr.undecided_constraints if cr is not None else []
         pi.splitter = self.splitter
-        pi.mdp = self.mdp
         return pi
 
     def encode(self, smt_solver):

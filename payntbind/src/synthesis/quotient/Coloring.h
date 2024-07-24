@@ -25,8 +25,6 @@ public:
     std::vector<std::vector<std::pair<uint64_t,uint64_t>>> const& getChoiceToAssignment() const;
     /** Get a mapping from states to holes involved in its choices. */
     std::vector<BitVector> const& getStateToHoles() const;
-    /** Get mask of uncolored choices. */
-    BitVector const& getUncoloredChoices() const;
     
     /** Get a mask of choices compatible with the family. */
     BitVector selectCompatibleChoices(Family const& subfamily) const;
@@ -47,8 +45,6 @@ protected:
     std::vector<BitVector> choice_to_holes;
     /** For each state, identification of holes associated with its choices. */
     std::vector<BitVector> state_to_holes;
-    /** Whether all states have at most one hole associated with its choices. */
-    bool is_simple;
 
     /** Choices not labeled by any hole. */
     BitVector uncolored_choices;

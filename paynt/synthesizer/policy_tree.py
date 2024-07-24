@@ -2,7 +2,6 @@ import stormpy
 import payntbind
 
 import paynt.family.family
-import paynt.quotient.models
 import paynt.synthesizer.synthesizer
 
 import paynt.quotient.quotient

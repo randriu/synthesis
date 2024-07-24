@@ -1,9 +1,6 @@
 #include "Coloring.h"
 
-#include <iostream>
-
 namespace synthesis {
-
 
 Coloring::Coloring(
     Family const& family, std::vector<uint64_t> const& row_groups,
@@ -34,14 +31,10 @@ Coloring::Coloring(
 
     auto num_states = row_groups.size()-1;
     state_to_holes.resize(num_states);
-    is_simple = true;
     for(uint64_t state = 0; state<num_states; ++state) {
         state_to_holes[state] = BitVector(num_holes,false);
         for(uint64_t choice = row_groups[state]; choice<row_groups[state+1]; ++choice) {
             state_to_holes[state] = state_to_holes[state] | choice_to_holes[choice]; 
-        }
-        if(state_to_holes[state].getNumberOfSetBits() > 1) {
-            is_simple = false;
         }
     }
 }
@@ -56,10 +49,6 @@ std::vector<std::vector<std::pair<uint64_t,uint64_t>>> const& Coloring::getChoic
 
 std::vector<BitVector> const& Coloring::getStateToHoles() const {
     return state_to_holes;
-}
-
-BitVector const& Coloring::getUncoloredChoices() const {
-    return uncolored_choices;
 }
 
 BitVector Coloring::selectCompatibleChoices(Family const& subfamily) const {

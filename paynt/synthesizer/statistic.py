@@ -2,6 +2,7 @@ import stormpy.storage
 
 import paynt.utils.profiler
 import paynt.synthesizer.synthesizer
+import paynt.models.models
 
 import math
 
@@ -42,6 +43,8 @@ class Statistic:
         self.acc_size_mdp = 0
         self.avg_size_mdp = 0
 
+        self.iterations_smt = None
+
         self.iterations_game = None
         self.acc_size_game = 0
         self.avg_size_game = 0
@@ -70,7 +73,7 @@ class Statistic:
     
     def iteration(self, model):
         ''' Identify the type of the model and count corresponding iteration. '''
-        if isinstance(model, paynt.quotient.models.Mdp):
+        if isinstance(model, paynt.models.models.Mdp):
             model = model.model
         if type(model) == stormpy.storage.SparseDtmc:
             self.iteration_dtmc(model.nr_states)
@@ -85,6 +88,11 @@ class Statistic:
         self.iterations_dtmc += 1
         self.acc_size_dtmc += size_dtmc
         self.print_status()
+
+    def iteration_smt(self):
+        if self.iterations_smt is None:
+            self.iterations_smt = 0
+        self.iterations_smt += 1
 
     def iteration_mdp(self, size_mdp):
         if self.iterations_mdp is None:
@@ -188,6 +196,10 @@ class Statistic:
             type_stats = f"MDP stats: avg MDP size: {avg_size}, iterations: {self.iterations_mdp}"
             iterations += f"{type_stats}\n"
 
+        if self.iterations_smt is not None:
+            type_stats = f"SMT stats: iterations: {self.iterations_smt}"
+            iterations += f"{type_stats}\n"
+
         if self.iterations_dtmc is not None:
             avg_size = round(safe_division(self.acc_size_dtmc, self.iterations_dtmc))
             type_stats = f"DTMC stats: avg DTMC size: {avg_size}, iterations: {self.iterations_dtmc}"
@@ -240,6 +252,7 @@ class Statistic:
     
     def print(self):    
         print(self.get_summary(),end="")
+        print("payntbind::selectCompatibleChoices = ", self.quotient.coloring.selectCompatibleChoicesTime())
         # self.print_mdp_family_table_entries()
 
 

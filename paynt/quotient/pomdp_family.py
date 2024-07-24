@@ -1,7 +1,7 @@
 import stormpy
 import payntbind
 
-import paynt.quotient.models
+import paynt.models.models
 import paynt.quotient.quotient
 import paynt.quotient.mdp_family
 import paynt.verification.property
@@ -126,7 +126,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return dtmc_sketch
 
 
-    def compute_qvalues_for_product_submdp(self, product_submdp : paynt.quotient.models.SubMdp):
+    def compute_qvalues_for_product_submdp(self, product_submdp : paynt.models.models.SubMdp):
         '''
         Given an MDP obtained after applying FSC to a family of POMDPs, compute for each state s, (reachable)
         memory node n, and action a, the Q-value Q((s,n),a).

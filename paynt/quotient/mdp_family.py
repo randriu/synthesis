@@ -3,7 +3,7 @@ import payntbind
 
 import paynt.family.family
 import paynt.quotient.quotient
-import paynt.quotient.models
+import paynt.models.models
 
 import collections
 import json
@@ -13,29 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
-
-    @staticmethod
-    def extract_choice_labels(mdp):
-        '''
-        :param mdp having a canonic choice labeling (exactly 1 label for each choice)
-        :returns a list of action labels
-        :returns for each choice, the corresponding action
-        '''
-        assert mdp.has_choice_labeling, "MDP does not have a choice labeling"
-        action_labels = list(mdp.choice_labeling.get_labels())
-        # sorting because get_labels() is not deterministic when passing through pybind
-        action_labels = sorted(action_labels)
-        label_to_action = {label:index for index,label in enumerate(action_labels)}
-        
-        logger.debug("associating choices with action labels...")
-        labeling = mdp.choice_labeling
-        choice_to_action = [None] * mdp.nr_choices
-        for choice in range(mdp.nr_choices):
-            label = list(labeling.get_labels_of_choice(choice))[0]
-            action = label_to_action[label]
-            choice_to_action[choice] = action
-
-        return action_labels,choice_to_action
 
     @staticmethod
     def map_state_action_to_choices(mdp, num_actions, choice_to_action):
@@ -76,7 +53,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
 
-        self.action_labels,self.choice_to_action = MdpFamilyQuotient.extract_choice_labels(self.quotient_mdp)
+        self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
         self.num_actions = len(self.action_labels)
         self.state_action_choices = MdpFamilyQuotient.map_state_action_to_choices(
             self.quotient_mdp, self.num_actions, self.choice_to_action)
@@ -219,4 +196,4 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
         model,state_map,choice_map = self.restrict_quotient(choices)
-        return paynt.quotient.models.SubMdp(model,state_map,choice_map)
+        return paynt.models.models.SubMdp(model,state_map,choice_map)

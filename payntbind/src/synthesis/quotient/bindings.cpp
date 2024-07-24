@@ -3,11 +3,13 @@
 #include "JaniChoices.h"
 #include "Family.h"
 #include "Coloring.h"
+#include "ColoringSmt.h"
 
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/BitVector.h>
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/sparse/JaniChoiceOrigins.h>
+#include <storm/exceptions/InvalidModelException.h>
 
 #include <storm/storage/Scheduler.h>
 
@@ -59,7 +61,6 @@ std::pair<storm::storage::BitVector,std::vector<std::vector<std::pair<uint64_t,u
     return std::make_pair(choice_is_valid,choice_to_hole_assignment);
 }
 
-
 template<typename ValueType>
 std::vector<std::vector<uint64_t>> computeChoiceDestinations(storm::models::sparse::Mdp<ValueType> const& mdp) {
     uint64_t num_choices = mdp.getNumberOfChoices();
@@ -90,7 +91,8 @@ std::vector<uint64_t> schedulerToStateToGlobalChoice(
 
 std::map<uint64_t,double> computeInconsistentHoleVariance(
     Family const& family,
-    std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice, std::vector<double> const& choice_to_value,
+    std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice,
+    std::vector<double> const& choice_to_value,
     Coloring const& coloring, std::map<uint64_t,std::vector<uint64_t>> const& hole_to_inconsistent_options,
     std::vector<double> const& state_to_expected_visits
 ) {
@@ -272,8 +274,8 @@ void bindings_coloring(py::module& m) {
 
 
     py::class_<synthesis::Family>(m, "Family")
-        .def(py::init<>(), "Constructor.")
-        .def(py::init<synthesis::Family const&>(), "Constructor.", py::arg("other"))
+        .def(py::init<>())
+        .def(py::init<synthesis::Family const&>())
         .def("numHoles", &synthesis::Family::numHoles)
         .def("addHole", &synthesis::Family::addHole)
         
@@ -287,12 +289,28 @@ void bindings_coloring(py::module& m) {
         ;
 
     py::class_<synthesis::Coloring>(m, "Coloring")
-        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint64_t,uint64_t>>> >(), "Constructor.")
+        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint64_t,uint64_t>>> >())
         .def("getChoiceToAssignment", &synthesis::Coloring::getChoiceToAssignment)
         .def("getStateToHoles", &synthesis::Coloring::getStateToHoles)
-        .def("getUncoloredChoices", &synthesis::Coloring::getUncoloredChoices)
         .def("selectCompatibleChoices", &synthesis::Coloring::selectCompatibleChoices)
         .def("collectHoleOptions", &synthesis::Coloring::collectHoleOptions)
+        ;
+
+    py::class_<synthesis::ColoringSmt>(m, "ColoringSmt")
+        .def(py::init<
+            std::vector<uint64_t> const&,
+            std::vector<uint64_t> const&,
+            storm::storage::sparse::StateValuations const&,
+            std::vector<storm::expressions::Variable> const&,
+            std::vector<uint64_t>,
+            std::vector<std::pair<std::vector<uint64_t>,std::vector<uint64_t>>>,
+            synthesis::Family const&,
+            std::vector<std::vector<int64_t>>
+        >())
+        .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmt::selectCompatibleChoices))
+        .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmt::selectCompatibleChoices))
+        .def("selectCompatibleChoicesTime", &synthesis::ColoringSmt::selectCompatibleChoicesTime)
+        .def("areChoicesConsistent", &synthesis::ColoringSmt::areChoicesConsistent)
         ;
 
 }

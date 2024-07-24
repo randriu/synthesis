@@ -68,7 +68,17 @@ module maze
 	
 endmodule
 
+module test
+	var : bool init false;
+	[up]    true -> (var'=true);
+	[right] true -> (var'=false);
+	[down]  true -> (var'=false);
+	[left]  true -> (var'=false);
+endmodule
+
 // rewards
+
+label "what" = mod(x,2)=0;
 
 rewards "steps"
 	clk=1: 1;

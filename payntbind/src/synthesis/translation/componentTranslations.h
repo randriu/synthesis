@@ -11,6 +11,16 @@
 
 namespace synthesis {
 
+    /**
+     * Given a (nondeterministic) model with canonic choice labeling (exactly 1 label per choice), return a list of action
+     * labels and a choice-to-action mapping.
+     */
+    template<typename ValueType>
+    std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels(
+        storm::models::sparse::Model<ValueType> const& model
+    );
+
+
     template<typename ValueType>
     storm::models::sparse::StateLabeling translateStateLabeling(
         storm::models::sparse::Model<ValueType> const& model,
@@ -34,6 +44,12 @@ namespace synthesis {
     template<typename ValueType>
     storm::models::sparse::StandardRewardModel<ValueType> translateRewardModel(
         storm::models::sparse::StandardRewardModel<ValueType> const& reward_model,
+        std::vector<uint64_t> const& translated_to_original_choice,
+        storm::storage::BitVector const& translated_choice_mask
+    );
+    template<typename ValueType>
+    std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<ValueType>> translateRewardModels(
+        storm::models::sparse::Model<ValueType> const& model,
         std::vector<uint64_t> const& translated_to_original_choice,
         storm::storage::BitVector const& translated_choice_mask
     );

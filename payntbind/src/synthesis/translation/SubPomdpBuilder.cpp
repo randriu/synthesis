@@ -83,12 +83,8 @@ namespace synthesis {
         }
         components.transitionMatrix =  builder.build();
 
-        
         components.choiceLabeling = synthesis::translateChoiceLabeling(pomdp,choice_translator.translationToItem(),translated_choice_mask);
-        for (auto const& reward_model : pomdp.getRewardModels()) {
-            auto new_reward_model = synthesis::translateRewardModel(reward_model.second,choice_translator.translationToItem(),translated_choice_mask);
-            components.rewardModels.emplace(reward_model.first, new_reward_model);
-        }
+        components.rewardModels = synthesis::translateRewardModels(pomdp,choice_translator.translationToItem(),translated_choice_mask);
 
         // build state observations
         auto observability_classes = synthesis::translateObservabilityClasses(
