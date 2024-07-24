@@ -12,7 +12,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         return "AR"
     
     def verify_family(self, family):
-        self.stat.iteration_smt()
+        # self.stat.iteration_smt()
         self.quotient.build(family)
         if family.mdp is None:
             return

@@ -1,0 +1,4 @@
+// Maximum probability of configuring correctly
+Pmax=? [ F (l=4 & ip=1) ];
+// Minimum probability of configuring correctly
+//Pmin=? [ F (l=4 & ip=1) ];

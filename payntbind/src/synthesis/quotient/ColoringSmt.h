@@ -24,8 +24,7 @@ public:
         std::vector<uint64_t> const& row_groups,
         std::vector<uint64_t> const& choice_to_action,
         storm::storage::sparse::StateValuations const& state_valuations,
-        std::vector<storm::expressions::Variable> const& variables,
-        std::vector<uint64_t> hole_variable,
+        std::vector<std::string> const& hole_to_variable_name,
         std::vector<std::pair<std::vector<uint64_t>,std::vector<uint64_t>>> hole_bounds,
         Family const& family,
         std::vector<std::vector<int64_t>> hole_domain

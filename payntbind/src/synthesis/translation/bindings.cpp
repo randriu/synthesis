@@ -167,18 +167,37 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> removeAction(
 }
 
 /**
- * Given an MDP, for any state in the set \p target_states, mark any unlabeled action, explicitly add all availabled
- * actions and subsequently removed unlabeled actions.
+ * Given an MDP, for any absorbing state with an unlabeled action, explicitly add all availabled actions and
+ * subsequently remove these unlabeled actions.
  */
 template<typename ValueType>
-std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInTargetStates(
-    storm::models::sparse::Model<ValueType> const& model,
-    storm::storage::BitVector const& target_states
+std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInAbsorbingStates(
+    storm::models::sparse::Model<ValueType> const& model
 ) {
     auto model_canonic = synthesis::addMissingChoiceLabels(model);
-    auto model_target_enabled = synthesis::enableAllActions(*model_canonic, target_states);
     const std::string NO_ACTION_LABEL = "__no_label__";
-    auto model_target_fixed = synthesis::removeAction(*model_target_enabled, NO_ACTION_LABEL, target_states);
+    storm::storage::BitVector const& no_action_label_choices = model_canonic->getChoiceLabeling().getChoices(NO_ACTION_LABEL);
+    storm::storage::BitVector absorbing_states(model.getNumberOfStates(),true);
+    for(uint64_t state = 0; state < model.getNumberOfStates(); ++state) {
+        bool state_is_absorbing = true;
+        for(uint64_t choice: model_canonic->getTransitionMatrix().getRowGroupIndices(state)) {
+            if(not no_action_label_choices[choice]) {
+                absorbing_states.set(state,false);
+                break;
+            }
+            for(auto const& entry: model_canonic->getTransitionMatrix().getRow(choice)) {
+                if(entry.getColumn() != state) {
+                    absorbing_states.set(state,false);
+                    break;
+                }
+            }
+            if(not absorbing_states[state]) {
+                break;
+            }
+        }
+    }
+    auto model_target_enabled = synthesis::enableAllActions(*model_canonic, absorbing_states);
+    auto model_target_fixed = synthesis::removeAction(*model_target_enabled, NO_ACTION_LABEL, absorbing_states);
     return model_target_fixed;
 }
 
@@ -189,7 +208,7 @@ void bindings_translation(py::module& m) {
     m.def("addMissingChoiceLabels", &synthesis::addMissingChoiceLabels<double>);
     m.def("extractActionLabels", &synthesis::extractActionLabels<double>);
     m.def("enableAllActions", &synthesis::enableAllActions<double>);
-    m.def("restoreActionsInTargetStates", &synthesis::restoreActionsInTargetStates<double>);
+    m.def("restoreActionsInAbsorbingStates", &synthesis::restoreActionsInAbsorbingStates<double>);
 
     py::class_<synthesis::SubPomdpBuilder<double>, std::shared_ptr<synthesis::SubPomdpBuilder<double>>>(m, "SubPomdpBuilder")
         .def(py::init<storm::models::sparse::Pomdp<double> const&>())

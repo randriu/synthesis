@@ -2,6 +2,7 @@ import paynt.quotient.quotient
 
 import stormpy
 import payntbind
+import json
 
 import logging
 logger = logging.getLogger(__name__)
@@ -9,39 +10,27 @@ logger = logging.getLogger(__name__)
 
 class Variable:
 
-    def __init__(self, variable, model):
-        assert variable.has_boolean_type() or variable.has_integer_type(), \
-            f"variable {variable.name} is neither integer nor boolean"
-        self.variable = variable
+    def __init__(self, name, model):
+        self.name = name
 
         assert model.has_state_valuations(), "model has no state valuations"
-        if self.has_integer_type:
-            value_getter = model.state_valuations.get_integer_value
-        else:
-            value_getter = model.state_valuations.get_boolean_value
         domain = set()
         for state in range(model.nr_states):
-            value = value_getter(state,self.variable)
+            valuation = json.loads(str(model.state_valuations.get_json(state)))
+            value = valuation[name]
             domain.add(value)
         domain = list(domain)
         # conversion of boolean variables to integers
-        if self.has_boolean_type:
-            domain = [1 if value else 0 for value in domain]
+        domain_new = []
+        for value in domain:
+            if value is True:
+                value = 1
+            elif value is False:
+                value = 0
+            domain_new.append(value)
+        domain = domain_new
         domain = sorted(domain)
         self.domain = domain
-
-
-    @property
-    def name(self):
-        return self.variable.name
-
-    @property
-    def has_integer_type(self):
-        return self.variable.has_integer_type()
-
-    @property
-    def has_boolean_type(self):
-        return self.variable.has_boolean_type()
 
     @property
     def domain_min(self):
@@ -64,8 +53,10 @@ class Variable:
         return f"{self.name}:{domain}"
 
     @classmethod
-    def from_model(cls, model, program_variables):
-        variables = [Variable(v,model) for v in program_variables]
+    def from_model(cls, model):
+        assert model.has_state_valuations(), "model has no state valuations"
+        valuation = json.loads(str(model.state_valuations.get_json(0)))
+        variables = [Variable(var,model) for var in valuation]
         variables = [v for v in variables if len(v.domain) > 1]
         return variables
 
@@ -98,8 +89,7 @@ class DecisionTreeNode:
         self.child_true = DecisionTreeNode(self)
 
     def set_variable_by_name(self, variable_name:str, decision_tree):
-        name_to_variable_index = {var.name:index for index,var in enumerate(decision_tree.variables)}
-        variable_index = name_to_variable_index[variable_name]
+        variable_index = [variable.name for variable in decision_tree.variables].index(variable_name)
         self.set_variable(variable_index)
 
     def create_hole(self, family, action_labels, variables):
@@ -113,7 +103,6 @@ class DecisionTreeNode:
             prefix = "A"
             option_labels = action_labels #+ ["__dont_care__"]
         else:
-            var = variables[self.variable_index]
             prefix = variables[self.variable_index].name
             option_labels = variables[self.variable_index].hole_domain
         hole_name = f"{prefix}_{self.hole}"
@@ -137,10 +126,10 @@ class DecisionTreeNode:
 
 class DecisionTree:
 
-    def __init__(self, model, program_variables):
+    def __init__(self, model):
 
         self.model = model
-        self.variables = Variable.from_model(model,program_variables)
+        self.variables = Variable.from_model(model)
         logger.debug(f"found the following variables: {[str(v) for v in self.variables]}")
         self.num_nodes = 0
         self.root = DecisionTreeNode(None)
@@ -173,29 +162,41 @@ class DecisionTree:
             node.create_hole(family, action_labels, self.variables)
         return family
 
-
-def custom_decision_tree(mdp, program_variables):
-    dt = DecisionTree(mdp, program_variables)
-
+def custom_decision_tree(mdp):
+    dt = DecisionTree(mdp)
     decide = lambda node,var_name : node.set_variable_by_name(var_name,dt)
 
-    decide(dt.root,"clk")
-    main = dt.root.child_false
+    # model = "maze"
+    model = "obstacles"
 
-    decide(dt.root.child_false, "y")
-    decide(dt.root.child_false.child_true, "x")
-    decide(dt.root.child_false.child_true.child_true, "x")
+    if model == "maze":
+        decide(dt.root,"clk")
+        main = dt.root.child_false
 
-    # decide(main,"y")
-    # decide(main.child_false,"x")
-    # decide(main.child_true,"x")
-    # decide(main.child_true.child_true,"x")
+        # decide(decide, "y")
+        # decide(decide.child_true, "x")
+        # decide(decide.child_true.child_true, "x")
 
-    # decide(main, "y")
-    # decide(main.child_false, "x")
-    # decide(main.child_false.child_true, "x")
-    # decide(main.child_true, "x")
-    # decide(main.child_true.child_true, "x")
+        # decide(main,"y")
+        # decide(main.child_false,"x")
+        # decide(main.child_true,"x")
+        # decide(main.child_true.child_true,"x")
+
+        decide(main, "y")
+        decide(main.child_false, "x")
+        decide(main.child_false.child_true, "x")
+        decide(main.child_true, "x")
+        decide(main.child_true.child_true, "x")
+
+    if model == "obstacles":
+        decide(dt.root, "x")
+        # decide(dt.root.child_true, "x")
+        # decide(dt.root.child_true.child_true, "y")
+        # decide(dt.root.child_true.child_false, "y")
+        decide(dt.root.child_false, "x")
+        # decide(dt.root.child_false.child_true, "y")
+        # decide(dt.root.child_false.child_false, "y")
+    
     return dt
 
 
@@ -205,17 +206,14 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, mdp, specification):
         super().__init__(specification=specification)
 
-        # get variables before choice origins are lost
-        assert mdp.has_choice_origins(), "model has no choice origins"
-        program_variables = mdp.choice_origins.program.variables
-
-        target_states = self.identify_target_states(mdp,self.get_property())
-        mdp = payntbind.synthesis.restoreActionsInTargetStates(mdp,target_states)
+        mdp = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         self.quotient_mdp = mdp
+        paynt_mdp = paynt.models.models.Mdp(mdp)
+        logger.info(f"optimal scheduler has value: {paynt_mdp.model_check_property(self.get_property())}")
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
 
-        decision_tree = custom_decision_tree(mdp, program_variables)
+        decision_tree = custom_decision_tree(mdp)
         family = decision_tree.create_family(self.action_labels)
         print("family = ", family)
 
@@ -224,21 +222,20 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             hole_bounds[node.hole] = node.collect_bounds()
         # print("hole bounds = ", hole_bounds)
 
-        hole_variable = [len(decision_tree.variables) for _ in range(family.num_holes)]
+        sv = mdp.state_valuations
+        hole_variable = ["" for _ in range(family.num_holes)]
         hole_domain = [[] for h in range(family.num_holes)]
         for node in decision_tree.collect_nonterminals():
-            hole_variable[node.hole] = node.variable_index
+            hole_variable[node.hole] = decision_tree.variables[node.variable_index].name
             hole_domain[node.hole] = family.hole_to_option_labels[node.hole]
         # print("hole variables = ", hole_variable)
         # print("hole domain = ", hole_domain)
-        stormpy_variables = [v.variable for v in decision_tree.variables]
 
         self.decision_tree = decision_tree
-        self.hole_variable = hole_variable
-        self.is_action_hole = [var == len(self.decision_tree.variables) for var in self.hole_variable]
+        self.is_action_hole = [var == "" for var in hole_variable]
         self.coloring = payntbind.synthesis.ColoringSmt(
             mdp.nondeterministic_choice_indices, self.choice_to_action,
-            mdp.state_valuations, stormpy_variables,
+            mdp.state_valuations,
             hole_variable, hole_bounds,
             family.family, hole_domain
         )
@@ -281,8 +278,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
         choices = self.state_to_choice_to_choices(state_to_choice)
         consistent,hole_selection = self.areChoicesConsistent(choices, mdp)
-        if mdp.is_deterministic:
-            assert consistent, "obtained a DTMC, but the scheduler is not consistent"
+        # print(consistent, hole_selection)
 
         # convert selection to actual hole options
         for hole,values in enumerate(hole_selection):
@@ -351,8 +347,9 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             assert len(hole_assignments[splitter]) == 1
             splitter_option = hole_assignments[splitter][0]
             index = family.hole_options(splitter).index(splitter_option)
+            assert index < family.hole_num_options(splitter)-1
             options = mdp.design_space.hole_options(splitter)
-            core_suboptions = [options[:index], options[index:]]
+            core_suboptions = [options[:index+1], options[index+1:]]
             other_suboptions = []
 
         new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)

@@ -11,24 +11,39 @@ ColoringSmt::ColoringSmt(
     std::vector<uint64_t> const& row_groups,
     std::vector<uint64_t> const& choice_to_action,
     storm::storage::sparse::StateValuations const& state_valuations,
-    std::vector<storm::expressions::Variable> const& variables,
-    std::vector<uint64_t> hole_variable,
+    std::vector<std::string> const& hole_to_variable_name,
     std::vector<std::pair<std::vector<uint64_t>,std::vector<uint64_t>>> hole_bounds,
     synthesis::Family const& family,
     std::vector<std::vector<int64_t>> hole_domain
 ) : choice_to_action(choice_to_action), row_groups(row_groups), family(family), hole_domain(hole_domain), solver(context) {
     
     num_actions = 1 + *max_element(choice_to_action.begin(),choice_to_action.end());
+    std::vector<storm::expressions::Variable> variables;
+    auto const& valuation = state_valuations.at(0);
+    for(auto x = valuation.begin(); x != valuation.end(); ++x) {
+        variables.push_back(x.getVariable());
+    }
+    std::vector<uint64_t> hole_variable(family.numHoles(),variables.size());
+    
     hole_corresponds_to_program_variable = storm::storage::BitVector(family.numHoles());
 
+    
     // create solver variables for each hole
     for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
-        uint64_t var = hole_variable[hole];
-        bool corresponds_to_program_variable = (var < variables.size());
+        std::string const& var_name = hole_to_variable_name[hole];
+        bool corresponds_to_program_variable = (var_name != "");
         hole_corresponds_to_program_variable.set(hole,corresponds_to_program_variable);
         std::string name;
         if(corresponds_to_program_variable) {
-            name = variables[var].getName() + "_" + std::to_string(hole);
+            name = var_name + "_" + std::to_string(hole);
+            uint64_t var_index;
+            for(var_index = 0; var_index < variables.size(); ++var_index) {
+                if(variables[var_index].getName() == var_name) {
+                    hole_variable[hole] = var_index;
+                    break;
+                }
+            }
+            STORM_LOG_THROW(var_index < variables.size(), storm::exceptions::InvalidArgumentException, "unexpected variable name");
         } else {
             name = "A_" + std::to_string(hole);
         }
