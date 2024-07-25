@@ -117,7 +117,11 @@ class Sketch:
         logger.info("sketch parsing OK")
              
         paynt.verification.property.Property.initialize()
-        
+
+        updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+        if updated is not None: explicit_quotient = updated
+        payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.choice_labeling)
+
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} actions".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))

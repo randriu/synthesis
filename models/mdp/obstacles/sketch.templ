@@ -4,30 +4,12 @@ const int N = 10;
 const int gMIN = 1;
 const int gMAX = N;
 
-const int o1x = 2;
-const int o1y = 2;
-
-const int o2x = 2;
-const int o2y = 6;
-
-const int o3x = 4;
-const int o3y = 3;
-
-const int o4x = 3;
-const int o4y = 6;
-
-const int o5x = 5;
-const int o5y = 5;
-
-const int o6x = 8;
-const int o6y = 8;
-
-formula at1 = (x = o1x & y = o1y);
-formula at2 = (x = o2x & y = o2y);
-formula at3 = (x = o3x & y = o3y);
-formula at4 = (x = o4x & y = o4y);
-formula at5 = (x = o5x & y = o5y);
-formula at6 = (x = o6x & y = o6y);
+formula at1 = (x = 1 & y = 5);
+formula at2 = (x = 5 & y = 1);
+formula at3 = (x = 2 & y = 2);
+formula at4 = (x = 9 & y = 10);
+formula at5 = (x = 9 & y = 9);
+formula at6 = (x = 2 & y = 5);
 
 formula crash = at1 | at2 | at3 | at4 | at5 | at6;
 formula goal = (x=gMAX & y=gMAX);

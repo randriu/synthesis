@@ -53,7 +53,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
 
-        self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
+        self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.num_actions = len(self.action_labels)
         self.state_action_choices = MdpFamilyQuotient.map_state_action_to_choices(
             self.quotient_mdp, self.num_actions, self.choice_to_action)

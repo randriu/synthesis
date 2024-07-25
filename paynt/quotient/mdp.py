@@ -190,12 +190,12 @@ def custom_decision_tree(mdp):
 
     if model == "obstacles":
         decide(dt.root, "x")
-        # decide(dt.root.child_true, "x")
-        # decide(dt.root.child_true.child_true, "y")
-        # decide(dt.root.child_true.child_false, "y")
+        decide(dt.root.child_true, "x")
+        decide(dt.root.child_true.child_true, "y")
+        decide(dt.root.child_true.child_false, "y")
         decide(dt.root.child_false, "x")
-        # decide(dt.root.child_false.child_true, "y")
-        # decide(dt.root.child_false.child_false, "y")
+        decide(dt.root.child_false.child_true, "y")
+        decide(dt.root.child_false.child_false, "y")
     
     return dt
 
@@ -206,11 +206,13 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, mdp, specification):
         super().__init__(specification=specification)
 
-        mdp = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
+        updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
+        if updated is not None: mdp = updated
+
         self.quotient_mdp = mdp
         paynt_mdp = paynt.models.models.Mdp(mdp)
         logger.info(f"optimal scheduler has value: {paynt_mdp.model_check_property(self.get_property())}")
-        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
+        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
 
         decision_tree = custom_decision_tree(mdp)
