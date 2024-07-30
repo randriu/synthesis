@@ -69,8 +69,6 @@ def setup_logger(log_path = None):
     help="synthesis method"
     )
 
-@click.option("--incomplete-search", is_flag=True, default=False,
-    help="use incomplete search during synthesis")
 @click.option("--disable-expected-visits", is_flag=True, default=False,
     help="do not compute expected visits for the splitting heuristic")
 
@@ -142,7 +140,7 @@ def paynt_run(
     project, sketch, props, relative_error, optimum_threshold, precision,
     export,
     method,
-    incomplete_search, disable_expected_visits,
+    disable_expected_visits,
     fsc_synthesis, fsc_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
@@ -161,7 +159,6 @@ def paynt_run(
     logger.info("This is Paynt version {}.".format(version()))
 
     # set CLI parameters
-    paynt.synthesizer.synthesizer.Synthesizer.incomplete_search = incomplete_search
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size

@@ -114,8 +114,6 @@ class SynthesizerARStorm(Synthesizer):
 
     def synthesize_one(self, family):
 
-        self.quotient.discarded = 0
-
         satisfying_assignment = None
         
         if self.main_family is not None:
@@ -185,7 +183,7 @@ class SynthesizerARStorm(Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family)
             families = families + subfamilies
 
         return satisfying_assignment

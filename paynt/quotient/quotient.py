@@ -41,9 +41,6 @@ class Quotient:
         if self.quotient_mdp is not None:
             self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
-        # (optional) counter of discarded assignments
-        self.discarded = 0
-
 
     def export_result(self, dtmc):
         ''' to be overridden '''
@@ -282,42 +279,7 @@ class Quotient:
         most_inconsistent = self.holes_with_max_score(num_definitions) 
         return most_inconsistent
 
-    def discard(self, mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search):
-
-        # default result
-        reduced_design_space = mdp.design_space.copy()
-        if len(other_suboptions) == 0:
-            suboptions = core_suboptions
-        else:
-            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
-
-        if not incomplete_search:
-            return reduced_design_space, suboptions
-
-        # reduce simple holes
-        ds_before = reduced_design_space.size
-
-        hole_to_states = [0] * self.design_space.num_holes
-        state_to_holes = self.coloring.getStateToHoles().copy()
-        for state in range(mdp.model.nr_states):
-            quotient_state = mdp.quotient_state_map[state]
-            for hole in state_to_holes[quotient_state]:
-                hole_to_states[hole] += 1
-
-        for hole in range(reduced_design_space.num_holes):
-            if hole_to_states[hole] <= 1:
-                reduced_design_space.hole_set_options(hole, hole_assignments[hole])
-        ds_after = reduced_design_space.size
-        self.discarded += ds_before - ds_after
-
-        # discard other suboptions
-        suboptions = core_suboptions
-        # self.discarded += (reduced_design_space.size * len(other_suboptions)) / (len(other_suboptions) + len(core_suboptions))
-
-        return reduced_design_space, suboptions
-
-
-    def split(self, family, incomplete_search):
+    def split(self, family):
 
         mdp = family.mdp
         assert not mdp.is_deterministic
@@ -340,8 +302,12 @@ class Quotient:
             other_suboptions = []
         # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
 
-        new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
-        
+        new_design_space = mdp.design_space.copy()
+        if len(other_suboptions) == 0:
+            suboptions = core_suboptions
+        else:
+            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
+
         # construct corresponding design subspaces
         design_subspaces = []
         

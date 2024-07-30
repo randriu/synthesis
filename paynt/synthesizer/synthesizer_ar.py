@@ -54,7 +54,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 continue
 
             # undecided
-            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family)
             families = families + subfamilies
 
         return satisfying_assignment
@@ -69,8 +69,6 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         return value
     
     def synthesize_one_experimental(self, family):
-
-        self.quotient.discarded = 0
 
         satisfying_assignment = None
         families = [family]
@@ -102,7 +100,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
             # split family with the best value
             family = undecided_families[0]
-            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family)
             families = subfamilies + undecided_families[1:]
                 
 

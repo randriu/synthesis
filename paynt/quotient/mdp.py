@@ -330,7 +330,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         inconsistent_differences = {splitter:10}
         return None, None, inconsistent_differences
 
-    def split(self, family, incomplete_search):
+    def split(self, family):
 
         mdp = family.mdp
         assert not mdp.is_deterministic
@@ -354,7 +354,11 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             core_suboptions = [options[:index+1], options[index+1:]]
             other_suboptions = []
 
-        new_design_space, suboptions = self.discard(mdp, hole_assignments, core_suboptions, other_suboptions, incomplete_search)
+        new_design_space = mdp.design_space.copy()
+        if len(other_suboptions) == 0:
+            suboptions = core_suboptions
+        else:
+            suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
         # construct corresponding design subspaces
         design_subspaces = []

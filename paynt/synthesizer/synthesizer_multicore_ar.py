@@ -55,7 +55,7 @@ def solve_family(args):
         
         subfamilies = []
         if res.can_improve:
-            subfamilies = quotient.split(family, Synthesizer.incomplete_search)
+            subfamilies = quotient.split(family)
             subfamilies = [ family_to_hole_options(family) for family in subfamilies ]
 
         return (family.mdp.states, improving_value, improving_assignment, subfamilies)

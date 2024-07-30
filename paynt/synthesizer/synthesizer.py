@@ -15,9 +15,6 @@ class FamilyEvaluation:
 
 class Synthesizer:
 
-    # if True, some subfamilies can be discarded and some holes can be generalized
-    incomplete_search = False
-
     @staticmethod
     def choose_synthesizer(quotient, method, fsc_synthesis, storm_control):
 
@@ -141,7 +138,6 @@ class Synthesizer:
             logger.debug(f"optimality threshold set to {optimum_threshold}")
         
         logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
-        self.quotient.discarded = 0
         self.stat.start(family)
         assignment = self.synthesize_one(family)
         if assignment is not None and assignment.size > 1 and not return_all:
