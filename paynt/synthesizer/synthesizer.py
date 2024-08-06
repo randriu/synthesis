@@ -19,6 +19,7 @@ class Synthesizer:
     def choose_synthesizer(quotient, method, fsc_synthesis, storm_control):
 
         # hiding imports here to avoid mutual top-level imports
+        import paynt.quotient.mdp
         import paynt.quotient.pomdp
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
@@ -30,11 +31,14 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.policy_tree
+        import paynt.synthesizer.decision_tree
 
 
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
+        if isinstance(quotient, paynt.quotient.mdp.MdpQuotient):
+            return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient)
         # FSC synthesis for POMDPs
         if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
             return paynt.synthesizer.synthesizer_pomdp.SynthesizerPomdp(quotient, method, storm_control)
@@ -48,7 +52,8 @@ class Synthesizer:
             else:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
 
-        # Synthesis engines
+
+        # synthesis engines
         if method == "onebyone":
             return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
         if method == "ar":
@@ -64,8 +69,8 @@ class Synthesizer:
     
     def __init__(self, quotient):
         self.quotient = quotient
-        self.stat = paynt.synthesizer.statistic.Statistic(self)
-        self.explored = 0
+        self.stat = None
+        self.explored = None
     
     @property
     def method_name(self):
@@ -100,6 +105,8 @@ class Synthesizer:
         if prop is None:
             prop = self.quotient.get_property()
 
+        self.stat = paynt.synthesizer.statistic.Statistic(self)
+        self.explored = 0
         logger.info("evaluation initiated, design space: {}".format(family.size))
         self.stat.start(family)
         evaluations = self.evaluate_all(family, prop, keep_value_only)
@@ -133,18 +140,20 @@ class Synthesizer:
         if family.constraint_indices is None:
             family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
         
-        if optimum_threshold is not None:
+        if self.quotient.specification.has_optimality and optimum_threshold is not None:
             self.quotient.specification.optimality.update_optimum(optimum_threshold)
             logger.debug(f"optimality threshold set to {optimum_threshold}")
         
-        logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
+        self.stat = paynt.synthesizer.statistic.Statistic(self)
+        self.explored = 0
+        # logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
         self.stat.start(family)
         assignment = self.synthesize_one(family)
         if assignment is not None and assignment.size > 1 and not return_all:
             assignment = assignment.pick_any()
         self.stat.finished_synthesis(assignment)
-        logger.info("synthesis finished, printing synthesized assignment below:")
-        logger.info(assignment)
+        # logger.info("synthesis finished, printing synthesized assignment below:")
+        # logger.info(assignment)
 
         if assignment is not None and assignment.size == 1:
             dtmc = self.quotient.build_assignment(assignment)

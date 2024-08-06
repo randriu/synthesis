@@ -39,7 +39,7 @@ class AllInOne:
         logger.info(f"constructed all in one MDP having {self.model.nr_states} states and {self.model.nr_choices} actions")
 
 
-    def run(self):
+    def synthesize(self, optimum_threshold=None):
 
         all_in_one_timer = paynt.utils.profiler.Timer()
         logger.info(f"starting all in one analysis")

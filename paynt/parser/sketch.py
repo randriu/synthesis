@@ -120,7 +120,8 @@ class Sketch:
 
         updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
         if updated is not None: explicit_quotient = updated
-        payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.choice_labeling)
+        if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
+            logger.warning("WARNING: choice labeling for the quotient is not canonic")
 
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} actions".format(

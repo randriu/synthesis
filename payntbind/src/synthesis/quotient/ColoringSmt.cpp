@@ -13,23 +13,22 @@ ColoringSmt::ColoringSmt(
     storm::storage::sparse::StateValuations const& state_valuations,
     std::vector<std::string> const& hole_to_variable_name,
     std::vector<std::pair<std::vector<uint64_t>,std::vector<uint64_t>>> hole_bounds,
-    synthesis::Family const& family,
     std::vector<std::vector<int64_t>> hole_domain
-) : choice_to_action(choice_to_action), row_groups(row_groups), family(family), hole_domain(hole_domain), solver(context) {
-    
-    num_actions = 1 + *max_element(choice_to_action.begin(),choice_to_action.end());
+) : choice_to_action(choice_to_action), row_groups(row_groups), hole_domain(hole_domain), solver(context) {
+
+    uint64_t num_holes = hole_bounds.size();
     std::vector<storm::expressions::Variable> variables;
     auto const& valuation = state_valuations.at(0);
     for(auto x = valuation.begin(); x != valuation.end(); ++x) {
         variables.push_back(x.getVariable());
     }
-    std::vector<uint64_t> hole_variable(family.numHoles(),variables.size());
+    std::vector<uint64_t> hole_variable(num_holes,variables.size());
     
-    hole_corresponds_to_program_variable = storm::storage::BitVector(family.numHoles());
+    hole_corresponds_to_program_variable = BitVector(num_holes);
 
     
     // create solver variables for each hole
-    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
+    for(uint64_t hole = 0; hole < num_holes; ++hole) {
         std::string const& var_name = hole_to_variable_name[hole];
         bool corresponds_to_program_variable = (var_name != "");
         hole_corresponds_to_program_variable.set(hole,corresponds_to_program_variable);
@@ -52,10 +51,10 @@ ColoringSmt::ColoringSmt(
     }
 
     // create formula describing hole relationships
-    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
-        uint64_t var = hole_variable[hole];
+    for(uint64_t hole = 0; hole < num_holes; ++hole) {
         z3::expr_vector restriction_clauses(context);
         if(hole_corresponds_to_program_variable[hole]) {
+            uint64_t var = hole_variable[hole];
             // see if any of its bounds is a hole associated with the same variable
             auto solver_variable = hole_to_solver_variable[hole];
             auto const& [lower_bounds,upper_bounds] = hole_bounds[hole];
@@ -66,7 +65,7 @@ ColoringSmt::ColoringSmt(
             }
             for(auto bound: upper_bounds) {
                 if(hole_variable[bound] == var) {
-                    restriction_clauses.push_back(solver_variable <= hole_to_solver_variable[bound]);
+                    restriction_clauses.push_back(solver_variable < hole_to_solver_variable[bound]);
                 }
             }
         }
@@ -78,16 +77,16 @@ ColoringSmt::ColoringSmt(
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             uint64_t action = choice_to_action[choice];
             
-            std::vector<z3::expr_vector> terminals;
+            std::vector<z3::expr_vector> paths;
             std::vector<std::vector<std::pair<uint64_t,int>>> terminal_evaluation;
             z3::expr_vector clauses(context);
             std::vector<std::string> clause_label;
             // for each action hole, create clauses that describe this choice selection
             for(uint64_t hole: ~hole_corresponds_to_program_variable) {
                 auto const& [lower_bounds,upper_bounds] = hole_bounds[hole];
-                z3::expr_vector terminal_atoms(context);
+                z3::expr_vector path(context);
                 std::vector<std::pair<uint64_t,int>> evaluation;
-                terminal_atoms.push_back((hole_to_solver_variable[hole] == (int)action));
+                path.push_back((hole_to_solver_variable[hole] == (int)action));
                 evaluation.emplace_back(hole,(int)action);
 
                 // add atoms describing lower and upper bounds
@@ -97,27 +96,27 @@ ColoringSmt::ColoringSmt(
                     auto program_variable = variables[hole_variable[bound]];
                     auto solver_variable = hole_to_solver_variable[bound];
                     int value = getVariableValueAtState(state_valuations,state,program_variable);
-                    terminal_atoms.push_back(value <= solver_variable);
+                    path.push_back(value <= solver_variable);
                     evaluation.emplace_back(bound,value);
                 }
                 for(auto bound: upper_bounds) {
                     auto program_variable = variables[hole_variable[bound]];
                     auto solver_variable = hole_to_solver_variable[bound];
                     int value = getVariableValueAtState(state_valuations,state,program_variable);
-                    terminal_atoms.push_back(value > solver_variable);
+                    path.push_back(value > solver_variable);
                     evaluation.emplace_back(bound,value);
                 }
                 uint64_t clause_index = clauses.size();
                 std::string label = "c" + std::to_string(choice) + "_" + std::to_string(clause_index);
 
-                terminals.push_back(terminal_atoms);
+                paths.push_back(path);
                 terminal_evaluation.push_back(evaluation);
-                clauses.push_back(z3::mk_or(terminal_atoms));
+                clauses.push_back(z3::mk_or(path));
                 clause_label.push_back(label);
             }
-            choice_terminal.push_back(terminals);
+            choice_path.push_back(paths);
             choice_clause.push_back(clauses);
-            choice_terminal_evaluation.push_back(terminal_evaluation);
+            choice_path_evaluation.push_back(terminal_evaluation);
             choice_clause_label.push_back(clause_label);
         }
     }
@@ -133,14 +132,13 @@ const uint64_t ColoringSmt::numChoices() const {
 }
 
 int ColoringSmt::getVariableValueAtState(
-        storm::storage::sparse::StateValuations const& state_valuations, uint64_t state, storm::expressions::Variable variable
+    storm::storage::sparse::StateValuations const& state_valuations, uint64_t state, storm::expressions::Variable variable
 ) const {
     if(variable.hasBooleanType()) {
         return (int)state_valuations.getBooleanValue(state,variable);
     } else {
         return state_valuations.getIntegerValue(state,variable);
     }
-    
 }
 
 void ColoringSmt::addHoleEncoding(Family const& family, uint64_t hole) {
@@ -154,8 +152,8 @@ void ColoringSmt::addHoleEncoding(Family const& family, uint64_t hole) {
         // convention: hole options in the family are ordered
         int domain_min = domain[family_options.front()];
         int domain_max = domain[family_options.back()];
-        // z3::expr encoding = (domain_min <= solver_variable) and (solver_variable <= domain_max) and hole_restriction[hole];
-        z3::expr encoding = (domain_min <= solver_variable) and (solver_variable <= domain_max);
+        z3::expr encoding = (domain_min <= solver_variable) and (solver_variable <= domain_max) and hole_restriction[hole];
+        // z3::expr encoding = (domain_min <= solver_variable) and (solver_variable <= domain_max);
         solver.add(encoding, label_str);
     } else {
         // action hole
@@ -203,7 +201,6 @@ BitVector ColoringSmt::selectCompatibleChoices(Family const& subfamily, BitVecto
     // check individual choices
     std::vector<std::vector<uint64_t>> state_enabled_choices(numStates());
     for(uint64_t state = 0; state < numStates(); ++state) {
-        bool all_choices_disabled = true;
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             if(not base_choices[choice]) {
                 continue;
@@ -214,13 +211,12 @@ BitVector ColoringSmt::selectCompatibleChoices(Family const& subfamily, BitVecto
             z3::check_result result = solver.check();
             selectCompatibleChoicesTimer.stop();
             if(result == z3::sat) {
-                all_choices_disabled = false;
                 selection.set(choice,true);
                 state_enabled_choices[state].push_back(choice);
             }
             solver.pop();
         }
-        if(all_choices_disabled) {
+        if(state_enabled_choices[state].empty()) {
             solver.pop();
             selection.clear();
             return selection;
@@ -250,17 +246,20 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt::areChoicesConsis
 
     solver.push();
     addFamilyEncoding(subfamily);
+    solver.push();
     for(auto choice: choices) {
         addChoiceEncoding(choice);
     }
     z3::check_result result = solver.check();
     
-    std::vector<std::set<uint64_t>> hole_options(family.numHoles());
-    std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
+    uint64_t num_holes = subfamily.numHoles();
+    std::vector<std::set<uint64_t>> hole_options(num_holes);
+    std::vector<std::vector<uint64_t>> hole_options_vector(num_holes);
     if(result == z3::sat) {
         z3::model model = solver.get_model();
         solver.pop();
-        for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
+        solver.pop();
+        for(uint64_t hole = 0; hole < num_holes; ++hole) {
             z3::expr solver_variable = hole_to_solver_variable[hole];
             uint64_t value = model.eval(solver_variable).get_numeral_int64();
             hole_options_vector[hole].push_back(value);
@@ -270,37 +269,33 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt::areChoicesConsis
     
     z3::expr_vector unsat_core = solver.unsat_core();
     solver.pop();
-    for(auto expr: unsat_core) {
+    for(z3::expr expr: unsat_core) {
         std::istringstream iss(expr.decl().name().str());
         char prefix; iss >> prefix;
         if(prefix == 'h') {
             continue;
         }
 
-        // choice clause
-        uint64_t choice,clause; iss >> choice; iss >> prefix; iss >> clause;
+        uint64_t choice,path; iss >> choice; iss >> prefix; iss >> path;
         uint64_t action = choice_to_action[choice];
-        uint64_t action_hole;
-        // filter clauses that are unsat within the subfamily
-        // std::cout << "checking: " << choice_clause[choice][clause] << std::endl;
-        solver.push();
-        addFamilyEncoding(subfamily);
-        for(uint64_t terminal = 0; terminal < choice_terminal[choice][clause].size(); ++terminal) {
+        // filter paths that are unsat within the subfamily
+        // std::cout << "checking: " << choice_path[choice][path] << std::endl;
+        for(uint64_t terminal = 0; terminal < choice_path[choice][path].size(); ++terminal) {
             solver.push();
-            solver.add(choice_terminal[choice][clause][terminal]);
+            solver.add(choice_path[choice][path][terminal]);
             auto result = solver.check();
             solver.pop();
             if(result == z3::unsat) {
                 continue;
             } 
-            // std::cout << choice_terminal[choice][clause][terminal] << std::endl;
-            auto const& [hole,value] = choice_terminal_evaluation[choice][clause][terminal];
+            // std::cout << choice_path[choice][path][terminal] << std::endl;
+            auto const& [hole,value] = choice_path_evaluation[choice][path][terminal];
             hole_options[hole].insert(value);
         }
-        solver.pop();
     }
+    solver.pop();
 
-    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
+    for(uint64_t hole = 0; hole < num_holes; ++hole) {
         hole_options_vector[hole].assign(hole_options[hole].begin(),hole_options[hole].end());
     }
     return std::make_pair(false,hole_options_vector);

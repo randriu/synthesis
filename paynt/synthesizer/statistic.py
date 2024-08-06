@@ -251,8 +251,6 @@ class Statistic:
     
     def print(self):    
         print(self.get_summary(),end="")
-        print("payntbind::selectCompatibleChoices = ", self.quotient.coloring.selectCompatibleChoicesTime())
-        # self.print_mdp_family_table_entries()
 
 
     def print_mdp_family_table_entries(self):

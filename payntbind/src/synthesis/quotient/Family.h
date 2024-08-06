@@ -17,7 +17,7 @@ public:
     Family(Family const& other);
 
     uint64_t numHoles() const;
-    void addHole(uint64_t num_options);
+    uint64_t addHole(uint64_t num_options);
     
     std::vector<uint64_t> const& holeOptions(uint64_t hole) const;
     BitVector const& holeOptionsMask(uint64_t hole) const;

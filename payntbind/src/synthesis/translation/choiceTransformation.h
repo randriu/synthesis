@@ -32,9 +32,16 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addMissingChoiceLabelsM
 );
 
 /**
- * Assert that choice labeling is canonic, i.e. each choice has exactly one label.
+ * Assert that choice labeling is canonic, i.e. each choice has exactly one label and each has at most one choice with
+ * any given label.
+ * @param abort_on_fail if true, then an exception is thrown
+ * @return whether canonicity holds
  */
-void assertChoiceLabelingIsCanonic(storm::models::sparse::ChoiceLabeling const& choice_labeling);
+bool assertChoiceLabelingIsCanonic(
+    std::vector<uint64_t> const& row_groups,
+    storm::models::sparse::ChoiceLabeling const& choice_labeling,
+    bool throw_on_fail = true
+);
 
 /**
  * Remove labels that have zero associated choices.

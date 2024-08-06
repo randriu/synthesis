@@ -23,13 +23,15 @@ uint64_t Family::numHoles() const {
     return hole_options.size();
 }
 
-void Family::addHole(uint64_t num_options) {
+uint64_t Family::addHole(uint64_t num_options) {
+    uint64_t hole_index = numHoles();
     hole_options_mask.push_back(BitVector(num_options,true));
     std::vector<uint64_t> options(num_options);
     for(uint64_t option=0; option<num_options; ++option) {
         options[option]=option;
     }
     hole_options.push_back(options);
+    return hole_index;
 }
 
 std::vector<uint64_t> const& Family::holeOptions(uint64_t hole) const {

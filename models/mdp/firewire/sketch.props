@@ -1,0 +1,10 @@
+// A leader is always eventually elected with probability 1
+// "elected": P>=1 [ F "done" ];
+// Maximum expected time to elect a leader
+// "time_max": R{"time"}max=? [ F "done" ];
+// Minimum expected time to elect a leader
+R{"time"}min=? [ F "done" ];
+// Maximum expected time spent sending before electing a leader
+// "time_sending": R{"time_sending"}max=? [ F "done" ];
+// Minimum probability of completing within deadline
+// "deadline": Pmin=? [ F^{rew{"time"}<=deadline} ((s1=8) & (s2=7)) | ((s1=7) & (s2=8))];

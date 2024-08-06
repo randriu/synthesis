@@ -4,14 +4,16 @@
 #include "Family.h"
 #include "Coloring.h"
 #include "ColoringSmt.h"
+#include "ColoringSmtFull.h"
 
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/BitVector.h>
-#include <storm/models/sparse/Mdp.h>
 #include <storm/storage/sparse/JaniChoiceOrigins.h>
 #include <storm/exceptions/InvalidModelException.h>
 
 #include <storm/storage/Scheduler.h>
+
+#include <z3++.h>
 
 namespace synthesis {
 
@@ -303,13 +305,29 @@ void bindings_coloring(py::module& m) {
             storm::storage::sparse::StateValuations const&,
             std::vector<std::string> const&,
             std::vector<std::pair<std::vector<uint64_t>,std::vector<uint64_t>>>,
-            synthesis::Family const&,
             std::vector<std::vector<int64_t>>
         >())
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmt::selectCompatibleChoices))
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmt::selectCompatibleChoices))
         .def("selectCompatibleChoicesTime", &synthesis::ColoringSmt::selectCompatibleChoicesTime)
         .def("areChoicesConsistent", &synthesis::ColoringSmt::areChoicesConsistent)
+        ;
+
+    py::class_<synthesis::ColoringSmtFull>(m, "ColoringSmtFull")
+        .def(py::init<
+            std::vector<uint64_t> const&,
+            std::vector<uint64_t> const&,
+            storm::storage::sparse::StateValuations const&,
+            std::vector<std::string> const&,
+            std::vector<std::vector<int64_t>> const&,
+            std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const&
+        >())
+        // .def_property_readonly("family", &synthesis::ColoringSmtFull::getFamily)
+        .def("getFamilyInfo", &synthesis::ColoringSmtFull::getFamilyInfo)
+        .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmtFull::selectCompatibleChoices))
+        .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmtFull::selectCompatibleChoices))
+        .def("selectCompatibleChoicesTime", &synthesis::ColoringSmtFull::selectCompatibleChoicesTime)
+        .def("areChoicesConsistent", &synthesis::ColoringSmtFull::areChoicesConsistent)
         ;
 
 }
