@@ -16,6 +16,7 @@ class ModelBuilder:
         builder_options.set_build_choice_labels(True)
         builder_options.set_add_overlapping_guards_label(True)
         builder_options.set_build_observation_valuations(True)
+        builder_options.set_build_all_reward_models(True)
         # builder_options.set_exploration_checks(True)
         return builder_options
 
