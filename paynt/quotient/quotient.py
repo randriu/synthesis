@@ -41,6 +41,16 @@ class Quotient:
         if self.quotient_mdp is not None:
             self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
 
+        prop_subformula = specification.stormpy_formulae()[0].subformula
+        is_discounted_prop = prop_subformula.is_discounted_cumulative_reward_formula or \
+                                            prop_subformula.is_discounted_total_reward_formula
+        
+        if is_discounted_prop:
+            # TODO replace with getDiscountFactor once implemented in Storm/StormPy 
+            self.discounted_expected_visits = eval(prop_subformula.__str__()[2:-1])
+        else:
+            self.discounted_expected_visits = 1
+
 
     def export_result(self, dtmc):
         ''' to be overridden '''
@@ -183,7 +193,13 @@ class Quotient:
         # extract DTMC induced by this MDP-scheduler
         sub_mdp,state_map,_ = self.restrict_mdp(mdp, choices)
         dtmc = Quotient.mdp_to_dtmc(sub_mdp)
-        dtmc_visits = paynt.verification.property.Property.compute_expected_visits(dtmc)
+
+        if self.discounted_expected_visits < 1:
+            discounted_dtmc = payntbind.synthesis.apply_discount_transformation_to_dtmc(dtmc, self.discounted_expected_visits)
+            dtmc_visits = paynt.verification.property.Property.compute_expected_visits(discounted_dtmc)
+            dtmc_visits = dtmc_visits[:-1] # Do not include the discount sink state
+        else:
+            dtmc_visits = paynt.verification.property.Property.compute_expected_visits(dtmc)
 
         # handle infinity- and zero-visits
         if prop.minimizing:

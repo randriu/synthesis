@@ -1,0 +1,2 @@
+//R{"steps"}min=? [F goal]
+R{"steps"}min=? [C{0.99}]
