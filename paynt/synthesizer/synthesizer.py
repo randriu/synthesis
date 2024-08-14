@@ -25,6 +25,7 @@ class Synthesizer:
         import paynt.quotient.pomdp
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
+        import paynt.quotient.posmg
         import paynt.synthesizer.synthesizer_onebyone
         import paynt.synthesizer.synthesizer_ar
         import paynt.synthesizer.synthesizer_cegis
@@ -32,6 +33,7 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_multicore_ar
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.synthesizer_decpomdp
+        import paynt.synthesizer.synthesizer_posmg
         import paynt.synthesizer.policy_tree
 
 
@@ -50,6 +52,9 @@ class Synthesizer:
                 return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
             else:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
+        # FSC synthesis for POSMGs
+        if isinstance(quotient, paynt.quotient.posmg.PosmgQuotient) and fsc_synthesis:
+            return paynt.synthesizer.synthesizer_posmg.SynthesizerPosmg(quotient)
 
         # Synthesis engines
         if method == "onebyone":
@@ -63,18 +68,18 @@ class Synthesizer:
         if method == "ar_multicore":
             return paynt.synthesizer.synthesizer_multicore_ar.SynthesizerMultiCoreAR(quotient)
         raise ValueError("invalid method name")
-    
-    
+
+
     def __init__(self, quotient):
         self.quotient = quotient
         self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
-    
+
     @property
     def method_name(self):
         ''' to be overridden '''
         pass
-    
+
     def explore(self, family):
         self.explored += family.size
 
@@ -114,10 +119,10 @@ class Synthesizer:
 
         if print_stats:
             self.stat.print()
-        
+
         return evaluations
 
-    
+
     def synthesize_one(self, family):
         ''' to be overridden '''
         pass
@@ -135,11 +140,11 @@ class Synthesizer:
             family = self.quotient.design_space
         if family.constraint_indices is None:
             family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
-        
+
         if optimum_threshold is not None:
             self.quotient.specification.optimality.update_optimum(optimum_threshold)
             logger.debug(f"optimality threshold set to {optimum_threshold}")
-        
+
         logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
         self.quotient.discarded = 0
         self.stat.start(family)
@@ -163,7 +168,7 @@ class Synthesizer:
 
         return assignment
 
-    
+
     def run(self, optimum_threshold=None, export_evaluation=None):
         if isinstance(self.quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
             return self.evaluate(export_filename_base=export_evaluation)
