@@ -72,7 +72,7 @@ class SynthesizerPOMDP:
 
         while True:
         # for x in range(2):
-            
+
             paynt.quotient.pomdp.PomdpQuotient.current_family_index = mem_size
 
             # unfold memory according to the best result
@@ -157,7 +157,7 @@ class SynthesizerPOMDP:
                 break
 
             mem_size += 1
-            
+
             #break
 
     # main SAYNT loop
@@ -252,7 +252,7 @@ class SynthesizerPOMDP:
 
             if self.storm_control.is_storm_better == False:
                 self.storm_control.parse_results(self.quotient)
-            
+
             paynt.quotient.pomdp.PomdpQuotient.current_family_index = mem_size
 
             # unfold memory according to the best result
@@ -333,7 +333,7 @@ class SynthesizerPOMDP:
             self.storm_control.update_data()
 
             mem_size += 1
-            
+
             #break
 
 
@@ -344,13 +344,13 @@ class SynthesizerPOMDP:
         mem_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size
         opt = self.quotient.specification.optimality.optimum
         while True:
-            
+
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             if unfold_imperfect_only:
                 self.quotient.set_imperfect_memory_size(mem_size)
             else:
                 self.quotient.set_global_memory_size(mem_size)
-            
+
             self.synthesize(self.quotient.design_space)
 
             opt_old = opt
@@ -362,12 +362,12 @@ class SynthesizerPOMDP:
             mem_size += 1
 
             #break
-    
+
     def solve_mdp(self, family):
 
         # solve quotient MDP
         self.quotient.build(family)
-        spec = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
+        spec = self.quotient.check_specification(family.mdp, family.constraint_indices)
 
         # nothing more to do if optimality cannot be improved
         if not spec.optimality_result.can_improve:
@@ -385,7 +385,7 @@ class SynthesizerPOMDP:
 
         result = spec.optimality_result
         selection = result.primary_selection
-        
+
         choice_values = result.primary_choice_values
         expected_visits = result.primary_expected_visits
         # scores = result.primary_scores
@@ -393,7 +393,7 @@ class SynthesizerPOMDP:
 
         return family.mdp, spec, selection, choice_values, expected_visits, scores
 
-    
+
     def strategy_expected_uai(self):
 
 
@@ -417,7 +417,7 @@ class SynthesizerPOMDP:
         # for iteration in range(4):
 
             # print(self.quotient.observation_labels)
-            
+
             print("\n------------------------------------------------------------\n")
 
             # print(action_inconsistencies)
@@ -425,7 +425,7 @@ class SynthesizerPOMDP:
 
             # construct the quotient
             # self.quotient.unfold_memory()
-            
+
             # use inconsistencies to break symmetry
             family = self.quotient.break_symmetry_uai(self.quotient.design_space, action_inconsistencies, memory_inconsistencies)
             # family = self.quotient.design_space
@@ -433,15 +433,15 @@ class SynthesizerPOMDP:
             # solve MDP that corresponds to this restricted family
             mdp,spec,selection,choice_values,expected_visits,hole_scores = self.solve_mdp(family)
             # print(expected_visits)
-            
+
             # check whether that primary direction was not enough ?
             if not spec.optimality_result.can_improve:
                 logger.info("Optimum matches the upper bound of the observation-free MDP.")
                 break
-            
+
             # synthesize optimal assignment
             synthesized_assignment = self.synthesize(family)
-           
+
             # identify hole that we want to improve
             selected_hole = None
             selected_options = None
@@ -463,12 +463,12 @@ class SynthesizerPOMDP:
                     if not holes:
                         continue
                     hole = list(holes)[0]
-                    
+
                     # get choice obtained by the MDP model checker
                     choice_0 = mdp.model.transition_matrix.get_row_group_start(state)
                     mdp_choice = scheduler.get_choice(state).get_deterministic_choice()
                     mdp_choice = choice_0 + mdp_choice
-                    
+
                     # get choice implied by the synthesizer
                     syn_option = synthesized_assignment.hole_options(hole)[0]
                     nci = mdp.model.nondeterministic_choice_indices
@@ -479,12 +479,12 @@ class SynthesizerPOMDP:
                         if choice_color == {hole:syn_option}:
                             syn_choice = choice
                             break
-                    
+
                     # estimate improvement
                     mdp_value = choice_values[mdp_choice]
                     syn_value = choice_values[syn_choice]
                     improvement = abs(syn_value - mdp_value)
-                    
+
                     state_improvement[state] = improvement
 
                 # had there been no new assignment, the hole of interest will
@@ -541,7 +541,7 @@ class SynthesizerPOMDP:
             selected_hole = with_max_score[0]
             # selected_hole = holes_to_inject[0]
             selected_options = selection[selected_hole]
-            
+
             print()
             print("hole scores: ", hole_scores)
             print("selected hole: ", selected_hole)
@@ -561,7 +561,7 @@ class SynthesizerPOMDP:
                     action_inconsistencies[obs] |= actions
                 else:
                     memory_inconsistencies[obs] |= updates
-            
+
             # print status
             opt = "-"
             if self.quotient.specification.optimality.optimum is not None:
@@ -574,7 +574,7 @@ class SynthesizerPOMDP:
             logger.info("Injecting memory into observation {} ...".format(selected_observation))
             self.quotient.increase_memory_size(selected_observation)
             memory_injections += 1
-                
+
 
 
     def run(self, optimum_threshold=None, export_evaluation=None):
@@ -587,9 +587,9 @@ class SynthesizerPOMDP:
             ))
             # start SAYNT
             if self.storm_control.iteration_timeout is not None:
-                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout, 
-                                          paynt_timeout=self.storm_control.paynt_timeout, 
-                                          storm_timeout=self.storm_control.storm_timeout, 
+                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
+                                          paynt_timeout=self.storm_control.paynt_timeout,
+                                          storm_timeout=self.storm_control.storm_timeout,
                                           iteration_limit=0)
             # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
             elif self.storm_control.get_result is not None:
@@ -619,7 +619,7 @@ class SynthesizerPOMDP:
             self.strategy_iterative(unfold_imperfect_only=True)
 
 
-        
+
 
 
 

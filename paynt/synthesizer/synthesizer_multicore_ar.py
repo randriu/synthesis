@@ -46,13 +46,13 @@ def solve_family(args):
             quotient.specification.optimality.optimum = optimum
 
         quotient.build(family)
-        res = quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
+        res = quotient.check_specification(family.mdp, family.constraint_indices)
         family.analysis_result = res
         improving_value = res.improving_value
         improving_assignment = res.improving_assignment
         if improving_assignment is not None:
             improving_assignment = family_to_hole_options(improving_assignment)
-        
+
         subfamilies = []
         if res.can_improve:
             subfamilies = quotient.split(family, Synthesizer.incomplete_search)
@@ -63,7 +63,7 @@ def solve_family(args):
     except:
         logger.error("Worker sub-process encountered an error.")
         return None
-        
+
 
 
 class SynthesizerMultiCoreAR(SynthesizerAR):
@@ -90,7 +90,7 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
         with multiprocessing.Pool(
             # processes=1
         ) as pool:
-            
+
             while families:
 
                 # get current optimum
@@ -106,7 +106,7 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
                 input_families_size = sum([family.size for family in input_families])
                 remaining_families = families[:-split]
                 input_families = [family_to_hole_options(family) for family in input_families]
-                
+
                 inputs = zip(input_families, [optimum] * len(input_families))
 
                 results = pool.map(solve_family, inputs)

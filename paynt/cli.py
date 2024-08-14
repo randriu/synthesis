@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def setup_logger(log_path = None):
     ''' Setup routine for logging. '''
-    
+
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     # root.setLevel(logging.INFO)

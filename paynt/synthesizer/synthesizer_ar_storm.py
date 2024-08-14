@@ -76,7 +76,7 @@ class SynthesizerARStorm(Synthesizer):
 
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
-        res = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
+        res = self.quotient.check_specification(family.mdp, family.constraint_indices)
         family.analysis_result = res
 
         if family.analysis_result.improving_value is not None:
@@ -117,7 +117,7 @@ class SynthesizerARStorm(Synthesizer):
         self.quotient.discarded = 0
 
         satisfying_assignment = None
-        
+
         if self.main_family is not None:
             family = self.main_family
 

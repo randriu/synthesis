@@ -470,7 +470,7 @@ class Quotient:
         return paynt.verification.property_result.SpecificationResult(constraints_result, optimality_result)
 
 
-    def check_specification_for_mdp(self, mdp, constraint_indices=None, double_check=True):
+    def check_specification(self, mdp, constraint_indices=None, double_check=True):
         '''
         Check specification.
         :param specification containing constraints and optimality

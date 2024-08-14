@@ -10,15 +10,15 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     @property
     def method_name(self):
         return "AR"
-    
+
     def verify_family(self, family):
         self.quotient.build(family)
         self.stat.iteration_mdp(family.mdp.states)
-        res = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
+        res = self.quotient.check_specification(family.mdp, family.constraint_indices)
         if res.improving_assignment == "any":
             res.improving_assignment = family
         family.analysis_result = res
-    
+
     def update_optimum(self, family):
         ia = family.analysis_result.improving_assignment
         if family.analysis_result.improving_value is not None:
@@ -57,7 +57,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
         return satisfying_assignment
 
-    
+
     def family_value(self, family):
         ur = family.analysis_result.undecided_result()
         value = ur.primary.value
@@ -65,7 +65,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         if ur.minimizing:
             value *= -1
         return value
-    
+
     def synthesize_one_experimental(self, family):
 
         self.quotient.discarded = 0
@@ -82,7 +82,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                 self.update_optimum(family)
                 if family.analysis_result.improving_assignment is not None:
                     satisfying_assignment = family.analysis_result.improving_assignment
-            
+
             # analyze families once more and keep undecided ones
             undecided_families = []
             for family in families:
@@ -93,7 +93,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                     undecided_families.append(family)
             if not undecided_families:
                 break
-            
+
             # sort families
             undecided_families = sorted(undecided_families, key=lambda f: self.family_value(f), reverse=True)
             # print([self.family_value(f) for f in undecided_families])
@@ -102,6 +102,6 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             family = undecided_families[0]
             subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
             families = subfamilies + undecided_families[1:]
-                
+
 
         return satisfying_assignment
