@@ -31,6 +31,7 @@ void bindings_posmg(py::module &m) {
         .def("set_observation_memory_size", &synthesis::PosmgManager::setObservationMemorySize,
             py::arg("observation"), py::arg("memory_size"))
         .def("get_state_player_indications", &synthesis::PosmgManager::getStatePlayerIndications)
+        .def("get_action_count", &synthesis::PosmgManager::getActionCount, py::arg("state"))
         .def_property_readonly("state_prototype", [](synthesis::PosmgManager& manager) {return manager.statePrototype;})
         .def_property_readonly("state_memory", [](synthesis::PosmgManager& manager) {return manager.stateMemory;})
         .def_property_readonly("observation_memory_size", [](synthesis::PosmgManager& manager) {return manager.optPlayerObservationMemorySize;})

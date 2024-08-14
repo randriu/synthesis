@@ -7,6 +7,7 @@ namespace synthesis {
     {
         this->calculateObservationMap();
         this->calculateObservationSuccesors();
+        this->calculatePrototypeActionCount();
         this->calculateObservationActions();
         this->calculatePrototypeRowIndex();
 
@@ -82,14 +83,26 @@ namespace synthesis {
         }
     }
 
+    void PosmgManager::calculatePrototypeActionCount()
+    {
+        auto prototypeCount = this->posmg.getNumberOfStates();
+        this->prototypeActionCount.resize(prototypeCount);
+
+        for (uint64_t prototype = 0; prototype < prototypeCount; prototype++)
+        {
+            auto actionCount = this->posmg.getTransitionMatrix().getRowGroupSize(prototype);
+            this->prototypeActionCount[prototype] = actionCount;
+        }
+    }
+
     void PosmgManager::calculateObservationActions()
     {
-        for (uint64_t state = 0; state < this->posmg.getNumberOfStates(); state++)
+        for (uint64_t prototype = 0; prototype < this->posmg.getNumberOfStates(); prototype++)
         {
-            if (isOptPlayerState(state))
+            if (isOptPlayerState(prototype))
             {
-                auto observation = this->posmg.getObservation(state);
-                auto actionCount = this->posmg.getTransitionMatrix().getRowGroupSize(state);
+                auto observation = this->posmg.getObservation(prototype);
+                auto actionCount = this->prototypeActionCount[prototype];
                 this->optPlayerObservationActions[observation] = actionCount;
             }
         }
@@ -111,7 +124,6 @@ namespace synthesis {
             }
         }
     }
-
 
 
     void PosmgManager::buildStateSpace()
@@ -303,11 +315,10 @@ namespace synthesis {
         this->rowMemoryOption.resize(this->rowCount);
     }
 
+    // version where each state of non optimising players has it's own action hole
     void PosmgManager::buildDesignSpaceSpurious()
     {
-        // todo
         this->resetDesignSpace();
-
 
         // create action and memory holes for each optimizing player observation
         // store number of available options at each hole
@@ -318,7 +329,7 @@ namespace synthesis {
                 for (uint64_t memory = 0; memory < this->optPlayerObservationMemorySize.at(observation); memory++)
                 {
                     this->actionHoles[observation].push_back(this->holeCount);
-                    this->holeOptionCount.push_back(this->optPlayerObservationActions.at(observation));
+                    // this->holeOptionCount.push_back(this->optPlayerObservationActions.at(observation));
                     this->holeCount++;
                 }
             }
@@ -327,11 +338,24 @@ namespace synthesis {
                 for (uint64_t memory = 0; memory < this->optPlayerObservationMemorySize.at(observation); memory++)
                 {
                     this->memoryHoles[observation].push_back(this->holeCount);
-                    this->holeOptionCount.push_back(this->optPlayerObservationActions.at(observation));
+                    // this->holeOptionCount.push_back(this->optPlayerObservationActions.at(observation));
                     this->holeCount++;
                 }
             }
         }
+
+        // create acton holes for each other player state
+        for (uint64_t state = 0; state < this->stateCount; state++)
+        {
+            auto prototype = this->statePrototype[state];
+
+            if (!isOptPlayerState(prototype) && this->posmg.getTransitionMatrix().getRowGroupSize(prototype) > 1)
+            {
+                this->nonOptActionHoles[state] = this->holeCount;
+                this->holeCount++;
+            }
+        }
+
 
         for (uint64_t state = 0; state < this->stateCount; state++)
         {
@@ -349,7 +373,16 @@ namespace synthesis {
                     auto rowIndex = this->prototypeRowIndex[prototypeRow];
                     this->rowActionOption[row] = rowIndex;
                 }
-                else // other player or only one action
+                else if (!isOptPlayerState(prototype) && this->posmg.getTransitionMatrix().getRowGroupSize(prototype) > 1)
+                {
+                    auto actionHole = this->nonOptActionHoles.at(state);
+                    this->rowActionHole[row] = actionHole;
+
+                    auto prototypeRow = this->rowPrototype[row];
+                    auto rowIndex = this->prototypeRowIndex[prototypeRow];
+                    this->rowActionOption[row] = rowIndex;
+                }
+                else // only one action
                 {
                     this->rowActionHole[row] = this->holeCount;
                 }
@@ -387,6 +420,12 @@ namespace synthesis {
 
     bool PosmgManager::isOptPlayerState(uint64_t state){
         return this->posmg.getStatePlayerIndications()[state] == this->optimizingPlayer;
+    }
+
+    uint64_t PosmgManager::getActionCount(uint64_t state)
+    {
+        auto prototype = this->statePrototype[state];
+        return this->prototypeActionCount[prototype];
     }
 
     bool PosmgManager::contains(std::vector<uint64_t> v, uint64_t elem)

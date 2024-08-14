@@ -26,6 +26,14 @@ class PosmgManager {
          */
         std::vector<uint64_t> getStatePlayerIndications();
 
+        /**
+         * @brief For quotient state return number of available actions
+         *
+         * @param state Quotient state
+         * @return uint64_t
+         */
+        uint64_t getActionCount(uint64_t state);
+
 
         // For each state contains its prototype state (reverse of prototypeDuplicates)
         std::vector<uint64_t> statePrototype;
@@ -46,11 +54,17 @@ class PosmgManager {
         // For each optimizing player observation contains number of available actions
         std::unordered_map<uint32_t, uint64_t> optPlayerObservationActions;
 
+        // For each prototype state number of available actions
+        std::vector<uint64_t> prototypeActionCount;
+
         // Total number of holes
         uint64_t holeCount;
 
         // For each optimizing player observation a vector of action holes
         std::unordered_map<uint32_t, std::vector<uint64_t>> actionHoles;
+
+        // For each non optimizin player state an action hole
+        std::unordered_map<uint64_t, uint64_t> nonOptActionHoles;
 
         // For each optimizing player observation a vector of memory holes
         std::unordered_map<uint32_t, std::vector<uint64_t>> memoryHoles;
@@ -85,6 +99,11 @@ class PosmgManager {
          * @brief For each optimizing player observation calculate set of all succesor states
          */
         void calculateObservationSuccesors();
+
+        /**
+         * @brief For each prototype state calculate number of available actions
+         */
+        void calculatePrototypeActionCount();
 
         /**
          * @brief For each optimizing player observation calculate number of available actions.

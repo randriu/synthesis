@@ -34,6 +34,8 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         self.actions_at_opt_player_observation = None
         # action labels corresponding to ^
         self.action_labels_at_opt_player_observation = None
+        # action labels at each posmg state
+        self.action_labels_at_posmg_state = None
         # number of observations of optimizing player
         self.opt_player_observation_count = self.posmg.get_p0_observation_count()
         # for each optimizing player observation, number of states associated with it
@@ -73,23 +75,29 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
                     continue
                 self.actions_at_opt_player_observation[obs] = self.posmg.get_nr_available_actions(state)
 
+        # collect lables of action available for each prototype
+        self.action_labels_at_posmg_state = [[] for state in range(self.posmg.nr_states)]
+        for state in range(self.posmg.nr_states):
+            if self.action_labels_at_posmg_state[state] != []:
+                continue
+            actions = self.posmg.get_nr_available_actions(state)
+            for offset in range(actions):
+                choice = self.posmg.get_choice_index(state, offset)
+                labels = self.posmg.choice_labeling.get_labels_of_choice(choice)
+                assert len(labels) <= 1, "expected at most 1 label"
+                if len(labels) == 0:
+                    label = self.EMPTY_LABEL
+                else:
+                    label = list(labels)[0]
+                self.action_labels_at_posmg_state[state].append(label)
+
         # collect labels of actions available at each observation
-        self.action_labels_at_opt_player_observation = {obs:[] for obs in self.opt_player_observations}
+        self.action_labels_at_opt_player_observation = {}
         for state in range(self.posmg.nr_states):
             if state_players[state] == self.optimizing_player:
                 obs = state_obs[state]
-                if self.action_labels_at_opt_player_observation[obs] != []:
-                    continue
-                actions = self.posmg.get_nr_available_actions(state)
-                for offset in range(actions):
-                    choice = self.posmg.get_choice_index(state,offset)
-                    labels = self.posmg.choice_labeling.get_labels_of_choice(choice)
-                    assert len(labels) <= 1, "expected at most 1 label"
-                    if len(labels) == 0:
-                        label = self.EMPTY_LABEL
-                    else:
-                        label = list(labels)[0]
-                    self.action_labels_at_opt_player_observation[obs].append(label)
+                labels = self.action_labels_at_posmg_state[state]
+                self.action_labels_at_opt_player_observation[obs] = labels
 
         # mark perfect observations
         #self.opt_player_observation_states = [0 for _ in range(self.opt_player_observation_count)]
@@ -99,18 +107,10 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
                 obs = state_obs[state]
                 self.opt_player_observation_states[obs] += 1
 
-        #self.set_imperfect_memory_size(PosmgQuotient.initial_memory_size)
-        self.set_imperfect_memory_size(2)
-
-        # result = payntbind.synthesis.smg_model_checking(smg, specification[0].raw_formula,
-                                                        # only_initial_states=False, set_produce_schedulers=True,
-                                                        # env=paynt.verification.property.Property.environment)
-
-        #vals = result.values[smg.initial_states[0]]
-        # vals2 = result.get_values()[smg.initial_states[0]]
+        self.set_imperfect_memory_size(PosmgQuotient.initial_memory_size)
+        # self.set_imperfect_memory_size(2)
 
 
-        exit()
 
     def set_manager_memory_vector(self):
         for obs, memory in self.opt_player_observation_memory_size.items():
@@ -124,13 +124,15 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
 
 
 
-    def create_hole_name(self, obs, mem, is_action_hole):
+    def create_hole_name(self, player, value, mem, is_action_hole):
         category = "A" if is_action_hole else "M"
         # obs_label = self.observation_labels[obs] # TODO maybe we will have this in the future
-        obs_label = obs
-        return "{}(P{},{},{})".format(category,self.optimizing_player,obs_label,mem)
+        if player == self.optimizing_player:
+            return "{}(P{},O{},M{})".format(category,player,value,mem)
+        else:
+            return "{}(P{},S{},M{})".format(category,player,value,mem)
 
-
+    # version where each state of non optimising players has it's own action hole
     def create_coloring(self):
 
         # create holes
@@ -148,7 +150,7 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
                 option_labels = self.action_labels_at_opt_player_observation[opt_player_obs]
                 for mem in range(self.opt_player_observation_memory_size[opt_player_obs]):
                     hole_indices.append(family.num_holes)
-                    name = self.create_hole_name(opt_player_obs,mem,True)
+                    name = self.create_hole_name(self.optimizing_player,opt_player_obs,mem,True)
                     family.add_hole(name,option_labels)
                     # self.is_action_hole.append(True)
             # self.observation_action_holes.append(hole_indices)
@@ -159,11 +161,23 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
             if num_updates > 1:
                 option_labels = [str(x) for x in range(num_updates)]
                 for mem in range(self.opt_player_observation_memory_size[opt_player_obs]):
-                    name = self.create_hole_name(opt_player_obs,mem,False)
+                    name = self.create_hole_name(self.optimizing_player,opt_player_obs,mem,False)
                     hole_indices.append(family.num_holes)
                     family.add_hole(name,option_labels)
                     # self.is_action_hole.append(False)
             # self.observation_memory_holes.append(hole_indices)
+
+        for state in range(self.quotient_mdp.nr_states):
+            quotient_state_player_indication = self.posmg_manager.get_state_player_indications()
+            if quotient_state_player_indication[state] != self.optimizing_player:
+                num_actions = self.posmg_manager.get_action_count(state)
+                if num_actions > 1:
+                    posmg_state = self.posmg_manager.state_prototype[state]
+                    mem = self.posmg_manager.state_memory[state]
+                    option_labels = self.action_labels_at_posmg_state[posmg_state]
+                    hole_indices.append(family.num_holes)
+                    name = self.create_hole_name(quotient_state_player_indication[state],posmg_state,mem,True)
+                    family.add_hole(name,option_labels)
 
         # create the coloring
         assert self.posmg_manager.num_holes == family.num_holes
