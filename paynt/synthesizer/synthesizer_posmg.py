@@ -30,7 +30,7 @@ class SynthesizerPosmg:
         synthesizer = self.synthesizer(self.quotient)
         family.constraint_indices = self.quotient.design_space.constraint_indices
         assignment = synthesizer.synthesize(family, keep_optimum=True, print_stats=print_stats)
-        self.total_iters += synthesizer.stat.iterations_mdp
+        self.total_iters += synthesizer.stat.iterations_game
         return assignment
 
     def strategy_iterative(self):
@@ -43,7 +43,8 @@ class SynthesizerPosmg:
         while True:
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
 
-            self.quotient.set_imperfect_memory_size(mem_size)
+            if mem_size > self.quotient.current_memory_size:
+                self.quotient.set_imperfect_memory_size(mem_size)
 
             self.synthesize(self.quotient.design_space)
 
@@ -51,7 +52,7 @@ class SynthesizerPosmg:
             opt = self.quotient.specification.optimality.optimum
 
             mem_size += 1
-            break
+            # break
 
 
     def run(self, optimum_threshold=None, export_evaluation=None):

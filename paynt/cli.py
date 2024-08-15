@@ -5,6 +5,7 @@ import paynt.parser.sketch
 import paynt.quotient
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
+import paynt.quotient.posmg
 import paynt.quotient.storm_pomdp_control
 
 import paynt.synthesizer.all_in_one
@@ -167,6 +168,7 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
+    paynt.quotient.posmg.PosmgQuotient.initial_memory_size = fsc_memory_size
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.split_wrt_mdp_scheduler = mdp_split_wrt_mdp
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices

@@ -1,3 +1,4 @@
+import paynt.quotient.posmg
 import paynt.synthesizer.synthesizer
 import paynt.quotient.pomdp
 import paynt.verification.property_result
@@ -13,7 +14,10 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
     def verify_family(self, family):
         self.quotient.build(family)
-        self.stat.iteration_mdp(family.mdp.states)
+        if isinstance(self.quotient, paynt.quotient.posmg.PosmgQuotient):
+            self.stat.iteration_game(family.mdp.states)
+        else:
+            self.stat.iteration_mdp(family.mdp.states)
         res = self.quotient.check_specification(family.mdp, family.constraint_indices)
         if res.improving_assignment == "any":
             res.improving_assignment = family

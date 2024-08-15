@@ -108,7 +108,7 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
                 self.opt_player_observation_states[obs] += 1
 
         self.set_imperfect_memory_size(PosmgQuotient.initial_memory_size)
-        # self.set_imperfect_memory_size(2)
+        self.current_memory_size = PosmgQuotient.initial_memory_size
 
 
 
@@ -211,7 +211,7 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         # self.observation_memory_holes = None
         # self.is_action_hole = None
 
-        logger.debug("unfolding {}-FSC template into one-sided POSMG...".format(max(self.opt_player_observation_memory_size)))
+        logger.debug("unfolding {}-FSC template into one-sided POSMG...".format(max(self.opt_player_observation_memory_size.values())))
         self.quotient_mdp = self.posmg_manager.construct_mdp()
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")

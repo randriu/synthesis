@@ -121,6 +121,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # do initial unfolding
         self.set_imperfect_memory_size(PomdpQuotient.initial_memory_size)
         # self.set_global_memory_size(PomdpQuotient.initial_memory_size)
+        self.current_memory_size = PomdpQuotient.initial_memory_size
 
 
     @property

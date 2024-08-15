@@ -346,10 +346,11 @@ class SynthesizerPOMDP:
         while True:
 
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
-            if unfold_imperfect_only:
-                self.quotient.set_imperfect_memory_size(mem_size)
-            else:
-                self.quotient.set_global_memory_size(mem_size)
+            if mem_size > self.quotient.current_memory_size:
+                if unfold_imperfect_only:
+                    self.quotient.set_imperfect_memory_size(mem_size)
+                else:
+                    self.quotient.set_global_memory_size(mem_size)
 
             self.synthesize(self.quotient.design_space)
 
