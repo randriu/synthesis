@@ -33,7 +33,6 @@ class Synthesizer:
         import paynt.synthesizer.policy_tree
         import paynt.synthesizer.decision_tree
 
-
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
@@ -51,7 +50,6 @@ class Synthesizer:
                 return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
             else:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
-
 
         # synthesis engines
         if method == "onebyone":
@@ -146,7 +144,7 @@ class Synthesizer:
         
         self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
-        # logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
+        logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
         self.stat.start(family)
         assignment = self.synthesize_one(family)
         if assignment is not None and assignment.size > 1 and not return_all:

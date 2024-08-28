@@ -34,14 +34,11 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
     def synthesize_one(self, family):
         # return self.synthesize_one_experimental(family)
-
         satisfying_assignment = None
         families = [family]
 
         while families:
-
             family = families.pop(-1)
-
             self.verify_family(family)
             self.update_optimum(family)
             if family.analysis_result.improving_assignment is not None:
@@ -49,14 +46,13 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             if family.analysis_result.can_improve == False:
                 self.explore(family)
                 continue
-
             # undecided
             subfamilies = self.quotient.split(family)
             families = families + subfamilies
 
         return satisfying_assignment
 
-    
+
     def family_value(self, family):
         ur = family.analysis_result.undecided_result()
         value = ur.primary.value
@@ -64,7 +60,8 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         if ur.minimizing:
             value *= -1
         return value
-    
+
+
     def synthesize_one_experimental(self, family):
 
         satisfying_assignment = None

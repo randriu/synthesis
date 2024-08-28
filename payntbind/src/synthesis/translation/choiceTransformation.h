@@ -14,6 +14,12 @@ namespace synthesis {
 const std::string NO_ACTION_LABEL = "__no_label__";
 
 /**
+ * Return for each state a list of its state destinations.
+ */
+template<typename ValueType>
+std::vector<std::vector<uint64_t>> computeChoiceDestinations(storm::models::sparse::Model<ValueType> const& model);
+
+/**
  * Add \p NO_ACTION_LABEL label to any choice that does not have any.
  */
 template<typename ValueType>

@@ -11,6 +11,18 @@
 namespace synthesis {
 
 template<typename ValueType>
+std::vector<std::vector<uint64_t>> computeChoiceDestinations(storm::models::sparse::Model<ValueType> const& model) {
+    uint64_t num_choices = model.getNumberOfChoices();
+    std::vector<std::vector<uint64_t>> choice_destinations(num_choices);
+    for(uint64_t choice = 0; choice < num_choices; ++choice) {
+        for(auto const& entry: model.getTransitionMatrix().getRow(choice)) {
+            choice_destinations[choice].push_back(entry.getColumn());
+        }
+    }
+    return choice_destinations;
+}
+
+template<typename ValueType>
 void addMissingChoiceLabelsLabeling(
     storm::models::sparse::Model<ValueType> const& model,
     storm::models::sparse::ChoiceLabeling& choice_labeling
@@ -305,6 +317,8 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInAbsorbi
     return synthesis::removeAction(*model_absorbing_enabled, NO_ACTION_LABEL, absorbing_states);
 }
 
+template std::vector<std::vector<uint64_t>> computeChoiceDestinations<double>(
+    storm::models::sparse::Model<double> const& model);
 template std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels<double>(
     storm::models::sparse::Model<double> const& model);
 template void addMissingChoiceLabelsLabeling<double>(

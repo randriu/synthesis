@@ -11,6 +11,7 @@ import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
+import paynt.synthesizer.decision_tree
 
 import click
 import sys
@@ -117,13 +118,18 @@ def setup_logger(log_path = None):
     help="memory limit (MB) for the all-in-one abstraction")
 
 @click.option("--mdp-split-wrt-mdp", is_flag=True, default=False,
-    help="# if set, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used")
+    help="if set, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used")
 @click.option("--mdp-discard-unreachable-choices", is_flag=True, default=False,
-    help="# if set, unreachable choices will be discarded from the splitting scheduler")
+    help="if set, unreachable choices will be discarded from the splitting scheduler")
 @click.option("--mdp-use-randomized-abstraction", is_flag=True, default=False,
-    help="# if set, randomized abstraction guess-and-verify will be used instead of game abstraction;" +
+    help="if set, randomized abstraction guess-and-verify will be used instead of game abstraction;" +
     " MDP abstraction scheduler will be used for splitting"
 )
+
+@click.option("--tree-depth", default=0, type=int,
+    help="decision tree synthesis: tree depth")
+@click.option("--tree-enumeration", is_flag=True, default=False,
+    help="decision tree synthesis: if set, all trees of size at most tree_depth will be enumerated")
 
 @click.option(
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for cassandra models",
@@ -147,6 +153,7 @@ def paynt_run(
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one, all_in_one_maxmem,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
+    tree_depth, tree_enumeration,
     constraint_bound,
     ce_generator,
     profiling
@@ -168,6 +175,9 @@ def paynt_run(
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.split_wrt_mdp_scheduler = mdp_split_wrt_mdp
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_randomized_abstraction = mdp_use_randomized_abstraction
+
+    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
+    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
 
     storm_control = None
     if storm_pomdp:
@@ -193,7 +203,7 @@ def paynt_run(
 
 def print_profiler_stats(profiler):
     stats = pstats.Stats(profiler)
-    NUM_LINES = 20
+    NUM_LINES = 10
 
     logger.debug("cProfiler info:")
     stats.sort_stats('tottime').print_stats(NUM_LINES)

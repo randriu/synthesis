@@ -10,6 +10,7 @@
 
 void bindings_translation(py::module& m) {
 
+    m.def("computeChoiceDestinations", &synthesis::computeChoiceDestinations<double>);
     m.def("addMissingChoiceLabels", &synthesis::addMissingChoiceLabelsModel<double>);
     m.def("assertChoiceLabelingIsCanonic", &synthesis::assertChoiceLabelingIsCanonic);
     m.def("extractActionLabels", &synthesis::extractActionLabels<double>);

@@ -754,7 +754,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         state_submdp_to_value = result.result.get_values()
 
         # map states of a sub-MDP to the states of the quotient MDP to the state-memory pairs of the POMDPxFSC
-        import collections
         state_memory_value = collections.defaultdict(lambda: None)
         for submdp_state,value in enumerate(state_submdp_to_value):
             mdp_state = submdp.quotient_state_map[submdp_state]

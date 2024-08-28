@@ -5,10 +5,6 @@
 
 namespace synthesis {
 
-Family::Family() {
-    // left intentionally blank
-}
-
 Family::Family(Family const& other) {
     hole_options = std::vector<std::vector<uint64_t>>(other.numHoles());
     hole_options_mask = std::vector<BitVector>(other.numHoles());
@@ -18,30 +14,20 @@ Family::Family(Family const& other) {
     }
 }
 
-
 uint64_t Family::numHoles() const {
     return hole_options.size();
 }
 
 uint64_t Family::addHole(uint64_t num_options) {
-    uint64_t hole_index = numHoles();
+    uint64_t hole = numHoles();
     hole_options_mask.push_back(BitVector(num_options,true));
     std::vector<uint64_t> options(num_options);
     for(uint64_t option=0; option<num_options; ++option) {
-        options[option]=option;
+        options[option] = option;
     }
     hole_options.push_back(options);
-    return hole_index;
+    return hole;
 }
-
-std::vector<uint64_t> const& Family::holeOptions(uint64_t hole) const {
-    return hole_options[hole];
-}
-
-BitVector const& Family::holeOptionsMask(uint64_t hole) const {
-    return hole_options_mask[hole];
-}
-
 
 void Family::holeSetOptions(uint64_t hole, std::vector<uint64_t> const& options) {
     hole_options[hole] = options;
@@ -59,8 +45,13 @@ void Family::holeSetOptions(uint64_t hole, BitVector const& options) {
 }
 
 
+std::vector<uint64_t> const& Family::holeOptions(uint64_t hole) const {
+    return hole_options[hole];
+}
 
-
+BitVector const& Family::holeOptionsMask(uint64_t hole) const {
+    return hole_options_mask[hole];
+}
 
 uint64_t Family::holeNumOptions(uint64_t hole) const {
     return hole_options[hole].size();
@@ -68,6 +59,23 @@ uint64_t Family::holeNumOptions(uint64_t hole) const {
 
 uint64_t Family::holeNumOptionsTotal(uint64_t hole) const {
     return hole_options_mask[hole].size();
+}
+
+/*uint128_t Family::size() const {
+    uint128_t size = 1;
+    for(uint64_t hole = 0; hole < numHoles(); ++hole) {
+        size *= holeNumOptions(hole);
+    }
+    return size;
+}*/
+
+bool Family::isAssignment() const {
+    for(uint64_t hole = 0; hole < numHoles(); ++hole) {
+        if(holeNumOptions(hole) > 1) {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Family::holeContains(uint64_t hole, uint64_t option) const {

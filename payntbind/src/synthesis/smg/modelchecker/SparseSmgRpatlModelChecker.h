@@ -1,8 +1,17 @@
 #pragma once
 
-/* 
- * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+/**
+ * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
+ * Storm version.
  */
+
+/**
+ * Note: this model checker implementation is not compatible with the old version of Storm that uses discounted rewards
+ * due to the removed RewardMeasureType (see https://github.com/moves-rwth/storm/pull/575).
+ * Uncomment the line below to DISABLE Smg model checker, thus enabling the compilation of the old Storm that implements
+ * discounted rewards.
+ */
+// #define STORM_VERSION_DISCOUNTED_REWARD
 
 #include <map>
 #include <functional>
@@ -16,6 +25,7 @@ namespace synthesis {
     template<class SparseSmgModelType>
     class SparseSmgRpatlModelChecker : public storm::modelchecker::SparsePropositionalModelChecker<SparseSmgModelType> {
     public:
+
         typedef typename SparseSmgModelType::ValueType ValueType;
         typedef typename SparseSmgModelType::RewardModelType RewardModelType;
 
@@ -30,6 +40,7 @@ namespace synthesis {
         // The implemented methods of the AbstractModelChecker interface.
         bool canHandle(storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& checkTask) const override;
 
+        #ifndef STORM_VERSION_DISCOUNTED_REWARD
         std::unique_ptr<storm::modelchecker::CheckResult> checkGameFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::GameFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> checkProbabilityOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::ProbabilityOperatorFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> checkRewardOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::RewardOperatorFormula, ValueType> const& checkTask) override;
@@ -45,6 +56,8 @@ namespace synthesis {
 
         std::unique_ptr<storm::modelchecker::CheckResult> computeLongRunAverageProbabilities(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::StateFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> computeLongRunAverageRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::LongRunAverageRewardFormula, ValueType> const& checkTask) override;
+
+        #endif // STORM_VERSION_DISCOUNTED_REWARD
 
     private:
         storm::storage::BitVector statesOfCoalition;

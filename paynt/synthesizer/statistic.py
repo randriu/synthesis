@@ -151,7 +151,7 @@ class Statistic:
         
         spec = self.quotient.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
-            optimum = round(spec.optimality.optimum,3)
+            optimum = round(spec.optimality.optimum,4)
             ret_str += f", opt = {optimum}"
         return ret_str
 

@@ -19,39 +19,72 @@ using BitVector = storm::storage::BitVector;
 class TreeNode {
 public:
 
-    class HoleInfo {
+    class Hole {
     public:
+        /** Unique hole identifier. */
         uint64_t hole;
+        /** Hole name. */
         std::string name;
-        z3::expr solver_variable;
-        std::string solver_string;
-        z3::expr restriction;
+        /** True if the variable is of interval type, else if it is of enumeration type. */
+        bool is_interval_type;
 
-        HoleInfo(z3::context& ctx);
-        int64_t getModelValue(z3::model const& model) const {
-            return model.eval(solver_variable).get_numeral_int64();
-        }
+        z3::expr solver_variable;
+        std::string solver_string_domain;
+
+        z3::expr restriction;
+        std::string solver_string_restriction;
+
+        Hole(bool is_interval_type, z3::context& ctx);
+        void createSolverVariable();
+        uint64_t getModelValue(z3::model const& model) const;
+
+        z3::expr domainEncoding(Family const& subfamily) const;
+        void addDomainEncoding(Family const& subfamily, z3::solver& solver) const;
+
+    protected:
+        /** Express option domain as an interval. */
+        z3::expr domainInterval(Family const& subfamily) const;
+        /** Express option domain as enumeration. */
+        z3::expr domainEnumeration(Family const& subfamily) const;
     };
 
+    /** Verify expression in the using provided solver. The solver may already contain some assertions. */
     static bool verifyExpression(z3::solver & solver, z3::expr const& expr);
 
+    /** Unique node identifier. */
     uint64_t identifier;
+    /** Solver context. */
     z3::context& ctx;
+    /** List of variable names. */
+    std::vector<std::string> const& variable_name;
+    /** List of variable domains, used to derive number of hole options. */
+    std::vector<std::vector<int64_t>> const& variable_domain;
 
+    /** Parent node, NULL for the root node. */
     std::shared_ptr<TreeNode> parent;
+    /** Child node if the condition holds, NULL for the terminal node. */
     std::shared_ptr<TreeNode> child_true;
+    /** Child node if the condition does not hold, NULL for the terminal node. */
     std::shared_ptr<TreeNode> child_false;
 
     /** Depth of this node in the tree. */
     uint64_t depth;
-    /** Every possible path (a sequence of steps) that can be taken from this node. */
-    std::vector<std::vector<std::pair<bool,uint64_t>>> paths;
+    /** Every possible path (a sequence of condition steps) that can be taken from this node. */
+    std::vector<std::vector<bool>> paths;
 
-    TreeNode(uint64_t identifier, z3::context& ctx);
+    /** Create a tree node with the unique identifier. */
+    TreeNode(
+        uint64_t identifier, z3::context& ctx,
+        std::vector<std::string> const& variable_name,
+        std::vector<std::vector<int64_t>> const& variable_domain
+    );
+    /** Number of program variables. */
+    const uint64_t numVariables() const;
 
     /** Store pointers to parent and children, if exist. */
     void createTree(
-        std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list, std::vector<std::shared_ptr<TreeNode>> & tree
+        std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
+        std::vector<std::shared_ptr<TreeNode>> & tree
     );
 
     /** Return true if this node has no parent. */
@@ -60,102 +93,172 @@ public:
     bool isTerminal() const;
     /** Return true if this node if a true child of its parent. */
     bool isTrueChild() const;
+    /** Retrieve true child of this node if the condition holds, get false child otherwise. */
+    std::shared_ptr<TreeNode> getChild(bool condition) const;
+    /** Execute the path and the corresponding node of the tree. */
+    const TreeNode *getNodeOfPath(std::vector<bool> const& path, uint64_t step) const;
 
     /** Create all holes and solver variables associated with this node. */
     virtual void createHoles(Family& family) {}
     /** Collect name and type (action,decision, or variable) of each hole. */
     virtual void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {}
-    /** Create expressions that describe steps from this node. */
-    virtual void createSteps(z3::expr_vector const& substitution_variables) {}
+
     /** Create a list of paths from this node. */
     virtual void createPaths(z3::expr_vector const& substitution_variables) {}
-    /** Convert path to the path expression. */
-    virtual void loadPathExpression(std::vector<std::pair<bool,uint64_t>> const& path, z3::expr_vector & path_expression) const {}
+    /** Create expression for a path. */
+    virtual void loadPathExpression(
+        std::vector<bool> const& path, z3::expr_vector & expression
+    ) const {}
+
     /** Add encoding of hole option in the given family. */
     virtual void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const {}
-
-    /** TODO */
-    virtual void loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {}
-    /** TODO */
-    virtual void loadHoleAssignmentOfPath(
-        z3::solver & solver,
-        std::vector<std::pair<bool,uint64_t>> const& path, z3::expr_vector const& path_expression,
-        std::vector<int64_t> const& choice_substitution,
-        z3::expr_vector const& substitution_variables,
-        z3::expr_vector const& choice_substitution_expr,
+    /** Check whether the path is enabled in the given state for the given subfamily. */
+    virtual bool isPathEnabledInState(
+        std::vector<bool> const& path,
+        Family const& subfamily,
+        std::vector<uint64_t> const& state_valuation
+    ) const {return false;};
+    
+    /** Extract hole assignments used in the SMT model. */
+    virtual void loadHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
+    ) const {}
+    virtual void unsatCoreAnalysisMeta(
+        Family const& subfamily,
+        std::vector<bool> const& path,
+        std::vector<uint64_t> const& state_valuation,
+        uint64_t path_action, bool action_enabled,
         std::vector<std::set<uint64_t>> & hole_options
     ) const {}
-    
+
 };
+
 
 class TerminalNode: public TreeNode {
 public:
     const uint64_t num_actions;
-    HoleInfo action_hole;
+    Hole action_hole;
     z3::expr action_expr;
 
-    TerminalNode(uint64_t identifier, z3::context & ctx, uint64_t num_actions);
+    TerminalNode(
+        uint64_t identifier, z3::context & ctx,
+        std::vector<std::string> const& variable_name,
+        std::vector<std::vector<int64_t>> const& variable_domain,
+        uint64_t num_actions
+    );
 
     void createHoles(Family& family) override;
     void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
-    void createSteps(z3::expr_vector const& substitution_variables) override;
     void createPaths(z3::expr_vector const& substitution_variables) override;
-    void loadPathExpression(std::vector<std::pair<bool,uint64_t>> const& path, z3::expr_vector & path_expression) const override;
+    void loadPathExpression(
+        std::vector<bool> const& path, z3::expr_vector & expression
+    ) const override;
+
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
-    void loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const override;
-    void loadHoleAssignmentOfPath(
-        z3::solver & solver,
-        std::vector<std::pair<bool,uint64_t>> const& path, z3::expr_vector const& path_expression,
-        std::vector<int64_t> const& choice_substitution,
-        z3::expr_vector const& substitution_variables,
-        z3::expr_vector const& choice_substitution_expr,
+    bool isPathEnabledInState(
+        std::vector<bool> const& path,
+        Family const& subfamily,
+        std::vector<uint64_t> const& state_valuation
+    ) const override;
+
+    void loadHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
+    ) const override;
+    void unsatCoreAnalysisMeta(
+        Family const& subfamily,
+        std::vector<bool> const& path,
+        std::vector<uint64_t> const& state_valuation,
+        uint64_t path_action, bool action_enabled,
         std::vector<std::set<uint64_t>> & hole_options
     ) const override;
 };
 
 
-class InnerNode: public TreeNode {
+class InnerNodeSpecific: public TreeNode {
 public:
 
-    std::vector<std::string> const& variable_name;
-    std::vector<std::vector<int64_t>> const& variable_domain;
+    uint64_t variable;
+    Hole variable_hole;
 
-    HoleInfo decision_hole;
-    std::vector<HoleInfo> variable_hole;
-    std::vector<z3::expr> steps_true;
-    std::vector<z3::expr> steps_false;
+    z3::expr step_true;
+    z3::expr step_false;
 
-    InnerNode(
-        uint64_t identifier,
-        z3::context & ctx,
+    InnerNodeSpecific(
+        uint64_t identifier, z3::context & ctx,
+        std::vector<std::string> const& variable_name,
+        std::vector<std::vector<int64_t>> const& variable_domain,
+        uint64_t variable
+    );
+
+    void createHoles(Family& family) override;
+    void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
+    void createPaths(z3::expr_vector const& substitution_variables) override;
+    void loadPathExpression(
+        std::vector<bool> const& path, z3::expr_vector & expression
+    ) const override;
+
+    void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
+    bool isPathEnabledInState(
+        std::vector<bool> const& path,
+        Family const& subfamily,
+        std::vector<uint64_t> const& state_valuation
+    ) const override;
+
+    void loadHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
+    ) const override;
+    void unsatCoreAnalysisMeta(
+        Family const& subfamily,
+        std::vector<bool> const& path,
+        std::vector<uint64_t> const& state_valuation,
+        uint64_t path_action, bool action_enabled,
+        std::vector<std::set<uint64_t>> & hole_options
+    ) const override;
+};
+
+
+class InnerNodeGeneric: public TreeNode {
+public:
+
+    Hole decision_hole;
+    std::vector<Hole> variable_hole;
+
+    z3::expr step_true;
+    z3::expr step_false;
+
+    InnerNodeGeneric(
+        uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain
     );
 
-    const uint64_t numVariables() const;
-    /** Convert variable value to the corresponding hole option via variable domain. */
-    const uint64_t variableValueToHoleOption(uint64_t variable, int64_t value) const;
-
-    /** Retrieve true child of this node if the condition holds, get false child otherwise. */
-    std::shared_ptr<TreeNode> getChild(bool condition) const;
-    std::vector<z3::expr> const& getSteps(bool condition) const;
-
     void createHoles(Family& family) override;
     void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
-    void createSteps(z3::expr_vector const& substitution_variables) override;
     void createPaths(z3::expr_vector const& substitution_variables) override;
-    void loadPathExpression(std::vector<std::pair<bool,uint64_t>> const& path, z3::expr_vector & path_expression) const override;
-    void addFamilyEncoding(Family const& family, z3::solver & solver) const override;
-    void loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const override;
-    void loadHoleAssignmentOfPath(
-        z3::solver & solver,
-        std::vector<std::pair<bool,uint64_t>> const& path, z3::expr_vector const& path_expression,
-        std::vector<int64_t> const& choice_substitution,
-        z3::expr_vector const& substitution_variables,
-        z3::expr_vector const& choice_substitution_expr,
-        std::vector<std::set<uint64_t>> & hole_options
+    void loadPathExpression(
+        std::vector<bool> const& path, z3::expr_vector & expression
     ) const override;
 
+    void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
+    bool isPathEnabledInState(
+        std::vector<bool> const& path,
+        Family const& subfamily,
+        std::vector<uint64_t> const& state_valuation
+    ) const override;
+
+    void loadHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
+    ) const override;
+    void unsatCoreAnalysisMeta(
+        Family const& subfamily,
+        std::vector<bool> const& path,
+        std::vector<uint64_t> const& state_valuation,
+        uint64_t path_action, bool action_enabled,
+        std::vector<std::set<uint64_t>> & hole_options
+    ) const override;
 };
+
+
+
 
 }

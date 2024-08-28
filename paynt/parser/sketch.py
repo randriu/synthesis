@@ -2,7 +2,6 @@ import stormpy
 import payntbind
 
 import paynt.models.model_builder
-
 import paynt.quotient.quotient
 import paynt.quotient.mdp
 import paynt.quotient.pomdp
@@ -15,11 +14,11 @@ import paynt.verification.property
 from paynt.parser.prism_parser import PrismParser
 
 import uuid
+import os
+import json
 
 import logging
 logger = logging.getLogger(__name__)
-
-import os
 
 
 def substitute_suffix(string, delimiter, replacer):
@@ -88,7 +87,17 @@ class Sketch:
                 explicit_quotient = paynt.models.model_builder.ModelBuilder.from_drn(sketch_path)
                 specification = PrismParser.parse_specification(properties_path, relative_error)
                 filetype = "drn"
-            except:
+                project_path = os.path.dirname(sketch_path)
+                valuations_path = project_path + "/state_valuations.json"
+                state_valuations = None
+                if os.path.exists(valuations_path) and os.path.isfile(valuations_path):
+                    with open(valuations_path) as file:
+                        state_valuations = json.load(file)
+                if state_valuations is not None:
+                    logger.info(f"found state_valuations.json, adding to the model...")
+                    explicit_quotient = payntbind.synthesis.addStateValuations(explicit_quotient,state_valuations)
+            except Exception as e:
+                print(e)
                 pass
         if filetype is None:
             try:
@@ -115,9 +124,8 @@ class Sketch:
 
         assert filetype is not None, "unknow format of input file"
         logger.info("sketch parsing OK")
-             
-        paynt.verification.property.Property.initialize()
 
+        paynt.verification.property.Property.initialize()
         updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
         if updated is not None: explicit_quotient = updated
         if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
@@ -139,7 +147,7 @@ class Sketch:
             exit(0)
 
         return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager)
-    
+
 
     @classmethod
     def load_sketch_as_all_in_one(cls, sketch_path, properties_path):

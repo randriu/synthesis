@@ -65,7 +65,6 @@ class Quotient:
         choice_map = submodel_construction.new_to_old_action_mapping.copy()
         return model,state_map,choice_map
 
- 
     def restrict_quotient(self, choices):
         return self.restrict_mdp(self.quotient_mdp, choices)        
     
@@ -144,8 +143,7 @@ class Quotient:
         hole_selection = self.coloring.collectHoleOptions(choices)
         return hole_selection
 
-    
-    
+
     def choice_values(self, mdp, prop, state_values):
         '''
         Get choice values after model checking MDP against a property.
@@ -437,7 +435,7 @@ class Quotient:
                 result.primary_selection,consistent = self.scheduler_is_consistent(mdp, opt, result.primary.result)
                 if not consistent:
                     result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
-                        self.scheduler_get_quantitative_values(mdp, opt, result.primary.result, result.primary_selection)                        
+                        self.scheduler_get_quantitative_values(mdp, opt, result.primary.result, result.primary_selection)
                 if consistent:
                     # LB is tight and LB < OPT
                     result.improving_assignment = mdp.design_space.assume_options_copy(result.primary_selection)
