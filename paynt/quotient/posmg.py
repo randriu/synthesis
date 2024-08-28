@@ -316,6 +316,11 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
             smg_result = payntbind.synthesis.smg_model_checking(smg, formulas[0].raw_formula,
                                                             only_initial_states=False, set_produce_schedulers=True,
                                                             env=paynt.verification.property.Property.environment)
+            
+            # print(dir(smg_result))
+            # for i,x in enumerate(smg_result.get_values()):
+            #     print(f"{i}: {x}")
+            exit()
             value = smg_result.at(smg.initial_states[0])
             result.primary = paynt.verification.property_result.PropertyResult(opt, smg_result, value)
 

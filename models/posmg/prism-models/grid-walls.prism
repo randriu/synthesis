@@ -1,0 +1,83 @@
+// NxN grid, player1 starts at (1,1) and his goal is to get to (N,N) without crashing into player2
+// player2 starts at (3,3) and can only choose one of these locations at each step: (1,3), (3,1), (3,3), (3,5), (5,3)
+// player1 has slippery movement
+
+smg
+
+const int N=5;
+const int xMIN = 1;
+const int yMIN = 1;
+const int xMAX = N;
+const int yMAX = N;
+
+player p1
+    player1, [l1], [r1], [d1], [u1]
+endplayer
+
+player p2
+    player2, [center], [right], [up], [left], [down]
+endplayer
+
+// DEFINING THE OBSERVATIONS
+// player1 only observes its own coordinates
+observable "x1" = x1;
+observable "y1" = y1;
+observable "clk" = clk;
+observable "done" = done;
+
+formula crash = (x1=x2 & y1=y2);
+formula goal = (x1=xMAX & y1=yMAX);
+formula done = goal | crash;
+
+// clock to make the game alternating
+formula clk_next = mod(clk+1,2);
+module clk
+    clk : [0..1] init 0;
+
+    [l1] !done & clk=0 -> (clk'=clk_next);
+    [r1] !done & clk=0 -> (clk'=clk_next);
+    [d1] !done & clk=0 -> (clk'=clk_next);
+    [u1] !done & clk=0 -> (clk'=clk_next);
+
+    [center] !done & clk=1 -> (clk'=clk_next);
+    [up] !done & clk=1 -> (clk'=clk_next);
+    [right] !done & clk=1 -> (clk'=clk_next);
+    [left] !done & clk=1 -> (clk'=clk_next);
+    [down] !done & clk=1 -> (clk'=clk_next);
+endmodule
+
+
+label "goal" = goal;
+
+const double slip = 0.1;
+
+const int x1_init = 1;
+const int y1_init = 1;
+
+formula x1right  = min(x1+1,xMAX);
+formula x1left   = max(x1-1,xMIN);
+formula y1up     = min(y1+1,yMAX);
+formula y1down   = max(y1-1,yMIN);
+
+module player1
+    x1 : [xMIN..xMAX] init x1_init;
+    y1 : [yMIN..yMAX] init y1_init;
+    [l1] true -> 1-slip : (x1'=x1left)  + slip : (y1'=y1down);
+    [r1] true -> 1-slip : (x1'=x1right) + slip : (y1'=y1up);
+    [d1] true -> 1-slip : (y1'=y1down)  + slip : (x1'=x1right);
+    [u1] true -> 1-slip : (y1'=y1up)    + slip : (x1'=x1left);
+endmodule
+
+const int x2_init = 3;
+const int y2_init = 3;
+
+module player2
+    x2 : [xMIN..xMAX] init x2_init;
+    y2 : [yMIN..yMAX] init y2_init;
+    [center] true -> (x2'=3)&(y2'=3);
+    [right] true -> (x2'=1)&(y2'=3);
+    [up] true -> (x2'=3)&(y2'=5);
+    [left] true -> (x2'=5)&(y2'=3);
+    [down] true -> (x2'=3)&(y2'=1);
+endmodule
+

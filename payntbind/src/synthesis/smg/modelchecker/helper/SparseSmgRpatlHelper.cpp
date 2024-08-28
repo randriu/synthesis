@@ -4,13 +4,17 @@
 
 #include "SparseSmgRpatlHelper.h"
 
+#include <queue>
+
 #include <storm/environment/solver/GameSolverEnvironment.h>
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
 #include <storm/utility/vector.h>
+#include <storm/storage/MaximalEndComponentDecomposition.h>
 
 #include "internal/GameViHelper.h"
 #include "internal/Multiplier.h"
+#include "GameMaximalEndComponentDecomposition.h"
 
 namespace synthesis {
 
@@ -42,6 +46,12 @@ namespace synthesis {
         storm::storage::BitVector clippedStatesOfCoalition(relevantStates.getNumberOfSetBits());
         synthesis::setClippedStatesOfCoalition(&clippedStatesOfCoalition, relevantStates, statesOfCoalition);
 
+        auto transposed_matrix = storm::storage::SparseMatrix<ValueType>(transitionMatrix.transpose(true));
+        auto endComponentDecomposition = storm::storage::MaximalEndComponentDecomposition<ValueType>(transitionMatrix, transposed_matrix);
+
+        // Fill up the result vector with with 1s for psi states
+        storm::utility::vector::setVectorValues(result, psiStates, storm::utility::one<ValueType>());
+
         if(!relevantStates.empty()) {
             // Reduce the matrix to relevant states.
             storm::storage::SparseMatrix<ValueType> submatrix = transitionMatrix.getSubmatrix(true, relevantStates, relevantStates, false);
@@ -52,17 +62,96 @@ namespace synthesis {
             }
             viHelper.performValueIteration(env, x, b, goal.direction(), constrainedChoiceValues);
 
+            // TODO computes the choice values
+
             // Fill up the constrainedChoice Values to full size.
             viHelper.fillChoiceValuesVector(constrainedChoiceValues, relevantStates, transitionMatrix.getRowGroupIndices());
 
+            // Fill up the result vector with the values of x for the relevant states, with 1s for psi states
+            storm::utility::vector::setVectorValues(result, relevantStates, x);
+
             if (produceScheduler) {
-                scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(expandScheduler(viHelper.extractScheduler(), psiStates, ~phiStates));
+                std::vector<uint64_t> optimalChoices(transitionMatrix.getRowGroupCount(),0);
+                std::vector<uint64_t> numberOfOptimalChoices(transitionMatrix.getRowGroupCount(),0);
+
+                // compute the number of max value choices based on the choice values
+                // if there's only one max value choice in a state, it is optimal and it will be already in the optimalChoice vector
+                // if the state belongs to a player that's not optimizing we can choose arbitrary max value choice
+                for (uint64_t state = 0; state < transitionMatrix.getRowGroupCount(); state++) {
+                    if (relevantStates.get(state)) {
+                        if (!statesOfCoalition.get(state)) { // not sure why the statesOfCoalition bitvector is flipped
+                            uint64_t stateRowIndex = 0;
+                            for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
+                                if (constrainedChoiceValues[choice] >= result[state]) {
+                                    numberOfOptimalChoices[state]++;
+                                    optimalChoices[state] = stateRowIndex;
+                                }
+                                stateRowIndex++;
+                            }
+                        } else {
+                            uint64_t stateRowIndex = 0;
+                            for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
+                                if (constrainedChoiceValues[choice] <= result[state]) {
+                                    numberOfOptimalChoices[state]++;
+                                    optimalChoices[state] = stateRowIndex;
+                                    break;
+                                }
+                                stateRowIndex++;
+                            }
+                        }
+                    }
+                }
+
+                for (uint64_t state = 0; state < transitionMatrix.getRowGroupCount(); state++) {
+                    std::cout << state << ": " << numberOfOptimalChoices[state] << std::endl;
+                }
+
+                // for each MEC compute which max value choices lead to an exit of the MEC
+                for (auto const& mec : endComponentDecomposition) {
+                    std::vector<int64_t> distanceToMECExit(mec.size(),-1);
+                    std::vector<uint64_t> statesInMEC;
+                    std::queue<uint64_t> BFSqueue;
+                    for (auto const& stateActions : mec) {
+                        uint64_t const& state = stateActions.first;
+                        statesInMEC.push_back(state);
+                        // if the state has multiple max value choices (it must belong to the optimizing player see above)
+                        if (numberOfOptimalChoices[state] > 1) {
+                            uint64_t stateChoiceIndex = 0;
+                            for (uint64_t row = transitionMatrix.getRowGroupIndices()[state], endRow = transitionMatrix.getRowGroupIndices()[state + 1]; row < endRow; ++row) {
+                                // check if the choice belongs to MEC, if not then this choice is the best exit choice for the MEC
+                                // the states with such choices will be used as the initial states for backwards BFS
+                                if ((constrainedChoiceValues[row] >= result[state]) && (stateActions.second.find(row) != stateActions.second.end())) {
+                                    auto stateIt = std::find(statesInMEC.begin(), statesInMEC.end(), state);
+                                    int stateMECIndex = stateIt - statesInMEC.begin();
+                                    distanceToMECExit[stateMECIndex] = 0;
+                                    BFSqueue.push(state);
+                                    optimalChoices[state] = stateChoiceIndex;
+                                    numberOfOptimalChoices[state] = 1;
+                                    break;
+                                }
+                                stateChoiceIndex++;
+                            }
+                        }
+
+                        // perform BFS on the transposed matrix to identify states close to MEC exit
+
+                        /*
+                            if state in MEC and has multiple optimal choices
+                                if optimal choice in MEC leads to source state
+                                    place state in BFSqueue and update its optimal choice
+                        */
+                    }
+                }
+
+
+                storm::storage::Scheduler<ValueType> tempScheduler(optimalChoices.size());
+                for (uint64_t state = 0; state < optimalChoices.size(); ++state) {
+                    tempScheduler.setChoice(optimalChoices[state], state);
+                }
+                scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(expandScheduler(tempScheduler, psiStates, ~phiStates));
             }
         }
-
-        // Fill up the result vector with the values of x for the relevant states, with 1s for psi states (0 is default)
-        storm::utility::vector::setVectorValues(result, relevantStates, x);
-        storm::utility::vector::setVectorValues(result, psiStates, storm::utility::one<ValueType>());
+        
         return SMGSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(relevantStates), std::move(scheduler), std::move(constrainedChoiceValues));
     }
 
