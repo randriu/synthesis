@@ -62,18 +62,92 @@ namespace synthesis {
             }
             viHelper.performValueIteration(env, x, b, goal.direction(), constrainedChoiceValues);
 
-            // TODO computes the choice values
-
             // Fill up the constrainedChoice Values to full size.
             viHelper.fillChoiceValuesVector(constrainedChoiceValues, relevantStates, transitionMatrix.getRowGroupIndices());
 
             // Fill up the result vector with the values of x for the relevant states, with 1s for psi states
             storm::utility::vector::setVectorValues(result, relevantStates, x);
 
+            // if produceScheduler is true, produce scheduler based on the final values from value iteration
             if (produceScheduler) {
-                std::vector<uint64_t> optimalChoices(transitionMatrix.getRowGroupCount(),0);
+                uint64_t stateCount = transitionMatrix.getRowGroupCount();
+                std::vector<uint64_t> optimalChoices(stateCount,0);
+                storm::storage::BitVector optimalChoiceSet(stateCount);
 
-                for (uint64_t state = 0; state < transitionMatrix.getRowGroupCount(); state++) {
+                for (auto const& mec : endComponentDecomposition) {
+                    std::vector<uint64_t> statesInMEC;
+                    std::queue<uint64_t> BFSqueue;
+                    // for each MEC compute which max value choices lead to an exit of the MEC
+                    for (auto const& stateActions : mec) {
+                        uint64_t const& state = stateActions.first;
+                        statesInMEC.push_back(state);
+                        uint64_t stateChoiceIndex = 0;
+                        for (uint64_t row = transitionMatrix.getRowGroupIndices()[state], endRow = transitionMatrix.getRowGroupIndices()[state + 1]; row < endRow; ++row) {
+                            // check if the choice belongs to MEC, if not then this choice is the best exit choice for the MEC
+                            // the states with such choices will be used as the initial states for backwards BFS
+                            if ((!statesOfCoalition.get(state)) && (constrainedChoiceValues[row] >= result[state]) && (stateActions.second.find(row) == stateActions.second.end())) {
+                                BFSqueue.push(state);
+                                optimalChoices[state] = stateChoiceIndex;
+                                optimalChoiceSet.set(state);
+                                break;
+                            } else if ((statesOfCoalition.get(state)) && (constrainedChoiceValues[row] <= result[state]) && (stateActions.second.find(row) == stateActions.second.end())) {
+                                BFSqueue.push(state);
+                                optimalChoices[state] = stateChoiceIndex;
+                                optimalChoiceSet.set(state);
+                                break;
+                            }
+                            stateChoiceIndex++;
+                        }
+                    }
+
+                    // perform BFS on the transposed matrix to identify actions that lead to an exit of MEC
+                    while (!BFSqueue.empty()) {
+                        auto currentState = BFSqueue.front();
+                        BFSqueue.pop();
+                        auto transposedRow = transposed_matrix.getRow(currentState);
+                        for (auto const &entry : transposedRow) {
+                            auto preState = entry.getColumn();
+                            auto preStateIt = std::find(statesInMEC.begin(), statesInMEC.end(), preState);
+                            if ((preStateIt != statesInMEC.end()) && (!optimalChoiceSet.get(preState))) {
+                                uint64_t stateChoiceIndex = 0;
+                                bool choiceFound = false;
+                                for (uint64_t row = transitionMatrix.getRowGroupIndices()[preState], endRow = transitionMatrix.getRowGroupIndices()[preState + 1]; row < endRow; ++row) {
+                                    if ((!statesOfCoalition.get(preState)) && (constrainedChoiceValues[row] >= result[preState])) {
+                                        for (auto const &preStateEntry : transitionMatrix.getRow(row)) {
+                                            if (preStateEntry.getColumn() == currentState) {
+                                                BFSqueue.push(preState);
+                                                optimalChoices[preState] = stateChoiceIndex;
+                                                optimalChoiceSet.set(preState);
+                                                choiceFound = true;
+                                                break;
+                                            }
+                                        }
+                                    } else if ((statesOfCoalition.get(preState)) && (constrainedChoiceValues[row] <= result[preState])) {
+                                        for (auto const &preStateEntry : transitionMatrix.getRow(row)) {
+                                            if (preStateEntry.getColumn() == currentState) {
+                                                BFSqueue.push(preState);
+                                                optimalChoices[preState] = stateChoiceIndex;
+                                                optimalChoiceSet.set(preState);
+                                                choiceFound = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (choiceFound) {
+                                        break;
+                                    }
+                                    stateChoiceIndex++;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // fill in the choices for states outside of MECs
+                for (uint64_t state = 0; state < stateCount; state++) {
+                    if (optimalChoiceSet.get(state)) {
+                        continue;
+                    }
                     if (!statesOfCoalition.get(state)) { // not sure why the statesOfCoalition bitvector is flipped
                         uint64_t stateRowIndex = 0;
                         for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
@@ -91,85 +165,6 @@ namespace synthesis {
                                 break;
                             }
                             stateRowIndex++;
-                        }
-                    }
-                }
-
-                for (auto const& mec : endComponentDecomposition) {
-                    std::vector<int64_t> distanceToMECExit(mec.size(),-1);
-                    std::vector<uint64_t> statesInMEC;
-                    std::queue<uint64_t> BFSqueue;
-                    // for each MEC compute which max value choices lead to an exit of the MEC
-                    for (auto const& stateActions : mec) {
-                        uint64_t const& state = stateActions.first;
-                        statesInMEC.push_back(state);
-                        uint64_t stateChoiceIndex = 0;
-                        for (uint64_t row = transitionMatrix.getRowGroupIndices()[state], endRow = transitionMatrix.getRowGroupIndices()[state + 1]; row < endRow; ++row) {
-                            // check if the choice belongs to MEC, if not then this choice is the best exit choice for the MEC
-                            // the states with such choices will be used as the initial states for backwards BFS
-                            if ((!statesOfCoalition.get(state)) && (constrainedChoiceValues[row] >= result[state]) && (stateActions.second.find(row) == stateActions.second.end())) {
-                                auto stateIt = std::find(statesInMEC.begin(), statesInMEC.end(), state);
-                                int stateMECIndex = stateIt - statesInMEC.begin();
-                                distanceToMECExit[stateMECIndex] = 0;
-                                BFSqueue.push(state);
-                                optimalChoices[state] = stateChoiceIndex;
-                                break;
-                            } else if ((statesOfCoalition.get(state)) && (constrainedChoiceValues[row] <= result[state]) && (stateActions.second.find(row) == stateActions.second.end())) {
-                                auto stateIt = std::find(statesInMEC.begin(), statesInMEC.end(), state);
-                                int stateMECIndex = stateIt - statesInMEC.begin();
-                                distanceToMECExit[stateMECIndex] = 0;
-                                BFSqueue.push(state);
-                                optimalChoices[state] = stateChoiceIndex;
-                                break;
-                            }
-                            stateChoiceIndex++;
-                        }
-                    }
-
-                    // perform BFS on the transposed matrix to identify actions that lead to an exit of MEC
-                    while (!BFSqueue.empty()) {
-                        auto currentState = BFSqueue.front();
-                        BFSqueue.pop();
-                        auto transposedRow = transposed_matrix.getRow(currentState);
-                        for (auto const &entry : transposedRow) {
-                            auto preState = entry.getColumn();
-                            auto preStateIt = std::find(statesInMEC.begin(), statesInMEC.end(), preState);
-                            int preStateMECIndex = preStateIt - statesInMEC.begin();
-                            if ((preStateIt != statesInMEC.end()) && (distanceToMECExit[preStateMECIndex] < 0)) {
-                                uint64_t stateChoiceIndex = 0;
-                                bool choiceFound = false;
-                                for (uint64_t row = transitionMatrix.getRowGroupIndices()[preState], endRow = transitionMatrix.getRowGroupIndices()[preState + 1]; row < endRow; ++row) {
-                                    if ((!statesOfCoalition.get(preState)) && (constrainedChoiceValues[row] >= result[preState])) {
-                                        for (auto const &preStateEntry : transitionMatrix.getRow(row)) {
-                                            if (preStateEntry.getColumn() == currentState) {
-                                                auto currentStateIt = std::find(statesInMEC.begin(), statesInMEC.end(), currentState);
-                                                int currentStateMECIndex = currentStateIt - statesInMEC.begin();
-                                                distanceToMECExit[preStateMECIndex] = distanceToMECExit[currentStateMECIndex] + 1;
-                                                BFSqueue.push(preState);
-                                                optimalChoices[preState] = stateChoiceIndex;
-                                                choiceFound = true;
-                                                break;
-                                            }
-                                        }
-                                    } else if ((statesOfCoalition.get(preState)) && (constrainedChoiceValues[row] <= result[preState])) {
-                                        for (auto const &preStateEntry : transitionMatrix.getRow(row)) {
-                                            if (preStateEntry.getColumn() == currentState) {
-                                                auto currentStateIt = std::find(statesInMEC.begin(), statesInMEC.end(), currentState);
-                                                int currentStateMECIndex = currentStateIt - statesInMEC.begin();
-                                                distanceToMECExit[preStateMECIndex] = distanceToMECExit[currentStateMECIndex] + 1;
-                                                BFSqueue.push(preState);
-                                                optimalChoices[preState] = stateChoiceIndex;
-                                                choiceFound = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (choiceFound) {
-                                        break;
-                                    }
-                                    stateChoiceIndex++;
-                                }
-                            }
                         }
                     }
                 }
