@@ -342,7 +342,6 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         // check selected choices simultaneously
         solver.push();
         getRoot()->addFamilyEncoding(subfamily,solver);
-        timers["selectCompatibleChoices::3 prepare to check consistent scheduler existence"].start();
         for(uint64_t state: state_reached) {
             z3::expr_vector enabled_choices(ctx);
             /*for(uint64_t choice: state_enabled_choices[state]) {
@@ -351,17 +350,13 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             }
             solver.add(z3::mk_or(enabled_choices));*/
         }
-        timers["selectCompatibleChoices::3 prepare to check consistent scheduler existence"].stop();
-        timers["selectCompatibleChoices::4 consistent scheduler existence"].start();
         bool consistent_scheduler_exists = check();
-        timers["selectCompatibleChoices::4 consistent scheduler existence"].stop();
         if(not consistent_scheduler_exists) {
             STORM_LOG_WARN_COND(not subfamily.isAssignment(), "Hole assignment does not induce a DTMC.");
             selection.clear();
         }
         solver.pop(); 
     }
-    timers["selectCompatibleChoices::2 state exploration"].stop();
 
     timers[__FUNCTION__].stop();
     return selection;
