@@ -43,8 +43,6 @@ class Statistic:
         self.acc_size_mdp = 0
         self.avg_size_mdp = 0
 
-        self.iterations_smt = None
-
         self.iterations_game = None
         self.acc_size_game = 0
         self.avg_size_game = 0
@@ -88,11 +86,6 @@ class Statistic:
         self.iterations_dtmc += 1
         self.acc_size_dtmc += size_dtmc
         self.print_status()
-
-    def iteration_smt(self):
-        if self.iterations_smt is None:
-            self.iterations_smt = 0
-        self.iterations_smt += 1
 
     def iteration_mdp(self, size_mdp):
         if self.iterations_mdp is None:
@@ -148,6 +141,7 @@ class Statistic:
         if self.iterations_dtmc is not None:
             iters += [f"DTMC: {self.iterations_dtmc}"]
         ret_str += ", iters = {" + ", ".join(iters) + "}"
+        # ret_str += f", pres = {self.synthesizer.num_preserved}"
         
         spec = self.quotient.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
@@ -163,10 +157,10 @@ class Statistic:
         self.status_horizon = self.synthesis_timer.read() + Statistic.status_period_seconds
 
 
-    def finished_synthesis(self, assignment):
+    def finished_synthesis(self):
         self.job_type = "synthesis"
         self.synthesis_timer.stop()
-        self.synthesized_assignment = assignment
+        self.synthesized_assignment = self.synthesizer.best_assignment
 
     def finished_evaluation(self, evaluations):
         self.job_type = "evaluation"
@@ -195,10 +189,6 @@ class Statistic:
             type_stats = f"MDP stats: avg MDP size: {avg_size}, iterations: {self.iterations_mdp}"
             iterations += f"{type_stats}\n"
 
-        if self.iterations_smt is not None:
-            type_stats = f"SMT stats: iterations: {self.iterations_smt}"
-            iterations += f"{type_stats}\n"
-
         if self.iterations_dtmc is not None:
             avg_size = round(safe_division(self.acc_size_dtmc, self.iterations_dtmc))
             type_stats = f"DTMC stats: avg DTMC size: {avg_size}, iterations: {self.iterations_dtmc}"
@@ -218,7 +208,7 @@ class Statistic:
         if not self.evaluations or not isinstance(self.evaluations[0], paynt.synthesizer.synthesizer.FamilyEvaluation):
             return ""
         members_sat = sum( [evaluation.family.size for evaluation in self.evaluations if evaluation.sat ])
-        members_total = self.quotient.design_space.size
+        members_total = self.quotient.family.size
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
 
@@ -231,7 +221,7 @@ class Statistic:
 
         quotient_states = self.quotient.quotient_mdp.nr_states
         quotient_actions = self.quotient.quotient_mdp.nr_choices
-        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size_or_order}, quotient: {quotient_states} states / {quotient_actions} actions"
+        design_space = f"number of holes: {self.quotient.family.num_holes}, family size: {self.quotient.family.size_or_order}, quotient: {quotient_states} states / {quotient_actions} actions"
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
 
         iterations = self.get_summary_iterations()

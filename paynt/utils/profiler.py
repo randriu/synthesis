@@ -33,6 +33,22 @@ class Timer:
         else:
             return self.time + (self.timestamp() - self.timer)
 
+class GlobalTimeoutTimer(Timer):
+
+    @classmethod
+    def start(cls, timeout=None):
+        cls.timeout = timeout
+        cls.global_timer = Timer()
+        cls.global_timer.start()
+
+    @classmethod
+    def stop(cls):
+        cls.global_timer.stop()
+
+    @classmethod
+    def timeout_reached(cls):
+        return cls.timeout is not None and cls.global_timer.read() > cls.timeout
+
 
 class Profiler:
 

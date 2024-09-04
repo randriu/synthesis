@@ -78,7 +78,7 @@ class Quotient:
         choices = self.coloring.selectCompatibleChoices(family.family)
         family.mdp = self.build_from_choice_mask(choices)
         family.selected_choices = choices
-        family.mdp.design_space = family
+        family.mdp.family = family
 
 
     @staticmethod
@@ -201,7 +201,7 @@ class Quotient:
 
     def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
         hole_variance = payntbind.synthesis.computeInconsistentHoleVariance(
-            self.design_space.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
+            self.family.family, mdp.nondeterministic_choice_indices, quotient_choice_map, choice_values,
             self.coloring, inconsistent_assignments, expected_visits)
         return hole_variance
 
@@ -214,7 +214,7 @@ class Quotient:
         :return whether the scheduler is consistent
         '''
         if mdp.is_deterministic:
-            selection = [[mdp.design_space.hole_options(hole)[0]] for hole in range(mdp.design_space.num_holes)]
+            selection = [[mdp.family.hole_options(hole)[0]] for hole in range(mdp.family.num_holes)]
             return selection, True
 
         # get qualitative scheduler selection, filter inconsistent assignments
@@ -224,27 +224,22 @@ class Quotient:
         for hole,options in enumerate(selection):
             if len(options) == 0:
                 # if some hole options are not involved in the selection, we can fix an arbitrary value
-                selection[hole] = [mdp.design_space.hole_options(hole)[0]]
+                selection[hole] = [mdp.family.hole_options(hole)[0]]
 
         return selection, scheduler_is_consistent
 
-    def scheduler_get_quantitative_values(self, mdp, prop, result, selection):
-        '''
-        :return choice values
-        :return expected visits
-        :return hole scores
-        '''
+    def scheduler_scores(self, mdp, prop, result, selection):
         inconsistent_assignments = {hole:options for hole,options in enumerate(selection) if len(options) > 1 }
         choice_values = self.choice_values(mdp.model, prop, result.get_values())
         choices = result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
         expected_visits = self.compute_expected_visits(mdp.model, prop, choices)
-        inconsistent_differences = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
-        return choice_values, expected_visits, inconsistent_differences
+        scores = self.estimate_scheduler_difference(mdp.model, mdp.quotient_choice_map, inconsistent_assignments, choice_values, expected_visits)
+        return scores
 
 
     def suboptions_half(self, mdp, splitter):
         ''' Split options of a splitter into two halves. '''
-        options = mdp.design_space.hole_options(splitter)
+        options = mdp.family.hole_options(splitter)
         half = len(options) // 2
         suboptions = [options[:half], options[half:]]
         return suboptions
@@ -254,7 +249,7 @@ class Quotient:
         assert len(used_options) > 1
         suboptions = [[option] for option in used_options]
         index = 0
-        for option in mdp.design_space.hole_options(splitter):
+        for option in mdp.family.hole_options(splitter):
             if option in used_options:
                 continue
             suboptions[index].append(option)
@@ -264,7 +259,7 @@ class Quotient:
     def suboptions_enumerate(self, mdp, splitter, used_options):
         assert len(used_options) > 1
         core_suboptions = [[option] for option in used_options]
-        other_suboptions = [option for option in mdp.design_space.hole_options(splitter) if option not in used_options]
+        other_suboptions = [option for option in mdp.family.hole_options(splitter) if option not in used_options]
         return core_suboptions, other_suboptions
 
     def holes_with_max_score(self, hole_score):
@@ -284,23 +279,22 @@ class Quotient:
 
         # split family wrt last undecided result
         result = family.analysis_result.undecided_result()
-
         hole_assignments = result.primary_selection
-        scores = result.primary_scores
+        scores = self.scheduler_scores(mdp, result.prop, result.primary.result, result.primary_selection)
         if scores is None:
-            scores = {hole:0 for hole in range(mdp.design_space.num_holes) if mdp.design_space.hole_num_options(hole) > 1}
+            scores = {hole:0 for hole in range(mdp.family.num_holes) if mdp.family.hole_num_options(hole) > 1}
         
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
         if len(hole_assignments[splitter]) > 1:
             core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
         else:
-            assert mdp.design_space.hole_num_options(splitter) > 1
+            assert mdp.family.hole_num_options(splitter) > 1
             core_suboptions = self.suboptions_half(mdp, splitter)
             other_suboptions = []
-        # print(mdp.design_space[splitter], core_suboptions, other_suboptions)
+        # print(mdp.family[splitter], core_suboptions, other_suboptions)
 
-        new_design_space = mdp.design_space.copy()
+        new_family = mdp.family.copy()
         if len(other_suboptions) == 0:
             suboptions = core_suboptions
         else:
@@ -309,28 +303,17 @@ class Quotient:
         # construct corresponding design subspaces
         design_subspaces = []
         
+        # construct corresponding subfamilies
+        subfamilies = []
         family.splitter = splitter
         parent_info = family.collect_parent_info(self.specification)
         for suboption in suboptions:
-            subholes = new_design_space.subholes(splitter, suboption)
-            design_subspace = paynt.family.family.DesignSpace(subholes, parent_info)
-            design_subspace.hole_set_options(splitter, suboption)
-            design_subspaces.append(design_subspace)
+            subfamily = new_family.subholes(splitter, suboption)
+            subfamily.add_parent_info(parent_info)
+            subfamily.hole_set_options(splitter, suboption)
+            subfamilies.append(subfamily)
 
-        return design_subspaces
-
-
-    def double_check_assignment(self, assignment):
-        '''
-        Double-check whether this assignment truly improves optimum.
-        '''
-        dtmc = self.build_assignment(assignment)
-        res = self.check_specification_for_dtmc(dtmc)
-        # opt_result = dtmc.model_check_property(opt_prop)
-        if res.constraints_result.sat and self.specification.optimality.improves_optimum(res.optimality_result.value):
-            return assignment, res.optimality_result.value
-        else:
-            return None, None
+        return subfamilies
 
 
     def get_property(self):
@@ -353,104 +336,3 @@ class Quotient:
     def identify_target_states(self, model, prop):
         target_label = prop.get_target_label()
         return model.labeling.get_states(target_label)
-
-
-    def check_specification_for_dtmc(self, dtmc, constraint_indices=None, short_evaluation=False):
-        
-        # check constraints
-        if constraint_indices is None:
-            constraint_indices = range(len(self.specification.constraints))
-        results = [None for _ in self.specification.constraints]
-        for index in constraint_indices:
-            result = dtmc.model_check_property(self.specification.constraints[index])
-            results[index] = result
-            if short_evaluation and result.sat is False:
-                break
-        constraints_result = paynt.verification.property_result.ConstraintsResult(results)
-
-        #check optimality
-        optimality_result = None
-        if self.specification.has_optimality and not (short_evaluation and constraints_result.sat is False):
-            optimality_result = dtmc.model_check_property(self.specification.optimality)
-
-        return paynt.verification.property_result.SpecificationResult(constraints_result, optimality_result)
-
-
-    def check_specification_for_mdp(self, mdp, constraint_indices=None, double_check=True):
-        '''
-        Check specification.
-        :param specification containing constraints and optimality
-        :param constraint_indices a selection of property indices to investigate (default: all)
-        :param double_check if True, the new optimum is double-checked
-        '''
-        # check constraints
-        if constraint_indices is None:
-            constraint_indices = range(len(self.specification.constraints))
-        results = [None for _ in self.specification.constraints]
-        for index in constraint_indices:
-            constraint = self.specification.constraints[index]
-            result = paynt.verification.property_result.MdpPropertyResult(constraint)
-
-            # check primary direction
-            result.primary = mdp.model_check_property(constraint)
-
-            # no need to check secondary direction if primary direction yields UNSAT
-            if not result.primary.sat:
-                result.sat = False
-            else:
-                # check secondary direction
-                result.secondary = mdp.model_check_property(constraint, alt=True)
-                if mdp.is_deterministic and result.primary.value != result.secondary.value:
-                    logger.warning("WARNING: model is deterministic but min<max")
-                if result.secondary.sat:
-                    result.sat = True
-
-            # primary direction is SAT
-            if result.sat is None:
-                # check if the primary scheduler is consistent
-                result.primary_selection,consistent = self.scheduler_is_consistent(mdp, constraint, result.primary.result)
-                if not consistent:
-                    result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
-                        self.scheduler_get_quantitative_values(mdp, constraint, result.primary.result, result.primary_selection)
-
-            results[index] = result
-            if result.sat is False:
-                break
-        constraints_result = paynt.verification.property_result.ConstraintsResult(results)
-
-        # check optimality
-        optimality_result = None
-        if self.specification.has_optimality and not constraints_result.sat is False:
-            opt = self.specification.optimality
-            result = paynt.verification.property_result.MdpOptimalityResult(opt)
-
-            # check primary direction
-            result.primary = mdp.model_check_property(opt, alt = False)
-            if not result.primary.improves_optimum:
-                # OPT <= LB
-                result.can_improve = False
-            else:
-                # LB < OPT
-                # check if LB is tight
-                result.primary_selection,consistent = self.scheduler_is_consistent(mdp, opt, result.primary.result)
-                if not consistent:
-                    result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
-                        self.scheduler_get_quantitative_values(mdp, opt, result.primary.result, result.primary_selection)
-                if consistent:
-                    # LB is tight and LB < OPT
-                    result.improving_assignment = mdp.design_space.assume_options_copy(result.primary_selection)
-                    result.can_improve = False
-                else:
-                    result.can_improve = True
-            optimality_result = result
-
-            if optimality_result.improving_assignment is not None and double_check:
-                optimality_result.improving_assignment, optimality_result.improving_value = self.double_check_assignment(optimality_result.improving_assignment)
-        return paynt.verification.property_result.MdpSpecificationResult(constraints_result, optimality_result)
-
-
-class DtmcFamilyQuotient(Quotient):
-    
-    def __init__(self, quotient_mdp, family, coloring, specification):
-        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
-        self.design_space = paynt.family.family.DesignSpace(family)

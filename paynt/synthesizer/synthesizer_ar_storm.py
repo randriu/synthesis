@@ -1,6 +1,5 @@
 from stormpy import pomdp
 import paynt.synthesizer.synthesizer_ar
-from .synthesizer import Synthesizer
 from ..quotient.storm_pomdp_control import StormPOMDPControl
 from os import makedirs
 
@@ -11,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Abstraction Refinement + Storm splitting
-class SynthesizerARStorm(Synthesizer):
+class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     # family exploration order: True = DFS, False = BFS
     exploration_order_dfs = True
@@ -73,11 +72,8 @@ class SynthesizerARStorm(Synthesizer):
 
 
     def verify_family(self, family):
-
         self.quotient.build(family)
-        self.stat.iteration_mdp(family.mdp.states)
-        res = self.quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
-        family.analysis_result = res
+        self.check_specification_for_mdp(family)
 
         if family.analysis_result.improving_value is not None:
             if self.saynt_timer is not None:
@@ -114,7 +110,7 @@ class SynthesizerARStorm(Synthesizer):
 
     def synthesize_one(self, family):
 
-        satisfying_assignment = None
+        self.best_assignment = None
         
         if self.main_family is not None:
             family = self.main_family
@@ -127,9 +123,9 @@ class SynthesizerARStorm(Synthesizer):
             if self.s_queue is not None:
                 # if the queue is non empty, pause for PAYNT was requested
                 if not self.s_queue.empty():
-                    if satisfying_assignment is not None:
-                        self.storm_control.latest_paynt_result = satisfying_assignment
-                        self.storm_control.paynt_export = self.quotient.extract_policy(satisfying_assignment)
+                    if self.best_assignment is not None:
+                        self.storm_control.latest_paynt_result = self.best_assignment
+                        self.storm_control.paynt_export = self.quotient.extract_policy(self.best_assignment)
                         self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
                         self.storm_control.paynt_fsc_size = self.quotient.policy_size(self.storm_control.latest_paynt_result)
                         self.storm_control.latest_paynt_result_fsc = self.quotient.assignment_to_fsc(self.storm_control.latest_paynt_result)
@@ -147,7 +143,7 @@ class SynthesizerARStorm(Synthesizer):
                             # if the result found by Storm is better and needs more memory end the current synthesis and add memory
                             if self.storm_control.is_memory_needed():
                                 logger.info("Additional memory needed")
-                                return satisfying_assignment
+                                return self.best_assignment
                             else:
                                 logger.info("Applying family split according to Storm results")
                                 families, self.subfamilies_buffer = self.storm_split(families)
@@ -158,7 +154,7 @@ class SynthesizerARStorm(Synthesizer):
 
                     elif status == "terminate":
                         logger.info("Terminating controller synthesis")
-                        return satisfying_assignment
+                        return self.best_assignment
 
             if SynthesizerARStorm.exploration_order_dfs:
                 family = families.pop(-1)
@@ -170,7 +166,7 @@ class SynthesizerARStorm(Synthesizer):
 
             self.verify_family(family)
             if family.analysis_result.improving_assignment is not None:
-                satisfying_assignment = family.analysis_result.improving_assignment
+                self.best_assignment = family.analysis_result.improving_assignment
             # family can be pruned
             if family.analysis_result.can_improve == False:
                 self.explore(family)
@@ -186,5 +182,5 @@ class SynthesizerARStorm(Synthesizer):
             subfamilies = self.quotient.split(family)
             families = families + subfamilies
 
-        return satisfying_assignment
+        return self.best_assignment
 

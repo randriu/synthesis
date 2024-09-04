@@ -21,7 +21,7 @@ def family_to_hole_options(family):
     return [family.hole_options(hole) for hole in range(family.num_holes)]
 
 def hole_options_to_family(hole_options):
-    family = quotient.design_space.copy()
+    family = quotient.family.copy()
     for hole,options in enumerate(hole_options):
         family.hole_set_options(hole,options)
     return family
@@ -46,8 +46,8 @@ def solve_family(args):
             quotient.specification.optimality.optimum = optimum
 
         quotient.build(family)
-        res = quotient.check_specification_for_mdp(family.mdp, family.constraint_indices)
-        family.analysis_result = res
+        quotient.check_specification_for_mdp(family)
+        res = family.analysis_result
         improving_value = res.improving_value
         improving_assignment = res.improving_assignment
         if improving_assignment is not None:

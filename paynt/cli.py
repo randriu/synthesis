@@ -1,5 +1,6 @@
 from . import version
 
+import paynt.utils.profiler
 import paynt.parser.sketch
 
 import paynt.quotient
@@ -59,6 +60,8 @@ def setup_logger(log_path = None):
     help="known optimum bound")
 @click.option("--precision", type=click.FLOAT, default=1e-4,
     help="model checking precision")
+@click.option("--timeout", type=int,
+    help="timeout (s)")
 
 @click.option("--export",
     type=click.Choice(['jani', 'drn', 'pomdp']),
@@ -132,7 +135,7 @@ def setup_logger(log_path = None):
     help="decision tree synthesis: if set, all trees of size at most tree_depth will be enumerated")
 
 @click.option(
-    "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for cassandra models",
+    "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
 )
 
 @click.option(
@@ -143,7 +146,7 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, optimum_threshold, precision,
+    project, sketch, props, relative_error, optimum_threshold, precision, timeout,
     export,
     method,
     disable_expected_visits,
@@ -158,10 +161,12 @@ def paynt_run(
     ce_generator,
     profiling
 ):
+
     profiler = None
     if profiling:
         profiler = cProfile.Profile()
         profiler.enable()
+    paynt.utils.profiler.GlobalTimeoutTimer.start(timeout)
 
     logger.info("This is Paynt version {}.".format(version()))
 

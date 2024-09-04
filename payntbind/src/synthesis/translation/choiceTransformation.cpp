@@ -63,7 +63,7 @@ bool assertChoiceLabelingIsCanonic(
             auto const& labels = choice_labeling.getLabelsOfChoice(choice);
             if(labels.size() != 1) {
                 if(throw_on_fail) {
-                    STORM_LOG_THROW(labels.size() == 1, storm::exceptions::InvalidModelException, "expected exactly 1 label for choice " << choice);
+                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "expected exactly 1 label for choice " << choice);
                 } else {
                     return false;
                 }
@@ -71,7 +71,7 @@ bool assertChoiceLabelingIsCanonic(
             std::string const& label = *(labels.begin());
             if(state_labels.find(label) != state_labels.end()) {
                 if(throw_on_fail) {
-                    STORM_LOG_THROW(state_labels.find(label) == state_labels.end(), storm::exceptions::InvalidModelException, "label " << label << " is used twice for choices in state " << state);
+                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "label " << label << " is used twice for choices in state " << state);
                 } else {
                     return false;
                 }
@@ -133,7 +133,7 @@ std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels(
         action_labels.push_back(label);
     }
 
-    assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling);
+    assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling, false);
     std::vector<uint64_t> choice_to_action(model.getNumberOfChoices());
     for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
         auto const& labels = choice_labeling.getLabelsOfChoice(choice);

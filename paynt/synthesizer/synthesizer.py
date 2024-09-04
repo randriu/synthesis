@@ -63,21 +63,27 @@ class Synthesizer:
         if method == "ar_multicore":
             return paynt.synthesizer.synthesizer_multicore_ar.SynthesizerMultiCoreAR(quotient)
         raise ValueError("invalid method name")
-    
-    
+
+
     def __init__(self, quotient):
         self.quotient = quotient
         self.stat = None
         self.explored = None
-    
+        self.best_assignment = None
+        self.best_assignment_value = None
+
     @property
     def method_name(self):
         ''' to be overridden '''
         pass
-    
+
+    def set_optimality_threshold(self, optimum_threshold):
+        if self.quotient.specification.has_optimality and optimum_threshold is not None:
+            self.quotient.specification.optimality.update_optimum(optimum_threshold)
+            logger.debug(f"optimality threshold set to {optimum_threshold}")
+
     def explore(self, family):
         self.explored += family.size
-
 
     def evaluate_all(self, family, prop, keep_value_only=False):
         ''' to be overridden '''
@@ -99,7 +105,7 @@ class Synthesizer:
         :returns a list of (family,evaluation) pairs
         '''
         if family is None:
-            family = self.quotient.design_space
+            family = self.quotient.family
         if prop is None:
             prop = self.quotient.get_property()
 
@@ -134,34 +140,34 @@ class Synthesizer:
         :param print_stats if True, synthesis stats will be printed upon completion
         '''
         if family is None:
-            family = self.quotient.design_space
+            family = self.quotient.family
         if family.constraint_indices is None:
             family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
         
-        if self.quotient.specification.has_optimality and optimum_threshold is not None:
-            self.quotient.specification.optimality.update_optimum(optimum_threshold)
-            logger.debug(f"optimality threshold set to {optimum_threshold}")
-        
+        self.set_optimality_threshold(optimum_threshold)
         self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
         logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
         self.stat.start(family)
-        assignment = self.synthesize_one(family)
-        if assignment is not None and assignment.size > 1 and not return_all:
-            assignment = assignment.pick_any()
-        self.stat.finished_synthesis(assignment)
+        self.synthesize_one(family)
+        if self.best_assignment is not None and self.best_assignment.size > 1 and not return_all:
+            self.best_assignment = self.best_assignment.pick_any()
+        self.stat.finished_synthesis()
         # logger.info("synthesis finished, printing synthesized assignment below:")
         # logger.info(assignment)
 
-        if assignment is not None and assignment.size == 1:
-            dtmc = self.quotient.build_assignment(assignment)
-            result = self.quotient.check_specification_for_dtmc(dtmc)
+        if self.best_assignment is not None and self.best_assignment.size == 1:
+            dtmc = self.quotient.build_assignment(self.best_assignment)
+            result = dtmc.check_specification(self.quotient.specification)
             logger.info(f"double-checking specification satisfiability: {result}")
 
         if print_stats:
             self.stat.print()
 
+        assignment = self.best_assignment
         if not keep_optimum:
+            self.best_assignment = None
+            self.best_assignment_value = None
             self.quotient.specification.reset()
 
         return assignment

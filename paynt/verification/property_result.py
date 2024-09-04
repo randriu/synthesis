@@ -37,9 +37,9 @@ class ConstraintsResult:
 
 
 class SpecificationResult:
-    def __init__(self, constraints_result, optimality_result):
-        self.constraints_result = constraints_result
-        self.optimality_result = optimality_result
+    def __init__(self):
+        self.constraints_result = None
+        self.optimality_result = None
 
     def __str__(self):
         return str(self.constraints_result) + " : " + str(self.optimality_result)
@@ -77,15 +77,10 @@ class SpecificationResult:
 class MdpPropertyResult:
     def __init__(self,prop):
         self.prop = prop
-        
         self.primary = None
         self.secondary = None
         self.sat = None
-
         self.primary_selection = None
-        self.primary_choice_values = None
-        self.primary_expected_visits = None
-        self.primary_scores = None
 
     @property
     def minimizing(self):
@@ -98,8 +93,6 @@ class MdpPropertyResult:
             return "{} - {}".format(prim,seco)
         else:
             return "{} - {}".format(seco,prim)
-            
-
 
 
 
@@ -113,12 +106,10 @@ class MdpOptimalityResult(MdpPropertyResult):
 
 class MdpSpecificationResult(SpecificationResult):
 
-    def __init__(self, constraints_result, optimality_result):
-        super().__init__(constraints_result,optimality_result)
-        self.evaluate()
+    def __init__(self):
+        pass
 
-    
-    def evaluate(self):
+    def evaluate(self, family):
         self.improving_assignment = None
         self.improving_value = None
         self.can_improve = None
@@ -126,28 +117,25 @@ class MdpSpecificationResult(SpecificationResult):
         cr = self.constraints_result
         opt = self.optimality_result
 
-        if cr.sat == True:
+        if cr.sat is False:
+            self.can_improve = False
+            return
+
+        if cr.sat is True:
             # all constraints were satisfied
             if opt is None:
-                self.improving_assignment = "any"
+                self.improving_assignment = family
                 self.can_improve = False
             else:
                 self.improving_assignment = opt.improving_assignment
                 self.improving_value = opt.improving_value
-                self.can_improve = opt.can_improve
-                
+                self.can_improve = opt.can_improve        
             return
 
-        if cr.sat == False:
-            self.can_improve = False
-            return
-
-        # constraints undecided: try to push optimality assignment
-        if opt is not None: 
+        # constraints undecided
+        if opt is None: 
+            self.can_improve = True
+        else:
             self.improving_assignment = opt.improving_assignment
             self.improving_value = opt.improving_value
             self.can_improve = opt.improving_value is None and opt.can_improve
-        else:
-            self.can_improve = True
-
-

@@ -105,19 +105,17 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
-        family, choice_to_hole_options = self.create_coloring()
+        self.family, choice_to_hole_options = self.create_coloring()
        
-        self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
+        self.coloring = payntbind.synthesis.Coloring(self.family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
 
         # to each hole-option pair a list of actions colored by this combination
-        self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
-        for hole in range(family.num_holes):
-            self.hole_option_to_actions[hole] = [[] for option in family.hole_options(hole)]
+        self.hole_option_to_actions = [[] for hole in range(self.family.num_holes)]
+        for hole in range(self.family.num_holes):
+            self.hole_option_to_actions[hole] = [[] for option in self.family.hole_options(hole)]
         for choice in range(self.quotient_mdp.nr_choices):
             for hole,option in choice_to_hole_options[choice]:
                 self.hole_option_to_actions[hole][option].append(choice)
-
-        self.design_space = paynt.family.family.DesignSpace(family)
 
 
     def create_coloring(self):

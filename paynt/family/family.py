@@ -10,6 +10,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class ParentInfo():
+    '''
+    Container for stuff to be remembered when splitting an undecided family into subfamilies. Generally used to
+    speed-up work with the subfamilies.
+    :note it is better to store these things in a separate container instead
+        of having a reference to the parent family (that will never be considered again) for memory efficiency.
+    '''
+    def __init__(self):
+        pass
+        self.selected_choices = None
+        self.constraint_indices = None
+        self.refinement_depth = None
+        self.splitter = None
+
+
 class Family:
 
     def __init__(self, other=None):
@@ -21,6 +36,21 @@ class Family:
             self.family = payntbind.synthesis.Family(other.family)
             self.hole_to_name = other.hole_to_name
             self.hole_to_option_labels = other.hole_to_option_labels
+
+        self.parent_info = None
+        self.refinement_depth = 0
+        self.constraint_indices = None
+
+        self.selected_choices = None
+        self.mdp = None
+        self.analysis_result = None
+        self.splitter = None
+        self.encoding = None
+
+    def add_parent_info(self, parent_info):
+        self.parent_info = parent_info
+        self.refinement_depth = parent_info.refinement_depth + 1
+        self.constraint_indices = parent_info.constraint_indices
 
     @property
     def num_holes(self):
@@ -121,61 +151,6 @@ class Family:
         shallow_copy.hole_set_options(hole_index,options)
         return shallow_copy
 
-
-
-class ParentInfo():
-    '''
-    Container for stuff to be remembered when splitting an undecided family
-    into subfamilies. Generally used to speed-up work with the subfamilies.
-    :note it is better to store these things in a separate container instead
-      of having a reference to the parent family (that will never be considered
-      again) for the purposes of memory efficiency.
-    '''
-    def __init__(self):
-        # list of constraint indices still undecided in this family
-        self.constraint_indices = None
-
-        # how many refinements were needed to create this family
-        self.refinement_depth = None
-
-        # index of a hole used to split the family
-        self.splitter = None
-
-
-class DesignSpace(Family):
-    '''
-    List of holes supplied with
-    - a list of constraint indices to investigate in this design space
-    - (optionally) z3 encoding of this design space
-    :note z3 (re-)encoding construction must be invoked manually
-    '''
-
-    # whether hints will be stored for subsequent MDP model checking
-    store_hints = True
-    
-    def __init__(self, family = None, parent_info = None):
-        super().__init__(family)
-
-        self.mdp = None
-        self.selected_choices = None
-        
-        # SMT encoding
-        self.encoding = None
-
-        self.refinement_depth = 0
-        self.constraint_indices = None
-
-        self.analysis_result = None
-        self.splitter = None
-        self.parent_info = parent_info
-        if parent_info is not None:
-            self.refinement_depth = parent_info.refinement_depth + 1
-            self.constraint_indices = parent_info.constraint_indices
-
-    def copy(self):
-        return DesignSpace(super().copy())
-
-    
     def collect_parent_info(self, specification):
         pi = ParentInfo()
         pi.selected_choices = self.selected_choices

@@ -105,7 +105,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
 
         # the product inherits the design space
-        product_family = self.design_space.copy()
+        product_family = self.family.copy()
         
         # the choices of the product inherit colors of the quotient
         product_choice_to_hole_options = []
@@ -122,7 +122,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         
         # handle specification
         product_specification = self.specification.copy()
-        dtmc_sketch = paynt.quotient.quotient.DtmcFamilyQuotient(product, product_family, product_coloring, product_specification)
+        dtmc_sketch = paynt.quotient.quotient.Quotient(product, product_family, product_coloring, product_specification)
         return dtmc_sketch
 
 

@@ -37,6 +37,25 @@ class Mdp:
         value = result.at(self.initial_state)
         return paynt.verification.property_result.PropertyResult(prop, result, value)
 
+    def check_specification(self, spec, constraint_indices=None, short_evaluation=False):
+        ''' Assuming this is a DTMC. '''
+        if constraint_indices is None:
+            constraint_indices = spec.all_constraint_indices()
+        results = [None for _ in spec.constraints]
+        for index in constraint_indices:
+            result = self.model_check_property(spec.constraints[index])
+            results[index] = result
+            if short_evaluation and result.sat is False:
+                break
+        spec_result = paynt.verification.property_result.SpecificationResult()
+        spec_result.constraints_result = paynt.verification.property_result.ConstraintsResult(results)
+
+        if spec.has_optimality and not (short_evaluation and spec_result.constraints_result.sat is False):
+            spec_result.optimality_result = self.model_check_property(spec.optimality)
+        return spec_result
+
+    
+
 class SubMdp(Mdp):
 
     def __init__(self, model, quotient_state_map, quotient_choice_map):

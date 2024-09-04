@@ -716,10 +716,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # construct corresponding design subspaces
         subfamilies = []
         family.splitter = splitter
-        new_design_space = family.copy()
+        new_family = family.copy()
         for suboption in suboptions:
-            subholes = new_design_space.subholes(splitter, suboption)
-            subfamily = paynt.family.family.DesignSpace(subholes)
+            subfamily = new_family.subholes(splitter, suboption)
             subfamily.hole_set_options(splitter, suboption)
             subfamily.candidate_policy = None
             subfamilies.append(subfamily)
@@ -770,7 +769,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
 
-        self.stat.num_mdps_total = self.quotient.design_space.size
+        self.stat.num_mdps_total = self.quotient.family.size
         self.stat.num_mdps_sat = sum([n.family.size for n in policy_tree.collect_sat()])
         self.stat.num_nodes = len(policy_tree.collect_all())
         self.stat.num_leaves = len(policy_tree.collect_leaves())

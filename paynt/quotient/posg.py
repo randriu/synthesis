@@ -22,7 +22,6 @@ class PosgQuotient(paynt.quotient.quotient.Quotient):
         # TODO Antonin
         self.coloring = None
         self.family = None
-        self.design_space = None
 
         pomdp = self.quotient_mdp
         print(type(pomdp), dir(pomdp))

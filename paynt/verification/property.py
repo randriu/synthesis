@@ -258,7 +258,6 @@ class OptimalityProperty(Property):
         return self.result_valid(value) and self.meets_op(value, self.optimum)
 
     def update_optimum(self, optimum):
-        # assert self.improves_optimum(optimum)
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)
@@ -346,6 +345,9 @@ class Specification:
         if self.has_optimality:
             properties += [self.optimality]
         return properties
+
+    def all_constraint_indices(self):
+        return range(len(self.constraints))
 
     def stormpy_properties(self):
         return [p.property for p in self.all_properties()]

@@ -8,57 +8,65 @@ namespace synthesis {
 
 
 TreeNode::Hole::Hole(bool is_interval_type, z3::context& ctx)
-: is_interval_type(is_interval_type), solver_variable(ctx), restriction(ctx) {
+: is_interval_type(is_interval_type), solver_variable(ctx), solver_variable_harm(ctx), restriction(ctx) {
+    // left intentionally blank
+}
+
+TreeNode::Hole::Hole(bool is_interval_type, z3::context& ctx, uint64_t depth)
+: is_interval_type(is_interval_type), solver_variable(ctx), solver_variable_harm(ctx), restriction(ctx), depth(depth) {
     // left intentionally blank
 }
 
 void TreeNode::Hole::createSolverVariable() {
     solver_variable = solver_variable.ctx().int_const(name.c_str());
     solver_string_domain = "h_" + std::to_string(hole);
+    solver_string_domain_harm = "z_" + std::to_string(hole);
     solver_string_restriction = "r_" + std::to_string(hole);
+
+    name_harm = name + "_h";
+    solver_variable_harm = solver_variable.ctx().int_const(name_harm.c_str());
 }
 
 uint64_t TreeNode::Hole::getModelValue(z3::model const& model) const {
     return model.eval(solver_variable).get_numeral_int64();
 }
+uint64_t TreeNode::Hole::getModelValueHarmonizing(z3::model const& model) const {
+    return model.eval(solver_variable_harm).get_numeral_int64();
+}
+void TreeNode::Hole::loadModelValueHarmonizing(z3::model const& model, std::vector<std::set<uint64_t>> & hole_options) const {
+    hole_options[hole].insert(getModelValue(model));
+    hole_options[hole].insert(getModelValueHarmonizing(model));
+}
 
-z3::expr TreeNode::Hole::domainEncoding(Family const& subfamily) const {
+z3::expr TreeNode::Hole::domainEncoding(Family const& subfamily, bool harmonizing) const {
+    z3::expr const& variable = not harmonizing ? solver_variable : solver_variable_harm;
+    std::vector<uint64_t> const& domain = subfamily.holeOptions(hole);
     if(is_interval_type) {
-        return domainInterval(subfamily);
+        int domain_min = domain.front();
+        int domain_max = domain.back();
+        if(domain_min < domain_max) {
+            return (domain_min <= variable) and (variable <= domain_max);
+        } else {
+            return (variable == domain_min);
+        }
     } else {
-        return domainEnumeration(subfamily);
+        z3::expr_vector options(variable.ctx());
+        for(uint64_t option: domain) {
+            options.push_back(variable == (int)option);
+        }
+        return z3::mk_or(options);
     }
 }
 
 void TreeNode::Hole::addDomainEncoding(Family const& subfamily, z3::solver& solver) const {
-    z3::expr encoding = domainEncoding(subfamily);
-    // std::cout << solver_string_domain.c_str() << " : " << encoding << std::endl;
-    solver.add(encoding, solver_string_domain.c_str());
-    if(is_interval_type) {
-        // std::cout << solver_string_restriction.c_str() << " : " << restriction << std::endl;
-        // solver.add(restriction, solver_string_restriction.c_str());    
-    }
-}
+    solver.add(domainEncoding(subfamily, false), solver_string_domain.c_str());
+    solver.add(domainEncoding(subfamily, true), solver_string_domain_harm.c_str());
 
-z3::expr TreeNode::Hole::domainInterval(Family const& subfamily) const {
-    std::vector<uint64_t> const& domain = subfamily.holeOptions(hole);
-    int domain_min = domain.front();
-    int domain_max = domain.back();
-    if(domain_min < domain_max) {
-        return (domain_min <= solver_variable) and (solver_variable <= domain_max);
-    } else {
-        return (solver_variable == domain_min);
-    }
+    /*if(is_interval_type) {
+        std::cout << solver_string_restriction.c_str() << " : " << restriction << std::endl;
+        solver.add(restriction, solver_string_restriction.c_str());    
+    }*/
 }
-
-z3::expr TreeNode::Hole::domainEnumeration(Family const& subfamily) const {
-    z3::expr_vector options(solver_variable.ctx());
-    for(uint64_t option: subfamily.holeOptions(hole)) {
-        options.push_back(solver_variable == (int)option);
-    }
-    return z3::mk_or(options);
-}
-
 
 bool TreeNode::verifyExpression(z3::solver & solver, z3::expr const& expr) {
     solver.push();
@@ -133,11 +141,13 @@ TerminalNode::TerminalNode(
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name, std::vector<std::vector<int64_t>> const& variable_domain,
         uint64_t num_actions
-) : TreeNode(identifier,ctx,variable_name,variable_domain), num_actions(num_actions), action_hole(false,ctx), action_expr(ctx) {}
+) : TreeNode(identifier,ctx,variable_name,variable_domain), num_actions(num_actions), action_hole(false,ctx),
+    action_expr(ctx), action_expr_harm(ctx) {}
 
 void TerminalNode::createHoles(Family& family) {
     action_hole.hole = family.addHole(num_actions);
     action_hole.name = "A_" + std::to_string(identifier);
+    action_hole.depth = depth;
     action_hole.createSolverVariable();
 }
 
@@ -150,10 +160,23 @@ void TerminalNode::createPaths(z3::expr_vector const& substitution_variables) {
     paths.push_back({true});
 }
 
-void TerminalNode::loadPathExpression(
-    std::vector<bool> const& path, z3::expr_vector & expression
-) const {
+void TerminalNode::createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) {
+    z3::expr const& hv = harmonizing_variable;
+    int hole = (int)action_hole.hole;
+    z3::expr eh = action_hole.solver_variable_harm == substitution_variables.back();
+    action_expr_harm = (hv != hole and action_expr) or (hv == hole and ((not action_expr and eh) or (action_expr and not eh)));
+}
+
+void TerminalNode::loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {
     expression.push_back(action_expr);
+}
+
+void TerminalNode::loadAllHoles(std::vector<const Hole *> & holes) const {
+    holes[action_hole.hole] = &action_hole;
+}
+
+void TerminalNode::loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const {
+    holes.push_back(action_hole.hole);
 }
 
 void TerminalNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
@@ -163,6 +186,17 @@ void TerminalNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver
 void TerminalNode::loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {
     hole_options[action_hole.hole].push_back(action_hole.getModelValue(model));
 }
+void TerminalNode::loadHarmonizingHoleAssignmentFromModel(
+    z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+) const {
+    if(action_hole.hole == harmonizing_hole) {
+        action_hole.loadModelValueHarmonizing(model,hole_options);
+    }
+}
+
+void TerminalNode::printHarmonizing(z3::model const& model) const {
+    std::cout << action_hole.name_harm << " = " << action_hole.getModelValueHarmonizing(model) << std::endl;
+}
 
 bool TerminalNode::isPathEnabledInState(
     std::vector<bool> const& path, Family const& subfamily, std::vector<uint64_t> const& state_valuation
@@ -170,7 +204,7 @@ bool TerminalNode::isPathEnabledInState(
     return true;
 }
 
-void TerminalNode::unsatCoreAnalysisMeta(
+void TerminalNode::unsatCoreAnalysis(
     Family const& subfamily,
     std::vector<bool> const& path,
     std::vector<uint64_t> const& state_valuation,
@@ -186,163 +220,30 @@ void TerminalNode::unsatCoreAnalysisMeta(
 
 
 
-
-
-InnerNodeSpecific::InnerNodeSpecific(
-        uint64_t identifier, z3::context & ctx,
-        std::vector<std::string> const& variable_name,
-        std::vector<std::vector<int64_t>> const& variable_domain,
-        uint64_t variable
-) : TreeNode(identifier,ctx,variable_name,variable_domain), variable(variable), variable_hole(true,ctx),
-step_true(ctx), step_false(ctx) {}
-
-void InnerNodeSpecific::createHoles(Family& family) {
-    variable_hole.hole = family.addHole(variable_domain[variable].size()-1);
-    variable_hole.name = variable_name[variable] + "_" + std::to_string(identifier);
-    variable_hole.createSolverVariable();
-
-    // add restrictions
-    InnerNodeSpecific *node = this;
-    InnerNodeSpecific *node_parent = std::dynamic_pointer_cast<InnerNodeSpecific>(node->parent).get();
-    InnerNodeSpecific *lower_bound = NULL;
-    InnerNodeSpecific *upper_bound = NULL;
-    while(node_parent != NULL) {
-        if(node_parent->variable == variable) {
-            if(node->isTrueChild()) {
-                if(upper_bound == NULL) {
-                    upper_bound = node_parent;
-                }
-            } else {
-                if(lower_bound == NULL) {
-                    lower_bound = node_parent;
-                }
-            }
-            if(upper_bound != NULL and lower_bound != NULL) {
-                break;
-            }
-        }
-        node = node_parent;
-        node_parent = std::dynamic_pointer_cast<InnerNodeSpecific>(node->parent).get();
-    }
-    z3::expr_vector restriction(ctx);
-    if(lower_bound != NULL) {
-        restriction.push_back(variable_hole.solver_variable >= lower_bound->variable_hole.solver_variable);
-    }
-    if(upper_bound != NULL) {
-        restriction.push_back(variable_hole.solver_variable <= upper_bound->variable_hole.solver_variable);
-    }
-    variable_hole.restriction = z3::mk_and(restriction);
-    child_true->createHoles(family);
-    child_false->createHoles(family);
-}
-
-void InnerNodeSpecific::loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {
-    hole_info[variable_hole.hole] = std::make_pair(variable_hole.name,variable_name[variable]);
-    child_true->loadHoleInfo(hole_info);
-    child_false->loadHoleInfo(hole_info);
-}
-
-void InnerNodeSpecific::createPaths(z3::expr_vector const& substitution_variables) {
-    child_true->createPaths(substitution_variables);
-    child_false->createPaths(substitution_variables);
-
-    step_true = substitution_variables[variable] <= variable_hole.solver_variable;
-    step_false = substitution_variables[variable] > variable_hole.solver_variable;
-    for(bool condition: {true,false}) {
-        std::shared_ptr<TreeNode> child = getChild(condition);
-        for(std::vector<bool> const& suffix: child->paths) {
-            std::vector<bool> path;
-            path.push_back(condition);
-            path.insert(path.end(),suffix.begin(),suffix.end());
-            paths.push_back(path);
-        }
-    }
-}
-
-void InnerNodeSpecific::loadPathExpression(
-    std::vector<bool> const& path, z3::expr_vector & expression
-) const {
-    bool step_to_true_child = path[depth];
-    z3::expr const& step = step_to_true_child ? step_true : step_false;
-    expression.push_back(step);
-    getChild(step_to_true_child)->loadPathExpression(path,expression);
-}
-
-void InnerNodeSpecific::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
-    variable_hole.addDomainEncoding(subfamily,solver);
-    child_true->addFamilyEncoding(subfamily,solver);
-    child_false->addFamilyEncoding(subfamily,solver);
-}
-
-bool InnerNodeSpecific::isPathEnabledInState(
-    std::vector<bool> const& path, Family const& subfamily, std::vector<uint64_t> const& state_valuation
-) const {
-    bool step_to_true_child = path[depth];
-    uint64_t value = state_valuation[variable];
-    std::vector<uint64_t> const& domain = subfamily.holeOptions(variable_hole.hole);
-    if(    step_to_true_child and not (value <= domain.back())) {
-        return false;
-    }
-    if(not step_to_true_child and not (value > domain.front())) {
-        return false;
-    }
-    return getChild(step_to_true_child)->isPathEnabledInState(path,subfamily,state_valuation);
-}
-
-void InnerNodeSpecific::loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {
-    uint64_t hole_option = variable_hole.getModelValue(model);
-    hole_options[variable_hole.hole].push_back(hole_option);
-    child_true->loadHoleAssignmentFromModel(model,hole_options);
-    child_false->loadHoleAssignmentFromModel(model,hole_options);
-}
-
-void InnerNodeSpecific::unsatCoreAnalysisMeta(
-    Family const& subfamily,
-    std::vector<bool> const& path,
-    std::vector<uint64_t> const& state_valuation,
-    uint64_t path_action, bool action_enabled,
-    std::vector<std::set<uint64_t>> & hole_options
-) const {
-    bool step_to_true_child = path[depth];
-    std::vector<uint64_t> const& domain = subfamily.holeOptions(variable_hole.hole);
-    if(action_enabled == step_to_true_child) {
-        if(state_valuation[variable] <= domain.back()) {
-            hole_options[variable_hole.hole].insert(domain.back());
-        }
-    } else {
-        if(state_valuation[variable] > domain.front()) {
-            hole_options[variable_hole.hole].insert(domain.front());
-        }
-    }
-    getChild(step_to_true_child)->unsatCoreAnalysisMeta(subfamily,path,state_valuation,path_action,action_enabled,hole_options);
-}
-
-
-
-
-
-InnerNodeGeneric::InnerNodeGeneric(
+InnerNode::InnerNode(
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain
-) : TreeNode(identifier,ctx,variable_name,variable_domain), decision_hole(false,ctx), step_true(ctx), step_false(ctx) {}
+) : TreeNode(identifier,ctx,variable_name,variable_domain), decision_hole(false,ctx),
+    step_true(ctx), step_false(ctx), step_true_harm(ctx), step_false_harm(ctx) {}
 
-void InnerNodeGeneric::createHoles(Family& family) {
+void InnerNode::createHoles(Family& family) {
+    decision_hole.hole = family.addHole(numVariables());
+    decision_hole.name = "V_" + std::to_string(identifier);
+    decision_hole.depth = depth;
+    decision_hole.createSolverVariable();
     for(uint64_t variable = 0; variable < numVariables(); ++variable) {
-        Hole hole(true,ctx);
+        Hole hole(true,ctx,depth);
         hole.hole = family.addHole(variable_domain[variable].size()-1);
         hole.name = variable_name[variable] + "_" + std::to_string(identifier);
         hole.createSolverVariable();
         variable_hole.push_back(hole);
     }
-    decision_hole.hole = family.addHole(numVariables());
-    decision_hole.name = "V_" + std::to_string(identifier);
-    decision_hole.createSolverVariable();
 
-    InnerNodeGeneric *node = this;
-    InnerNodeGeneric *node_parent = std::dynamic_pointer_cast<InnerNodeGeneric>(node->parent).get();
-    std::vector<InnerNodeGeneric *> lower_bounds;
-    std::vector<InnerNodeGeneric *> upper_bounds;
+    InnerNode *node = this;
+    InnerNode *node_parent = std::dynamic_pointer_cast<InnerNode>(node->parent).get();
+    std::vector<InnerNode *> lower_bounds;
+    std::vector<InnerNode *> upper_bounds;
     while(node_parent != NULL) {
         if(node->isTrueChild()) {
             upper_bounds.push_back(node_parent);
@@ -350,18 +251,18 @@ void InnerNodeGeneric::createHoles(Family& family) {
             lower_bounds.push_back(node_parent);
         }
         node = node_parent;
-        node_parent = std::dynamic_pointer_cast<InnerNodeGeneric>(node->parent).get();
+        node_parent = std::dynamic_pointer_cast<InnerNode>(node->parent).get();
     }
     for(uint64_t variable = 0; variable < numVariables(); ++variable) {
         // Vi=v => (V_lb=v => Xlb <= Xi) and (V_ub=v => Xi <= Xub)
         z3::expr lhs = decision_hole.solver_variable != (int)variable;
         z3::expr_vector rhs(ctx);
         z3::expr const& var_node = variable_hole[variable].solver_variable;
-        for(InnerNodeGeneric *bound: lower_bounds) {
+        for(InnerNode *bound: lower_bounds) {
             z3::expr const& var_bound = bound->variable_hole[variable].solver_variable;
             rhs.push_back(bound->decision_hole.solver_variable != (int)variable or var_bound <= var_node);
         }
-        for(InnerNodeGeneric *bound: upper_bounds) {
+        for(InnerNode *bound: upper_bounds) {
             z3::expr const& var_bound = bound->variable_hole[variable].solver_variable;
             rhs.push_back(bound->decision_hole.solver_variable != (int)variable or var_node <= var_bound);
         }
@@ -371,7 +272,7 @@ void InnerNodeGeneric::createHoles(Family& family) {
     child_false->createHoles(family);
 }
 
-void InnerNodeGeneric::loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {
+void InnerNode::loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {
     hole_info[decision_hole.hole] = std::make_pair(decision_hole.name,"__decision__");
     for(uint64_t variable = 0; variable < numVariables(); ++variable) {
         Hole const& hole = variable_hole[variable];
@@ -381,7 +282,7 @@ void InnerNodeGeneric::loadHoleInfo(std::vector<std::pair<std::string,std::strin
     child_false->loadHoleInfo(hole_info);
 }
 
-void InnerNodeGeneric::createPaths(z3::expr_vector const& substitution_variables) {
+void InnerNode::createPaths(z3::expr_vector const& substitution_variables) {
     child_true->createPaths(substitution_variables);
     child_false->createPaths(substitution_variables);
 
@@ -410,16 +311,58 @@ void InnerNodeGeneric::createPaths(z3::expr_vector const& substitution_variables
     }
 }
 
-void InnerNodeGeneric::loadPathExpression(
-    std::vector<bool> const& path, z3::expr_vector & expression
-) const {
+void InnerNode::createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) {
+    child_true->createPathsHarmonizing(substitution_variables, harmonizing_variable);
+    child_false->createPathsHarmonizing(substitution_variables, harmonizing_variable);
+
+    // create steps
+    z3::expr_vector step_true_options(ctx);
+    z3::expr_vector step_false_options(ctx);
+    z3::expr const& hv = harmonizing_variable;
+    for(uint64_t variable = 0; variable < numVariables(); ++variable) {
+        Hole d = decision_hole;
+        z3::expr de = d.solver_variable == (int)variable;
+        z3::expr deh = d.solver_variable_harm == (int)variable;
+        z3::expr expr_decision = (hv != (int)d.hole and de) or (hv == (int)d.hole and ((not de and deh) or (de and not deh)) );
+
+        Hole v = variable_hole[variable];
+        z3::expr ve =  substitution_variables[variable] <= v.solver_variable;
+        z3::expr veh = substitution_variables[variable] <= v.solver_variable_harm;
+        z3::expr expr_true =  (hv != (int)v.hole and ve)     or (hv == (int)v.hole and ((not ve and veh) or (ve and not veh)) );
+        z3::expr expr_false = (hv != (int)v.hole and not ve) or (hv == (int)v.hole and ((ve and not veh) or (not ve and veh)) );
+
+        step_true_options.push_back(expr_decision and expr_true);
+        step_false_options.push_back(expr_decision and expr_false);        
+    }
+    step_true_harm = z3::mk_or(step_true_options);
+    step_false_harm = z3::mk_or(step_false_options);
+}
+
+void InnerNode::loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {
     bool step_to_true_child = path[depth];
     z3::expr const& step = step_to_true_child ? step_true : step_false;
     expression.push_back(step);
     getChild(step_to_true_child)->loadPathExpression(path,expression);
 }
 
-void InnerNodeGeneric::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
+void InnerNode::loadAllHoles(std::vector<const Hole *> & holes) const {
+    holes[decision_hole.hole] = &decision_hole;
+    for(Hole const& hole: variable_hole) {
+        holes[hole.hole] = &hole;
+    }
+    child_true->loadAllHoles(holes);
+    child_false->loadAllHoles(holes);
+}
+
+void InnerNode::loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const {
+    holes.push_back(decision_hole.hole);
+    for(Hole const& hole: variable_hole) {
+        holes.push_back(hole.hole);
+    }
+    getChild(path[depth])->loadPathHoles(path,holes);
+}
+
+void InnerNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
     decision_hole.addDomainEncoding(subfamily,solver);
     for(Hole const& hole: variable_hole) {
         hole.addDomainEncoding(subfamily,solver);
@@ -428,7 +371,7 @@ void InnerNodeGeneric::addFamilyEncoding(Family const& subfamily, z3::solver& so
     child_false->addFamilyEncoding(subfamily,solver);
 }
 
-bool InnerNodeGeneric::isPathEnabledInState(
+bool InnerNode::isPathEnabledInState(
     std::vector<bool> const& path, Family const& subfamily, std::vector<uint64_t> const& state_valuation
 ) const {
     bool step_to_true_child = path[depth];
@@ -447,7 +390,7 @@ bool InnerNodeGeneric::isPathEnabledInState(
     return false;
 }
 
-void InnerNodeGeneric::loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {
+void InnerNode::loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {
     hole_options[decision_hole.hole].push_back(decision_hole.getModelValue(model));
     for(Hole const& hole: variable_hole) {
         hole_options[hole.hole].push_back(hole.getModelValue(model));
@@ -455,8 +398,33 @@ void InnerNodeGeneric::loadHoleAssignmentFromModel(z3::model const& model, std::
     child_true->loadHoleAssignmentFromModel(model,hole_options);
     child_false->loadHoleAssignmentFromModel(model,hole_options);
 }
+void InnerNode::loadHarmonizingHoleAssignmentFromModel(
+    z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+) const {
+    if(decision_hole.hole == harmonizing_hole) {
+        decision_hole.loadModelValueHarmonizing(model,hole_options);
+        return;
+    }
+    for(Hole const& hole: variable_hole) {
+        if(hole.hole == harmonizing_hole) {
+            hole.loadModelValueHarmonizing(model,hole_options);
+            return;
+        }
+    }
+    child_true->loadHarmonizingHoleAssignmentFromModel(model,hole_options,harmonizing_hole);
+    child_false->loadHarmonizingHoleAssignmentFromModel(model,hole_options,harmonizing_hole);
+}
 
-void InnerNodeGeneric::unsatCoreAnalysisMeta(
+void InnerNode::printHarmonizing(z3::model const& model) const {
+    std::cout << decision_hole.name_harm << " = " << decision_hole.getModelValueHarmonizing(model) << std::endl;
+    for(Hole const& hole: variable_hole) {
+        std::cout << hole.name_harm << " = " << hole.getModelValueHarmonizing(model) << std::endl;
+    }
+    child_true->printHarmonizing(model);
+    child_false->printHarmonizing(model);
+}
+
+void InnerNode::unsatCoreAnalysis(
     Family const& subfamily,
     std::vector<bool> const& path,
     std::vector<uint64_t> const& state_valuation,
@@ -513,10 +481,9 @@ void InnerNodeGeneric::unsatCoreAnalysisMeta(
             hole_options[decision_hole.hole].insert(sat_variable);
             hole_options[variable_hole[sat_variable].hole].insert(sat_variable_option);
             return;
-        }        
+        }
     }
-    getChild(step_to_true_child)->unsatCoreAnalysisMeta(subfamily,path,state_valuation,path_action,action_enabled,hole_options);   
+    getChild(step_to_true_child)->unsatCoreAnalysis(subfamily,path,state_valuation,path_action,action_enabled,hole_options);
 }
-
 
 }

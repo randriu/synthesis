@@ -40,8 +40,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     def __init__(self, quotient_mdp, family, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
 
-        self.design_space = paynt.family.family.DesignSpace(self.family)
-
         # number of distinct actions in the quotient
         self.num_actions = None
         # a list of action labels

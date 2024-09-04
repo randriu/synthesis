@@ -223,7 +223,7 @@ class Sketch:
     def build_quotient_container(cls, prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager):
         if jani_unfolder is not None:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-                quotient_container = paynt.quotient.quotient.DtmcFamilyQuotient(explicit_quotient, family, coloring, specification)
+                quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
                 quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:

@@ -31,14 +31,24 @@ public:
         z3::expr solver_variable;
         std::string solver_string_domain;
 
+        // harmonizing variable
+        std::string name_harm;
+        z3::expr solver_variable_harm;
+        std::string solver_string_domain_harm;
+
         z3::expr restriction;
         std::string solver_string_restriction;
 
+        uint64_t depth;
+
         Hole(bool is_interval_type, z3::context& ctx);
+        Hole(bool is_interval_type, z3::context& ctx, uint64_t depth);
         void createSolverVariable();
         uint64_t getModelValue(z3::model const& model) const;
+        uint64_t getModelValueHarmonizing(z3::model const& model) const;
+        void loadModelValueHarmonizing(z3::model const& model, std::vector<std::set<uint64_t>> & hole_options) const;
 
-        z3::expr domainEncoding(Family const& subfamily) const;
+        z3::expr domainEncoding(Family const& subfamily, bool harmonizing) const;
         void addDomainEncoding(Family const& subfamily, z3::solver& solver) const;
 
     protected:
@@ -105,10 +115,13 @@ public:
 
     /** Create a list of paths from this node. */
     virtual void createPaths(z3::expr_vector const& substitution_variables) {}
+    /** Create a list of paths from this node. */
+    virtual void createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) {}
     /** Create expression for a path. */
-    virtual void loadPathExpression(
-        std::vector<bool> const& path, z3::expr_vector & expression
-    ) const {}
+    virtual void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {}
+    /** TODO */
+    virtual void loadAllHoles(std::vector<const Hole *> & holes) const {};
+    virtual void loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const {};
 
     /** Add encoding of hole option in the given family. */
     virtual void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const {}
@@ -123,7 +136,13 @@ public:
     virtual void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
     ) const {}
-    virtual void unsatCoreAnalysisMeta(
+    virtual void loadHarmonizingHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+    ) const {}
+    
+    virtual void printHarmonizing(z3::model const& model) const {}
+    
+    virtual void unsatCoreAnalysis(
         Family const& subfamily,
         std::vector<bool> const& path,
         std::vector<uint64_t> const& state_valuation,
@@ -139,6 +158,7 @@ public:
     const uint64_t num_actions;
     Hole action_hole;
     z3::expr action_expr;
+    z3::expr action_expr_harm;
 
     TerminalNode(
         uint64_t identifier, z3::context & ctx,
@@ -150,9 +170,10 @@ public:
     void createHoles(Family& family) override;
     void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
     void createPaths(z3::expr_vector const& substitution_variables) override;
-    void loadPathExpression(
-        std::vector<bool> const& path, z3::expr_vector & expression
-    ) const override;
+    void createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) override;
+    void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const override;
+    void loadAllHoles(std::vector<const Hole *> & holes) const override;
+    void loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
     bool isPathEnabledInState(
@@ -164,7 +185,12 @@ public:
     void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
     ) const override;
-    void unsatCoreAnalysisMeta(
+    void loadHarmonizingHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+    ) const override;
+    void printHarmonizing(z3::model const& model) const override;
+
+    void unsatCoreAnalysis(
         Family const& subfamily,
         std::vector<bool> const& path,
         std::vector<uint64_t> const& state_valuation,
@@ -174,50 +200,7 @@ public:
 };
 
 
-class InnerNodeSpecific: public TreeNode {
-public:
-
-    uint64_t variable;
-    Hole variable_hole;
-
-    z3::expr step_true;
-    z3::expr step_false;
-
-    InnerNodeSpecific(
-        uint64_t identifier, z3::context & ctx,
-        std::vector<std::string> const& variable_name,
-        std::vector<std::vector<int64_t>> const& variable_domain,
-        uint64_t variable
-    );
-
-    void createHoles(Family& family) override;
-    void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
-    void createPaths(z3::expr_vector const& substitution_variables) override;
-    void loadPathExpression(
-        std::vector<bool> const& path, z3::expr_vector & expression
-    ) const override;
-
-    void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
-    bool isPathEnabledInState(
-        std::vector<bool> const& path,
-        Family const& subfamily,
-        std::vector<uint64_t> const& state_valuation
-    ) const override;
-
-    void loadHoleAssignmentFromModel(
-        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
-    ) const override;
-    void unsatCoreAnalysisMeta(
-        Family const& subfamily,
-        std::vector<bool> const& path,
-        std::vector<uint64_t> const& state_valuation,
-        uint64_t path_action, bool action_enabled,
-        std::vector<std::set<uint64_t>> & hole_options
-    ) const override;
-};
-
-
-class InnerNodeGeneric: public TreeNode {
+class InnerNode: public TreeNode {
 public:
 
     Hole decision_hole;
@@ -226,7 +209,10 @@ public:
     z3::expr step_true;
     z3::expr step_false;
 
-    InnerNodeGeneric(
+    z3::expr step_true_harm;
+    z3::expr step_false_harm;
+
+    InnerNode(
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain
@@ -235,9 +221,10 @@ public:
     void createHoles(Family& family) override;
     void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
     void createPaths(z3::expr_vector const& substitution_variables) override;
-    void loadPathExpression(
-        std::vector<bool> const& path, z3::expr_vector & expression
-    ) const override;
+    void createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) override;
+    void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const override;
+    void loadAllHoles(std::vector<const Hole *> & holes) const override;
+    void loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
     bool isPathEnabledInState(
@@ -249,7 +236,12 @@ public:
     void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
     ) const override;
-    void unsatCoreAnalysisMeta(
+    void loadHarmonizingHoleAssignmentFromModel(
+        z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+    ) const override;
+    void printHarmonizing(z3::model const& model) const override;
+
+    void unsatCoreAnalysis(
         Family const& subfamily,
         std::vector<bool> const& path,
         std::vector<uint64_t> const& state_valuation,
