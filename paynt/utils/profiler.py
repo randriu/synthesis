@@ -35,6 +35,8 @@ class Timer:
 
 class GlobalTimeoutTimer(Timer):
 
+    timeout = None
+
     @classmethod
     def start(cls, timeout=None):
         cls.timeout = timeout
