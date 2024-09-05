@@ -6,7 +6,7 @@
 
 namespace synthesis {
         
-    template<typename ValueType>
+    /*template<typename ValueType>
     std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>,std::vector<uint64_t>> randomizeActionVariant(
         storm::models::sparse::Model<ValueType> const& model,
         std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices
@@ -74,7 +74,7 @@ namespace synthesis {
         auto randomized_model = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
         return std::make_pair(randomized_model,choice_to_action);
     }
-    template std::pair<std::shared_ptr<storm::models::sparse::Mdp<double>>,std::vector<uint64_t>> randomizeActionVariant(storm::models::sparse::Model<double> const& model, std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices);
+    template std::pair<std::shared_ptr<storm::models::sparse::Mdp<double>>,std::vector<uint64_t>> randomizeActionVariant(storm::models::sparse::Model<double> const& model, std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices);*/
 
 
     template<typename ValueType>

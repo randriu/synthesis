@@ -12,26 +12,27 @@ namespace synthesis {
     
     
     template<typename ValueType>
-    class ProductPomdpRandomizedFsc {
+    class FscUnfolder {
 
     public:
 
-        ProductPomdpRandomizedFsc(
+        FscUnfolder(
             storm::models::sparse::Model<ValueType> const& quotient,
-            std::vector<uint32_t> state_to_obs_class,
+            std::vector<uint32_t> const& state_to_obs_class,
             uint64_t num_actions,
-            std::vector<uint64_t> choice_to_action
+            std::vector<uint64_t> const& choice_to_action
         );
 
         /**
          * Create a product of the quotient POMDP and the given FSC.
          * @param action_function for each node in the FSC and for each observation class, a dictionary containing
          *  entries (action,probability)
-         * @param action_function for each node in the FSC and for each observation class, a memory update
+         * @param action_function for each node in the FSC and for each (posterior) observation class, a dictionary
+         *  containing entries (memory,probability)
          */
         void applyFsc(
             std::vector<std::vector<std::map<uint64_t,double>>> action_function,
-            std::vector<std::vector<uint64_t>> update_function
+            std::vector<std::vector<std::map<uint64_t,double>>> update_function
         );
 
         /** The constructed product with an FSC. */
@@ -40,8 +41,8 @@ namespace synthesis {
         std::vector<uint64_t> product_choice_to_choice;
         /** For each state of the product MDP, the original state. */
         std::vector<uint64_t> product_state_to_state;
-        /** For each state of the product MDP, the correponding state-memory-action triple. */
-        std::vector<std::pair<uint64_t,std::pair<uint64_t,uint64_t>>> product_state_to_state_memory_action;
+        /** For each state of the product MDP, the correponding state-memory-action-transitioned tuple. */
+        std::vector<std::pair<uint64_t,std::tuple<uint64_t,uint64_t,bool>>> product_state_to_state_memory_action_transitioned;
 
 
     private:
@@ -57,22 +58,27 @@ namespace synthesis {
         /** For each state-action pair, a list of choices that implement this action. */
         std::vector<std::vector<std::set<uint64_t>>> state_action_choices;
 
-        /** For each state, maps memory-action selection to the state in the product. */
-        ItemKeyTranslator<std::pair<uint64_t,uint64_t>> state_translator;
+        uint64_t invalidAction();
+        uint64_t invalidChoice();
+
+        /**
+         * Each state is a tuple (s,n,act,tr) with the following semantics:
+         * - from state (s,n,-,-), an action act is selected according to gamma(n,O(s)), transitioning to (s,n,act,-)
+         * - from state (s,n,act,-), a variant of action act is executed, transitioning to (s',n,-,+)
+         * - from state (s',n,-,+), a memory update n' is selected according delta(n,O(s')), transitioning to (s',n',-,-)
+         **/
+        ItemKeyTranslator<std::tuple<uint64_t,uint64_t,bool>> state_translator;
         uint64_t translateInitialState();
         uint64_t numberOfTranslatedStates();
-
-        /** For each choice and memory value, the choice in the product. */
-        ItemKeyTranslator<uint64_t> choice_translator;
         uint64_t numberOfTranslatedChoices();
 
         void buildStateSpace(
             std::vector<std::vector<std::map<uint64_t,double>>> action_function,
-            std::vector<std::vector<uint64_t>> update_function
+            std::vector<std::vector<std::map<uint64_t,double>>> update_function
         );
         storm::storage::SparseMatrix<ValueType> buildTransitionMatrix(
             std::vector<std::vector<std::map<uint64_t,double>>> action_function,
-            std::vector<std::vector<uint64_t>> update_function
+            std::vector<std::vector<std::map<uint64_t,double>>> update_function
         );
 
         void clearMemory();

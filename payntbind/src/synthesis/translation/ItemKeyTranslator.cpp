@@ -64,4 +64,5 @@ namespace synthesis {
 
     template class ItemKeyTranslator<uint64_t>;
     template class ItemKeyTranslator<std::pair<uint64_t,uint64_t>>;
+    template class ItemKeyTranslator<std::tuple<uint64_t,uint64_t,bool>>;
 }
