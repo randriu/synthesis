@@ -67,7 +67,7 @@ namespace synthesis {
         }
     }
 
-    #ifndef STORM_VERSION_DISCOUNTED_REWARD
+    #ifndef DISABLE_SMG
 
     template<typename SparseSmgModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<SparseSmgModelType>::checkGameFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::GameFormula, ValueType> const& checkTask) {
@@ -225,7 +225,7 @@ namespace synthesis {
         return result;
     }
 
-    #endif //STORM_VERSION_DISCOUNTED_REWARD
+    #endif //DISABLE_SMG
 
     template class SparseSmgRpatlModelChecker<storm::models::sparse::Smg<double>>;
 

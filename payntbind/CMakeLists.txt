@@ -8,6 +8,12 @@ set(PYBIND_VERSION "" CACHE STRING "Pybind11 version to use")
 MARK_AS_ADVANCED(PYBIND_VERSION)
 set(STORM_DIR_HINT "" CACHE STRING "A hint where the Storm library can be found.")
 
+#+
+if (DEFINED DISABLE_SMG)
+    add_definitions(-DDISABLE_SMG)
+endif()
+
+
 find_package(storm REQUIRED HINTS ${STORM_DIR_HINT})
 
 find_package(Python COMPONENTS Interpreter Development REQUIRED)

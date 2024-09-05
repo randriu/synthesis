@@ -33,6 +33,7 @@ class CMakeBuild(build_ext):
         ('debug', None, 'Build in Debug mode'),
         ('jobs=', 'j', 'Number of jobs to use for compiling'),
         ('pybind-version=', None, 'Pybind11 version to use'),
+        ('disable-smg', None, 'Disable SMG solver'), #+
     ]
 
     config = SetupConfig()
@@ -100,6 +101,11 @@ class CMakeBuild(build_ext):
         cmake_args += ['-DPYBIND_VERSION=' + pybind_version]
         if storm_dir is not None:
             cmake_args += ['-DSTORM_DIR_HINT=' + storm_dir]
+
+        #+
+        disable_smg = self.config.get_as_bool("disable_smg")
+        if disable_smg is True:
+            cmake_args += ['-DDISABLE_SMG=ON']
         
         # Configure extensions
         env = os.environ.copy()
@@ -125,6 +131,7 @@ class CMakeBuild(build_ext):
         self.debug = None
         self.jobs = None
         self.pybind_version = None
+        self.disable_smg = None #+
 
     def finalize_options(self):
         build_ext.finalize_options(self)
@@ -136,6 +143,8 @@ class CMakeBuild(build_ext):
         self.config.update("debug", self.debug)
         self.config.update("jobs", self.jobs)
         self.config.update("pybind_version", self.pybind_version)
+        self.config.update("disable_smg", self.disable_smg) #+
+
 
 
 setup(
