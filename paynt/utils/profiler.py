@@ -103,19 +103,19 @@ class Profiler:
         Profiler.print_all()
 
 
-class GlobalTimeLimit(Timer):
+class GlobalTimeLimit:
 
-    timeout = None
+    time_limit_s = None
 
     @classmethod
-    def start(cls, timeout=None):
-        cls.timeout = timeout
+    def start(cls, time_limit_s=None):
+        cls.time_limit_s = time_limit_s
         cls.global_timer = Timer()
         cls.global_timer.start()
 
     @classmethod
-    def time_limit_reached(cls):
-        return cls.timeout is not None and cls.global_timer.read() > cls.timeout
+    def limit_reached(cls):
+        return cls.time_limit_s is not None and cls.global_timer.read() > cls.time_limit_s
 
 
 class GlobalMemoryLimit:
@@ -123,8 +123,7 @@ class GlobalMemoryLimit:
     memory_limit_mb = None
 
     @classmethod
-    def memory_limit_reached(cls):
+    def limit_reached(cls):
         process = psutil.Process(os.getpid())
         allocated_mb = process.memory_info().rss / (1024 * 1024)
         return cls.memory_limit_mb is not None and allocated_mb > cls.memory_limit_mb
-

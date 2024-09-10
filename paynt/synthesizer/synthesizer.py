@@ -78,13 +78,13 @@ class Synthesizer:
         pass
 
     def global_time_limit_reached(self):
-        if paynt.utils.profiler.GlobalTimeLimit.time_limit_reached():
+        if paynt.utils.profiler.GlobalTimeLimit.limit_reached():
             logger.info("time limit reached, aborting...")
             return True
         return False
 
     def global_memory_limit_reached(self):
-        if paynt.utils.profiler.GlobalMemoryLimit.memory_limit_reached():
+        if paynt.utils.profiler.GlobalMemoryLimit.limit_reached():
             logger.info("memory limit reached, aborting...")
             return True
         return False
