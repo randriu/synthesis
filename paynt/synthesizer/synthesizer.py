@@ -77,6 +77,21 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
+    def global_time_limit_reached(self):
+        if paynt.utils.profiler.GlobalTimeLimit.time_limit_reached():
+            logger.info("time limit reached, aborting...")
+            return True
+        return False
+
+    def global_memory_limit_reached(self):
+        if paynt.utils.profiler.GlobalMemoryLimit.memory_limit_reached():
+            logger.info("memory limit reached, aborting...")
+            return True
+        return False
+
+    def global_resource_limit_reached(self):
+        return self.global_time_limit_reached() or self.global_memory_limit_reached()
+
     def set_optimality_threshold(self, optimum_threshold):
         if self.quotient.specification.has_optimality and optimum_threshold is not None:
             self.quotient.specification.optimality.update_optimum(optimum_threshold)

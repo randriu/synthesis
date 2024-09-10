@@ -60,7 +60,7 @@ python3 setup.py develop
 
 # paynt dependencies
 sudo apt -y install graphviz
-pip3 install click z3-solver graphviz
+pip3 install click z3-solver psutil graphviz
 
 # build payntbind
 cd ${PAYNT_ROOT}/payntbind

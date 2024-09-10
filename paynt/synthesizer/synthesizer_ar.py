@@ -1,7 +1,6 @@
 import paynt.synthesizer.synthesizer
 import paynt.quotient.pomdp
 import paynt.verification.property_result
-import paynt.utils.profiler
 
 import logging
 logger = logging.getLogger(__name__)
@@ -98,8 +97,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         # return self.synthesize_one_experimental(family)
         families = [family]
         while families:
-            if paynt.utils.profiler.GlobalTimeoutTimer.timeout_reached():
-                logger.info("timeout reached, aborting...")
+            if self.global_resource_limit_reached():
                 break
             family = families.pop(-1)
             self.verify_family(family)

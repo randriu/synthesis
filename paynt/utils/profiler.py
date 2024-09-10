@@ -1,4 +1,6 @@
 import time
+import psutil
+import os
 
 
 class Timer:
@@ -32,25 +34,6 @@ class Timer:
             return self.time
         else:
             return self.time + (self.timestamp() - self.timer)
-
-class GlobalTimeoutTimer(Timer):
-
-    timeout = None
-
-    @classmethod
-    def start(cls, timeout=None):
-        cls.timeout = timeout
-        cls.global_timer = Timer()
-        cls.global_timer.start()
-
-    @classmethod
-    def stop(cls):
-        cls.global_timer.stop()
-
-    @classmethod
-    def timeout_reached(cls):
-        return cls.timeout is not None and cls.global_timer.read() > cls.timeout
-
 
 class Profiler:
 
@@ -119,4 +102,29 @@ class Profiler:
         Profiler.timer_total.stop()
         Profiler.print_all()
 
+
+class GlobalTimeLimit(Timer):
+
+    timeout = None
+
+    @classmethod
+    def start(cls, timeout=None):
+        cls.timeout = timeout
+        cls.global_timer = Timer()
+        cls.global_timer.start()
+
+    @classmethod
+    def time_limit_reached(cls):
+        return cls.timeout is not None and cls.global_timer.read() > cls.timeout
+
+
+class GlobalMemoryLimit:
+
+    memory_limit_mb = None
+
+    @classmethod
+    def memory_limit_reached(cls):
+        process = psutil.Process(os.getpid())
+        allocated_mb = process.memory_info().rss / (1024 * 1024)
+        return cls.memory_limit_mb is not None and allocated_mb > cls.memory_limit_mb
 

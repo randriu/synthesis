@@ -10,7 +10,7 @@ WORKDIR /opt/
 # install dependencies
 RUN apt-get update -qq
 RUN apt-get install -y graphviz
-RUN pip install click z3-solver graphviz
+RUN pip install click z3-solver psutil graphviz
 
 # build paynt
 WORKDIR /opt/paynt

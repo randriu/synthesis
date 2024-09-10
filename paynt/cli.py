@@ -166,7 +166,7 @@ def paynt_run(
     if profiling:
         profiler = cProfile.Profile()
         profiler.enable()
-    paynt.utils.profiler.GlobalTimeoutTimer.start(timeout)
+    paynt.utils.profiler.GlobalTimeLimit.start(timeout)
 
     logger.info("This is Paynt version {}.".format(version()))
 
