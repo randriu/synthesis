@@ -120,17 +120,24 @@ std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels(
 ) {
     // collect action labels
     storm::models::sparse::ChoiceLabeling const& choice_labeling = model.getChoiceLabeling();
-    std::vector<std::string> action_labels;
-    std::map<std::string,uint64_t> action_label_index;
     std::set<std::string> action_labels_set;
     for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
         for(std::string const& label: choice_labeling.getLabelsOfChoice(choice)) {
             action_labels_set.insert(label);
         }
     }
+
+    // sort action labels to ensure order determinism
+    std::vector<std::string> action_labels;
     for(std::string const& label: action_labels_set) {
-        action_label_index[label] = action_labels.size();
         action_labels.push_back(label);
+    }
+    std::sort(action_labels.begin(),action_labels.end());
+
+    // map action labels to actions
+    std::map<std::string,uint64_t> action_label_to_action;
+    for(uint64_t action = 0; action < action_labels.size(); ++action) {
+        action_label_to_action[action_labels[action]] = action;
     }
 
     assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling, false);
@@ -138,7 +145,7 @@ std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels(
     for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
         auto const& labels = choice_labeling.getLabelsOfChoice(choice);
         std::string const& label = *(labels.begin());
-        uint64_t action = action_label_index[label];
+        uint64_t action = action_label_to_action[label];
         choice_to_action[choice] = action;
     }
     return std::make_pair(action_labels,choice_to_action);
@@ -148,8 +155,7 @@ template<typename ValueType>
 std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<uint64_t>> enableAllActions(
     storm::models::sparse::Model<ValueType> const& model
 ) {
-    storm::storage::BitVector all_states(model.getNumberOfStates(),true);
-    return enableAllActions(model,all_states);
+    return enableAllActions(model,storm::storage::BitVector(model.getNumberOfStates(),true));
 }
 
 template<typename ValueType>

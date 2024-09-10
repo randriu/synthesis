@@ -70,7 +70,7 @@ std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<u
 /**
  * Given a model with canonic choice labeling, make sure that in each state in the set \p state_maks all actions
  * are available. If an action is not available in a state, add it to this state with the behavior of the first
- * existing action.
+ * existing action. The order of actions is the one obtained by \c extractActionLabels
  * @return the updated model and a choice-to-action mapping
  */
 template<typename ValueType>
