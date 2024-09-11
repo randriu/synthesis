@@ -144,9 +144,12 @@ class Statistic:
         # ret_str += f", pres = {self.synthesizer.num_preserved}"
         
         spec = self.quotient.specification
-        if spec.has_optimality and spec.optimality.optimum is not None:
-            optimum = round(spec.optimality.optimum,4)
-            ret_str += f", opt = {optimum}"
+        if spec.has_optimality:
+            opt = self.synthesizer.best_assignment_value
+            if opt is None:
+                opt = spec.optimality.optimum
+            if opt is not None:
+                ret_str += f", opt = {round(opt,4)}"
         return ret_str
 
 

@@ -98,7 +98,7 @@ python3 paynt.py models/archive/cav21-paynt/maze --props hard.props --method hyb
 python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0
 python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
 python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
-python3 models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis --timeout 10
+timeout 10s python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
 python3 paynt.py models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
 python3 paynt.py models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```

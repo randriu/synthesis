@@ -33,10 +33,6 @@ uint64_t TreeNode::Hole::getModelValue(z3::model const& model) const {
 uint64_t TreeNode::Hole::getModelValueHarmonizing(z3::model const& model) const {
     return model.eval(solver_variable_harm).get_numeral_int64();
 }
-void TreeNode::Hole::loadModelValueHarmonizing(z3::model const& model, std::vector<std::set<uint64_t>> & hole_options) const {
-    hole_options[hole].insert(getModelValue(model));
-    hole_options[hole].insert(getModelValueHarmonizing(model));
-}
 
 z3::expr TreeNode::Hole::domainEncoding(Family const& subfamily, bool harmonizing) const {
     z3::expr const& variable = not harmonizing ? solver_variable : solver_variable_harm;
@@ -186,17 +182,14 @@ void TerminalNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver
 void TerminalNode::loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {
     hole_options[action_hole.hole].push_back(action_hole.getModelValue(model));
 }
-void TerminalNode::loadHarmonizingHoleAssignmentFromModel(
-    z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+void TerminalNode::loadHoleAssignmentFromModelHarmonizing(
+    z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options, uint64_t harmonizing_hole
 ) const {
-    if(action_hole.hole == harmonizing_hole) {
-        action_hole.loadModelValueHarmonizing(model,hole_options);
+    if(harmonizing_hole == action_hole.hole) {
+        hole_options[action_hole.hole].push_back(action_hole.getModelValueHarmonizing(model));
     }
 }
 
-void TerminalNode::printHarmonizing(z3::model const& model) const {
-    std::cout << action_hole.name_harm << " = " << action_hole.getModelValueHarmonizing(model) << std::endl;
-}
 
 bool TerminalNode::isPathEnabledInState(
     std::vector<bool> const& path, Family const& subfamily, std::vector<uint64_t> const& state_valuation
@@ -398,30 +391,25 @@ void InnerNode::loadHoleAssignmentFromModel(z3::model const& model, std::vector<
     child_true->loadHoleAssignmentFromModel(model,hole_options);
     child_false->loadHoleAssignmentFromModel(model,hole_options);
 }
-void InnerNode::loadHarmonizingHoleAssignmentFromModel(
-    z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+void InnerNode::loadHoleAssignmentFromModelHarmonizing(
+    z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options, uint64_t harmonizing_hole
 ) const {
-    if(decision_hole.hole == harmonizing_hole) {
-        decision_hole.loadModelValueHarmonizing(model,hole_options);
-        return;
-    }
-    for(Hole const& hole: variable_hole) {
-        if(hole.hole == harmonizing_hole) {
-            hole.loadModelValueHarmonizing(model,hole_options);
-            return;
+    const Hole *harmonizing_hole_ptr = NULL;
+    if(harmonizing_hole == decision_hole.hole) {
+        harmonizing_hole_ptr = &decision_hole;
+    } else {
+        for(Hole const& hole: variable_hole) {
+            if(harmonizing_hole == hole.hole) {
+                harmonizing_hole_ptr = &hole;
+            }
         }
     }
-    child_true->loadHarmonizingHoleAssignmentFromModel(model,hole_options,harmonizing_hole);
-    child_false->loadHarmonizingHoleAssignmentFromModel(model,hole_options,harmonizing_hole);
-}
-
-void InnerNode::printHarmonizing(z3::model const& model) const {
-    std::cout << decision_hole.name_harm << " = " << decision_hole.getModelValueHarmonizing(model) << std::endl;
-    for(Hole const& hole: variable_hole) {
-        std::cout << hole.name_harm << " = " << hole.getModelValueHarmonizing(model) << std::endl;
+    if(harmonizing_hole_ptr != NULL) {
+        hole_options[harmonizing_hole_ptr->hole].push_back(harmonizing_hole_ptr->getModelValueHarmonizing(model));
+        return;
     }
-    child_true->printHarmonizing(model);
-    child_false->printHarmonizing(model);
+    child_true->loadHoleAssignmentFromModelHarmonizing(model,hole_options,harmonizing_hole);
+    child_false->loadHoleAssignmentFromModelHarmonizing(model,hole_options,harmonizing_hole);
 }
 
 void InnerNode::unsatCoreAnalysis(

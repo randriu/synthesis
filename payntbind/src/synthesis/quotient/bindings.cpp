@@ -322,13 +322,13 @@ void bindings_coloring(py::module& m) {
             storm::models::sparse::NondeterministicModel<double> const&,
             std::vector<std::string> const&,
             std::vector<std::vector<int64_t>> const&,
-            std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const&
+            std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const&,
+            bool
         >())
         .def("getFamilyInfo", &synthesis::ColoringSmt<>::getFamilyInfo)
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
         .def("areChoicesConsistent", &synthesis::ColoringSmt<>::areChoicesConsistent)
-        .def("areChoicesConsistent2", &synthesis::ColoringSmt<>::areChoicesConsistent2)
         .def("getProfilingInfo", &synthesis::ColoringSmt<>::getProfilingInfo)
         ;
 }

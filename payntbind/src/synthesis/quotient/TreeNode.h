@@ -46,7 +46,6 @@ public:
         void createSolverVariable();
         uint64_t getModelValue(z3::model const& model) const;
         uint64_t getModelValueHarmonizing(z3::model const& model) const;
-        void loadModelValueHarmonizing(z3::model const& model, std::vector<std::set<uint64_t>> & hole_options) const;
 
         z3::expr domainEncoding(Family const& subfamily, bool harmonizing) const;
         void addDomainEncoding(Family const& subfamily, z3::solver& solver) const;
@@ -136,11 +135,9 @@ public:
     virtual void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
     ) const {}
-    virtual void loadHarmonizingHoleAssignmentFromModel(
-        z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+    virtual void loadHoleAssignmentFromModelHarmonizing(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options, uint64_t harmonizing_hole
     ) const {}
-    
-    virtual void printHarmonizing(z3::model const& model) const {}
     
     virtual void unsatCoreAnalysis(
         Family const& subfamily,
@@ -185,10 +182,9 @@ public:
     void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
     ) const override;
-    void loadHarmonizingHoleAssignmentFromModel(
-        z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+    void loadHoleAssignmentFromModelHarmonizing(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options, uint64_t harmonizing_hole
     ) const override;
-    void printHarmonizing(z3::model const& model) const override;
 
     void unsatCoreAnalysis(
         Family const& subfamily,
@@ -236,10 +232,9 @@ public:
     void loadHoleAssignmentFromModel(
         z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options
     ) const override;
-    void loadHarmonizingHoleAssignmentFromModel(
-        z3::model const& model, std::vector<std::set<uint64_t>> & hole_options, uint64_t harmonizing_hole
+    void loadHoleAssignmentFromModelHarmonizing(
+        z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options, uint64_t harmonizing_hole
     ) const override;
-    void printHarmonizing(z3::model const& model) const override;
 
     void unsatCoreAnalysis(
         Family const& subfamily,

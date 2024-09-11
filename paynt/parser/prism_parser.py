@@ -39,6 +39,7 @@ class PrismParser:
         if len(hole_definitions) > 0:
             logger.info("processing hole definitions...")
             prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
+        prism = prism.label_unlabelled_commands({})
 
         specification = PrismParser.parse_specification(properties_path, relative_error, prism)
 

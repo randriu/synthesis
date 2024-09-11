@@ -15,13 +15,14 @@ ColoringSmt<ValueType>::ColoringSmt(
     storm::models::sparse::NondeterministicModel<ValueType> const& model,
     std::vector<std::string> const& variable_name,
     std::vector<std::vector<int64_t>> const& variable_domain,
-    std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list
+    std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
+    bool one_consistency_check
 ) : initial_state(*model.getInitialStates().begin()),
     row_groups(model.getNondeterministicChoiceIndices()),
     choice_destinations(synthesis::computeChoiceDestinations(model)),
     choice_to_action(synthesis::extractActionLabels(model).second),
     variable_name(variable_name), variable_domain(variable_domain),
-    solver(ctx), harmonizing_variable(ctx) {
+    solver(ctx), harmonizing_variable(ctx), one_consistency_check(one_consistency_check) {
 
     timers[__FUNCTION__].start();
     // std::cout << __FUNCTION__ << " start" << std::endl;
@@ -117,12 +118,15 @@ ColoringSmt<ValueType>::ColoringSmt(
     }
 
     // collect all path expressions
-    std::vector<z3::expr_vector> path_expressions;
+    z3::expr_vector path_expression(ctx);
     for(std::vector<bool> const& path: getRoot()->paths) {
         z3::expr_vector expression(ctx);
         getRoot()->loadPathExpression(path,expression);
-        path_expressions.push_back(expression);
-
+        z3::expr_vector steps(ctx);
+        for(uint64_t step = 0; step < expression.size()-1; ++step) {
+            steps.push_back(expression[step]);
+        }
+        path_expression.push_back(not z3::mk_and(steps) or expression.back());
         const TreeNode *node = getRoot()->getNodeOfPath(path,path.size()-1);
         const TerminalNode * terminal = dynamic_cast<const TerminalNode *>(node);
         path_action_hole.push_back(terminal->action_hole.hole);
@@ -132,33 +136,25 @@ ColoringSmt<ValueType>::ColoringSmt(
     timers["ColoringSmt:: create choice colors"].start();
     for(uint64_t state = 0; state < numStates(); ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            std::vector<z3::expr> path_exprs;
-            std::vector<z3::expr> path_exprs_harm;
-            z3::expr_vector path_and_action(ctx);
-            z3::expr_vector path_and_action_harm(ctx);
             std::vector<std::string> path_label;
-
+            z3::expr_vector path_evaluated(ctx);
             for(uint64_t path = 0; path < numPaths(); ++path) {
                 std::string label = "p" + std::to_string(choice) + "_" + std::to_string(path);
                 path_label.push_back(label);
-
-                z3::expr_vector path_steps_evaluated(ctx);
-                for(uint64_t step = 0; step < path_expressions[path].size()-1; ++step) {
-                    z3::expr step_expr = path_expressions[path][step];
-                    path_steps_evaluated.push_back(step_expr.substitute(substitution_variables,choice_substitution_expr[choice]));
-                }
-                z3::expr action_evaluated = path_expressions[path].back().substitute(substitution_variables,choice_substitution_expr[choice]);
-                z3::expr path_evaluated = not z3::mk_and(path_steps_evaluated); // mind the negation
-                path_exprs.push_back(path_evaluated);
-                path_and_action.push_back(path_evaluated or action_evaluated);
+                path_evaluated.push_back(path_expression[path].substitute(substitution_variables,choice_substitution_expr[choice]));
             }
             choice_path_label.push_back(path_label);
-
-            choice_path.push_back(path_exprs);
-            choice_path_and_action.push_back(path_and_action);
+            choice_path_expresssion.push_back(path_evaluated);
         }
     }
+    timers["ColoringSmt:: create choice colors"].stop();
 
+    if(one_consistency_check) {
+        timers[__FUNCTION__].stop();
+        return;
+    }
+
+    timers["ColoringSmt:: create harmonizing variants"].start();
     // create harmonizing variants
     std::vector<const TreeNode::Hole *> all_holes(family.numHoles());
     getRoot()->loadAllHoles(all_holes);
@@ -173,25 +169,27 @@ ColoringSmt<ValueType>::ColoringSmt(
         z3::expr_vector with(ctx); with.push_back(hole->solver_variable_harm); hole_with.push_back(with);
     }
 
+    z3::expr_vector path_expression_harmonizing(ctx);
+    for(uint64_t path = 0; path < numPaths(); ++path) {
+        z3::expr e = path_expression[path];
+        z3::expr_vector variants(ctx);
+        variants.push_back(e);
+        for(uint64_t hole: path_holes[path]) {
+            variants.push_back(
+                (harmonizing_variable == (int)hole) and e.substitute(hole_what[hole],hole_with[hole])
+            );
+        }
+        path_expression_harmonizing.push_back(z3::mk_or(variants));
+    }
+
     for(uint64_t choice = 0; choice < numChoices(); ++choice) {
         z3::expr_vector path_variants(ctx);
         for(uint64_t path = 0; path < numPaths(); ++path) {
-            std::vector<z3::expr> choice_path_variants;
-            z3::expr e = choice_path_and_action[choice][path];
-            z3::expr_vector variants(ctx);
-            variants.push_back(e);
-            for(uint64_t hole: path_holes[path]) {
-                variants.push_back(
-                    (harmonizing_variable == (int)hole) and e.substitute(hole_what[hole],hole_with[hole])
-                );
-            }
-            path_variants.push_back(z3::mk_or(variants));
-            // std::cout << choice_path_and_action[choice][path] << std::endl;
-            // std::cout << path_variants.back() << std::endl;
+            path_variants.push_back(path_expression_harmonizing[path].substitute(substitution_variables,choice_substitution_expr[choice]));
         }
-        choice_path_and_action_harm.push_back(path_variants);
+        choice_path_expresssion_harm.push_back(path_variants);
     }
-    timers["ColoringSmt:: create choice colors"].stop();
+    timers["ColoringSmt:: create harmonizing variants"].stop();
 
     // std::cout << __FUNCTION__ << " end" << std::endl;
     timers[__FUNCTION__].stop();
@@ -345,8 +343,8 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         for(uint64_t state: state_reached) {
             z3::expr_vector enabled_choices(ctx);
             /*for(uint64_t choice: state_enabled_choices[state]) {
-                // enabled_choices.push_back(z3::mk_and(choice_path_and_action[choice]));
-                enabled_choices.push_back(choice_path_and_action_expr[choice]);
+                // enabled_choices.push_back(z3::mk_and(choice_path_expresssion[choice]));
+                enabled_choices.push_back(choice_path_expresssion_expr[choice]);
             }
             solver.add(z3::mk_or(enabled_choices));*/
         }
@@ -362,86 +360,11 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
     return selection;
 }
 
+
 template<typename ValueType>
 std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistent(BitVector const& choices, Family const& subfamily) {
     timers[__FUNCTION__].start();
-
-
-    timers["areChoicesConsistent::1 is scheduler consistent?"].start();
-    solver.push();
-    getRoot()->addFamilyEncoding(subfamily,solver);
-    solver.push();
-    for(uint64_t choice: choices) {
-        uint64_t state = choice_to_state[choice];
-        for(uint64_t path: state_path_enabled[state]) {
-            const char *label = choice_path_label[choice][path].c_str();
-
-            solver.add(choice_path_and_action[choice][path], label);
-            
-            /*bool action_enabled = subfamily.holeContains(path_action_hole[path],choice_to_action[choice]);
-            if(action_enabled) {
-                solver.add(choice_path_and_action[choice][path], label);
-            } else {
-                solver.add(choice_path[choice][path], label);
-            }*/
-        }
-    }
-    bool consistent = check();
-    timers["areChoicesConsistent::1 is scheduler consistent?"].stop();
-
-    std::vector<std::set<uint64_t>> hole_options(family.numHoles());
     std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
-    if(consistent) {
-        z3::model model = solver.get_model();
-        solver.pop();
-        solver.pop();
-        getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
-        timers[__FUNCTION__].stop();
-        return std::make_pair(true,hole_options_vector);
-    }
-
-    z3::expr_vector unsat_core = solver.unsat_core();
-    solver.pop();
-
-    // std::cout << "-- unsat core start --" << std::endl;
-    timers["areChoicesConsistent::2 unsat core analysis"].start();
-    for(z3::expr expr: unsat_core) {
-        std::istringstream iss(expr.decl().name().str());
-        // std::cout << expr << std::endl;
-        char prefix; iss >> prefix;
-        if(prefix == 'h' or prefix == 'z') {
-            continue;
-        }
-
-        uint64_t choice,path; iss >> choice; iss >> prefix; iss >> path;
-        uint64_t action = choice_to_action[choice];
-        bool action_enabled = subfamily.holeContains(path_action_hole[path],choice_to_action[choice]);
-        // std::cout << "state = " << choice_to_state[choice] << ", choice = " << choice << ", path = " << path << std::endl;
-        /*if(action_enabled) {
-            std::cout << "UC: " << choice_path_and_action[choice][path] << std::endl;
-        } else {
-            std::cout << "UC: " << (choice_path[choice][path]) << std::endl;
-        }*/
-        getRoot()->unsatCoreAnalysis(
-            subfamily, getRoot()->paths[path], state_valuation[choice_to_state[choice]],
-            choice_to_action[choice], action_enabled, hole_options
-        );
-    }
-    // std::cout << "-- unsat core end --" <<std::endl;
-    solver.pop();
-    timers["areChoicesConsistent::2 unsat core analysis"].stop();
-
-    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
-        hole_options_vector[hole].assign(hole_options[hole].begin(),hole_options[hole].end());
-    }
-    timers[__FUNCTION__].stop();
-    return std::make_pair(false,hole_options_vector);
-}
-
-
-template<typename ValueType>
-std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistent2(BitVector const& choices, Family const& subfamily) {
-    timers[__FUNCTION__].start();
 
     timers["areChoicesConsistent::1 is scheduler consistent?"].start();
     solver.push();
@@ -451,15 +374,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         uint64_t state = choice_to_state[choice];
         for(uint64_t path: state_path_enabled[state]) {
             const char *label = choice_path_label[choice][path].c_str();
-
-            solver.add(choice_path_and_action[choice][path], label);
-            
-            /*bool action_enabled = subfamily.holeContains(path_action_hole[path],choice_to_action[choice]);
-            if(action_enabled) {
-                solver.add(choice_path_and_action[choice][path], label);
-            } else {
-                solver.add(choice_path[choice][path], label);
-            }*/
+            solver.add(choice_path_expresssion[choice][path], label);
         }
     }
     bool consistent = check();
@@ -469,12 +384,16 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         z3::model model = solver.get_model();
         solver.pop();
         solver.pop();
-        std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
         getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
         timers[__FUNCTION__].stop();
         return std::make_pair(true,hole_options_vector);
     }
     solver.pop();
+    if(one_consistency_check) {
+        solver.pop();
+        timers[__FUNCTION__].stop();
+        return std::make_pair(false,hole_options_vector);
+    }
 
     timers["areChoicesConsistent::2 better unsat core"].start();
     solver.push();
@@ -494,12 +413,9 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
                 continue;
             }
             // std::cout << "adding choice = " << choice << std::endl;
-            for(uint64_t path = 0; path < numPaths(); ++path) {
-                if(not state_path_enabled[state][path]) {
-                    continue;
-                }
+            for(uint64_t path: state_path_enabled[state]) {
                 const char *label = choice_path_label[choice][path].c_str();
-                solver.add(choice_path_and_action[choice][path], label);
+                solver.add(choice_path_expresssion[choice][path], label);
             }
             consistent = check();
             if(not consistent) {
@@ -533,12 +449,11 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
 
         uint64_t choice,path; iss >> choice; iss >> prefix; iss >> path;
         const char *label = choice_path_label[choice][path].c_str();
-        solver.add(choice_path_and_action_harm[choice][path], label);
+        solver.add(choice_path_expresssion_harm[choice][path], label);
         if(PRINT_UNSAT_CORE) {
             bool action_enabled = subfamily.holeContains(path_action_hole[path],choice_to_action[choice]);
             std::cout << "choice = " << choice << ", path = " << path << ", enabled = " << action_enabled << std::endl;
-            std::cout << choice_path_and_action[choice][path] << std::endl;
-            // std::cout << choice_path_and_action_harm[choice][path] << std::endl;
+            std::cout << choice_path_expresssion[choice][path] << std::endl;
         }
         
     }
@@ -576,8 +491,13 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     z3::model model = solver.get_model();
 
     uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
-    std::vector<std::set<uint64_t>> hole_options(family.numHoles());
-    getRoot()->loadHarmonizingHoleAssignmentFromModel(model,hole_options,harmonizing_hole);
+    getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
+    getRoot()->loadHoleAssignmentFromModelHarmonizing(model,hole_options_vector,harmonizing_hole);
+    if(hole_options_vector[harmonizing_hole][0] > hole_options_vector[harmonizing_hole][1]) {
+        uint64_t tmp = hole_options_vector[harmonizing_hole][0];
+        hole_options_vector[harmonizing_hole][0] = hole_options_vector[harmonizing_hole][1];
+        hole_options_vector[harmonizing_hole][1] = tmp;
+    }
     if(PRINT_UNSAT_CORE)
         std::cout << "-- unsat core end --" << std::endl;
     
@@ -585,10 +505,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     solver.pop();
     timers["areChoicesConsistent::3 unsat core analysis"].stop();
 
-    std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
-    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
-        hole_options_vector[hole].assign(hole_options[hole].begin(),hole_options[hole].end());
-    }
     timers[__FUNCTION__].stop();
     return std::make_pair(false,hole_options_vector);
 }

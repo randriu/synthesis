@@ -25,7 +25,8 @@ public:
         storm::models::sparse::NondeterministicModel<ValueType> const& model,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain,
-        std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list
+        std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
+        bool one_consistency_check = false
     );
 
     /** For each hole, get a list of name-type pairs.  */
@@ -46,9 +47,6 @@ public:
      * assignment if A holds, or a list of inconsistent hole assignments to be used for splitting.
      */
     std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent(
-        BitVector const& choices, Family const& subfamily
-    );
-    std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent2(
         BitVector const& choices, Family const& subfamily
     );
 
@@ -107,29 +105,30 @@ protected:
     /** Unrefined family. */
     Family family;
 
+    /** Check the current SMT formula. */
     bool check();
 
     /** For each path, an index of the hole that occurs at its end. */
     std::vector<uint64_t> path_action_hole;
     /** For each choice and path, a label passed to SMT solver. */
     std::vector<std::vector<std::string>> choice_path_label;
-    
-    /** For each choice and path, the corresponding (negated!) expression describing the prefix. */
-    std::vector<std::vector<z3::expr>> choice_path;
     /** For each choice, its color expressed as a conjunction of all path implications. */
-    std::vector<z3::expr_vector> choice_path_and_action;
+    std::vector<z3::expr_vector> choice_path_expresssion;
 
+    /** SMT variable refering to harmonizing hole. */
     z3::expr harmonizing_variable;
-    /** For each choice and path, the corresponding (negated!) expression describing the prefix. */
-    std::vector<std::vector<z3::expr>> choice_path_harm;
     /** For each choice, its color expressed as a conjunction of all path implications. */
-    std::vector<z3::expr_vector> choice_path_and_action_harm;
+    std::vector<z3::expr_vector> choice_path_expresssion_harm;
 
     /** For each state, whether (in the last subfamily) the path was enabled. */
     std::vector<BitVector> state_path_enabled;
 
     /** Check whether (in the subfamily) the choice is enabled. */
     bool isChoiceEnabled(Family const& subfamily, uint64_t state, uint64_t choice);
+
+    /** If true, the object will be setup for one consistency check. */
+    bool one_consistency_check;
+
 };
 
 }

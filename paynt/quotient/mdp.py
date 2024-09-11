@@ -52,11 +52,12 @@ class Variable:
     @classmethod
     def from_model(cls, model):
         assert model.has_state_valuations(), "model has no state valuations"
-        valuation = json.loads(str(model.state_valuations.get_json(0)))
+        sv = model.state_valuations
+        valuation = json.loads(str(sv.get_json(0)))
         variable_name = [var_name for var_name in valuation]
         state_valuations = []
         for state in range(model.nr_states):
-            valuation = json.loads(str(model.state_valuations.get_json(state)))
+            valuation = json.loads(str(sv.get_json(state)))
             valuation = [valuation[var_name] for var_name in variable_name]
             state_valuations.append(valuation)
         variables = [Variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
@@ -184,7 +185,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         variable_name = [v.name for v in variables]
         variable_domain = [v.domain for v in variables]
         tree_list = self.decision_tree.to_list()
-        self.coloring = payntbind.synthesis.ColoringSmt(self.quotient_mdp, variable_name, variable_domain, tree_list)
+        self.coloring = payntbind.synthesis.ColoringSmt(self.quotient_mdp, variable_name, variable_domain, tree_list, False)
 
         # reconstruct the family
         hole_info = self.coloring.getFamilyInfo()
@@ -243,12 +244,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
-        # print(self.family)
-        # print(family)
-        # for hole in range(family.num_holes):
-        #     print(f"{family.hole_name(hole)} = {family.hole_options(hole)}")
         return self.coloring.areChoicesConsistent(choices, family.family)
-        return self.coloring.areChoicesConsistent2(choices, family.family)
 
     def scheduler_is_consistent(self, mdp, prop, result):
         ''' Get hole options involved in the scheduler selection. '''
@@ -260,12 +256,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         if self.specification.is_single_property:
             mdp.family.scheduler_choices = choices
         consistent,hole_selection = self.are_choices_consistent(choices, mdp.family)
-        # print(mdp.family)
-        # print(consistent,hole_selection)
-
-        # if not consistent:
-        #     inconsistent_assignments = {hole:options for hole,options in enumerate(hole_selection) if len(options) > 1 }
-        #     assert len(inconsistent_assignments) > 0, f"obtained selection with no inconsistencies: {hole_selection}"
 
         for hole,options in enumerate(hole_selection):
             for option in options:
@@ -282,9 +272,8 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         inconsistent_decision_holes = [(hole,options) for hole,options in inconsistent_assignments.items() if self.is_decision_hole[hole]]
         inconsistent_variable_holes = [(hole,options) for hole,options in inconsistent_assignments.items() if self.is_variable_hole[hole]]
 
-        # choose one splitter and force its score
+        # choose one splitter
         splitter = None
-
         # try action or decision holes first
         if len(inconsistent_action_holes) > 0:
             splitter = inconsistent_action_holes[0][0]
@@ -293,6 +282,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         else:
             splitter = inconsistent_variable_holes[0][0]
         assert splitter is not None, "splitter not set"
+        # force the score of the selected splitter
         return {splitter:10}
 
 
@@ -317,11 +307,10 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             # split in half
             index_split = len(subfamily_options)//2
 
-            assert len(hole_assignments[splitter]) == 2, "when does this not hold?"
-            option_1 = hole_assignments[splitter][0]
-            option_2 = hole_assignments[splitter][1]
-            index_split = subfamily_options.index(option_2)
-            # index_split = subfamily_options.index(option_1)+1
+            # split by inconsistent options
+            option_1 = hole_assignments[splitter][0]; index_1 = subfamily_options.index(option_1)
+            option_2 = hole_assignments[splitter][1]; index_2 = subfamily_options.index(option_2)
+            index_split = index_2
 
             core_suboptions = [subfamily_options[:index_split], subfamily_options[index_split:]]
 

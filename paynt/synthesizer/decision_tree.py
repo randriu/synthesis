@@ -23,8 +23,32 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def method_name(self):
         return "AR (decision tree)"
 
+    def verify_hole_selection(self, family, hole_selection):
+        spec = self.quotient.specification
+        assignment = family.assume_options_copy(hole_selection)
+        dtmc = self.quotient.build_assignment(assignment)
+        res = dtmc.check_specification(spec)
+        if not res.constraints_result.sat:
+            return
+        if not spec.has_optimality:
+            family.analysis_result.improving_assignment = assignment
+            family.analysis_result.can_improve = False
+            return
+        assignment_value = res.optimality_result.value
+        if spec.optimality.improves_optimum(assignment_value):
+            logger.info(f"harmonization achieved value {res.optimality_result.value}")
+            self.num_harmonization_succeeded += 1
+            family.analysis_result.improving_assignment = assignment
+            family.analysis_result.improving_value = assignment_value
+            family.analysis_result.can_improve = True
 
-    def harmonize_inconsistent_scheduler(self, family):
+            family_value = family.analysis_result.optimality_result.primary.value
+            if(abs(family_value-assignment_value) < 1e-3):
+                logger.info(f"harmonization leads to family skip")
+                self.num_harmonization_skip += 1
+                family.analysis_result.can_improve = False
+
+    def harmonize_inconsistent_scheduler_relevant(self, family):
         self.num_harmonizations += 1
         mdp = family.mdp
         result = family.analysis_result.undecided_result()
@@ -57,39 +81,30 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 state_diff = 0
             state_score[mdp_state] = state_diff
             state_score[mdp_state] *= expected_visits[mdp_state]
-        threshold = 0
-        # threshold = numpy.quantile(state_score,0.2) # keep some percentage
+        # threshold = 0
+        threshold = numpy.quantile(state_score,0.9) # keep some percentage
         for mdp_state,score in enumerate(state_score):
             quotient_state = mdp.quotient_state_map[mdp_state]
             if state_to_choice[quotient_state] is not None and score <= threshold:
                 choices_reduced.set(state_to_choice[quotient_state],False)
+        print(f"kept {choices_reduced.number_of_set_bits()}/{family.scheduler_choices.number_of_set_bits()} choices")
 
-        consistent,hole_selection = self.quotient.are_choices_consistent(choices_reduced, family.family)
+        consistent,hole_selection = self.quotient.are_choices_consistent(choices_reduced, family)
         if not consistent:
             return
         # logger.info(f"harmonization is SAT")
-        spec = self.quotient.specification
-        assignment = family.assume_options_copy(hole_selection)
-        dtmc = self.quotient.build_assignment(assignment)
-        res = dtmc.check_specification(spec)
-        if res.constraints_result.sat:
-            if not spec.has_optimality:
-                family.analysis_result.improving_assignment = assignment
-                family.analysis_result.can_improve = False
-            else:
-                assignment_value = res.optimality_result.value
-                if spec.optimality.improves_optimum(assignment_value):
-                    logger.info(f"harmonization achieved value {res.optimality_result.value}")
-                    self.num_harmonization_succeeded += 1
-                    family.analysis_result.improving_assignment = assignment
-                    family.analysis_result.improving_value = assignment_value
-                    family.analysis_result.can_improve = True
+        self.verify_hole_selection(family,hole_selection)
 
-                    family_value = family.analysis_result.optimality_result.primary.value
-                    if(abs(family_value-assignment_value) < 0.001):
-                        logger.info(f"harmonization leads to family skip")
-                        self.num_harmonization_skip += 1
-                        family.analysis_result.can_improve = False
+    def harmonize_inconsistent_scheduler(self, family):
+        self.num_harmonizations += 1
+        mdp = family.mdp
+        result = family.analysis_result.undecided_result()
+        hole_selection = result.primary_selection
+        harmonizing_hole = [hole for hole,options in enumerate(hole_selection) if len(options)>1][0]
+        selection_1 = hole_selection.copy(); selection_1[harmonizing_hole] = [selection_1[harmonizing_hole][0]]
+        selection_2 = hole_selection.copy(); selection_2[harmonizing_hole] = [selection_2[harmonizing_hole][1]]
+        for selection in [selection_1,selection_2]:
+            self.verify_hole_selection(family,selection)
 
     def verify_family(self, family):
         self.num_families_considered += 1
@@ -119,7 +134,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.check_specification_for_mdp(family)
         if not family.analysis_result.can_improve:
             return
-        # self.harmonize_inconsistent_scheduler(family)
+        self.harmonize_inconsistent_scheduler(family)
+        # self.harmonize_inconsistent_scheduler_relevant(family)
 
 
     def synthesize_tree(self, depth:int):
@@ -142,7 +158,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.num_harmonization_skip = 0
 
         if self.quotient.specification.has_optimality:
-            epsilon = 1e-1
+            epsilon = 1e-2
             mc_result_positive = mc_result.value > 0
             if self.quotient.specification.optimality.maximizing == mc_result_positive:
                 epsilon *= -1
@@ -157,6 +173,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         else:
             for depth in range(SynthesizerDecisionTree.tree_depth+1):
                 self.synthesize_tree(depth)
+                if self.global_resource_limit_reached():
+                    break
+                if self.best_assignment is not None:
+                # if self.best_assignment_value is not None and abs( (self.best_assignment_value-mc_result.value)/mc_result.value ) <1e-2:
+                    break
 
         logger.info(f"the optimal scheduler has value: {mc_result}")
         if self.best_assignment is not None:
