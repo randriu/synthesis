@@ -118,7 +118,7 @@ class Property:
         return formula_alt
     
     def __str__(self):
-        return str(self.formula)
+        return str(self.property.raw_formula)
 
     @property
     def reward(self):

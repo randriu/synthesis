@@ -107,9 +107,9 @@ class MdpOptimalityResult(MdpPropertyResult):
 class MdpSpecificationResult(SpecificationResult):
 
     def __init__(self):
-        pass
+        super().__init__()
 
-    def evaluate(self, family):
+    def evaluate(self, family=None, admissible_assignment=None):
         self.improving_assignment = None
         self.improving_value = None
         self.can_improve = None
@@ -124,7 +124,10 @@ class MdpSpecificationResult(SpecificationResult):
         if cr.sat is True:
             # all constraints were satisfied
             if opt is None:
-                self.improving_assignment = family
+                if admissible_assignment is not None:
+                    self.improving_assignment = admissible_assignment
+                else:
+                    self.improving_assignment = family
                 self.can_improve = False
             else:
                 self.improving_assignment = opt.improving_assignment

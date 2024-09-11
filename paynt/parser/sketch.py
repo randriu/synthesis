@@ -122,7 +122,7 @@ class Sketch:
             except SyntaxError:
                 pass
 
-        assert filetype is not None, "unknow format of input file"
+        assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
         paynt.verification.property.Property.initialize()

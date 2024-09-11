@@ -267,11 +267,6 @@ class Quotient:
         with_max_score = [hole_index for hole_index in hole_score if hole_score[hole_index] == max_score]
         return with_max_score
 
-    def most_inconsistent_holes(self, scheduler_assignment):
-        num_definitions = [len(options) for options in scheduler_assignment]
-        most_inconsistent = self.holes_with_max_score(num_definitions) 
-        return most_inconsistent
-
     def split(self, family):
 
         mdp = family.mdp

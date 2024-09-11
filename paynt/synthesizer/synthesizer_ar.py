@@ -16,6 +16,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         self.stat.iteration(mdp)
 
         # check constraints
+        admissible_assignment = None
         spec = self.quotient.specification
         if family.constraint_indices is None:
             family.constraint_indices = spec.all_constraint_indices()
@@ -23,28 +24,32 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         for index in family.constraint_indices:
             constraint = spec.constraints[index]
             result = paynt.verification.property_result.MdpPropertyResult(constraint)
+            results[index] = result
 
             # check primary direction
             result.primary = mdp.model_check_property(constraint)
-
-            # no need to check secondary direction if primary direction yields UNSAT
-            if not result.primary.sat:
+            if result.primary.sat is False:
                 result.sat = False
-            else:
-                # check secondary direction
-                result.secondary = mdp.model_check_property(constraint, alt=True)
-                if mdp.is_deterministic and result.primary.value != result.secondary.value:
-                    logger.warning("WARNING: model is deterministic but min<max")
-                if result.secondary.sat:
-                    result.sat = True
-
-            # primary direction is SAT
-            if result.sat is None:
-                # check if the primary scheduler is consistent
-                result.primary_selection,_ = self.quotient.scheduler_is_consistent(mdp, constraint, result.primary.result)
-            results[index] = result
-            if result.sat is False:
                 break
+
+            # check if the primary scheduler is consistent
+            result.primary_selection,consistent = self.quotient.scheduler_is_consistent(mdp, constraint, result.primary.result)
+            if consistent:
+                assignment = family.assume_options_copy(result.primary_selection)
+                dtmc = self.quotient.build_assignment(assignment)
+                res = dtmc.check_specification(self.quotient.specification)
+                if res.accepting_dtmc(self.quotient.specification):
+                    result.sat = True
+                    admissible_assignment = assignment
+
+            # primary direction is SAT: check secondary direction to see whether all SAT
+            result.secondary = mdp.model_check_property(constraint, alt=True)
+            if mdp.is_deterministic and result.primary.value != result.secondary.value:
+                logger.warning("WARNING: model is deterministic but min<max")
+            if result.secondary.sat:
+                result.sat = True
+                continue
+
         spec_result = paynt.verification.property_result.MdpSpecificationResult()
         spec_result.constraints_result = paynt.verification.property_result.ConstraintsResult(results)
 
@@ -73,7 +78,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                         result.improving_value = res.optimality_result.value
             spec_result.optimality_result = result
 
-        spec_result.evaluate(family)
+        spec_result.evaluate(family, admissible_assignment)
         family.analysis_result = spec_result
 
 
@@ -84,14 +89,20 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
 
     def update_optimum(self, family):
         ia = family.analysis_result.improving_assignment
-        iv = family.analysis_result.improving_value
-        if iv is not None and self.quotient.specification.optimality.improves_optimum(iv):
-            self.quotient.specification.optimality.update_optimum(iv)
+        if ia is None:
+            return
+        if not self.quotient.specification.has_optimality:
             self.best_assignment = ia
-            self.best_assignment_value = iv
-            # logger.info(f"new optimum achieved: {iv}")
-            if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
-                self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
+            return
+        iv = family.analysis_result.improving_value
+        if not self.quotient.specification.optimality.improves_optimum(iv):
+            return
+        self.quotient.specification.optimality.update_optimum(iv)
+        self.best_assignment = ia
+        self.best_assignment_value = iv
+        # logger.info(f"new optimum achieved: {iv}")
+        if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
+            self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
 
 
     def synthesize_one(self, family):
