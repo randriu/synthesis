@@ -507,14 +507,10 @@ void bindings_coloring(py::module& m) {
 
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 
-<<<<<<< HEAD
     m.def("mdpAddFreshState", &synthesis::mdpAddFreshState<double>);
     m.def("removeSelfLoops", &synthesis::removeSelfLoops<double>);
     m.def("mergeChoices", &synthesis::mergeChoices<double>);
 
-
-=======
->>>>>>> master
     py::class_<synthesis::Family>(m, "Family")
         .def(py::init<>())
         .def(py::init<synthesis::Family const&>())
