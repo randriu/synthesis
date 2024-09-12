@@ -24,19 +24,6 @@ class SubPomdp:
         # for each choice of the POMDP, a choice in the quotient
         self.quotient_choice_map = quotient_choice_map
 
-        # for each state and for each action, a local index of the choice labeled with this action,
-        # or None if action is not available in the state
-        self.state_action_to_local_choice = []
-        tm = model.transition_matrix
-        for state in range(model.nr_states):
-            action_to_local_choice = [None]*quotient.num_actions
-            for local_choice,pomdp_choice in enumerate(range(tm.get_row_group_start(state),tm.get_row_group_end(state))):
-                quotient_choice = quotient_choice_map[pomdp_choice]
-                action = quotient.choice_to_action[quotient_choice]
-                assert action_to_local_choice[action] is None, "duplicate action {} in POMDP state {}".format(action,state)
-                action_to_local_choice[action] = local_choice
-            self.state_action_to_local_choice.append(action_to_local_choice)
-
 
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 

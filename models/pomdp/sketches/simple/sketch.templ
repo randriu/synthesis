@@ -1,0 +1,21 @@
+pomdp
+
+formula goal = s=2;
+
+observable "goal" = goal;
+
+hole int X in {0..1};
+
+module m
+    s : [0..2] init 0;
+
+    [a] s=0 -> 1/2:(s'=X+1)+1/2:(s'=0);
+    [b] s=0 -> 1/2:(s'=X)+1/2:(s'=1);
+
+    [a] s=1 -> 1/2:(s'=X)+1/2:(s'=0);
+    [b] s=1 -> 1/2:(s'=X)+1/2:(s'=2);
+endmodule
+
+rewards "steps"
+    true: 1;
+endrewards
