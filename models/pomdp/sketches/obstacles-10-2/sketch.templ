@@ -1,0 +1,85 @@
+pomdp
+
+const int N = 10;
+const int gMIN = 1;
+const int gMAX = N;
+
+observable "clk" = clk;
+observable "goal" = goal;
+observable "x_small" = x<(gMAX/2);
+observable "y_small" = y<(gMAX/2);
+
+hole int o1x in {3..5};
+hole int o1y in {3..5};
+
+hole int o2x in {6..8};
+hole int o2y in {6..8};
+
+formula at1 = (x = o1x & y = o1y);
+formula at2 = (x = o2x & y = o2y);
+
+formula near1 = o1x_MIN<=x & x<=o1x_MAX & o1y_MIN<=y & y<=o1y_MAX;
+formula near2 = o2x_MIN<=x & x<=o2x_MAX & o2y_MIN<=y & y<=o2y_MAX;
+
+formula goal = (x=gMAX & y=gMAX);
+
+const NUM_OBS = 2;
+formula clk_next = mod(clk+1,NUM_OBS+1);
+module clk
+    clk : [-1..NUM_OBS] init -1;
+
+    [place] clk=-1 -> (clk'=clk_next);
+
+    [up] !goal & clk=0 -> (clk'=clk_next);
+    [do] !goal & clk=0 -> (clk'=clk_next);
+    [le] !goal & clk=0 -> (clk'=clk_next);
+    [ri] !goal & clk=0 -> (clk'=clk_next);
+    
+    [detect1] !goal & clk=1 -> (clk'=clk_next);
+    [detect2] !goal & clk=2 -> (clk'=clk_next);
+endmodule
+
+
+const double slip = 0.1;
+
+formula yup = min(y+1,gMAX);
+formula ydo = max(y-1,gMIN);
+formula xle = max(x-1,gMIN);
+formula xri = min(x+1,gMAX);
+
+module agent
+    x : [gMIN..gMAX] init gMIN;
+    y : [gMIN..gMAX] init gMIN;
+
+    [place] true ->  1/4: (x'=o1x-1) & (y'=o1y) + 1/4: (x'=1) & (y'=1) + 1/4: (x'=2) & (y'=1) + 1/4: (x'=1) & (y'=3);
+
+    [up] true -> 1-slip : (y'=yup) + slip : (y'=min(y+2,gMAX));
+    [do] true -> 1-slip : (y'=ydo) + slip : (y'=max(y-2,gMIN));
+    [le] true -> 1-slip : (x'=xle) + slip : (x'=max(x-2,gMIN));
+    [ri] true -> 1-slip : (x'=xri) + slip : (x'=min(x+2,gMAX));
+endmodule
+
+module visit1
+    visit1 : bool init false;
+    [detect1] !near1 -> true;
+    [detect1]  near1 -> (visit1'=at1);
+
+    [up] true -> (visit1'=false);
+    [do] true -> (visit1'=false);
+    [le] true -> (visit1'=false);
+    [ri] true -> (visit1'=false);
+endmodule
+
+module visit2=visit1[visit1=visit2,detect1=detect2,near1=near2,at1=at2] endmodule
+
+formula step_penalty = 1;
+formula crash_penalty = 100;
+formula num_crashes = (visit1?1:0)+(visit2?1:0);
+formula penalty = step_penalty + num_crashes*crash_penalty;
+
+rewards "penalty"
+    [up] true : penalty;
+    [do] true : penalty;
+    [le] true : penalty;
+    [ri] true : penalty;
+endrewards

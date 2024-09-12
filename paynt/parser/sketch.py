@@ -146,7 +146,24 @@ class Sketch:
             logger.info("export OK, aborting...")
             exit(0)
 
-        return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager)
+        if jani_unfolder is not None:
+            if prism.model_type == stormpy.storage.PrismModelType.DTMC:
+                quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
+            elif prism.model_type == stormpy.storage.PrismModelType.MDP:
+                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
+            elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
+                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
+        else:
+            assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
+            if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
+                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
+            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
+                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
+            elif not explicit_quotient.is_partially_observable:
+                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
+            else:
+                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
+        return quotient_container
 
 
     @classmethod
@@ -217,27 +234,3 @@ class Sketch:
             output_path = substitute_suffix(sketch_path, '.', 'pomdp')
             property_path = substitute_suffix(sketch_path, '/', 'props.pomdp')
             paynt.parser.pomdp_parser.PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
-
-
-    @classmethod
-    def build_quotient_container(cls, prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager):
-        if jani_unfolder is not None:
-            if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-                quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
-            elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
-            elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
-                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
-        else:
-            assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
-            if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
-                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
-            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
-                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
-            elif not explicit_quotient.is_partially_observable:
-                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
-            else:
-                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
-        return quotient_container
-
-

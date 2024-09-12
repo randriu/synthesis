@@ -103,10 +103,8 @@ storm::models::sparse::StandardRewardModel<ValueType> translateRewardModel(
     storm::storage::BitVector const& translated_choice_mask
 ) {
     std::optional<std::vector<ValueType>> state_rewards;
-    STORM_LOG_THROW(!reward_model.hasStateRewards(), storm::exceptions::NotSupportedException,
-        "state rewards are currently not supported.");
-    STORM_LOG_THROW(!reward_model.hasTransitionRewards(), storm::exceptions::NotSupportedException,
-        "transition rewards are currently not supported.");
+    STORM_LOG_THROW(!reward_model.hasStateRewards() and !reward_model.hasTransitionRewards() and reward_model.hasStateActionRewards(),
+        storm::exceptions::NotSupportedException, "expected state-action rewards");
     
     uint64_t num_choices = reward_model.getStateActionRewardVector().size();
     std::vector<ValueType> action_rewards(translated_to_original_choice.size());
