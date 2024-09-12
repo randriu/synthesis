@@ -35,7 +35,7 @@ git clone https://github.com/moves-rwth/storm.git storm
 mkdir -p ${PREREQUISITES}/storm/build
 cd ${PREREQUISITES}/storm/build
 cmake ..
-make storm-main storm-pomdp --jobs ${COMPILE_JOBS}
+make storm storm-pomdp storm-counterexamples --jobs ${COMPILE_JOBS}
 # make check --jobs ${COMPILE_JOBS}
 
 # setup and activate python environment
@@ -60,7 +60,7 @@ python3 setup.py develop
 
 # paynt dependencies
 sudo apt -y install graphviz
-pip3 install click z3-solver graphviz
+pip3 install click z3-solver psutil graphviz
 
 # build payntbind
 cd ${PAYNT_ROOT}/payntbind

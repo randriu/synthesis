@@ -1,0 +1,118 @@
+pomdp
+
+observables
+    start,finish, ax,ay, r1lastobs,r1picked, r2lastobs,r2picked, r3lastobs,r3picked
+endobservables
+
+const int N = 20; // grid size NxN
+const int gMIN = 1;
+const int gMAX = N;
+
+// we are done when we reach max x location
+formula done = ax=gMAX;
+
+label "goal" = finish;
+
+module clk
+    start : bool init false;
+    finish : bool init false;
+
+    // random placement
+    [place] !start -> (start'=true);
+
+    [l] start & !done -> true;
+    [r] start & !done -> true;
+    [u] start & !done -> true;
+    [d] start & !done -> true;
+    [scan] start & !done -> true;
+    [pick] start & !done -> true;
+    
+    // when done, execute this action once to obtain some rewards
+    [finish] done & !finish -> (finish'=true);
+endmodule
+
+
+
+const double slip = 0.2;
+
+formula al = min(max(ax-1,gMIN),gMAX);
+formula ar = min(max(ax+1,gMIN),gMAX);
+formula au = min(max(ay-1,gMIN),gMAX);
+formula ad = min(max(ay+1,gMIN),gMAX);
+
+module agent
+    ax : [gMIN..gMAX] init gMIN;
+    ay : [gMIN..gMAX] init gMIN;
+
+    [l] true -> 1-slip : (ax'=al) + slip : true;
+    [r] true -> 1-slip : (ax'=ar) + slip : true;
+    [d] true -> 1-slip : (ay'=ad) + slip : true;
+    [u] true -> 1-slip : (ay'=au) + slip : true;
+endmodule
+
+
+
+// rock locations
+const r1x = gMAX/2;
+const r1y = gMAX/2;
+const r2x = gMIN+1;
+const r2y = gMAX/2;
+const r3x = gMAX/2;
+const r3y = gMIN+1;
+const r4x = gMAX-1;
+const r4y = gMIN+1;
+
+// how likely a rock is a good one
+const double goodrock = 0.5;
+
+formula maxdist = gMAX-gMIN + gMAX-gMIN;
+
+formula r1dist = max(r1x-ax,ax-r1x) + max(r1y-ay,ay-r1y);
+formula normdistr1 = 1 / (1+r1dist/maxdist);
+
+formula r2dist = max(r2x-ax,ax-r2x) + max(r2y-ay,ay-r2y);
+formula normdistr2 = 1 / (1+r2dist/maxdist);
+
+formula r3dist = max(r3x-ax,ax-r3x) + max(r3y-ay,ay-r3y);
+formula normdistr3 = 1 / (1+r3dist/maxdist);
+
+formula r4dist = max(r4x-ax,ax-r4x) + max(r4y-ay,ay-r4y);
+formula normdistr4 = 1 / (1+r4dist/maxdist);
+
+module rock1
+    r1good : bool init false;
+    r1lastobs : bool init false;
+    r1picked : bool init false;
+    
+    [place] true -> goodrock : (r1good'=true) + (1-goodrock) : (r1good'=false);
+
+    [scan] !r1picked -> normdistr1: (r1lastobs'=r1good) +  1-normdistr1: (r1lastobs'=!r1good);
+    [scan]  r1picked -> true;
+    [pick]  (r1dist=0 & !r1picked) -> (r1picked'=true);
+    [pick] !(r1dist=0 & !r1picked) -> true;
+endmodule
+
+module rock2 = rock1[r1good=r2good,r1lastobs=r2lastobs,r1picked=r2picked ,normdistr1=normdistr2] endmodule
+module rock3 = rock1[r1good=r3good,r1lastobs=r3lastobs,r1picked=r3picked ,normdistr1=normdistr3] endmodule
+module rock4 = rock1[r1good=r4good,r1lastobs=r4lastobs,r1picked=r4picked ,normdistr1=normdistr4] endmodule
+
+
+
+const int pickedBad = 20;
+const int skippedGood = 40;
+
+formula r1result = (r1picked & !r1good ? pickedBad : 0) + (!r1picked & r1good ? skippedGood : 0);
+formula r2result = (r2picked & !r2good ? pickedBad : 0) + (!r2picked & r2good ? skippedGood : 0);
+formula r3result = (r3picked & !r3good ? pickedBad : 0) + (!r3picked & r3good ? skippedGood : 0);
+formula r4result = (r4picked & !r4good ? pickedBad : 0) + (!r4picked & r4good ? skippedGood : 0);
+
+rewards "cost"
+    [l] true : 1;
+    [r] true : 1;
+    [u] true : 1;
+    [d] true : 1;
+    [scan] true : 1;
+    [pick] true : 1;
+    [finish] true : r1result+r2result+r3result+r4result;
+endrewards
+

@@ -1,0 +1,109 @@
+// NxN grid, player1 starts at (1,1) and his goal is to get to (N,N) without crashing into any of player2's obstacles
+// player2 starts has 3 obstacles he can move (they start at (1,N), (N,1) and (4,4)) and wants crash into player1 with at least one obstacle
+// player2 has slippery movement
+
+smg
+
+const int N=4;
+const int xMIN = 1;
+const int yMIN = 1;
+const int xMAX = N;
+const int yMAX = N;
+
+player p1
+    player1, [l1], [r1], [d1], [u1]
+endplayer
+
+player p2
+    player2, [l21], [r21], [d21], [u21], [l22], [r22], [d22], [u22], [l23], [r23], [d23], [u23]
+endplayer
+
+// DEFINING THE OBSERVATIONS
+// player1 only observes its location in the grid and coordinate x of all obstacles
+observable "x1" = x1;
+observable "y1" = y1;
+observable "x21" = x21;
+observable "x22" = x22;
+observable "x23" = x23;
+observable "clk" = clk;
+observable "done" = done;
+
+formula crash = (x1=x21 & y1=y21) | (x1=x22 & y1=y22) | (x1=x23 & y1=y23);
+formula goal = (x1=xMAX & y1=yMAX);
+formula done = goal | crash;
+
+// clock to make the game alternating
+formula clk_next = mod(clk+1,2);
+module clk
+    clk : [0..1] init 0;
+
+    [l1] !done & clk=0 -> (clk'=clk_next);
+    [r1] !done & clk=0 -> (clk'=clk_next);
+    [d1] !done & clk=0 -> (clk'=clk_next);
+    [u1] !done & clk=0 -> (clk'=clk_next);
+
+    [l21] !done & clk=1 -> (clk'=clk_next);
+    [r21] !done & clk=1 -> (clk'=clk_next);
+    [d21] !done & clk=1 -> (clk'=clk_next);
+    [u21] !done & clk=1 -> (clk'=clk_next);
+    [l22] !done & clk=1 -> (clk'=clk_next);
+    [r22] !done & clk=1 -> (clk'=clk_next);
+    [d22] !done & clk=1 -> (clk'=clk_next);
+    [u22] !done & clk=1 -> (clk'=clk_next);
+    [l23] !done & clk=1 -> (clk'=clk_next);
+    [r23] !done & clk=1 -> (clk'=clk_next);
+    [d23] !done & clk=1 -> (clk'=clk_next);
+    [u23] !done & clk=1 -> (clk'=clk_next);
+endmodule
+
+
+label "goal" = goal;
+
+const double slip = 0.4;
+
+const int x1_init = 1;
+const int y1_init = 1;
+
+formula x1right  = min(x1+1,xMAX);
+formula x1left   = max(x1-1,xMIN);
+formula y1up     = min(y1+1,yMAX);
+formula y1down   = max(y1-1,yMIN);
+
+module player1
+    x1 : [xMIN..xMAX] init x1_init;
+    y1 : [yMIN..yMAX] init y1_init;
+    [l1] true -> 1: (x1'=x1left);
+    [r1] true -> 1: (x1'=x1right);
+    [d1] true -> 1: (y1'=y1down);
+    [u1] true -> 1: (y1'=y1up);
+endmodule
+
+const int x21_init = 4;
+const int y21_init = 4;
+const int x22_init = 1;
+const int y22_init = N;
+const int x23_init = N;
+const int y23_init = 1;
+
+
+module player2
+    x21 : [xMIN..xMAX] init x21_init;
+    y21 : [yMIN..yMAX] init y21_init;
+    x22 : [xMIN..xMAX] init x22_init;
+    y22 : [yMIN..yMAX] init y22_init;
+    x23 : [xMIN..xMAX] init x23_init;
+    y23 : [yMIN..yMAX] init y23_init;
+    [l21] true -> 1-slip : (x21'=max(x21-1,xMIN)) + slip : (y21'=max(y21-1,yMIN));
+    [r21] true -> 1-slip : (x21'=min(x21+1,xMAX)) + slip : (y21'=min(y21+1,yMAX));
+    [d21] true -> 1-slip : (y21'=max(y21-1,yMIN)) + slip : (x21'=min(x21+1,xMAX));
+    [u21] true -> 1-slip : (y21'=min(y21+1,yMAX)) + slip : (x21'=max(x21-1,xMIN));
+    [l22] true -> 1-slip : (x22'=max(x22-1,xMIN)) + slip : (y22'=max(y22-1,yMIN));
+    [r22] true -> 1-slip : (x22'=min(x22+1,xMAX)) + slip : (y22'=min(y22+1,yMAX));
+    [d22] true -> 1-slip : (y22'=max(y22-1,yMIN)) + slip : (x22'=min(x22+1,xMAX));
+    [u22] true -> 1-slip : (y22'=min(y22+1,yMAX)) + slip : (x22'=max(x22-1,xMIN));
+    [l23] true -> 1-slip : (x23'=max(x23-1,xMIN)) + slip : (y23'=max(y23-1,yMIN));
+    [r23] true -> 1-slip : (x23'=min(x23+1,xMAX)) + slip : (y23'=min(y23+1,yMAX));
+    [d23] true -> 1-slip : (y23'=max(y23-1,yMIN)) + slip : (x23'=min(x23+1,xMAX));
+    [u23] true -> 1-slip : (y23'=min(y23+1,yMAX)) + slip : (x23'=max(x23-1,xMIN));
+endmodule
+

@@ -22,16 +22,16 @@ class Graph:
         """
         self.graph = pgv.AGraph(strict=False, directed=True)
 
-    def parse(self, design_space) -> None:
+    def parse(self, family) -> None:
         """Parses the design space holes into the nodes dictionary:
                 {start_node: {end_node1: [observation1],...}, end_node2: ...}
 
-            design_space: list of holes
+            family: list of holes
         """
         self.nodes = {}
-        for hole in range(design_space.num_holes):
-            tmp = parse_hole(design_space.hole_name(hole))
-            tmp["next"] = list(design_space.hole_options(hole))
+        for hole in range(family.num_holes):
+            tmp = parse_hole(family.hole_name(hole))
+            tmp["next"] = list(family.hole_options(hole))
 
             for next in tmp["next"]:
                 if tmp["type"] == "Assignment":
@@ -62,14 +62,14 @@ class Graph:
                     self.graph.add_edge(start, end)
         self.graph.layout("circo")
 
-    def print(self, design_space, file_name="out", show_labels=False, args="-Gsize=5! -Gratio=\"expand\" -Gnodesep=.5") -> None:
+    def print(self, family, file_name="out", show_labels=False, args="-Gsize=5! -Gratio=\"expand\" -Gnodesep=.5") -> None:
         """Prints a graph in .png format.
 
-            design_space: list of Holes
+            family: list of Holes
             file_name: name of file where the graph will be saved without the extention (e.g. file_name=file => file.png)
             args: string with Graphvix arguments to specify the output format
         """
-        self.parse(design_space)
+        self.parse(family)
         self.create_graph(show_labels=show_labels)
         self.graph.draw(file_name + ".png", format="png", args=args)
 

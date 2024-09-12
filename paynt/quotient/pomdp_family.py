@@ -1,7 +1,7 @@
 import stormpy
 import payntbind
 
-import paynt.quotient.models
+import paynt.models.models
 import paynt.quotient.quotient
 import paynt.quotient.mdp_family
 import paynt.verification.property
@@ -47,7 +47,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         # for each observation, a list of actions (indices) available
         self.observation_to_actions = None
         # POMDP manager used for unfolding the memory model into the quotient POMDP
-        self.product_pomdp_fsc = None
+        self.fsc_unfolder = None
 
         # identify actions available at each observation
         self.observation_to_actions = [None] * self.num_observations
@@ -73,15 +73,6 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return len(self.observation_to_actions[obs])==1
 
     
-    def initialize_fsc_unfolder(self, fsc_is_deterministic=False):
-        if fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, payntbind.synthesis.ProductPomdpFsc):
-            self.product_pomdp_fsc = payntbind.synthesis.ProductPomdpFsc(
-                self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
-        if not fsc_is_deterministic and not isinstance(self.product_pomdp_fsc, payntbind.synthesis.ProductPomdpRandomizedFsc):
-            self.product_pomdp_fsc = payntbind.synthesis.ProductPomdpRandomizedFsc(
-                self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action)
-    
-    
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
@@ -92,20 +83,24 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return SubPomdp(pomdp,self,state_map,choice_map)
 
 
-    def build_dtmc_sketch(self, fsc):
+    def build_dtmc_sketch(self, fsc, negate_specification=True):
         '''
         Construct the family of DTMCs representing the execution of the given FSC in different environments.
         '''
 
         # create the product
-        fsc.check(self.observation_to_actions)
-        self.initialize_fsc_unfolder(fsc.is_deterministic)
-        self.product_pomdp_fsc.apply_fsc(fsc.action_function, fsc.update_function)
-        product = self.product_pomdp_fsc.product
-        product_choice_to_choice = self.product_pomdp_fsc.product_choice_to_choice
+        fsc.check_action_function(self.observation_to_actions)
+
+        
+        self.fsc_unfolder = payntbind.synthesis.FscUnfolder(
+            self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action
+        )
+        self.fsc_unfolder.apply_fsc(fsc.action_function, fsc.update_function)
+        product = self.fsc_unfolder.product
+        product_choice_to_choice = self.fsc_unfolder.product_choice_to_choice
 
         # the product inherits the design space
-        product_family = self.design_space.copy()
+        product_family = self.family.copy()
         
         # the choices of the product inherit colors of the quotient
         product_choice_to_hole_options = []
@@ -120,13 +115,21 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             product_choice_to_hole_options.append(hole_options)
         product_coloring = payntbind.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, product_choice_to_hole_options)
         
-        # handle specification
+        # copy the specification
         product_specification = self.specification.copy()
-        dtmc_sketch = paynt.quotient.quotient.DtmcFamilyQuotient(product, product_family, product_coloring, product_specification)
+        if negate_specification:
+            product_specification = product_specification.negate()
+
+        dtmc_sketch = paynt.quotient.quotient.Quotient(product, product_family, product_coloring, product_specification)
         return dtmc_sketch
 
 
-    def compute_qvalues_for_product_submdp(self, product_submdp : paynt.quotient.models.SubMdp):
+
+
+
+### LEGACY CODE, NOT UP-TO-DATE ###
+
+    def compute_qvalues_for_product_submdp(self, product_submdp : paynt.models.models.SubMdp):
         '''
         Given an MDP obtained after applying FSC to a family of POMDPs, compute for each state s, (reachable)
         memory node n, and action a, the Q-value Q((s,n),a).

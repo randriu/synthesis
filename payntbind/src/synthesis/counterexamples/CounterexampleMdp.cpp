@@ -1,7 +1,9 @@
 #include "CounterexampleMdp.h"
 
 #include <storm/storage/BitVector.h>
-#include <storm/exceptions/UnexpectedException.h>
+#include <storm/exceptions/InvalidArgumentException.h>
+#include <storm/exceptions/NotImplementedException.h>
+
 #include <storm/storage/sparse/JaniChoiceOrigins.h>
 #include <storm/storage/sparse/StateValuations.h>
 #include <storm/utility/builder.h>
@@ -131,7 +133,7 @@ void CounterexampleGeneratorMdp<ValueType,StateType>::prepareMdp(
     this->hole_wave.clear();
     this->wave_states.clear();
     this->state_horizon_blocking.clear();
-    this->unregistered_holes_count = std::vector<size_t>(mdp_states);
+    this->unregistered_holes_count = std::vector<uint64_t>(mdp_states);
     this->mdp_holes = std::vector<std::set<uint64_t>>(mdp_states);
     this->current_wave = 0;
     this->reachable_flag = storm::storage::BitVector(mdp_states, false);
@@ -170,7 +172,7 @@ template <typename ValueType, typename StateType>
 bool CounterexampleGeneratorMdp<ValueType,StateType>::exploreWave () {
 
     storm::storage::SparseMatrix<ValueType> const& transition_matrix = this->mdp->getTransitionMatrix();
-    std::vector<size_t> row_group_indices = transition_matrix.getRowGroupIndices();
+    std::vector<uint64_t> row_group_indices = transition_matrix.getRowGroupIndices();
     uint64_t mdp_states = this->mdp->getNumberOfStates();
 
     // Expand the non-blocking horizon
@@ -389,7 +391,7 @@ std::pair<bool,bool> CounterexampleGeneratorMdp<ValueType,StateType>::expandAndC
     // Get MDP info
     uint64_t mdp_states = this->mdp->getNumberOfStates();
     storm::storage::SparseMatrix<ValueType> const& transition_matrix = this->mdp->getTransitionMatrix();
-    std::vector<size_t> row_group_indices = transition_matrix.getRowGroupIndices();
+    std::vector<uint64_t> row_group_indices = transition_matrix.getRowGroupIndices();
     StateType initial_state = *(this->mdp->getInitialStates().begin());
     std::vector<StateType> to_expand = this->wave_states[current_wave-1];
     // Expand states from the new wave:

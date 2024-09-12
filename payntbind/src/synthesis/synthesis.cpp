@@ -10,5 +10,7 @@ void define_synthesis(py::module& m) {
     bindings_pomdp_family(m);
 
     bindings_coloring(m);
+
+    bindings_smg(m);
 }
 

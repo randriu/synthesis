@@ -1,15 +1,18 @@
 from . import version
 
+import paynt.utils.profiler
 import paynt.parser.sketch
 
 import paynt.quotient
 import paynt.quotient.pomdp
+import paynt.quotient.decpomdp
 import paynt.quotient.storm_pomdp_control
 
 import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
+import paynt.synthesizer.decision_tree
 
 import click
 import sys
@@ -46,8 +49,7 @@ def setup_logger(log_path = None):
 
 
 @click.command()
-@click.option("--project", required=True, type=click.Path(exists=True),
-    help="project path")
+@click.argument('project', type=click.Path(exists=True))
 @click.option("--sketch", default="sketch.templ", show_default=True,
     help="name of the sketch file in the project")
 @click.option("--props", default="sketch.props", show_default=True,
@@ -58,6 +60,8 @@ def setup_logger(log_path = None):
     help="known optimum bound")
 @click.option("--precision", type=click.FLOAT, default=1e-4,
     help="model checking precision")
+@click.option("--timeout", type=int,
+    help="timeout (s)")
 
 @click.option("--export",
     type=click.Choice(['jani', 'drn', 'pomdp']),
@@ -73,14 +77,14 @@ def setup_logger(log_path = None):
     help="do not compute expected visits for the splitting heuristic")
 
 @click.option("--fsc-synthesis", is_flag=True, default=False,
-    help="enable incremental synthesis of FSCs for a POMDP")
-@click.option("--pomdp-memory-size", default=1, show_default=True,
-    help="implicit memory size for POMDP FSCs")
+    help="enable incremental synthesis of FSCs for a (Dec-)POMDP")
+@click.option("--fsc-memory-size", default=1, show_default=True,
+    help="implicit memory size for (Dec-)POMDP FSCs")
 @click.option("--posterior-aware", is_flag=True, default=False,
     help="unfold MDP taking posterior observation of into account")
 
 @click.option("--storm-pomdp", is_flag=True, default=False,
-    help="enable running storm analysis for POMDPs to enhance FSC synthesis (supports AR only for now!)")
+    help="enable running belief analysis in STorm to enhance FSC synthesis for POMDPs (AR only)")
 @click.option(
     "--storm-options",
     default="cutoff",
@@ -111,20 +115,27 @@ def setup_logger(log_path = None):
 
 @click.option(
     "--all-in-one", type=click.Choice(["sparse", "bdd"]), default=None, show_default=True,
-    help="all in one MDP approach",
+    help="use all-in-one MDP abstraction",
 )
+@click.option("--all-in-one-maxmem", default=4096, type=int,
+    help="memory limit (MB) for the all-in-one abstraction")
 
 @click.option("--mdp-split-wrt-mdp", is_flag=True, default=False,
-    help="# if set, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used")
+    help="if set, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used")
 @click.option("--mdp-discard-unreachable-choices", is_flag=True, default=False,
-    help="# if set, unreachable choices will be discarded from the splitting scheduler")
+    help="if set, unreachable choices will be discarded from the splitting scheduler")
 @click.option("--mdp-use-randomized-abstraction", is_flag=True, default=False,
-    help="# if set, randomized abstraction guess-and-verify will be used instead of game abstraction;" +
+    help="if set, randomized abstraction guess-and-verify will be used instead of game abstraction;" +
     " MDP abstraction scheduler will be used for splitting"
 )
 
+@click.option("--tree-depth", default=0, type=int,
+    help="decision tree synthesis: tree depth")
+@click.option("--tree-enumeration", is_flag=True, default=False,
+    help="decision tree synthesis: if set, all trees of size at most tree_depth will be enumerated")
+
 @click.option(
-    "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for cassandra models",
+    "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
 )
 
 @click.option(
@@ -135,36 +146,43 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, optimum_threshold, precision,
+    project, sketch, props, relative_error, optimum_threshold, precision, timeout,
     export,
     method,
     disable_expected_visits,
-    fsc_synthesis, pomdp_memory_size, posterior_aware,
+    fsc_synthesis, fsc_memory_size, posterior_aware,
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
-    all_in_one,
+    all_in_one, all_in_one_maxmem,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
+    tree_depth, tree_enumeration,
     constraint_bound,
     ce_generator,
     profiling
 ):
+
     profiler = None
     if profiling:
         profiler = cProfile.Profile()
         profiler.enable()
+    paynt.utils.profiler.GlobalTimeLimit.start(timeout)
 
     logger.info("This is Paynt version {}.".format(version()))
 
     # set CLI parameters
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
-    paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = pomdp_memory_size
+    paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
+    paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.split_wrt_mdp_scheduler = mdp_split_wrt_mdp
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.use_randomized_abstraction = mdp_use_randomized_abstraction
+
+    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
+    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
 
     storm_control = None
     if storm_pomdp:
@@ -182,7 +200,7 @@ def paynt_run(
         synthesizer.run(optimum_threshold, export_evaluation)
     else:
         all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
-        all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, family)
+        all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, all_in_one_maxmem, family)
         all_in_one_analysis.run()
     if profiling:
         profiler.disable()
@@ -190,7 +208,7 @@ def paynt_run(
 
 def print_profiler_stats(profiler):
     stats = pstats.Stats(profiler)
-    NUM_LINES = 20
+    NUM_LINES = 10
 
     logger.debug("cProfiler info:")
     stats.sort_stats('tottime').print_stats(NUM_LINES)

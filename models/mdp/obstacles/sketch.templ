@@ -1,0 +1,47 @@
+mdp
+
+const int N = 10;
+const int gMIN = 1;
+const int gMAX = N;
+
+formula at1 = (x = 1 & y = 5);
+formula at2 = (x = 5 & y = 1);
+formula at3 = (x = 2 & y = 2);
+formula at4 = (x = 9 & y = 10);
+formula at5 = (x = 9 & y = 9);
+formula at6 = (x = 2 & y = 5);
+
+formula crash = at1 | at2 | at3 | at4 | at5 | at6;
+formula goal = (x=gMAX & y=gMAX);
+
+label "notbad" = !crash;
+label "goal" = goal;
+
+
+const double slip = 0.2;
+
+formula al  = min(max(x-1,gMIN),gMAX);
+formula all = min(max(x-2,gMIN),gMAX);
+formula ar  = min(max(x+1,gMIN),gMAX);
+formula arr = min(max(x+2,gMIN),gMAX);
+formula au  = min(max(y-1,gMIN),gMAX);
+formula auu = min(max(y-2,gMIN),gMAX);
+formula ad  = min(max(y+1,gMIN),gMAX);
+formula add = min(max(y+2,gMIN),gMAX);
+
+module agent
+    x : [gMIN..gMAX] init gMIN;
+    y : [gMIN..gMAX] init gMIN;
+
+    [le] !crash -> 1-slip : (x'=al) + slip : (x'=all);
+    [ri] !crash -> 1-slip : (x'=ar) + slip : (x'=arr);
+    [up] !crash -> 1-slip : (y'=au) + slip : (y'=auu);
+    [do] !crash -> 1-slip : (y'=ad) + slip : (y'=add);
+endmodule
+
+rewards "steps"
+    [le] true: 1;
+    [ri] true: 1;
+    [up] true: 1;
+    [do] true: 1;
+endrewards

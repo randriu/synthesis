@@ -1,1 +1,1 @@
-R[exp]{"reward"}max=? [F "discount_sink"]
+R{"reward"}max=? [F "discount_sink"]

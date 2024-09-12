@@ -1,4 +1,6 @@
 import time
+import psutil
+import os
 
 
 class Timer:
@@ -32,7 +34,6 @@ class Timer:
             return self.time
         else:
             return self.time + (self.timestamp() - self.timer)
-
 
 class Profiler:
 
@@ -102,3 +103,27 @@ class Profiler:
         Profiler.print_all()
 
 
+class GlobalTimeLimit:
+
+    time_limit_s = None
+
+    @classmethod
+    def start(cls, time_limit_s=None):
+        cls.time_limit_s = time_limit_s
+        cls.global_timer = Timer()
+        cls.global_timer.start()
+
+    @classmethod
+    def limit_reached(cls):
+        return cls.time_limit_s is not None and cls.global_timer.read() > cls.time_limit_s
+
+
+class GlobalMemoryLimit:
+
+    memory_limit_mb = None
+
+    @classmethod
+    def limit_reached(cls):
+        process = psutil.Process(os.getpid())
+        allocated_mb = process.memory_info().rss / (1024 * 1024)
+        return cls.memory_limit_mb is not None and allocated_mb > cls.memory_limit_mb

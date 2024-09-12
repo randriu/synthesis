@@ -1,4 +1,5 @@
 #include "JaniChoices.h"
+#include "src/synthesis/translation/choiceTransformation.h"
 
 #include <storm/models/sparse/Mdp.h>
 #include <storm/storage/jani/Model.h>
@@ -27,37 +28,9 @@ namespace synthesis {
                 choice_labeling.addLabelToChoice(jani.getAction(action_index).getName(), choice);
             }
         }
-        
-        return choice_labeling;
-    }
 
-    /**
-     * Given model and its choice labeling, remove unused labels and make sure that all choices have at most 1 label.
-     * If the choice does not have a label, label it with the label derived from the provided prefix.
-     * Make sure that for each state of the MDP, either all its rows have no labels or all its rows have exactly one
-     */
-    template<typename ValueType>
-    void makeChoiceLabelingCanonic(
-        storm::models::sparse::Model<ValueType> const& model,
-        storm::models::sparse::ChoiceLabeling& choice_labeling,
-        std::string const& no_label_prefix
-    ) {
-        for(auto const& label: choice_labeling.getLabels()) {
-            if(choice_labeling.getChoices(label).empty()) {
-                choice_labeling.removeLabel(label);
-            }
-        }
-        storm::storage::BitVector no_label_labeling(model.getNumberOfChoices());
-        for(uint64_t choice = 0; choice < model.getNumberOfChoices(); choice++) {
-            uint64_t choice_num_labels = choice_labeling.getLabelsOfChoice(choice).size();
-            if(choice_num_labels > 1) {
-                throw std::invalid_argument("A choice of the model contains multiple labels.");
-            }
-            if(choice_num_labels == 0) {
-                no_label_labeling.set(choice,true);
-            }
-        }
-        std::string empty_label = choice_labeling.addUniqueLabel(no_label_prefix, no_label_labeling);
+        removeUnusedLabels(choice_labeling);
+        return choice_labeling;
     }
 
     template<typename ValueType>
@@ -68,9 +41,8 @@ namespace synthesis {
         if(model.hasStateValuations()) {
             components.stateValuations = model.getStateValuations();
         }
-        storm::models::sparse::ChoiceLabeling choice_labeling = reconstructChoiceLabelsFromJani(model);
-        makeChoiceLabelingCanonic(model,choice_labeling,"empty_label");
-        components.choiceLabeling = choice_labeling;
+        components.choiceLabeling = reconstructChoiceLabelsFromJani(model);
+        addMissingChoiceLabelsLabeling(model,components.choiceLabeling.value());
         components.rewardModels = model.getRewardModels();
         return std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
     }

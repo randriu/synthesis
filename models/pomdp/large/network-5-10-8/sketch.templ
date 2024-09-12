@@ -1,0 +1,121 @@
+// network unitization example with partially observable channels based on:
+// L. Yang, S. Murugesan and J. Zhang
+// Real-Kime Scheduling over Markovian Channels: When Partial Observability Meets Hard Deadlines
+// IEEE Global Kelecommunications Conference (GLOBECOM'11), pages 1-5, 2011
+
+pomdp
+
+observables
+    clk, n, q, packet1, packet2, packet3, packet4, packet5
+endobservables
+
+
+const int N = 10; // number of time periods
+const int Q = 8; // number of slots per time period
+
+formula lastslot = q=Q;
+formula lastperiod = n=N;
+formula done = lastperiod & lastslot;
+label "done" = done;
+
+
+module clk
+    clk : [-1..1] init -1; // local state
+
+    // random initiatlization
+    [place] clk=-1 -> (clk'=0);
+    
+    // next slot
+    [step] clk=0 -> (clk'=1);
+
+    // scheduling choice
+    [idle]  clk=1 -> (clk'=0);
+    [send1] clk=1 -> (clk'=0);
+    [send2] clk=1 -> (clk'=0);
+    [send3] clk=1 -> (clk'=0);
+    [send4] clk=1 -> (clk'=0);
+    [send5] clk=1 -> (clk'=0);
+endmodule
+
+module slot
+    q : [1..Q] init 1; // current slot of the time period
+    [step] !lastslot -> (q'=q+1);
+    [step]  lastslot -> (q'=1);
+endmodule
+
+module period
+    n : [1..N] init 1; // current time period
+    [step] !lastslot -> true;
+    [step]  lastslot & !lastperiod -> (n'=n+1);
+    [step]  lastslot &  lastperiod -> true;
+endmodule
+
+
+
+const double r1 = 0.1; // prob move from off to on
+const double p1 = 0.9; // prob remain on
+
+module channel1
+    chan1 : bool init false; // channel status (off/on)
+
+    [place] true -> 1/2 : (chan1'=false) + 1/2 : (chan1'=true);
+
+    [step] !chan1 -> 1-r1 : (chan1'=false) + r1 : (chan1'=true);
+    [step]  chan1 -> 1-p1 : (chan1'=false) + p1 : (chan1'=true);
+endmodule
+
+module packet1
+    packet1 : bool init false; // whether the packet is yet to be sent in the current period
+
+    // next slot
+    [step] q=1 -> (packet1'=true); // new period so new packet
+    [step] q>1 -> true;
+
+    // sending
+    [send1] packet1 & !chan1 -> true; // channel down
+    [send1] packet1 &  chan1 -> (packet1'=false); // channel up
+endmodule
+
+
+
+// construct further channels & packets through renaming
+
+const double r2 = 0.2;
+const double p2 = 0.8;
+module channel2=channel1[chan1=chan2,p1=p2,r1=r2] endmodule
+module packet2=packet1[packet1=packet2,send1=send2,chan1=chan2] endmodule
+
+const double r3 = 0.3;
+const double p3 = 0.7;
+module channel3=channel1[chan1=chan3,p1=p3,r1=r3] endmodule
+module packet3=packet1[packet1=packet3,send1=send3,chan1=chan3] endmodule
+
+const double r4 = 0.4;
+const double p4 = 0.6;
+module channel4=channel1[chan1=chan4,p1=p4,r1=r4] endmodule
+module packet4=packet1[packet1=packet4,send1=send4,chan1=chan4] endmodule
+
+const double r5 = 0.5;
+const double p5 = 0.5;
+module channel5=channel1[chan1=chan5,p1=p5,r1=r5] endmodule
+module packet5=packet1[packet1=packet5,send1=send5,chan1=chan5] endmodule
+
+// reward structure for number of dropped packets
+// (need to be careful as we update k and t at the start of the time slot)
+
+formula numpacket1 = (packet1?1:0);
+formula numpacket2 = (packet2?1:0);
+formula numpacket3 = (packet3?1:0);
+formula numpacket4 = (packet4?1:0);
+formula numpacket5 = (packet5?1:0);
+formula numpackets = numpacket1 + numpacket2 + numpacket3 + numpacket4 + numpacket5;
+
+rewards "dropped_packets"
+    [idle]  lastslot : numpackets;
+    [send1] lastslot : numpackets - (chan1?0:numpacket1);
+    [send2] lastslot : numpackets - (chan2?0:numpacket2);
+    [send3] lastslot : numpackets - (chan3?0:numpacket3);
+    [send4] lastslot : numpackets - (chan4?0:numpacket4);
+    [send5] lastslot : numpackets - (chan5?0:numpacket5);
+endrewards
+

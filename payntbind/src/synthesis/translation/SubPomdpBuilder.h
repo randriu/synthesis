@@ -2,6 +2,8 @@
 
 #include "src/synthesis/translation/ItemTranslator.h"
 
+#include <storm/adapters/RationalNumberAdapter.h>
+#include <storm/models/sparse/Model.h>
 #include <storm/models/sparse/Pomdp.h>
 
 namespace synthesis {

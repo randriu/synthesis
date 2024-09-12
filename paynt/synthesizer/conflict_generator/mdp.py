@@ -17,8 +17,9 @@ class ConflictGeneratorMdp(paynt.synthesizer.conflict_generator.dtmc.ConflictGen
             state_to_holes.append(holes)
         formulae = self.quotient.specification.stormpy_formulae()
         self.counterexample_generator = payntbind.synthesis.CounterexampleGeneratorMdp(
-            self.quotient.quotient_mdp, self.quotient.design_space.num_holes,
-            state_to_holes, formulae)
+            self.quotient.quotient_mdp, self.quotient.family.num_holes,
+            state_to_holes, formulae
+        )
 
     def prepare_model(self, model):
         self.counterexample_generator.prepare_mdp(model.model, model.quotient_state_map)

@@ -1,0 +1,109 @@
+pomdp
+
+const int N = 8;
+const int gMIN = 1;
+const int gMAX = N;
+
+observable "clk" = clk;
+observable "goal" = goal;
+observable "x_small" = x<(gMAX/2);
+observable "y_small" = y<(gMAX/2);
+
+hole int o1x in {1..2};
+hole int o1y in {1..2};
+
+hole int o2x in {1..2};
+hole int o2y in {3..5};
+
+hole int o3x in {3..5};
+hole int o3y in {1..2};
+
+hole int o4x in {3..5};
+hole int o4y in {6..8};
+
+hole int o5x in {6..8};
+hole int o5y in {3..5};
+
+hole int o6x in {6..7};
+hole int o6y in {6..7};
+
+formula at1 = (x = o1x & y = o1y);
+formula at2 = (x = o2x & y = o2y);
+formula at3 = (x = o3x & y = o3y);
+formula at4 = (x = o4x & y = o4y);
+formula at5 = (x = o5x & y = o5y);
+formula at6 = (x = o6x & y = o6y);
+
+formula near1 = o1x_MIN<=x & x<=o1x_MAX & o1y_MIN<=y & y<=o1y_MAX;
+formula near2 = o2x_MIN<=x & x<=o2x_MAX & o2y_MIN<=y & y<=o2y_MAX;
+formula near3 = o3x_MIN<=x & x<=o3x_MAX & o3y_MIN<=y & y<=o3y_MAX;
+formula near4 = o4x_MIN<=x & x<=o4x_MAX & o4y_MIN<=y & y<=o4y_MAX;
+formula near5 = o5x_MIN<=x & x<=o5x_MAX & o5y_MIN<=y & y<=o5y_MAX;
+formula near6 = o6x_MIN<=x & x<=o6x_MAX & o6y_MIN<=y & y<=o6y_MAX;
+
+formula goal = (x=gMAX & y=gMAX);
+
+const NUM_OBS = 6;
+formula clk_next = mod(clk+1,NUM_OBS+1);
+module clk
+    clk : [-1..NUM_OBS] init 0;
+
+    [up] !goal & clk=0 -> (clk'=clk_next);
+    [do] !goal & clk=0 -> (clk'=clk_next);
+    [le] !goal & clk=0 -> (clk'=clk_next);
+    [ri] !goal & clk=0 -> (clk'=clk_next);
+    
+    [detect1] !goal & clk=1 -> (clk'=clk_next);
+    [detect2] !goal & clk=2 -> (clk'=clk_next);
+    [detect3] !goal & clk=3 -> (clk'=clk_next);
+    [detect4] !goal & clk=4 -> (clk'=clk_next);
+    [detect5] !goal & clk=5 -> (clk'=clk_next);
+    [detect6] !goal & clk=6 -> (clk'=clk_next);
+endmodule
+
+
+const double slip = 0.1;
+
+formula yup = min(y+1,gMAX);
+formula ydo = max(y-1,gMIN);
+formula xle = max(x-1,gMIN);
+formula xri = min(x+1,gMAX);
+
+module agent
+    x : [gMIN..gMAX] init gMIN;
+    y : [gMIN..gMAX] init gMIN;
+
+    [up] true -> 1-slip : (y'=yup) + slip : (y'=min(y+2,gMAX));
+    [do] true -> 1-slip : (y'=ydo) + slip : (y'=max(y-2,gMIN));
+    [le] true -> 1-slip : (x'=xle) + slip : (x'=max(x-2,gMIN));
+    [ri] true -> 1-slip : (x'=xri) + slip : (x'=min(x+2,gMAX));
+endmodule
+
+module visit1
+    visit1 : bool init false;
+    [detect1] !near1 -> true;
+    [detect1]  near1 -> (visit1'=at1);
+
+    [up] true -> (visit1'=false);
+    [do] true -> (visit1'=false);
+    [le] true -> (visit1'=false);
+    [ri] true -> (visit1'=false);
+endmodule
+
+module visit2=visit1[visit1=visit2,detect1=detect2,near1=near2,at1=at2] endmodule
+module visit3=visit1[visit1=visit3,detect1=detect3,near1=near3,at1=at3] endmodule
+module visit4=visit1[visit1=visit4,detect1=detect4,near1=near4,at1=at4] endmodule
+module visit5=visit1[visit1=visit5,detect1=detect5,near1=near5,at1=at5] endmodule
+module visit6=visit1[visit1=visit6,detect1=detect6,near1=near6,at1=at6] endmodule
+
+formula step_penalty = 1;
+formula crash_penalty = 100;
+formula num_crashes = (visit1?1:0)+(visit2?1:0)+(visit3?1:0)+(visit4?1:0)+(visit5?1:0)+(visit6?1:0);
+formula penalty = step_penalty + num_crashes*crash_penalty;
+
+rewards "penalty"
+    [up] true : penalty;
+    [do] true : penalty;
+    [le] true : penalty;
+    [ri] true : penalty;
+endrewards

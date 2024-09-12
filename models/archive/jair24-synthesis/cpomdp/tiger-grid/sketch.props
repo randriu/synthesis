@@ -1,0 +1,2 @@
+R{"reward"}max=? [F "discount_sink"]
+R{"constraint"}<=18 [F "discount_sink"]

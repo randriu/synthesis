@@ -20,7 +20,8 @@ class StormPOMDPControl:
     storm_bounds = None             # under-approximation value from Storm
 
     # PAYNT data and FSC export
-    latest_paynt_result = None
+    latest_paynt_result = None      # holds the synthesised assignment
+    latest_paynt_result_fsc = None  # holds the FSC built from assignment
     paynt_bounds = None
     paynt_export = []
 
@@ -544,7 +545,7 @@ class StormPOMDPControl:
 
                 restricted_family.hole_set_options(hole,selected_actions)
 
-        logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size, restricted_family.size))
+        logger.info("Main family based on data from Storm: reduced design space from {} to {}".format(family.size_or_order, restricted_family.size_or_order))
 
         return restricted_family
 

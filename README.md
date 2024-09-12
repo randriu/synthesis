@@ -1,6 +1,6 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs and Dec-POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
 - [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
@@ -27,7 +27,7 @@ PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https:
 ```shell
 sudo apt install -y graphviz
 source ${VIRTUAL_ENV}/bin/activate
-pip3 install click z3-solver graphviz
+pip3 install click z3-solver psutil graphviz
 cd payntbind
 python3 setup.py develop
 cd ..
@@ -62,18 +62,17 @@ source ${VIRTUAL_ENV}/bin/activate
 PAYNT can be executed using the command in the following form:
 
 ```shell
-python3 paynt.py [OPTIONS]
+python3 paynt.py PROJECT [OPTIONS]
 ```
-where the most important options are:
-- ``--project PROJECT``: the path to the benchmark folder [required]
+where ``PROJECT`` is the path to the benchmark folder and the most important options are:
 - ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description or a POMDP program [default: ``sketch.templ``]
 - ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
 - ``--props PROPS``: the file in the ``PROJECT`` folder containing synthesis specification [default: ``sketch.props``]
 - ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
 
 Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
-- ``--pomdp-memory-size INTEGER``    implicit memory size for POMDP FSCs [default: 1]
-- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a POMDP using iterative exploration of k-FSCs
+- ``--fsc-memory-size INTEGER``    implicit memory size for (Dec-)POMDP FSCs [default: 1]
+- ``--fsc-synthesis``: enables incremental synthesis of FSCs for a (Dec-)POMDP using iterative exploration of k-FSCs
 - ``--posterior-aware``: enables the synthesis of posterior aware FSCs
 
 SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy are needed):
@@ -90,19 +89,18 @@ SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy ar
 Other options:
 - ``--help``: shows the help message of the PAYNT and aborts
 - ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
-- ``--incomplete-search``:  uses incomplete search during synthesis
 
 
 Here are various PAYNT calls:
 ```shell
-python3 paynt.py --project models/cav21/maze --props hard.props
-python3 paynt.py --project models/cav21/maze --props hard.props --method hybrid
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
-timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
-python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
-python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
+python3 paynt.py models/archive/cav21-paynt/maze --props hard.props
+python3 paynt.py models/archive/cav21-paynt/maze --props hard.props --method hybrid
+python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0
+python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
+python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
+timeout 10s python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
+python3 paynt.py models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 paynt.py models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The Python environment can be deactivated by runnning
@@ -139,8 +137,8 @@ For now, we can see that we ask PAYNT to look at the sketch (located in director
 The tool will print a series of log messages and, in the end, a short summary of the synthesis process, similar to the one below:
 
 ```
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
+formula 1: R{"requests_lost"}<=1 [F "finished"]
+optimal setting: formula: R{"power"}min=? [F "finished"]; direction: min; eps: 0.0
 
 method: Hybrid, synthesis time: 12.39 s
 number of holes: 7, family size: 12150
@@ -175,8 +173,8 @@ python3 paynt/paynt.py --project cav21-benchmark/dpm-demo hybrid
 we obtain the following summary:
 
 ```shell
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-optimal setting: formula: R[exp]{"power"}min=? [F "finished"]; direction: min; eps: 0.0
+formula 1: R{"requests_lost"}<=1 [F "finished"]
+optimal setting: formula: R{"power"}min=? [F "finished"]; direction: min; eps: 0.0
 
 method: Hybrid, synthesis time: 67.62 s
 number of holes: 7, family size: 12150
@@ -309,8 +307,8 @@ R{"power"}<=9100 [ F "finished" ]
 Running PAYNT again (with hybrid synthesis approach) will produce the following result
 
 ```shell
-formula 1: R[exp]{"requests_lost"}<=1 [F "finished"]
-formula 2: R[exp]{"power"}<=9100 [F "finished"]
+formula 1: R{"requests_lost"}<=1 [F "finished"]
+formula 2: R{"power"}<=9100 [F "finished"]
 
 method: Hybrid, synthesis time: 67.52 s
 number of holes: 7, family size: 12150

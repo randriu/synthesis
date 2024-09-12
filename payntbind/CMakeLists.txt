@@ -8,6 +8,12 @@ set(PYBIND_VERSION "" CACHE STRING "Pybind11 version to use")
 MARK_AS_ADVANCED(PYBIND_VERSION)
 set(STORM_DIR_HINT "" CACHE STRING "A hint where the Storm library can be found.")
 
+#+
+if (DEFINED DISABLE_SMG)
+    add_definitions(-DDISABLE_SMG)
+endif()
+
+
 find_package(storm REQUIRED HINTS ${STORM_DIR_HINT})
 
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
@@ -87,8 +93,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINAR
 payntbind_module(synthesis) 
 target_include_directories(synthesis
   PRIVATE
-  src/synthesis/decpomdp/madp/src/base/
-  src/synthesis/decpomdp/madp/src/include/
-  src/synthesis/decpomdp/madp/src/parser/
+  src/synthesis/decpomdp/madp/base/
+  src/synthesis/decpomdp/madp/include/
+  src/synthesis/decpomdp/madp/parser/
 )
 target_link_libraries(synthesis PUBLIC storm storm-pomdp)
