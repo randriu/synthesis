@@ -318,7 +318,8 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         if(not any_choice_enabled) {
             if(subfamily.isAssignment()) {
                 // STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling first action...");
-                uint64_t choice = row_groups[state];
+                // uint64_t choice = row_groups[state]; // pick the first choice
+                uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
                 selection.set(choice,true);
                 for(uint64_t dst: choice_destinations[choice]) {
                     if(not state_reached[dst]) {

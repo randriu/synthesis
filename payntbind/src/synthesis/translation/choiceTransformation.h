@@ -100,4 +100,12 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInAbsorbi
     storm::models::sparse::Model<ValueType> const& model
 );
 
+/**
+ * To every state of an MDP add an explicit action that executes a random choice between available actions.
+ */
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
+    storm::models::sparse::Model<ValueType> const& model
+);
+
 }

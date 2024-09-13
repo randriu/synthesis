@@ -3,6 +3,7 @@
 #include "src/synthesis/translation/componentTranslations.h"
 
 #include <storm/exceptions/InvalidModelException.h>
+#include <storm/exceptions/UnexpectedException.h>
 #include <storm/exceptions/InvalidArgumentException.h>
 #include <storm/models/sparse/Pomdp.h>
 #include <storm/utility/builder.h>
@@ -323,6 +324,91 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInAbsorbi
     return synthesis::removeAction(*model_absorbing_enabled, NO_ACTION_LABEL, absorbing_states);
 }
 
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
+    storm::models::sparse::Model<ValueType> const& model
+) {
+    auto [action_labels,choice_to_action] = synthesis::extractActionLabels<ValueType>(model);
+    std::string DONT_CARE_ACTION_LABEL = "__random__";
+    auto it = std::find(action_labels.begin(),action_labels.end(),DONT_CARE_ACTION_LABEL);
+    STORM_LOG_THROW(it == action_labels.end(), storm::exceptions::UnexpectedException,
+        "label " << DONT_CARE_ACTION_LABEL << " is already defined");
+    uint64_t num_actions = action_labels.size();
+    uint64_t num_states = model.getNumberOfStates();
+    uint64_t num_choices = model.getNumberOfChoices();
+
+    // for each action, find any choice that corresponds to this action
+    // we compute this to easily build choice labeling later
+    std::vector<uint64_t> action_reference_choice(num_actions);
+    for(uint64_t choice = 0; choice < num_choices; ++choice) {
+        action_reference_choice[choice_to_action[choice]] = choice;
+    }
+
+    // translate choices
+    std::vector<uint64_t> translated_to_original_choice;
+    std::vector<uint64_t> row_groups_new;
+    for(uint64_t state = 0; state < num_states; ++state) {
+        row_groups_new.push_back(translated_to_original_choice.size());
+        // copy existing choices
+        for(uint64_t choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
+            translated_to_original_choice.push_back(choice);
+        }
+        // add don't care action
+        translated_to_original_choice.push_back(num_choices);
+    }
+    row_groups_new.push_back(translated_to_original_choice.size());
+    uint64_t num_translated_choices = translated_to_original_choice.size();
+    storm::storage::BitVector translated_choice_mask(num_translated_choices,false);
+    for(uint64_t translated_choice = 0; translated_choice < num_translated_choices; ++translated_choice) {
+        translated_choice_mask.set(translated_choice, translated_to_original_choice[translated_choice] < num_choices);
+    }
+
+    // build components
+    storm::storage::sparse::ModelComponents<ValueType> components = componentsFromModel(model);
+    components.choiceOrigins.reset();
+    auto choiceLabeling = synthesis::translateChoiceLabeling<ValueType>(model,translated_to_original_choice,translated_choice_mask);
+    choiceLabeling.addLabel(DONT_CARE_ACTION_LABEL, ~translated_choice_mask);
+    components.choiceLabeling = choiceLabeling;
+    storm::storage::SparseMatrixBuilder<ValueType> builder(num_translated_choices, num_states, 0, true, true, num_states);
+    for(uint64_t state = 0; state < num_states; ++state) {
+        builder.newRowGroup(row_groups_new[state]);
+        // copy existing choices
+        std::map<uint64_t,ValueType> dont_care_transitions;
+        uint64_t new_translated_choice = row_groups_new[state+1]-1;
+        uint64_t state_num_choices = new_translated_choice-row_groups_new[state];
+        for(uint64_t translated_choice = row_groups_new[state]; translated_choice < new_translated_choice; ++translated_choice) {
+            uint64_t choice = translated_to_original_choice[translated_choice];
+            for(auto entry: model.getTransitionMatrix().getRow(choice)) {
+                uint64_t dst = entry.getColumn();
+                ValueType prob = entry.getValue();
+                builder.addNextValue(translated_choice, dst, prob);
+                dont_care_transitions[dst] += prob/state_num_choices;
+            }
+        }
+        // add don't care action
+        for(auto [dst,prob]: dont_care_transitions) {
+            builder.addNextValue(new_translated_choice,dst,prob);
+        }
+    }
+    components.transitionMatrix =  builder.build();
+    auto rewardModels = synthesis::translateRewardModels(model,translated_to_original_choice,translated_choice_mask);
+    for(auto & [name,reward_model]: rewardModels) {
+        std::cout << "processing " << name  << std::endl;
+        std::vector<ValueType> & choice_reward = reward_model.getStateActionRewardVector();
+        ValueType reward_sum = 0;
+        for(uint64_t state = 0; state < num_states; ++state) {
+            uint64_t new_translated_choice = row_groups_new[state+1]-1;
+            uint64_t state_num_choices = new_translated_choice-row_groups_new[state];
+            for(uint64_t translated_choice = row_groups_new[state]; translated_choice < new_translated_choice; ++translated_choice) {
+                reward_sum += choice_reward[translated_choice];
+            }
+            choice_reward[new_translated_choice] = reward_sum / state_num_choices;
+        }
+    }
+    components.rewardModels = rewardModels;
+    return storm::utility::builder::buildModelFromComponents<ValueType,storm::models::sparse::StandardRewardModel<ValueType>>(model.getType(),std::move(components));
+}
+
 template std::vector<std::vector<uint64_t>> computeChoiceDestinations<double>(
     storm::models::sparse::Model<double> const& model);
 template std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels<double>(
@@ -342,6 +428,8 @@ template std::shared_ptr<storm::models::sparse::Model<double>> removeAction<doub
     std::string const& action_to_remove_label,
     storm::storage::BitVector const& state_mask);
 template std::shared_ptr<storm::models::sparse::Model<double>> restoreActionsInAbsorbingStates<double>(
+    storm::models::sparse::Model<double> const& model);
+template std::shared_ptr<storm::models::sparse::Model<double>> addDontCareAction<double>(
     storm::models::sparse::Model<double> const& model);
 
 }

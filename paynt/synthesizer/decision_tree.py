@@ -41,6 +41,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             family.analysis_result.improving_assignment = assignment
             family.analysis_result.improving_value = assignment_value
             family.analysis_result.can_improve = True
+            self.update_optimum(family)
 
             family_value = family.analysis_result.optimality_result.primary.value
             if(abs(family_value-assignment_value) < 1e-3):
@@ -175,8 +176,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.synthesize_tree(depth)
                 if self.global_resource_limit_reached():
                     break
-                if self.best_assignment is not None:
-                # if self.best_assignment_value is not None and abs( (self.best_assignment_value-mc_result.value)/mc_result.value ) <1e-2:
+                # if self.best_assignment is not None:
+                if self.best_assignment_value is not None and abs( (self.best_assignment_value-mc_result.value)/mc_result.value ) <1e-2:
                     break
 
         logger.info(f"the optimal scheduler has value: {mc_result}")

@@ -165,6 +165,8 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         super().__init__(specification=specification)
         updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         if updated is not None: mdp = updated
+        mdp = payntbind.synthesis.addDontCareAction(mdp)
+
         self.quotient_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
