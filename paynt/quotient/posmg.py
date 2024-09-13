@@ -238,6 +238,7 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         :param constraint_indices a selection of property indices to investigate (default: all)
         :param double_check if True, the new optimum is double-checked
         '''
+        # create a smg
         quotient_player_indications = self.posmg_manager.get_state_player_indications()
 
         transition_matrix = mdp.model.transition_matrix
@@ -262,45 +263,35 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         if constraint_indices is None:
             constraint_indices = range(len(self.specification.constraints))
         results = [None for _ in self.specification.constraints]
-        # TODO ADD IMPLEMENTATION FOR CONSTRAINTS
-        # for index in constraint_indices:
-        #     constraint = self.specification.constraints[index]
-        #     constraint_str = constraint.property.raw_formula.__str__()
-        #     game_formula_str = f"<<{self.optimizing_player}>> " + constraint_str
-        #     formulas = stormpy.parse_properties(game_formula_str)
-        #     result = paynt.verification.property_result.MdpPropertyResult(constraint)
+        for index in constraint_indices:
+            constraint = self.specification.constraints[index]
+            result = paynt.verification.property_result.MdpPropertyResult(constraint)
 
-        #     # check primary direction
-        #     # result.primary = mdp.model_check_property(constraint)
+            # check primary direction
+            result.primary = self.smg_model_check_property(smg, constraint, False)
 
-        #     smg_result = payntbind.synthesis.smg_model_checking(smg, formulas[0].raw_formula,
-        #                                                     only_initial_states=False, set_produce_schedulers=True,
-        #                                                     env=paynt.verification.property.Property.environment)
-        #     value = smg_result.at(smg.initial_states[0])
-        #     result.primary = paynt.verification.property_result.PropertyResult(opt, smg_result, value)
+            # no need to check secondary direction if primary direction yields UNSAT
+            if not result.primary.sat:
+                result.sat = False
+            else:
+                # check secondary direction
+                result.secondary = self.smg_model_check_property(smg, constraint, True)
+                if mdp.is_deterministic and result.primary.value != result.secondary.value:
+                    logger.warning("WARNING: model is deterministic but min<max")
+                if result.secondary.sat:
+                    result.sat = True
 
-        #     # no need to check secondary direction if primary direction yields UNSAT
-        #     if not result.primary.sat:
-        #         result.sat = False
-        #     else:
-        #         # check secondary direction
-        #         result.secondary = mdp.model_check_property(constraint, alt=True)
-        #         if mdp.is_deterministic and result.primary.value != result.secondary.value:
-        #             logger.warning("WARNING: model is deterministic but min<max")
-        #         if result.secondary.sat:
-        #             result.sat = True
+            # primary direction is SAT
+            if result.sat is None:
+                # check if the primary scheduler is consistent
+                result.primary_selection,consistent = self.scheduler_is_consistent(mdp, constraint, result.primary.result)
+                if not consistent:
+                    result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
+                        self.scheduler_get_quantitative_values(mdp, constraint, result.primary.result, result.primary_selection)
 
-        #     # primary direction is SAT
-        #     if result.sat is None:
-        #         # check if the primary scheduler is consistent
-        #         result.primary_selection,consistent = self.scheduler_is_consistent(mdp, constraint, result.primary.result)
-        #         if not consistent:
-        #             result.primary_choice_values,result.primary_expected_visits,result.primary_scores = \
-        #                 self.scheduler_get_quantitative_values(mdp, constraint, result.primary.result, result.primary_selection)
-
-        #     results[index] = result
-        #     if result.sat is False:
-        #         break
+            results[index] = result
+            if result.sat is False:
+                break
         constraints_result = paynt.verification.property_result.ConstraintsResult(results)
 
         # check optimality
@@ -308,18 +299,10 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         # if self.specification.has_optimality and not constraints_result.sat is False:
         if self.specification.has_optimality:
             opt = self.specification.optimality
-            opt_str = opt.property.raw_formula.__str__()
-            game_formula_str = f"<<{self.optimizing_player}>> " + opt_str
-            formulas = stormpy.parse_properties(game_formula_str)
             result = paynt.verification.property_result.MdpOptimalityResult(opt)
 
-            smg_result = payntbind.synthesis.smg_model_checking(smg, formulas[0].raw_formula,
-                                                            only_initial_states=False, set_produce_schedulers=True,
-                                                            env=paynt.verification.property.Property.environment)
-            
-            value = smg_result.at(smg.initial_states[0])
-            result.primary = paynt.verification.property_result.PropertyResult(opt, smg_result, value)
-
+            # check primary direction
+            result.primary = self.smg_model_check_property(smg, opt)
             if not result.primary.improves_optimum:
                 # OPT <= LB
                 result.can_improve = False
@@ -341,4 +324,18 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
             if optimality_result.improving_assignment is not None and double_check:
                 optimality_result.improving_assignment, optimality_result.improving_value = self.double_check_assignment(optimality_result.improving_assignment)
         return paynt.verification.property_result.MdpSpecificationResult(constraints_result, optimality_result)
+
+    def smg_model_check_property(self, smg, prop, alt=False):
+        probability_formula_str = prop.formula.__str__() if not alt else prop.formula_alt.__str__()
+        game_formula_str = f"<<{self.optimizing_player}>> " + probability_formula_str
+        formulas = stormpy.parse_properties(game_formula_str)
+        formula = formulas[0].raw_formula
+
+        result = payntbind.synthesis.smg_model_checking(smg, formula,
+                                                        only_initial_states=False, set_produce_schedulers=True,
+                                                        env=paynt.verification.property.Property.environment)
+
+        value = result.at(smg.initial_states[0])
+        return paynt.verification.property_result.PropertyResult(prop, result, value)
+
 
