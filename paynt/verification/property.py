@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def construct_property(prop, relative_error):
     rf = prop.raw_formula
-    if not rf.is_reward_operator and rf.is_game_formula:
+    if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
         paynt.quotient.posmg.PosmgQuotient.optimizing_player = extract_player_index(rf)
         rf = rf.subformula
         prop = stormpy.core.Property(prop.name, rf)
