@@ -329,6 +329,8 @@ void bindings_coloring(py::module& m) {
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
         .def("areChoicesConsistent", &synthesis::ColoringSmt<>::areChoicesConsistent)
+        .def_property_readonly("unsat_core", [](synthesis::ColoringSmt<>& coloring) {return coloring.unsat_core;})
+        .def("areChoicesConsistentUseHint", &synthesis::ColoringSmt<>::areChoicesConsistentUseHint)
         .def("getProfilingInfo", &synthesis::ColoringSmt<>::getProfilingInfo)
         ;
 }

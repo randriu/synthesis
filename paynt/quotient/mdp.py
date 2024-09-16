@@ -7,7 +7,6 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
-
 class Variable:
 
     def __init__(self, variable, name, state_valuations):
@@ -174,6 +173,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
         self.coloring = None
         self.family = None
+        self.splitter_count = None
 
     def decide(self, node, var_name):
         node.set_variable_by_name(var_name,self.decision_tree)
@@ -213,6 +213,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 variable = variable_name.index(hole_type)
                 option_labels = variables[variable].hole_domain
             self.family.add_hole(hole_name, option_labels)
+        self.splitter_count = [0] * self.family.num_holes
 
 
 
@@ -247,6 +248,10 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
         return self.coloring.areChoicesConsistent(choices, family.family)
+        # if family.parent_info is None:
+        #     return self.coloring.areChoicesConsistent(choices, family.family)
+        # else:
+        #     return self.coloring.areChoicesConsistentUseHint(choices, family.family, family.parent_info.unsat_core_hint)
 
     def scheduler_is_consistent(self, mdp, prop, result):
         ''' Get hole options involved in the scheduler selection. '''
@@ -300,6 +305,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
+        self.splitter_count[splitter] += 1
         if self.is_action_hole[splitter] or self.is_decision_hole[splitter]:
             assert len(hole_assignments[splitter]) > 1
             core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])
@@ -331,6 +337,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         parent_info = family.collect_parent_info(self.specification)
         parent_info.analysis_result = family.analysis_result
         parent_info.scheduler_choices = family.scheduler_choices
+        parent_info.unsat_core_hint = self.coloring.unsat_core.copy()
         for suboption in suboptions:
             subfamily = new_family.subholes(splitter, suboption)
             subfamily.add_parent_info(parent_info)

@@ -169,8 +169,16 @@ std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<u
     uint64_t num_states = model.getNumberOfStates();
     uint64_t num_choices = model.getNumberOfChoices();
 
+    uint64_t dont_care_action = num_actions;
+    for(uint64_t action = 0; action < num_actions; ++action) {
+        if(action_labels[action] == DONT_CARE_ACTION_LABEL) {
+            dont_care_action = action;
+            break;
+        }
+    }
+
     // for each action, find any choice that corresponds to this action
-    // we compute this to easily build choice labeling later
+    // we compute this to easily build the new choice labeling
     std::vector<uint64_t> action_reference_choice(num_actions);
     for(uint64_t choice = 0; choice < num_choices; ++choice) {
         action_reference_choice[choice_to_action[choice]] = choice;
@@ -193,23 +201,26 @@ std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<u
                 translated_to_original_choice_label.push_back(choice);
                 translated_to_true_action.push_back(choice_to_action[choice]);
             }
-        } else {
-            // identify existing actions
-            action_exists.clear();
-            for(uint64_t choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
-                uint64_t action = choice_to_action[choice];
-                action_exists.set(action,true);
-                translated_to_original_choice.push_back(choice);
-                translated_to_original_choice_label.push_back(choice);
-                translated_to_true_action.push_back(action);
+            continue;
+        }
+        // identify existing actions, identify the fallback choice
+        action_exists.clear();
+        uint64_t fallback_choice = row_groups_old[state];
+        for(uint64_t choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
+            uint64_t action = choice_to_action[choice];
+            if(action == dont_care_action) {
+                fallback_choice = choice;
             }
-            // add missing actions
-            for(uint64_t action: ~action_exists) {
-                uint64_t default_choice = row_groups_old[state];
-                translated_to_original_choice.push_back(default_choice);
-                translated_to_original_choice_label.push_back(action_reference_choice[action]);
-                translated_to_true_action.push_back(choice_to_action[default_choice]);
-            }
+            action_exists.set(action,true);
+            translated_to_original_choice.push_back(choice);
+            translated_to_original_choice_label.push_back(choice);
+            translated_to_true_action.push_back(action);
+        }
+        // add missing actions
+        for(uint64_t action: ~action_exists) {
+            translated_to_original_choice.push_back(fallback_choice);
+            translated_to_original_choice_label.push_back(action_reference_choice[action]);
+            translated_to_true_action.push_back(choice_to_action[fallback_choice]);
         }
     }
     row_groups_new.push_back(translated_to_original_choice.size());
@@ -329,7 +340,6 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     storm::models::sparse::Model<ValueType> const& model
 ) {
     auto [action_labels,choice_to_action] = synthesis::extractActionLabels<ValueType>(model);
-    std::string DONT_CARE_ACTION_LABEL = "__random__";
     auto it = std::find(action_labels.begin(),action_labels.end(),DONT_CARE_ACTION_LABEL);
     STORM_LOG_THROW(it == action_labels.end(), storm::exceptions::UnexpectedException,
         "label " << DONT_CARE_ACTION_LABEL << " is already defined");

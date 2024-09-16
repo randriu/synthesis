@@ -49,6 +49,9 @@ public:
     std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent(
         BitVector const& choices, Family const& subfamily
     );
+    std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistentUseHint(
+        BitVector const& choices, Family const& subfamily, std::vector<std::pair<uint64_t,uint64_t>> const& unsat_core_hint
+    );
 
     std::map<std::string,storm::utility::Stopwatch> timers;
     std::vector<std::pair<std::string,double>> getProfilingInfo() {
@@ -58,6 +61,10 @@ public:
         }
         return profiling;
     }
+
+
+    /** TODO */
+    std::vector<std::pair<uint64_t,uint64_t>> unsat_core;
 
 protected:
 
@@ -125,6 +132,10 @@ protected:
 
     /** Check whether (in the subfamily) the choice is enabled. */
     bool isChoiceEnabled(Family const& subfamily, uint64_t state, uint64_t choice);
+
+    /** TODO */
+    bool PRINT_UNSAT_CORE = false;
+    void loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily);
 
     /** If true, the object will be setup for one consistency check. */
     bool one_consistency_check;

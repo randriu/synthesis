@@ -7,8 +7,6 @@ import payntbind
 import logging
 logger = logging.getLogger(__name__)
 
-# import numpy
-
 class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     # tree depth
@@ -49,52 +47,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.num_harmonization_skip += 1
                 family.analysis_result.can_improve = False
 
-    def harmonize_inconsistent_scheduler_relevant(self, family):
-        self.num_harmonizations += 1
-        mdp = family.mdp
-        result = family.analysis_result.undecided_result()
-        mdp_choice_values = self.quotient.choice_values(mdp.model, result.prop, result.primary.result.get_values())
-        state_to_choice = self.quotient.scheduler_to_state_to_choice(mdp, result.primary.result.scheduler)
-        choices_reduced = stormpy.BitVector(family.scheduler_choices)
-
-        choices_support = result.primary.result.scheduler.compute_action_support(mdp.model.nondeterministic_choice_indices)
-        expected_visits = self.quotient.compute_expected_visits(mdp.model, result.prop, choices_support)
-        assert len(expected_visits) == mdp.model.nr_states
-        state_score = [0] * mdp.model.nr_states
-        ndi = mdp.model.nondeterministic_choice_indices
-        for mdp_state in range(mdp.model.nr_states):
-            if state_to_choice[mdp.quotient_state_map[mdp_state]] is None:
-                # state is unreachable in the DTMC induced by the scheduler
-                continue
-            state_min = state_max = mdp_choice_values[ndi[mdp_state]]
-            for choice in range(ndi[mdp_state]+1,ndi[mdp_state+1]):
-                if state_min is None or mdp_choice_values[choice] < state_min:
-                    state_min = mdp_choice_values[choice]
-                if state_max is None or mdp_choice_values[choice] > state_max:
-                    state_max = mdp_choice_values[choice]
-            divisor = None
-            max_diff = state_max-state_min
-            if abs(state_min) > 0.001:
-                state_diff = abs(max_diff/state_min)
-            elif abs(state_max) > 0.001:
-                state_diff = abs(max_diff/state_max)
-            else:
-                state_diff = 0
-            state_score[mdp_state] = state_diff
-            state_score[mdp_state] *= expected_visits[mdp_state]
-        # threshold = 0
-        threshold = numpy.quantile(state_score,0.9) # keep some percentage
-        for mdp_state,score in enumerate(state_score):
-            quotient_state = mdp.quotient_state_map[mdp_state]
-            if state_to_choice[quotient_state] is not None and score <= threshold:
-                choices_reduced.set(state_to_choice[quotient_state],False)
-        print(f"kept {choices_reduced.number_of_set_bits()}/{family.scheduler_choices.number_of_set_bits()} choices")
-
-        consistent,hole_selection = self.quotient.are_choices_consistent(choices_reduced, family)
-        if not consistent:
-            return
-        # logger.info(f"harmonization is SAT")
-        self.verify_hole_selection(family,hole_selection)
 
     def harmonize_inconsistent_scheduler(self, family):
         self.num_harmonizations += 1
@@ -106,6 +58,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         selection_2 = hole_selection.copy(); selection_2[harmonizing_hole] = [selection_2[harmonizing_hole][1]]
         for selection in [selection_1,selection_2]:
             self.verify_hole_selection(family,selection)
+
 
     def verify_family(self, family):
         self.num_families_considered += 1
@@ -124,9 +77,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.num_schedulers_preserved += 1
                 family.analysis_result = family.parent_info.analysis_result
                 family.scheduler_choices = family.parent_info.scheduler_choices
-                # print("DTMC size = ", family.scheduler_choices.number_of_set_bits())
                 consistent,hole_selection = self.quotient.are_choices_consistent(family.scheduler_choices, family)
-                # print("consistent (same parent) ", consistent)
                 assert not consistent
                 family.analysis_result.optimality_result.primary_selection = hole_selection
                 return
@@ -136,7 +87,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if not family.analysis_result.can_improve:
             return
         self.harmonize_inconsistent_scheduler(family)
-        # self.harmonize_inconsistent_scheduler_relevant(family)
 
 
     def synthesize_tree(self, depth:int):
@@ -159,7 +109,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.num_harmonization_skip = 0
 
         if self.quotient.specification.has_optimality:
-            epsilon = 1e-2
+            epsilon = 1e-1
             mc_result_positive = mc_result.value > 0
             if self.quotient.specification.optimality.maximizing == mc_result_positive:
                 epsilon *= -1
@@ -191,8 +141,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         print()
         logger.info(f"families considered: {self.num_families_considered}")
         logger.info(f"families skipped by construction: {self.num_families_skipped}")
-        logger.info(f"families model checked: {self.num_families_model_checked}")
         logger.info(f"families with schedulers preserved: {self.num_schedulers_preserved}")
+        logger.info(f"families model checked: {self.num_families_model_checked}")
         logger.info(f"harmonizations attempted: {self.num_harmonizations}")
         logger.info(f"harmonizations succeeded: {self.num_harmonization_succeeded}")
         logger.info(f"harmonizations lead to family skip: {self.num_harmonization_skip}")
@@ -203,5 +153,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             time_percent = round(time/time_total*100,1)
             print(f"{name} = {time} s ({time_percent} %)")
         print()
+
+        # splits_total = sum(self.quotient.splitter_count)
+        # if splits_total == 0: splits_total = 1
+        # splitter_freq = [ round(splits/splits_total*100,1) for splits in self.quotient.splitter_count]
+        # for hole,freq in enumerate(splitter_freq):
+        #     print(self.quotient.family.hole_name(hole),freq)
+        # print()
 
         return self.best_assignment
