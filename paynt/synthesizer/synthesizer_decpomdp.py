@@ -54,7 +54,7 @@ class SynthesizerDecPomdp:
             mem_size += 1
 
             #break
-            
 
-    def run(self, optimum_threshold=None, export_evaluation=None):
+
+    def run(self, optimum_threshold=None):
         self.strategy_iterative(unfold_imperfect_only=True)

@@ -9,7 +9,6 @@ import paynt.quotient.decpomdp
 import paynt.quotient.storm_pomdp_control
 import paynt.quotient.mdp
 
-import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
@@ -114,13 +113,6 @@ def setup_logger(log_path = None):
 @click.option("--export-evaluation", type=click.Path(), default=None,
     help="base filename to output evaluation result")
 
-@click.option(
-    "--all-in-one", type=click.Choice(["sparse", "bdd"]), default=None, show_default=True,
-    help="use all-in-one MDP abstraction",
-)
-@click.option("--all-in-one-maxmem", default=4096, type=int,
-    help="memory limit (MB) for the all-in-one abstraction")
-
 @click.option("--mdp-split-wrt-mdp", is_flag=True, default=False,
     help="if set, MDP abstraction scheduler will be used for splitting, otherwise game abstraction scheduler will be used")
 @click.option("--mdp-discard-unreachable-choices", is_flag=True, default=False,
@@ -157,7 +149,6 @@ def paynt_run(
     storm_pomdp, iterative_storm, get_storm_result, storm_options, prune_storm,
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_evaluation,
-    all_in_one, all_in_one_maxmem,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
     tree_depth, tree_enumeration, add_dont_care_action,
     constraint_bound,
@@ -198,14 +189,10 @@ def paynt_run(
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    if all_in_one is None:
-        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound)
-        synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
-        synthesizer.run(optimum_threshold, export_evaluation)
-    else:
-        all_in_one_program, specification, family = paynt.parser.sketch.Sketch.load_sketch_as_all_in_one(sketch_path, properties_path)
-        all_in_one_analysis = paynt.synthesizer.all_in_one.AllInOne(all_in_one_program, specification, all_in_one, all_in_one_maxmem, family)
-        all_in_one_analysis.run()
+    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound)
+    synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
+    synthesizer.run(optimum_threshold)
+
     if profiling:
         profiler.disable()
         print_profiler_stats(profiler)

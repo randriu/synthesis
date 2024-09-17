@@ -790,6 +790,11 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             evaluations.append(evaluation)
         return evaluations
 
+
+    def run(self, optimum_threshold=None):
+        return self.evaluate(export_filename_base=None)
+
+
     def export_evaluation_result(self, evaluations, export_filename_base):
         import json
         policies = self.policy_tree.extract_policies(self.quotient)
