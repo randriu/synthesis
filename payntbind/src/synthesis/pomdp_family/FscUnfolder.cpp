@@ -14,7 +14,7 @@ namespace synthesis {
     ) : quotient(quotient), state_to_obs_class(state_to_obs_class),
         num_actions(num_actions), choice_to_action(choice_to_action) {
         
-        this->state_translator = ItemKeyTranslator<std::tuple<uint64_t,uint64_t,bool>>();
+        this->state_translator = ItemKeyTranslator<std::pair<uint64_t,uint64_t>>();
         this->state_action_choices.resize(this->quotient.getNumberOfStates());
         std::vector<uint64_t> const& row_groups = this->quotient.getTransitionMatrix().getRowGroupIndices();
         for(uint64_t state = 0; state < this->quotient.getNumberOfStates(); ++state) {
@@ -50,7 +50,7 @@ namespace synthesis {
     uint64_t FscUnfolder<ValueType>::translateInitialState() {
         uint64_t initial_state = *(this->quotient.getInitialStates().begin());
         uint64_t initial_memory = 0;
-        return this->state_translator.translate(initial_state,std::make_tuple(initial_memory,invalidAction(),false));
+        return this->state_translator.translate(initial_state,std::make_pair(initial_memory,invalidAction()));
     }
     
     
@@ -62,26 +62,24 @@ namespace synthesis {
         this->state_translator.resize(this->quotient.getNumberOfStates());
         uint64_t translated_state = this->translateInitialState();
         while(true) {
-            auto[state,memory_action_transitioned] = this->state_translator.retrieve(translated_state);
-            auto[memory,action,transitioned] = memory_action_transitioned;
+            auto[state,memory_action] = this->state_translator.retrieve(translated_state);
+            auto[memory,action] = memory_action;
             uint64_t observation = this->state_to_obs_class[state];
-            if(action == invalidAction() and not transitioned) {
+            if(action == invalidAction()) {
                 // random choice of an action
-                for(auto [action,prob] : action_function[memory][observation]) {
-                    this->state_translator.translate(state,std::make_tuple(memory,action,false));
+                for(auto [action,_] : action_function[memory][observation]) {
+                    this->state_translator.translate(state,std::make_pair(memory,action));
                 }
-            } else if(action != invalidAction()) {
+            } else { // action != invalidAction()) {
                 // executing variants of the selected actions
                 for(uint64_t choice: this->state_action_choices[state][action]) {
                     for(auto const &entry: this->quotient.getTransitionMatrix().getRow(choice)) {
                         uint64_t state_dst = entry.getColumn();
-                        this->state_translator.translate(state_dst,std::make_tuple(memory,invalidAction(),true));
+                        // executing memory update
+                        for(auto [memory_dst,_] : update_function[memory][observation]) {
+                            this->state_translator.translate(state_dst,std::make_pair(memory_dst,invalidAction()));
+                        }
                     }
-                }
-            } else { // action == invalidAction() and transitioned
-                // executing memory update
-                for(auto [memory_dst,prob] : update_function[memory][observation]) {
-                    this->state_translator.translate(state,std::make_tuple(memory_dst,invalidAction(),false));
                 }
             }
             translated_state++;
@@ -91,7 +89,7 @@ namespace synthesis {
         }
 
         this->product_state_to_state = this->state_translator.translationToItem();
-        this->product_state_to_state_memory_action_transitioned = this->state_translator.translationToItemKey();
+        // this->product_state_to_state_memory_action = this->state_translator.translationToItemKey();
     }
 
     template<typename ValueType>
@@ -103,35 +101,30 @@ namespace synthesis {
         storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, false, true, 0);
         for(uint64_t translated_state = 0; translated_state < numberOfTranslatedStates(); ++translated_state) {
             builder.newRowGroup(numberOfTranslatedChoices());
-            auto[state,memory_action_transitioned] = this->state_translator.retrieve(translated_state);
-            auto[memory,action,transitioned] = memory_action_transitioned;
+            auto[state,memory_action] = this->state_translator.retrieve(translated_state);
+            auto[memory,action] = memory_action;
             uint64_t observation = this->state_to_obs_class[state];
-            if(action == invalidAction() and not transitioned) {
+            if(action == invalidAction()) {
                 // random choice of an action
                 uint64_t product_choice = numberOfTranslatedChoices();
                 this->product_choice_to_choice.push_back(invalidChoice());
                 for(auto [action,prob] : action_function[memory][observation]) {
-                    uint64_t translated_dst = this->state_translator.translate(state,std::make_tuple(memory,action,false));
+                    uint64_t translated_dst = this->state_translator.translate(state,std::make_pair(memory,action));
                     builder.addNextValue(product_choice, translated_dst, prob);
                 }
-            } else if(action != invalidAction()) {
+            } else { // action == invalidAction()
                 // executing variants of the selected actions
                 for(uint64_t choice: this->state_action_choices[state][action]) {
                     uint64_t product_choice = numberOfTranslatedChoices();
                     this->product_choice_to_choice.push_back(choice);
                     for(auto const &entry: this->quotient.getTransitionMatrix().getRow(choice)) {
                         uint64_t state_dst = entry.getColumn();
-                        uint64_t translated_dst = this->state_translator.translate(state_dst,std::make_tuple(memory,invalidAction(),true));
-                        builder.addNextValue(product_choice, translated_dst, entry.getValue());
+                        // executing memory update
+                        for(auto [memory_dst,prob] : update_function[memory][observation]) {
+                            uint64_t translated_dst = this->state_translator.translate(state_dst,std::make_pair(memory_dst,invalidAction()));
+                            builder.addNextValue(product_choice, translated_dst, entry.getValue()*prob);
+                        }
                     }
-                }
-            } else { // action == invalidAction() and transitioned
-                // executing memory update
-                uint64_t product_choice = numberOfTranslatedChoices();
-                this->product_choice_to_choice.push_back(invalidChoice());
-                for(auto [memory_dst,prob] : update_function[memory][observation]) {
-                    uint64_t translated_dst = this->state_translator.translate(state,std::make_tuple(memory_dst,invalidAction(),false));
-                    builder.addNextValue(product_choice, translated_dst, prob);
                 }
             }
         }

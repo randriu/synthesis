@@ -27,7 +27,7 @@ namespace synthesis {
          * Create a product of the quotient POMDP and the given FSC.
          * @param action_function for each node in the FSC and for each observation class, a dictionary containing
          *  entries (action,probability)
-         * @param action_function for each node in the FSC and for each (posterior) observation class, a dictionary
+         * @param action_function for each node in the FSC and for each observation class, a dictionary
          *  containing entries (memory,probability)
          */
         void applyFsc(
@@ -41,8 +41,8 @@ namespace synthesis {
         std::vector<uint64_t> product_choice_to_choice;
         /** For each state of the product MDP, the original state. */
         std::vector<uint64_t> product_state_to_state;
-        /** For each state of the product MDP, the correponding state-memory-action-transitioned tuple. */
-        std::vector<std::pair<uint64_t,std::tuple<uint64_t,uint64_t,bool>>> product_state_to_state_memory_action_transitioned;
+        /** For each state of the product MDP, the correponding state-memory-action tuple. */
+        // std::vector<std::pair<uint64_t,std::pair<uint64_t,uint64_t>>> product_state_to_state_memory_action;
 
 
     private:
@@ -62,12 +62,11 @@ namespace synthesis {
         uint64_t invalidChoice();
 
         /**
-         * Each state is a tuple (s,n,act,tr) with the following semantics:
-         * - from state (s,n,-,-), an action act is selected according to gamma(n,O(s)), transitioning to (s,n,act,-)
-         * - from state (s,n,act,-), a variant of action act is executed, transitioning to (s',n,-,+)
-         * - from state (s',n,-,+), a memory update n' is selected according delta(n,O(s')), transitioning to (s',n',-,-)
+         * Each state is a tuple (s,n,act) with the following semantics:
+         * - from state (s,n,-), an action act is selected according to gamma(n,O(s)), transitioning to (s,n,act)
+         * - from state (s,n,act), a variant of action act is executed and n' is selected according to delta(n,O(s)), transitioning to (s',n',-)
          **/
-        ItemKeyTranslator<std::tuple<uint64_t,uint64_t,bool>> state_translator;
+        ItemKeyTranslator<std::pair<uint64_t,uint64_t>> state_translator;
         uint64_t translateInitialState();
         uint64_t numberOfTranslatedStates();
         uint64_t numberOfTranslatedChoices();
