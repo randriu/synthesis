@@ -1,12 +1,13 @@
 from . import version
 
-import paynt.utils.profiler
+import paynt.utils.timer
 import paynt.parser.sketch
 
 import paynt.quotient
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
 import paynt.quotient.storm_pomdp_control
+import paynt.quotient.mdp
 
 import paynt.synthesizer.all_in_one
 import paynt.synthesizer.synthesizer
@@ -133,6 +134,8 @@ def setup_logger(log_path = None):
     help="decision tree synthesis: tree depth")
 @click.option("--tree-enumeration", is_flag=True, default=False,
     help="decision tree synthesis: if set, all trees of size at most tree_depth will be enumerated")
+@click.option("--add-dont-care-action", is_flag=True, default=False,
+    help="decision tree synthesis: if set, an explicit action simulating a random action selection will be added to each state")
 
 @click.option(
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
@@ -156,7 +159,7 @@ def paynt_run(
     export_fsc_storm, export_fsc_paynt, export_evaluation,
     all_in_one, all_in_one_maxmem,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
-    tree_depth, tree_enumeration,
+    tree_depth, tree_enumeration, add_dont_care_action,
     constraint_bound,
     ce_generator,
     profiling
@@ -166,7 +169,7 @@ def paynt_run(
     if profiling:
         profiler = cProfile.Profile()
         profiler.enable()
-    paynt.utils.profiler.GlobalTimeLimit.start(timeout)
+    paynt.utils.timer.GlobalTimer.start(timeout)
 
     logger.info("This is Paynt version {}.".format(version()))
 
@@ -183,6 +186,7 @@ def paynt_run(
 
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
+    paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
 
     storm_control = None
     if storm_pomdp:

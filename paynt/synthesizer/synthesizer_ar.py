@@ -100,7 +100,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         self.quotient.specification.optimality.update_optimum(iv)
         self.best_assignment = ia
         self.best_assignment_value = iv
-        # logger.info(f"new optimum achieved: {iv}")
+        logger.info(f"value {round(iv,4)} achieved after {round(self.synthesis_timer.read(),2)} seconds")
         if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
             self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
 
@@ -108,7 +108,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     def synthesize_one(self, family):
         families = [family]
         while families:
-            if self.global_resource_limit_reached():
+            if self.resource_limit_reached():
                 break
             family = families.pop(-1)
             self.verify_family(family)

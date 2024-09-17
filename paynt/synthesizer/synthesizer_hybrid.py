@@ -3,8 +3,7 @@ import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_cegis
 
 import paynt.family.smt
-
-from ..utils.profiler import Timer
+import paynt.utils.timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -25,8 +24,8 @@ class StageControl:
 
     def __init__(self, family_size):
         # timings
-        self.timer_ar = Timer()
-        self.timer_cegis = Timer()
+        self.timer_ar = paynt.utils.timer.Timer()
+        self.timer_cegis = paynt.utils.timer.Timer()
 
         self.family_size = family_size
         self.pruned_ar = 0

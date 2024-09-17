@@ -2,7 +2,7 @@ import stormpy
 import stormpy.pomdp
 import payntbind
 
-import paynt.utils.profiler
+import paynt.utils.timer
 
 from os import makedirs
 
@@ -129,7 +129,7 @@ class StormPOMDPControl:
         belmc = stormpy.pomdp.BeliefExplorationModelCheckerDouble(self.pomdp, options)
 
         logger.info("starting Storm POMDP analysis")
-        storm_timer = paynt.utils.profiler.Timer()
+        storm_timer = paynt.utils.timer.Timer()
         storm_timer.start()
         result = belmc.check(self.spec_formulas[0], self.paynt_export)   # calls Storm
         storm_timer.stop()

@@ -1,4 +1,5 @@
 import paynt.synthesizer.statistic
+import paynt.utils.timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -68,6 +69,7 @@ class Synthesizer:
     def __init__(self, quotient):
         self.quotient = quotient
         self.stat = None
+        self.synthesis_timer = None
         self.explored = None
         self.best_assignment = None
         self.best_assignment_value = None
@@ -77,20 +79,21 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def global_time_limit_reached(self):
-        if paynt.utils.profiler.GlobalTimeLimit.limit_reached():
+    def time_limit_reached(self):
+        if (self.synthesis_timer is not None and self.synthesis_timer.time_limit_reached()) or \
+            paynt.utils.timer.GlobalTimer.time_limit_reached():
             logger.info("time limit reached, aborting...")
             return True
         return False
 
-    def global_memory_limit_reached(self):
-        if paynt.utils.profiler.GlobalMemoryLimit.limit_reached():
+    def memory_limit_reached(self):
+        if paynt.utils.timer.GlobalMemoryLimit.limit_reached():
             logger.info("memory limit reached, aborting...")
             return True
         return False
 
-    def global_resource_limit_reached(self):
-        return self.global_time_limit_reached() or self.global_memory_limit_reached()
+    def resource_limit_reached(self):
+        return self.time_limit_reached() or self.memory_limit_reached()
 
     def set_optimality_threshold(self, optimum_threshold):
         if self.quotient.specification.has_optimality and optimum_threshold is not None:
@@ -145,14 +148,18 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def synthesize(self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True):
+    def synthesize(
+        self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True, timeout=None
+    ):
         '''
         :param family family of assignment to search in
+        :param families alternatively, a list of families can be given
         :param optimum_threshold known bound on the optimum value
         :param keep_optimum if True, the optimality specification will not be reset upon finish
         :param return_all if True and the synthesis returns a family, all assignments will be returned instead of an
             arbitrary one
         :param print_stats if True, synthesis stats will be printed upon completion
+        :param timeout synthesis time limit, seconds
         '''
         if family is None:
             family = self.quotient.family
@@ -160,9 +167,10 @@ class Synthesizer:
             family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
         
         self.set_optimality_threshold(optimum_threshold)
+        self.synthesis_timer = paynt.utils.timer.Timer(timeout)
+        self.synthesis_timer.start()
         self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
-        logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
         self.stat.start(family)
         self.synthesize_one(family)
         if self.best_assignment is not None and self.best_assignment.size > 1 and not return_all:

@@ -118,15 +118,13 @@ ColoringSmt<ValueType>::ColoringSmt(
     }
 
     // collect all path expressions
+    std::vector<z3::expr_vector> path_step_expression;
     z3::expr_vector path_expression(ctx);
     for(std::vector<bool> const& path: getRoot()->paths) {
-        z3::expr_vector expression(ctx);
-        getRoot()->loadPathExpression(path,expression);
-        z3::expr_vector steps(ctx);
-        for(uint64_t step = 0; step < expression.size()-1; ++step) {
-            steps.push_back(expression[step]);
-        }
-        path_expression.push_back(not z3::mk_and(steps) or expression.back());
+        z3::expr_vector step_expression(ctx);
+        getRoot()->loadPathExpression(path,step_expression);
+        path_step_expression.push_back(step_expression);
+        path_expression.push_back(z3::mk_or(step_expression));
         const TreeNode *node = getRoot()->getNodeOfPath(path,path.size()-1);
         const TerminalNode * terminal = dynamic_cast<const TerminalNode *>(node);
         path_action_hole.push_back(terminal->action_hole.hole);
@@ -155,45 +153,48 @@ ColoringSmt<ValueType>::ColoringSmt(
         return;
     }
 
-    timers["ColoringSmt:: create harmonizing variants"].start();
+    timers["ColoringSmt:: create harmonizing variants (1)"].start();
     // create harmonizing variants
     std::vector<const TreeNode::Hole *> all_holes(family.numHoles());
     getRoot()->loadAllHoles(all_holes);
-    std::vector<std::vector<uint64_t>> path_holes(numPaths());
-    for(uint64_t path = 0; path < numPaths(); ++path) {
-        getRoot()->loadPathHoles(getRoot()->paths[path],path_holes[path]);
-    }
     std::vector<z3::expr_vector> hole_what;
     std::vector<z3::expr_vector> hole_with;
     for(const TreeNode::Hole *hole: all_holes) {
         z3::expr_vector what(ctx); what.push_back(hole->solver_variable); hole_what.push_back(what);
         z3::expr_vector with(ctx); with.push_back(hole->solver_variable_harm); hole_with.push_back(with);
     }
+    
+    std::vector<std::vector<std::vector<uint64_t>>> path_step_holes(numPaths());
+    for(uint64_t path = 0; path < numPaths(); ++path) {
+        getRoot()->loadPathStepHoles(getRoot()->paths[path],path_step_holes[path]);
+    }
 
     z3::expr_vector path_expression_harmonizing(ctx);
     for(uint64_t path = 0; path < numPaths(); ++path) {
-        z3::expr e = path_expression[path];
         z3::expr_vector variants(ctx);
-        variants.push_back(e);
-        for(uint64_t hole: path_holes[path]) {
-            variants.push_back(
-                (harmonizing_variable == (int)hole) and e.substitute(hole_what[hole],hole_with[hole])
-            );
+        variants.push_back(path_expression[path]);
+        for(uint64_t step = 0; step < path_step_expression[path].size(); ++step) {
+            for(uint64_t hole: path_step_holes[path][step]) {
+                variants.push_back(
+                    (harmonizing_variable == (int)hole) and path_step_expression[path][step].substitute(hole_what[hole],hole_with[hole])
+                );
+            }
         }
         path_expression_harmonizing.push_back(z3::mk_or(variants));
     }
+    timers["ColoringSmt:: create harmonizing variants (1)"].stop();
 
     for(uint64_t choice = 0; choice < numChoices(); ++choice) {
-        z3::expr_vector path_variants(ctx);
-        for(uint64_t path = 0; path < numPaths(); ++path) {
-            path_variants.push_back(path_expression_harmonizing[path].substitute(substitution_variables,choice_substitution_expr[choice]));
-            // path_variants.push_back(path_expression_harmonizing[path].substitute(substitution_variables,choice_substitution_expr[choice]).simplify());
-        }
-        choice_path_expresssion_harm.push_back(path_variants);
+        choice_path_expresssion_harm.push_back(z3::expr_vector(ctx));
     }
-    timers["ColoringSmt:: create harmonizing variants"].stop();
+    timers["ColoringSmt:: create harmonizing variants (2)"].start();
+    for(uint64_t path = 0; path < numPaths(); ++path) {
+        for(uint64_t choice = 0; choice < numChoices(); ++choice) {
+            choice_path_expresssion_harm[choice].push_back(path_expression_harmonizing[path].substitute(substitution_variables,choice_substitution_expr[choice]));
+        }
+    }
+    timers["ColoringSmt:: create harmonizing variants (2)"].stop();
 
-    // std::cout << __FUNCTION__ << " end" << std::endl;
     timers[__FUNCTION__].stop();
 }
 
@@ -235,8 +236,8 @@ bool ColoringSmt<ValueType>::check() {
     return sat;
 }
 
-template<typename ValueType>std::vector<std::pair<std::string,std::string>> ColoringSmt<ValueType>::getFamilyInfo() {
-    std::vector<std::pair<std::string,std::string>> hole_info(family.numHoles());
+template<typename ValueType>std::vector<std::tuple<uint64_t,std::string,std::string>> ColoringSmt<ValueType>::getFamilyInfo() {
+    std::vector<std::tuple<uint64_t,std::string,std::string>> hole_info(family.numHoles());
     getRoot()->loadHoleInfo(hole_info);
     return hole_info;
 }
@@ -320,8 +321,8 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         if(not any_choice_enabled) {
             if(subfamily.isAssignment()) {
                 // STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling first action...");
-                uint64_t choice = row_groups[state]; // pick the first choice
-                // uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
+                // uint64_t choice = row_groups[state]; // pick the first choice
+                uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
                 selection.set(choice,true);
                 for(uint64_t dst: choice_destinations[choice]) {
                     if(not state_reached[dst]) {
@@ -370,8 +371,7 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
     for(z3::expr expr: unsat_core_expr) {
         std::istringstream iss(expr.decl().name().str());
         char prefix; iss >> prefix;
-        STORM_LOG_THROW(prefix == 'h' or prefix == 'p', storm::exceptions::UnexpectedException, "unexpected expression label");
-        if(prefix == 'h') {
+        if(prefix == 'h' or prefix == 'z') {
             // uint64_t hole; iss >> hole;
             // this->unsat_core.emplace_back(hole,numPaths());
             continue;

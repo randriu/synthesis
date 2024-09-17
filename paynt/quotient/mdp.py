@@ -70,10 +70,11 @@ class DecisionTreeNode:
     def __init__(self, parent):
         self.parent = parent
         self.variable_index = None
-        self.child_false = None
         self.child_true = None
-        self.hole = None
+        self.child_false = None
         self.identifier = None
+        self.holes = None
+        self.hole_assignment = None
 
     @property
     def is_terminal(self):
@@ -87,13 +88,10 @@ class DecisionTreeNode:
     def is_true_child(self):
         return self is self.parent.child_true
 
-    def add_decision(self):
-        '''
-        Associate (an index of) a variable with the node.
-        '''
-        if self.is_terminal:
-            self.child_false = DecisionTreeNode(self)
-            self.child_true = DecisionTreeNode(self)
+    def add_children(self):
+        assert self.is_terminal
+        self.child_true = DecisionTreeNode(self)
+        self.child_false = DecisionTreeNode(self)
 
     def assign_identifiers(self, identifier=0):
         self.identifier = identifier
@@ -102,6 +100,29 @@ class DecisionTreeNode:
         identifier = self.child_true.assign_identifiers(identifier+1)
         identifier = self.child_false.assign_identifiers(identifier+1)
         return identifier
+
+    def associate_holes(self, node_hole_info):
+        self.holes = [hole for hole,_,_ in node_hole_info[self.identifier]]
+        if self.is_terminal:
+            return
+        self.child_true.associate_holes(node_hole_info)
+        self.child_false.associate_holes(node_hole_info)
+
+    def associate_assignment(self, assignment):
+        self.hole_assignment = [assignment.hole_options(hole)[0] for hole in self.holes]
+        if self.is_terminal:
+            return
+        self.child_true.associate_assignment(assignment)
+        self.child_false.associate_assignment(assignment)
+
+    def apply_hint(self, subfamily, tree_hint):
+        if self.is_terminal or tree_hint.is_terminal:
+            return
+        for hole_index,option in enumerate(tree_hint.hole_assignment):
+            hole = self.holes[hole_index]
+            subfamily.hole_set_options(hole,[option])
+        self.child_true.apply_hint(subfamily,tree_hint.child_true)
+        self.child_false.apply_hint(subfamily,tree_hint.child_false)
 
 
 class DecisionTree:
@@ -118,7 +139,8 @@ class DecisionTree:
         self.reset()
         for level in range(depth):
             for node in self.collect_terminals():
-                node.add_decision()
+                node.add_children()
+        self.root.assign_identifiers()
 
     def collect_nodes(self, node_condition=None):
         if node_condition is None:
@@ -139,7 +161,6 @@ class DecisionTree:
         return self.collect_nodes(lambda node : not node.is_terminal)
 
     def to_list(self):
-        self.root.assign_identifiers()
         num_nodes = len(self.collect_nodes())
         node_info = [ None for node in range(num_nodes) ]
         for node in self.collect_nodes():
@@ -149,22 +170,18 @@ class DecisionTree:
             node_info[node.identifier] = (parent,child_true,child_false)
         return node_info
 
-    def collect_variables(self):
-        node_to_variable = None
-        nodes = self.collect_nodes()
-        node_to_variable = [len(self.variables) for node in range(len(nodes))]
-        for node in nodes:
-            if node.variable_index is not None:
-                node_to_variable[node.identifier] = node.variable_index
-        return node_to_variable
 
 class MdpQuotient(paynt.quotient.quotient.Quotient):
+
+    # if set, an explicit action simulating a random action selection will be added to each state
+    add_dont_care_action = False
 
     def __init__(self, mdp, specification):
         super().__init__(specification=specification)
         updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         if updated is not None: mdp = updated
-        mdp = payntbind.synthesis.addDontCareAction(mdp)
+        if MdpQuotient.add_dont_care_action:
+            mdp = payntbind.synthesis.addDontCareAction(mdp)
 
         self.quotient_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
@@ -181,7 +198,10 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     '''
     Build the design space and coloring corresponding to the current decision tree.
     '''
-    def build_coloring(self):
+    def set_depth(self, depth):
+        logger.debug(f"synthesizing tree of depth {depth}")
+        self.decision_tree.set_depth(depth)
+
         # logger.debug("building coloring...")
         variables = self.decision_tree.variables
         variable_name = [v.name for v in variables]
@@ -197,24 +217,23 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         self.is_variable_hole = [False for hole in hole_info]
         domain_max = max([len(domain) for domain in variable_domain])
         bound_domain = list(range(domain_max))
+        node_hole_info = [[] for node in self.decision_tree.collect_nodes()]
         for hole,info in enumerate(hole_info):
-            hole_name,hole_type = info
+            node,hole_name,hole_type = info
+            node_hole_info[node].append( (hole,hole_name,hole_type) )
             if hole_type == "__action__":
                 self.is_action_hole[hole] = True
                 option_labels = self.action_labels
             elif hole_type == "__decision__":
                 self.is_decision_hole[hole] = True
                 option_labels = variable_name
-            elif hole_type == "__bound__":
-                self.is_bound_hole[hole] = True
-                option_labels = bound_domain
             else:
                 self.is_variable_hole[hole] = True
                 variable = variable_name.index(hole_type)
                 option_labels = variables[variable].hole_domain
             self.family.add_hole(hole_name, option_labels)
         self.splitter_count = [0] * self.family.num_holes
-
+        self.decision_tree.root.associate_holes(node_hole_info)
 
 
     def build_unsat_result(self):

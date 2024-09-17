@@ -147,8 +147,8 @@ void TerminalNode::createHoles(Family& family) {
     action_hole.createSolverVariable();
 }
 
-void TerminalNode::loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {
-    hole_info[action_hole.hole] = std::make_pair(action_hole.name,"__action__");
+void TerminalNode::loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const {
+    hole_info[action_hole.hole] = std::make_tuple(identifier,action_hole.name,"__action__");
 }
 
 void TerminalNode::createPaths(z3::expr_vector const& substitution_variables) {
@@ -171,9 +171,10 @@ void TerminalNode::loadAllHoles(std::vector<const Hole *> & holes) const {
     holes[action_hole.hole] = &action_hole;
 }
 
-void TerminalNode::loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const {
-    holes.push_back(action_hole.hole);
+void TerminalNode::loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const {
+    step_holes.push_back({action_hole.hole});
 }
+
 
 void TerminalNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
     action_hole.addDomainEncoding(subfamily,solver);
@@ -265,11 +266,11 @@ void InnerNode::createHoles(Family& family) {
     child_false->createHoles(family);
 }
 
-void InnerNode::loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {
-    hole_info[decision_hole.hole] = std::make_pair(decision_hole.name,"__decision__");
+void InnerNode::loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const {
+    hole_info[decision_hole.hole] = std::make_tuple(identifier,decision_hole.name,"__decision__");
     for(uint64_t variable = 0; variable < numVariables(); ++variable) {
         Hole const& hole = variable_hole[variable];
-        hole_info[hole.hole] = std::make_pair(hole.name,variable_name[variable]);
+        hole_info[hole.hole] = std::make_tuple(identifier,hole.name,variable_name[variable]);
     }
     child_true->loadHoleInfo(hole_info);
     child_false->loadHoleInfo(hole_info);
@@ -289,8 +290,9 @@ void InnerNode::createPaths(z3::expr_vector const& substitution_variables) {
         step_true_options.push_back( dv == (int)variable and substitution_variables[variable] <= vv);
         step_false_options.push_back(dv == (int)variable and substitution_variables[variable]  > vv);
     }
-    step_true = z3::mk_or(step_true_options);
-    step_false = z3::mk_or(step_false_options);
+    // mind the negation below
+    step_true = not z3::mk_or(step_true_options);
+    step_false = not z3::mk_or(step_false_options);
 
     // create paths
     for(bool condition: {true,false}) {
@@ -347,13 +349,16 @@ void InnerNode::loadAllHoles(std::vector<const Hole *> & holes) const {
     child_false->loadAllHoles(holes);
 }
 
-void InnerNode::loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const {
+void InnerNode::loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const {
+    std::vector<uint64_t> holes;
     holes.push_back(decision_hole.hole);
     for(Hole const& hole: variable_hole) {
         holes.push_back(hole.hole);
     }
-    getChild(path[depth])->loadPathHoles(path,holes);
+    step_holes.push_back(holes);
+    getChild(path[depth])->loadPathStepHoles(path,step_holes);
 }
+
 
 void InnerNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
     decision_hole.addDomainEncoding(subfamily,solver);

@@ -8,7 +8,7 @@ from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 import paynt.quotient.quotient
 import paynt.quotient.pomdp
-from ..utils.profiler import Timer
+import paynt.utils.timer
 
 import paynt.verification.property
 
@@ -49,7 +49,7 @@ class SynthesizerPomdp:
             self.synthesis_terminate = False
             self.synthesizer = SynthesizerARStorm       # SAYNT only works with abstraction refinement
             if self.storm_control.iteration_timeout is not None:
-                self.saynt_timer = Timer()
+                self.saynt_timer = paynt.utils.timer.Timer()
                 self.synthesizer.saynt_timer = self.saynt_timer
                 self.storm_control.saynt_timer = self.saynt_timer
 

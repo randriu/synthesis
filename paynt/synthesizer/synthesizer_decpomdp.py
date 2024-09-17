@@ -8,8 +8,6 @@ from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
 
 import paynt.quotient.quotient
 import paynt.quotient.decpomdp
-from ..utils.profiler import Timer
-
 import paynt.verification.property
 
 import logging 

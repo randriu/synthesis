@@ -30,7 +30,7 @@ public:
     );
 
     /** For each hole, get a list of name-type pairs.  */
-    std::vector<std::pair<std::string,std::string>> getFamilyInfo();
+    std::vector<std::tuple<uint64_t,std::string,std::string>> getFamilyInfo();
 
     /** Whether a check for an admissible family member is done before choice selection. */
     const bool CHECK_FAMILY_CONSISTENCE = true;

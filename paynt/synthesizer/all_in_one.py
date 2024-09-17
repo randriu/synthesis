@@ -1,7 +1,7 @@
 import stormpy
 import payntbind
 
-import paynt.utils.profiler
+import paynt.utils.timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class AllInOne:
         self.approach = approach
         self.family = family
 
-        build_timer = paynt.utils.profiler.Timer()
+        build_timer = paynt.utils.timer.Timer()
         logger.info(f"building {self.approach} all in one MDP")
 
         build_timer.start()
@@ -41,7 +41,7 @@ class AllInOne:
 
     def synthesize(self, optimum_threshold=None):
 
-        all_in_one_timer = paynt.utils.profiler.Timer()
+        all_in_one_timer = paynt.utils.timer.Timer()
         logger.info(f"starting all in one analysis")
 
         all_in_one_timer.start()

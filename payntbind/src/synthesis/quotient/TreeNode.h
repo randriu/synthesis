@@ -110,7 +110,7 @@ public:
     /** Create all holes and solver variables associated with this node. */
     virtual void createHoles(Family& family) {}
     /** Collect name and type (action,decision, or variable) of each hole. */
-    virtual void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const {}
+    virtual void loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const {}
 
     /** Create a list of paths from this node. */
     virtual void createPaths(z3::expr_vector const& substitution_variables) {}
@@ -120,7 +120,7 @@ public:
     virtual void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {}
     /** TODO */
     virtual void loadAllHoles(std::vector<const Hole *> & holes) const {};
-    virtual void loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const {};
+    virtual void loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const {};
 
     /** Add encoding of hole option in the given family. */
     virtual void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const {}
@@ -165,12 +165,12 @@ public:
     );
 
     void createHoles(Family& family) override;
-    void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
+    void loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const override;
     void createPaths(z3::expr_vector const& substitution_variables) override;
     void createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) override;
     void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const override;
     void loadAllHoles(std::vector<const Hole *> & holes) const override;
-    void loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const override;
+    void loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
     bool isPathEnabledInState(
@@ -215,12 +215,12 @@ public:
     );
 
     void createHoles(Family& family) override;
-    void loadHoleInfo(std::vector<std::pair<std::string,std::string>> & hole_info) const override;
+    void loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const override;
     void createPaths(z3::expr_vector const& substitution_variables) override;
     void createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) override;
     void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const override;
     void loadAllHoles(std::vector<const Hole *> & holes) const override;
-    void loadPathHoles(std::vector<bool> const& path, std::vector<uint64_t> & holes) const override;
+    void loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
     bool isPathEnabledInState(
