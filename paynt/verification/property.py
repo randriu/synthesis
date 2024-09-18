@@ -141,9 +141,7 @@ class Property:
         self.__init__(prop)
 
     def property_copy(self):
-        formula_copy = self.formula.clone()
-        property_copy = stormpy.core.Property(self.name, formula_copy)
-        return property_copy
+        return stormpy.core.Property(self.name, self.property.raw_formula.clone())
 
     def copy(self):
         return Property(self.property_copy())
