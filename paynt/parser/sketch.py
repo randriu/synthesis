@@ -132,7 +132,7 @@ class Sketch:
             logger.warning("WARNING: choice labeling for the quotient is not canonic")
 
         make_rewards_action_based(explicit_quotient)
-        logger.debug("constructed explicit quotient having {} states and {} actions".format(
+        logger.debug("constructed explicit quotient having {} states and {} choices".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
         specification.check()

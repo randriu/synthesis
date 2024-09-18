@@ -133,7 +133,6 @@ protected:
     /** Check whether (in the subfamily) the choice is enabled. */
     bool isChoiceEnabled(Family const& subfamily, uint64_t state, uint64_t choice);
 
-    /** TODO */
     bool PRINT_UNSAT_CORE = false;
     void loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily);
 

@@ -372,8 +372,7 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
         std::istringstream iss(expr.decl().name().str());
         char prefix; iss >> prefix;
         if(prefix == 'h' or prefix == 'z') {
-            // uint64_t hole; iss >> hole;
-            // this->unsat_core.emplace_back(hole,numPaths());
+            // uint64_t hole; iss >> prefix; iss >> hole;
             continue;
         }
         // prefix == 'p'
@@ -481,19 +480,41 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     if(PRINT_UNSAT_CORE)
         std::cout << "-- unsat core start --" << std::endl;
     timers["areChoicesConsistent::3 unsat core analysis"].start();
-    solver.push();
     for(auto [choice,path]: this->unsat_core) {
         const char *label = choice_path_label[choice][path].c_str();
         solver.add(choice_path_expresssion_harm[choice][path], label);
     }
+
+    z3::model model(ctx);
+
+    /*z3::expr_vector harmonizing_variable_domain(ctx);
+    for(uint64_t hole: harmonizing_hole_hint) {
+        harmonizing_variable_domain.push_back(harmonizing_variable == (int)hole);
+    }
+    solver.add(z3::mk_or(harmonizing_variable_domain), "harmonizing_domain");*/
+
+    /*bool harmonizing_hole_found = false;
+    for(uint64_t hole = 0; hole < family.numHoles(); ++hole) {
+        solver.push();
+        solver.add(harmonizing_variable == (int)hole, "harmonizing_domain");
+        if(check()) {
+            harmonizing_hole_found = true;
+            model = solver.get_model();
+            solver.pop();
+            break;
+        }
+        solver.pop();
+    }
+    STORM_LOG_THROW(harmonizing_hole_found, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");*/
+
     solver.add(0 <= harmonizing_variable and harmonizing_variable < family.numHoles(), "harmonizing_domain");
     consistent = check();
     STORM_LOG_THROW(consistent, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");
-    z3::model model = solver.get_model();
-    solver.pop();
-    solver.pop();
+    model = solver.get_model();
 
+    solver.pop();
     uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
+
     getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
     getRoot()->loadHoleAssignmentFromModelHarmonizing(model,hole_options_vector,harmonizing_hole);
     if(hole_options_vector[harmonizing_hole][0] > hole_options_vector[harmonizing_hole][1]) {

@@ -44,12 +44,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             family.analysis_result.can_improve = True
             self.update_optimum(family)
 
-            family_value = family.analysis_result.optimality_result.primary.value
-            if(abs(family_value-assignment_value) < 1e-3):
-                # logger.info(f"harmonization leads to family skip")
-                self.num_harmonization_skip += 1
-                family.analysis_result.can_improve = False
-
 
     def harmonize_inconsistent_scheduler(self, family):
         self.num_harmonizations += 1
@@ -91,22 +85,43 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             return
         self.harmonize_inconsistent_scheduler(family)
 
+    def counters_reset(self):
+        self.num_families_considered = 0
+        self.num_families_skipped = 0
+        self.num_families_model_checked = 0
+        self.num_schedulers_preserved = 0
+        self.num_harmonizations = 0
+        self.num_harmonization_succeeded = 0
+
+    def counters_print(self):
+        logger.info(f"families considered: {self.num_families_considered}")
+        logger.info(f"families skipped by construction: {self.num_families_skipped}")
+        logger.info(f"families with schedulers preserved: {self.num_schedulers_preserved}")
+        logger.info(f"families model checked: {self.num_families_model_checked}")
+        logger.info(f"harmonizations attempted: {self.num_harmonizations}")
+        logger.info(f"harmonizations succeeded: {self.num_harmonization_succeeded}")
+        print()
 
     def synthesize_tree(self, depth:int):
+        self.counters_reset()
         self.quotient.set_depth(depth)
         self.synthesize(keep_optimum=True)
+        self.counters_print()
 
     def synthesize_tree_sequence(self, opt_result_value):
         tree_hint = None
         for depth in range(SynthesizerDecisionTree.tree_depth+1):
+            print()
             self.quotient.set_depth(depth)
             best_assignment_old = self.best_assignment
 
             family = self.quotient.family
             self.explored = 0
+            self.counters_reset()
             self.stat = paynt.synthesizer.statistic.Statistic(self)
-            print()
             self.stat.start(family)
+            self.synthesis_timer = paynt.utils.timer.Timer()
+            self.synthesis_timer.start()
             families = [family]
 
             if SynthesizerDecisionTree.use_tree_hint and tree_hint is not None:
@@ -118,6 +133,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.synthesize_one(family)
             self.stat.finished_synthesis()
             self.stat.print()
+            self.counters_print()
 
             new_assignment_synthesized = self.best_assignment != best_assignment_old
             if new_assignment_synthesized:
@@ -139,20 +155,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 break
 
 
-
     def run(self, optimum_threshold=None):
         paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
         mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         opt_result_value = mc_result.value
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
-
-        self.num_families_considered = 0
-        self.num_families_skipped = 0
-        self.num_families_model_checked = 0
-        self.num_schedulers_preserved = 0
-        self.num_harmonizations = 0
-        self.num_harmonization_succeeded = 0
-        self.num_harmonization_skip = 0
 
         if self.quotient.specification.has_optimality:
             epsilon = 1e-1
@@ -178,28 +185,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         else:
             logger.info("no admissible assignment found")
         time_total = paynt.utils.timer.GlobalTimer.read()
-        logger.info(f"synthesis time: {round(time_total, 2)} s")
-
-        print()
-        logger.info(f"families considered: {self.num_families_considered}")
-        logger.info(f"families skipped by construction: {self.num_families_skipped}")
-        logger.info(f"families with schedulers preserved: {self.num_schedulers_preserved}")
-        logger.info(f"families model checked: {self.num_families_model_checked}")
-        logger.info(f"harmonizations attempted: {self.num_harmonizations}")
-        logger.info(f"harmonizations succeeded: {self.num_harmonization_succeeded}")
-        logger.info(f"harmonizations lead to family skip: {self.num_harmonization_skip}")
+        # logger.info(f"synthesis time: {round(time_total, 2)} s")
 
         print()
         for name,time in self.quotient.coloring.getProfilingInfo():
             time_percent = round(time/time_total*100,1)
             print(f"{name} = {time} s ({time_percent} %)")
-        print()
-
-        # splits_total = sum(self.quotient.splitter_count)
-        # if splits_total == 0: splits_total = 1
-        # splitter_freq = [ round(splits/splits_total*100,1) for splits in self.quotient.splitter_count]
-        # for hole,freq in enumerate(splitter_freq):
-        #     print(self.quotient.family.hole_name(hole),freq)
-        # print()
 
         return self.best_assignment
