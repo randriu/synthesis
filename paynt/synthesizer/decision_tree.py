@@ -59,7 +59,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def verify_family(self, family):
         self.num_families_considered += 1
-
         self.quotient.build(family)
         if family.mdp is None:
             self.num_families_skipped += 1
@@ -84,6 +83,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if not family.analysis_result.can_improve:
             return
         self.harmonize_inconsistent_scheduler(family)
+
 
     def counters_reset(self):
         self.num_families_considered = 0
@@ -110,6 +110,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def synthesize_tree_sequence(self, opt_result_value):
         tree_hint = None
+        global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
+        if global_timeout is None:
+            global_timeout = 300
+        depth_timeout = global_timeout / 2 / SynthesizerDecisionTree.tree_depth
         for depth in range(SynthesizerDecisionTree.tree_depth+1):
             print()
             self.quotient.set_depth(depth)
@@ -120,7 +124,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             self.counters_reset()
             self.stat = paynt.synthesizer.statistic.Statistic(self)
             self.stat.start(family)
-            self.synthesis_timer = paynt.utils.timer.Timer()
+            timeout = depth_timeout if depth < SynthesizerDecisionTree.tree_depth else None
+            self.synthesis_timer = paynt.utils.timer.Timer(timeout)
             self.synthesis_timer.start()
             families = [family]
 
@@ -133,6 +138,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.synthesize_one(family)
             self.stat.finished_synthesis()
             self.stat.print()
+            self.synthesis_timer = None
             self.counters_print()
 
             new_assignment_synthesized = self.best_assignment != best_assignment_old

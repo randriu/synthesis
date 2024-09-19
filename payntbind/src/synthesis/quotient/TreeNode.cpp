@@ -135,10 +135,13 @@ const TreeNode *TreeNode::getNodeOfPath(std::vector<bool> const& path, uint64_t 
 
 TerminalNode::TerminalNode(
         uint64_t identifier, z3::context & ctx,
-        std::vector<std::string> const& variable_name, std::vector<std::vector<int64_t>> const& variable_domain,
-        uint64_t num_actions
-) : TreeNode(identifier,ctx,variable_name,variable_domain), num_actions(num_actions), action_hole(false,ctx),
-    action_expr(ctx), action_expr_harm(ctx) {}
+        std::vector<std::string> const& variable_name,
+        std::vector<std::vector<int64_t>> const& variable_domain,
+        uint64_t num_actions,
+        z3::expr const& action_substitution_variable
+) : TreeNode(identifier,ctx,variable_name,variable_domain),
+    num_actions(num_actions), action_substitution_variable(action_substitution_variable),
+    action_hole(false,ctx), action_expr(ctx), action_expr_harm(ctx) {}
 
 void TerminalNode::createHoles(Family& family) {
     action_hole.hole = family.addHole(num_actions);
@@ -151,20 +154,26 @@ void TerminalNode::loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std:
     hole_info[action_hole.hole] = std::make_tuple(identifier,action_hole.name,"__action__");
 }
 
-void TerminalNode::createPaths(z3::expr_vector const& substitution_variables) {
-    action_expr = action_hole.solver_variable == substitution_variables.back();
+void TerminalNode::createPaths(z3::expr const& harmonizing_variable) {
     paths.push_back({true});
-}
-
-void TerminalNode::createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) {
-    z3::expr const& hv = harmonizing_variable;
-    int hole = (int)action_hole.hole;
-    z3::expr eh = action_hole.solver_variable_harm == substitution_variables.back();
-    action_expr_harm = (hv != hole and action_expr) or (hv == hole and ((not action_expr and eh) or (action_expr and not eh)));
+    action_expr = action_hole.solver_variable == action_substitution_variable;
+    action_expr_harm = action_expr or (harmonizing_variable == (int)action_hole.hole and action_hole.solver_variable_harm == action_substitution_variable);
 }
 
 void TerminalNode::loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {
     expression.push_back(action_expr);
+}
+
+void TerminalNode::loadPathExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & expression) const {
+    expression.push_back(action_expr_harm);
+}
+
+void TerminalNode::substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {
+    //
+}
+
+z3::expr TerminalNode::substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const {
+    return action_hole.solver_variable == (int)action or (harmonizing_variable == (int)action_hole.hole and action_hole.solver_variable_harm == (int)action);
 }
 
 void TerminalNode::loadAllHoles(std::vector<const Hole *> & holes) const {
@@ -217,8 +226,10 @@ void TerminalNode::unsatCoreAnalysis(
 InnerNode::InnerNode(
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
-        std::vector<std::vector<int64_t>> const& variable_domain
-) : TreeNode(identifier,ctx,variable_name,variable_domain), decision_hole(false,ctx),
+        std::vector<std::vector<int64_t>> const& variable_domain,
+        z3::expr_vector const& state_substitution_variables
+) : TreeNode(identifier,ctx,variable_name,variable_domain),
+    decision_hole(false,ctx), state_substitution_variables(state_substitution_variables),
     step_true(ctx), step_false(ctx), step_true_harm(ctx), step_false_harm(ctx) {}
 
 void InnerNode::createHoles(Family& family) {
@@ -276,23 +287,10 @@ void InnerNode::loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::st
     child_false->loadHoleInfo(hole_info);
 }
 
-void InnerNode::createPaths(z3::expr_vector const& substitution_variables) {
-    child_true->createPaths(substitution_variables);
-    child_false->createPaths(substitution_variables);
+void InnerNode::createPaths(z3::expr const& harmonizing_variable) {
 
-    // create steps
-    z3::expr_vector step_true_options(ctx);
-    z3::expr_vector step_false_options(ctx);
-    for(uint64_t variable = 0; variable < numVariables(); ++variable) {
-        z3::expr const& dv = decision_hole.solver_variable;
-        z3::expr const& vv = variable_hole[variable].solver_variable;
-        
-        step_true_options.push_back( dv == (int)variable and substitution_variables[variable] <= vv);
-        step_false_options.push_back(dv == (int)variable and substitution_variables[variable]  > vv);
-    }
-    // mind the negation below
-    step_true = not z3::mk_or(step_true_options);
-    step_false = not z3::mk_or(step_false_options);
+    child_true->createPaths(harmonizing_variable);
+    child_false->createPaths(harmonizing_variable);
 
     // create paths
     for(bool condition: {true,false}) {
@@ -304,33 +302,74 @@ void InnerNode::createPaths(z3::expr_vector const& substitution_variables) {
             paths.push_back(path);
         }
     }
-}
-
-void InnerNode::createPathsHarmonizing(z3::expr_vector const& substitution_variables, z3::expr const& harmonizing_variable) {
-    child_true->createPathsHarmonizing(substitution_variables, harmonizing_variable);
-    child_false->createPathsHarmonizing(substitution_variables, harmonizing_variable);
 
     // create steps
     z3::expr_vector step_true_options(ctx);
     z3::expr_vector step_false_options(ctx);
-    z3::expr const& hv = harmonizing_variable;
     for(uint64_t variable = 0; variable < numVariables(); ++variable) {
-        Hole d = decision_hole;
-        z3::expr de = d.solver_variable == (int)variable;
-        z3::expr deh = d.solver_variable_harm == (int)variable;
-        z3::expr expr_decision = (hv != (int)d.hole and de) or (hv == (int)d.hole and ((not de and deh) or (de and not deh)) );
-
-        Hole v = variable_hole[variable];
-        z3::expr ve =  substitution_variables[variable] <= v.solver_variable;
-        z3::expr veh = substitution_variables[variable] <= v.solver_variable_harm;
-        z3::expr expr_true =  (hv != (int)v.hole and ve)     or (hv == (int)v.hole and ((not ve and veh) or (ve and not veh)) );
-        z3::expr expr_false = (hv != (int)v.hole and not ve) or (hv == (int)v.hole and ((ve and not veh) or (not ve and veh)) );
-
-        step_true_options.push_back(expr_decision and expr_true);
-        step_false_options.push_back(expr_decision and expr_false);        
+        z3::expr const& dv = decision_hole.solver_variable;
+        z3::expr const& vv = variable_hole[variable].solver_variable;
+        // mind the negation below
+        step_true_options.push_back( not(dv == (int)variable and state_substitution_variables[variable] <= vv));
+        step_false_options.push_back(not(dv == (int)variable and state_substitution_variables[variable]  > vv));
     }
-    step_true_harm = z3::mk_or(step_true_options);
-    step_false_harm = z3::mk_or(step_false_options);
+    step_true = z3::mk_and(step_true_options);
+    step_false = z3::mk_and(step_false_options);
+
+    // create steps (harmonizing)
+    z3::expr_vector step_true_harm_options(ctx);
+    z3::expr_vector step_false_harm_options(ctx);
+
+    z3::expr_vector what(ctx); what.push_back(decision_hole.solver_variable);
+    z3::expr_vector with(ctx); with.push_back(decision_hole.solver_variable_harm);
+    z3::expr dtrue =  harmonizing_variable == (int)decision_hole.hole and step_true.substitute(what,with);
+    z3::expr dfalse = harmonizing_variable == (int)decision_hole.hole and step_false.substitute(what,with);
+
+    for(uint64_t var = 0; var < numVariables(); ++var) {
+        Hole const& hole = variable_hole[var];
+        z3::expr const& dv = decision_hole.solver_variable;
+        z3::expr const& vv = variable_hole[var].solver_variable;
+        z3::expr const& vvh = variable_hole[var].solver_variable_harm;
+        step_true_harm_options.push_back(  not(dv == (int)var and state_substitution_variables[var] <= vv) or (harmonizing_variable == (int)hole.hole and not(state_substitution_variables[var] <= vvh) ) );
+        step_false_harm_options.push_back( not(dv == (int)var and state_substitution_variables[var]  > vv) or (harmonizing_variable == (int)hole.hole and not(state_substitution_variables[var] >  vvh) ) );
+    }
+
+    step_true_harm = dtrue or z3::mk_and(step_true_harm_options);
+    step_false_harm = dfalse or z3::mk_and(step_false_harm_options);
+
+    /*step_true_harm_options.push_back(step_true);
+    step_false_harm_options.push_back(step_false);
+
+    z3::expr_vector what(ctx); what.push_back(decision_hole.solver_variable);
+    z3::expr_vector with(ctx); with.push_back(decision_hole.solver_variable_harm);
+    step_true_harm_options.push_back(harmonizing_variable == (int)decision_hole.hole and step_true.substitute(what,with));
+    step_false_harm_options.push_back(harmonizing_variable == (int)decision_hole.hole and step_false.substitute(what,with));
+    for(uint64_t variable = 0; variable < numVariables(); ++variable) {
+        Hole const& hole = variable_hole[variable];
+
+        // create steps
+        z3::expr_vector step_true_options(ctx);
+        z3::expr_vector step_false_options(ctx);
+        step_true_options.push_back(harmonizing_variable == (int)hole.hole);
+        step_false_options.push_back(harmonizing_variable == (int)hole.hole);
+        for(uint64_t var = 0; var < numVariables(); ++var) {
+            z3::expr const& dv = decision_hole.solver_variable;
+            z3::expr const& vv = variable_hole[var].solver_variable;
+            z3::expr const& vvh = variable_hole[var].solver_variable_harm;
+            // mind the negation below
+            if(var != variable) {
+                step_true_options.push_back( not(dv == (int)var and substitution_variables[var] <= vv));
+                step_false_options.push_back(not(dv == (int)var and substitution_variables[var]  > vv));
+            } else {
+                step_true_options.push_back( not(substitution_variables[var] <= vvh));
+                step_false_options.push_back(not(substitution_variables[var]  > vvh));
+            }
+        }
+        step_true_harm_options.push_back(z3::mk_and(step_true_options));
+        step_false_harm_options.push_back(z3::mk_and(step_false_options));
+    }
+    step_true_harm = z3::mk_or(step_true_harm_options);
+    step_false_harm = z3::mk_or(step_false_harm_options);*/
 }
 
 void InnerNode::loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {
@@ -339,6 +378,26 @@ void InnerNode::loadPathExpression(std::vector<bool> const& path, z3::expr_vecto
     expression.push_back(step);
     getChild(step_to_true_child)->loadPathExpression(path,expression);
 }
+
+void InnerNode::loadPathExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & expression) const {
+    bool step_to_true_child = path[depth];
+    z3::expr const& step = step_to_true_child ? step_true_harm : step_false_harm;
+    expression.push_back(step);
+    getChild(step_to_true_child)->loadPathExpressionHarmonizing(path,expression);
+}
+
+void InnerNode::substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {
+    bool step_to_true_child = path[depth];
+    z3::expr step = step_to_true_child ? step_true_harm : step_false_harm;
+    substituted.push_back(step.substitute(state_substitution_variables,state_valuation));
+    getChild(step_to_true_child)->substitutePrefixExpressionHarmonizing(path,state_valuation,substituted);
+}
+
+z3::expr InnerNode::substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const {
+    return getChild(path[depth])->substituteActionExpressionHarmonizing(path,action,harmonizing_variable);
+}
+
+
 
 void InnerNode::loadAllHoles(std::vector<const Hole *> & holes) const {
     holes[decision_hole.hole] = &decision_hole;
