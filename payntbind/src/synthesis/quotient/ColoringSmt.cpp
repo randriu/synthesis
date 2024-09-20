@@ -119,36 +119,12 @@ ColoringSmt<ValueType>::ColoringSmt(
         state_substitution_expr.push_back(substitution_expr);
     }
 
-    // create choice substitutions
-    // std::vector<z3::expr_vector> choice_action_substitution_expr;
-    std::vector<z3::expr_vector> choice_substitution_expr;
-    for(uint64_t state = 0; state < numStates(); ++state) {
-        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            z3::expr_vector substitution_expr(ctx);
-            for(uint64_t value: state_valuation[state]) {
-                substitution_expr.push_back(ctx.int_val(value));
-            }
-            z3::expr action_substitution_expr = ctx.int_val(choice_to_action[choice]);
-            substitution_expr.push_back(action_substitution_expr);
-            choice_substitution_expr.push_back(substitution_expr);
-        }
-    }
-
-    // collect all path expressions
-    std::vector<z3::expr_vector> path_step_expression;
-    z3::expr_vector path_expression(ctx);
-    for(std::vector<bool> const& path: getRoot()->paths) {
-        z3::expr_vector step_expression(ctx);
-        getRoot()->loadPathExpression(path,step_expression);
-        path_step_expression.push_back(step_expression);
-        path_expression.push_back(z3::mk_or(step_expression));
-        const TreeNode *node = getRoot()->getNodeOfPath(path,path.size()-1);
-        const TerminalNode * terminal = dynamic_cast<const TerminalNode *>(node);
-        path_action_hole.push_back(terminal->action_hole.hole);
-    }
-
     // create choice colors
     timers["ColoringSmt:: create choice colors"].start();
+
+    for(std::vector<bool> const& path: getRoot()->paths) {
+        path_action_hole.push_back(getRoot()->getPathActionHole(path));
+    }
 
     choice_path_label.resize(numChoices());
     for(uint64_t state = 0; state < numStates(); ++state) {
@@ -160,31 +136,31 @@ ColoringSmt<ValueType>::ColoringSmt(
         }
     }
 
-    /*std::vector<z3::expr_vector> state_path_expresssion;
+    std::vector<z3::expr_vector> state_path_expression;
     for(uint64_t state = 0; state < numStates(); ++state) {
-        z3::expr_vector path_evaluated(ctx);
+        state_path_expression.push_back(z3::expr_vector(ctx));
         for(uint64_t path = 0; path < numPaths(); ++path) {
-            path_evaluated.push_back(path_expression[path].substitute(state_substitution_variables,state_substitution_expr[state]));
+            z3::expr_vector substituted(ctx);
+            getRoot()->substitutePrefixExpression(getRoot()->paths[path], state_substitution_expr[state], substituted);
+            state_path_expression[state].push_back(z3::mk_or(substituted));
         }
-        state_path_expresssion.push_back(path_evaluated);
+    }
+    std::vector<z3::expr_vector> action_path_expression;
+    for(uint64_t action = 0; action < num_actions; ++action) {
+        action_path_expression.push_back(z3::expr_vector(ctx));
+        for(uint64_t path = 0; path < numPaths(); ++path) {
+            z3::expr substituted = getRoot()->substituteActionExpression(getRoot()->paths[path], action);
+            action_path_expression[action].push_back(substituted);
+        }
     }
 
     for(uint64_t state = 0; state < numStates(); ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            z3::expr_vector path_evaluated(ctx);
+            choice_path_expresssion.push_back(z3::expr_vector(ctx));
+            uint64_t action = choice_to_action[choice];
             for(uint64_t path = 0; path < numPaths(); ++path) {
-                path_evaluated.push_back(state_path_expresssion[state][path].substitute(action_substitution_variables,choice_action_substitution_expr[choice]));
+                choice_path_expresssion[choice].push_back(state_path_expression[state][path] or action_path_expression[action][path]);
             }
-            choice_path_expresssion.push_back(path_evaluated);
-        }
-    }*/
-    for(uint64_t state = 0; state < numStates(); ++state) {
-        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            z3::expr_vector path_evaluated(ctx);
-            for(uint64_t path = 0; path < numPaths(); ++path) {
-                path_evaluated.push_back(path_expression[path].substitute(choice_substitution_variables,choice_substitution_expr[choice]));
-            }
-            choice_path_expresssion.push_back(path_evaluated);
         }
     }
     timers["ColoringSmt:: create choice colors"].stop();

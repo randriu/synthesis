@@ -105,26 +105,26 @@ public:
     /** Retrieve true child of this node if the condition holds, get false child otherwise. */
     std::shared_ptr<TreeNode> getChild(bool condition) const;
     /** Execute the path and the corresponding node of the tree. */
-    const TreeNode *getNodeOfPath(std::vector<bool> const& path, uint64_t step) const;
+    // const TreeNode *getNodeOfPath(std::vector<bool> const& path, uint64_t step) const;
 
     /** Create all holes and solver variables associated with this node. */
     virtual void createHoles(Family& family) {}
-    /** Collect name and type (action,decision, or variable) of each hole. */
+    /** Collect name and type (action, decision, or variable) of each hole. */
     virtual void loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const {}
 
     /** Create a list of paths from this node. */
     virtual void createPaths(z3::expr const& harmonizing_variable) {}
+    /** Retrieve action hole associated with the path. */
+    virtual uint64_t getPathActionHole(std::vector<bool> const& path) {return 0;}
 
-    /** Create expression for a path. */
-    virtual void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const {}
-    /** Create expression for a harmonizing path. */
-    virtual void loadPathExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & expression) const {}
-    /** TODO */
-    virtual void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {}
-    virtual z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const { return z3::expr(ctx); }
-
-    virtual void loadAllHoles(std::vector<const Hole *> & holes) const {};
-    virtual void loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const {};
+    /** Add a step expression evaluated for a given state valuation. */
+    virtual void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {};
+    /** Add an action expression evaluated for a given state valuation. */
+    virtual z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const {return z3::expr(ctx);};
+    /** Add a step expression evaluated for a given state valuation (harmonizing). */
+    virtual void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {};
+    /** Add an action expression evaluated for a given state valuation (harmonizing). */
+    virtual z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const {return z3::expr(ctx);};
 
     /** Add encoding of hole option in the given family. */
     virtual void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const {}
@@ -173,14 +173,12 @@ public:
     void createHoles(Family& family) override;
     void loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const override;
     void createPaths(z3::expr const& harmonizing_variable) override;
+    uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const override;
-    void loadPathExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & expression) const override;
+    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
+    z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const override;
     void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const override;
-
-    void loadAllHoles(std::vector<const Hole *> & holes) const override;
-    void loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
     bool isPathEnabledInState(
@@ -229,14 +227,12 @@ public:
     void createHoles(Family& family) override;
     void loadHoleInfo(std::vector<std::tuple<uint64_t,std::string,std::string>> & hole_info) const override;
     void createPaths(z3::expr const& harmonizing_variable) override;
+    uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void loadPathExpression(std::vector<bool> const& path, z3::expr_vector & expression) const override;
-    void loadPathExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & expression) const override;
+    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
+    z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const override;
     void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const override;
-
-    void loadAllHoles(std::vector<const Hole *> & holes) const override;
-    void loadPathStepHoles(std::vector<bool> const& path, std::vector<std::vector<uint64_t>> & step_holes) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
     bool isPathEnabledInState(
