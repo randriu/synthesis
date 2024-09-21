@@ -182,6 +182,10 @@ class StormPOMDPControl:
     def interactive_storm_resume(self, storm_timeout):
         control_thread = Thread(target=self.interactive_control, args=(belmc, False, storm_timeout,))
 
+        if self.storm_terminated:
+            logger.info("Storm already terminated")
+            return
+        
         logger.info("Interactive Storm resumed")
         control_thread.start()
 
@@ -243,6 +247,7 @@ class StormPOMDPControl:
 
         sleep(storm_timeout)
         if self.storm_terminated:
+            logger.info("Storm terminated")
             return
         logger.info("Pausing Storm")
         belmc.pause_unfolding()
