@@ -104,7 +104,7 @@ ColoringSmt<ValueType>::ColoringSmt(
                     break;
                 }
             }
-            STORM_LOG_THROW(domain_option_found, storm::exceptions::UnexpectedException, "Hole option not found.");
+            STORM_LOG_THROW(domain_option_found, storm::exceptions::UnexpectedException, "hole option not found.");
         }
     }
 
