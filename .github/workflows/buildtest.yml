@@ -57,7 +57,7 @@ jobs:
       - name: Git clone
         uses: actions/checkout@v4
       - name: Build paynt image from Dockerfile
-        run: docker build -t ${{ matrix.buildType.imageName }}:${{matrix.buildType.dockerTag}} . --build-arg base_image=${{matrix.buildType.imageBase}} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{matrix.buildType.dockerTag}} . --build-arg base_image=${{matrix.buildType.baseImage}} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
       - name: Login into docker
         # Only login if using mdp on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu'
