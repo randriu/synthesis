@@ -403,10 +403,9 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     components.transitionMatrix =  builder.build();
     auto rewardModels = synthesis::translateRewardModels(model,translated_to_original_choice,translated_choice_mask);
     for(auto & [name,reward_model]: rewardModels) {
-        std::cout << "processing " << name  << std::endl;
         std::vector<ValueType> & choice_reward = reward_model.getStateActionRewardVector();
-        ValueType reward_sum = 0;
         for(uint64_t state = 0; state < num_states; ++state) {
+            ValueType reward_sum = 0;
             uint64_t new_translated_choice = row_groups_new[state+1]-1;
             uint64_t state_num_choices = new_translated_choice-row_groups_new[state];
             for(uint64_t translated_choice = row_groups_new[state]; translated_choice < new_translated_choice; ++translated_choice) {

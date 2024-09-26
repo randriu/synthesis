@@ -45,7 +45,7 @@ jobs:
         run: docker push ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
 
   deploy-mdp:
-    name: Deploy on latest (mdp) (${{ matrix.buildType.name }})
+    name: Deploy on branch (mdp) (${{ matrix.buildType.name }})
     runs-on: ubuntu-latest
     strategy:
       matrix:

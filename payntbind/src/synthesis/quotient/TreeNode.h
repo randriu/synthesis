@@ -118,7 +118,7 @@ public:
     virtual uint64_t getPathActionHole(std::vector<bool> const& path) {return 0;}
 
     /** Add a step expression evaluated for a given state valuation. */
-    virtual void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {};
+    virtual void substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const {};
     /** Add an action expression evaluated for a given state valuation. */
     virtual z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const {return z3::expr(ctx);};
     /** Add a step expression evaluated for a given state valuation (harmonizing). */
@@ -175,7 +175,7 @@ public:
     void createPaths(z3::expr const& harmonizing_variable) override;
     uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
+    void substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const override;
     void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const override;
@@ -229,7 +229,7 @@ public:
     void createPaths(z3::expr const& harmonizing_variable) override;
     uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
+    void substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const override;
     void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const override;

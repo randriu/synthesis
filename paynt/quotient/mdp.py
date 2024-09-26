@@ -180,8 +180,10 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         super().__init__(specification=specification)
         updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         if updated is not None: mdp = updated
+        # action_labels, _ payntbind.synthesis.extractActionLabels(mdp)
         if MdpQuotient.add_dont_care_action:
             mdp = payntbind.synthesis.addDontCareAction(mdp)
+        # stormpy.export_to_drn(mdp, sketch_path+".drn")
 
         self.quotient_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)

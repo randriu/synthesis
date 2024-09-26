@@ -25,7 +25,6 @@ ColoringSmt<ValueType>::ColoringSmt(
     solver(ctx), harmonizing_variable(ctx), one_consistency_check(one_consistency_check) {
 
     timers[__FUNCTION__].start();
-    // std::cout << __FUNCTION__ << " start" << std::endl;
 
     for(uint64_t state = 0; state < numStates(); ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
@@ -109,7 +108,7 @@ ColoringSmt<ValueType>::ColoringSmt(
         }
     }
 
-    // create choice substitutions
+    // create state substitutions
     std::vector<z3::expr_vector> state_substitution_expr;
     for(uint64_t state = 0; state < numStates(); ++state) {
         z3::expr_vector substitution_expr(ctx);
@@ -141,7 +140,8 @@ ColoringSmt<ValueType>::ColoringSmt(
         state_path_expression.push_back(z3::expr_vector(ctx));
         for(uint64_t path = 0; path < numPaths(); ++path) {
             z3::expr_vector substituted(ctx);
-            getRoot()->substitutePrefixExpression(getRoot()->paths[path], state_substitution_expr[state], substituted);
+            // getRoot()->substitutePrefixExpression(getRoot()->paths[path], state_substitution_expr[state], substituted);
+            getRoot()->substitutePrefixExpression(getRoot()->paths[path], state_valuation[state], substituted);
             state_path_expression[state].push_back(z3::mk_or(substituted));
         }
     }
@@ -415,12 +415,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     timers[__FUNCTION__].start();
     std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
 
-    if(one_consistency_check) {
-        solver.pop();
-        timers[__FUNCTION__].stop();
-        return std::make_pair(false,hole_options_vector);
-    }
-
     timers["areChoicesConsistent::1 is scheduler consistent?"].start();
     solver.push();
     getRoot()->addFamilyEncoding(subfamily,solver);
@@ -432,7 +426,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
             solver.add(choice_path_expresssion[choice][path], label);
         }
     }
-    // std::cout << "(1) added choices: " << choices.getNumberOfSetBits() << std::endl;
     bool consistent = check();
     timers["areChoicesConsistent::1 is scheduler consistent?"].stop();
 
@@ -444,6 +437,14 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         timers[__FUNCTION__].stop();
         return std::make_pair(true,hole_options_vector);
     }
+
+    if(one_consistency_check) {
+        solver.pop();
+        solver.pop();
+        timers[__FUNCTION__].stop();
+        return std::make_pair(false,hole_options_vector);
+    }
+
     solver.pop();
 
     timers["areChoicesConsistent::2 better unsat core"].start();
@@ -539,95 +540,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
 
 
 
-template<typename ValueType>
-std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistentUseHint(BitVector const& choices, Family const& subfamily, std::vector<std::pair<uint64_t,uint64_t>> const& unsat_core_hint) {
-    timers[__FUNCTION__].start();
-    std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
-
-    timers["areChoicesConsistent::2 better unsat core"].start();
-    solver.push();
-    getRoot()->addFamilyEncoding(subfamily,solver);
-    solver.push();
-    std::queue<uint64_t> unexplored_states;
-    BitVector state_reached(numStates(),false);
-    for(auto [choice,path]: unsat_core_hint) {
-        uint64_t state = choice_to_state[choice];
-        if(not state_reached[state]) {
-            unexplored_states.push(state);
-            state_reached.set(state,true);
-        }
-    }
-    if(not state_reached[initial_state]) {
-        unexplored_states.push(initial_state);
-        state_reached.set(initial_state,true);
-    }
-    bool consistent = true;
-    while(not unexplored_states.empty()) {
-        uint64_t state = unexplored_states.front(); unexplored_states.pop();
-        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            if(not choices[choice]) {
-                continue;
-            }
-            for(uint64_t path: state_path_enabled[state]) {
-                const char *label = choice_path_label[choice][path].c_str();
-                solver.add(choice_path_expresssion[choice][path], label);
-            }
-            consistent = check();
-            if(not consistent) {
-                break;
-            }
-            for(uint64_t dst: choice_destinations[choice]) {
-                if(not state_reached[dst]) {
-                    unexplored_states.push(dst);
-                    state_reached.set(dst,true);
-                }
-            }
-            break;
-        }
-    }
-    timers["areChoicesConsistent::2 better unsat core"].stop();
-
-    if(consistent) {
-        z3::model model = solver.get_model();
-        solver.pop();
-        solver.pop();
-        getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
-        timers[__FUNCTION__].stop();
-        return std::make_pair(true,hole_options_vector);
-    }
-    z3::expr_vector unsat_core_expr = solver.unsat_core();
-    solver.pop();
-    loadUnsatCore(unsat_core_expr,subfamily);
-
-    if(PRINT_UNSAT_CORE)
-        std::cout << "-- unsat core start --" << std::endl;
-    timers["areChoicesConsistent::3 unsat core analysis"].start();
-    solver.push();
-    solver.add(0 <= harmonizing_variable and harmonizing_variable < family.numHoles(), "harmonizing_domain");
-    for(auto [choice,path]: this->unsat_core) {
-        solver.add(choice_path_expresssion_harm[choice][path]);
-    }
-    consistent = check();
-    STORM_LOG_THROW(consistent, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");
-    z3::model model = solver.get_model();
-    solver.pop();
-    solver.pop();
-
-    uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
-    getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
-    getRoot()->loadHoleAssignmentFromModelHarmonizing(model,hole_options_vector,harmonizing_hole);
-    if(hole_options_vector[harmonizing_hole][0] > hole_options_vector[harmonizing_hole][1]) {
-        uint64_t tmp = hole_options_vector[harmonizing_hole][0];
-        hole_options_vector[harmonizing_hole][0] = hole_options_vector[harmonizing_hole][1];
-        hole_options_vector[harmonizing_hole][1] = tmp;
-    }
-    if(PRINT_UNSAT_CORE)
-        std::cout << "-- unsat core end --" << std::endl;
-    timers["areChoicesConsistent::3 unsat core analysis"].stop();
-
-    timers[__FUNCTION__].stop();
-    return std::make_pair(false,hole_options_vector);
-}
 
 
 template class ColoringSmt<>;

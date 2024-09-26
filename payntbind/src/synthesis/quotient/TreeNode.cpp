@@ -165,7 +165,7 @@ uint64_t TerminalNode::getPathActionHole(std::vector<bool> const& path) {
 }
 
 
-void TerminalNode::substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {
+void TerminalNode::substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const {
     //
 }
 
@@ -374,10 +374,29 @@ uint64_t InnerNode::getPathActionHole(std::vector<bool> const& path) {
 }
 
 
-void InnerNode::substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {
+void InnerNode::substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const {
     bool step_to_true_child = path[depth];
-    z3::expr step = step_to_true_child ? step_true : step_false;
-    substituted.push_back(step.substitute(state_substitution_variables,state_valuation));
+    // z3::expr step = step_to_true_child ? step_true : step_false;
+    // substituted.push_back(step.substitute(state_substitution_variables,state_valuation));
+
+    z3::expr_vector step_options(ctx);
+    z3::expr const& dv = decision_hole.solver_variable;
+    for(uint64_t variable = 0; variable < numVariables(); ++variable) {
+        z3::expr const& vv = variable_hole[variable].solver_variable;
+        // mind the negation below
+        if(step_to_true_child) {
+            if(state_valuation[variable] > 0) {
+                // not (Vi = vj => sj<=xj)
+                step_options.push_back( dv == ctx.int_val(variable) and not(ctx.int_val(state_valuation[variable]) <= vv));
+            }
+        } else {
+            if(state_valuation[variable] < variable_domain[variable].size()-1) {
+                step_options.push_back( dv == ctx.int_val(variable) and not(ctx.int_val(state_valuation[variable])  > vv));
+            }
+        }
+    }
+    substituted.push_back(z3::mk_or(step_options));
+
     getChild(step_to_true_child)->substitutePrefixExpression(path,state_valuation,substituted);
 }
 

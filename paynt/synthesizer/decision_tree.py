@@ -82,7 +82,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.check_specification_for_mdp(family)
         if not family.analysis_result.can_improve:
             return
-        self.harmonize_inconsistent_scheduler(family)
+        # self.harmonize_inconsistent_scheduler(family)
 
 
     def counters_reset(self):
@@ -115,6 +115,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             global_timeout = 300
         depth_timeout = global_timeout / 2 / SynthesizerDecisionTree.tree_depth
         for depth in range(SynthesizerDecisionTree.tree_depth+1):
+            print()
+            print("DEPTH = ", depth)
             print()
             self.quotient.set_depth(depth)
             best_assignment_old = self.best_assignment
