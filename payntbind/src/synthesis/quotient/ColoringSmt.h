@@ -49,9 +49,6 @@ public:
     std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent(
         BitVector const& choices, Family const& subfamily
     );
-    std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistentUseHint(
-        BitVector const& choices, Family const& subfamily, std::vector<std::pair<uint64_t,uint64_t>> const& unsat_core_hint
-    );
 
     std::map<std::string,storm::utility::Stopwatch> timers;
     std::vector<std::pair<std::string,double>> getProfilingInfo() {

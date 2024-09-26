@@ -16,6 +16,9 @@ class FamilyEvaluation:
 
 class Synthesizer:
 
+    # base filename (i.e. without extension) to export synthesis result
+    export_synthesis_filename_base = None
+
     @staticmethod
     def choose_synthesizer(quotient, method, fsc_synthesis=False, storm_control=None):
 
