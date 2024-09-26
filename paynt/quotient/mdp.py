@@ -188,11 +188,9 @@ class DecisionTreeNode:
 
 class DecisionTree:
 
-    def __init__(self, quotient, variable_name, state_valuations):
+    def __init__(self, quotient, variables, state_valuations):
         self.quotient = quotient
         self.state_valuations = state_valuations
-        variables = [Variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
-        variables = [v for v in variables if len(v.domain) > 1]
         self.variables = variables
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
         self.reset()
@@ -276,8 +274,11 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             valuation = json.loads(str(sv.get_json(state)))
             valuation = [valuation[var_name] for var_name in variable_name]
             state_valuations.append(valuation)
-        self.decision_tree = DecisionTree(self,variable_name,state_valuations)
+        self.state_valuations = state_valuations
+        variables = [Variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
+        self.variables = [v for v in variables if len(v.domain) > 1]
 
+        self.decision_tree = None
         self.coloring = None
         self.family = None
         self.splitter_count = None
@@ -285,11 +286,12 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def decide(self, node, var_name):
         node.set_variable_by_name(var_name,self.decision_tree)
 
-    '''
-    Build the design space and coloring corresponding to the current decision tree.
-    '''
-    def set_depth(self, depth):
+    def reset_tree(self, depth):
+        '''
+        Rebuild the decision tree template, the design space and the coloring.
+        '''
         logger.debug(f"synthesizing tree of depth {depth}")
+        self.decision_tree = DecisionTree(self,self.variables,self.state_valuations)
         self.decision_tree.set_depth(depth)
 
         # logger.debug("building coloring...")

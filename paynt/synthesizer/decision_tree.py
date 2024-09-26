@@ -118,7 +118,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def synthesize_tree(self, depth:int):
         self.counters_reset()
-        self.quotient.set_depth(depth)
+        self.quotient.reset_tree(depth)
         self.best_assignment = self.best_assignment_value = None
         self.synthesize(keep_optimum=True)
         if self.best_assignment is not None:
@@ -135,7 +135,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if global_timeout is None: global_timeout = 1800
         depth_timeout = global_timeout / 2 / SynthesizerDecisionTree.tree_depth
         for depth in range(SynthesizerDecisionTree.tree_depth+1):
-            self.quotient.set_depth(depth)
+            print()
+            self.quotient.reset_tree(depth)
             best_assignment_old = self.best_assignment
 
             family = self.quotient.family
@@ -150,7 +151,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
             if SynthesizerDecisionTree.use_tree_hint and self.best_tree is not None:
                 subfamily = family.copy()
-                self.quotient.decision_tree.root.apply_hint(subfamily,self.best_tree)
+                self.quotient.decision_tree.root.apply_hint(subfamily,self.best_tree.root)
                 families = [subfamily,family]
 
             for family in families:
@@ -170,12 +171,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                     result = dtmc.check_specification(self.quotient.specification)
                     logger.info(f"double-checking specification satisfiability: {result}")
 
+                self.best_tree = self.quotient.decision_tree
+                self.best_tree.root.associate_assignment(self.best_assignment)
+                self.best_tree_value = self.best_assignment_value
+
                 if abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3:
                     break
-
-                self.best_tree = self.quotient.decision_tree.root
-                self.best_tree.associate_assignment(self.best_assignment)
-                self.best_tree_value = self.best_assignment_value
 
             if self.resource_limit_reached():
                 break
