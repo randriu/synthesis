@@ -2,8 +2,8 @@
 # command-line arguments can be specified e.g. as follows: --build-arg no_threads=8
 
 # base image
-ARG BASE_IMG=movesrwth/stormpy:ci
-FROM $BASE_IMG
+ARG base_image=movesrwth/stormpy:ci
+FROM $base_image
 
 # additional arguments for compiling payntbind
 ARG setup_args=""
