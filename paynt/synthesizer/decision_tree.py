@@ -209,7 +209,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.best_tree = self.quotient.decision_tree
                 self.best_tree.root.associate_assignment(self.best_assignment)
                 self.best_tree_value = self.best_assignment_value
-                if abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-4:
+                if consistent:
+                    break
+                if not disable_counterexamples and abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-4:
                     break
 
             if self.resource_limit_reached():
