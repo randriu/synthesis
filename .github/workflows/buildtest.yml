@@ -50,14 +50,14 @@ jobs:
     strategy:
       matrix:
         buildType:
-          - {name: "Release", imageName : "randriu/paynt", dockerTag: "mdp", setupArgs: ""}
+          - {name: "Release", imageName : "randriu/paynt", dockerTag: "mdp", baseImage : "randriu/stormpy-alex", setupArgs: "--disable-smg"}
       fail-fast: false
     if: github.ref == 'refs/heads/mdp'
     steps:
       - name: Git clone
         uses: actions/checkout@v4
       - name: Build paynt image from Dockerfile
-        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{matrix.buildType.dockerTag}} . --build-arg base_image=${{matrix.buildType.baseImage}} --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
       - name: Login into docker
         # Only login if using mdp on original repo (and not for pull requests or forks)
         if: github.repository_owner == 'randriu'

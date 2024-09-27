@@ -126,6 +126,10 @@ def setup_logger(log_path = None):
     help="decision tree synthesis: tree depth")
 @click.option("--tree-enumeration", is_flag=True, default=False,
     help="decision tree synthesis: if set, all trees of size at most tree_depth will be enumerated")
+@click.option("--tree-map-scheduler", type=click.Path(), default=None,
+    help="decision tree synthesis: path to a scheduler to be mapped to a decision tree")
+@click.option("--add-dont-care-action", is_flag=True, default=False,
+    help="decision tree synthesis: # if set, an explicit action executing a random choice of an available action will be added to each state")
 
 @click.option(
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
@@ -148,7 +152,7 @@ def paynt_run(
     use_storm_cutoffs, unfold_strategy_storm,
     export_fsc_storm, export_fsc_paynt, export_synthesis,
     mdp_split_wrt_mdp, mdp_discard_unreachable_choices, mdp_use_randomized_abstraction,
-    tree_depth, tree_enumeration,
+    tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
     ce_generator,
     profiling
@@ -176,6 +180,8 @@ def paynt_run(
 
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
+    paynt.synthesizer.decision_tree.SynthesizerDecisionTree.scheduler_path = tree_map_scheduler
+    paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
 
     storm_control = None
     if storm_pomdp:

@@ -1,8 +1,13 @@
-FROM movesrwth/stormpy:ci
+# usage: docker build -t yourusername/paynt .
+# command-line arguments can be specified e.g. as follows: --build-arg no_threads=8
 
-# Additional arguments for compiling payntbind
+# base image
+ARG base_image=movesrwth/stormpy:ci
+FROM $base_image
+
+# additional arguments for compiling payntbind
 ARG setup_args=""
-# Number of threads to use for parallel compilation
+# number of threads to use for parallel compilation
 ARG no_threads=2
 
 WORKDIR /opt/

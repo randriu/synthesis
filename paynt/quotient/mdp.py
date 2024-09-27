@@ -188,13 +188,10 @@ class DecisionTreeNode:
 
 class DecisionTree:
 
-    def __init__(self, quotient, variable_name, state_valuations):
+    def __init__(self, quotient, variables, state_valuations):
         self.quotient = quotient
         self.state_valuations = state_valuations
-        variables = [Variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
-        variables = [v for v in variables if len(v.domain) > 1]
         self.variables = variables
-        logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
         self.reset()
 
     def reset(self):
@@ -254,18 +251,22 @@ class DecisionTree:
 
 class MdpQuotient(paynt.quotient.quotient.Quotient):
 
+    # if true, an explicit action executing a random choice of an available action will be added to each state
+    add_dont_care_action = False
+
     def __init__(self, mdp, specification):
         super().__init__(specification=specification)
         updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         if updated is not None: mdp = updated
         action_labels,_ = payntbind.synthesis.extractActionLabels(mdp)
-        if "__random__" not in action_labels:
+        if "__random__" not in action_labels and MdpQuotient.add_dont_care_action:
             logger.debug("adding explicit don't-care action to every state...")
             mdp = payntbind.synthesis.addDontCareAction(mdp)
 
         self.quotient_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
+        logger.info(f"MDP has {len(self.action_labels)} actions")
 
         assert mdp.has_state_valuations(), "model has no state valuations"
         sv = mdp.state_valuations
@@ -276,20 +277,59 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             valuation = json.loads(str(sv.get_json(state)))
             valuation = [valuation[var_name] for var_name in variable_name]
             state_valuations.append(valuation)
-        self.decision_tree = DecisionTree(self,variable_name,state_valuations)
+        variables = [Variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
+        variable_mask = [len(v.domain) > 1 for v in variables]
+        variables = [v for index,v in enumerate(variables) if variable_mask[index]]
+        for state,valuation in enumerate(state_valuations):
+            state_valuations[state] = [value for index,value in enumerate(valuation) if variable_mask[index]]
+        self.variables = variables
+        self.state_valuations = state_valuations
+        logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
 
+        self.decision_tree = None
         self.coloring = None
         self.family = None
         self.splitter_count = None
 
-    def decide(self, node, var_name):
-        node.set_variable_by_name(var_name,self.decision_tree)
+    def state_valuation_to_state(self, valuation):
+        valuation = [valuation[v.name] for v in self.variables]
+        for state,state_valuation in enumerate(self.state_valuations):
+            if valuation == state_valuation:
+                return state
+        else:
+            assert False, "state valuation not found"
 
-    '''
-    Build the design space and coloring corresponding to the current decision tree.
-    '''
-    def set_depth(self, depth):
-        logger.debug(f"synthesizing tree of depth {depth}")
+    def scheduler_json_to_choices(self, scheduler_json):
+        ndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        assert self.quotient_mdp.nr_states == len(scheduler_json)
+        state_to_choice = self.empty_scheduler()
+        for state_decision in scheduler_json:
+            state = self.state_valuation_to_state(state_decision["s"])
+            actions = state_decision["c"]
+            assert len(actions) == 1
+            action_labels = actions[0]["labels"]
+            assert len(action_labels) <= 1
+            if len(action_labels) == 0:
+                state_to_choice[state] = ndi[state]
+                continue
+            action = self.action_labels.index(action_labels[0])
+            # find a choice that executes this action
+            for choice in range(ndi[state],ndi[state+1]):
+                if self.choice_to_action[choice] == action:
+                    state_to_choice[state] = choice
+                    break
+            else:
+                assert False, "action is not available in the state"
+        state_to_choice = self.discard_unreachable_choices(state_to_choice)
+        choices = self.state_to_choice_to_choices(state_to_choice)
+        return choices
+
+    def reset_tree(self, depth, disable_counterexamples=False):
+        '''
+        Rebuild the decision tree template, the design space and the coloring.
+        '''
+        logger.debug(f"building tree of depth {depth}")
+        self.decision_tree = DecisionTree(self,self.variables,self.state_valuations)
         self.decision_tree.set_depth(depth)
 
         # logger.debug("building coloring...")
@@ -297,7 +337,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         variable_name = [v.name for v in variables]
         variable_domain = [v.domain for v in variables]
         tree_list = self.decision_tree.to_list()
-        self.coloring = payntbind.synthesis.ColoringSmt(self.quotient_mdp, variable_name, variable_domain, tree_list, False)
+        self.coloring = payntbind.synthesis.ColoringSmt(self.quotient_mdp, variable_name, variable_domain, tree_list, disable_counterexamples)
 
         # reconstruct the family
         hole_info = self.coloring.getFamilyInfo()

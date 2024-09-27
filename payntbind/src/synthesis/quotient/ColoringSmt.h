@@ -26,7 +26,7 @@ public:
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain,
         std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
-        bool one_consistency_check = false
+        bool disable_counterexamples = false
     );
 
     /** For each hole, get a list of name-type pairs.  */
@@ -134,7 +134,7 @@ protected:
     void loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily);
 
     /** If true, the object will be setup for one consistency check. */
-    bool one_consistency_check;
+    bool disable_counterexamples;
 
 };
 
