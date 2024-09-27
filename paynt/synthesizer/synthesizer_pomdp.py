@@ -152,6 +152,7 @@ class SynthesizerPomdp:
                 self.storm_control.paynt_export = self.quotient.extract_policy(assignment)
                 self.storm_control.paynt_bounds = self.quotient.specification.optimality.optimum
                 self.storm_control.paynt_fsc_size = self.quotient.policy_size(self.storm_control.latest_paynt_result)
+                self.storm_control.latest_paynt_result_fsc = self.quotient.assignment_to_fsc(self.storm_control.latest_paynt_result)
 
             self.storm_control.update_data()
 
