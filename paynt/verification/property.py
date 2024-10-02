@@ -125,6 +125,10 @@ class Property:
         return self.formula.is_reward_operator
 
     @property
+    def is_discounted_reward(self):
+        return self.formula.is_reward_operator and self.formula.subformula.is_discounted_total_reward_formula
+
+    @property
     def maximizing(self):
         return not self.minimizing
 

@@ -259,7 +259,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if self.best_tree is None:
             logger.info("no admissible tree found")
         else:
-            self.best_tree.simplify()
+            target_states = self.quotient.identify_target_states()
+            self.best_tree.simplify(target_states)
             depth = self.best_tree.get_depth()
             num_nodes = len(self.best_tree.collect_nonterminals())
             logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
