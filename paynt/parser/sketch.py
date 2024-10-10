@@ -88,13 +88,14 @@ class Sketch:
                 specification = PrismParser.parse_specification(properties_path, relative_error)
                 filetype = "drn"
                 project_path = os.path.dirname(sketch_path)
-                valuations_path = project_path + "/state_valuations.json"
+                valuations_filename = "state-valuations.json"
+                valuations_path = project_path + "/" + valuations_filename
                 state_valuations = None
                 if os.path.exists(valuations_path) and os.path.isfile(valuations_path):
                     with open(valuations_path) as file:
                         state_valuations = json.load(file)
                 if state_valuations is not None:
-                    logger.info(f"found state_valuations.json, adding to the model...")
+                    logger.info(f"found state valuations in {valuations_path}, adding to the model...")
                     explicit_quotient = payntbind.synthesis.addStateValuations(explicit_quotient,state_valuations)
             except Exception as e:
                 print(e)

@@ -453,7 +453,6 @@ bool InnerNode::isPathEnabledInState(
 ) const {
     bool step_to_true_child = path[depth];
     for(uint64_t variable = 0; variable < numVariables(); ++variable) {
-        z3::expr const& dv = decision_hole.solver_variable;
         if(not subfamily.holeContains(decision_hole.hole,variable)) {
             continue;
         }
