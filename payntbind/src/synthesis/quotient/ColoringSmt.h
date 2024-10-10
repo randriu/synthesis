@@ -65,6 +65,9 @@ public:
 
 protected:
 
+    /** If true, the object will be setup for one consistency check. */
+    bool disable_counterexamples;
+
     /** The initial state. */
     const uint64_t initial_state;
     /** Valuation of each state. */
@@ -132,9 +135,6 @@ protected:
 
     bool PRINT_UNSAT_CORE = false;
     void loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily);
-
-    /** If true, the object will be setup for one consistency check. */
-    bool disable_counterexamples;
 
 };
 

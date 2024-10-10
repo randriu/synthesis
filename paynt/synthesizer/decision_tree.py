@@ -86,7 +86,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.check_specification_for_mdp(family)
         if not family.analysis_result.can_improve:
             return
-        # self.harmonize_inconsistent_scheduler(family)
+        if SynthesizerDecisionTree.scheduler_path is not None:
+            return
+        self.harmonize_inconsistent_scheduler(family)
 
 
     def counters_reset(self):
@@ -134,7 +136,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.best_tree = self.best_tree_value = None
 
         global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
-        if global_timeout is None: global_timeout = 1800
+        if global_timeout is None: global_timeout = 900
         depth_timeout = global_timeout / 2 / SynthesizerDecisionTree.tree_depth
         for depth in range(SynthesizerDecisionTree.tree_depth+1):
             print()
@@ -257,18 +259,20 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if self.best_tree is None:
             logger.info("no admissible tree found")
         else:
-            self.best_tree.simplify()
+            target_states = self.quotient.identify_target_states()
+            self.best_tree.simplify(target_states)
+            depth = self.best_tree.get_depth()
+            num_nodes = len(self.best_tree.collect_nonterminals())
+            logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
+            if self.quotient.specification.has_optimality:
+                logger.info(f"the synthesized tree has value {self.best_tree_value}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
 
-            depth = self.best_tree.get_depth()
-            if self.quotient.specification.has_optimality:
-                logger.info(f"the synthesized tree has value {self.best_tree_value}")
-            num_nodes = len(self.best_tree.collect_nonterminals())
-            logger.info(f"the synthesized tree is of depth {depth} and has {num_nodes} decision nodes")
             if self.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
-        time_total = paynt.utils.timer.GlobalTimer.read()
+        time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
+        logger.info(f"synthesis finished after {time_total} seconds")
 
         # print()
         # for name,time in self.quotient.coloring.getProfilingInfo():

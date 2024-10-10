@@ -328,6 +328,12 @@ class Quotient:
                     break
         return state_is_absorbing
 
-    def identify_target_states(self, model, prop):
+    def identify_target_states(self, model=None, prop=None):
+        if model is None:
+            model = self.quotient_mdp
+        if prop is None:
+            prop = self.get_property()
+        if prop.is_discounted_reward:
+            return stormpy.BitVector(model.nr_states,False)
         target_label = prop.get_target_label()
         return model.labeling.get_states(target_label)

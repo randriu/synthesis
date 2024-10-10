@@ -118,11 +118,14 @@ public:
     virtual uint64_t getPathActionHole(std::vector<bool> const& path) {return 0;}
 
     /** Add a step expression evaluated for a given state valuation. */
-    virtual void substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const {};
+    virtual void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation) {};
+    virtual void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector & substituted) const {};
     /** Add an action expression evaluated for a given state valuation. */
     virtual z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const {return z3::expr(ctx);};
+
     /** Add a step expression evaluated for a given state valuation (harmonizing). */
-    virtual void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {};
+    virtual void createPrefixSubstitutionsHarmonizing(z3::expr_vector const& state_valuation) {};
+    virtual void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & substituted) const {};
     /** Add an action expression evaluated for a given state valuation (harmonizing). */
     virtual z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const {return z3::expr(ctx);};
 
@@ -175,9 +178,12 @@ public:
     void createPaths(z3::expr const& harmonizing_variable) override;
     uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const override;
+    void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation) override;
+    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const override;
-    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
+
+    void createPrefixSubstitutionsHarmonizing(z3::expr_vector const& state_valuation) override;
+    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
@@ -217,6 +223,9 @@ public:
     z3::expr step_true_harm;
     z3::expr step_false_harm;
 
+    z3::expr substituted_true;
+    z3::expr substituted_false;
+
     InnerNode(
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
@@ -229,9 +238,12 @@ public:
     void createPaths(z3::expr const& harmonizing_variable) override;
     uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void substitutePrefixExpression(std::vector<bool> const& path, std::vector<uint64_t> const& state_valuation, z3::expr_vector & substituted) const override;
+    void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation) override;
+    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpression(std::vector<bool> const& path, uint64_t action) const override;
-    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const override;
+
+    void createPrefixSubstitutionsHarmonizing(z3::expr_vector const& state_valuation) override;
+    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
     z3::expr substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const override;
 
     void addFamilyEncoding(Family const& subfamily, z3::solver & solver) const override;
