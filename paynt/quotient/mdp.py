@@ -181,8 +181,8 @@ class DecisionTreeNode:
 
         graphviz_tree.node(self.graphviz_id, label=node_label, shape="box", style="rounded", margin="0.05,0.05")
         if not self.is_terminal:
-            graphviz_tree.edge(self.graphviz_id,self.child_true.graphviz_id,label="True")
-            graphviz_tree.edge(self.graphviz_id,self.child_false.graphviz_id,label="False")
+            graphviz_tree.edge(self.graphviz_id,self.child_true.graphviz_id,label="T")
+            graphviz_tree.edge(self.graphviz_id,self.child_false.graphviz_id,label="F")
 
 
 
@@ -235,8 +235,9 @@ class DecisionTree:
             node_info[node.identifier] = (parent,child_true,child_false)
         return node_info
 
-    def simplify(self):
-        self.root.simplify(self.variables, self.state_valuations)
+    def simplify(self, target_state_mask):
+        state_valuations = [self.state_valuations[state] for state in ~target_state_mask]
+        self.root.simplify(self.variables, state_valuations)
 
     def to_string(self):
         return self.root.to_string(self.variables,self.quotient.action_labels)
