@@ -1,0 +1,131 @@
+// ------ Attacker x Defender -------
+// Attacker needs to get from the left part of the map to the right part.
+// There are two outposts with defenders, who try to stop the attacker by stepping on the same square.
+// If a predefined maximum number of rounds is reached, the defenders win.
+// Defenders are the optimizing player and thus have only partial observability. Attakcer has full observability.
+
+smg
+
+// MAP CONSTANTS
+const int WIDTH = 5;
+const int HEIGHT = 3;
+
+const int xMIN = 1;
+const int xMAX = WIDTH;
+const int yMIN = 1;
+const int yMAX = HEIGHT;
+ 
+
+// PLAYERS
+player d
+	defender1, [d1up], [d1down], [d1stay],
+	defender2, [d2up], [d2down], [d2stay]
+endplayer
+
+player a
+	attacker, [aup], [adown], [aright], [astay]
+endplayer
+
+
+// END CONDITION
+const int max_rounds = 8;
+
+formula catch = (ax=d1x & ay=d1y) | (ax=d2x & ay=d2y);
+formula timeout = round=max_rounds;
+formula d_win = catch | timeout;
+formula a_win = ax=xMAX;
+formula done = d_win | a_win;
+
+label "goal" = d_win;
+label "catch" = catch;
+label "timeout" = timeout;
+label "a_win" = a_win;
+
+
+// OBSERVATIONS
+observable "d1y" = d1y;
+observable "d2y" = d2y;
+observable "clk" = clk;
+observable "done" = done;
+
+// CLOCK MODULE
+// To make game alternating and to count rounds.
+// Defenders have to start to simulate concurent actions, because they have imperfect observations.
+const int defender_units = 2;
+const int all_units = defender_units+1;
+
+formula next_clk = mod(clk+1, all_units);
+
+module clk
+	// clk=0 means it's attacker's turn
+	clk : [0..defender_units] init 1;
+	round : [1..max_rounds] init 1;
+
+	[d1up]		!done & clk=1 -> (clk'=next_clk);
+	[d1down]	!done & clk=1 -> (clk'=next_clk);
+	[d1stay]	!done & clk=1 -> (clk'=next_clk);
+
+	[d2up]		!done & clk=2 -> (clk'=next_clk);
+	[d2down]	!done & clk=2 -> (clk'=next_clk);
+	[d2stay]	!done & clk=2 -> (clk'=next_clk);
+
+	[aup] 		!done & clk=0 -> (clk'=next_clk) & (round'=round+1);
+	[adown] 	!done & clk=0 -> (clk'=next_clk) & (round'=round+1);
+	[aright]	!done & clk=0 -> (clk'=next_clk) & (round'=round+1);
+	[astay]		!done & clk=0 -> (clk'=next_clk) & (round'=round+1);
+
+endmodule
+
+
+// DEFENDER MODULES
+const double slip = 0.3;
+
+formula move_up = min(d1y+1, yMAX);
+formula move_down = max(d1y-1, yMIN);
+
+const int d1x = 2;
+const int d1y_init = 2;
+
+module defender1
+	d1y : [yMIN..yMAX] init d1y_init;
+
+	[d1up]		true -> 1-slip : (d1y'=move_up) + slip : true;
+	[d1down] 	true -> 1-slip : (d1y'=move_down) + slip : true; 
+//	[d1stay]	true -> 1-(2*slip) : true + slip : (d1y'=move_up) + slip : (d1y'=move_down);
+	[d1stay]	true -> 1 : true;
+
+endmodule
+
+
+const int d2x = 4;
+const int d2y_init = 2;
+
+module defender2 = defender1
+	[ d1y=d2y, d1y_init=d2y_init, d1up=d2up, d1down=d2down, d1stay=d2stay ]
+endmodule
+
+
+// ATTACKER MODULE
+const int ax_init = xMIN;
+const int ay_init = 2;
+
+module attacker
+	ax : [xMIN..xMAX] init ax_init;
+	ay : [yMIN..yMAX] init ay_init;
+
+	[aup]		true -> 1 : (ay'=min(ay+1, yMAX));
+	[adown]		true -> 1 : (ay'=max(ay-1, yMIN));
+	[aright]	true -> 1 : (ax'=min(ax+1, xMAX));
+	[astay]		true -> 1 : true;
+endmodule
+
+
+
+
+
+
+
+
+
+
+

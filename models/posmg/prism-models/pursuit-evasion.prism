@@ -24,17 +24,19 @@ endplayer
 
 // END CONDITION
 formula done = ((p1x = ex) & (p1y = ey)) | ((p2x = ex) & (p1y = ey));
-label "done" = done;
+label "goal" = done;
 
 
 // !!! uncomment before exporting !!!
 
 // OBSERVATIONS
 // player p only observes position of all pursuers
-//observable "p1x" = p1x;
-//observable "p1y" = p1y;
-//observable "p2x" = p1x;
-//observable "p2y" = p2y;
+observable "p1x" = p1x;
+observable "p1y" = p1y;
+observable "p2x" = p1x;
+observable "p2y" = p2y;
+observable "clk" = clk;
+observable "done" = done;
 
 // CLOCK MODULE
 // to make game alternating

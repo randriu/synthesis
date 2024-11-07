@@ -1,0 +1,66 @@
+// Exported by prism
+// Original model type: POSMG
+@type: POSMG
+@parameters
+
+@reward_models
+ 
+@nr_states
+16
+@nr_choices
+16
+@model
+state 0 {0} <0> [0, 1] init
+	action roll1 [0, 0]
+		4 : 0.5
+		6 : 0.5
+state 1 {4} <0> [0, 1] deadlock done
+	action __NOLABEL__ [0, 0]
+		1 : 1
+state 2 {4} <0> [0, 101] deadlock done
+	action __NOLABEL__ [0, 0]
+		2 : 1
+state 3 {0} <0> [0, 1]
+	action roll1 [0, 0]
+		5 : 0.5
+		7 : 0.5
+state 4 {1} <1> [0, 1]
+	action roll2 [2, 0]
+		8 : 0.5
+		9 : 0.5
+state 5 {1} <1> [0, 1]
+	action roll2 [2, 0]
+		8 : 0.5
+		9 : 0.5
+state 6 {1} <1> [0, 1]
+	action roll2 [2, 0]
+		10 : 0.5
+		11 : 0.5
+state 7 {1} <1> [0, 1]
+	action roll2 [2, 0]
+		10 : 0.5
+		11 : 0.5
+state 8 {2} <0> [0, 1]
+	action eval [0, 0]
+		12 : 1
+state 9 {2} <0> [0, 1]
+	action eval [0, 0]
+		13 : 1
+state 10 {2} <0> [0, 1]
+	action eval [0, 0]
+		14 : 1
+state 11 {2} <0> [0, 1]
+	action eval [0, 0]
+		15 : 1
+state 12 {3} <0> [0, 1]
+	action end [0, 0]
+		0 : 1
+state 13 {3} <0> [0, 1]
+	action end [0, 0]
+		1 : 1
+state 14 {3} <0> [0, 101]
+	action end [0, 0]
+		2 : 1
+state 15 {3} <0> [0, 1]
+	action end [0, 0]
+		3 : 1
