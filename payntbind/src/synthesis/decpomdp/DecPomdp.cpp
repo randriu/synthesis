@@ -1,8 +1,8 @@
 #include "DecPomdp.h"
 
-#include "madp/src/base/Globals.h"
-#include "madp/src/base/E.h"
-#include "madp/src/parser/MADPParser.h"
+#include "madp/base/Globals.h"
+#include "madp/base/E.h"
+#include "madp/parser/MADPParser.h"
 
 #include <stack>
 

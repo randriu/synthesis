@@ -1,0 +1,114 @@
+pomdp
+
+// grid dimensions
+const int N=5;
+const int xMIN = 0;
+const int yMIN = 0;
+const int xMAX = N-1;
+const int yMAX = N-1;
+
+formula goal = (x=xMAX) & (y=yMAX);
+
+observable "clk" = clk;
+observable "goal" = goal;
+observable "see" = see;
+
+// synchronization
+formula clk_next = mod(clk+1,4);
+module clk
+    clk : [-1..3] init -1;
+
+    [place] !goal & clk=-1 -> (clk'=clk_next);
+
+    [left]  !goal & clk=0 -> (clk'=clk_next);
+    [right] !goal & clk=0 -> (clk'=clk_next);
+    [down]  !goal & clk=0 -> (clk'=clk_next);
+    [up]    !goal & clk=0 -> (clk'=clk_next);
+    [wait]  !goal & clk=0 -> (clk'=clk_next);
+
+    [o]     !goal & clk=1 -> (clk'=clk_next);
+    
+    [detect1] !goal & clk=2 -> (clk'=clk_next);
+    [detect2] !goal & clk=3 -> (clk'=clk_next);
+endmodule
+
+
+// agent moving towards the exit
+const double slip = 0.0;
+module agent
+    x : [xMIN..xMAX] init xMIN;
+    y : [yMIN..yMAX] init yMIN;
+
+    [left]  true -> (1-slip): (x'=max(x-1,xMIN)) + slip: true;
+    [right] true -> (1-slip): (x'=min(x+1,xMAX)) + slip: true;
+    [down]  true -> (1-slip): (y'=max(y-1,yMIN)) + slip: true;
+    [up]    true -> (1-slip): (y'=min(y+1,yMAX)) + slip: true;
+    [wait]  true -> true;
+endmodule
+
+
+// obstacles oscillating on the x-axis
+hole int o1x_init in {0,1,2,3,4};
+hole int o2x_init in {0,1,2,3,4};
+
+hole int goright1_init in {0,1};
+hole int goright2_init in {0,1};
+
+hole int o1y in {1,2,3,4};
+hole int o2y in {1,2,3,4};
+
+module obstacle1
+    o1x : [xMIN..xMAX] init xMIN;
+    goright1 : bool init true;
+
+    [place] true -> (o1x'=o1x_init) & (goright1'=goright1_init=1);
+
+    [o]  goright1 & o1x < xMAX -> 1/2: (o1x'=min(xMAX,o1x+1)) + 1/2: true;
+    [o]  goright1 & o1x = xMAX -> (goright1'=false);
+
+    [o] !goright1 & o1x > xMIN -> 1/2: (o1x'=max(xMIN,o1x-1)) + 1/2: true;
+    [o] !goright1 & o1x = xMIN -> (goright1'=true);
+endmodule
+
+module obstacle2=obstacle1[o1x=o2x,goright1=goright2,o1x_init=o2x_init,goright1_init=goright2_init] endmodule
+
+
+// obstacle detection
+const int RADIUS = 1;
+formula see1 = (x-o1x<=RADIUS & o1x-x<=RADIUS) & (y-o1y<=RADIUS & o1y-y<=RADIUS);
+formula see2 = (x-o2x<=RADIUS & o2x-x<=RADIUS) & (y-o2y<=RADIUS & o2y-y<=RADIUS);
+module scanner
+    see: bool init false;
+    [detect1]   true -> (see'=see1);
+    [detect2]   true -> (see'=see2);
+endmodule
+
+// crash detection
+formula at1 = x=o1x & y=o1y;
+formula at2 = x=o2x & y=o2y;
+
+module crash1
+    crash1 : bool init false;
+    [detect1] true -> (crash1'=at1);
+
+    [up]    true -> (crash1'=false);
+    [down]  true -> (crash1'=false);
+    [left]  true -> (crash1'=false);
+    [right] true -> (crash1'=false);
+    [wait]  true -> (crash1'=false);
+endmodule
+
+module crash2=crash1[crash1=crash2,detect1=detect2,at1=at2] endmodule
+
+formula step_penalty = 1;
+formula crash_penalty = 100;
+formula num_crashes = (crash1?1:0)+(crash2?1:0);
+formula penalty = step_penalty + num_crashes*crash_penalty;
+
+rewards "penalty"
+    [up]    true : penalty;
+    [down]  true : penalty;
+    [left]  true : penalty;
+    [right] true : penalty;
+    [wait]  true : penalty;
+endrewards

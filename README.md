@@ -27,7 +27,7 @@ PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https:
 ```shell
 sudo apt install -y graphviz
 source ${VIRTUAL_ENV}/bin/activate
-pip3 install click z3-solver graphviz
+pip3 install click z3-solver psutil graphviz
 cd payntbind
 python3 setup.py develop
 cd ..
@@ -62,7 +62,7 @@ source ${VIRTUAL_ENV}/bin/activate
 PAYNT can be executed using the command in the following form:
 
 ```shell
-python3 paynt.py [OPTIONS] PROJECT
+python3 paynt.py PROJECT [OPTIONS]
 ```
 where ``PROJECT`` is the path to the benchmark folder and the most important options are:
 - ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description or a POMDP program [default: ``sketch.templ``]
@@ -89,19 +89,18 @@ SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy ar
 Other options:
 - ``--help``: shows the help message of the PAYNT and aborts
 - ``--export [drn|pomdp]``: exports the model to *.drn/*.pomdp and aborts
-- ``--incomplete-search``:  uses incomplete search during synthesis
 
 
 Here are various PAYNT calls:
 ```shell
-python3 paynt.py --project models/cav21/maze --props hard.props
-python3 paynt.py --project models/cav21/maze --props hard.props --method hybrid
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 2
-python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --pomdp-memory-size 5 --method ar_multicore
-timeout 10s python3 paynt.py --project models/pomdp/uai/grid-avoid-4-0 --fsc-synthesis
-python3 paynt.py --project models/pomdp/storm-integration/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
-python3 paynt.py --project models/pomdp/storm-integration/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
+python3 paynt.py models/archive/cav21-paynt/maze --props hard.props
+python3 paynt.py models/archive/cav21-paynt/maze --props hard.props --method hybrid
+python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0
+python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
+python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
+timeout 10s python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
+python3 paynt.py models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 paynt.py models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The Python environment can be deactivated by runnning

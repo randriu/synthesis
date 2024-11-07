@@ -1,5 +1,0 @@
-R{"steps"}min=? [F finished];
-//R{"steps"}<=THRESHOLD [F finished];
-//P>=0.49 [F heads];
-//P>=0.49 [F tails];
-

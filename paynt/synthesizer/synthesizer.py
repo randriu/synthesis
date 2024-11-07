@@ -1,4 +1,5 @@
 import paynt.synthesizer.statistic
+import paynt.utils.timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,13 +16,14 @@ class FamilyEvaluation:
 
 class Synthesizer:
 
-    # if True, some subfamilies can be discarded and some holes can be generalized
-    incomplete_search = False
+    # base filename (i.e. without extension) to export synthesis result
+    export_synthesis_filename_base = None
 
     @staticmethod
-    def choose_synthesizer(quotient, method, fsc_synthesis, storm_control):
+    def choose_synthesizer(quotient, method, fsc_synthesis=False, storm_control=None):
 
         # hiding imports here to avoid mutual top-level imports
+        import paynt.quotient.mdp
         import paynt.quotient.pomdp
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
@@ -33,14 +35,16 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.policy_tree
-
+        import paynt.synthesizer.decision_tree
 
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
+        if isinstance(quotient, paynt.quotient.mdp.MdpQuotient):
+            return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient)
         # FSC synthesis for POMDPs
         if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
-            return paynt.synthesizer.synthesizer_pomdp.SynthesizerPOMDP(quotient, method, storm_control)
+            return paynt.synthesizer.synthesizer_pomdp.SynthesizerPomdp(quotient, method, storm_control)
         # FSC synthesis for Dec-POMDPs
         if isinstance(quotient, paynt.quotient.decpomdp.DecPomdpQuotient) and fsc_synthesis:
             return paynt.synthesizer.synthesizer_decpomdp.SynthesizerDecPomdp(quotient)
@@ -51,7 +55,7 @@ class Synthesizer:
             else:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
 
-        # Synthesis engines
+        # synthesis engines
         if method == "onebyone":
             return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
         if method == "ar":
@@ -63,21 +67,44 @@ class Synthesizer:
         if method == "ar_multicore":
             return paynt.synthesizer.synthesizer_multicore_ar.SynthesizerMultiCoreAR(quotient)
         raise ValueError("invalid method name")
-    
-    
+
+
     def __init__(self, quotient):
         self.quotient = quotient
-        self.stat = paynt.synthesizer.statistic.Statistic(self)
-        self.explored = 0
-    
+        self.stat = None
+        self.synthesis_timer = None
+        self.explored = None
+        self.best_assignment = None
+        self.best_assignment_value = None
+
     @property
     def method_name(self):
         ''' to be overridden '''
         pass
-    
+
+    def time_limit_reached(self):
+        if (self.synthesis_timer is not None and self.synthesis_timer.time_limit_reached()) or \
+            paynt.utils.timer.GlobalTimer.time_limit_reached():
+            logger.info("time limit reached, aborting...")
+            return True
+        return False
+
+    def memory_limit_reached(self):
+        if paynt.utils.timer.GlobalMemoryLimit.limit_reached():
+            logger.info("memory limit reached, aborting...")
+            return True
+        return False
+
+    def resource_limit_reached(self):
+        return self.time_limit_reached() or self.memory_limit_reached()
+
+    def set_optimality_threshold(self, optimum_threshold):
+        if self.quotient.specification.has_optimality and optimum_threshold is not None:
+            self.quotient.specification.optimality.update_optimum(optimum_threshold)
+            logger.debug(f"optimality threshold set to {optimum_threshold}")
+
     def explore(self, family):
         self.explored += family.size
-
 
     def evaluate_all(self, family, prop, keep_value_only=False):
         ''' to be overridden '''
@@ -99,10 +126,12 @@ class Synthesizer:
         :returns a list of (family,evaluation) pairs
         '''
         if family is None:
-            family = self.quotient.design_space
+            family = self.quotient.family
         if prop is None:
             prop = self.quotient.get_property()
 
+        self.stat = paynt.synthesizer.statistic.Statistic(self)
+        self.explored = 0
         logger.info("evaluation initiated, design space: {}".format(family.size))
         self.stat.start(family)
         evaluations = self.evaluate_all(family, prop, keep_value_only)
@@ -122,50 +151,54 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def synthesize(self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True):
+    def synthesize(
+        self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True, timeout=None
+    ):
         '''
         :param family family of assignment to search in
+        :param families alternatively, a list of families can be given
         :param optimum_threshold known bound on the optimum value
         :param keep_optimum if True, the optimality specification will not be reset upon finish
         :param return_all if True and the synthesis returns a family, all assignments will be returned instead of an
             arbitrary one
         :param print_stats if True, synthesis stats will be printed upon completion
+        :param timeout synthesis time limit, seconds
         '''
         if family is None:
-            family = self.quotient.design_space
+            family = self.quotient.family
         if family.constraint_indices is None:
             family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
         
-        if optimum_threshold is not None:
-            self.quotient.specification.optimality.update_optimum(optimum_threshold)
-            logger.debug(f"optimality threshold set to {optimum_threshold}")
-        
-        logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
-        self.quotient.discarded = 0
+        self.set_optimality_threshold(optimum_threshold)
+        self.synthesis_timer = paynt.utils.timer.Timer(timeout)
+        self.synthesis_timer.start()
+        self.stat = paynt.synthesizer.statistic.Statistic(self)
+        self.explored = 0
         self.stat.start(family)
-        assignment = self.synthesize_one(family)
-        if assignment is not None and assignment.size > 1 and not return_all:
-            assignment = assignment.pick_any()
-        self.stat.finished_synthesis(assignment)
-        logger.info("synthesis finished, printing synthesized assignment below:")
-        logger.info(assignment)
+        self.synthesize_one(family)
+        if self.best_assignment is not None and self.best_assignment.size > 1 and not return_all:
+            self.best_assignment = self.best_assignment.pick_any()
+        self.stat.finished_synthesis()
+        if self.best_assignment is not None:
+            logger.info("printing synthesized assignment below:")
+            logger.info(self.best_assignment)
 
-        if assignment is not None and assignment.size == 1:
-            dtmc = self.quotient.build_assignment(assignment)
-            result = self.quotient.check_specification_for_dtmc(dtmc)
+        if self.best_assignment is not None and self.best_assignment.size == 1:
+            dtmc = self.quotient.build_assignment(self.best_assignment)
+            result = dtmc.check_specification(self.quotient.specification)
             logger.info(f"double-checking specification satisfiability: {result}")
 
         if print_stats:
             self.stat.print()
 
+        assignment = self.best_assignment
         if not keep_optimum:
+            self.best_assignment = None
+            self.best_assignment_value = None
             self.quotient.specification.reset()
 
         return assignment
 
     
-    def run(self, optimum_threshold=None, export_evaluation=None):
-        if isinstance(self.quotient, paynt.quotient.mdp_family.MdpFamilyQuotient):
-            return self.evaluate(export_filename_base=export_evaluation)
-        else:
-            return self.synthesize(optimum_threshold=optimum_threshold)
+    def run(self, optimum_threshold=None):
+        return self.synthesize(optimum_threshold=optimum_threshold)

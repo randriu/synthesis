@@ -8,6 +8,7 @@ import paynt.quotient.fsc
 
 import math
 import re
+import collections
 
 import logging
 logger = logging.getLogger(__name__)
@@ -25,11 +26,11 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     
     def __init__(self, pomdp, specification, decpomdp_manager=None):
-        super().__init__(specification = specification)
+        super().__init__(specification=specification)
 
         # unfolded POMDP
         self.quotient_mdp = None
-        self.design_space = None
+        self.family = None
         self.coloring = None
         # to each hole-option pair a list of actions colored by this combination (reverse coloring)
         self.hole_option_to_actions = None
@@ -100,8 +101,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             obs = state_obs[state]
             if self.action_labels_at_observation[obs] != []:
                 continue
-            actions = self.pomdp.get_nr_available_actions(state)
-            for offset in range(actions):
+            for offset in range(self.actions_at_observation[obs]):
                 choice = self.pomdp.get_choice_index(state,offset)
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
                 assert len(labels) <= 1, "expected at most 1 label"
@@ -342,21 +342,18 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
-        family, choice_to_hole_options = self.create_coloring()
+        self.family, choice_to_hole_options = self.create_coloring()
 
-        self.coloring = payntbind.synthesis.Coloring(family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
+        self.coloring = payntbind.synthesis.Coloring(self.family.family, self.quotient_mdp.nondeterministic_choice_indices, choice_to_hole_options)
 
         # to each hole-option pair a list of actions colored by this combination
-        self.hole_option_to_actions = [[] for hole in range(family.num_holes)]
-        for hole in range(family.num_holes):
-            self.hole_option_to_actions[hole] = [[] for option in family.hole_options(hole)]
+        self.hole_option_to_actions = [[] for hole in range(self.family.num_holes)]
+        for hole in range(self.family.num_holes):
+            self.hole_option_to_actions[hole] = [[] for option in self.family.hole_options(hole)]
         for choice in range(self.quotient_mdp.nr_choices):
             for hole,option in choice_to_hole_options[choice]:
                 self.hole_option_to_actions[hole][option].append(choice)
 
-        self.design_space = paynt.family.family.DesignSpace(family)
-
-    
 
     
     def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
@@ -598,7 +595,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
     def extract_policy(self, assignment):
         dtmc = self.build_assignment(assignment)
-        mc_result = self.check_specification_for_dtmc(dtmc)
+        mc_result = dtmc.check_specification(self.specification)
         policy = self.collect_policy(dtmc, mc_result)
         return policy
 
@@ -737,3 +734,62 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         fsc.check(observation_to_actions)
 
         return fsc
+
+
+    def compute_qvalues(self, assignment):
+        '''
+        Given an MDP obtained after applying an FSC to a POMDP, compute for each state s, (reachable) memory node n
+        the Q-value Q(s,n).
+        :param assignment hole assignment encoding an FSC; it is assumed the assignment is the one obtained
+            for the current unfolding
+        :note Q(s,n) may be None if (s,n) exists in the unfolded POMDP but is not reachable in the induced DTMC
+        '''
+        # model check
+        submdp = self.build_assignment(assignment)
+        prop = self.get_property()
+        result = submdp.model_check_property(prop)
+        state_submdp_to_value = result.result.get_values()
+
+        # map states of a sub-MDP to the states of the quotient MDP to the state-memory pairs of the POMDPxFSC
+        state_memory_value = collections.defaultdict(lambda: None)
+        for submdp_state,value in enumerate(state_submdp_to_value):
+            mdp_state = submdp.quotient_state_map[submdp_state]
+            pomdp_state = self.pomdp_manager.state_prototype[mdp_state]
+            memory_node = self.pomdp_manager.state_memory[mdp_state]
+            state_memory_value[ (pomdp_state,memory_node) ] = value
+
+        # make this mapping total
+        memory_size = 1 + max([memory for state,memory in state_memory_value.keys()])
+        state_memory_value_total = [[None for memory in range(memory_size)] for state in range(self.pomdp.nr_states)]
+        for state in range(self.pomdp.nr_states):
+            for memory in range(memory_size):
+                value = state_memory_value[(state,memory)]
+                if value is None:
+                    obs = self.pomdp.observations[state]
+                    if memory < self.observation_memory_size[obs]:
+                        # case 1: (s,n) exists but is not reachable in the induced DTMC
+                        value = None
+                    else:
+                        # case 2: (s,n) does not exist because n memory was not allocated for s
+                        # i.e. (s,n) has the same value as (s,0)
+                        value = state_memory_value[(state,0)]
+                state_memory_value_total[state][memory] = value
+
+        return state_memory_value_total
+
+
+    def next_belief(self, belief, action_label, next_obs):
+        any_belief_state = list(belief.keys())[0]
+        obs = self.pomdp.observations[any_belief_state]
+        action = self.action_labels_at_observation[obs].index(action_label)
+        new_belief = collections.defaultdict(float)
+        ndi = self.pomdp.nondeterministic_choice_indices.copy()
+        for state,state_prob in belief.items():
+            choice = self.pomdp.get_choice_index(state,action)
+            for entry in self.pomdp.transition_matrix.get_row(choice):
+                next_state = entry.column
+                if self.pomdp.observations[next_state] == next_obs:
+                    new_belief[next_state] += state_prob * entry.value()
+        prob_sum = sum(new_belief.values())
+        new_belief = {state:prob/prob_sum for state,prob in new_belief.items()}
+        return new_belief

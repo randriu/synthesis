@@ -1,7 +1,8 @@
 #pragma once
 
-/* 
- * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+/**
+ * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
+ * Storm version.
  */
 
 #include <map>
@@ -16,6 +17,7 @@ namespace synthesis {
     template<class SparseSmgModelType>
     class SparseSmgRpatlModelChecker : public storm::modelchecker::SparsePropositionalModelChecker<SparseSmgModelType> {
     public:
+
         typedef typename SparseSmgModelType::ValueType ValueType;
         typedef typename SparseSmgModelType::RewardModelType RewardModelType;
 
@@ -30,6 +32,7 @@ namespace synthesis {
         // The implemented methods of the AbstractModelChecker interface.
         bool canHandle(storm::modelchecker::CheckTask<storm::logic::Formula, ValueType> const& checkTask) const override;
 
+        #ifndef DISABLE_SMG
         std::unique_ptr<storm::modelchecker::CheckResult> checkGameFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::GameFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> checkProbabilityOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::ProbabilityOperatorFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> checkRewardOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::RewardOperatorFormula, ValueType> const& checkTask) override;
@@ -45,6 +48,8 @@ namespace synthesis {
 
         std::unique_ptr<storm::modelchecker::CheckResult> computeLongRunAverageProbabilities(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::StateFormula, ValueType> const& checkTask) override;
         std::unique_ptr<storm::modelchecker::CheckResult> computeLongRunAverageRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::LongRunAverageRewardFormula, ValueType> const& checkTask) override;
+
+        #endif // DISABLE_SMG
 
     private:
         storm::storage::BitVector statesOfCoalition;

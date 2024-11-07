@@ -30,7 +30,8 @@ class SetupConfig:
             "storm_dir": "",
             "debug": False,
             "jobs": str(no_jobs),
-            "pybind_version": ""
+            "pybind_version": "",
+            "disable_smg": False, #+
         }
 
     def load_from_file(self, path):

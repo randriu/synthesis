@@ -3,8 +3,7 @@ import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_cegis
 
 import paynt.family.smt
-
-from ..utils.profiler import Timer
+import paynt.utils.timer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -25,8 +24,8 @@ class StageControl:
 
     def __init__(self, family_size):
         # timings
-        self.timer_ar = Timer()
-        self.timer_cegis = Timer()
+        self.timer_ar = paynt.utils.timer.Timer()
+        self.timer_cegis = paynt.utils.timer.Timer()
 
         self.family_size = family_size
         self.pruned_ar = 0
@@ -95,10 +94,9 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
     def synthesize_one(self, family):
 
         self.conflict_generator.initialize()
-        smt_solver = paynt.family.smt.SmtSolver(self.quotient.design_space)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient.family)
 
         # AR-CEGIS loop
-        satisfying_assignment = None
         families = [family]
         self.stage_control = StageControl(family.size)
         while families:
@@ -115,8 +113,6 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
             # analyze the family
             self.verify_family(family)
             self.update_optimum(family)
-            if family.analysis_result.improving_assignment is not None:
-                satisfying_assignment = family.analysis_result.improving_assignment
             if family.analysis_result.can_improve == False:
                 self.explore(family)
                 self.stage_control.prune_ar(family.size)
@@ -152,16 +148,16 @@ class SynthesizerHybrid(paynt.synthesizer.synthesizer_ar.SynthesizerAR, paynt.sy
                 self.stage_control.prune_cegis(pruned)
 
                 if accepting_assignment is not None:
-                    satisfying_assignment = accepting_assignment
+                    self.best_assignment = accepting_assignment
                     if not self.quotient.specification.can_be_improved:
-                        return satisfying_assignment
+                        return self.best_assignment
 
                 # assignment is UNSAT: move on to the next assignment
 
             if family_explored:
                 continue
         
-            subfamilies = self.quotient.split(family, paynt.synthesizer.synthesizer.Synthesizer.incomplete_search)
+            subfamilies = self.quotient.split(family)
             families = families + subfamilies
 
-        return satisfying_assignment
+        return self.best_assignment

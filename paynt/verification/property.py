@@ -50,10 +50,10 @@ class Property:
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
 
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
+        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
+        se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
         # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
 
     @classmethod
@@ -118,11 +118,15 @@ class Property:
         return formula_alt
     
     def __str__(self):
-        return str(self.formula)
+        return str(self.property.raw_formula)
 
     @property
     def reward(self):
         return self.formula.is_reward_operator
+
+    @property
+    def is_discounted_reward(self):
+        return self.formula.is_reward_operator and self.formula.subformula.is_discounted_total_reward_formula
 
     @property
     def maximizing(self):
@@ -141,9 +145,7 @@ class Property:
         self.__init__(prop)
 
     def property_copy(self):
-        formula_copy = self.formula.clone()
-        property_copy = stormpy.core.Property(self.name, formula_copy)
-        return property_copy
+        return stormpy.core.Property(self.name, self.property.raw_formula.clone())
 
     def copy(self):
         return Property(self.property_copy())
@@ -162,7 +164,7 @@ class Property:
         return False
 
     def negate(self):
-        negated_formula = self.formula.clone()
+        negated_formula = self.property.raw_formula.clone()
         negated_formula.comparison_type = {
             stormpy.ComparisonType.LESS:    stormpy.ComparisonType.GEQ,
             stormpy.ComparisonType.LEQ:     stormpy.ComparisonType.GREATER,
@@ -258,7 +260,6 @@ class OptimalityProperty(Property):
         return self.result_valid(value) and self.meets_op(value, self.optimum)
 
     def update_optimum(self, optimum):
-        # assert self.improves_optimum(optimum)
         self.optimum = optimum
         if self.minimizing:
             self.threshold = optimum * (1 - self.epsilon)
@@ -285,7 +286,7 @@ class OptimalityProperty(Property):
         return not( not self.reward and self.minimizing and self.threshold == 0 )
 
     def negate(self):
-        negated_formula = self.formula.clone()
+        negated_formula = self.property.raw_formula.clone()
         negate_optimality_type = {
             stormpy.OptimizationDirection.Minimize:    stormpy.OptimizationDirection.Maximize,
             stormpy.OptimizationDirection.Maximize:    stormpy.OptimizationDirection.Minimize
@@ -346,6 +347,9 @@ class Specification:
         if self.has_optimality:
             properties += [self.optimality]
         return properties
+
+    def all_constraint_indices(self):
+        return range(len(self.constraints))
 
     def stormpy_properties(self):
         return [p.property for p in self.all_properties()]

@@ -1,10 +1,9 @@
 import stormpy
 import payntbind
 
-
-import paynt.quotient.models
-
+import paynt.models.model_builder
 import paynt.quotient.quotient
+import paynt.quotient.mdp
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
 import paynt.quotient.posg
@@ -15,11 +14,11 @@ import paynt.verification.property
 from paynt.parser.prism_parser import PrismParser
 
 import uuid
+import os
+import json
 
 import logging
 logger = logging.getLogger(__name__)
-
-import os
 
 
 def substitute_suffix(string, delimiter, replacer):
@@ -55,12 +54,6 @@ def make_rewards_action_based(model):
 class Sketch:
 
     @classmethod
-    def read_drn(cls, sketch_path):
-        builder_options = stormpy.core.DirectEncodingParserOptions()
-        builder_options.build_choice_labels = True
-        return stormpy.build_model_from_drn(sketch_path, builder_options)
-
-    @classmethod
     def load_sketch(cls, sketch_path, properties_path,
         export=None, relative_error=0, precision=1e-4, constraint_bound=None):
 
@@ -91,10 +84,21 @@ class Sketch:
         if filetype is None:
             try:
                 logger.info(f"assuming sketch in DRN format...")
-                explicit_quotient = Sketch.read_drn(sketch_path)
+                explicit_quotient = paynt.models.model_builder.ModelBuilder.from_drn(sketch_path)
                 specification = PrismParser.parse_specification(properties_path, relative_error)
                 filetype = "drn"
-            except:
+                project_path = os.path.dirname(sketch_path)
+                valuations_filename = "state-valuations.json"
+                valuations_path = project_path + "/" + valuations_filename
+                state_valuations = None
+                if os.path.exists(valuations_path) and os.path.isfile(valuations_path):
+                    with open(valuations_path) as file:
+                        state_valuations = json.load(file)
+                if state_valuations is not None:
+                    logger.info(f"found state valuations in {valuations_path}, adding to the model...")
+                    explicit_quotient = payntbind.synthesis.addStateValuations(explicit_quotient,state_valuations)
+            except Exception as e:
+                print(e)
                 pass
         if filetype is None:
             try:
@@ -119,14 +123,17 @@ class Sketch:
             except SyntaxError:
                 pass
 
-        assert filetype is not None, "unknow format of input file"
+        assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
-             
-        paynt.quotient.models.Mdp.initialize(specification)
+
         paynt.verification.property.Property.initialize()
-        
+        updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+        if updated is not None: explicit_quotient = updated
+        if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
+            logger.warning("WARNING: choice labeling for the quotient is not canonic")
+
         make_rewards_action_based(explicit_quotient)
-        logger.debug("constructed explicit quotient having {} states and {} actions".format(
+        logger.debug("constructed explicit quotient having {} states and {} choices".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
         specification.check()
@@ -140,8 +147,25 @@ class Sketch:
             logger.info("export OK, aborting...")
             exit(0)
 
-        return Sketch.build_quotient_container(prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager)
-    
+        if jani_unfolder is not None:
+            if prism.model_type == stormpy.storage.PrismModelType.DTMC:
+                quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
+            elif prism.model_type == stormpy.storage.PrismModelType.MDP:
+                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
+            elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
+                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
+        else:
+            assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
+            if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
+                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
+            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
+                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
+            elif not explicit_quotient.is_partially_observable:
+                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
+            else:
+                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
+        return quotient_container
+
 
     @classmethod
     def load_sketch_as_all_in_one(cls, sketch_path, properties_path):
@@ -211,25 +235,3 @@ class Sketch:
             output_path = substitute_suffix(sketch_path, '.', 'pomdp')
             property_path = substitute_suffix(sketch_path, '/', 'props.pomdp')
             paynt.parser.pomdp_parser.PomdpParser.write_model_in_pomdp_solve_format(explicit_quotient, output_path, property_path)
-
-
-    @classmethod
-    def build_quotient_container(cls, prism, jani_unfolder, explicit_quotient, family, coloring, specification, obs_evaluator, decpomdp_manager):
-        if jani_unfolder is not None:
-            if prism.model_type == stormpy.storage.PrismModelType.DTMC:
-                quotient_container = paynt.quotient.quotient.DtmcFamilyQuotient(explicit_quotient, family, coloring, specification)
-            elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
-            elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
-                quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
-        else:
-            assert explicit_quotient.is_nondeterministic_model
-            if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
-                quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
-            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
-                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
-            else:
-                quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
-        return quotient_container
-
-

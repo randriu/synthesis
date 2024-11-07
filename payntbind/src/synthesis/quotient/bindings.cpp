@@ -3,15 +3,52 @@
 #include "JaniChoices.h"
 #include "Family.h"
 #include "Coloring.h"
+#include "ColoringSmt.h"
+#include "src/synthesis/translation/componentTranslations.h"
 
+#include <storm/storage/expressions/ExpressionManager.h>
+#include <storm/storage/expressions/Variable.h>
+#include <storm/storage/sparse/StateValuations.h>
+#include <storm/utility/builder.h>
+
+#include <storm/exceptions/InvalidModelException.h>
 #include <storm/models/sparse/Mdp.h>
+#include <storm/models/sparse/NondeterministicModel.h>
 #include <storm/storage/BitVector.h>
-#include <storm/models/sparse/Mdp.h>
 #include <storm/storage/sparse/JaniChoiceOrigins.h>
 
 #include <storm/storage/Scheduler.h>
 
+#include <z3++.h>
+
 namespace synthesis {
+
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Model<ValueType>> addStateValuations(
+    storm::models::sparse::Model<ValueType> const& model,
+    std::vector<std::vector<std::pair<std::string,int64_t>>> const& state_valuations
+) {
+    STORM_LOG_THROW(
+        model.getNumberOfStates() == state_valuations.size(), storm::exceptions::InvalidModelException,
+        "Number of state valuations does not match the state count."
+    );
+    std::shared_ptr<storm::expressions::ExpressionManager> em(new storm::expressions::ExpressionManager());
+    storm::storage::sparse::StateValuationsBuilder sv_builder;
+    for(auto [variable_name,_]: state_valuations[0]) {
+        sv_builder.addVariable(em->declareIntegerVariable(variable_name));
+    }
+    for(uint64_t state = 0; state < model.getNumberOfStates(); ++state) {
+        std::vector<bool> boolean_values;
+        std::vector<int64_t> integer_values(em->getNumberOfVariables());
+        for(auto [variable_name,value]: state_valuations[state]) {
+            integer_values[em->getVariable(variable_name).getIndex()] = value;
+        }
+        sv_builder.addState(state, std::move(boolean_values), std::move(integer_values));
+    }
+    storm::storage::sparse::ModelComponents<ValueType> components = synthesis::componentsFromModel(model);
+    components.stateValuations = sv_builder.build();
+    return storm::utility::builder::buildModelFromComponents<ValueType>(model.getType(),std::move(components));
+}
 
 template<typename ValueType>
 std::pair<storm::storage::BitVector,std::vector<std::vector<std::pair<uint64_t,uint64_t>>>> janiMapChoicesToHoleAssignments(
@@ -59,19 +96,6 @@ std::pair<storm::storage::BitVector,std::vector<std::vector<std::pair<uint64_t,u
     return std::make_pair(choice_is_valid,choice_to_hole_assignment);
 }
 
-
-template<typename ValueType>
-std::vector<std::vector<uint64_t>> computeChoiceDestinations(storm::models::sparse::Mdp<ValueType> const& mdp) {
-    uint64_t num_choices = mdp.getNumberOfChoices();
-    std::vector<std::vector<uint64_t>> choice_destinations(num_choices);
-    for(uint64_t choice = 0; choice < num_choices; ++choice) {
-        for(auto const& entry: mdp.getTransitionMatrix().getRow(choice)) {
-            choice_destinations[choice].push_back(entry.getColumn());
-        }
-    }
-    return choice_destinations;
-}
-
 template<typename ValueType>
 std::vector<uint64_t> schedulerToStateToGlobalChoice(
     storm::storage::Scheduler<ValueType> const& scheduler, storm::models::sparse::Mdp<ValueType> const& sub_mdp,
@@ -90,7 +114,8 @@ std::vector<uint64_t> schedulerToStateToGlobalChoice(
 
 std::map<uint64_t,double> computeInconsistentHoleVariance(
     Family const& family,
-    std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice, std::vector<double> const& choice_to_value,
+    std::vector<uint64_t> const& row_groups, std::vector<uint64_t> const& choice_to_global_choice,
+    std::vector<double> const& choice_to_value,
     Coloring const& coloring, std::map<uint64_t,std::vector<uint64_t>> const& hole_to_inconsistent_options,
     std::vector<double> const& state_to_expected_visits
 ) {
@@ -260,20 +285,18 @@ storm::storage::BitVector policyToChoicesForFamily(
 
 void bindings_coloring(py::module& m) {
 
+    m.def("addStateValuations", &synthesis::addStateValuations<double>);
     m.def("janiMapChoicesToHoleAssignments", &synthesis::janiMapChoicesToHoleAssignments<double>);
     m.def("addChoiceLabelsFromJani", &synthesis::addChoiceLabelsFromJani<double>);
-
-    m.def("computeChoiceDestinations", &synthesis::computeChoiceDestinations<double>);
 
     m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
 
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);
 
-
     py::class_<synthesis::Family>(m, "Family")
-        .def(py::init<>(), "Constructor.")
-        .def(py::init<synthesis::Family const&>(), "Constructor.", py::arg("other"))
+        .def(py::init<>())
+        .def(py::init<synthesis::Family const&>())
         .def("numHoles", &synthesis::Family::numHoles)
         .def("addHole", &synthesis::Family::addHole)
         
@@ -287,12 +310,26 @@ void bindings_coloring(py::module& m) {
         ;
 
     py::class_<synthesis::Coloring>(m, "Coloring")
-        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint64_t,uint64_t>>> >(), "Constructor.")
+        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint64_t,uint64_t>>> >())
         .def("getChoiceToAssignment", &synthesis::Coloring::getChoiceToAssignment)
         .def("getStateToHoles", &synthesis::Coloring::getStateToHoles)
-        .def("getUncoloredChoices", &synthesis::Coloring::getUncoloredChoices)
         .def("selectCompatibleChoices", &synthesis::Coloring::selectCompatibleChoices)
         .def("collectHoleOptions", &synthesis::Coloring::collectHoleOptions)
         ;
 
+    py::class_<synthesis::ColoringSmt<>>(m, "ColoringSmt")
+        .def(py::init<
+            storm::models::sparse::NondeterministicModel<double> const&,
+            std::vector<std::string> const&,
+            std::vector<std::vector<int64_t>> const&,
+            std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const&,
+            bool
+        >())
+        .def("getFamilyInfo", &synthesis::ColoringSmt<>::getFamilyInfo)
+        .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
+        .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
+        .def("areChoicesConsistent", &synthesis::ColoringSmt<>::areChoicesConsistent)
+        .def_property_readonly("unsat_core", [](synthesis::ColoringSmt<>& coloring) {return coloring.unsat_core;})
+        .def("getProfilingInfo", &synthesis::ColoringSmt<>::getProfilingInfo)
+        ;
 }

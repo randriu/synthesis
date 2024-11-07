@@ -67,11 +67,11 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         assert family.mdp is not None, "analyzed family does not have an associated quotient MDP"
 
         dtmc = self.quotient.build_assignment(assignment)
-        self.stat.iteration_dtmc(dtmc.states)
-        mc_result = self.quotient.check_specification_for_dtmc(dtmc, family.constraint_indices, short_evaluation=True)
+        self.stat.iteration(dtmc)
+        result = dtmc.check_specification(self.quotient.specification, family.constraint_indices, short_evaluation=True)
         # analyze model checking results
         accepting_assignment = None
-        accepting,improving_value = mc_result.accepting_dtmc(self.quotient.specification)
+        accepting,improving_value = result.accepting_dtmc(self.quotient.specification)
         if accepting:
             accepting_assignment = assignment
         if improving_value is not None:
@@ -79,7 +79,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         if accepting and not self.quotient.specification.can_be_improved():
             return [], accepting_assignment
 
-        conflict_requests = self.collect_conflict_requests(family, mc_result)
+        conflict_requests = self.collect_conflict_requests(family, result)
         conflicts = self.conflict_generator.construct_conflicts(family, assignment, dtmc, conflict_requests)
 
         return conflicts, accepting_assignment
@@ -92,22 +92,21 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         self.conflict_generator.initialize()
 
         # use sketch design space as a SAT baseline (TODO why?)
-        smt_solver = paynt.family.smt.SmtSolver(self.quotient.design_space)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient.family)
         
         # CEGIS loop
-        satisfying_assignment = None
         assignment = smt_solver.pick_assignment(family)
         while assignment is not None:
             
             conflicts, accepting_assignment = self.analyze_family_assignment_cegis(family, assignment)
             if accepting_assignment is not None:
-                satisfying_assignment = accepting_assignment
+                self.best_assignment = accepting_assignment
                 if not self.quotient.specification.can_be_improved():
-                    return satisfying_assignment
+                    return self.best_assignment
 
             pruned = smt_solver.exclude_conflicts(family, assignment, conflicts)
             self.explored += pruned
             
             # construct next assignment
             assignment = smt_solver.pick_assignment(family)
-        return satisfying_assignment
+        return self.best_assignment

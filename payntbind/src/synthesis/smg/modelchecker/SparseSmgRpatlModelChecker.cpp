@@ -1,5 +1,6 @@
-/* 
- * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+/**
+ * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
+ * Storm version.
  */
 
 #include "SparseSmgRpatlModelChecker.h"
@@ -23,6 +24,7 @@
 #include "helper/SparseNondeterministicGameInfiniteHorizonHelper.h"
 
 namespace synthesis {
+
 
     storm::logic::FragmentSpecification rpatl() {
         storm::logic::FragmentSpecification rpatl = storm::logic::propositional();
@@ -64,6 +66,8 @@ namespace synthesis {
             return false;
         }
     }
+
+    #ifndef DISABLE_SMG
 
     template<typename SparseSmgModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<SparseSmgModelType>::checkGameFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::GameFormula, ValueType> const& checkTask) {
@@ -221,5 +225,8 @@ namespace synthesis {
         return result;
     }
 
+    #endif //DISABLE_SMG
+
     template class SparseSmgRpatlModelChecker<storm::models::sparse::Smg<double>>;
+
 }

@@ -1,7 +1,8 @@
 import stormpy.storage
 
-import paynt.utils.profiler
+import paynt.utils.timer
 import paynt.synthesizer.synthesizer
+import paynt.models.models
 
 import math
 
@@ -27,7 +28,7 @@ class Statistic:
 
     # parameters
     status_period_seconds = 3
-    synthesis_timer_total = paynt.utils.profiler.Timer()
+    synthesis_timer_total = paynt.utils.timer.Timer()
     
     def __init__(self, synthesizer):
         
@@ -58,11 +59,12 @@ class Statistic:
         self.num_policies_merged = None
 
         self.family_size = None
-        self.synthesis_timer = paynt.utils.profiler.Timer()
+        self.synthesis_timer = paynt.utils.timer.Timer()
         self.status_horizon = Statistic.status_period_seconds
 
 
     def start(self, family):
+        logger.info("synthesis initiated, design space: {}".format(family.size_or_order))
         self.family_size = family.size
         self.synthesis_timer.start()
         if not self.synthesis_timer_total.running:
@@ -70,7 +72,7 @@ class Statistic:
     
     def iteration(self, model):
         ''' Identify the type of the model and count corresponding iteration. '''
-        if isinstance(model, paynt.quotient.models.Mdp):
+        if isinstance(model, paynt.models.models.Mdp):
             model = model.model
         if type(model) == stormpy.storage.SparseDtmc:
             self.iteration_dtmc(model.nr_states)
@@ -110,8 +112,7 @@ class Statistic:
     
     def status(self):
         ret_str = "> "
-        discarded = self.quotient.discarded
-        fraction_explored = (self.synthesizer.explored + discarded) / self.family_size
+        fraction_explored = self.synthesizer.explored / self.family_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
         ret_str += f"progress {percentage_explored}%"
@@ -141,11 +142,15 @@ class Statistic:
         if self.iterations_dtmc is not None:
             iters += [f"DTMC: {self.iterations_dtmc}"]
         ret_str += ", iters = {" + ", ".join(iters) + "}"
+        # ret_str += f", pres = {self.synthesizer.num_preserved}"
         
         spec = self.quotient.specification
-        if spec.has_optimality and spec.optimality.optimum is not None:
-            optimum = round(spec.optimality.optimum,3)
-            ret_str += f", opt = {optimum}"
+        if spec.has_optimality:
+            opt = self.synthesizer.best_assignment_value
+            if opt is None:
+                opt = spec.optimality.optimum
+            if opt is not None:
+                ret_str += f", opt = {round(opt,4)}"
         return ret_str
 
 
@@ -156,10 +161,10 @@ class Statistic:
         self.status_horizon = self.synthesis_timer.read() + Statistic.status_period_seconds
 
 
-    def finished_synthesis(self, assignment):
+    def finished_synthesis(self):
         self.job_type = "synthesis"
         self.synthesis_timer.stop()
-        self.synthesized_assignment = assignment
+        self.synthesized_assignment = self.synthesizer.best_assignment
 
     def finished_evaluation(self, evaluations):
         self.job_type = "evaluation"
@@ -207,7 +212,7 @@ class Statistic:
         if not self.evaluations or not isinstance(self.evaluations[0], paynt.synthesizer.synthesizer.FamilyEvaluation):
             return ""
         members_sat = sum( [evaluation.family.size for evaluation in self.evaluations if evaluation.sat ])
-        members_total = self.quotient.design_space.size
+        members_total = self.quotient.family.size
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
 
@@ -220,7 +225,7 @@ class Statistic:
 
         quotient_states = self.quotient.quotient_mdp.nr_states
         quotient_actions = self.quotient.quotient_mdp.nr_choices
-        design_space = f"number of holes: {self.quotient.design_space.num_holes}, family size: {self.quotient.design_space.size_or_order}, quotient: {quotient_states} states / {quotient_actions} actions"
+        design_space = f"number of holes: {self.quotient.family.num_holes}, family size: {self.quotient.family.size_or_order}, quotient: {quotient_states} states / {quotient_actions} actions"
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
 
         iterations = self.get_summary_iterations()
@@ -240,7 +245,6 @@ class Statistic:
     
     def print(self):    
         print(self.get_summary(),end="")
-        # self.print_mdp_family_table_entries()
 
 
     def print_mdp_family_table_entries(self):
