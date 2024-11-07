@@ -23,17 +23,20 @@ class DrnParser:
         explicit_model = None
         try:
             type = DrnParser.decide_type_of_drn(sketch_path)
-            if type == 'POSMG':
+            if type == 'POSMG' or type == 'SMG':
                 pomdp_path = sketch_path + '.tmp'
                 state_player_indications = DrnParser.pomdp_from_posmg(sketch_path, pomdp_path)
                 pomdp = DrnParser.read_pomdp_drn(pomdp_path)
                 explicit_model = payntbind.synthesis.create_posmg(pomdp, state_player_indications)
                 os.remove(pomdp_path)
+            elif type == 'SMG':
+                smg = DrnParser.read_pomdp_drn(sketch_path)
             elif type == 'POMDP':
                 explicit_model = DrnParser.read_pomdp_drn(sketch_path)
             else:
                 raise ValueError('Unsupported model type in .drn file')
-        except:
+        except Exception as e:
+            print(e)
             raise ValueError('Failed to read sketch file in a .drn format')
         return explicit_model
 
@@ -95,7 +98,8 @@ class DrnParser:
     def read_pomdp_drn(cls, sketch_path):
         builder_options = stormpy.core.DirectEncodingParserOptions()
         builder_options.build_choice_labels = True
-        return stormpy.core._build_sparse_model_from_drn(sketch_path, builder_options)
+        pomdp = stormpy.core._build_sparse_model_from_drn(sketch_path, builder_options)
+        return pomdp
 
     @staticmethod
     def parse_posmg_specification(properties_path):
