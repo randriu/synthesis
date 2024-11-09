@@ -52,7 +52,7 @@ def solve_family(args):
         improving_assignment = res.improving_assignment
         if improving_assignment is not None:
             improving_assignment = family_to_hole_options(improving_assignment)
-        
+
         subfamilies = []
         if res.can_improve:
             subfamilies = quotient.split(family)
@@ -63,7 +63,7 @@ def solve_family(args):
     except:
         logger.error("Worker sub-process encountered an error.")
         return None
-        
+
 
 
 class SynthesizerMultiCoreAR(SynthesizerAR):
@@ -90,7 +90,7 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
         with multiprocessing.Pool(
             # processes=1
         ) as pool:
-            
+
             while families:
 
                 # get current optimum
@@ -106,7 +106,7 @@ class SynthesizerMultiCoreAR(SynthesizerAR):
                 input_families_size = sum([family.size for family in input_families])
                 remaining_families = families[:-split]
                 input_families = [family_to_hole_options(family) for family in input_families]
-                
+
                 inputs = zip(input_families, [optimum] * len(input_families))
 
                 results = pool.map(solve_family, inputs)

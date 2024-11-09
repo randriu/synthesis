@@ -25,8 +25,8 @@ namespace synthesis {
 
     template<typename ValueType>
     GameMaximalEndComponentDecomposition<ValueType>::GameMaximalEndComponentDecomposition(storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions) {
-        singleMEC(transitionMatrix, backwardTransitions);
-        //performGameMaximalEndComponentDecomposition(transitionMatrix, backwardTransitions);
+        // singleMEC(transitionMatrix, backwardTransitions);
+        performGameMaximalEndComponentDecomposition(transitionMatrix, backwardTransitions);
     }
 
     template<typename ValueType>

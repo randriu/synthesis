@@ -1,4 +1,5 @@
 import stormpy
+from paynt.parser.drn_parser import DrnParser
 
 class ModelBuilder:
 
@@ -36,6 +37,4 @@ class ModelBuilder:
 
     @classmethod
     def from_drn(cls, drn_path):
-        builder_options = stormpy.core.DirectEncodingParserOptions()
-        builder_options.build_choice_labels = True
-        return stormpy.build_model_from_drn(drn_path, builder_options)
+        return DrnParser.parse_drn(drn_path)

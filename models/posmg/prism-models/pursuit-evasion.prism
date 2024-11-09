@@ -1,0 +1,131 @@
+// Pursuit evasion
+// note: model not tested yet
+
+smg
+
+const int HEIGHT=3;
+const int WIDTH=3;
+
+const int xMIN=1;
+const int xMAX=WIDTH;
+const int yMIN=1;
+const int yMAX=HEIGHT;
+
+// PLAYERS
+player p
+	pursuer1, [p1up], [p1down], [p1right], [p1left], 
+	pursuer2, [p2up], [p2down], [p2right], [p2left]
+endplayer
+
+player e
+	evader, [eup], [edown], [eright], [eleft]
+endplayer
+
+
+// END CONDITION
+formula done = ((p1x = ex) & (p1y = ey)) | ((p2x = ex) & (p1y = ey));
+label "goal" = done;
+
+
+// !!! uncomment before exporting !!!
+
+// OBSERVATIONS
+// player p only observes position of all pursuers
+observable "p1x" = p1x;
+observable "p1y" = p1y;
+observable "p2x" = p1x;
+observable "p2y" = p2y;
+observable "clk" = clk;
+observable "done" = done;
+
+// CLOCK MODULE
+// to make game alternating
+// player 2 (e) plays first, then player 1 (p)
+// player 1's actions are divided between two (possibly more) modules (corresponding to individual pursuers),
+// but could also be modeled at as one combined action of the whole pursuer unit
+// todo: which approach is better?
+const int pursuer_count=2;
+formula next_clk = mod(clk+1, pursuer_count+1); // +1 because of evader
+
+module clk
+	// clk=0 means it's evaders turn
+	clk : [0..pursuer_count] init 0;
+
+	[eup] 		!done & clk=0 -> (clk'=next_clk);
+	[edown] 	!done & clk=0 -> (clk'=next_clk);
+	[eright]	!done & clk=0 -> (clk'=next_clk);
+	[eleft] 	!done & clk=0 -> (clk'=next_clk);
+
+	[p1up]		!done & clk=1 -> (clk'=next_clk);
+	[p1down]	!done & clk=1 -> (clk'=next_clk);
+	[p1right]	!done & clk=1 -> (clk'=next_clk);
+	[p1left]	!done & clk=1 -> (clk'=next_clk);
+
+	[p2up]		!done & clk=2 -> (clk'=next_clk);
+	[p2down]	!done & clk=2 -> (clk'=next_clk);
+	[p2right]	!done & clk=2 -> (clk'=next_clk);
+	[p2left]	!done & clk=2 -> (clk'=next_clk);
+
+endmodule
+
+
+// MOVEMENT FORMULAS
+formula move_up = min(ey+1, yMAX);
+formula move_down = max(ey-1, yMIN);
+formula move_right = min(ex+1, xMAX);
+formula move_left = max(ex-1, xMIN);
+
+
+// EVADER AND PURSUERS MODULES
+const int ex_init = xMAX;
+const int ey_init = yMAX;
+
+module evader
+	ex : [xMIN..xMAX] init ex_init;
+	ey : [yMIN..yMAX] init ey_init;
+
+	[eup] 		true -> 1 : (ey'=move_up);
+	[edown] 	true -> 1 : (ey'=move_down);
+	[eright]	true -> 1 : (ex'=move_right);
+	[eleft]		true -> 1 : (ex'=move_left);
+endmodule
+
+
+const int p1x_init=1;
+const int p1y_init=1;
+
+module 
+	pursuer1 = evader 
+	[ ex=p1x, ey=p1y, ex_init=p1x_init, ey_init=p1y_init, eup=p1up, edown=p1down, eright=p1right, eleft=p1left ]
+endmodule
+
+
+const int p2x_init=1;
+const int p2y_init=2;
+
+module 
+	pursuer2 = evader
+	[ ex=p2x, ey=p2y, ex_init=p2x_init, ey_init=p2y_init, eup=p2up, edown=p2down, eright=p2right, eleft=p2left ]
+endmodule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

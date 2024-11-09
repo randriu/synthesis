@@ -1,6 +1,5 @@
 import stormpy
 import payntbind
-
 import math
 import operator
 
@@ -10,6 +9,11 @@ logger = logging.getLogger(__name__)
 
 def construct_property(prop, relative_error):
     rf = prop.raw_formula
+    if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
+        import paynt.quotient.posmg
+        paynt.quotient.posmg.PosmgQuotient.optimizing_player = extract_player_index(rf)
+        rf = rf.subformula
+        prop = stormpy.core.Property(prop.name, rf)
     assert rf.has_bound != rf.has_optimality_type, \
         "optimizing formula contains a bound or a comparison formula does not"
     if rf.has_bound:
@@ -17,6 +21,14 @@ def construct_property(prop, relative_error):
     else:
         prop = OptimalityProperty(prop, relative_error)
     return prop
+
+def extract_player_index(formula):
+    # TODO add support for multiple players in coalition
+    string = formula.__str__()
+    l_idx = string.index('<<')
+    r_idx = string.index('>>')
+    player_num = string[l_idx + len('<<') : r_idx]
+    return int(player_num)
 
 def construct_reward_property(reward_name, minimizing, target_label):
     direction = "min" if minimizing else "max"
@@ -27,12 +39,12 @@ def construct_reward_property(reward_name, minimizing, target_label):
 
 class Property:
     ''' Wrapper over a stormpy property. '''
-    
+
     # model checking environment (method & precision)
     environment = None
     # model checking precision
     model_checking_precision = 1e-4
-    
+
     @classmethod
     def set_model_checking_precision(cls, precision):
         cls.model_checking_precision = precision
@@ -70,7 +82,7 @@ class Property:
     def above_model_checking_precision(a, b):
         return abs(a-b) > Property.model_checking_precision
 
-    
+
     def __init__(self, prop):
         self.property = prop
         self.name = prop.name
@@ -102,7 +114,7 @@ class Property:
         else:
             self.formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
         self.formula_alt = Property.alt_formula(self.formula)
-        
+
     @staticmethod
     def alt_formula(formula):
         '''
@@ -116,7 +128,7 @@ class Property:
             optimality_type = stormpy.OptimizationDirection.Minimize
         formula_alt.set_optimality_type(optimality_type)
         return formula_alt
-    
+
     def __str__(self):
         return str(self.property.raw_formula)
 
@@ -188,7 +200,7 @@ class Property:
     def get_reward_name(self):
         assert self.reward
         return self.formula.reward_name
-    
+
     def transform_to_optimality_formula(self, prism):
         direction = "min" if self.minimizing else "max"
         if self.reward:
@@ -298,11 +310,11 @@ class OptimalityProperty(Property):
 
 
 class Specification:
-    
+
     def __init__(self, properties):
         self.constraints = []
         self.optimality = None
-        
+
         # sort the properties
         optimalities = []
         for p in properties:
@@ -329,7 +341,7 @@ class Specification:
     def reset(self):
         if self.optimality is not None:
             self.optimality.reset()
-        
+
     @property
     def has_optimality(self):
         return self.optimality is not None
@@ -361,10 +373,10 @@ class Specification:
         return any([p.is_until for p in self.all_properties()])
 
     def transform_until_to_eventually(self):
-        for p in self.all_properties(): 
+        for p in self.all_properties():
             p.transform_until_to_eventually()
 
-    
+
     def check(self):
         # TODO
         pass

@@ -83,7 +83,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 return
 
         self.num_families_model_checked += 1
-        self.check_specification_for_mdp(family)
+        self.check_specification(family)
         if not family.analysis_result.can_improve:
             return
         if SynthesizerDecisionTree.scheduler_path is not None:

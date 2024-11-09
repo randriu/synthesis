@@ -1,0 +1,73 @@
+smg
+
+player p1
+	player1, [roll1]
+endplayer
+
+player p2
+	player2, [roll2]
+endplayer
+
+label "done" = finished;
+
+observable "clk" = clk;
+observable "finished" = finished;
+
+formula next_clk = mod(clk+1, 4);
+module clk
+
+	clk : [0..3] init 0;
+
+	[roll1] !finished & clk=0 -> (clk'=next_clk);
+	[roll2] !finished & clk=1 -> (clk'=next_clk);
+	[eval]  !finished & clk=2 -> (clk'=next_clk);
+	[end]	!finished & clk=3 -> (clk'=next_clk);
+
+endmodule
+
+module player1
+
+	p1val : [1..2] init 1;	
+
+	[roll1] true -> 0.5 : (p1val'=1) + 0.5 : (p1val'=2);
+
+endmodule
+
+module player2
+
+	p2val : [1..2] init 1;	
+
+	[roll2] true -> 0.5 : (p2val'=1) + 0.5 : (p2val'=2);
+
+endmodule
+
+module eval
+
+	p1win : bool init false;
+	p2win : bool init false;
+
+	[eval] p1val>p2val -> 1 : (p1win'=true);
+	[eval] p2val>p1val -> 1 : (p2win'=true);
+	[eval] p1val=p2val -> 1 : true;
+
+endmodule
+
+module end
+
+	finished : bool init false;
+
+	[end] p1win | p2win -> 1 : (finished'=true);
+	[end] !p1win & !p2win -> 1 : true;
+
+endmodule
+
+
+
+rewards
+	p1win : 100;
+	true : 1;
+endrewards
+
+rewards
+	[roll2] true : 2;
+endrewards

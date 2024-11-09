@@ -74,7 +74,7 @@ class SynthesizerPomdp:
 
         while True:
         # for x in range(2):
-            
+
             paynt.quotient.pomdp.PomdpQuotient.current_family_index = mem_size
 
             # unfold memory according to the best result
@@ -160,7 +160,7 @@ class SynthesizerPomdp:
                 break
 
             mem_size += 1
-            
+
             #break
 
     # main SAYNT loop
@@ -255,7 +255,7 @@ class SynthesizerPomdp:
 
             if self.storm_control.is_storm_better == False:
                 self.storm_control.parse_results(self.quotient)
-            
+
             paynt.quotient.pomdp.PomdpQuotient.current_family_index = mem_size
 
             # unfold memory according to the best result
@@ -336,7 +336,7 @@ class SynthesizerPomdp:
             self.storm_control.update_data()
 
             mem_size += 1
-            
+
             #break
 
 
@@ -347,13 +347,13 @@ class SynthesizerPomdp:
         mem_size = paynt.quotient.pomdp.PomdpQuotient.initial_memory_size
         opt = self.quotient.specification.optimality.optimum
         while True:
-            
+
             logger.info("Synthesizing optimal k={} controller ...".format(mem_size) )
             if unfold_imperfect_only:
                 self.quotient.set_imperfect_memory_size(mem_size)
             else:
                 self.quotient.set_global_memory_size(mem_size)
-            
+
             self.synthesize(self.quotient.family)
 
             opt_old = opt
@@ -377,9 +377,9 @@ class SynthesizerPomdp:
             ))
             # start SAYNT
             if self.storm_control.iteration_timeout is not None:
-                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout, 
-                                          paynt_timeout=self.storm_control.paynt_timeout, 
-                                          storm_timeout=self.storm_control.storm_timeout, 
+                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
+                                          paynt_timeout=self.storm_control.paynt_timeout,
+                                          storm_timeout=self.storm_control.storm_timeout,
                                           iteration_limit=0)
             # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
             elif self.storm_control.get_result is not None:
@@ -408,7 +408,7 @@ class SynthesizerPomdp:
             self.strategy_iterative(unfold_imperfect_only=True)
 
 
-        
+
 
 
 

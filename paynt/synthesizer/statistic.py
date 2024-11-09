@@ -185,7 +185,7 @@ class Statistic:
         iterations = ""
         if self.iterations_game is not None:
             avg_size = round(safe_division(self.acc_size_game, self.iterations_game))
-            type_stats = f"Game stats: avg MDP size: {avg_size}, iterations: {self.iterations_game}" 
+            type_stats = f"Game stats: avg game size: {avg_size}, iterations: {self.iterations_game}" 
             iterations += f"{type_stats}\n"
 
         if self.iterations_mdp is not None:

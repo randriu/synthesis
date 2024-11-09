@@ -6,12 +6,13 @@ import paynt.quotient.quotient
 import paynt.quotient.mdp
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
-import paynt.quotient.posg
+import paynt.quotient.posmg
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
 
 from paynt.parser.prism_parser import PrismParser
+from paynt.parser.drn_parser import DrnParser
 
 import uuid
 import os
@@ -127,20 +128,19 @@ class Sketch:
         logger.info("sketch parsing OK")
 
         paynt.verification.property.Property.initialize()
-        updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
-        if updated is not None: explicit_quotient = updated
-        if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
-            logger.warning("WARNING: choice labeling for the quotient is not canonic")
+        if not isinstance(explicit_quotient, payntbind.synthesis.Posmg):
+            updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+            if updated is not None: explicit_quotient = updated
+            if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
+                logger.warning("WARNING: choice labeling for the quotient is not canonic")
+        else:
+            pass
+            # TODO ??? is it necessary
 
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} choices".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
-        specification.check()
-        if specification.contains_until_properties() and filetype != "prism":
-            logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
-        specification.transform_until_to_eventually()
-        logger.info(f"found the following specification {specification}")
 
         if export is not None:
             Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)
@@ -155,11 +155,11 @@ class Sketch:
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
         else:
-            assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
+            # assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
                 quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
-            elif explicit_quotient.labeling.contains_label(paynt.quotient.posg.PosgQuotient.PLAYER_1_STATE_LABEL):
-                quotient_container = paynt.quotient.posg.PosgQuotient(explicit_quotient, specification)
+            elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
+                quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
             elif not explicit_quotient.is_partially_observable:
                 quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
             else:
@@ -217,9 +217,9 @@ class Sketch:
         except SyntaxError as e:
             logger.error(f"all in one approach supports only input in PRISM format!")
             raise e
-        
+
         return prism, specification, family
-    
+
     @classmethod
     def export(cls, export, sketch_path, jani_unfolder, explicit_quotient):
         if export == "jani":

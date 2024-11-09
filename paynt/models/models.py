@@ -6,13 +6,20 @@ import paynt.verification.property_result
 import logging
 logger = logging.getLogger(__name__)
 
+class Smg:
+    formula = None
+
+    @classmethod
+    def initialize(cls, specification):
+        cls.formula = specification
+
 class Mdp:
 
     @classmethod
     def assert_no_overlapping_guards(cls, model):
         if model.labeling.contains_label("overlap_guards"):
             assert model.labeling.get_states("overlap_guards").number_of_set_bits() == 0
-    
+
     def __init__(self, model):
         # Mdp.assert_no_overlapping_guards(model)
         self.model = model
@@ -54,7 +61,7 @@ class Mdp:
             spec_result.optimality_result = self.model_check_property(spec.optimality)
         return spec_result
 
-    
+
 
 class SubMdp(Mdp):
 
