@@ -21,7 +21,7 @@ include(resources/include_pybind11.cmake)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/macros.cmake)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # This sets interprocedural optimization off as this leads to some problems on some systems
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
@@ -90,7 +90,7 @@ endfunction(stormpy_optional_module)
 # Generate definitions used during compilation
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/config.h)
 
-payntbind_module(synthesis) 
+payntbind_module(synthesis)
 target_include_directories(synthesis
   PRIVATE
   src/synthesis/decpomdp/madp/base/

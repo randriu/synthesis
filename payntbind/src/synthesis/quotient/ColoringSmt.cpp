@@ -269,7 +269,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             "family is UNSAT (?)"
         );
     }
-    
+
     // for every action, compute for every path whether it admits this acitons
     /*std::vector<BitVector> action_path_enabled;
     for(uint64_t action = 0; action < num_actions; ++action) {
@@ -362,7 +362,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             STORM_LOG_WARN_COND(not subfamily.isAssignment(), "Hole assignment does not induce a DTMC.");
             selection.clear();
         }
-        solver.pop(); 
+        solver.pop();
     }
 
     timers[__FUNCTION__].stop();
@@ -514,7 +514,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     }
     STORM_LOG_THROW(harmonizing_hole_found, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");*/
 
-    solver.add(0 <= harmonizing_variable and harmonizing_variable < family.numHoles(), "harmonizing_domain");
+    solver.add(0 <= harmonizing_variable and harmonizing_variable < (int)family.numHoles(), "harmonizing_domain");
     consistent = check();
     STORM_LOG_THROW(consistent, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");
     model = solver.get_model();

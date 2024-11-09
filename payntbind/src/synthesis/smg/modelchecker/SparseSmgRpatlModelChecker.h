@@ -5,6 +5,7 @@
  * Storm version.
  */
 
+#include <gmpxx.h>
 #include <map>
 #include <functional>
 
