@@ -11,6 +11,7 @@ void bindings_posmg(py::module &m) {
         .def("get_observations", &synthesis::Posmg::getObservations)
         .def("get_p0_observation_count", &synthesis::Posmg::getP0ObservationCount)
         .def("get_mdp", &synthesis::Posmg::getMdp)
+        .def_property_readonly("nondeterministic_choice_indices", [](synthesis::Posmg const& m) { return m.getNondeterministicChoiceIndices(); })
         .def("get_pomdp", &synthesis::Posmg::getPomdp)
         // this binding (calculation) is done in stormpy for mdp, but posmg doesn't inherit from mdp, so it is also copied here
         .def("get_nr_available_actions", [](synthesis::Posmg const& posmg, uint64_t stateIndex)
