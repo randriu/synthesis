@@ -128,14 +128,11 @@ class Sketch:
         logger.info("sketch parsing OK")
 
         paynt.verification.property.Property.initialize()
-        if not isinstance(explicit_quotient, payntbind.synthesis.Posmg):
-            updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
-            if updated is not None: explicit_quotient = updated
-            if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
-                logger.warning("WARNING: choice labeling for the quotient is not canonic")
-        else:
-            pass
-            # TODO ??? is it necessary
+        updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+        if updated is not None: explicit_quotient = updated
+        if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
+            logger.warning("WARNING: choice labeling for the quotient is not canonic")
+
 
         make_rewards_action_based(explicit_quotient)
         logger.debug("constructed explicit quotient having {} states and {} choices".format(
