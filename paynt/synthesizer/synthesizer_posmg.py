@@ -28,7 +28,7 @@ class SynthesizerPosmg:
 
     def synthesize(self, family, print_stats=True):
         synthesizer = self.synthesizer(self.quotient)
-        family.constraint_indices = self.quotient.design_space.constraint_indices
+        family.constraint_indices = self.quotient.family.constraint_indices
         assignment = synthesizer.synthesize(family, keep_optimum=True, print_stats=print_stats)
         self.total_iters += synthesizer.stat.iterations_game
         return assignment
@@ -46,7 +46,7 @@ class SynthesizerPosmg:
             if mem_size > self.quotient.current_memory_size:
                 self.quotient.set_imperfect_memory_size(mem_size)
 
-            self.synthesize(self.quotient.design_space)
+            self.synthesize(self.quotient.family)
 
             opt_old = opt
             opt = self.quotient.specification.optimality.optimum
