@@ -3,7 +3,7 @@ from . import version
 import paynt.utils.timer
 import paynt.parser.sketch
 
-import paynt.quotient
+import paynt.quotient.quotient
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
 import paynt.quotient.storm_pomdp_control
