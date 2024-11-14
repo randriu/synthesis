@@ -113,6 +113,8 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             family = families.pop(-1)
             self.verify_family(family)
             self.update_optimum(family)
+            if not self.quotient.specification.has_optimality and self.best_assignment is not None:
+                break
             # break
             if family.analysis_result.can_improve is False:
                 self.explore(family)
