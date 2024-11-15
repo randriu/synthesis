@@ -792,7 +792,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
 
     def run(self, optimum_threshold=None):
-        return self.evaluate(export_filename_base=None)
+        return self.evaluate(export_filename_base=paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base)
 
 
     def export_evaluation_result(self, evaluations, export_filename_base):

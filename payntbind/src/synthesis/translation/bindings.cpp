@@ -4,10 +4,10 @@
 #include "src/synthesis/translation/componentTranslations.h"
 #include "src/synthesis/translation/choiceTransformation.h"
 
-#include <storm/exceptions/InvalidModelException.h>
-#include <storm/utility/builder.h>
-#include <storm/transformer/SubsystemBuilder.h>
+namespace synthesis {
 
+
+}
 void bindings_translation(py::module& m) {
 
     m.def("computeChoiceDestinations", &synthesis::computeChoiceDestinations<double>);
@@ -17,6 +17,7 @@ void bindings_translation(py::module& m) {
     m.def("enableAllActions", py::overload_cast<storm::models::sparse::Model<double> const&>(&synthesis::enableAllActions<double>));
     m.def("restoreActionsInAbsorbingStates", &synthesis::restoreActionsInAbsorbingStates<double>);
     m.def("addDontCareAction", &synthesis::addDontCareAction<double>);
+    m.def("createModelUnion", &synthesis::createModelUnion<double>);
 
     py::class_<synthesis::SubPomdpBuilder<double>, std::shared_ptr<synthesis::SubPomdpBuilder<double>>>(m, "SubPomdpBuilder")
         .def(py::init<storm::models::sparse::Pomdp<double> const&>())

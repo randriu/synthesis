@@ -1,8 +1,4 @@
-import sys
-
-if sys.version_info[0] == 2:
-    raise ImportError('Python 2.x is not supported for stormpy.')
-
+import stormpy
 from .synthesis import *
 
 __version__ = "unknown"
