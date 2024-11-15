@@ -4,6 +4,7 @@ import payntbind
 import paynt.models.models
 import paynt.quotient.quotient
 import paynt.quotient.mdp_family
+import paynt.quotient.posmg
 import paynt.verification.property
 
 
@@ -25,6 +26,35 @@ class SubPomdp:
         self.quotient_choice_map = quotient_choice_map
 
 
+class GameAbstractionSolver():
+    def __init__(self):
+        self.synthesizer
+
+        self.solution_value = None
+        self.solution_state_values = None
+        self.solution_state_to_player1_action = None
+        self.solution_state_to_quotient_choice = None
+
+    def solve(self, quotient_choice_mask, player1_maximizing, palyer2_maximizing):
+        # pomdp representing the game
+        # from self.pomdp and quotient_choice_mask Add states for player2
+        # Roman will implement this method
+        pomdp_game, state_player_indications = None
+
+        posmg = payntbind.synthesis.create_posmg(pomdp_game, state_player_indications)
+
+        prop = None # optimality Pmax for player1
+        posmgQuotient = paynt.quotient.posmg(posmg, prop)
+        synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
+        # for fsc synthesis (we probably dont want)
+        # synthesizer = paynt.synthesizer.synthesizer_posmg.SynthesizerPosmg(quotient)
+
+        assignment = synthesizer.run()
+        # assignment is of type paynt.family.family.Family
+
+        # how to get required values?
+
+
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
     def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
@@ -43,9 +73,12 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             obs = state_to_observation[state]
             if self.observation_to_actions[obs] is not None:
                 assert self.observation_to_actions[obs] == available_actions,\
-                    f"two states in observation class {obs} differ in available actions"
+                    f"two states in observation cla ss {obs} differ in available actions"
                 continue
             self.observation_to_actions[obs] = available_actions
+
+        # quotient pomdp representing the whole family of pomdps
+        self.pomdp = self.create_pomdp()
 
 
     @property
@@ -59,11 +92,27 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
-    
+    # todo test if correct
+    def create_pomdp(self):
+        mdp = self.quotient_mdp
+        observability_classes = self.state_to_observation
+
+        transition_matrix = mdp.transition_matrix
+        state_labeling = mdp.labeling
+        components = stormpy.SparseModelComponents(
+            transition_matrix=transition_matrix,
+            state_labeling=state_labeling,
+            observability_classes=observability_classes)
+
+        if mdp.has_choice_labeling():
+            components.choice_labeling = mdp.choice_labeling
+
+        return stormpy.storage.SparsePomdp(components)
+
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
-        
+
         choices = self.coloring.selectCompatibleChoices(family.family)
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
@@ -78,7 +127,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         # create the product
         fsc.check_action_function(self.observation_to_actions)
 
-        
+
         self.fsc_unfolder = payntbind.synthesis.FscUnfolder(
             self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action
         )
@@ -88,7 +137,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         # the product inherits the design space
         product_family = self.family.copy()
-        
+
         # the choices of the product inherit colors of the quotient
         product_choice_to_hole_options = []
         quotient_num_choces = self.quotient_mdp.nr_choices
@@ -101,7 +150,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
                 hole_options = [(hole,option) for hole,option in choice_to_hole_assignment[choice]]
             product_choice_to_hole_options.append(hole_options)
         product_coloring = payntbind.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, product_choice_to_hole_options)
-        
+
         # copy the specification
         product_specification = self.specification.copy()
         if negate_specification:
@@ -109,6 +158,15 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         dtmc_sketch = paynt.quotient.quotient.Quotient(product, product_family, product_coloring, product_specification)
         return dtmc_sketch
+
+
+### Tonda
+
+    def build_game_abstraction_solver(self, prop):
+        return GameAbstractionSolver()
+
+
+### end Tonda
 
 
 
@@ -158,7 +216,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             if choice == invalid_choice:
                 # randomized FSC: we are in the intermediate state, move on to the next one
                 continue
-            
+
             product_state = dtmc.quotient_state_map[dtmc_state]
             state = self.product_pomdp_fsc.product_state_to_state[product_state]
             obs = self.state_to_observation[state]
@@ -173,8 +231,8 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             assert action in self.observation_to_actions[obs], "invalid trace"
 
         return trace
-    
-    
+
+
     def compute_witnessing_traces(self, dtmc_sketch, satisfying_assignment, num_traces, trace_max_length):
         '''
         Generate witnessing paths in the DTMC induced by the DTMC sketch and a satisfying assignment.
@@ -197,7 +255,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         if prop.is_reward:
             logger.warning("WARNING: specification is a reward property, but generated traces \
                 will be based on transition probabilities")
-        
+
         target_label = self.extract_target_label()
         target_states = dtmc.model.labeling.get_states(target_label)
 
