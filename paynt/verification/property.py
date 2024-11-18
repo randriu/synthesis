@@ -95,7 +95,9 @@ class Property:
     def __init__(self, prop):
         self.property = prop
         rf = prop.raw_formula
+
         self.game_optimizing_player = None # player index for game properties
+        self.game_formula = None
 
         # use comparison type to deduce optimizing direction
         comparison_type = rf.comparison_type
@@ -156,6 +158,10 @@ class Property:
     @property
     def is_until(self):
         return self.formula.subformula.is_until_formula
+
+    @property
+    def has_game_formula(self):
+        return self.game_formula is not None
 
     def transform_until_to_eventually(self):
         if not self.is_until:
@@ -235,6 +241,9 @@ class OptimalityProperty(Property):
     def __init__(self, prop, epsilon=0):
         self.property = prop
         rf = prop.raw_formula
+
+        self.game_optimizing_player = None # player index for game properties
+        self.game_formula = None
 
         # use comparison type to deduce optimizing direction
         if rf.optimality_type == stormpy.OptimizationDirection.Minimize:
