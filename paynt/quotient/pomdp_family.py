@@ -92,7 +92,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
-    # todo test if correct
+    # build pomdp model from mdp and state->observation map
     def create_pomdp(self):
         mdp = self.quotient_mdp
         observability_classes = self.state_to_observation
@@ -101,8 +101,9 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         state_labeling = mdp.labeling
         components = stormpy.SparseModelComponents(
             transition_matrix=transition_matrix,
-            state_labeling=state_labeling,
-            observability_classes=observability_classes)
+            state_labeling=state_labeling)
+
+        components.observability_classes=observability_classes
 
         if mdp.has_choice_labeling():
             components.choice_labeling = mdp.choice_labeling
