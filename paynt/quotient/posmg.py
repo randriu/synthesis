@@ -17,9 +17,6 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
     # implicit size for POSMG unfolding
     initial_memory_size = 1
 
-    # the index of optimizing player
-    optimizing_player = 0
-
     def __init__(self, posmg, specification):
         super().__init__(specification = specification)
 
@@ -58,6 +55,11 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         state_players = self.posmg.get_state_player_indications()
         # all observation
         state_obs = self.posmg.get_observations()
+
+        if not specification.has_optimality:
+            self.optimizing_player = 0
+        else:
+            self.optimizing_player = specification.optimality.game_optimizing_player
 
 
         # initialize posmg manager
