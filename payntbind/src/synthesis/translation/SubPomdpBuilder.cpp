@@ -63,7 +63,7 @@ namespace synthesis {
         auto translated_num_states = state_translator.numTranslations();
         auto translated_num_choices = choice_translator.numTranslations();
         storm::storage::SparseMatrixBuilder<ValueType> builder(
-            translated_num_choices, translated_num_states, 0, true, true, translated_num_states
+            translated_num_choices, translated_num_states, 0, false, true, translated_num_states
         );
         for(uint64_t translated_state = 0; translated_state < translated_num_states; ++translated_state) {
             if(translated_state == translated_initial_state) {

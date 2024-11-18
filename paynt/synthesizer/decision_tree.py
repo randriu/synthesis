@@ -110,10 +110,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def export_decision_tree(self, decision_tree, export_filename_base):
         tree = decision_tree.to_graphviz()
-        # tree_filename = export_filename_base + ".dot"
-        # with open(tree_filename, 'w') as file:
-        #     file.write(tree.source)
-        # logger.info(f"exported decision tree to {tree_filename}")
+        tree_filename = export_filename_base + ".dot"
+        with open(tree_filename, 'w') as file:
+            file.write(tree.source)
+        logger.info(f"exported decision tree to {tree_filename}")
 
         tree_visualization_filename = export_filename_base + ".png"
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default

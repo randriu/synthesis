@@ -35,7 +35,7 @@ git clone https://github.com/moves-rwth/storm.git storm
 mkdir -p ${PREREQUISITES}/storm/build
 cd ${PREREQUISITES}/storm/build
 cmake ..
-make storm storm-pomdp storm-counterexamples --jobs ${COMPILE_JOBS}
+make storm storm-cli storm-pomdp --jobs ${COMPILE_JOBS}
 # make check --jobs ${COMPILE_JOBS}
 
 # setup and activate python environment

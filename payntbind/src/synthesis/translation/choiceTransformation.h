@@ -111,4 +111,12 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     storm::models::sparse::Model<ValueType> const& model
 );
 
+/**
+ * Create a union model with a fresh initial state simulating a uniform choice.
+ */
+template<typename ValueType>
+std::shared_ptr<storm::models::sparse::Model<ValueType>> createModelUnion(
+    std::vector<std::shared_ptr<storm::models::sparse::Model<ValueType>>> const& models
+);
+
 }
