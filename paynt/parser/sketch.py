@@ -138,6 +138,10 @@ class Sketch:
         logger.debug("constructed explicit quotient having {} states and {} choices".format(
             explicit_quotient.nr_states, explicit_quotient.nr_choices))
 
+        if specification.contains_until_properties() and filetype != "prism":
+            logger.info("WARNING: using until formulae with non-PRISM inputs might lead to unexpected behaviour")
+        specification.transform_until_to_eventually()
+        logger.info(f"found the following specification {specification}")
 
         if export is not None:
             Sketch.export(export, sketch_path, jani_unfolder, explicit_quotient)

@@ -9,17 +9,28 @@ logger = logging.getLogger(__name__)
 
 def construct_property(prop, relative_error):
     rf = prop.raw_formula
+    player_index = None
     if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
-        import paynt.quotient.posmg
-        paynt.quotient.posmg.PosmgQuotient.optimizing_player = extract_player_index(rf)
+        # import paynt.quotient.posmg
+        # paynt.quotient.posmg.PosmgQuotient.optimizing_player = extract_player_index(rf)
+        player_index = extract_player_index(rf)
+        game_rf = rf
         rf = rf.subformula
-        prop = stormpy.core.Property(prop.name, rf)
+        prop = stormpy.core.Property("", rf)
     assert rf.has_bound != rf.has_optimality_type, \
         "optimizing formula contains a bound or a comparison formula does not"
     if rf.has_bound:
         prop = Property(prop)
     else:
         prop = OptimalityProperty(prop, relative_error)
+
+    if player_index is not None:
+        prop.game_optimizing_player = player_index
+        prop.game_formula = game_rf
+        alt_formula_str = f"<<{prop.game_optimizing_player}>> " + prop.formula_alt.__str__()
+        formulas = stormpy.parse_properties(alt_formula_str)
+        prop.game_formula_alt = formulas[0].raw_formula
+
     return prop
 
 def extract_player_index(formula):
@@ -85,8 +96,8 @@ class Property:
 
     def __init__(self, prop):
         self.property = prop
-        self.name = prop.name
         rf = prop.raw_formula
+        self.game_optimizing_player = None # player index for game properties
 
         # use comparison type to deduce optimizing direction
         comparison_type = rf.comparison_type
@@ -157,7 +168,7 @@ class Property:
         self.__init__(prop)
 
     def property_copy(self):
-        return stormpy.core.Property(self.name, self.property.raw_formula.clone())
+        return stormpy.core.Property("", self.property.raw_formula.clone())
 
     def copy(self):
         return Property(self.property_copy())
@@ -183,7 +194,7 @@ class Property:
             stormpy.ComparisonType.GREATER: stormpy.ComparisonType.LEQ,
             stormpy.ComparisonType.GEQ:     stormpy.ComparisonType.LESS
         }[negated_formula.comparison_type]
-        stormpy_property_negated = stormpy.core.Property(self.name, negated_formula)
+        stormpy_property_negated = stormpy.core.Property("", negated_formula)
         property_negated = Property(stormpy_property_negated)
         return property_negated
 
@@ -225,7 +236,6 @@ class OptimalityProperty(Property):
     '''
     def __init__(self, prop, epsilon=0):
         self.property = prop
-        self.name = prop.name
         rf = prop.raw_formula
 
         # use comparison type to deduce optimizing direction
@@ -304,7 +314,7 @@ class OptimalityProperty(Property):
             stormpy.OptimizationDirection.Maximize:    stormpy.OptimizationDirection.Minimize
         }[negated_formula.optimality_type]
         negated_formula.set_optimality_type(negate_optimality_type)
-        stormpy_property_negated = stormpy.core.Property(self.name, negated_formula)
+        stormpy_property_negated = stormpy.core.Property("", negated_formula)
         property_negated = OptimalityProperty(stormpy_property_negated,self.epsilon)
         return property_negated
 
