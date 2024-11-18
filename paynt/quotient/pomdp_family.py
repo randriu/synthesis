@@ -27,24 +27,37 @@ class SubPomdp:
 
 
 class GameAbstractionSolver():
-    def __init__(self):
-        self.synthesizer
-
+    def __init__(self, prop):
         self.solution_value = None
         self.solution_state_values = None
         self.solution_state_to_player1_action = None
         self.solution_state_to_quotient_choice = None
 
+        self.posmg_specification = self.create_posmg_specification(prop)
+
+    # warning: target state(s) in sketch.props must be specified using label (not formula),
+    # because property is parsed without prism context
+    # e.g. P>=0.95 [F "goal"] not P>=0.95 [F goal]
+    def create_posmg_specification(self, prop):
+        propertyString = prop.formula.__str__() # contains optimality property
+        property = stormpy.parse_properties(propertyString)[0]
+        properties = [paynt.verification.property.OptimalityProperty(property)]
+        specification = paynt.verification.property.Specification(properties)
+
+        return specification
+
+
     def solve(self, quotient_choice_mask, player1_maximizing, palyer2_maximizing):
         # pomdp representing the game
-        # from self.pomdp and quotient_choice_mask Add states for player2
+        # from self.pomdp and quotient_choice_mask. Add states for player2
         # Roman will implement this method
         pomdp_game, state_player_indications = None
 
         posmg = payntbind.synthesis.create_posmg(pomdp_game, state_player_indications)
 
-        prop = None # optimality Pmax for player1
-        posmgQuotient = paynt.quotient.posmg(posmg, prop)
+        posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
+        paynt.quotient.posmg.PosmgQuotient.optimizing_player = 0 # hard coded. Has to correspond to state_player_indications
+
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         # for fsc synthesis (we probably dont want)
         # synthesizer = paynt.synthesizer.synthesizer_posmg.SynthesizerPosmg(quotient)
@@ -110,6 +123,11 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         return stormpy.storage.SparsePomdp(components)
 
+    def build_game_abstraction_solver(self, prop):
+        return GameAbstractionSolver(prop)
+
+################################################################################
+
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
@@ -159,16 +177,6 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         dtmc_sketch = paynt.quotient.quotient.Quotient(product, product_family, product_coloring, product_specification)
         return dtmc_sketch
-
-
-### Tonda
-
-    def build_game_abstraction_solver(self, prop):
-        return GameAbstractionSolver()
-
-
-### end Tonda
-
 
 
 

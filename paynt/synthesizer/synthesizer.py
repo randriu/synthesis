@@ -39,9 +39,9 @@ class Synthesizer:
         import paynt.synthesizer.policy_tree
         import paynt.synthesizer.decision_tree
 
+        # Policy Tree synthesis form family of POMDPs
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
-            logger.info("nothing to do with the POMDP sketch, aborting...")
-            exit(0)
+            return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)  # todo replace with posmg_policy_tree
         if isinstance(quotient, paynt.quotient.mdp.MdpQuotient):
             return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient)
         # FSC synthesis for POMDPs
