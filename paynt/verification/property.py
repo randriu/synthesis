@@ -11,8 +11,6 @@ def construct_property(prop, relative_error):
     rf = prop.raw_formula
     player_index = None
     if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
-        # import paynt.quotient.posmg
-        # paynt.quotient.posmg.PosmgQuotient.optimizing_player = extract_player_index(rf)
         player_index = extract_player_index(rf)
         game_rf = rf
         rf = rf.subformula
