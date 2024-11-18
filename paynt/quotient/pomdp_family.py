@@ -62,8 +62,9 @@ class GameAbstractionSolver():
         # for fsc synthesis (we probably dont want)
         # synthesizer = paynt.synthesizer.synthesizer_posmg.SynthesizerPosmg(quotient)
 
-        assignment = synthesizer.run()
-        # assignment is of type paynt.family.family.Family
+        assignment = synthesizer.synthesize(keep_optimum=True, print_stats=False)
+
+        self.solution_value = synthesizer.best_assignment_value
 
         # how to get required values?
 
