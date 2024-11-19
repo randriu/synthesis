@@ -41,7 +41,7 @@ class Synthesizer:
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
         if isinstance(quotient, paynt.quotient.mdp.MdpQuotient):
-            return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient)
+            return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient,export_synthesis_filename_base=self.export_synthesis_filename_base)
         # FSC synthesis for POMDPs
         if isinstance(quotient, paynt.quotient.pomdp.PomdpQuotient) and fsc_synthesis:
             return paynt.synthesizer.synthesizer_pomdp.SynthesizerPomdp(quotient, method, storm_control)
@@ -114,7 +114,7 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True, export_filename_base=None):
+    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True):
         '''
         Evaluate each member of the family wrt the given property.
         :param family if None, then the design space of the quotient will be used
@@ -138,8 +138,8 @@ class Synthesizer:
         self.stat.finished_evaluation(evaluations)
         logger.info("evaluation finished")
 
-        if export_filename_base is not None:
-            self.export_evaluation_result(evaluations, export_filename_base)
+        if self.export_synthesis_filename_base is not None:
+            self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
 
         if print_stats:
             self.stat.print()

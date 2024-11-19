@@ -19,10 +19,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     # path to a scheduler to be mapped to a decision tree
     scheduler_path = None
 
-    def __init__(self, *args):
+    def __init__(self, *args, export_synthesis_filename_base=None):
         super().__init__(*args)
         self.best_tree = None
         self.best_tree_value = None
+        self.export_synthesis_filename_base = export_synthesis_filename_base
 
     @property
     def method_name(self):
