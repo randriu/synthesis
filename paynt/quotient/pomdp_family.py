@@ -27,7 +27,10 @@ class SubPomdp:
 
 
 class GameAbstractionSolver():
-    def __init__(self, prop):
+    def __init__(self, prop, quotient_num_actions, choice_to_action):
+        self.quotient_num_actions = quotient_num_actions
+        self.choice_to_action = choice_to_action
+
         self.solution_value = None
         self.solution_state_values = None
         self.solution_state_to_player1_action = None
@@ -50,6 +53,19 @@ class GameAbstractionSolver():
         return specification
 
 
+    def calculate_state_to_player1_action(self, state_to_quotient_choice, choice_to_action, num_actions):
+        num_choices = len(choice_to_action)
+
+        state_to_player1_action = []
+        for choice in state_to_quotient_choice:
+            if choice == num_choices:
+                state_to_player1_action.append(num_actions)
+            else:
+                state_to_player1_action.append(choice_to_action[choice])
+
+        return state_to_player1_action
+
+
     def solve(self, quotient_choice_mask, player1_maximizing, palyer2_maximizing):
         # pomdp representing the game
         # from self.pomdp and quotient_choice_mask. Add states for player2
@@ -68,7 +84,16 @@ class GameAbstractionSolver():
 
         self.solution_value = synthesizer.best_assignment_value
 
-        # how to get required values?
+        self.solution_state_values = None # todo
+
+        self.solution_state_to_quotient_choice = None # todo
+
+        self.solution_state_to_player1_action = self.calculate_state_to_player1_action(
+                                                    self.solution_state_to_quotient_choice,
+                                                    self.choice_to_action,
+                                                    self.quotient_num_actions)
+
+
 
 
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
@@ -127,7 +152,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return stormpy.storage.SparsePomdp(components)
 
     def build_game_abstraction_solver(self, prop):
-        return GameAbstractionSolver(prop)
+        return GameAbstractionSolver(prop, len(self.action_labels), self.choice_to_action)
 
 ################################################################################
 
