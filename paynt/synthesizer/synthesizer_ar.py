@@ -12,18 +12,14 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
     def method_name(self):
         return "AR"
 
-    def model_check_property(self, mdp, prop, alt = False):
-        ''' decide which model checker to use and return result '''
-        quotient = self.quotient
-        if isinstance(quotient, paynt.quotient.posmg.PosmgQuotient):
-            smg = quotient.create_smg_from_mdp(mdp)
-            return quotient.smg_model_check_property(smg, prop, alt)
-        else:
-            return mdp.model_check_property(prop, alt)
-
     def check_specification(self, family):
         ''' Check specification for mdp or smg based on self.quotient '''
         mdp = family.mdp
+
+        if isinstance(self.quotient, paynt.quotient.posmg.PosmgQuotient):
+            model = self.quotient.create_smg_from_mdp(mdp)
+        else:
+            model = mdp
 
         # check constraints
         admissible_assignment = None
@@ -37,7 +33,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             results[index] = result
 
             # check primary direction
-            result.primary = self.model_check_property(mdp, constraint)
+            result.primary = model.model_check_property(constraint)
             if result.primary.sat is False:
                 result.sat = False
                 break
@@ -53,7 +49,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
                     admissible_assignment = assignment
 
             # primary direction is SAT: check secondary direction to see whether all SAT
-            result.secondary = self.model_check_property(mdp, constraint, alt=True)
+            result.secondary = model.model_check_property(constraint, alt=True)
             if mdp.is_deterministic and result.primary.value != result.secondary.value:
                 logger.warning("WARNING: model is deterministic but min<max")
             if result.secondary.sat:
@@ -69,7 +65,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             result = paynt.verification.property_result.MdpOptimalityResult(opt)
 
             # check primary direction
-            result.primary = self.model_check_property(mdp, opt)
+            result.primary = model.model_check_property(opt)
             if not result.primary.improves_optimum:
                 # OPT <= LB
                 result.can_improve = False

@@ -3,15 +3,11 @@ import stormpy
 import paynt.verification.property
 import paynt.verification.property_result
 
+import payntbind
+
 import logging
 logger = logging.getLogger(__name__)
 
-class Smg:
-    formula = None
-
-    @classmethod
-    def initialize(cls, specification):
-        cls.formula = specification
 
 class Mdp:
 
@@ -69,3 +65,19 @@ class SubMdp(Mdp):
         super().__init__(model)
         self.quotient_choice_map = quotient_choice_map
         self.quotient_state_map = quotient_state_map
+
+
+class Smg(Mdp):
+    
+    def __init__(self, model):
+        super().__init__(model)
+
+    def model_check_property(self, prop, alt=False):
+        formula = prop.game_formula if not alt else prop.game_formula_alt
+
+        result = payntbind.synthesis.smg_model_checking(self.model, formula,
+                                                        only_initial_states=False, set_produce_schedulers=True,
+                                                        env=paynt.verification.property.Property.environment)
+
+        value = result.at(self.model.initial_states[0])
+        return paynt.verification.property_result.PropertyResult(prop, result, value)

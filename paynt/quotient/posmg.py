@@ -1,3 +1,5 @@
+import paynt.models
+import paynt.models.models
 import payntbind
 import stormpy
 
@@ -14,9 +16,6 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
 
     # implicit size for POSMG unfolding
     initial_memory_size = 1
-
-    # the index of optimizing player
-    optimizing_player = 0
 
     def __init__(self, posmg, specification):
         super().__init__(specification = specification)
@@ -56,6 +55,11 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
         state_players = self.posmg.get_state_player_indications()
         # all observation
         state_obs = self.posmg.get_observations()
+
+        if not specification.has_optimality:
+            self.optimizing_player = 0
+        else:
+            self.optimizing_player = specification.optimality.game_optimizing_player
 
 
         # initialize posmg manager
@@ -248,19 +252,5 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
             state_player_inidcations.append(player)
         components.state_player_indications = state_player_inidcations
 
-        return stormpy.storage.SparseSmg(components)
-
-    def smg_model_check_property(self, smg, prop, alt=False):
-        probability_formula_str = prop.formula.__str__() if not alt else prop.formula_alt.__str__()
-        game_formula_str = f"<<{self.optimizing_player}>> " + probability_formula_str
-        formulas = stormpy.parse_properties(game_formula_str)
-        formula = formulas[0].raw_formula
-
-        result = payntbind.synthesis.smg_model_checking(smg, formula,
-                                                        only_initial_states=False, set_produce_schedulers=True,
-                                                        env=paynt.verification.property.Property.environment)
-
-        value = result.at(smg.initial_states[0])
-        return paynt.verification.property_result.PropertyResult(prop, result, value)
-
+        return paynt.models.models.Smg(stormpy.storage.SparseSmg(components))
 
