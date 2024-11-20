@@ -81,7 +81,7 @@ endfunction(stormpy_optional_module)
 # Generate definitions used during compilation
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/config.h)
 
-payntbind_module(synthesis) 
+payntbind_module(synthesis)
 target_include_directories(synthesis
   PRIVATE
   src/synthesis/decpomdp/madp/base/

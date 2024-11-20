@@ -40,19 +40,27 @@ void addMissingChoiceLabelsLabeling(
         return;
     }
     STORM_LOG_THROW(not choice_labeling.containsLabel(NO_ACTION_LABEL), storm::exceptions::InvalidModelException, "model already has the '" << NO_ACTION_LABEL << "' label");
-    choice_labeling.addLabel(NO_ACTION_LABEL, choice_has_no_label);    
+    choice_labeling.addLabel(NO_ACTION_LABEL, choice_has_no_label);
 }
 
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Model<ValueType>> addMissingChoiceLabelsModel(
     storm::models::sparse::Model<ValueType> const& model
 ) {
-    storm::storage::sparse::ModelComponents<ValueType> components = componentsFromModel(model);
-    addMissingChoiceLabelsLabeling(model,components.choiceLabeling.value());
-    if(not components.choiceLabeling.value().containsLabel(NO_ACTION_LABEL)) {
+    try
+    {
+        storm::storage::sparse::ModelComponents<ValueType> components = componentsFromModel(model);
+        addMissingChoiceLabelsLabeling(model,components.choiceLabeling.value());
+        if(not components.choiceLabeling.value().containsLabel(NO_ACTION_LABEL)) {
+            return NULL;
+        }
+        return storm::utility::builder::buildModelFromComponents<ValueType>(model.getType(),std::move(components));
+    }
+    catch(const std::exception& e)
+    {
+        // e.g if model is POSMG. Todo add support for POSMG
         return NULL;
     }
-    return storm::utility::builder::buildModelFromComponents<ValueType>(model.getType(),std::move(components));
 }
 
 bool assertChoiceLabelingIsCanonic(

@@ -73,7 +73,7 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def verify_family(self, family):
         self.quotient.build(family)
-        self.check_specification_for_mdp(family)
+        self.check_specification(family)
 
         if family.analysis_result.improving_value is not None:
             if self.saynt_timer is not None:
@@ -111,7 +111,7 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def synthesize_one(self, family):
 
         self.best_assignment = None
-        
+
         if self.main_family is not None:
             family = self.main_family
 

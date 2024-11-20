@@ -53,6 +53,7 @@ class DecPomdpQuotient(paynt.quotient.quotient.Quotient):
                 
         # do initial unfolding
         self.set_imperfect_memory_size(DecPomdpQuotient.initial_memory_size)
+        self.current_memory_size = DecPomdpQuotient.initial_memory_size
         
 
     def create_hole_name(self, agent, obs, mem, is_action_hole):

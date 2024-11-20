@@ -21,10 +21,6 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
 
-    # label associated with un-labelled choices
-    EMPTY_LABEL = "__no_label__"
-
-    
     def __init__(self, pomdp, specification, decpomdp_manager=None):
         super().__init__(specification=specification)
 
@@ -47,9 +43,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.action_labels_at_observation = None
         # for each observation, number of states associated with it
         self.observation_states = None
-        
+
         # attributes associated with an unfolded quotient MDP
-        
+
         # number of memory states allocated to each observation
         self.observation_memory_size = None
         # Storm POMDP manager
@@ -68,9 +64,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # same number and the same order of available actions
 
         logger.info(f"constructed POMDP having {self.observations} observations.")
-        
+
         state_obs = self.pomdp.observations.copy()
-        
+
         # extract observation labels
         if self.pomdp.has_observation_valuations():
             ov = self.pomdp.observation_valuations
@@ -106,7 +102,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 labels = self.pomdp.choice_labeling.get_labels_of_choice(choice)
                 assert len(labels) <= 1, "expected at most 1 label"
                 if len(labels) == 0:
-                    label = PomdpQuotient.EMPTY_LABEL
+                    label = self.EMPTY_LABEL
                 else :
                     label = list(labels)[0]
                 self.action_labels_at_observation[obs].append(label)
@@ -125,8 +121,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # do initial unfolding
         self.set_imperfect_memory_size(PomdpQuotient.initial_memory_size)
         # self.set_global_memory_size(PomdpQuotient.initial_memory_size)
+        self.current_memory_size = PomdpQuotient.initial_memory_size
 
-    
+
     @property
     def observations(self):
         return self.pomdp.nr_observations
@@ -177,7 +174,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         ]
         self.set_manager_memory_vector()
         self.unfold_memory()
-    
+
     def increase_memory_size(self, obs):
         self.observation_memory_size[obs] += 1
         self.set_manager_memory_vector()
@@ -213,7 +210,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.set_manager_memory_vector()
         self.unfold_memory()
 
-    
+
     def create_coloring(self):
         if PomdpQuotient.posterior_aware:
             return self.create_coloring_aposteriori()
@@ -225,7 +222,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.is_action_hole = []
 
         for obs in range(self.observations):
-            
+
             # action holes
             hole_indices = []
             num_actions = self.actions_at_observation[obs]
@@ -278,7 +275,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         update_holes = self.pomdp_manager.update_holes
 
         holes = [None] * len(hole_num_options)
-        
+
         # action holes
         for key,index in action_holes.items():
             num_options = hole_num_options[index]
@@ -325,18 +322,18 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         return family, choice_to_hole_options
 
-    
+
     def unfold_memory(self):
-        
+
         # reset attributes
         self.quotient_mdp = None
         self.coloring = None
         self.hole_option_to_actions = None
-        
+
         self.observation_action_holes = None
         self.observation_memory_holes = None
         self.is_action_hole = None
-        
+
         logger.debug("unfolding {}-FSC template into POMDP...".format(max(self.observation_memory_size)))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
@@ -355,7 +352,8 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.hole_option_to_actions[hole][option].append(choice)
 
 
-    
+
+
     def estimate_scheduler_difference(self, mdp, quotient_choice_map, inconsistent_assignments, choice_values, expected_visits):
 
         if PomdpQuotient.posterior_aware:
@@ -388,7 +386,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 choice_0 = quotient_to_restricted_action_map[choice_0_global]
                 if choice_0 is None:
                     continue
-                
+
                 source_state = choice_to_state[choice_0]
                 source_state_visits = expected_visits[source_state]
 
@@ -411,7 +409,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 assert not math.isnan(difference)
                 difference_sum += difference
                 states_affected += 1
-            
+
             if states_affected == 0:
                 hole_score = 0
             else:
@@ -421,8 +419,8 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         return inconsistent_differences
 
 
-    
-    
+
+
     def sift_actions_and_updates(self, obs, hole, options):
         actions = set()
         updates = set()
@@ -433,11 +431,11 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         return actions,updates
 
     def break_symmetry_uai(self, family, action_inconsistencies, memory_inconsistencies):
-        
+
         # go through each observation of interest and break symmetry
         restricted_family = family.copy()
         for obs in range(self.observations):
-            
+
             num_actions = self.actions_at_observation[obs]
             num_updates = self.pomdp_manager.max_successor_memory_size[obs]
 
@@ -447,7 +445,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
             all_actions = [action for action in range(num_actions)]
             selected_actions = [all_actions.copy() for hole in obs_holes]
-            
+
             all_updates = [update for update in range(num_updates)]
             selected_updates = [all_updates.copy() for hole in obs_holes]
 
@@ -485,20 +483,20 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         return restricted_family
 
-    
-    
+
+
     def export_result(self, dtmc, mc_result):
         self.export_pomdp()
         self.export_optimal_dtmc(dtmc)
         self.export_policy(dtmc, mc_result)
 
-    
+
     def export_pomdp(self):
         pomdp_path = "pomdp.drn"
         logger.info("Exporting POMDP to {}".format(pomdp_path))
         stormpy.export_to_drn(self.pomdp, pomdp_path)
 
-    
+
     def export_optimal_dtmc(self, dtmc):
 
         # label states with a pomdp_state:memory_node pair
@@ -523,7 +521,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             if not choice_labeling.contains_label(choice_label):
                 choice_labeling.add_label(choice_label)
             # state and choices indices coincide for DTMCs
-            choice_labeling.add_label_to_choice(choice_label,state)    
+            choice_labeling.add_label_to_choice(choice_label,state)
 
         # add choice labeling to the model
         m = dtmc.model
@@ -536,7 +534,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         logger.info("Exporting optimal DTMC to {}".format(dtmc_path))
         stormpy.export_to_drn(dtmc.model, dtmc_path)
 
-    
+
     def collect_policy(self, dtmc, mc_result):
         # assuming single optimizing property
         assert self.specification.num_properties == 1 and self.specification.has_optimality
@@ -576,7 +574,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 if len(policy[obs][mem]) == 0:
                     continue
                 state_values = [ {state:value} for state,value in policy[obs][mem].items() ]
-                
+
                 sub_policy = {}
                 sub_policy["memory_node"] = mem
                 sub_policy["state_values"] = state_values
@@ -599,7 +597,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         policy = self.collect_policy(dtmc, mc_result)
         return policy
 
-    
+
     def policy_size(self, assignment):
         '''
         Compute how many natural numbers are needed to encode the mu-FSC under
@@ -608,18 +606,18 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # going through the induced DTMC, too lazy to parse hole names
         dtmc = self.build_assignment(assignment)
-        
+
         # size of action function gamma:
         #   for each memory node, a list of prior-action pairs
         size_gamma = sum(self.observation_memory_size) # explicit
         # size_gamma = sum([len(x) for x in prior_observations]) * 2 # sparse
-        
+
         if not self.posterior_aware:
             # size of update function delta of a posterior-unaware FSC:
             #   for each memory node, a list of prior-update pairs
             size_delta = sum(self.observation_memory_size) # explicit
             return size_gamma + size_delta
-        
+
         # posterior-aware update selection
         # for each memory node and for each prior, collect a set of possible posteriors
         max_mem = max(self.observation_memory_size)
@@ -651,7 +649,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         return size_gamma + size_delta
 
-    
+
     def get_family_pomdp(self, mdp):
         '''
         Constructs POMDP from the quotient MDP. Used for computing POMDP abstraction bounds.

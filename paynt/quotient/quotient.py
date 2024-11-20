@@ -16,6 +16,9 @@ class Quotient:
     # if True, expected visits will not be computed for hole scoring
     disable_expected_visits = False
 
+    # label associated with un-labelled choices
+    EMPTY_LABEL = "__no_label__"
+
     @staticmethod
     def make_vector_defined(vector):
         vector_noinf = [ value if value != math.inf else 0 for value in vector]
@@ -24,7 +27,7 @@ class Quotient:
         return vector_valid
 
     def __init__(self, quotient_mdp = None, family = None, coloring = None, specification = None):
-        
+
         # colored qoutient MDP for the super-family
         self.quotient_mdp = quotient_mdp
         self.family = family
@@ -45,7 +48,7 @@ class Quotient:
     def export_result(self, dtmc):
         ''' to be overridden '''
         pass
-    
+
 
     def restrict_mdp(self, mdp, choices):
         '''
@@ -66,12 +69,12 @@ class Quotient:
         return model,state_map,choice_map
 
     def restrict_quotient(self, choices):
-        return self.restrict_mdp(self.quotient_mdp, choices)        
-    
+        return self.restrict_mdp(self.quotient_mdp, choices)
+
     def build_from_choice_mask(self, choices):
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         return paynt.models.models.SubMdp(mdp, state_map, choice_map)
-    
+
     def build(self, family):
         ''' Construct the quotient MDP for the family. '''
         # select actions compatible with the family and restrict the quotient
@@ -96,7 +99,7 @@ class Quotient:
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         model = Quotient.mdp_to_dtmc(mdp)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
-    
+
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states
 
@@ -134,7 +137,7 @@ class Quotient:
             if choice is not None and choice < num_choices:
                 choices.set(choice,True)
         return choices
-    
+
     def scheduler_selection(self, mdp, scheduler):
         ''' Get hole options involved in the scheduler selection. '''
         assert scheduler.memoryless and scheduler.deterministic
@@ -205,7 +208,7 @@ class Quotient:
             self.coloring, inconsistent_assignments, expected_visits)
         return hole_variance
 
-    
+
     def scheduler_is_consistent(self, mdp, prop, result):
         '''
         Get hole assignment induced by this scheduler and fill undefined
@@ -278,7 +281,7 @@ class Quotient:
         scores = self.scheduler_scores(mdp, result.prop, result.primary.result, result.primary_selection)
         if scores is None:
             scores = {hole:0 for hole in range(mdp.family.num_holes) if mdp.family.hole_num_options(hole) > 1}
-        
+
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
         if len(hole_assignments[splitter]) > 1:
@@ -297,7 +300,7 @@ class Quotient:
 
         # construct corresponding design subspaces
         design_subspaces = []
-        
+
         # construct corresponding subfamilies
         subfamilies = []
         family.splitter = splitter

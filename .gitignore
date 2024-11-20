@@ -4,3 +4,6 @@ __pycache__/
 prerequisites/
 
 .vscode
+
+# OSX
+.DS_Store

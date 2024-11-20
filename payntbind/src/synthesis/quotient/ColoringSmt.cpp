@@ -269,7 +269,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             "family is UNSAT (?)"
         );
     }
-    
+
     // for every action, compute for every path whether it admits this acitons
     /*std::vector<BitVector> action_path_enabled;
     for(uint64_t action = 0; action < num_actions; ++action) {
@@ -362,7 +362,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             STORM_LOG_WARN_COND(not subfamily.isAssignment(), "Hole assignment does not induce a DTMC.");
             selection.clear();
         }
-        solver.pop(); 
+        solver.pop();
     }
 
     timers[__FUNCTION__].stop();

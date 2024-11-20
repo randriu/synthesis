@@ -1,0 +1,147 @@
+// -------- Ships -----------
+
+smg
+
+// MAP CONSTANTS
+const int WIDTH = 6;
+const int HEIGHT = 2;
+
+const int xMIN = 1;
+const int xMAX = WIDTH;
+const int yMIN = 1;
+const int yMAX = HEIGHT;
+ 
+
+// PLAYERS
+player d
+	defender, [s21], [s31], [s41], [s22], [s32], [s42]//, [s23], [s33], [s43]
+endplayer
+
+player a
+	damage, [eval], attacker, [a1], [a2]//, [a3]
+endplayer
+
+
+// END CONDITION
+formula d_win = a1_dead & a2_dead;// & a3_dead;
+formula a_win = a1x>=xMAX-1 & a2x>=xMAX-1;// & a3x=xMAX;
+formula done = a_win | d_win;
+
+label "goal" = d_win;
+
+// OBSERVATIONS
+observable "shot_x" = shot_x;
+observable "shot_y" = shot_y;
+observable "a1_dead" = a1_dead;
+observable "a2_dead" = a2_dead;
+//observable "a3_dead" = a3_dead;
+observable "clk" = clk;
+observable "done" = done;
+
+// CLOCK MODULE
+// To make game alternating.
+// Attacker has to start to simulate concurent actions, because he has full observations.
+
+formula next_clk = mod(clk+1, 3);
+
+module clk
+	// clk=0 means it's attacker's turn
+	clk : [0..2] init 0;
+
+	[a1]	!done & clk=0 -> (clk'=next_clk);
+	[a2]	!done & clk=0 -> (clk'=next_clk);
+//	[a3]	!done & clk=0 -> (clk'=next_clk);
+
+	[s21]	!done & clk=1 -> (clk'=next_clk);
+	[s22]	!done & clk=1 -> (clk'=next_clk);
+//	[s23]	!done & clk=1 -> (clk'=next_clk);
+	[s31]	!done & clk=1 -> (clk'=next_clk);
+	[s32]	!done & clk=1 -> (clk'=next_clk);
+//	[s33]	!done & clk=1 -> (clk'=next_clk);
+	[s41]	!done & clk=1 -> (clk'=next_clk);
+	[s42]	!done & clk=1 -> (clk'=next_clk);
+//	[s43]	!done & clk=1 -> (clk'=next_clk);
+//	[s51]	!done & clk=1 -> (clk'=next_clk);
+//	[s52]	!done & clk=1 -> (clk'=next_clk);
+//	[s53]	!done & clk=1 -> (clk'=next_clk);
+
+	[eval]	!done & clk=2 -> (clk'=next_clk);
+
+endmodule
+
+
+// DEFENDER MODULE
+//const double miss = 0.2; // todo
+
+module defender
+	shot_x : [xMIN+1..xMAX-1] init xMAX-1; // initialize to rightmost column so attacker cannot accidantly drive into the "first" nonexistant shot
+	shot_y : [yMIN..yMAX];
+
+	[s21]	true -> 1 : (shot_x'=2)&(shot_y'=1);
+	[s22]	true -> 1 : (shot_x'=2)&(shot_y'=2);
+//	[s23]	true -> 1 : (shot_x'=2)&(shot_y'=3);
+
+	[s31]	true -> 1 : (shot_x'=3)&(shot_y'=1);
+	[s32]	true -> 1 : (shot_x'=3)&(shot_y'=2);
+//	[s33]	true -> 1 : (shot_x'=3)&(shot_y'=3);
+
+	[s41]	true -> 1 : (shot_x'=4)&(shot_y'=1);
+	[s42]	true -> 1 : (shot_x'=4)&(shot_y'=2);
+//	[s43]	true -> 1 : (shot_x'=4)&(shot_y'=3);
+
+//	[s51]	true -> 1 : (shot_x'=5)&(shot_y'=1);
+//	[s52]	true -> 1 : (shot_x'=5)&(shot_y'=2);
+//	[s53]	true -> 1 : (shot_x'=5)&(shot_y'=3);
+
+endmodule
+
+
+// ATTACKER MODULE
+const int ax_init = 1;
+const int a1y = 1;
+const int a2y = 2;
+//const int a3y = 3;
+
+const double speed = 0.4;
+
+module attacker
+
+	a1x : [xMIN..xMAX] init ax_init;
+	a2x : [xMIN..xMAX] init ax_init;
+//	a3x : [xMIN..xMAX] init ax_init;
+
+//	[a1]	true -> 1 : (a1x'=!a1_dead ? min(a1x+1, xMAX) : a1x);
+//	[a2]	true -> 1 : (a2x'=!a2_dead ? min(a2x+1, xMAX) : a2x);
+//	[a3]	true -> 1 : (a3x'=!a3_dead ? min(a3x+1, xMAX) : a3x);
+
+	[a1]	!a1_dead -> 1-speed : (a1x'=min(a1x+1, xMAX)) + speed : (a1x'= min(a1x+2, xMAX));
+	[a2]	!a2_dead -> 1-speed : (a2x'=min(a2x+1, xMAX)) + speed : (a2x'= min(a1x+2, xMAX));
+//	[a3]	!a3_dead -> 1-speed : (a3x'=min(a3x+1, xMAX)) + speed : (a3x'= a3x=xMAX-1 ? xMAX : a3x+2);
+
+endmodule
+
+
+formula a1_hit = a1x=shot_x & a1y=shot_y;
+formula a2_hit = a2x=shot_x & a2y=shot_y;
+//formula a3_hit = a3x=shot_x & a3y=shot_y;
+
+module damage
+
+	a1_dead : bool init false;
+	a2_dead : bool init false;
+//	a3_dead : bool init false;
+
+	[eval]	a1_hit  -> 1 : (a1_dead'=true);
+	[eval]	a2_hit  -> 1 : (a2_dead'=true);
+//	[eval]	a3_hit	-> 1 : (a3_dead'=true);
+	[eval]	!a1_hit & !a2_hit-> 1 : true; // ADD A3_HIT !!!!!!!1
+
+endmodule
+
+
+
+
+
+
+
+

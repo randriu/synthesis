@@ -27,6 +27,7 @@ class Synthesizer:
         import paynt.quotient.pomdp
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
+        import paynt.quotient.posmg
         import paynt.synthesizer.synthesizer_onebyone
         import paynt.synthesizer.synthesizer_ar
         import paynt.synthesizer.synthesizer_cegis
@@ -34,6 +35,7 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_multicore_ar
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.synthesizer_decpomdp
+        import paynt.synthesizer.synthesizer_posmg
         import paynt.synthesizer.policy_tree
         import paynt.synthesizer.decision_tree
 
@@ -54,6 +56,9 @@ class Synthesizer:
                 return paynt.synthesizer.synthesizer_onebyone.SynthesizerOneByOne(quotient)
             else:
                 return paynt.synthesizer.policy_tree.SynthesizerPolicyTree(quotient)
+        # FSC synthesis for POSMGs
+        if isinstance(quotient, paynt.quotient.posmg.PosmgQuotient) and fsc_synthesis:
+            return paynt.synthesizer.synthesizer_posmg.SynthesizerPosmg(quotient)
 
         # synthesis engines
         if method == "onebyone":
@@ -143,10 +148,10 @@ class Synthesizer:
 
         if print_stats:
             self.stat.print()
-        
+
         return evaluations
 
-    
+
     def synthesize_one(self, family):
         ''' to be overridden '''
         pass
@@ -168,7 +173,7 @@ class Synthesizer:
             family = self.quotient.family
         if family.constraint_indices is None:
             family.constraint_indices = list(range(len(self.quotient.specification.constraints)))
-        
+
         self.set_optimality_threshold(optimum_threshold)
         self.synthesis_timer = paynt.utils.timer.Timer(timeout)
         self.synthesis_timer.start()
@@ -199,6 +204,6 @@ class Synthesizer:
 
         return assignment
 
-    
+
     def run(self, optimum_threshold=None):
         return self.synthesize(optimum_threshold=optimum_threshold)
