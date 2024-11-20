@@ -39,10 +39,13 @@ class GameAbstractionSolver():
     # because property is parsed without prism context
     # e.g. P>=0.95 [F "goal"] not P>=0.95 [F goal]
     def create_posmg_specification(self, prop):
-        propertyString = prop.formula.__str__() # contains optimality property
-        property = stormpy.parse_properties(propertyString)[0]
-        properties = [paynt.verification.property.OptimalityProperty(property)]
-        specification = paynt.verification.property.Specification(properties)
+        formula_str = prop.formula.__str__() # contains optimality property
+        optimizing_player = 0 # hard coded. Has to correspond with state_player_indications
+        game_fromula_str = f"<<{optimizing_player}>> " + formula_str
+
+        storm_property = stormpy.parse_properties(game_fromula_str)[0]
+        property = paynt.verification.property.construct_property(storm_property, 0) # realtive error?
+        specification = paynt.verification.property.Specification([property])
 
         return specification
 
@@ -56,7 +59,6 @@ class GameAbstractionSolver():
         posmg = payntbind.synthesis.create_posmg(pomdp_game, state_player_indications)
 
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
-        paynt.quotient.posmg.PosmgQuotient.optimizing_player = 0 # hard coded. Has to correspond to state_player_indications
 
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         # for fsc synthesis (we probably dont want)
