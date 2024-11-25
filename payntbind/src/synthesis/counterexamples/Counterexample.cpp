@@ -417,11 +417,22 @@ namespace synthesis {
         this->hint_result = storm::api::verifyWithSparseEngine<ValueType>(env, subdtmc, task);
         this->timer_model_check.stop();
         storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& result = this->hint_result->template asExplicitQuantitativeCheckResult<ValueType>();
+
+        auto comparisonType = this->formula_modified[index]->asOperatorFormula().getComparisonType();
+
         bool satisfied;
         if(this->formula_safety[index]) {
-            satisfied = result[initial_state] < formula_bound;
+            if (comparisonType == storm::logic::ComparisonType::Less) {
+                satisfied = result[initial_state] < formula_bound;
+            } else {
+                satisfied = result[initial_state] <= formula_bound;
+            }
         } else {
-            satisfied = result[initial_state] > formula_bound;
+            if (comparisonType == storm::logic::ComparisonType::Greater) {
+                satisfied = result[initial_state] > formula_bound;
+            } else {
+                satisfied = result[initial_state] >= formula_bound;
+            }
         }
 
         return satisfied;
