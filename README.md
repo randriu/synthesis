@@ -49,19 +49,6 @@ docker pull randriu/paynt
 docker run --rm -it randriu/paynt
 python3 paynt.py --help
 ```
-You can make simple script or alias in .bashrc for easier usage
-    
-```shell
-#!/bin/sh
-
-source /path/to/your/venv/bin/activate
-python3 /path/to/your/paynt.py "$@"
-deactivate
-```
-
-```shell
-alias paynt="source /path/to/your/venv/bin/activate && python3 /path/to/your/paynt.py"
-```
 
 
 ## Running PAYNT
@@ -116,11 +103,19 @@ python3 paynt.py models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp
 python3 paynt.py models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
-The Python environment can be deactivated by runnning
+The Python environment can be deactivated by running
 ```sh
 deactivate
 ```
 
+You might consider creating an alias (e.g. in your `.bashrc`) for simpler usage:
+```shell
+paynt() {
+    source /path/to/your/venv/bin/activate
+    python3 /path/to/your/paynt.py $@
+    deactivate
+}
+```
 
 # PAYNT tutorial
 
