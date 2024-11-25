@@ -24,8 +24,8 @@ void bindings_posmg(py::module &m) {
              py::arg("state"), py::arg("action_offset"), "gets the choice index for the offset action from the given state.");
 
 
-    m.def("posmgFromPomdp", &synthesis::posmgFromPomdp<double>, py::arg("pomdp"), py::arg("state_player_indications"));
-    m.def("posmgFromSmg", &synthesis::posmgFromSmg<double>, py::arg("smg"), py::arg("observability_classes"));
+    m.def("posmg_from_pomdp", &synthesis::posmgFromPomdp<double>, py::arg("pomdp"), py::arg("state_player_indications"));
+    m.def("posmg_from_smg", &synthesis::posmgFromSmg<double>, py::arg("smg"), py::arg("observability_classes"));
 
     py::class_<synthesis::PosmgManager<double>, std::shared_ptr<synthesis::PosmgManager<double>>>(m, "PosmgManager")
         .def(py::init<synthesis::Posmg<double> const&, uint64_t>(), py::arg("posmg"), py::arg("optimizing_player"))

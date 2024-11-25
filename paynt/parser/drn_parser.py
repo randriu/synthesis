@@ -27,7 +27,7 @@ class DrnParser:
                 pomdp_path = sketch_path + '.tmp'
                 state_player_indications = DrnParser.pomdp_from_posmg(sketch_path, pomdp_path)
                 pomdp = DrnParser.read_drn(pomdp_path)
-                explicit_model = payntbind.synthesis.posmgFromPomdp(pomdp, state_player_indications)
+                explicit_model = payntbind.synthesis.posmg_from_pomdp(pomdp, state_player_indications)
                 os.remove(pomdp_path)
             else:
                 explicit_model = DrnParser.read_drn(sketch_path)

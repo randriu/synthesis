@@ -679,7 +679,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def evaluate_all(self, family, prop, keep_value_only=False):
         assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.quotient.build_game_abstraction_solver(prop)
-        # game_solver.enable_profiling(True)
         family.candidate_policy = None
         policy_tree = PolicyTree(family)
 
@@ -729,7 +728,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.stat.num_leaves_merged = len(policy_tree.collect_leaves())
         self.stat.num_policies_merged = len(policy_tree.policies)
         self.policy_tree = policy_tree
-        # game_solver.print_profiling()
 
         # convert policy tree to family evaluation
         evaluations = []
