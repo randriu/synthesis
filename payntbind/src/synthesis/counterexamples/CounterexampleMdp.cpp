@@ -466,7 +466,7 @@ std::pair<bool,bool> CounterexampleGeneratorMdp<ValueType,StateType>::expandAndC
     this->timer_model_check.stop();
     storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& model_check_result = this->hint_result->template asExplicitQuantitativeCheckResult<ValueType>();
 
-    auto comparisonType = this->formula_modified[index]->asOperatorFormula().getComparisonType();
+    auto comparisonType = this->formula_modified[formula_index]->asOperatorFormula().getComparisonType();
 
     bool satisfied;
     if(this->formula_safety[formula_index]) {
