@@ -12,7 +12,7 @@ namespace synthesis {
         storm::prism::Program & prism,
         storm::models::sparse::Model<ValueType> const& model
     ) {
-        // substitute constanst and simplify formulas in the program
+        // substitute constants and simplify formulas in the program
         prism = prism.substituteConstantsFormulas(true,true);
 
         // identify names and types of observation labels
@@ -79,7 +79,6 @@ namespace synthesis {
         return this->obs_class_to_evaluation[obs_class].getAsInt(OBS_EXPR_VALUE_SIZE*obs_expr,OBS_EXPR_VALUE_SIZE);
     }
 
-    
     template<typename ValueType>
     std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> ObservationEvaluator<ValueType>::addObservationsToSubMdp(
         storm::models::sparse::Mdp<ValueType> const& sub_mdp,

@@ -3,6 +3,7 @@
 #include "ObservationEvaluator.h"
 #include "FscUnfolder.h"
 #include "GameAbstractionSolver.h"
+#include "SmgAbstraction.h"
 
 void bindings_pomdp_family(py::module& m) {
 
@@ -34,15 +35,36 @@ void bindings_pomdp_family(py::module& m) {
     // m.def("randomize_action_variant", &synthesis::randomizeActionVariant<double>);
     py::class_<synthesis::GameAbstractionSolver<double>>(m, "GameAbstractionSolver")
         .def(
-            py::init<storm::models::sparse::Model<double> const&, uint64_t, std::vector<uint64_t> const&, std::string const&, double>(),
-            py::arg("quotient"), py::arg("quoitent_num_actions"), py::arg("choice_to_action"), py::arg("target_label"), py::arg("precision")
+            py::init<
+                storm::models::sparse::Model<double> const&,
+                uint64_t,
+                std::vector<uint64_t> const&,
+                std::shared_ptr<storm::logic::Formula const>,
+                bool,
+                std::string const&,
+                double
+            >(),
+            py::arg("quotient"), py::arg("num_actions"), py::arg("choice_to_action"), py::arg("formula"), py::arg("player1_maximizing"), py::arg("target_label"), py::arg("precision")
         )
-        .def("solve", &synthesis::GameAbstractionSolver<double>::solve)
+        .def("solve_sg", &synthesis::GameAbstractionSolver<double>::solveSg)
+        .def("solve_smg", &synthesis::GameAbstractionSolver<double>::solveSmg)
         .def_property_readonly("solution_state_values", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_values;})
         .def_property_readonly("solution_value", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_value;})
         .def_property_readonly("solution_state_to_player1_action", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_player1_action;})
         .def_property_readonly("solution_state_to_quotient_choice", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_quotient_choice;})
         .def("enable_profiling", &synthesis::GameAbstractionSolver<double>::enableProfiling)
         .def("print_profiling", &synthesis::GameAbstractionSolver<double>::printProfiling)
+        ;
+
+        py::class_<synthesis::SmgAbstraction<double>, std::shared_ptr<synthesis::SmgAbstraction<double>>>(m, "SmgAbstraction")
+        .def(py::init<
+            storm::models::sparse::Model<double> const&,
+            uint64_t,
+            std::vector<uint64_t> const&,
+            storm::storage::BitVector const&
+        >(), py::arg("model"), py::arg("num_actions"), py::arg("choice_to_action"), py::arg("choice_mask"))
+        .def_readonly("smg", &synthesis::SmgAbstraction<double>::smg)
+        .def_readonly("state_to_quotient_state_action", &synthesis::SmgAbstraction<double>::state_to_quotient_state_action)
+        .def_readonly("choice_to_quotient_choice", &synthesis::SmgAbstraction<double>::choice_to_quotient_choice)
         ;
 }

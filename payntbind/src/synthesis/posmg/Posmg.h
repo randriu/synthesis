@@ -1,29 +1,28 @@
 #pragma once
 
-#include "storm/models/sparse/Smg.h"
-#include "storm/models/sparse/Pomdp.h"
+#include <storm/models/sparse/StandardRewardModel.h>
+#include <storm/models/sparse/Smg.h>
+#include <storm/models/sparse/Pomdp.h>
 #include <storm/adapters/RationalFunctionAdapter.h>
 
 namespace synthesis {
 
 /**
- * @brief A class representing Partially observable multiplayer game
- * @todo make generic with template
+ * @brief A class representing partially observable stochastic multiplayer game.
  */
-class Posmg : public storm::models::sparse::Smg<double> {
+template<class ValueType, typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>>
+class Posmg : public storm::models::sparse::Smg<ValueType,RewardModelType> {
     public:
     /**
      * @brief Construct a new Posmg object from model components
      *
      * @param components Both statePlayerIndications and observabilityClasses have to be filled
      */
-    Posmg(storm::storage::sparse::ModelComponents<double> const& components);
-    Posmg(storm::storage::sparse::ModelComponents<double> &&components);
+    Posmg(storm::storage::sparse::ModelComponents<ValueType,RewardModelType> const& components);
+    Posmg(storm::storage::sparse::ModelComponents<ValueType,RewardModelType>&& components);
 
     /**
      * @brief Return a vector of observatinos
-     *
-     * @return std::vector<uint32_t> const&
      */
     std::vector<uint32_t> const &getObservations() const;
 
@@ -37,24 +36,18 @@ class Posmg : public storm::models::sparse::Smg<double> {
 
     /**
      * @brief Return number of observations corresponding to player 0 states.
-     *
-     * @return uint64_t
      */
     uint64_t getP0ObservationCount() const;
 
     /**
      * @brief Get the underlying MDP
-     *
-     * @return storm::models::sparse::Mdp<double>
      */
-    storm::models::sparse::Mdp<double> getMdp();
+    storm::models::sparse::Mdp<ValueType,RewardModelType> getMdp();
 
     /**
      * @brief Get the underlying POMDP
-     *
-     * @return storm::models::sparse::Pomdp<double>
      */
-    storm::models::sparse::Pomdp<double> getPomdp();
+    storm::models::sparse::Pomdp<ValueType,RewardModelType> getPomdp();
 
     private:
     /**
@@ -70,22 +63,23 @@ class Posmg : public storm::models::sparse::Smg<double> {
 };
 
 /**
- * @brief Create and return a Posmg object from pomdp and state indications
- *
- * @param pomdp Model information from this pomdp will be used to create the game
+ * @brief Create a POSMG from a POMDP and state indications.
+ * @param pomdp Base POMDP
  * @param statePlayerIndications Vector indicating which states belong to which player
- * @return Posmg
  */
-Posmg createPosmg(storm::models::sparse::Pomdp<double> pomdp,
-            std::vector<storm::storage::PlayerIndex> statePlayerIndications);
+template<typename ValueType,typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>>
+Posmg<ValueType,RewardModelType> posmgFromPomdp(
+    storm::models::sparse::Pomdp<ValueType,RewardModelType> pomdp,
+    std::vector<storm::storage::PlayerIndex> statePlayerIndications);
 
 /**
- * @brief Create and return a Components object based on the provided model
- *
- * @param model Properites to create the ModelComponents are taken from this model.
- * @return storm::storage::sparse::ModelComponents<double>
+ * @brief Create a POSMG from an SMG and observability classes.
+ * @param smg Base SMG
+ * @param observabilityClasses for each state an observability class
  */
-storm::storage::sparse::ModelComponents<double> createComponents(
-        storm::models::sparse::NondeterministicModel<double> const& model);
+template<typename ValueType,typename RewardModelType = storm::models::sparse::StandardRewardModel<ValueType>>
+Posmg<ValueType,RewardModelType> posmgFromSmg(
+    storm::models::sparse::Smg<ValueType,RewardModelType> smg,
+    std::optional<std::vector<uint32_t>> observabilityClasses);
 
 } // namespace synthesis

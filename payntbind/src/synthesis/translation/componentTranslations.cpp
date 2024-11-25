@@ -1,6 +1,7 @@
 #include "componentTranslations.h"
 
 #include <storm/models/sparse/Pomdp.h>
+#include <storm/models/sparse/Smg.h>
 #include <storm/utility/builder.h>
 #include <storm/exceptions/NotSupportedException.h>
 #include <storm/exceptions/InvalidModelException.h>
@@ -22,6 +23,11 @@ storm::storage::sparse::ModelComponents<ValueType> componentsFromModel(
         auto pomdp = static_cast<storm::models::sparse::Pomdp<ValueType> const&>(model);
         components.observabilityClasses = pomdp.getObservations();
         components.observationValuations = pomdp.getOptionalObservationValuations();
+    }
+    if (model.getType() == storm::models::ModelType::Smg) {
+        auto smg = static_cast<storm::models::sparse::Smg<ValueType> const&>(model);
+        components.statePlayerIndications = smg.getStatePlayerIndications();
+        // skipping playerNameToIndexMap since Smg does not directly exposes those
     }
     return components;
 }

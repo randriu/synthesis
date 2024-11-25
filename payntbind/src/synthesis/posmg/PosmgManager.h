@@ -5,17 +5,18 @@
 
 namespace synthesis {
 
+template<class ValueType>
 class PosmgManager {
     public:
 
-        PosmgManager(Posmg const& posmg, uint64_t optimizingPlayer);
+        PosmgManager(Posmg<ValueType> const& posmg, uint64_t optimizingPlayer);
 
         /**
          * @brief unfold memory
          */
         std::shared_ptr<storm::models::sparse::Mdp<double>> constructMdp();
 
-        std::vector<u_int64_t> getObservationMapping();
+        std::vector<uint64_t> getObservationMapping();
 
         void setObservationMemorySize(uint64_t observation, uint64_t memorySize);
 
@@ -164,7 +165,7 @@ class PosmgManager {
         bool contains(std::vector<uint64_t> v, uint64_t elem);
 
         /** original POSMG */
-        Posmg const& posmg;
+        Posmg<ValueType> const& posmg;
 
         /** index of optimizing player */
         uint64_t optimizingPlayer;
@@ -174,7 +175,7 @@ class PosmgManager {
          * observability and the other player has complete observability, we keep a vector of
          * optimizing player's observations, which also serves as a mapping.
          */
-        std::vector<u_int64_t> optPlayerObservationMap;
+        std::vector<uint64_t> optPlayerObservationMap;
 
         // For each row in original posmg contains its index withing its row group
         std::vector<uint64_t> prototypeRowIndex;
@@ -201,7 +202,7 @@ class PosmgManager {
         std::vector<uint64_t> rowMemory;
 
         // Unfolded mdp created from posmg
-        std::shared_ptr<storm::models::sparse::Mdp<double>> mdp;
+        std::shared_ptr<storm::models::sparse::Mdp<ValueType>> mdp;
 
 
 }; // class PosmgManager
