@@ -4,6 +4,7 @@ __pycache__/
 prerequisites/
 
 .vscode
+.idea
 
 # OSX
 .DS_Store
