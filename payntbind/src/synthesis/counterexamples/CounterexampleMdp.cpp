@@ -465,13 +465,22 @@ std::pair<bool,bool> CounterexampleGeneratorMdp<ValueType,StateType>::expandAndC
     this->hint_result = storm::api::verifyWithSparseEngine<ValueType>(env, submdp, task);
     this->timer_model_check.stop();
     storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>& model_check_result = this->hint_result->template asExplicitQuantitativeCheckResult<ValueType>();
+
+    auto comparisonType = this->formula_modified[formula_index]->asOperatorFormula().getComparisonType();
+
     bool satisfied;
     if(this->formula_safety[formula_index]) {
-        satisfied = model_check_result[initial_state] < formula_bound;
-        // std::cout << model_check_result[initial_state] << " < " << formula_bound << std::endl;
+        if (comparisonType == storm::logic::ComparisonType::Less) {
+            satisfied = model_check_result[initial_state] < formula_bound;
+        } else {
+            satisfied = model_check_result[initial_state] <= formula_bound;
+        }
     } else {
-        satisfied = model_check_result[initial_state] > formula_bound;
-        // std::cout << model_check_result[initial_state] << " > " << formula_bound << std::endl;
+        if (comparisonType == storm::logic::ComparisonType::Greater) {
+            satisfied = model_check_result[initial_state] > formula_bound;
+        } else {
+            satisfied = model_check_result[initial_state] >= formula_bound;
+        }
     }
     result.second = satisfied;
 

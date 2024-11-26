@@ -2,7 +2,8 @@
 
 namespace synthesis {
 
-    PosmgManager::PosmgManager(Posmg const& posmg, uint64_t optimizingPlayer)
+    template<typename ValueType>
+    PosmgManager<ValueType>::PosmgManager(Posmg<ValueType> const& posmg, uint64_t optimizingPlayer)
         : posmg(posmg), optimizingPlayer(optimizingPlayer)
     {
         this->calculateObservationMap();
@@ -16,17 +17,20 @@ namespace synthesis {
         this->prototypeDuplicates.resize(posmg.getNumberOfStates());
     }
 
-    std::vector<u_int64_t> PosmgManager::getObservationMapping()
+    template<typename ValueType>
+    std::vector<uint64_t> PosmgManager<ValueType>::getObservationMapping()
     {
         return this->optPlayerObservationMap;
     }
 
-    void PosmgManager::setObservationMemorySize(uint64_t observation, uint64_t memorySize)
+    template<typename ValueType>
+    void PosmgManager<ValueType>::setObservationMemorySize(uint64_t observation, uint64_t memorySize)
     {
         this->optPlayerObservationMemorySize[observation] = memorySize;
     }
 
-    std::vector<uint64_t> PosmgManager::getStatePlayerIndications()
+    template<typename ValueType>
+    std::vector<uint64_t> PosmgManager<ValueType>::getStatePlayerIndications()
     {
         std::vector<uint64_t> statePlayerIndications(this->stateCount);
         for (uint64_t state = 0; state < this->stateCount; state++)
@@ -38,8 +42,8 @@ namespace synthesis {
         return statePlayerIndications;
     }
 
-
-    void PosmgManager::calculateObservationMap()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::calculateObservationMap()
     {
         this->optPlayerObservationMap.clear();
 
@@ -59,7 +63,8 @@ namespace synthesis {
         }
     }
 
-    void PosmgManager::calculateObservationSuccesors()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::calculateObservationSuccesors()
     {
         auto transitionMat = this->posmg.getTransitionMatrix();
         auto stateCount = this->posmg.getNumberOfStates();
@@ -83,7 +88,8 @@ namespace synthesis {
         }
     }
 
-    void PosmgManager::calculatePrototypeActionCount()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::calculatePrototypeActionCount()
     {
         auto prototypeCount = this->posmg.getNumberOfStates();
         this->prototypeActionCount.resize(prototypeCount);
@@ -95,7 +101,8 @@ namespace synthesis {
         }
     }
 
-    void PosmgManager::calculateObservationActions()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::calculateObservationActions()
     {
         for (uint64_t prototype = 0; prototype < this->posmg.getNumberOfStates(); prototype++)
         {
@@ -108,7 +115,8 @@ namespace synthesis {
         }
     }
 
-    void PosmgManager::calculatePrototypeRowIndex()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::calculatePrototypeRowIndex()
     {
         this->prototypeRowIndex.resize(this->posmg.getTransitionMatrix().getRowCount());
 
@@ -125,8 +133,8 @@ namespace synthesis {
         }
     }
 
-
-    void PosmgManager::buildStateSpace()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::buildStateSpace()
     {
         auto prototypeCount = this->posmg.getNumberOfStates();
         this->stateDuplicateCount.resize(prototypeCount, 1); // je potreba resize???
@@ -183,7 +191,8 @@ namespace synthesis {
         }
     }
 
-    void PosmgManager::buildTransitionMatrixSpurious() {
+    template<typename ValueType>
+    void PosmgManager<ValueType>::buildTransitionMatrixSpurious() {
         // calculate maxSuccesorDuplicateCount
         for (auto entry : this->succesors)
         {
@@ -236,14 +245,16 @@ namespace synthesis {
         this->rowGroups[this->stateCount] = this->rowCount;
     }
 
-    uint64_t PosmgManager::translateState(uint64_t prototype, uint64_t memory) {
+    template<typename ValueType>
+    uint64_t PosmgManager<ValueType>::translateState(uint64_t prototype, uint64_t memory) {
         if(memory >= this->prototypeDuplicates[prototype].size()) {
             memory = 0;
         }
         return this->prototypeDuplicates[prototype][memory];
     }
 
-    storm::storage::SparseMatrix<double> PosmgManager::constructTransitionMatrix()
+    template<typename ValueType>
+    storm::storage::SparseMatrix<double> PosmgManager<ValueType>::constructTransitionMatrix()
     {
         storm::storage::SparseMatrixBuilder<double> builder(
             this->rowCount, this->stateCount, 0, true, true, this->stateCount
@@ -266,7 +277,8 @@ namespace synthesis {
         return builder.build();
     }
 
-    storm::models::sparse::StateLabeling PosmgManager::constructStateLabeling()
+    template<typename ValueType>
+    storm::models::sparse::StateLabeling PosmgManager<ValueType>::constructStateLabeling()
     {
         storm::models::sparse::StateLabeling labeling(this->stateCount);
         for (auto const& label : this->posmg.getStateLabeling().getLabels())
@@ -297,7 +309,8 @@ namespace synthesis {
         return labeling;
     }
 
-    void PosmgManager::resetDesignSpace()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::resetDesignSpace()
     {
         this->holeCount = 0;
         this->actionHoles.clear();
@@ -316,7 +329,8 @@ namespace synthesis {
     }
 
     // version where each state of non optimising players has it's own action hole
-    void PosmgManager::buildDesignSpaceSpurious()
+    template<typename ValueType>
+    void PosmgManager<ValueType>::buildDesignSpaceSpurious()
     {
         this->resetDesignSpace();
 
@@ -403,34 +417,40 @@ namespace synthesis {
 
     }
 
-    std::shared_ptr<storm::models::sparse::Mdp<double>> PosmgManager::constructMdp()
+    template<typename ValueType>
+    std::shared_ptr<storm::models::sparse::Mdp<double>> PosmgManager<ValueType>::constructMdp()
     {
         this->buildStateSpace();
         this->buildTransitionMatrixSpurious();
 
-        storm::storage::sparse::ModelComponents<double> components;
+        storm::storage::sparse::ModelComponents<ValueType> components;
         components.transitionMatrix = this->constructTransitionMatrix();
         components.stateLabeling = this->constructStateLabeling();
-        this->mdp = std::make_shared<storm::models::sparse::Mdp<double>>(std::move(components));
+        this->mdp = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
 
         this->buildDesignSpaceSpurious();
 
         return this->mdp;
     }
 
-    bool PosmgManager::isOptPlayerState(uint64_t state){
+    template<typename ValueType>
+    bool PosmgManager<ValueType>::isOptPlayerState(uint64_t state){
         return this->posmg.getStatePlayerIndications()[state] == this->optimizingPlayer;
     }
 
-    uint64_t PosmgManager::getActionCount(uint64_t state)
+    template<typename ValueType>
+    uint64_t PosmgManager<ValueType>::getActionCount(uint64_t state)
     {
         auto prototype = this->statePrototype[state];
         return this->prototypeActionCount[prototype];
     }
 
-    bool PosmgManager::contains(std::vector<uint64_t> v, uint64_t elem)
+    template<typename ValueType>
+    bool PosmgManager<ValueType>::contains(std::vector<uint64_t> v, uint64_t elem)
     {
         return std::find(v.begin(), v.end(), elem) != v.end();
     }
+
+    template class PosmgManager<double>;
 
 } // namespace synthesis
