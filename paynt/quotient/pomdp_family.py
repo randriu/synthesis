@@ -95,7 +95,7 @@ class GameAbstractionSolver():
         return state_to_player1_action
 
 
-    def solve(self, quotient_choice_mask, player1_maximizing, palyer2_maximizing):
+    def solve_smg(self, quotient_choice_mask):
         # pomdp representing the game
         # from self.pomdp and quotient_choice_mask. Add states for player2
         # Roman will implement this method
