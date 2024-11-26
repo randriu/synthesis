@@ -27,7 +27,8 @@ class SubPomdp:
 
 
 class GameAbstractionSolver():
-    def __init__(self, prop, quotient_num_actions, choice_to_action):
+    def __init__(self, quotient_pomdp, prop, quotient_num_actions, choice_to_action):
+        self.quotient_pomdp = quotient_pomdp
         self.quotient_num_actions = quotient_num_actions
         self.choice_to_action = choice_to_action
 
@@ -38,11 +39,39 @@ class GameAbstractionSolver():
 
         self.posmg_specification = self.create_posmg_specification(prop)
 
-    # warning: target state(s) in sketch.props must be specified using label (not formula),
-    # because property is parsed without prism context
-    # e.g. P>=0.95 [F "goal"] not P>=0.95 [F goal]
+    def specify_target_with_label(self, labeling, prop):
+        '''
+        If the target is specified by a label return this label.
+        If the target is specified by an expression, mark all target states with a new
+        label and return this label.
+        '''
+        target = prop.formula.subformula.subformula
+        target_label = prop.get_target_label()
+
+        target_is_label = isinstance(target, stormpy.logic.AtomicLabelFormula)
+        if target_is_label:
+            return target_label
+
+        # target is an expression
+        new_target_label = 'goul'
+
+        while labeling.contains_label(new_target_label):
+            new_target_label += '_' # add arbitrary character at the end to make new label unique
+
+        labeling.add_label(new_target_label)
+        target_states = labeling.get_states(target_label)
+        labeling.set_states(new_target_label, target_states)
+
+        return new_target_label
+
     def create_posmg_specification(self, prop):
-        formula_str = prop.formula.__str__() # contains optimality property
+        formula_str = prop.formula.__str__()
+
+        target_label = prop.get_target_label()
+        new_target_label = self.specify_target_with_label(self.quotient_pomdp.labeling, prop)
+        if target_label != new_target_label:
+            formula_str = formula_str.replace(target_label, '"' + new_target_label + '"')
+
         optimizing_player = 0 # hard coded. Has to correspond with state_player_indications
         game_fromula_str = f"<<{optimizing_player}>> " + formula_str
 
@@ -152,7 +181,8 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return stormpy.storage.SparsePomdp(components)
 
     def build_game_abstraction_solver(self, prop):
-        return GameAbstractionSolver(prop, len(self.action_labels), self.choice_to_action)
+        return GameAbstractionSolver(self.pomdp, prop, len(self.action_labels), self.choice_to_action)
+
 
 ################################################################################
 
