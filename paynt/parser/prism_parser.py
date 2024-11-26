@@ -70,8 +70,8 @@ class PrismParser:
             sketch_lines = f.readlines()
 
         # replace hole definitions with constants
-        hole_re_brace = re.compile(r'^\s*hole\s+(.*?)\s+(.*?)\s+in\s+\{(.*?)\}\s*;\s*$')
-        # hole_re_bracket = re.compile(r'^\s*hole\s+(.*?)\s+(.*?)\s+in\s+[(.*?)]\s+;\s+$')
+        hole_re_brace = re.compile(r'^\s*hole\s+(.*?)\s+(.*?)\s+in\s+\{(.*?)\}\s*;')
+        # hole_re_bracket = re.compile(r'^\s*hole\s+(.*?)\s+(.*?)\s+in\s+[(.*?)]\s+;')
         sketch_output = []
         hole_definitions = []
         for line in sketch_lines:
