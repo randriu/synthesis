@@ -56,21 +56,16 @@ class JaniUnfolder:
                 p = paynt.verification.property.OptimalityProperty(prop_new,epsilon)
             properties_unpacked.append(p)
         self.specification = paynt.verification.property.Specification(properties_unpacked)
+        self.jani_unfolded,edge_to_hole_options = JaniUnfolder.unfold_jani(jani, family, hole_expressions)
 
-        # unfold holes in the program
-        self.hole_expressions = hole_expressions
-        self.jani_unfolded = None
-        self.unfold_jani(jani, family)
         logger.debug("constructing the quotient...")
-
-        # construct the explicit quotient
         quotient_mdp = paynt.models.model_builder.ModelBuilder.from_jani(self.jani_unfolded, self.specification)
 
         # associate each action of a quotient MDP with hole options
         # reconstruct choice labels from choice origins
         logger.debug("associating choices of the quotient with hole assignments...")
         choice_is_valid,choice_to_hole_options = payntbind.synthesis.janiMapChoicesToHoleAssignments(
-            quotient_mdp,family.family,self.edge_to_hole_options
+            quotient_mdp,family.family,edge_to_hole_options
         )
 
         # handle conflicting colors
@@ -93,9 +88,8 @@ class JaniUnfolder:
         self.choice_to_hole_options = choice_to_hole_options
         return
 
-
-    # Unfold holes in the jani program
-    def unfold_jani(self, jani, family):
+    @staticmethod
+    def unfold_jani(jani, family, hole_expressions):
         # ensure that jani.constants are in the same order as our holes
         open_constants = [c for c in jani.constants if not c.defined]
         expression_variables = [c.expression_variable for c in open_constants]
@@ -107,9 +101,9 @@ class JaniUnfolder:
         jani_program = stormpy.JaniModel(jani)
         new_automata = dict()
         for aut_index,automaton in enumerate(jani_program.automata):
-            if not self.automaton_has_holes(automaton, set(expression_variables)):
+            if not JaniUnfolder.automaton_has_holes(automaton, set(expression_variables)):
                 continue
-            new_aut = self.construct_automaton(automaton, family, expression_variables, combination_coloring)
+            new_aut = JaniUnfolder.construct_automaton(automaton, family, hole_expressions, expression_variables, combination_coloring)
             new_automata[aut_index] = new_aut
         for aut_index,aut in new_automata.items():
             jani_program.replace_automaton(aut_index, aut)
@@ -132,11 +126,10 @@ class JaniUnfolder:
                 options = [(hole_index,option) for hole_index,option in enumerate(options) if option is not None]
                 edge_to_hole_options[global_index] = options
 
-        self.jani_unfolded = jani_program
-        self.edge_to_hole_options = edge_to_hole_options
+        return jani_program,edge_to_hole_options
 
-    
-    def edge_has_holes(self, edge, expression_variables):
+    @staticmethod
+    def edge_has_holes(edge, expression_variables):
         if edge.guard.contains_variable(expression_variables):
             return True
         for dest in edge.destinations:
@@ -147,24 +140,27 @@ class JaniUnfolder:
                     return True
         return False
 
-    def automaton_has_holes(self, automaton, expression_variables):
+    @staticmethod
+    def automaton_has_holes(automaton, expression_variables):
         for edge in automaton.edges:
-            if self.edge_has_holes(edge,expression_variables):
+            if JaniUnfolder.edge_has_holes(edge,expression_variables):
                 return True
         return False
 
-    def construct_automaton(self, automaton, family, expression_variables, combination_coloring):
+    @staticmethod
+    def construct_automaton(automaton, family, hole_expressions, expression_variables, combination_coloring):
         new_aut = stormpy.storage.JaniAutomaton(automaton.name, automaton.location_variable)
         [new_aut.add_location(loc) for loc in automaton.locations]
         [new_aut.add_initial_location(idx) for idx in automaton.initial_location_indices]
         [new_aut.variables.add_variable(var) for var in automaton.variables]
         for edge in automaton.edges:
-            new_edges = self.construct_edges(edge, family, expression_variables, combination_coloring)
+            new_edges = JaniUnfolder.construct_edges(edge, family, hole_expressions, expression_variables, combination_coloring)
             for new_edge in new_edges:
                 new_aut.add_edge(new_edge)
         return new_aut
 
-    def construct_edges(self, edge, family, expression_variables, combination_coloring):
+    @staticmethod
+    def construct_edges(edge, family, hole_expressions, expression_variables, combination_coloring):
 
         # relevant holes in guard
         variables = edge.template_edge.guard.get_variables()
@@ -185,9 +181,9 @@ class JaniUnfolder:
         relevant_holes = relevant_guard | relevant_probs | relevant_updates
 
         new_edges = []
-        if not relevant_holes:
+        if len(relevant_holes) == 0:
             # copy without unfolding
-            new_edges.append(self.construct_edge(edge))
+            new_edges.append(JaniUnfolder.construct_edge(edge))
             return new_edges
 
         # unfold all combinations
@@ -197,34 +193,36 @@ class JaniUnfolder:
         ]
         for combination in itertools.product(*combinations):
             substitution = {
-                expression_variables[hole] : self.hole_expressions[hole][combination[hole]]
+                expression_variables[hole] : hole_expressions[hole][combination[hole]]
                 for hole in range(family.num_holes)
                 if combination[hole] is not None
             }
-            new_edge = self.construct_edge(edge,substitution)
+            new_edge = JaniUnfolder.construct_edge(edge,substitution)
             new_edge.color = combination_coloring.get_or_make_color(combination)
             new_edges.append(new_edge)
         return new_edges
 
-    def construct_edge(self, edge, substitution = None):
-
+    @staticmethod
+    def construct_edge(edge, substitution = None):
         guard = stormpy.Expression(edge.template_edge.guard)
-        dests = [(d.target_location_index, d.probability) for d in edge.destinations]
+        assignments = edge.template_edge.assignments.clone()
+        destinations = [(dst.target_location_index,dst.probability) for dst in edge.destinations]
 
         if substitution is not None:
             guard = guard.substitute(substitution)
-            dests = [(t, p.substitute(substitution)) for (t,p) in dests]
+            assignments.substitute(substitution, substitute_transcendental_numbers=True)
+            destinations = [(target,prob.substitute(substitution)) for target,prob in destinations]
 
-        templ_edge = stormpy.storage.JaniTemplateEdge(guard)
+        template_edge = stormpy.storage.JaniTemplateEdge(guard)
+        payntbind.synthesis.janiTemplateEdgeAddAssignments(template_edge,assignments)
         for templ_edge_dest in edge.template_edge.destinations:
             assignments = templ_edge_dest.assignments.clone()
             if substitution is not None:
                 assignments.substitute(substitution, substitute_transcendental_numbers=True)
-                # assignments.substitute(substitution) # legacy version
-            templ_edge.add_destination(stormpy.storage.JaniTemplateEdgeDestination(assignments))
+            template_edge.add_destination(stormpy.storage.JaniTemplateEdgeDestination(assignments))
 
         new_edge = stormpy.storage.JaniEdge(
-            edge.source_location_index, edge.action_index, edge.rate, templ_edge, dests
+            edge.source_location_index, edge.action_index, edge.rate, template_edge, destinations
         )
         return new_edge
 
