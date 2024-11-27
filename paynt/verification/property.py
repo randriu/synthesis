@@ -167,7 +167,7 @@ class Property:
         if not self.is_until:
             return
         logger.info("converting until formula to eventually...")
-        formula = payntbind.synthesis.transform_until_to_eventually(self.formula)
+        formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
         self.__init__(prop)
 
@@ -306,7 +306,7 @@ class OptimalityProperty(Property):
         if not self.is_until:
             return
         logger.info("converting until formula to eventually...")
-        formula = payntbind.synthesis.transform_until_to_eventually(self.formula)
+        formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
         prop = stormpy.core.Property("", formula)
         self.__init__(prop, self.epsilon)
 

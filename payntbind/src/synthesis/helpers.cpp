@@ -14,6 +14,8 @@
 #include <storm/storage/SparseMatrix.h>
 #include <storm/models/sparse/Model.h>
 
+#include <storm/storage/jani/TemplateEdge.h>
+
 namespace synthesis {
 
 template<typename ValueType>
@@ -42,6 +44,16 @@ void removeRewardModel(storm::models::sparse::Model<ValueType> & model, std::str
     model.removeRewardModel(reward_name);
 }
 
+bool janiTemplateEdgeAddTransientAssignment(storm::jani::TemplateEdge & template_edge, storm::jani::Assignment const& assignment, bool add_to_existing = false) {
+    return template_edge.addTransientAssignment(assignment,add_to_existing);
+}
+
+void janiTemplateEdgeAddAssignments(storm::jani::TemplateEdge & template_edge, storm::jani::OrderedAssignments const& assignments) {
+    for(auto const& assignment: assignments) {
+        template_edge.addTransientAssignment(assignment);
+    }
+}
+
 }
 
 
@@ -65,5 +77,6 @@ void define_helpers(py::module& m) {
         return result;
     }, py::arg("matrix"), py::arg("vector"));
 
+    m.def("janiTemplateEdgeAddAssignments", &synthesis::janiTemplateEdgeAddAssignments, py::arg("template_edge"), py::arg("assignments"));
 }
 
