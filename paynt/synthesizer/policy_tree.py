@@ -529,8 +529,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # construct and solve the game abstraction
         # logger.debug("solving game abstraction...")
 
-        # game_solver.solve_sg(family.selected_choices)
-        game_solver.solve_smg(family.selected_choices)
+        game_solver.solve_sg(family.selected_choices)
+        # game_solver.solve_smg(family.selected_choices)
 
         game_value = game_solver.solution_value
         self.stat.iteration_game(family.mdp.states)
