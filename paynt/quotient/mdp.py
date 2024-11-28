@@ -475,23 +475,17 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             for options in core_suboptions: assert len(options) > 0
             other_suboptions = []
 
-        new_family = mdp.family.copy()
         if len(other_suboptions) == 0:
             suboptions = core_suboptions
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
         # construct corresponding subfamilies
-        subfamilies = []
-        family.splitter = splitter
         parent_info = family.collect_parent_info(self.specification)
         parent_info.analysis_result = family.analysis_result
         parent_info.scheduler_choices = family.scheduler_choices
         parent_info.unsat_core_hint = self.coloring.unsat_core.copy()
-        for suboption in suboptions:
-            subfamily = new_family.subholes(splitter, suboption)
+        subfamilies = family.split(splitter,suboptions)
+        for subfamily in subfamilies:
             subfamily.add_parent_info(parent_info)
-            subfamily.hole_set_options(splitter, suboption)
-            subfamilies.append(subfamily)
-
         return subfamilies

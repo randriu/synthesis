@@ -22,7 +22,6 @@ class ParentInfo():
         self.selected_choices = None
         self.constraint_indices = None
         self.refinement_depth = None
-        self.splitter = None
 
 
 class Family:
@@ -44,7 +43,6 @@ class Family:
         self.selected_choices = None
         self.mdp = None
         self.analysis_result = None
-        self.splitter = None
         self.encoding = None
 
     def add_parent_info(self, parent_info):
@@ -108,12 +106,27 @@ class Family:
     def copy(self):
         return Family(self)
 
+    def assume_hole_options_copy(self, hole, options):
+        '''
+        Create a copy and assume suboptions for a given hole.
+        @note this does not check whether @options are actually suboptions of this hole.
+        '''
+        subfamily = self.copy()
+        subfamily.hole_set_options(hole,options)
+        return subfamily
+
     def assume_options_copy(self, hole_options):
-        ''' Create a copy and assume suboptions for each hole. '''
-        holes_copy = self.copy()
+        '''
+        Create a copy and assume suboptions for each hole.
+        @note this does not check whether suboptions are actually suboptions of any given hole.
+        '''
+        subfamily = self.copy()
         for hole,options in enumerate(hole_options):
-            holes_copy.hole_set_options(hole,options)
-        return holes_copy
+            subfamily.hole_set_options(hole,options)
+        return subfamily
+
+    def split(self, splitter, suboptions):
+        return [self.assume_hole_options_copy(splitter,options) for options in suboptions]
 
     def pick_any(self):
         hole_options = [[self.hole_options(hole)[0]] for hole in range(self.num_holes)]
@@ -140,24 +153,12 @@ class Family:
         assignment = self.assume_options_copy(suboptions)
         return assignment
 
-    def subholes(self, hole_index, options):
-        '''
-        Construct a semi-shallow copy of self with only one modified hole
-          @hole_index having selected @options
-        :note this is a performance/memory optimization associated with creating
-          subfamilies wrt one splitter having restricted options
-        '''
-        shallow_copy = self.copy()
-        shallow_copy.hole_set_options(hole_index,options)
-        return shallow_copy
-
     def collect_parent_info(self, specification):
         pi = ParentInfo()
         pi.selected_choices = self.selected_choices
         pi.refinement_depth = self.refinement_depth
         cr = self.analysis_result.constraints_result
         pi.constraint_indices = cr.undecided_constraints if cr is not None else []
-        pi.splitter = self.splitter
         return pi
 
     def encode(self, smt_solver):
