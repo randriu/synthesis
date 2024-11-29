@@ -27,15 +27,16 @@ class SubPomdp:
 
 
 class GameAbstractionSolver():
-    def __init__(self, quotient_pomdp, prop, quotient_num_actions, choice_to_action):
-        self.quotient_pomdp = quotient_pomdp
+    def __init__(self, quotient_mdp, state_to_observation, prop, quotient_num_actions, choice_to_action):
+        self.quotient_mdp = quotient_mdp
+        self.state_to_observation = state_to_observation
         self.quotient_num_actions = quotient_num_actions
         self.choice_to_action = choice_to_action
 
         self.solution_value = None
-        self.solution_state_values = None
-        self.solution_state_to_player1_action = None
-        self.solution_state_to_quotient_choice = None
+        self.solution_state_values = [None for state in range(quotient_mdp.nr_states)]
+        self.solution_state_to_player1_action = [None for state in range(quotient_mdp.nr_states)]
+        self.solution_state_to_quotient_choice = [None for state in range(quotient_mdp.nr_states)]
 
         self.posmg_specification = self.create_posmg_specification(prop)
 
@@ -68,7 +69,7 @@ class GameAbstractionSolver():
         formula_str = prop.formula.__str__()
 
         target_label = prop.get_target_label()
-        new_target_label = self.specify_target_with_label(self.quotient_pomdp.labeling, prop)
+        new_target_label = self.specify_target_with_label(self.quotient_mdp.labeling, prop)
         if target_label != new_target_label:
             formula_str = formula_str.replace(target_label, '"' + new_target_label + '"')
 
@@ -94,34 +95,75 @@ class GameAbstractionSolver():
 
         return state_to_player1_action
 
-
     def solve_smg(self, quotient_choice_mask):
-        # pomdp representing the game
-        # from self.pomdp and quotient_choice_mask. Add states for player2
-        # Roman will implement this method
-        pomdp_game, state_player_indications = None
+        # initialize results
+        self.solution_value = 0
+        for state in range(self.quotient_mdp.nr_states):
+            self.solution_state_to_player1_action[state] = self.quotient_num_actions
+            self.solution_state_to_quotient_choice[state] = self.quotient_mdp.nr_choices
+            self.solution_state_values[state] = 0
 
-        posmg = payntbind.synthesis.create_posmg(pomdp_game, state_player_indications)
+        # create game abstraction
+        smg_abstraction = payntbind.synthesis.SmgAbstraction(
+            self.quotient_mdp,
+            self.quotient_num_actions,
+            self.choice_to_action,
+            quotient_choice_mask)
 
+        # create posmg
+        smg_state_observation = []
+        for smg_state in range(smg_abstraction.smg.nr_states):
+            quotient_state, _ = smg_abstraction.state_to_quotient_state_action[smg_state]
+            obs = self.state_to_observation[quotient_state]
+            smg_state_observation.append(obs)
+        posmg = payntbind.synthesis.posmg_from_smg(smg_abstraction.smg,smg_state_observation)
+
+        # solve posmg
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
-
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
-        # for fsc synthesis (we probably dont want)
-        # synthesizer = paynt.synthesizer.synthesizer_posmg.SynthesizerPosmg(quotient)
-
         assignment = synthesizer.synthesize(keep_optimum=True, print_stats=False)
 
-        self.solution_value = synthesizer.best_assignment_value
+        # is this correct?
+        if assignment is None:
+            return
 
-        self.solution_state_values = None # todo
+        # extract results
+        state_player_indications = posmgQuotient.posmg_manager.get_state_player_indications()
+        choices = posmgQuotient.coloring.selectCompatibleChoices(assignment.family)
+        model, game_state_map, game_choice_map = posmgQuotient.restrict_mdp(posmgQuotient.quotient_mdp, choices)
+        dtmc = paynt.models.models.Mdp(model)
+        result = dtmc.check_specification(self.posmg_specification)
 
-        self.solution_state_to_quotient_choice = None # todo
+        # fill solution_state_to_player1_action
+        for dtmc_state, game_state in enumerate(game_state_map):
+            if state_player_indications[game_state] == 0:
+                game_choice = game_choice_map[dtmc_state]
+                quotient_choice = smg_abstraction.choice_to_quotient_choice[game_choice]
+                selected_action = self.choice_to_action[quotient_choice]
 
-        self.solution_state_to_player1_action = self.calculate_state_to_player1_action(
-                                                    self.solution_state_to_quotient_choice,
-                                                    self.choice_to_action,
-                                                    self.quotient_num_actions)
+                quotient_state, _ = smg_abstraction.state_to_quotient_state_action[game_state]
+                self.solution_state_to_player1_action[quotient_state] = selected_action
 
+        # fill solution_state_to_quotient_choices
+        for dtmc_state, game_state in enumerate(game_state_map):
+            if state_player_indications[game_state] != 1:
+                continue
+            quotient_state, selected_action = smg_abstraction.state_to_quotient_state_action[game_state]
+            if selected_action != self.solution_state_to_player1_action[quotient_state]: # is this necessary? wont these states be removed during restrict mdp?
+                continue
+            game_choice = game_choice_map[dtmc_state]
+            quotient_choice = smg_abstraction.choice_to_quotient_choice[game_choice]
+            self.solution_state_to_quotient_choice[quotient_state] = quotient_choice
+
+        # fill solution_value
+        self.solution_value = synthesizer.best_assignment_value # or result.at(initial_state)
+
+        # fill solution_state_values
+        for dtmc_state, game_state in enumerate(game_state_map):
+            if state_player_indications[game_state] == 0:
+                value = result.optimality_result.result.at(dtmc_state)
+                quotient_state, _ = smg_abstraction.state_to_quotient_state_action[game_state]
+                self.solution_state_values[quotient_state] = value
 
 
 
@@ -177,7 +219,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return stormpy.storage.SparsePomdp(components)
 
     def build_game_abstraction_solver(self, prop):
-        return GameAbstractionSolver(self.pomdp, prop, len(self.action_labels), self.choice_to_action)
+        return GameAbstractionSolver(self.quotient_mdp, self.state_to_observation, prop, len(self.action_labels), self.choice_to_action)
 
     def assignment_to_policy(self, mdp, assignment):
         policy = self.empty_policy()
