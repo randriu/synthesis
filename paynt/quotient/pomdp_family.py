@@ -53,7 +53,7 @@ class GameAbstractionSolver():
             return target_label
 
         # target is an expression
-        new_target_label = 'goul'
+        new_target_label = 'goal'
 
         while labeling.contains_label(new_target_label):
             new_target_label += '_' # add arbitrary character at the end to make new label unique
