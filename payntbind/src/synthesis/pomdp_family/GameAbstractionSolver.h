@@ -49,9 +49,9 @@ namespace synthesis {
         void solveSg(storm::storage::BitVector const& quotient_choice_mask);
         void solveSmg(storm::storage::BitVector const& quotient_choice_mask);
 
-        /** State values for the solution. */
+        /** For each state, the value of the game. */
         std::vector<double> solution_state_values;
-        /** Solution value of the game. */
+        /** Value of the game in the initial state. */
         double solution_value;
         
         /**

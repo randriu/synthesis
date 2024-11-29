@@ -260,8 +260,8 @@ namespace synthesis {
         }
         storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const& result_quan = result->asExplicitQuantitativeCheckResult<ValueType>();
         storm::storage::Scheduler<ValueType> const& scheduler = result_quan.getScheduler();
-        this->solution_state_values = result_quan.getValueVector();
 
+        std::fill(this->solution_state_values.begin(),this->solution_state_values.end(),0);
         std::fill(this->solution_state_to_player1_action.begin(),this->solution_state_to_player1_action.end(),this->quotient_num_actions);
         std::fill(this->solution_state_to_quotient_choice.begin(),this->solution_state_to_quotient_choice.end(),this->quotient.getNumberOfChoices());
         std::vector<uint64_t> const& game_row_groups = abstraction.smg->getTransitionMatrix().getRowGroupIndices();
@@ -272,6 +272,7 @@ namespace synthesis {
                 continue;
             }
             auto [state,_] = abstraction.state_to_quotient_state_action[game_state];
+            this->solution_state_values[state] = result_quan[game_state];
             uint64_t game_choice = game_row_groups[game_state]+scheduler.getChoice(game_state).getDeterministicChoice();
             uint64_t player1_action = choice_to_action[abstraction.choice_to_quotient_choice[game_choice]];
             this->solution_state_to_player1_action[state] = player1_action;
