@@ -9,7 +9,15 @@ class SynthesizerPomdpPolicyTree(paynt.synthesizer.policy_tree.SynthesizerPolicy
 
     def solve_singleton(self, family, prop):
         mdp = family.mdp
-        pomdp = None # remember in family / create from mdp + observations
+
+        quotient_state_to_observation = self.quotient.state_to_observation
+        state_to_observation = []
+        for quotient_state in mdp.quotient_state_map:
+            observation = quotient_state_to_observation[quotient_state]
+            state_to_observation.append(observation)
+
+        pomdp = self.quotient.pomdp_from_mdp(mdp.model, state_to_observation)
+
         specification = paynt.verification.property.Specification([prop])
         quotient = paynt.quotient.pomdp.PomdpQuotient(pomdp, specification)
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
@@ -18,7 +26,7 @@ class SynthesizerPomdpPolicyTree(paynt.synthesizer.policy_tree.SynthesizerPolicy
         if assignment is None:
             return False
         else:
-            policy = None # create policy from assignment
+            policy = self.quotient.assignment_to_policy(mdp, assignment)
 
             return policy
 

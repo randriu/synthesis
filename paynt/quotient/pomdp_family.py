@@ -148,7 +148,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             self.observation_to_actions[obs] = available_actions
 
         # quotient pomdp representing the whole family of pomdps
-        self.pomdp = self.create_pomdp()
+        self.pomdp = self.pomdp_from_mdp(self.quotient_mdp, self.state_to_observation)
 
 
     @property
@@ -162,11 +162,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
-    # build pomdp model from mdp and state->observation map
-    def create_pomdp(self):
-        mdp = self.quotient_mdp
-        observability_classes = self.state_to_observation
-
+    def pomdp_from_mdp(self, mdp, observability_classes):
         transition_matrix = mdp.transition_matrix
         state_labeling = mdp.labeling
         components = stormpy.SparseModelComponents(
@@ -183,6 +179,19 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def build_game_abstraction_solver(self, prop):
         return GameAbstractionSolver(self.pomdp, prop, len(self.action_labels), self.choice_to_action)
 
+    def assignment_to_policy(self, mdp, assignment):
+        policy = self.empty_policy()
+
+        choices = self.coloring.selectCompatibleChoices(assignment.family)
+        dtmc, mdp_state_map, mdp_choice_map = self.restrict_mdp(mdp, choices) # is this needed?? can I get policy just from choices??
+
+        for dtmc_state, mdp_state in enumerate(mdp_state_map):
+            quotient_state = mdp.quotient_state_map[mdp_state]
+
+            mdp_choice = mdp_choice_map[dtmc_state]
+            quotient_choice = mdp.quotient_choice_map[mdp_choice]
+
+            policy[quotient_state] = quotient_choice
 
 ################################################################################
 
