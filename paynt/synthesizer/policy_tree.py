@@ -529,8 +529,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # construct and solve the game abstraction
         # logger.debug("solving game abstraction...")
 
-        # game_solver.solve_sg(family.selected_choices)
-        game_solver.solve_smg(family.selected_choices)
+        game_solver.solve_sg(family.selected_choices)
+        # game_solver.solve_smg(family.selected_choices)
 
         game_value = game_solver.solution_value
         self.stat.iteration_game(family.mdp.states)
@@ -660,15 +660,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             half = len(options) // 2
             suboptions = [options[:half], options[half:]]
 
-        # construct corresponding design subspaces
-        subfamilies = []
-        family.splitter = splitter
-        new_family = family.copy()
-        for suboption in suboptions:
-            subfamily = new_family.subholes(splitter, suboption)
-            subfamily.hole_set_options(splitter, suboption)
+        subfamilies = family.split(splitter,suboptions)
+        for subfamily in subfamilies:
             subfamily.candidate_policy = None
-            subfamilies.append(subfamily)
 
         if not SynthesizerPolicyTree.discard_unreachable_choices:
             self.assign_candidate_policy(subfamilies, hole_selection, splitter, policy)

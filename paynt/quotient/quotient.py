@@ -292,25 +292,16 @@ class Quotient:
             other_suboptions = []
         # print(mdp.family[splitter], core_suboptions, other_suboptions)
 
-        new_family = mdp.family.copy()
         if len(other_suboptions) == 0:
             suboptions = core_suboptions
         else:
             suboptions = [other_suboptions] + core_suboptions  # DFS solves core first
 
-        # construct corresponding design subspaces
-        design_subspaces = []
-
         # construct corresponding subfamilies
-        subfamilies = []
-        family.splitter = splitter
         parent_info = family.collect_parent_info(self.specification)
-        for suboption in suboptions:
-            subfamily = new_family.subholes(splitter, suboption)
+        subfamilies = family.split(splitter,suboptions)
+        for subfamily in subfamilies:
             subfamily.add_parent_info(parent_info)
-            subfamily.hole_set_options(splitter, suboption)
-            subfamilies.append(subfamily)
-
         return subfamilies
 
 
