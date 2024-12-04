@@ -189,9 +189,6 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
                 continue
             self.observation_to_actions[obs] = available_actions
 
-        # quotient pomdp representing the whole family of pomdps
-        self.pomdp = self.pomdp_from_mdp(self.quotient_mdp, self.state_to_observation)
-
 
     @property
     def num_observations(self):
