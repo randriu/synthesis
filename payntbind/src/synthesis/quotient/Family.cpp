@@ -30,15 +30,18 @@ uint64_t Family::addHole(uint64_t num_options) {
 }
 
 void Family::holeSetOptions(uint64_t hole, std::vector<uint64_t> const& options) {
-    hole_options[hole] = options;
     hole_options_mask[hole].clear();
-    for(auto option: options) {
+    for(uint64_t option: options) {
         hole_options_mask[hole].set(option);
+    }
+    hole_options[hole].clear();
+    for(uint64_t option: hole_options_mask[hole]) {
+        hole_options[hole].push_back(option);
     }
 }
 void Family::holeSetOptions(uint64_t hole, BitVector const& options) {
     hole_options[hole].clear();
-    for(auto option: options) {
+    for(uint64_t option: options) {
         hole_options[hole].push_back(option);
     }
     hole_options_mask[hole] = options;

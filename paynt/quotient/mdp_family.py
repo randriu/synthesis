@@ -186,7 +186,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         target_label = prop.get_target_label()
         precision = paynt.verification.property.Property.model_checking_precision
         solver = payntbind.synthesis.GameAbstractionSolver(
-            self.quotient_mdp, len(self.action_labels), self.choice_to_action, target_label, precision
+            self.quotient_mdp, len(self.action_labels), self.choice_to_action, prop.formula, prop.maximizing, target_label, precision
         )
         return solver
 

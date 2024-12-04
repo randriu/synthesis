@@ -1,108 +1,33 @@
 #include "GameAbstractionSolver.h"
 
+#include "src/synthesis/pomdp_family/SmgAbstraction.h"
+#include "src/synthesis/smg/smgModelChecker.h"
+#include "src/synthesis/translation/componentTranslations.h"
+#include "src/synthesis/translation/ItemKeyTranslator.h"
+#include "src/synthesis/translation/ItemTranslator.h"
 
+#include <storm/environment/solver/GameSolverEnvironment.h>
+#include <storm/environment/solver/NativeSolverEnvironment.h>
+#include <storm/models/sparse/Smg.h>
+#include <storm/solver/GameSolver.h>
+#include <storm/storage/PlayerIndex.h>
+#include <storm/utility/builder.h>
 
 #include <queue>
 
 namespace synthesis {
-        
-    /*template<typename ValueType>
-    std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>,std::vector<uint64_t>> randomizeActionVariant(
-        storm::models::sparse::Model<ValueType> const& model,
-        std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices
-    ) {
-        storm::storage::sparse::ModelComponents<ValueType> components;
-
-        // copy state labeling
-        storm::models::sparse::StateLabeling state_labeling(model.getNumberOfStates());
-        for (auto const& label : model.getStateLabeling().getLabels()) {
-            state_labeling.addLabel(label, storm::storage::BitVector(model.getStates(label)));
-        }
-        components.stateLabeling = state_labeling;
-        
-        // build transition matrix and reward models
-        storm::storage::SparseMatrixBuilder<ValueType> builder(0, 0, 0, false, true, 0);
-        std::map<std::string,std::vector<ValueType>> reward_vectors;
-        for(auto const& reward_model : model.getRewardModels()) {
-            reward_vectors.emplace(reward_model.first, std::vector<ValueType>());
-        }
-
-        uint64_t num_rows = 0;
-        std::vector<uint64_t> choice_to_action;
-        auto num_actions = state_action_choices[0].size();
-        for(uint64_t state=0; state<model.getNumberOfStates(); ++state) {
-            builder.newRowGroup(num_rows);
-            for(uint64_t action = 0; action<num_actions; ++action) {
-                auto & choices = state_action_choices[state][action];
-                if(choices.empty()) {
-                    continue;
-                }
-
-                // new choice
-                choice_to_action.push_back(action);
-
-                // handle transition matrix
-                auto num_choices = choices.size();
-                std::map<uint64_t,ValueType> dst_prob;
-                for(auto choice: choices) {
-                    for(auto const &entry: model.getTransitionMatrix().getRow(choice)) {
-                        dst_prob[entry.getColumn()] += entry.getValue() / num_choices;
-                    }
-                }
-                for(auto const& [dst,prob] : dst_prob) {
-                    builder.addNextValue(num_rows,dst,prob);
-                }
-                num_rows++;
-
-                // handle reward models
-                for(auto const& reward_model : model.getRewardModels()) {
-                    ValueType reward_value = 0;
-                    for(auto choice: choices) {
-                        reward_value += reward_model.second.getStateActionReward(choice) / num_choices;
-                    }
-                    reward_vectors[reward_model.first].push_back(reward_value);
-                }
-            }
-        }
-        components.transitionMatrix = builder.build();
-
-        for(auto const& [name,choice_rewards]: reward_vectors) {
-            std::optional<std::vector<ValueType>> state_rewards;
-            components.rewardModels.emplace(name, storm::models::sparse::StandardRewardModel<ValueType>(std::move(state_rewards), std::move(choice_rewards)));
-        }
-
-        auto randomized_model = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
-        return std::make_pair(randomized_model,choice_to_action);
-    }
-    template std::pair<std::shared_ptr<storm::models::sparse::Mdp<double>>,std::vector<uint64_t>> randomizeActionVariant(storm::models::sparse::Model<double> const& model, std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices);*/
-
-
-    template<typename ValueType>
-    void print_matrix(storm::storage::SparseMatrix<ValueType> matrix) {
-        auto const& row_group_indices = matrix.getRowGroupIndices();
-        for(uint64_t state=0; state < matrix.getRowGroupCount(); state++) {
-            std::cout << "state " << state << ": " << std::endl;
-            for(uint64_t row=row_group_indices[state]; row<row_group_indices[state+1]; row++) {
-                for(auto const &entry: matrix.getRow(row)) {
-                    std::cout << state << "-> "  << entry.getColumn() << " ["  << entry.getValue() << "];";
-                }
-                std::cout << std::endl;
-            }
-        }
-        std::cout << "-----" << std::endl;
-    }
-
-    template void print_matrix<storm::storage::sparse::state_type>(storm::storage::SparseMatrix<storm::storage::sparse::state_type> matrix);
-    template void print_matrix<double>(storm::storage::SparseMatrix<double> matrix);
 
     template<typename ValueType>
     GameAbstractionSolver<ValueType>::GameAbstractionSolver(
         storm::models::sparse::Model<ValueType> const& quotient,
         uint64_t quotient_num_actions,
         std::vector<uint64_t> const& choice_to_action,
+        std::shared_ptr<storm::logic::Formula const> formula,
+        bool player1_maximizing,
         std::string const& target_label,
         double precision
-    ) : quotient(quotient), quotient_num_actions(quotient_num_actions), choice_to_action(choice_to_action) {
+    ) : quotient(quotient), quotient_num_actions(quotient_num_actions), choice_to_action(choice_to_action),
+        player1_maximizing(player1_maximizing) {
 
         auto quotient_num_states = quotient.getNumberOfStates();
         auto quotient_num_choices = quotient.getNumberOfChoices();
@@ -114,6 +39,11 @@ namespace synthesis {
             }
         }
         this->setupSolverEnvironment(precision);
+
+        std::vector<std::variant<std::string, storm::storage::PlayerIndex>> coalition_vector;
+        coalition_vector.emplace_back((storm::storage::PlayerIndex)0);
+        storm::logic::PlayerCoalition coalition(coalition_vector);
+        this->game_formula = std::make_shared<storm::logic::GameFormula const>(coalition,formula);
 
         // identify target states
         this->state_is_target = storm::storage::BitVector(quotient_num_states,false);
@@ -149,17 +79,14 @@ namespace synthesis {
 
 
     template<typename ValueType>
-    void GameAbstractionSolver<ValueType>::solve(
-        storm::storage::BitVector quotient_choice_mask,
-        bool player1_maximizing, bool player2_maximizing
-    ) {
+    void GameAbstractionSolver<ValueType>::solveSg(storm::storage::BitVector const& quotient_choice_mask) {
         if(profiling_enabled) {
             this->timer_total.start();
         }
 
-        auto quotient_num_states = this->quotient.getNumberOfStates();
-        auto quotient_num_choices = this->quotient.getNumberOfChoices();
-        auto quotient_initial_state = *(this->quotient.getInitialStates().begin());
+        uint64_t quotient_num_states = this->quotient.getNumberOfStates();
+        uint64_t quotient_num_choices = this->quotient.getNumberOfChoices();
+        uint64_t quotient_initial_state = *(this->quotient.getInitialStates().begin());
 
         ItemTranslator state_to_player1_state(quotient_num_states);
         ItemKeyTranslator<uint64_t> state_action_to_player2_state(quotient_num_states);
@@ -172,20 +99,20 @@ namespace synthesis {
         state_is_encountered.set(quotient_initial_state,true);
         auto const& quotient_row_group_indices = this->quotient.getTransitionMatrix().getRowGroupIndices();
         while(not unexplored_states.empty()) {
-            auto state = unexplored_states.front();
+            uint64_t state = unexplored_states.front();
             unexplored_states.pop();
-            auto player1_state = state_to_player1_state.translate(state);
+            uint64_t player1_state = state_to_player1_state.translate(state);
             player1_state_to_actions.resize(state_to_player1_state.numTranslations());
-            for(auto choice = quotient_row_group_indices[state]; choice < quotient_row_group_indices[state+1]; choice++) {
+            for(uint64_t choice = quotient_row_group_indices[state]; choice < quotient_row_group_indices[state+1]; choice++) {
                 if(not quotient_choice_mask[choice]) {
                     continue;
                 }
-                auto action = choice_to_action[choice];
+                uint64_t action = choice_to_action[choice];
                 player1_state_to_actions[player1_state].insert(action);
-                auto player2_state = state_action_to_player2_state.translate(state,action);
+                uint64_t player2_state = state_action_to_player2_state.translate(state,action);
                 player2_state_to_choices.resize(state_action_to_player2_state.numTranslations());
                 player2_state_to_choices[player2_state].push_back(choice);
-                for(auto state_dst: this->choice_to_destinations[choice]) {
+                for(uint64_t state_dst: this->choice_to_destinations[choice]) {
                     if(state_is_encountered[state_dst]) {
                         continue;
                     }
@@ -194,12 +121,12 @@ namespace synthesis {
                 }
             }
         }
-        auto player1_num_states = state_to_player1_state.numTranslations();
-        auto player2_num_states = state_action_to_player2_state.numTranslations();
+        uint64_t player1_num_states = state_to_player1_state.numTranslations();
+        uint64_t player2_num_states = state_action_to_player2_state.numTranslations();
         
         // add fresh target states
-        auto player1_target_state = player1_num_states++;
-        auto player2_target_state = player2_num_states++;
+        uint64_t player1_target_state = player1_num_states++;
+        uint64_t player2_target_state = player2_num_states++;
 
         // build the matrix of Player 1
         std::vector<uint64_t> player1_choice_to_action;
@@ -207,10 +134,10 @@ namespace synthesis {
         uint64_t player1_num_rows = 0;
         for(uint64_t player1_state=0; player1_state<player1_num_states-1; player1_state++) {
             player1_matrix_builder.newRowGroup(player1_num_rows);
-            auto state = state_to_player1_state.retrieve(player1_state);
-            for(auto action: player1_state_to_actions[player1_state]) {
+            uint64_t state = state_to_player1_state.retrieve(player1_state);
+            for(uint64_t action: player1_state_to_actions[player1_state]) {
                 player1_choice_to_action.push_back(action);
-                auto player2_state = state_action_to_player2_state.translate(state,action);
+                uint64_t player2_state = state_action_to_player2_state.translate(state,action);
                 player1_matrix_builder.addNextValue(player1_num_rows,player2_state,1);
                 player1_num_rows++;
             }
@@ -263,8 +190,8 @@ namespace synthesis {
         // solve the game
         auto solver = storm::solver::GameSolverFactory<ValueType>().create(env, player1_matrix, player2_matrix);
         solver->setTrackSchedulers(true);
-        auto player1_direction = this->getOptimizationDirection(player1_maximizing);
-        auto player2_direction = this->getOptimizationDirection(player2_maximizing);
+        auto player1_direction = this->getOptimizationDirection(this->player1_maximizing);
+        auto player2_direction = this->getOptimizationDirection(not this->player1_maximizing);
         std::vector<double> player1_state_values(player1_num_states,0);
         if(profiling_enabled) {
             this->timer_game_solving.start();
@@ -311,7 +238,63 @@ namespace synthesis {
         }
 
         this->solution_value = this->solution_state_values[quotient_initial_state];
+    }
 
+    template<typename ValueType>
+    void GameAbstractionSolver<ValueType>::solveSmg(storm::storage::BitVector const& quotient_choice_mask) {
+        if(profiling_enabled) {
+            this->timer_total.start();
+        }
+
+        SmgAbstraction<ValueType> abstraction = synthesis::SmgAbstraction<ValueType>(
+            quotient,quotient_num_actions,choice_to_action,quotient_choice_mask
+        );
+
+        // solve the game
+        if(profiling_enabled) {
+            this->timer_game_solving.start();
+        }
+        std::shared_ptr<storm::modelchecker::CheckResult> result = synthesis::modelCheckSmg(*(abstraction.smg),this->game_formula,false,true,this->env);
+        if(profiling_enabled) {
+            this->timer_game_solving.stop();
+        }
+        storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType> const& result_quan = result->asExplicitQuantitativeCheckResult<ValueType>();
+        storm::storage::Scheduler<ValueType> const& scheduler = result_quan.getScheduler();
+        this->solution_state_values = result_quan.getValueVector();
+
+        std::fill(this->solution_state_to_player1_action.begin(),this->solution_state_to_player1_action.end(),this->quotient_num_actions);
+        std::fill(this->solution_state_to_quotient_choice.begin(),this->solution_state_to_quotient_choice.end(),this->quotient.getNumberOfChoices());
+        std::vector<uint64_t> const& game_row_groups = abstraction.smg->getTransitionMatrix().getRowGroupIndices();
+
+        // get actions selected by Player 0
+        for(uint64_t game_state = 0; game_state < abstraction.smg->getNumberOfStates(); ++game_state) {
+            if(abstraction.smg->getPlayerOfState(game_state) != 0) {
+                continue;
+            }
+            auto [state,_] = abstraction.state_to_quotient_state_action[game_state];
+            uint64_t game_choice = game_row_groups[game_state]+scheduler.getChoice(game_state).getDeterministicChoice();
+            uint64_t player1_action = choice_to_action[abstraction.choice_to_quotient_choice[game_choice]];
+            this->solution_state_to_player1_action[state] = player1_action;
+        }
+        // get action variants selected by Player 1 in corresponding states
+        for(uint64_t game_state = 0; game_state < abstraction.smg->getNumberOfStates(); ++game_state) {
+            if(abstraction.smg->getPlayerOfState(game_state) != 1) {
+                continue;
+            }
+            auto [state,action] = abstraction.state_to_quotient_state_action[game_state];
+            if(action !=  this->solution_state_to_player1_action[state]) {
+                continue;
+            }
+            uint64_t game_choice = game_row_groups[game_state]+scheduler.getChoice(game_state).getDeterministicChoice();
+            this->solution_state_to_quotient_choice[state] = abstraction.choice_to_quotient_choice[game_choice];
+        }
+
+        if(profiling_enabled) {
+            this->timer_total.stop();
+        }
+
+        uint64_t quotient_initial_state = *(this->quotient.getInitialStates().begin());
+        this->solution_value = this->solution_state_values[quotient_initial_state];
     }
 
 

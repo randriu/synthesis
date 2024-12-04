@@ -68,14 +68,14 @@ class SubMdp(Mdp):
 
 
 class Smg(Mdp):
-    
+
     def __init__(self, model):
         super().__init__(model)
 
     def model_check_property(self, prop, alt=False):
         formula = prop.game_formula if not alt else prop.game_formula_alt
 
-        result = payntbind.synthesis.smg_model_checking(self.model, formula,
+        result = payntbind.synthesis.model_check_smg(self.model, formula,
                                                         only_initial_states=False, set_produce_schedulers=True,
                                                         env=paynt.verification.property.Property.environment)
 

@@ -36,7 +36,6 @@ namespace synthesis {
     private:
 
         uint64_t num_items;
-        
         std::vector<std::map<K,uint64_t>> item_key_to_translation;
         std::vector<std::pair<uint64_t,K>> translation_to_item_key;
     };

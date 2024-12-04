@@ -1,27 +1,11 @@
 #pragma once
 
 #include <storm/models/sparse/Model.h>
-#include <storm/models/sparse/Mdp.h>
-#include <storm/solver/GameSolver.h>
 #include <storm/environment/Environment.h>
-#include <storm/environment/solver/GameSolverEnvironment.h>
-#include <storm/environment/solver/NativeSolverEnvironment.h>
 #include <storm/utility/Stopwatch.h>
-
-#include "src/synthesis/translation/ItemTranslator.h"
-#include "src/synthesis/translation/ItemKeyTranslator.h"
+#include <storm/logic/GameFormula.h>
 
 namespace synthesis {
-
-
-    /**
-     * Given an MDP having multiple variants of actions, create an MDP in which this variant selection is randomized.
-     */
-    template<typename ValueType>
-    std::pair<std::shared_ptr<storm::models::sparse::Mdp<ValueType>>,std::vector<uint64_t>> randomizeActionVariant(
-        storm::models::sparse::Model<ValueType> const& model,
-        std::vector<std::vector<std::vector<uint64_t>>> const& state_action_choices
-    );
 
     template<typename ValueType>
     class GameAbstractionSolver {
@@ -43,6 +27,8 @@ namespace synthesis {
          * @param quotient The quotient MDP. Sub-MDPs from the quotient will be used to construct sub-games.
          * @param quotient_num_action The total number of distinct actions in the quotient.
          * @param choice_to_action For each row of the quotient, the associated action.
+         * @param formula Game formula to model check.
+         * @param player1_maximizing Whether Player 1 maximizes.
          * @param target_label Label of the target states.
          * @param precision Game solving precision.
          */
@@ -50,6 +36,8 @@ namespace synthesis {
             storm::models::sparse::Model<ValueType> const& quotient,
             uint64_t quotient_num_actions,
             std::vector<uint64_t> const& choice_to_action,
+            std::shared_ptr<storm::logic::Formula const> formula,
+            bool player1_maximizing,
             std::string const& target_label,
             double precision
         );
@@ -58,10 +46,8 @@ namespace synthesis {
          * Solve the game induced by the sub-MDP.
          * @param quotient_choice_mask Choices of the quotient that remained in the sub-MDP.
          */
-        void solve(
-            storm::storage::BitVector quotient_choice_mask,
-            bool player1_maximizing, bool player2_maximizing
-        );
+        void solveSg(storm::storage::BitVector const& quotient_choice_mask);
+        void solveSmg(storm::storage::BitVector const& quotient_choice_mask);
 
         /** State values for the solution. */
         std::vector<double> solution_state_values;
@@ -88,6 +74,8 @@ namespace synthesis {
         storm::models::sparse::Model<ValueType> const& quotient;
         uint64_t quotient_num_actions;
         std::vector<uint64_t> choice_to_action;
+        std::shared_ptr<storm::logic::GameFormula const> game_formula;
+        bool player1_maximizing;
         
         /** Identification of target states. */
         storm::storage::BitVector state_is_target;
