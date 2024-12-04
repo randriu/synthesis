@@ -121,11 +121,9 @@ class GameAbstractionSolver():
         # solve posmg
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
-        assignment = synthesizer.synthesize(keep_optimum=True, print_stats=False)
+        assignment = synthesizer.synthesize(print_stats=False)
 
-        # is this correct?
-        if assignment is None:
-            return
+        assert assignment is not None
 
         # extract results
         state_player_indications = posmgQuotient.posmg_manager.get_state_player_indications()
@@ -156,7 +154,8 @@ class GameAbstractionSolver():
             self.solution_state_to_quotient_choice[quotient_state] = quotient_choice
 
         # fill solution_value
-        self.solution_value = synthesizer.best_assignment_value # or result.at(initial_state)
+        self.solution_value = result.optimality_result.result.at(self.quotient_mdp.initial_states[0])
+
 
         # fill solution_state_values
         for dtmc_state, game_state in enumerate(game_state_map):
