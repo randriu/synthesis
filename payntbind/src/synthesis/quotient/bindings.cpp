@@ -41,7 +41,7 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addStateValuations(
         std::vector<bool> boolean_values;
         std::vector<int64_t> integer_values(em->getNumberOfVariables());
         for(auto [variable_name,value]: state_valuations[state]) {
-            integer_values[em->getVariable(variable_name).getIndex()] = value;
+            integer_values[em->getVariable(variable_name).getOffset()] = value;
         }
         sv_builder.addState(state, std::move(boolean_values), std::move(integer_values));
     }
@@ -310,7 +310,11 @@ void bindings_coloring(py::module& m) {
         ;
 
     py::class_<synthesis::Coloring>(m, "Coloring")
-        .def(py::init<synthesis::Family const&, std::vector<uint64_t> const&, std::vector<std::vector<std::pair<uint64_t,uint64_t>>> >())
+        .def(py::init<
+            synthesis::Family const&,
+            std::vector<uint64_t> const&,
+            std::vector<std::vector<std::pair<uint64_t,uint64_t>>>
+        >())
         .def("getChoiceToAssignment", &synthesis::Coloring::getChoiceToAssignment)
         .def("getStateToHoles", &synthesis::Coloring::getStateToHoles)
         .def("selectCompatibleChoices", &synthesis::Coloring::selectCompatibleChoices)
@@ -319,17 +323,20 @@ void bindings_coloring(py::module& m) {
 
     py::class_<synthesis::ColoringSmt<>>(m, "ColoringSmt")
         .def(py::init<
-            storm::models::sparse::NondeterministicModel<double> const&,
+            std::vector<uint64_t> const&,
+            std::vector<uint64_t> const&,
+            storm::storage::sparse::StateValuations const&,
             std::vector<std::string> const&,
             std::vector<std::vector<int64_t>> const&,
             std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const&,
             bool
         >())
+        .def("enableStateExploration", &synthesis::ColoringSmt<>::enableStateExploration)
         .def("getFamilyInfo", &synthesis::ColoringSmt<>::getFamilyInfo)
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
         .def("selectCompatibleChoices", py::overload_cast<synthesis::Family const&, storm::storage::BitVector const&>(&synthesis::ColoringSmt<>::selectCompatibleChoices))
         .def("areChoicesConsistent", &synthesis::ColoringSmt<>::areChoicesConsistent)
-        .def_property_readonly("unsat_core", [](synthesis::ColoringSmt<>& coloring) {return coloring.unsat_core;})
+        // .def_property_readonly("unsat_core", [](synthesis::ColoringSmt<>& coloring) {return coloring.unsat_core;})
         .def("getProfilingInfo", &synthesis::ColoringSmt<>::getProfilingInfo)
         ;
 }

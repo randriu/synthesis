@@ -185,35 +185,20 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.resource_limit_reached():
                 break
 
-    def map_scheduler(self, scheduler_choices, opt_result_value):
-        # use counterexamples iff a dont' care action exists
-        disable_counterexamples = "__random__" not in self.quotient.action_labels
+    def map_scheduler(self, scheduler_choices):
         self.counters_reset()
         for depth in range(SynthesizerDecisionTree.tree_depth+1):
-            self.quotient.reset_tree(depth,disable_counterexamples=disable_counterexamples)
-            family = self.quotient.family
-            self.quotient.build(family)
+            self.quotient.reset_tree(depth,enable_harmonization=False)
+            family = self.quotient.family.copy()
             family.analysis_result = self.quotient.build_unsat_result()
-            best_assignment_old = self.best_assignment
-
+            self.quotient.build(family)
             consistent,hole_selection = self.quotient.are_choices_consistent(scheduler_choices, family)
             if consistent:
                 self.verify_hole_selection(family,hole_selection)
-            elif not disable_counterexamples:
-                harmonizing_hole = [hole for hole,options in enumerate(hole_selection) if len(options)>1][0]
-                selection_1 = hole_selection.copy(); selection_1[harmonizing_hole] = [selection_1[harmonizing_hole][0]]
-                selection_2 = hole_selection.copy(); selection_2[harmonizing_hole] = [selection_2[harmonizing_hole][1]]
-                for selection in [selection_1,selection_2]:
-                    self.verify_hole_selection(family,selection)
-
-            new_assignment_synthesized = self.best_assignment != best_assignment_old
-            if new_assignment_synthesized:
-                self.best_tree = self.quotient.decision_tree
-                self.best_tree.root.associate_assignment(self.best_assignment)
-                self.best_tree_value = self.best_assignment_value
-                if consistent:
-                    break
-                if not disable_counterexamples and abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-4:
+                if self.best_assignment is not None:
+                    self.best_tree = self.quotient.decision_tree
+                    self.best_tree.root.associate_assignment(self.best_assignment)
+                    self.best_tree_value = self.best_assignment_value
                     break
 
             if self.resource_limit_reached():
@@ -240,7 +225,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.best_assignment = self.best_assignment_value = None
         self.best_tree = self.best_tree_value = None
         if scheduler_choices is not None:
-            self.map_scheduler(scheduler_choices, opt_result_value)
+            self.map_scheduler(scheduler_choices)
         else:
             if self.quotient.specification.has_optimality:
                 epsilon = 1e-1
