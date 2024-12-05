@@ -119,7 +119,7 @@ class Synthesizer:
         ''' to be overridden '''
         pass
 
-    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True, export_filename_base=None):
+    def evaluate(self, family=None, prop=None, keep_value_only=False, print_stats=True):
         '''
         Evaluate each member of the family wrt the given property.
         :param family if None, then the design space of the quotient will be used
@@ -143,8 +143,8 @@ class Synthesizer:
         self.stat.finished_evaluation(evaluations)
         logger.info("evaluation finished")
 
-        if export_filename_base is not None:
-            self.export_evaluation_result(evaluations, export_filename_base)
+        if self.export_synthesis_filename_base is not None:
+            self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
 
         if print_stats:
             self.stat.print()
