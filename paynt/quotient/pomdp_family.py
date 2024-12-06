@@ -217,19 +217,25 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def build_game_abstraction_solver(self, prop):
         return GameAbstractionSolver(self.quotient_mdp, self.state_to_observation, prop, len(self.action_labels), self.choice_to_action)
 
-    def assignment_to_policy(self, mdp, assignment):
+    # mdp - SubMdp, represents one pomdp from the pomdp family
+    # pomodp_quotient - quotient used for pomdp synthesis
+    # assignment - result of pomdp synthesis
+    def assignment_to_policy(self, mdp, pomdp_quotient, assignment):
         policy = self.empty_policy()
 
-        choices = self.coloring.selectCompatibleChoices(assignment.family)
-        dtmc, mdp_state_map, mdp_choice_map = self.restrict_mdp(mdp, choices) # is this needed?? can I get policy just from choices??
+        choices = pomdp_quotient.coloring.selectCompatibleChoices(assignment.family)
+        dtmc, mdp_state_map, mdp_choice_map = self.restrict_mdp(mdp.model, choices)
 
         for dtmc_state, mdp_state in enumerate(mdp_state_map):
             quotient_state = mdp.quotient_state_map[mdp_state]
 
             mdp_choice = mdp_choice_map[dtmc_state]
             quotient_choice = mdp.quotient_choice_map[mdp_choice]
+            quotient_action = self.choice_to_action[quotient_choice]
 
-            policy[quotient_state] = quotient_choice
+            policy[quotient_state] = quotient_action
+
+        return policy
 
 ################################################################################
 

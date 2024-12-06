@@ -26,7 +26,7 @@ class SynthesizerPomdpPolicyTree(paynt.synthesizer.policy_tree.SynthesizerPolicy
         if assignment is None:
             return False
         else:
-            policy = self.quotient.assignment_to_policy(mdp, assignment)
+            policy = self.quotient.assignment_to_policy(mdp, quotient, assignment)
 
             return policy
 
