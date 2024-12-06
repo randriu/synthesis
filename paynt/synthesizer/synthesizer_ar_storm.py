@@ -41,21 +41,16 @@ class SynthesizerARStorm(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         # split each family in the current buffer to main family and corresponding subfamilies
         for family in families:
             if self.storm_control.use_cutoffs:
-                main_p = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict)
+                result_dict = self.storm_control.result_dict
             else:
-                main_p = self.storm_control.get_main_restricted_family(family, self.storm_control.result_dict_no_cutoffs)
-
+                result_dict = self.storm_control.result_dict_no_cutoffs
+            main_p = self.storm_control.get_main_restricted_family(family, result_dict)
             if main_p is None:
                 subfamilies.append(family)
                 continue
 
             main_families.append(main_p)
-
-            if self.storm_control.use_cutoffs:
-                subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict)
-            else:
-                subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, self.storm_control.result_dict_no_cutoffs)
-
+            subfamily_restrictions = self.storm_control.get_subfamilies_restrictions(family, result_dict)
             subfamilies_p = self.storm_control.get_subfamilies(subfamily_restrictions, family)
             subfamilies.extend(subfamilies_p)
 
