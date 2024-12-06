@@ -1,11 +1,9 @@
-import stormpy
 import payntbind
 
 import paynt.family.family
 import paynt.quotient.quotient
 import paynt.models.models
 
-import collections
 import json
 
 import logging
@@ -110,17 +108,24 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         ]
         return state_valuation_to_action
 
-    def policy_to_json(self, state_valuation_to_action, indent=""):
-        import json
-        json_string = "[\n"
-        for index,valuation_action in enumerate(state_valuation_to_action):
-            valuation,action = valuation_action
-            if index > 0:
-                json_string += ",\n"
-            json_string += indent + json.dumps(valuation_action)
-        json_string += "\n" + indent + "]"
-        return json_string
+    def policy_to_json(self, state_valuation_to_action, dt_control=False):
+        '''
+        :param state_valuation_to_action: a list of tuples (valuation,action) where valuation is a dictionary of variable
+        :param dt_control: if True, outputs JSON in the format expected by the DT control tool,
+                otherwise simpler format is used
+        '''
+        json_whole = []
+        for index, valuation_action in enumerate(state_valuation_to_action):
+            if dt_control:
+                json_unit = {}
+                valuation, action = valuation_action
+                json_unit["c"] = [{"origin": {"action-label": action}}]
+                json_unit["s"] = valuation
+                json_whole.append(json_unit)
+            else:
+                json_whole.append(valuation_action)
 
+        return json_whole
 
     
     def fix_and_apply_policy_to_family(self, family, policy):

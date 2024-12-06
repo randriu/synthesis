@@ -134,11 +134,11 @@ std::shared_ptr<TreeNode> TreeNode::getChild(bool condition) const {
 
 
 TerminalNode::TerminalNode(
-        uint64_t identifier, z3::context & ctx,
-        std::vector<std::string> const& variable_name,
-        std::vector<std::vector<int64_t>> const& variable_domain,
-        uint64_t num_actions,
-        z3::expr const& action_substitution_variable
+    uint64_t identifier, z3::context & ctx,
+    std::vector<std::string> const& variable_name,
+    std::vector<std::vector<int64_t>> const& variable_domain,
+    uint64_t num_actions,
+    z3::expr const& action_substitution_variable
 ) : TreeNode(identifier,ctx,variable_name,variable_domain),
     num_actions(num_actions), action_substitution_variable(action_substitution_variable),
     action_hole(false,ctx), action_expr(ctx), action_expr_harm(ctx) {}
@@ -228,10 +228,10 @@ void TerminalNode::unsatCoreAnalysis(
 
 
 InnerNode::InnerNode(
-        uint64_t identifier, z3::context & ctx,
-        std::vector<std::string> const& variable_name,
-        std::vector<std::vector<int64_t>> const& variable_domain,
-        z3::expr_vector const& state_substitution_variables
+    uint64_t identifier, z3::context & ctx,
+    std::vector<std::string> const& variable_name,
+    std::vector<std::vector<int64_t>> const& variable_domain,
+    z3::expr_vector const& state_substitution_variables
 ) : TreeNode(identifier,ctx,variable_name,variable_domain),
     decision_hole(false,ctx), state_substitution_variables(state_substitution_variables),
     step_true(ctx), step_false(ctx), substituted_true(ctx), substituted_false(ctx), step_true_harm(ctx), step_false_harm(ctx) {}

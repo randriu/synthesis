@@ -8,6 +8,7 @@
 #include <storm/utility/Stopwatch.h>
 
 #include <cstdint>
+#include <queue>
 #include <vector>
 #include <memory>
 
@@ -21,21 +22,35 @@ template<typename ValueType = double>
 class ColoringSmt {
 public:
 
+    /**
+     * Construct an SMT coloring.
+     * @param row groups (nondeterministic choice indices) of an underlying MDP
+     * @param choice_to_action for every choice, the corresponding action
+     * @param state_valuations state valuation of the underlying MDP
+     * @param variable_name list of variable names
+     * @param variable_domain list of possible variable values
+     * @param tree_list a decision tree template encoded via a list of (parent id, left child id, right child id) triples
+     * @param enable_harmonization if true, the object will be set up to enable CE generation via harmonization
+     */
     ColoringSmt(
-        storm::models::sparse::NondeterministicModel<ValueType> const& model,
+        std::vector<uint64_t> const& row_groups,
+        std::vector<uint64_t> const& choice_to_action,
+        storm::storage::sparse::StateValuations const& state_valuations,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain,
         std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
-        bool disable_counterexamples = false
+        bool enable_harmonization
     );
+
+    /**
+     * Enable efficient state exploration of reachable states.
+     * @note this is required for harmonization
+     */
+    void enableStateExploration(storm::models::sparse::NondeterministicModel<ValueType> const& model);
 
     /** For each hole, get a list of name-type pairs.  */
     std::vector<std::tuple<uint64_t,std::string,std::string>> getFamilyInfo();
 
-    /** Whether a check for an admissible family member is done before choice selection. */
-    const bool CHECK_FAMILY_CONSISTENCE = true;
-    /** Whether a check for constent scheduler existence is done after choice selection. */
-    const bool CHECK_CONSISTENT_SCHEDULER_EXISTENCE = false;
     /** Get a mask of choices compatible with the family. */
     BitVector selectCompatibleChoices(Family const& subfamily);
     /** Get a mask of sub-choices of \p base_choices compatible with the family. */
@@ -59,17 +74,14 @@ public:
         return profiling;
     }
 
-
-    /** TODO */
+    /** A list of choice-path indices appeared in the last UNSAT core. */
     std::vector<std::pair<uint64_t,uint64_t>> unsat_core;
 
 protected:
 
-    /** If true, the object will be setup for one consistency check. */
-    bool disable_counterexamples;
+    /** Whether a check for an admissible family member is done before choice selection. */
+    const bool CHECK_FAMILY_CONSISTENCE = true;
 
-    /** The initial state. */
-    const uint64_t initial_state;
     /** Valuation of each state. */
     std::vector<std::vector<uint64_t>> state_valuation;
 
@@ -81,8 +93,6 @@ protected:
     const uint64_t numStates() const;
     /** Number of choices in the quotient. */
     const uint64_t numChoices() const;
-    /** For each state, a list of target states. */
-    std::vector<std::vector<uint64_t>> choice_destinations;
 
     /** Number of MDP actions. */
     uint64_t num_actions;
@@ -112,6 +122,15 @@ protected:
     /** Unrefined family. */
     Family family;
 
+    /** Whether efficient state exploration has been enabled. */
+    bool enable_state_exploration = false;
+    /** The initial state. */
+    uint64_t initial_state;
+    /** For each state, a list of target states. */
+    std::vector<std::vector<uint64_t>> choice_destinations;
+    /** Add unexplored destinations of the given choice to the queue and mark them as reached. */
+    void visitChoice(uint64_t choice, BitVector & state_reached, std::queue<uint64_t> & unexplored_states);
+
     /** Check the current SMT formula. */
     bool check();
 
@@ -122,6 +141,8 @@ protected:
     /** For each choice, its color expressed as a conjunction of all path implications. */
     std::vector<z3::expr_vector> choice_path_expresssion;
 
+    /** TODO. */
+    const bool enable_harmonization;
     /** SMT variable refering to harmonizing hole. */
     z3::expr harmonizing_variable;
     /** For each choice, its color expressed as a conjunction of all path implications. */
