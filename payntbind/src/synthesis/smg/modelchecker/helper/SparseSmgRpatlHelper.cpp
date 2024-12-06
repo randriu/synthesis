@@ -160,6 +160,7 @@ namespace synthesis {
                         for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
                             if (maximize ? epsilonGreaterOrEqual(constrainedChoiceValues[choice], result[state]) : epsilonGreaterOrEqual(result[state], constrainedChoiceValues[choice])) {
                                 optimalChoices[state] = stateRowIndex;
+                                optimalChoiceSet.set(state);
                                 break;
                             }
                             stateRowIndex++;
@@ -169,6 +170,7 @@ namespace synthesis {
                         for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
                             if (maximize ? epsilonGreaterOrEqual(result[state], constrainedChoiceValues[choice]) : epsilonGreaterOrEqual(constrainedChoiceValues[choice], result[state])) {
                                 optimalChoices[state] = stateRowIndex;
+                                optimalChoiceSet.set(state);
                                 break;
                             }
                             stateRowIndex++;
