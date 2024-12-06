@@ -106,6 +106,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 else :
                     label = list(labels)[0]
                 self.action_labels_at_observation[obs].append(label)
+        for obs,labels in enumerate(self.action_labels_at_observation):
+            if len(labels) == 0:
+                logger.warning(f"WARNING: POMDP has no action for observation {obs}")
 
         # mark perfect observations
         self.observation_states = [0 for obs in range(self.observations)]
