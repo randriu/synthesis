@@ -30,8 +30,8 @@ namespace synthesis {
         }
     }
 
-    bool epsilonGreaterOrEqual(double x, double y, double eps=1e-8) {
-        return (x>=y) || (abs(x - y) <= eps);
+    bool epsilonGreaterOrEqual(double x, double y, double eps=1e-6) {
+        return (x>=y) || (fabs(x - y) <= eps);
     }
 
     template<typename ValueType>
@@ -178,8 +178,11 @@ namespace synthesis {
                     }
                 }
 
-                // double check if all states have a choice
+                //double check if all states have a choice
                 for (uint64_t state = 0; state < stateCount; state++) {
+                    if (!relevantStates.get(state)) {
+                        continue;
+                    }
                     assert(optimalChoiceSet.get(state));
                 }
 
