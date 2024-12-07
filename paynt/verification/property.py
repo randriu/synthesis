@@ -149,7 +149,9 @@ class Property:
 
     @property
     def is_discounted_reward(self):
-        return self.formula.is_reward_operator and self.formula.subformula.is_discounted_total_reward_formula
+        # TODO add discounted reward as a type to Stormpy formula
+        # return self.formula.is_reward_operator and self.formula.subformula.is_discounted_total_reward_formula
+        return self.formula.is_reward_operator and "discount" in str(self.formula.subformula)
 
     @property
     def maximizing(self):

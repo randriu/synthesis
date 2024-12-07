@@ -66,12 +66,15 @@ class FSC:
             assert len(self.action_function[node]) == self.num_observations, \
                 "in memory node {}, FSC action function is not defined for all observations".format(node)
             for obs in range(self.num_observations):
+                if observation_to_actions[obs] == []:
+                    assert self.action_function[node][obs] is None
+                    continue
                 if self.is_deterministic:
-                    action = self.action_function[node][obs]
-                    assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+                    action_support = [self.action_function[node][obs]]
                 else:
-                    for action,_ in self.action_function[node][obs].items():
-                        assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+                    action_support = self.action_function[node][obs].keys()
+                for action in action_support:
+                    assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
 
     def check_update_function(self):
         assert len(self.update_function) == self.num_nodes, "FSC update function is not defined for all memory nodes"
@@ -91,7 +94,7 @@ class FSC:
     def fill_trivial_actions(self, observation_to_actions):
         ''' For each observation with 1 available action, set gamma(n,z) to that action. '''
         for obs,actions in enumerate(observation_to_actions):
-            if len(actions)>1:
+            if len(actions) != 1:
                 continue
             action = actions[0]
             if not self.is_deterministic:

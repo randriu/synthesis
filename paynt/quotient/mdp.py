@@ -325,7 +325,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         choices = self.state_to_choice_to_choices(state_to_choice)
         return choices
 
-    def reset_tree(self, depth, disable_counterexamples=False):
+    def reset_tree(self, depth, enable_harmonization=True):
         '''
         Rebuild the decision tree template, the design space and the coloring.
         '''
@@ -333,12 +333,15 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         self.decision_tree = DecisionTree(self,self.variables,self.state_valuations)
         self.decision_tree.set_depth(depth)
 
-        # logger.debug("building coloring...")
         variables = self.decision_tree.variables
         variable_name = [v.name for v in variables]
         variable_domain = [v.domain for v in variables]
         tree_list = self.decision_tree.to_list()
-        self.coloring = payntbind.synthesis.ColoringSmt(self.quotient_mdp, variable_name, variable_domain, tree_list, disable_counterexamples)
+        self.coloring = payntbind.synthesis.ColoringSmt(
+            self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action, self.quotient_mdp.state_valuations,
+            variable_name, variable_domain, tree_list, enable_harmonization
+        )
+        self.coloring.enableStateExploration(self.quotient_mdp)
 
         # reconstruct the family
         hole_info = self.coloring.getFamilyInfo()
@@ -398,10 +401,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
         return self.coloring.areChoicesConsistent(choices, family.family)
-        # if family.parent_info is None:
-        #     return self.coloring.areChoicesConsistent(choices, family.family)
-        # else:
-        #     return self.coloring.areChoicesConsistentUseHint(choices, family.family, family.parent_info.unsat_core_hint)
+
 
     def scheduler_is_consistent(self, mdp, prop, result):
         ''' Get hole options involved in the scheduler selection. '''
@@ -484,7 +484,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         parent_info = family.collect_parent_info(self.specification)
         parent_info.analysis_result = family.analysis_result
         parent_info.scheduler_choices = family.scheduler_choices
-        parent_info.unsat_core_hint = self.coloring.unsat_core.copy()
+        # parent_info.unsat_core_hint = self.coloring.unsat_core.copy()
         subfamilies = family.split(splitter,suboptions)
         for subfamily in subfamilies:
             subfamily.add_parent_info(parent_info)

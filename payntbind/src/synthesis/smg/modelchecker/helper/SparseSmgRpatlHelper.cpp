@@ -5,6 +5,8 @@
 #include "SparseSmgRpatlHelper.h"
 
 #include <queue>
+#include <cmath>
+#include <cassert>
 
 #include <storm/environment/solver/GameSolverEnvironment.h>
 #include <storm/environment/Environment.h>
@@ -26,6 +28,10 @@ namespace synthesis {
                 clippedStatesCounter++;
             }
         }
+    }
+
+    bool epsilonGreaterOrEqual(double x, double y, double eps=1e-6) {
+        return (x>=y) || (fabs(x - y) <= eps);
     }
 
     template<typename ValueType>
@@ -86,12 +92,12 @@ namespace synthesis {
                         for (uint64_t row = transitionMatrix.getRowGroupIndices()[state], endRow = transitionMatrix.getRowGroupIndices()[state + 1]; row < endRow; ++row) {
                             // check if the choice belongs to MEC, if not then this choice is the best exit choice for the MEC
                             // the states with such choices will be used as the initial states for backwards BFS
-                            if ((!statesOfCoalition.get(state)) && (maximize ? constrainedChoiceValues[row] >= result[state] : constrainedChoiceValues[row] <= result[state]) && (stateActions.second.find(row) == stateActions.second.end())) {
+                            if ((!statesOfCoalition.get(state)) && (maximize ? epsilonGreaterOrEqual(constrainedChoiceValues[row], result[state]) : epsilonGreaterOrEqual(result[state], constrainedChoiceValues[row])) && (stateActions.second.find(row) == stateActions.second.end())) {
                                 BFSqueue.push(state);
                                 optimalChoices[state] = stateChoiceIndex;
                                 optimalChoiceSet.set(state);
                                 break;
-                            } else if ((statesOfCoalition.get(state)) && (maximize ? constrainedChoiceValues[row] <= result[state] : constrainedChoiceValues[row] >= result[state]) && (stateActions.second.find(row) == stateActions.second.end())) {
+                            } else if ((statesOfCoalition.get(state)) && (maximize ? epsilonGreaterOrEqual(result[state], constrainedChoiceValues[row]) : epsilonGreaterOrEqual(constrainedChoiceValues[row], result[state])) && (stateActions.second.find(row) == stateActions.second.end())) {
                                 BFSqueue.push(state);
                                 optimalChoices[state] = stateChoiceIndex;
                                 optimalChoiceSet.set(state);
@@ -113,7 +119,7 @@ namespace synthesis {
                                 uint64_t stateChoiceIndex = 0;
                                 bool choiceFound = false;
                                 for (uint64_t row = transitionMatrix.getRowGroupIndices()[preState], endRow = transitionMatrix.getRowGroupIndices()[preState + 1]; row < endRow; ++row) {
-                                    if ((!statesOfCoalition.get(preState)) && (maximize ? constrainedChoiceValues[row] >= result[preState] : constrainedChoiceValues[row] <= result[preState])) {
+                                    if ((!statesOfCoalition.get(preState)) && (maximize ? epsilonGreaterOrEqual(constrainedChoiceValues[row], result[preState]) : epsilonGreaterOrEqual(result[preState], constrainedChoiceValues[row]))) {
                                         for (auto const &preStateEntry : transitionMatrix.getRow(row)) {
                                             if (preStateEntry.getColumn() == currentState) {
                                                 BFSqueue.push(preState);
@@ -123,7 +129,7 @@ namespace synthesis {
                                                 break;
                                             }
                                         }
-                                    } else if ((statesOfCoalition.get(preState)) && (maximize ? constrainedChoiceValues[row] <= result[preState] : constrainedChoiceValues[row] >= result[preState])) {
+                                    } else if ((statesOfCoalition.get(preState)) && (maximize ? epsilonGreaterOrEqual(result[preState], constrainedChoiceValues[row]) : epsilonGreaterOrEqual(constrainedChoiceValues[row], result[preState]))) {
                                         for (auto const &preStateEntry : transitionMatrix.getRow(row)) {
                                             if (preStateEntry.getColumn() == currentState) {
                                                 BFSqueue.push(preState);
@@ -152,8 +158,9 @@ namespace synthesis {
                     if (!statesOfCoalition.get(state)) { // not sure why the statesOfCoalition bitvector is flipped
                         uint64_t stateRowIndex = 0;
                         for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
-                            if (maximize ? constrainedChoiceValues[choice] >= result[state] : constrainedChoiceValues[choice] <= result[state]) {
+                            if (maximize ? epsilonGreaterOrEqual(constrainedChoiceValues[choice], result[state]) : epsilonGreaterOrEqual(result[state], constrainedChoiceValues[choice])) {
                                 optimalChoices[state] = stateRowIndex;
+                                optimalChoiceSet.set(state);
                                 break;
                             }
                             stateRowIndex++;
@@ -161,13 +168,22 @@ namespace synthesis {
                     } else {
                         uint64_t stateRowIndex = 0;
                         for (auto choice : transitionMatrix.getRowGroupIndices(state)) {
-                            if (maximize ? constrainedChoiceValues[choice] <= result[state] : constrainedChoiceValues[choice] >= result[state]) {
+                            if (maximize ? epsilonGreaterOrEqual(result[state], constrainedChoiceValues[choice]) : epsilonGreaterOrEqual(constrainedChoiceValues[choice], result[state])) {
                                 optimalChoices[state] = stateRowIndex;
+                                optimalChoiceSet.set(state);
                                 break;
                             }
                             stateRowIndex++;
                         }
                     }
+                }
+
+                //double check if all states have a choice
+                for (uint64_t state = 0; state < stateCount; state++) {
+                    if (!relevantStates.get(state)) {
+                        continue;
+                    }
+                    assert(optimalChoiceSet.get(state));
                 }
 
                 storm::storage::Scheduler<ValueType> tempScheduler(optimalChoices.size());

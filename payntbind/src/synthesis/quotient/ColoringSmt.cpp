@@ -6,23 +6,22 @@
 #include <storm/exceptions/UnexpectedException.h>
 
 #include <sstream>
-#include <queue>
 
 namespace synthesis {
 
+
 template<typename ValueType>
 ColoringSmt<ValueType>::ColoringSmt(
-    storm::models::sparse::NondeterministicModel<ValueType> const& model,
+    std::vector<uint64_t> const& row_groups,
+    std::vector<uint64_t> const& choice_to_action,
+    storm::storage::sparse::StateValuations const& state_valuations,
     std::vector<std::string> const& variable_name,
     std::vector<std::vector<int64_t>> const& variable_domain,
     std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
-    bool disable_counterexamples
-) : initial_state(*model.getInitialStates().begin()),
-    row_groups(model.getNondeterministicChoiceIndices()),
-    choice_destinations(synthesis::computeChoiceDestinations(model)),
-    choice_to_action(synthesis::extractActionLabels(model).second),
+    bool enable_harmonization
+) : row_groups(row_groups), choice_to_action(choice_to_action),
     variable_name(variable_name), variable_domain(variable_domain),
-    solver(ctx), harmonizing_variable(ctx), disable_counterexamples(disable_counterexamples) {
+    solver(ctx), harmonizing_variable(ctx), enable_harmonization(enable_harmonization) {
 
     timers[__FUNCTION__].start();
 
@@ -34,7 +33,6 @@ ColoringSmt<ValueType>::ColoringSmt(
 
     // extract variables in the order of variable_name
     std::vector<storm::expressions::Variable> program_variables;
-    storm::storage::sparse::StateValuations const& state_valuations = model.getStateValuations();
     auto const& valuation = state_valuations.at(0);
     for(std::string const& name: variable_name) {
         bool variable_found = false;
@@ -62,7 +60,7 @@ ColoringSmt<ValueType>::ColoringSmt(
 
     // create the tree
     uint64_t num_nodes = tree_list.size();
-    uint64_t num_actions = *std::max_element(choice_to_action.begin(),choice_to_action.end())+1;
+    this->num_actions = *std::max_element(choice_to_action.begin(),choice_to_action.end())+1;
     for(uint64_t node = 0; node < num_nodes; ++node) {
         auto [parent,child_true,child_false] = tree_list[node];
         STORM_LOG_THROW(
@@ -72,7 +70,7 @@ ColoringSmt<ValueType>::ColoringSmt(
         if(child_true != num_nodes) {
             tree.push_back(std::make_shared<InnerNode>(node,ctx,this->variable_name,this->variable_domain,state_substitution_variables));
         } else {
-            tree.push_back(std::make_shared<TerminalNode>(node,ctx,this->variable_name,this->variable_domain,num_actions,action_substitution_variable));
+            tree.push_back(std::make_shared<TerminalNode>(node,ctx,this->variable_name,this->variable_domain,this->num_actions,action_substitution_variable));
         }
     }
     getRoot()->createTree(tree_list,tree);
@@ -108,16 +106,6 @@ ColoringSmt<ValueType>::ColoringSmt(
         }
     }
 
-    // create state substitutions
-    std::vector<z3::expr_vector> state_substitution_expr;
-    for(uint64_t state = 0; state < numStates(); ++state) {
-        z3::expr_vector substitution_expr(ctx);
-        for(uint64_t value: state_valuation[state]) {
-            substitution_expr.push_back(ctx.int_val(value));
-        }
-        state_substitution_expr.push_back(substitution_expr);
-    }
-
     // create choice colors
     timers["ColoringSmt:: create choice colors"].start();
 
@@ -146,7 +134,7 @@ ColoringSmt<ValueType>::ColoringSmt(
         }
     }
     std::vector<z3::expr_vector> action_path_expression;
-    for(uint64_t action = 0; action < num_actions; ++action) {
+    for(uint64_t action = 0; action < this->num_actions; ++action) {
         action_path_expression.push_back(z3::expr_vector(ctx));
         for(uint64_t path = 0; path < numPaths(); ++path) {
             z3::expr evaluated = getRoot()->substituteActionExpression(getRoot()->paths[path], action);
@@ -165,12 +153,24 @@ ColoringSmt<ValueType>::ColoringSmt(
     }
     timers["ColoringSmt:: create choice colors"].stop();
 
-    if(disable_counterexamples) {
+    if(not this->enable_harmonization) {
         timers[__FUNCTION__].stop();
         return;
     }
 
     timers["ColoringSmt:: create harmonizing variants"].start();
+
+    // create state substitutions
+    std::vector<z3::expr_vector> state_substitution_expr;
+    for(uint64_t state = 0; state < numStates(); ++state) {
+        z3::expr_vector substitution_expr(ctx);
+        for(uint64_t value: state_valuation[state]) {
+            substitution_expr.push_back(ctx.int_val(value));
+        }
+        state_substitution_expr.push_back(substitution_expr);
+    }
+
+    // create harmonizing expressions
     std::vector<z3::expr_vector> state_path_expression_harmonizing;
     for(uint64_t state = 0; state < numStates(); ++state) {
         getRoot()->createPrefixSubstitutionsHarmonizing(state_substitution_expr[state]);
@@ -201,6 +201,13 @@ ColoringSmt<ValueType>::ColoringSmt(
     timers["ColoringSmt:: create harmonizing variants"].stop();
 
     timers[__FUNCTION__].stop();
+}
+
+template<typename ValueType>
+void ColoringSmt<ValueType>::enableStateExploration(storm::models::sparse::NondeterministicModel<ValueType> const& model) {
+    this->enable_state_exploration = true;
+    this->initial_state = *model.getInitialStates().begin();
+    this->choice_destinations = synthesis::computeChoiceDestinations(model);
 }
 
 template<typename ValueType>
@@ -235,9 +242,9 @@ uint64_t ColoringSmt<ValueType>::numPaths() {
 
 template<typename ValueType>
 bool ColoringSmt<ValueType>::check() {
-    timers["solver.check()"].start();
+    timers[__FUNCTION__].start();
     bool sat = solver.check() == z3::sat;
-    timers["solver.check()"].stop();
+    timers[__FUNCTION__].stop();
     return sat;
 }
 
@@ -250,6 +257,16 @@ template<typename ValueType>std::vector<std::tuple<uint64_t,std::string,std::str
 template<typename ValueType>
 BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamily) {
     return selectCompatibleChoices(subfamily,BitVector(numChoices(),true));
+}
+
+template<typename ValueType>
+void ColoringSmt<ValueType>::visitChoice(uint64_t choice, BitVector & state_reached, std::queue<uint64_t> & unexplored_states) {
+    for(uint64_t dst: choice_destinations[choice]) {
+        if(not state_reached[dst]) {
+            unexplored_states.push(dst);
+            state_reached.set(dst,true);
+        }
+    }
 }
 
 template<typename ValueType>
@@ -281,81 +298,105 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
 
     // check individual choices
     timers["selectCompatibleChoices::2 state exploration"].start();
+
     BitVector selection(numChoices(),false);
-    // std::vector<std::vector<uint64_t>> state_enabled_choices(numStates());
-    std::queue<uint64_t> unexplored_states;
-    unexplored_states.push(initial_state);
-    BitVector state_reached(numStates(),false);
-    state_reached.set(initial_state,true);
-
-    while(not unexplored_states.empty()) {
-        uint64_t state = unexplored_states.front(); unexplored_states.pop();
-        /*std::cout << "state: ";
-        for(uint64_t variable = 0; variable < numVariables(); ++variable) {
-            std::cout << variable_name[variable] << " = " << variable_domain[variable][state_valuation[state][variable]] << ", ";
-        }
-        std::cout << std::endl;*/
-        state_path_enabled[state].clear();
-        for(uint64_t path = 0; path < numPaths(); ++path) {
-            bool path_enabled = getRoot()->isPathEnabledInState(getRoot()->paths[path],subfamily,state_valuation[state]);
-            state_path_enabled[state].set(path,path_enabled);
-        }
-
-        bool any_choice_enabled = false;
-        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            if(not base_choices[choice]) {
-                continue;
+    if(this->enable_state_exploration) {
+        std::queue<uint64_t> unexplored_states;
+        unexplored_states.push(initial_state);
+        BitVector state_reached(numStates(),false);
+        state_reached.set(initial_state,true);
+        while(not unexplored_states.empty()) {
+            uint64_t state = unexplored_states.front(); unexplored_states.pop();
+            state_path_enabled[state].clear();
+            for(uint64_t path = 0; path < numPaths(); ++path) {
+                bool path_enabled = getRoot()->isPathEnabledInState(getRoot()->paths[path],subfamily,state_valuation[state]);
+                state_path_enabled[state].set(path,path_enabled);
             }
-            bool choice_enabled = false;
-            for(uint64_t path: state_path_enabled[state]) {
-                if(subfamily.holeContains(path_action_hole[path],choice_to_action[choice])) {
+
+            bool any_choice_enabled = false;
+            for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+                if(not base_choices[choice]) {
+                    continue;
+                }
+                bool choice_enabled = false;
+                for(uint64_t path: state_path_enabled[state]) {
+                    if(subfamily.holeContains(path_action_hole[path],choice_to_action[choice])) {
+                        selection.set(choice,true);
+                        any_choice_enabled = true;
+                        visitChoice(choice,state_reached,unexplored_states);
+                        break;
+                    }
+                }
+            }
+            // if(state_enabled_choices[state].empty()) {
+            if(not any_choice_enabled) {
+                if(subfamily.isAssignment()) {
+                    // STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling first action...");
+                    // uint64_t choice = row_groups[state]; // pick the first choice
+                    uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
                     selection.set(choice,true);
-                    any_choice_enabled = true;
-                    // state_enabled_choices[state].push_back(choice);
-                    for(uint64_t dst: choice_destinations[choice]) {
-                        if(not state_reached[dst]) {
-                            unexplored_states.push(dst);
-                            state_reached.set(dst,true);
-                        }
-                    }
-                    break;
+                    visitChoice(choice,state_reached,unexplored_states);
+                } else {
+                    selection.clear();
+                    timers["selectCompatibleChoices::2 state exploration"].stop();
+                    timers[__FUNCTION__].stop();
+                    return selection;
                 }
             }
         }
-        // if(state_enabled_choices[state].empty()) {
-        if(not any_choice_enabled) {
-            if(subfamily.isAssignment()) {
-                // STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling first action...");
-                // uint64_t choice = row_groups[state]; // pick the first choice
-                uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
-                selection.set(choice,true);
-                for(uint64_t dst: choice_destinations[choice]) {
-                    if(not state_reached[dst]) {
-                        unexplored_states.push(dst);
-                        state_reached.set(dst,true);
+    } else {
+        for(uint64_t state = 0; state < numStates(); ++state) {
+            state_path_enabled[state].clear();
+            for(uint64_t path = 0; path < numPaths(); ++path) {
+                bool path_enabled = getRoot()->isPathEnabledInState(getRoot()->paths[path],subfamily,state_valuation[state]);
+                state_path_enabled[state].set(path,path_enabled);
+            }
+
+            bool any_choice_enabled = false;
+            for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+                if(not base_choices[choice]) {
+                    continue;
+                }
+                bool choice_enabled = false;
+                for(uint64_t path: state_path_enabled[state]) {
+                    if(subfamily.holeContains(path_action_hole[path],choice_to_action[choice])) {
+                        selection.set(choice,true);
+                        any_choice_enabled = true;
+                        break;
                     }
                 }
-            } else {
-                selection.clear();
-                timers["selectCompatibleChoices::2 state exploration"].stop();
-                timers[__FUNCTION__].stop();
-                return selection;
             }
+            // if(state_enabled_choices[state].empty()) {
+            if(not any_choice_enabled) {
+                if(subfamily.isAssignment()) {
+                    // STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling first action...");
+                    // uint64_t choice = row_groups[state]; // pick the first choice
+                    uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
+                    selection.set(choice,true);
+                } else {
+                    selection.clear();
+                    timers["selectCompatibleChoices::2 state exploration"].stop();
+                    timers[__FUNCTION__].stop();
+                    return selection;
+                }
+            }
+
         }
     }
+
     timers["selectCompatibleChoices::2 state exploration"].stop();
 
-    if(CHECK_CONSISTENT_SCHEDULER_EXISTENCE) {
+    /*if(CHECK_CONSISTENT_SCHEDULER_EXISTENCE) {
         // check selected choices simultaneously
         solver.push();
         getRoot()->addFamilyEncoding(subfamily,solver);
         for(uint64_t state: state_reached) {
             z3::expr_vector enabled_choices(ctx);
-            /*for(uint64_t choice: state_enabled_choices[state]) {
+            for(uint64_t choice: state_enabled_choices[state]) {
                 // enabled_choices.push_back(z3::mk_and(choice_path_expresssion[choice]));
                 enabled_choices.push_back(choice_path_expresssion_expr[choice]);
             }
-            solver.add(z3::mk_or(enabled_choices));*/
+            solver.add(z3::mk_or(enabled_choices));
         }
         bool consistent_scheduler_exists = check();
         if(not consistent_scheduler_exists) {
@@ -363,7 +404,7 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             selection.clear();
         }
         solver.pop();
-    }
+    }*/
 
     timers[__FUNCTION__].stop();
     return selection;
@@ -439,7 +480,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         return std::make_pair(true,hole_options_vector);
     }
 
-    if(disable_counterexamples) {
+    if(not this->enable_harmonization) {
         solver.pop();
         solver.pop();
         timers[__FUNCTION__].stop();
@@ -470,12 +511,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
             if(not consistent) {
                 break;
             }
-            for(uint64_t dst: choice_destinations[choice]) {
-                if(not state_reached[dst]) {
-                    unexplored_states.push(dst);
-                    state_reached.set(dst,true);
-                }
-            }
+            visitChoice(choice,state_reached,unexplored_states);
             break;
         }
     }
