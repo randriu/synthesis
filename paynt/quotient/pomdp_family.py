@@ -38,6 +38,8 @@ class GameAbstractionSolver():
         self.solution_state_to_player1_action = [None for state in range(quotient_mdp.nr_states)]
         self.solution_state_to_quotient_choice = [None for state in range(quotient_mdp.nr_states)]
 
+        self.game_iterations = None
+
         self.posmg_specification = self.create_posmg_specification(prop)
 
     def specify_target_with_label(self, labeling, prop):
@@ -103,6 +105,8 @@ class GameAbstractionSolver():
             self.solution_state_to_quotient_choice[state] = self.quotient_mdp.nr_choices
             self.solution_state_values[state] = 0
 
+            self.game_iterations = 0
+
         # create game abstraction
         smg_abstraction = payntbind.synthesis.SmgAbstraction(
             self.quotient_mdp,
@@ -124,6 +128,8 @@ class GameAbstractionSolver():
         assignment = synthesizer.synthesize(print_stats=False)
 
         assert assignment is not None
+
+        self.game_iterations = synthesizer.stat.iterations_game
 
         # extract results
         state_player_indications = posmgQuotient.posmg_manager.get_state_player_indications()

@@ -29,9 +29,9 @@ class Statistic:
     # parameters
     status_period_seconds = 3
     synthesis_timer_total = paynt.utils.timer.Timer()
-    
+
     def __init__(self, synthesizer):
-        
+
         self.synthesizer = synthesizer
         self.quotient = self.synthesizer.quotient
 
@@ -46,6 +46,12 @@ class Statistic:
         self.iterations_game = None
         self.acc_size_game = 0
         self.avg_size_game = 0
+
+        # used for families of pomdp
+        # iterations_game - posmg synthesis count (game abstraction)
+        # iterations_smg - total smg model checking count
+        #  (typicaly more smg checks for one game abstraction)
+        self.iterations_smg = None
 
         self.synthesized_assignment = None
         self.job_type = None
@@ -69,7 +75,7 @@ class Statistic:
         self.synthesis_timer.start()
         if not self.synthesis_timer_total.running:
             self.synthesis_timer_total.start()
-    
+
     def iteration(self, model):
         ''' Identify the type of the model and count corresponding iteration. '''
         if isinstance(model, paynt.models.models.Mdp):
@@ -102,6 +108,11 @@ class Statistic:
         self.acc_size_game += size_game
         self.print_status()
 
+    def add_smg_iterations(self, count):
+        if self.stat.iterations_smg is None:
+            self.stat.iterations_smg = 0
+        self.stat.iterations_smg += count
+
     def new_fsc_found(self, value, assignment, size):
         time_elapsed = round(self.synthesis_timer_total.read(),1)
         # print(f'new opt: {value}')
@@ -109,14 +120,14 @@ class Statistic:
         # print(f'-----------PAYNT----------- \
               # \nValue = {value} | Time elapsed = {time_elapsed}s | FSC size = {size}\nFSC = {assignment}\n', flush=True)
 
-    
+
     def status(self):
         ret_str = "> "
         fraction_explored = self.synthesizer.explored / self.family_size
         time_estimate = safe_division(self.synthesis_timer.read(), fraction_explored)
         percentage_explored = int(fraction_explored * 100000) / 1000.0
         ret_str += f"progress {percentage_explored}%"
-        
+
         time_elapsed = int(self.synthesis_timer.read())
         ret_str += f", elapsed {time_elapsed} s"
         time_estimate = int(time_estimate)
@@ -143,7 +154,7 @@ class Statistic:
             iters += [f"DTMC: {self.iterations_dtmc}"]
         ret_str += ", iters = {" + ", ".join(iters) + "}"
         # ret_str += f", pres = {self.synthesizer.num_preserved}"
-        
+
         spec = self.quotient.specification
         if spec.has_optimality:
             opt = self.synthesizer.best_assignment_value
@@ -170,7 +181,7 @@ class Statistic:
         self.job_type = "evaluation"
         self.synthesis_timer.stop()
         self.evaluations = evaluations
-        
+
 
     def get_summary_specification(self):
         spec = self.quotient.specification
@@ -185,7 +196,11 @@ class Statistic:
         iterations = ""
         if self.iterations_game is not None:
             avg_size = round(safe_division(self.acc_size_game, self.iterations_game))
-            type_stats = f"Game stats: avg game size: {avg_size}, iterations: {self.iterations_game}" 
+            type_stats = f"Game stats: avg game size: {avg_size}, iterations: {self.iterations_game}"
+            iterations += f"{type_stats}\n"
+
+        if self.iterations_smg is not None:
+            type_stats = f"SMG stats: iterations: {self.iterations_smg}"
             iterations += f"{type_stats}\n"
 
         if self.iterations_mdp is not None:
@@ -216,7 +231,7 @@ class Statistic:
         members_sat_percentage = int(round(members_sat/members_total*100,0))
         return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
 
-    
+
     def get_summary(self):
         specification = self.get_summary_specification()
 
@@ -229,7 +244,7 @@ class Statistic:
         timing = f"method: {self.synthesizer.method_name}, synthesis time: {round(self.synthesis_timer.time, 2)} s"
 
         iterations = self.get_summary_iterations()
-        
+
         if self.job_type == "synthesis":
             result = self.get_summary_synthesis()
         else:
@@ -242,8 +257,8 @@ class Statistic:
                 f"{iterations}\n{result}\n"\
                 f"{sep}"
         return summary
-    
-    def print(self):    
+
+    def print(self):
         print(self.get_summary(),end="")
 
 
@@ -272,7 +287,7 @@ class Statistic:
         print(synthesis_time,end=" ")
         print(self.num_nodes,end=" ")
         print(self.num_nodes_merged,end=" ")
-        
+
         print(self.num_leaves,end=" ")
         print(self.num_leaves_merged,end=" ")
         leaves_by_mdps = round(self.num_leaves_merged/self.num_mdps_total*100,2)

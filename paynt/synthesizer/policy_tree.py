@@ -64,7 +64,7 @@ class PolicyTreeNode:
 
     def __init__(self, family):
         self.family = family
-        
+
         self.splitter = None
         self.suboptions = []
         self.child_nodes = []
@@ -75,7 +75,7 @@ class PolicyTreeNode:
     @property
     def is_leaf(self):
         return self.sat is not None
-    
+
     def num_nodes(self):
         num = 1
         for child in self.child_nodes:
@@ -161,7 +161,7 @@ class PolicyTreeNode:
         policy = merge_policies(policy1,policy2)
         if policy is not None:
             return policy
-        
+
         policy12,policy21 = merge_policies_exclusively(policy1,policy2)
 
         # try policy1 for family2
@@ -204,7 +204,7 @@ class PolicyTreeNode:
                 policies[child1.policy_index] = policy
                 policies[child2.policy_index] = None
                 join_to_i.append(j)
-            
+
             self.merge_children_indices(join_to_i)
             i += 1
 
@@ -275,7 +275,7 @@ class PolicyTree:
             all_nodes.append(node)
             node_queue += node.child_nodes
         return all_nodes
-    
+
     def collect_leaves(self):
         node_queue = [self.root]
         leaves = []
@@ -316,7 +316,7 @@ class PolicyTree:
             leaf.double_check(quotient,prop)
         logger.info("all solutions are OK")
 
-    
+
     def count_diversity(self):
         from collections import defaultdict
         children_stats = defaultdict(int)
@@ -328,12 +328,12 @@ class PolicyTree:
             with_false = len([node for node in node.child_nodes if node.policy==False])
             children_stats[(with_policy,with_none,with_false)] += 1
         return children_stats
-    
+
 
     def print_stats(self):
         members_total = self.root.family.size
         num_policies = len(self.policies)
-        
+
         members_satisfied = 0
         num_leaves_singleton = 0
         leaves = self.collect_leaves()
@@ -403,9 +403,9 @@ class PolicyTree:
                 # discard irrelevant policy
                 policy_old_to_new_map[policy2_index] = policy1_index
                 self.policies[policy2_index] = None
-        
+
         return policy_old_to_new_map
-    
+
     def postprocess(self, quotient, prop):
 
         postprocessing_timer = paynt.utils.timer.Timer()
@@ -451,7 +451,7 @@ class PolicyTree:
         logger.debug(f"postprocessing took {time} s")
         return time
 
-    
+
     def extract_policies(self, quotient):
         return {
             f"p{policy_index}" : quotient.policy_to_state_valuation_actions(policy)
@@ -485,7 +485,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     double_check_policy_tree_leaves = False
     # if True, unreachable choices will be discarded from the splitting scheduler
     discard_unreachable_choices = False
-    
+
     @property
     def method_name(self):
         return "AR (policy tree)"
@@ -495,7 +495,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         _,mdp = quotient.fix_and_apply_policy_to_family(family, policy)
         if family.size == 1:
             quotient.assert_mdp_is_deterministic(mdp, family)
-        
+
         DOUBLE_CHECK_PRECISION = 1e-6
         default_precision = Property.model_checking_precision
         Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)
@@ -504,36 +504,39 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         if not policy_result.sat:
             logger.warning("policy should be SAT but (most likely due to model checking precision) has value {}".format(policy_result.value))
         return
-    
-    
+
+
     def verify_policy(self, family, prop, policy):
         _,mdp = self.quotient.fix_and_apply_policy_to_family(family, policy)
         policy_result = mdp.model_check_property(prop, alt=True)
         self.stat.iteration(mdp)
         return policy_result.sat
 
-    
+
     def solve_singleton(self, family, prop):
         result = family.mdp.model_check_property(prop)
         self.stat.iteration(family.mdp)
         if not result.sat:
             return False
         policy = self.quotient.scheduler_to_policy(result.result.scheduler, family.mdp)
-    
+
         # uncomment below to preemptively double-check the policy
         # SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, policy)
         return policy
 
 
+    def log_game_stats(self, states, game_solver):
+        self.stat.iteration_game(states)
+
     def solve_game_abstraction(self, family, prop, game_solver):
         # construct and solve the game abstraction
         # logger.debug("solving game abstraction...")
 
-        game_solver.solve_sg(family.selected_choices)
-        # game_solver.solve_smg(family.selected_choices)
+        # game_solver.solve_sg(family.selected_choices)
+        game_solver.solve_smg(family.selected_choices)
 
         game_value = game_solver.solution_value
-        self.stat.iteration_game(family.mdp.states)
+        self.log_game_stats(family.mdp.states, game_solver)
         game_sat = prop.satisfies_threshold_within_precision(game_value)
         # logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action
@@ -566,7 +569,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         if family.size == 1:
             mdp_family_result.policy = self.solve_singleton(family,prop)
             return mdp_family_result
-        
+
         if family.candidate_policy is None:
             game_policy,game_sat = self.solve_game_abstraction(family,prop,game_solver)
         else:
@@ -594,7 +597,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         mdp_family_result.splitter = splitter
         mdp_family_result.hole_selection = hole_selection
         return mdp_family_result
-    
+
     def choose_splitter(self, family, prop, scheduler_choices, state_values, hole_selection):
         inconsistent_assignments = {hole:options for hole,options in enumerate(hole_selection) if len(options) > 1}
         if len(inconsistent_assignments)==0:
@@ -610,13 +613,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         if len(inconsistent_assignments)==1:
             for hole in inconsistent_assignments.keys():
                 return hole
-        
+
         # compute scores for inconsistent holes
         scores = self.compute_scores(prop, scheduler_choices, state_values, inconsistent_assignments)
         splitters = self.quotient.holes_with_max_score(scores)
         splitter = splitters[0]
         return splitter
-    
+
     def compute_scores(self, prop, scheduler_choices, state_values, inconsistent_assignments):
         mdp = self.quotient.quotient_mdp
         choice_values = self.quotient.choice_values(mdp, prop, state_values)
@@ -669,7 +672,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         return suboptions,subfamilies
 
-    
+
     def evaluate_all(self, family, prop, keep_value_only=False):
         assert not prop.reward, "expecting reachability probability propery"
         game_solver = self.quotient.build_game_abstraction_solver(prop)
