@@ -63,10 +63,12 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
-        
         choices = self.coloring.selectCompatibleChoices(family.family)
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
+        # for state,quotient_state in enumerate(state_map):
+        #     assert pomdp.observations[state] == self.state_to_observation[quotient_state]
+        # assert pomdp.nr_observations == self.num_observations
         return SubPomdp(pomdp,self,state_map,choice_map)
 
 

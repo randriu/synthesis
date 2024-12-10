@@ -2,9 +2,8 @@ import stormpy
 
 from .statistic import Statistic
 import paynt.synthesizer.synthesizer_ar
-from .synthesizer_ar_storm import SynthesizerARStorm
-from .synthesizer_hybrid import SynthesizerHybrid
-from .synthesizer_multicore_ar import SynthesizerMultiCoreAR
+import paynt.synthesizer.synthesizer_hybrid
+import paynt.synthesizer.synthesizer_ar_storm
 
 import paynt.quotient.quotient
 import paynt.quotient.pomdp
@@ -27,24 +26,20 @@ class SynthesizerPomdp:
 
     def __init__(self, quotient, method, storm_control):
         self.quotient = quotient
-        self.use_storm = False
         self.synthesizer = None
         if method == "ar":
             self.synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR
-        elif method == "ar_multicore":
-            self.synthesizer = SynthesizerMultiCoreAR
         elif method == "hybrid":
-            self.synthesizer = SynthesizerHybrid
+            self.synthesizer = paynt.synthesizer.synthesizer_hybrid.SynthesizerHybrid
         self.total_iters = 0
 
+        self.storm_control = storm_control
         if storm_control is not None:
-            self.use_storm = True
-            self.storm_control = storm_control
             self.storm_control.quotient = self.quotient
             self.storm_control.pomdp = self.quotient.pomdp
             self.storm_control.spec_formulas = self.quotient.specification.stormpy_formulae()
             self.synthesis_terminate = False
-            self.synthesizer = SynthesizerARStorm       # SAYNT only works with abstraction refinement
+            self.synthesizer = paynt.synthesizer.synthesizer_ar_storm.SynthesizerARStorm # SAYNT only works with abstraction refinement
             if self.storm_control.iteration_timeout is not None:
                 self.saynt_timer = paynt.utils.timer.Timer()
                 self.synthesizer.saynt_timer = self.saynt_timer
@@ -281,31 +276,31 @@ class SynthesizerPomdp:
             #break
 
     def run(self, optimum_threshold=None):
-        # choose the synthesis strategy:
-        if self.use_storm:
-            logger.info("Storm POMDP option enabled")
-            logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
-                        (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
-                        self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs
-            ))
-            # start SAYNT
-            if self.storm_control.iteration_timeout is not None:
-                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
-                                          paynt_timeout=self.storm_control.paynt_timeout,
-                                          storm_timeout=self.storm_control.storm_timeout,
-                                          iteration_limit=0)
-            # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
-            elif self.storm_control.get_result is not None:
-                if self.storm_control.get_result:
-                    self.run_synthesis_timeout(self.storm_control.get_result)
-                self.storm_control.run_storm_analysis()
-            # run Storm and then use the obtained result to enhance PAYNT synthesis
-            else:
-                self.storm_control.get_storm_result()
-                self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.storm_control.unfold_storm)
-
-            self.print_synthesized_controllers()
-        # Pure PAYNT POMDP synthesis
-        else:
-            # self.strategy_iterative(unfold_imperfect_only=False)
+        if self.storm_control is None:
+            # Pure PAYNT POMDP synthesis
             self.strategy_iterative(unfold_imperfect_only=True)
+            return
+
+        # SAYNT
+        logger.info("Storm POMDP option enabled")
+        logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
+                    (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
+                    self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs
+        ))
+        # start SAYNT
+        if self.storm_control.iteration_timeout is not None:
+            self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
+                                      paynt_timeout=self.storm_control.paynt_timeout,
+                                      storm_timeout=self.storm_control.storm_timeout,
+                                      iteration_limit=0)
+        # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
+        elif self.storm_control.get_result is not None:
+            if self.storm_control.get_result:
+                self.run_synthesis_timeout(self.storm_control.get_result)
+            self.storm_control.run_storm_analysis()
+        # run Storm and then use the obtained result to enhance PAYNT synthesis
+        else:
+            self.storm_control.get_storm_result()
+            self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.storm_control.unfold_storm)
+
+        self.print_synthesized_controllers()
