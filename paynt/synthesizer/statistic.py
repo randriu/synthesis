@@ -109,9 +109,9 @@ class Statistic:
         self.print_status()
 
     def add_smg_iterations(self, count):
-        if self.stat.iterations_smg is None:
-            self.stat.iterations_smg = 0
-        self.stat.iterations_smg += count
+        if self.iterations_smg is None:
+            self.iterations_smg = 0
+        self.iterations_smg += count
 
     def new_fsc_found(self, value, assignment, size):
         time_elapsed = round(self.synthesis_timer_total.read(),1)
