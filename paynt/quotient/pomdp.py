@@ -719,21 +719,18 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # convert hole assignment to FSC
         for obs,holes in enumerate(self.observation_action_holes):
-            for memory,hole in enumerate(holes):
+            for node,hole in enumerate(holes):
                 option = assignment.hole_options(hole)[0]
                 action_label = self.action_labels_at_observation[obs][option]
                 action = action_label_indices[action_label]
-                fsc.action_function[memory][obs] = action
+                fsc.action_function[node][obs] = action
         for obs,holes in enumerate(self.observation_memory_holes):
-            for memory,hole in enumerate(holes):
+            for node,hole in enumerate(holes):
                 option = assignment.hole_options(hole)[0]
-                fsc.update_function[memory][obs] = option
+                fsc.update_function[node][obs] = option
 
-        # fixing the FSC for not fully unrolled quotients
         fsc.fill_implicit_actions_and_updates()
-
         fsc.check(observation_to_actions)
-
         return fsc
 
 

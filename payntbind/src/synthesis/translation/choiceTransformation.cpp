@@ -201,7 +201,7 @@ std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<u
     std::vector<uint64_t> translated_to_original_choice;
     std::vector<uint64_t> translated_to_original_choice_label;
     std::vector<uint64_t> row_groups_new;
-    storm::storage::BitVector action_exists(num_actions,false);
+    std::vector<uint64_t> action_to_choice(num_actions);
     for(uint64_t state = 0; state < num_states; ++state) {
         row_groups_new.push_back(translated_to_original_choice.size());
         if(not state_mask[state]) {
@@ -214,23 +214,27 @@ std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>,std::vector<u
             continue;
         }
         // identify existing actions, identify the fallback choice
-        action_exists.clear();
         uint64_t fallback_choice = row_groups_old[state];
+        std::fill(action_to_choice.begin(),action_to_choice.end(),num_choices);
         for(uint64_t choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
             uint64_t action = choice_to_action[choice];
             if(action == dont_care_action) {
                 fallback_choice = choice;
             }
-            action_exists.set(action,true);
-            translated_to_original_choice.push_back(choice);
-            translated_to_original_choice_label.push_back(choice);
-            translated_to_true_action.push_back(action);
+            action_to_choice[action] = choice;
         }
-        // add missing actions
-        for(uint64_t action: ~action_exists) {
-            translated_to_original_choice.push_back(fallback_choice);
+        uint64_t fallback_action = choice_to_action[fallback_choice];
+        // add new choices in the order of actions
+        for(uint64_t action = 0; action < num_actions; ++action) {
+            uint64_t choice = action_to_choice[action];
+            if(choice < num_choices) {
+                translated_to_original_choice.push_back(choice);
+                translated_to_true_action.push_back(action);
+            } else {
+                translated_to_original_choice.push_back(fallback_choice);
+                translated_to_true_action.push_back(fallback_action);
+            }
             translated_to_original_choice_label.push_back(action_reference_choice[action]);
-            translated_to_true_action.push_back(choice_to_action[fallback_choice]);
         }
     }
     row_groups_new.push_back(translated_to_original_choice.size());
