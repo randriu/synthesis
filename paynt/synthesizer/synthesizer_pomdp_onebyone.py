@@ -9,6 +9,9 @@ class SynthesizerPomdpOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
         return "pomdp 1-by-1"
 
     def synthesize_one(self, family):
+        sat = 0
+        unsat = 0
+
         for pomdp_combinations in family.all_combinations():
             combination = list(pomdp_combinations)
             pomdp_singleton_suboptions = [[option] for option in combination]
@@ -18,5 +21,14 @@ class SynthesizerPomdpOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
             pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(pomdp.model, self.quotient.specification)
             print(f"synthesizing for family {pomdp_singleton_family}")
             synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(pomdp_quotient)
-            synthesizer.synthesize(print_stats = False)
+            res = synthesizer.synthesize(print_stats = False)
+
+            if res:
+                sat += 1
+            else:
+                unsat += 1
+
+        print(f"sat: {sat}")
+        print(f"unsat: {unsat}")
+
 
