@@ -741,7 +741,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         policies_json = {}
         for index,key_value in enumerate(policies.items()):
             policy_id,policy = key_value
-            policy_json = self.quotient.policy_to_json(policy)
+            policy_json = self.quotient.policy_to_json(policy, dt_control=self.ldokoupi_flag)
             policies_json[policy_id] = policy_json
         policies_string = json.dumps(policies_json, indent=4)
 

@@ -1,12 +1,14 @@
+import logging
+
 import paynt.synthesizer.statistic
 import paynt.utils.timer
 
-import logging
 logger = logging.getLogger(__name__)
 
 
 class FamilyEvaluation:
     '''Result associated with a family after its evaluation. '''
+
     def __init__(self, family, value, sat, policy):
         self.family = family
         self.value = value
@@ -15,17 +17,16 @@ class FamilyEvaluation:
 
 
 class Synthesizer:
-
     # base filename (i.e. without extension) to export synthesis result
     export_synthesis_filename_base = None
+    # ldokoupi flag for 2024-5 DIP experiments
+    ldokoupi_flag = False
 
     @staticmethod
     def choose_synthesizer(quotient, method, fsc_synthesis=False, storm_control=None):
 
         # hiding imports here to avoid mutual top-level imports
         import paynt.quotient.mdp
-        import paynt.quotient.pomdp
-        import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
         import paynt.quotient.posmg
         import paynt.synthesizer.synthesizer_onebyone
@@ -73,7 +74,6 @@ class Synthesizer:
             return paynt.synthesizer.synthesizer_multicore_ar.SynthesizerMultiCoreAR(quotient)
         raise ValueError("invalid method name")
 
-
     def __init__(self, quotient):
         self.quotient = quotient
         self.stat = None
@@ -89,7 +89,7 @@ class Synthesizer:
 
     def time_limit_reached(self):
         if (self.synthesis_timer is not None and self.synthesis_timer.time_limit_reached()) or \
-            paynt.utils.timer.GlobalTimer.time_limit_reached():
+                paynt.utils.timer.GlobalTimer.time_limit_reached():
             logger.info("time limit reached, aborting...")
             return True
         return False
@@ -146,18 +146,53 @@ class Synthesizer:
         if self.export_synthesis_filename_base is not None:
             self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
 
+        if self.ldokoupi_flag:
+            # call the synthesizer to generate the decision tree for every policy from policy tree
+
+            # filter empty policies
+            all_policies = [evaluation.policy[0] for evaluation in evaluations if evaluation.policy is not None]
+            base_export_name = self.export_synthesis_filename_base
+
+            for counter, policy in enumerate(all_policies):
+                # we need to convert action to choice
+
+                # get all actions with no_label choice (to later discard)
+                no_label_choices = []
+                for i, action in enumerate(policy):
+                    action_index_for_state = policy[i] or 0
+                    if (action_index_for_state == 0):
+                        no_label_choices.append(i)
+
+                # list of choices for each state
+                choices = [
+                    self.quotient.state_action_choices[i][policy[i] or 0]
+                    for i in range(len(self.quotient.state_valuations))
+                ]
+                assert all(choice is not None for choice in choices)
+
+                # if there are multiple choices executing one action pick the first one
+                choices = [choice[0] if choice else None for choice in choices]
+
+                # Remove no_label_choices
+                choices = [choice for choice in choices if choice not in no_label_choices]
+
+                dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
+                # unique export name for each policy
+                dt_map_synthetiser.export_synthesis_filename_base = base_export_name + f"_policy_{counter}" if base_export_name else None
+                dt_map_synthetiser.run(policy=choices)
+
         if print_stats:
             self.stat.print()
 
         return evaluations
-
 
     def synthesize_one(self, family):
         ''' to be overridden '''
         pass
 
     def synthesize(
-        self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True, timeout=None
+            self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True,
+            timeout=None
     ):
         '''
         :param family family of assignment to search in
@@ -203,7 +238,6 @@ class Synthesizer:
             self.quotient.specification.reset()
 
         return assignment
-
 
     def run(self, optimum_threshold=None):
         return self.synthesize(optimum_threshold=optimum_threshold)

@@ -370,7 +370,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     # if true, an explicit action executing a random choice of an available action will be added to each state
     add_dont_care_action = False
     # if true, irrelevant states will not be considered for tree mapping
-    filter_deterministic_states = False
+    filter_deterministic_states = True
 
     @classmethod
     def get_state_valuations(cls, model):
