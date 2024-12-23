@@ -194,7 +194,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             self.quotient.build(family)
             consistent,hole_selection = self.quotient.are_choices_consistent(scheduler_choices, family)
             if consistent:
-                self.verify_hole_selection(family,hole_selection)
+                self.best_assignment = family.assume_options_copy(hole_selection)
+                # self.verify_hole_selection(family,hole_selection)
+                print(self.best_assignment)
                 if self.best_assignment is not None:
                     self.best_tree = self.quotient.decision_tree
                     self.best_tree.root.associate_assignment(self.best_assignment)
@@ -204,10 +206,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.resource_limit_reached():
                 break
 
-    def run(self, optimum_threshold=None):
-        # self.quotient.reset_tree(SynthesizerDecisionTree.tree_depth,enable_harmonization=True)
+    def run(self, optimum_threshold=None, policy=None):
         scheduler_choices = None
-        if SynthesizerDecisionTree.scheduler_path is None:
+        if policy is not None:
+            scheduler_choices = self.quotient.policy_to_policy_vector(policy)
+            mc_result = None
+        elif SynthesizerDecisionTree.scheduler_path is None:
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
             mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         else:
@@ -228,7 +232,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
             submdp = self.quotient.build_from_choice_mask(scheduler_choices)
             mc_result = submdp.model_check_property(self.quotient.get_property())
-        opt_result_value = mc_result.value
+        opt_result_value = mc_result.value if mc_result is not None else None
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
 
         if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:

@@ -138,6 +138,8 @@ def setup_logger(log_path = None):
 )
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
+@click.option("--ldokoupi", is_flag=True, default=False,
+    help="ldokoupi DIP experiments")
 
 def paynt_run(
     project, sketch, props, relative_error, optimum_threshold, precision, exact, timeout,
@@ -152,7 +154,8 @@ def paynt_run(
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
     ce_generator,
-    profiling
+    profiling,
+    ldokoupi
 ):
 
     profiler = None
@@ -166,6 +169,7 @@ def paynt_run(
     # set CLI parameters
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
     paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base = export_synthesis
+    paynt.synthesizer.synthesizer.Synthesizer.ldokoupi_flag = ldokoupi
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
