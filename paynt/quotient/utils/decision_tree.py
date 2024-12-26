@@ -9,6 +9,23 @@ class DecisionTree:
         self.variables = variables
         self.reset()
 
+    def mark_irrelevant_states_for_removal(self, variable: str):
+        """removal itself happens on the call of simplify"""
+        index,min_domain = None, None
+        for i,var in enumerate(self.variables):
+            if var.name == variable:
+                index, min_domain = i, var.domain_min
+                break
+        # reduce all state valuations to the minimal domain
+        # mark all state valuations for removal if they 're not minimal
+        for i in range(len(self.state_valuations)):
+            if not self.state_valuations[i]:
+                continue  # already marked
+
+            if self.state_valuations[i][index] != min_domain:
+                self.state_valuations[i] = None
+            #state_valuation[index] = min_domain
+
     def reset(self):
         self.root = DecisionTreeNode(None)
 
@@ -52,6 +69,7 @@ class DecisionTree:
 
     def simplify(self, target_state_mask):
         state_valuations = [self.state_valuations[state] for state in ~target_state_mask]
+        state_valuations = [state for state in state_valuations if state is not None]
         self.root.simplify(self.variables, state_valuations)
 
     def to_string(self):

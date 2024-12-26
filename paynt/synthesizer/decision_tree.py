@@ -74,7 +74,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.num_families_considered += 1
         self.quotient.build(family)
 
-        self.stat.iteration(family.mdp)
         if family.parent_info is not None:
             for choice in family.parent_info.scheduler_choices:
                 if not family.selected_choices[choice]:
@@ -92,6 +91,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.num_families_model_checked += 1
         self.check_specification(family)
         if not family.analysis_result.can_improve:
+            return
+        if SynthesizerDecisionTree.scheduler_path is not None:
             return
         self.harmonize_inconsistent_scheduler(family)
 
@@ -135,6 +136,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             file.write(tree.source)
         logger.info(f"exported decision tree to {tree_filename}")
 
+        if self.ldokoupi_flag:
+            return  # omit png
         tree_visualization_filename = export_filename_base + ".png"
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported decision tree visualization to {tree_visualization_filename}")
@@ -570,6 +573,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             family.analysis_result = self.quotient.build_unsat_result()
             self.quotient.build(family)
             consistent,hole_selection = self.quotient.are_choices_consistent(scheduler_choices, family)
+            # print("consistent", consistent, hole_selection)
             if consistent:
                 self.best_assignment = family.assume_options_copy(hole_selection)
                 # self.verify_hole_selection(family,hole_selection)
@@ -583,7 +587,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.resource_limit_reached():
                 break
 
-    def run(self, optimum_threshold=None, policy=None):
+        # self.counters_print()
+
+    def run(self, optimum_threshold=None, policy=None,irrelevant_variables=None):
+
         scheduler_choices = None
         if policy is not None:
             scheduler_choices = self.quotient.policy_to_policy_vector(policy)
@@ -647,6 +654,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info("no admissible tree found")
         else:
             relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
+
+            if irrelevant_variables:
+                # remove irrelevant states from the tree
+                for variable in irrelevant_variables:
+                    self.best_tree.mark_irrelevant_states_for_removal(variable)
+
             self.best_tree.simplify(relevant_state_valuations)
             depth = self.best_tree.get_depth()
             num_nodes = len(self.best_tree.collect_nonterminals())
