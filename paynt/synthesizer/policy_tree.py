@@ -757,6 +757,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             file.write(tree.source)
         logger.info(f"exported policy tree to {tree_filename}")
 
+        if self.ldokoupi_flag:
+            return  # omit png
         tree_visualization_filename = export_filename_base + ".png"
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported policy tree visualization to {tree_visualization_filename}")

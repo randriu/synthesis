@@ -49,6 +49,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_action_choices = None
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
+        # list of irrelevant variables, filled by extract_policies call
+        self.irrelevant_variables = None
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.num_actions = len(self.action_labels)
@@ -195,6 +197,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             ({variable:value for variable,value in valuation.items() if variable not in irrelevant_variables},action)
             for valuation,action in state_valuation_to_action
         ]
+        self.irrelevant_variables = irrelevant_variables
         return state_valuation_to_action
 
     def policy_to_json(self, state_valuation_to_action, dt_control=False):

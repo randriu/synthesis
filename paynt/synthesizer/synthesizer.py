@@ -176,10 +176,15 @@ class Synthesizer:
                 # Remove no_label_choices
                 choices = [choice for choice in choices if choice not in no_label_choices]
 
+                # get state_valuations for each state
+                state_valuations = [ self.quotient.state_valuations[i] for i in range(len(self.quotient.state_valuations))]
+
+                irrelevant_variables = self.quotient.irrelevant_variables
+
                 dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
                 # unique export name for each policy
-                dt_map_synthetiser.export_synthesis_filename_base = base_export_name + f"_policy_{counter}" if base_export_name else None
-                dt_map_synthetiser.run(policy=choices)
+                dt_map_synthetiser.export_synthesis_filename_base = base_export_name + f"_p{counter}" if base_export_name else None
+                dt_map_synthetiser.run(policy=choices,irrelevant_variables=irrelevant_variables)
 
         if print_stats:
             self.stat.print()
