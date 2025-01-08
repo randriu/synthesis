@@ -309,7 +309,8 @@ class Quotient:
         assert self.specification.num_properties == 1, "expecting a single property"
         return self.specification.all_properties()[0]
 
-    def identify_absorbing_states(self, model):
+    @classmethod
+    def identify_absorbing_states(cls, model):
         state_is_absorbing = [True] * model.nr_states
         tm = model.transition_matrix
         for state in range(model.nr_states):
@@ -321,6 +322,16 @@ class Quotient:
                 if not state_is_absorbing[state]:
                     break
         return state_is_absorbing
+
+    @classmethod
+    def identify_states_with_actions(cls, model):
+        ''' Get a mask of states having more than one action. '''
+        state_has_actions = [None] * model.nr_states
+        ndi = model.nondeterministic_choice_indices
+        for state in range(model.nr_states):
+            num_actions = ndi[state+1]-ndi[state]
+            state_has_actions[state] = (num_actions>1)
+        return state_has_actions
 
     def identify_target_states(self, model=None, prop=None):
         if model is None:

@@ -326,6 +326,7 @@ void bindings_coloring(py::module& m) {
             std::vector<uint64_t> const&,
             std::vector<uint64_t> const&,
             storm::storage::sparse::StateValuations const&,
+            storm::storage::BitVector const&,
             std::vector<std::string> const&,
             std::vector<std::vector<int64_t>> const&,
             std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const&,

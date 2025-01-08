@@ -244,8 +244,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if self.best_tree is None:
             logger.info("no admissible tree found")
         else:
-            target_states = self.quotient.identify_target_states()
-            self.best_tree.simplify(target_states)
+            relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
+            self.best_tree.simplify(relevant_state_valuations)
             depth = self.best_tree.get_depth()
             num_nodes = len(self.best_tree.collect_nonterminals())
             logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
@@ -253,6 +253,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
+            # logger.info(f"printing the PRISM module below:")
+            # print(self.best_tree.to_prism())
 
             if self.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
