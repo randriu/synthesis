@@ -1,0 +1,79 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 65,
+          "inner nodes": 32,
+          "paths": 33,
+          "bandwidth": 6
+        },
+        "time": "00:00:00.025"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "cars_left",
+          "cars_right",
+          "green_side",
+          "waiting_time"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_inner": [
+          5.0,
+          5.0,
+          1.0,
+          5.0
+        ],
+        "max_outer": [
+          5.0,
+          5.0,
+          1.0,
+          5.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "(wait)",
+            "(switch_light)"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          1
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 361,
+        "num_flattened": 361,
+        "num_unique_labels": 2
+      }
+    }
+  }
+}

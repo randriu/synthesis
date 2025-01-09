@@ -1,0 +1,3206 @@
+{
+    "actual_label": null,
+    "children": [
+        {
+            "actual_label": null,
+            "children": [
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": [
+                                        "(wait)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": [
+                                        "(switch_light)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.7647675776812725
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.0
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.3734425363287187
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.530507457864597
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.6357432697300313
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.7152969463728308
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.6000206969061731
+                                }
+                            ],
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": [
+                                "(wait)"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.6903382872815417
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.2738256185080299
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.5124869403668565
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.6560476989558571
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.7600578052639335
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.7445641897739105
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.8132721229224779
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.8280159144400314
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.8350150538720792
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.8391333955948317
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.8293672008481414
+                        }
+                    ],
+                    "edge_label": "true"
+                },
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": [
+                                        "(wait)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(switch_light)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(wait)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 0.6016067457394686
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "impurity": 0.0
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.4591479170272448
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.6666666666666666
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.8091254953788906
+                                        }
+                                    ],
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.4333482810989027
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.3060986113514965
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.4475154181935994
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.3060986113514965
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.38210225325431013
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.4333482810989027
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.4720912554607545
+                                }
+                            ],
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(switch_light)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": [
+                                                        "(wait)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": null,
+                                                    "children": [
+                                                        {
+                                                            "actual_label": [
+                                                                "(switch_light)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "true"
+                                                        },
+                                                        {
+                                                            "actual_label": null,
+                                                            "children": [
+                                                                {
+                                                                    "actual_label": [
+                                                                        "(wait)"
+                                                                    ],
+                                                                    "children": [],
+                                                                    "split": null,
+                                                                    "edge_label": "true"
+                                                                },
+                                                                {
+                                                                    "actual_label": [
+                                                                        "(switch_light)"
+                                                                    ],
+                                                                    "children": [],
+                                                                    "split": null,
+                                                                    "edge_label": "false"
+                                                                }
+                                                            ],
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "additional_splits": [
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 3.5
+                                                                    },
+                                                                    "impurity": 0.0
+                                                                }
+                                                            ],
+                                                            "edge_label": "false"
+                                                        }
+                                                    ],
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "additional_splits": [
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "impurity": 0.4591479170272448
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "impurity": 0.5408520829727552
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 4.5
+                                                            },
+                                                            "impurity": 0.3333333333333333
+                                                        }
+                                                    ],
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.9056390622295665
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "impurity": 0.4875168162362656
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.9056390622295665
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.9387218755408672
+                                                }
+                                            ],
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.7841591278514218
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 0.7344090826922439
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "impurity": 0.63628933528331
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.7841591278514218
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.8112781244591328
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.7682734124061352
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": [
+                                        "(switch_light)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.581976511553919
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.5408520829727552
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.6016067457394686
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.5408520829727552
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.633731420642133
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.6500224216483541
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.6251405611365027
+                                }
+                            ],
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.822614811976822
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.5805763128235762
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.576640378212
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.6787910330739665
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.7900652029949212
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.9756641176525702
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.9423879466348065
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.9955380299191111
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.9932895855503843
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.9863826390090816
+                        }
+                    ],
+                    "edge_label": "false"
+                }
+            ],
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "green_side"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "additional_splits": [
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.950421513383996
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "impurity": 0.949109739352511
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "impurity": 0.9439602056806939
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 0.9388412643736921
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 0.9405368207875014
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.9479195553668776
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "impurity": 0.949109739352511
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "impurity": 0.9494766261400744
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 0.9505268874505426
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 0.9497446178057861
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "green_side"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.9187443837838797
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "waiting_time"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.9413595645287326
+                }
+            ],
+            "edge_label": "true"
+        },
+        {
+            "actual_label": null,
+            "children": [
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(wait)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(switch_light)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.0
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.5
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.6887218755408672
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": [
+                                        "(switch_light)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.1352130207431888
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.1811881477331988
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.20690842515181687
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.22486004441134258
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.23866413092996355
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.16250560541208853
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.20690842515181687
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.23215757186274388
+                                }
+                            ],
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": [
+                                "(wait)"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "green_side"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.9924056671541609
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.9962331360961658
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.9974924140929851
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.9981202659295094
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.9984965658690084
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "green_side"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.12494114641659272
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.9949671891627883
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.9974924140929851
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.9983293540674865
+                        }
+                    ],
+                    "edge_label": "true"
+                },
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": [
+                                                        "(wait)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": [
+                                                        "(switch_light)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "waiting_time"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "impurity": 0.0
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "waiting_time"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.5
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "waiting_time"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.6887218755408672
+                                                }
+                                            ],
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(wait)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "impurity": 0.16225562489182657
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.38177360116998604
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.4867668746754797
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.5569698081001166
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.5414460711655218
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.5954618442383217
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.6053641536365195
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": [
+                                                        "(switch_light)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": null,
+                                                    "children": [
+                                                        {
+                                                            "actual_label": [
+                                                                "(wait)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "true"
+                                                        },
+                                                        {
+                                                            "actual_label": null,
+                                                            "children": [
+                                                                {
+                                                                    "actual_label": null,
+                                                                    "children": [
+                                                                        {
+                                                                            "actual_label": [
+                                                                                "(wait)"
+                                                                            ],
+                                                                            "children": [],
+                                                                            "split": null,
+                                                                            "edge_label": "true"
+                                                                        },
+                                                                        {
+                                                                            "actual_label": null,
+                                                                            "children": [
+                                                                                {
+                                                                                    "actual_label": [
+                                                                                        "(switch_light)"
+                                                                                    ],
+                                                                                    "children": [],
+                                                                                    "split": null,
+                                                                                    "edge_label": "true"
+                                                                                },
+                                                                                {
+                                                                                    "actual_label": null,
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "actual_label": [
+                                                                                                "(wait)"
+                                                                                            ],
+                                                                                            "children": [],
+                                                                                            "split": null,
+                                                                                            "edge_label": "true"
+                                                                                        },
+                                                                                        {
+                                                                                            "actual_label": null,
+                                                                                            "children": [
+                                                                                                {
+                                                                                                    "actual_label": [
+                                                                                                        "(wait)"
+                                                                                                    ],
+                                                                                                    "children": [],
+                                                                                                    "split": null,
+                                                                                                    "edge_label": "true"
+                                                                                                },
+                                                                                                {
+                                                                                                    "actual_label": [
+                                                                                                        "(switch_light)"
+                                                                                                    ],
+                                                                                                    "children": [],
+                                                                                                    "split": null,
+                                                                                                    "edge_label": "false"
+                                                                                                }
+                                                                                            ],
+                                                                                            "split": {
+                                                                                                "lhs": {
+                                                                                                    "coeff": 1,
+                                                                                                    "var": "cars_right"
+                                                                                                },
+                                                                                                "op": "<=",
+                                                                                                "rhs": 2.5
+                                                                                            },
+                                                                                            "additional_splits": [
+                                                                                                {
+                                                                                                    "split": {
+                                                                                                        "lhs": {
+                                                                                                            "coeff": 1,
+                                                                                                            "var": "cars_right"
+                                                                                                        },
+                                                                                                        "op": "<=",
+                                                                                                        "rhs": 2.5
+                                                                                                    },
+                                                                                                    "impurity": 0.0
+                                                                                                }
+                                                                                            ],
+                                                                                            "edge_label": "false"
+                                                                                        }
+                                                                                    ],
+                                                                                    "split": {
+                                                                                        "lhs": {
+                                                                                            "coeff": 1,
+                                                                                            "var": "cars_left"
+                                                                                        },
+                                                                                        "op": "<=",
+                                                                                        "rhs": 4.5
+                                                                                    },
+                                                                                    "additional_splits": [
+                                                                                        {
+                                                                                            "split": {
+                                                                                                "lhs": {
+                                                                                                    "coeff": 1,
+                                                                                                    "var": "cars_left"
+                                                                                                },
+                                                                                                "op": "<=",
+                                                                                                "rhs": 4.5
+                                                                                            },
+                                                                                            "impurity": 0.5
+                                                                                        },
+                                                                                        {
+                                                                                            "split": {
+                                                                                                "lhs": {
+                                                                                                    "coeff": 1,
+                                                                                                    "var": "cars_right"
+                                                                                                },
+                                                                                                "op": "<=",
+                                                                                                "rhs": 2.5
+                                                                                            },
+                                                                                            "impurity": 0.5
+                                                                                        }
+                                                                                    ],
+                                                                                    "edge_label": "false"
+                                                                                }
+                                                                            ],
+                                                                            "split": {
+                                                                                "lhs": {
+                                                                                    "coeff": 1,
+                                                                                    "var": "cars_left"
+                                                                                },
+                                                                                "op": "<=",
+                                                                                "rhs": 3.5
+                                                                            },
+                                                                            "additional_splits": [
+                                                                                {
+                                                                                    "split": {
+                                                                                        "lhs": {
+                                                                                            "coeff": 1,
+                                                                                            "var": "cars_left"
+                                                                                        },
+                                                                                        "op": "<=",
+                                                                                        "rhs": 3.5
+                                                                                    },
+                                                                                    "impurity": 0.5408520829727552
+                                                                                },
+                                                                                {
+                                                                                    "split": {
+                                                                                        "lhs": {
+                                                                                            "coeff": 1,
+                                                                                            "var": "cars_left"
+                                                                                        },
+                                                                                        "op": "<=",
+                                                                                        "rhs": 4.5
+                                                                                    },
+                                                                                    "impurity": 1.0
+                                                                                },
+                                                                                {
+                                                                                    "split": {
+                                                                                        "lhs": {
+                                                                                            "coeff": 1,
+                                                                                            "var": "cars_right"
+                                                                                        },
+                                                                                        "op": "<=",
+                                                                                        "rhs": 2.5
+                                                                                    },
+                                                                                    "impurity": 0.9182958340544896
+                                                                                }
+                                                                            ],
+                                                                            "edge_label": "false"
+                                                                        }
+                                                                    ],
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_right"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 1.5
+                                                                    },
+                                                                    "additional_splits": [
+                                                                        {
+                                                                            "split": {
+                                                                                "lhs": {
+                                                                                    "coeff": 1,
+                                                                                    "var": "cars_left"
+                                                                                },
+                                                                                "op": "<=",
+                                                                                "rhs": 3.5
+                                                                            },
+                                                                            "impurity": 0.7394468924503992
+                                                                        },
+                                                                        {
+                                                                            "split": {
+                                                                                "lhs": {
+                                                                                    "coeff": 1,
+                                                                                    "var": "cars_left"
+                                                                                },
+                                                                                "op": "<=",
+                                                                                "rhs": 4.5
+                                                                            },
+                                                                            "impurity": 0.9182958340544896
+                                                                        },
+                                                                        {
+                                                                            "split": {
+                                                                                "lhs": {
+                                                                                    "coeff": 1,
+                                                                                    "var": "cars_right"
+                                                                                },
+                                                                                "op": "<=",
+                                                                                "rhs": 1.5
+                                                                            },
+                                                                            "impurity": 0.6666666666666666
+                                                                        },
+                                                                        {
+                                                                            "split": {
+                                                                                "lhs": {
+                                                                                    "coeff": 1,
+                                                                                    "var": "cars_right"
+                                                                                },
+                                                                                "op": "<=",
+                                                                                "rhs": 2.5
+                                                                            },
+                                                                            "impurity": 0.7394468924503992
+                                                                        }
+                                                                    ],
+                                                                    "edge_label": "true"
+                                                                },
+                                                                {
+                                                                    "actual_label": [
+                                                                        "(switch_light)"
+                                                                    ],
+                                                                    "children": [],
+                                                                    "split": null,
+                                                                    "edge_label": "false"
+                                                                }
+                                                            ],
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "additional_splits": [
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 3.5
+                                                                    },
+                                                                    "impurity": 0.9073093649624541
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 4.5
+                                                                    },
+                                                                    "impurity": 0.9709505944546685
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_right"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 1.5
+                                                                    },
+                                                                    "impurity": 0.6490224995673063
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_right"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 2.5
+                                                                    },
+                                                                    "impurity": 0.5619639695247292
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_right"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 3.5
+                                                                    },
+                                                                    "impurity": 0.5509775004326937
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_right"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 4.5
+                                                                    },
+                                                                    "impurity": 0.8
+                                                                }
+                                                            ],
+                                                            "edge_label": "false"
+                                                        }
+                                                    ],
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "additional_splits": [
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 2.5
+                                                            },
+                                                            "impurity": 0.7282129458410014
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "impurity": 0.9854752972273343
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 4.5
+                                                            },
+                                                            "impurity": 0.9709505944546686
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 1.5
+                                                            },
+                                                            "impurity": 0.790959526630798
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 2.5
+                                                            },
+                                                            "impurity": 0.7684032777125323
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "impurity": 0.8112781244591328
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_right"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 4.5
+                                                            },
+                                                            "impurity": 0.9258028272317986
+                                                        }
+                                                    ],
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 1.5
+                                                    },
+                                                    "impurity": 0.7942195631902467
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "impurity": 0.9825703566728011
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.9825703566728011
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.9884096820811804
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 1.5
+                                                    },
+                                                    "impurity": 0.8916400632778653
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "impurity": 0.8545008048569774
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.8713415946277461
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.9443856189774725
+                                                }
+                                            ],
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": null,
+                                                    "children": [
+                                                        {
+                                                            "actual_label": null,
+                                                            "children": [
+                                                                {
+                                                                    "actual_label": null,
+                                                                    "children": [
+                                                                        {
+                                                                            "actual_label": [
+                                                                                "(switch_light)"
+                                                                            ],
+                                                                            "children": [],
+                                                                            "split": null,
+                                                                            "edge_label": "true"
+                                                                        },
+                                                                        {
+                                                                            "actual_label": [
+                                                                                "(wait)"
+                                                                            ],
+                                                                            "children": [],
+                                                                            "split": null,
+                                                                            "edge_label": "false"
+                                                                        }
+                                                                    ],
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 1.5
+                                                                    },
+                                                                    "additional_splits": [
+                                                                        {
+                                                                            "split": {
+                                                                                "lhs": {
+                                                                                    "coeff": 1,
+                                                                                    "var": "cars_left"
+                                                                                },
+                                                                                "op": "<=",
+                                                                                "rhs": 1.5
+                                                                            },
+                                                                            "impurity": 0.0
+                                                                        }
+                                                                    ],
+                                                                    "edge_label": "true"
+                                                                },
+                                                                {
+                                                                    "actual_label": [
+                                                                        "(switch_light)"
+                                                                    ],
+                                                                    "children": [],
+                                                                    "split": null,
+                                                                    "edge_label": "false"
+                                                                }
+                                                            ],
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 2.5
+                                                            },
+                                                            "additional_splits": [
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 1.5
+                                                                    },
+                                                                    "impurity": 0.6490224995673063
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 2.5
+                                                                    },
+                                                                    "impurity": 0.4
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 3.5
+                                                                    },
+                                                                    "impurity": 0.5509775004326937
+                                                                },
+                                                                {
+                                                                    "split": {
+                                                                        "lhs": {
+                                                                            "coeff": 1,
+                                                                            "var": "cars_left"
+                                                                        },
+                                                                        "op": "<=",
+                                                                        "rhs": 4.5
+                                                                    },
+                                                                    "impurity": 0.6490224995673063
+                                                                }
+                                                            ],
+                                                            "edge_label": "true"
+                                                        },
+                                                        {
+                                                            "actual_label": [
+                                                                "(switch_light)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "false"
+                                                        }
+                                                    ],
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "waiting_time"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "additional_splits": [
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 1.5
+                                                            },
+                                                            "impurity": 0.33105348024290704
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 2.5
+                                                            },
+                                                            "impurity": 0.26000896865934164
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "impurity": 0.30195500086538746
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "cars_left"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 4.5
+                                                            },
+                                                            "impurity": 0.33105348024290704
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "waiting_time"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 3.5
+                                                            },
+                                                            "impurity": 0.24064269829578744
+                                                        },
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "waiting_time"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 4.5
+                                                            },
+                                                            "impurity": 0.3126637290595208
+                                                        }
+                                                    ],
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": [
+                                                        "(switch_light)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 1.5
+                                                    },
+                                                    "impurity": 0.09783327765549976
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "impurity": 0.08433692012741285
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.09224530819725713
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_left"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.09783327765549976
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 1.5
+                                                    },
+                                                    "impurity": 0.07067186700428428
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 2.5
+                                                    },
+                                                    "impurity": 0.08433692012741285
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.09224530819725713
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "cars_right"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.09783327765549976
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "waiting_time"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 3.5
+                                                    },
+                                                    "impurity": 0.0807640630274716
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "waiting_time"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 4.5
+                                                    },
+                                                    "impurity": 0.09429369502788044
+                                                }
+                                            ],
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "impurity": 0.48787224377312033
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.5253334780401289
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.5292474491824218
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_left"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.5286506732775335
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 1.5
+                                            },
+                                            "impurity": 0.5047113282752715
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.5007868389677977
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.504572235835395
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "cars_right"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.5194025141060418
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.3240154076120017
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 3.5
+                                            },
+                                            "impurity": 0.39752013969226113
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "waiting_time"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.4757321659804246
+                                        }
+                                    ],
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.7466680339549288
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.7973891888532637
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.7955858547860678
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_left"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.797732977239147
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 0.5427741051922037
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 0.6163045708154735
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.666614045836287
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.710403160211367
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "cars_right"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.7606085016527683
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 0.6960187304981518
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 3.5
+                                    },
+                                    "impurity": 0.7502887809641982
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "waiting_time"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 0.7809312606253354
+                                }
+                            ],
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": [
+                                "(switch_light)"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "green_side"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.5086702398718747
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.5315737604719082
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.5307983797470626
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_left"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.5317222653793423
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.43682214306592787
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.45566885441320115
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.47456358323099135
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.4927785134234988
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "cars_right"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.5149758316184917
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "green_side"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.39890045981767197
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 0.48978195282004394
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.5111875850389895
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "waiting_time"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 0.5243309578281324
+                        }
+                    ],
+                    "edge_label": "false"
+                }
+            ],
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_left"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "additional_splits": [
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.6095841512884197
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "impurity": 0.6804287839406191
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "impurity": 0.6774212838293646
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 0.6895016084813739
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_left"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 0.692200819606068
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.6379220601584161
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "impurity": 0.6550161702008674
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "impurity": 0.6679082872251063
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 0.678392572990671
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "cars_right"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 0.6888306581165269
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "green_side"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.6941536438959024
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "waiting_time"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "impurity": 0.67097894931489
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "waiting_time"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 0.6849173296508406
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "waiting_time"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 0.6922858310746315
+                }
+            ],
+            "edge_label": "false"
+        }
+    ],
+    "split": {
+        "lhs": {
+            "coeff": 1,
+            "var": "waiting_time"
+        },
+        "op": "<=",
+        "rhs": 1.5
+    },
+    "additional_splits": [
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_left"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 0.8048927798297516
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_left"
+                },
+                "op": "<=",
+                "rhs": 1.5
+            },
+            "impurity": 0.8445270620541029
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_left"
+                },
+                "op": "<=",
+                "rhs": 2.5
+            },
+            "impurity": 0.8382171374326475
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_left"
+                },
+                "op": "<=",
+                "rhs": 3.5
+            },
+            "impurity": 0.8446322738929852
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_left"
+                },
+                "op": "<=",
+                "rhs": 4.5
+            },
+            "impurity": 0.8468478583094914
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_right"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 0.8154891001801903
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_right"
+                },
+                "op": "<=",
+                "rhs": 1.5
+            },
+            "impurity": 0.8325304124862482
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_right"
+                },
+                "op": "<=",
+                "rhs": 2.5
+            },
+            "impurity": 0.8356699206184183
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_right"
+                },
+                "op": "<=",
+                "rhs": 3.5
+            },
+            "impurity": 0.8426109877502886
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "cars_right"
+                },
+                "op": "<=",
+                "rhs": 4.5
+            },
+            "impurity": 0.8486192433457437
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "green_side"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 0.8461241268372756
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "waiting_time"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 0.8461976293242707
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "waiting_time"
+                },
+                "op": "<=",
+                "rhs": 1.5
+            },
+            "impurity": 0.7476468453663353
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "waiting_time"
+                },
+                "op": "<=",
+                "rhs": 2.5
+            },
+            "impurity": 0.7560282109766139
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "waiting_time"
+                },
+                "op": "<=",
+                "rhs": 3.5
+            },
+            "impurity": 0.8027209703762993
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "waiting_time"
+                },
+                "op": "<=",
+                "rhs": 4.5
+            },
+            "impurity": 0.832281418270986
+        }
+    ]
+}

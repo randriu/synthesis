@@ -10,8 +10,12 @@ logger = logging.getLogger(__name__)
 
 class Variable:
 
-    def __init__(self, variable, name, state_valuations):
+    def __init__(self, name, domain):
         self.name = name
+        self.domain = domain
+
+    @classmethod
+    def create_variable(cls, variable, name, state_valuations):
         domain = set()
         for state,valuation in enumerate(state_valuations):
             value = valuation[variable]
@@ -27,7 +31,7 @@ class Variable:
             domain_new.append(value)
         domain = domain_new
         domain = sorted(domain)
-        self.domain = domain
+        return cls(name,domain)
 
     @property
     def domain_min(self):
@@ -82,10 +86,31 @@ class DecisionTreeNode:
         self.child_true = DecisionTreeNode(self)
         self.child_false = DecisionTreeNode(self)
 
+    def set_node_from_helper(self, tree_helper_node, variable_names, variable_domains, action_labels):
+        if tree_helper_node["leaf"]:
+            self.action = action_labels.index(tree_helper_node["chosen"][0])
+        else:
+            self.variable = variable_names.index(tree_helper_node["chosen"][0])
+            self.variable_bound = variable_domains[self.variable].index(tree_helper_node["chosen"][1])
+
+    def add_children_from_helper(self, tree_helper, helper_node, variable_names, variable_domains, action_labels):
+        assert self.is_terminal
+        self.child_true = DecisionTreeNode(self)
+        true_child_helper = tree_helper[helper_node["children"][0]]
+        self.child_true.set_node_from_helper(true_child_helper, variable_names, variable_domains, action_labels)
+        self.child_false = DecisionTreeNode(self)
+        false_child_helper = tree_helper[helper_node["children"][1]]
+        self.child_false.set_node_from_helper(false_child_helper, variable_names, variable_domains, action_labels)
+
     def get_depth(self):
         if self.is_terminal:
             return 0
         return 1 + max([child.get_depth() for child in self.child_nodes])
+    
+    def get_number_of_descendants(self):
+        if self.is_terminal:
+            return 0
+        return 1 + sum([child.get_number_of_descendants() for child in self.child_nodes])
 
     def assign_identifiers(self, identifier=0):
         self.identifier = identifier
@@ -168,21 +193,39 @@ class DecisionTreeNode:
     def graphviz_id(self):
         return str(self.identifier)
 
-    def to_graphviz(self, graphviz_tree, variables, action_labels):
+    def to_graphviz(self, graphviz_tree, variables, action_labels, highlight_nodes=[]):
         if not self.is_terminal:
             for child in self.child_nodes:
-                child.to_graphviz(graphviz_tree,variables,action_labels)
+                child.to_graphviz(graphviz_tree,variables,action_labels,highlight_nodes)
 
         if self.is_terminal:
             node_label = action_labels[self.action]
         else:
             var = variables[self.variable]
             node_label = f"{var.name}<={var.domain[self.variable_bound]}"
-
-        graphviz_tree.node(self.graphviz_id, label=node_label, shape="box", style="rounded", margin="0.05,0.05")
+        
+        if self.identifier in highlight_nodes:
+            graphviz_tree.node(self.graphviz_id, label=node_label, shape="box", style="filled", fillcolor="lightgreen", margin="0.05,0.05")
+        else:
+            graphviz_tree.node(self.graphviz_id, label=node_label, shape="box", style="rounded", margin="0.05,0.05")
         if not self.is_terminal:
             graphviz_tree.edge(self.graphviz_id,self.child_true.graphviz_id,label="T")
             graphviz_tree.edge(self.graphviz_id,self.child_false.graphviz_id,label="F")
+
+    def get_action_for_state(self, quotient, state, state_valuation):
+        if self.is_terminal:
+            action_index = self.action
+            index = 0
+            for choice in range(quotient.quotient_mdp.nondeterministic_choice_indices[state],quotient.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                if quotient.choice_to_action[choice] == action_index:
+                    return index
+                index += 1
+        var = quotient.variables[self.variable]
+        bound = var.domain[self.variable_bound]
+        if state_valuation[self.variable] <= bound:
+            return self.child_true.get_action_for_state(quotient, state, state_valuation)
+        else:
+            return self.child_false.get_action_for_state(quotient, state, state_valuation)
 
 
 
@@ -206,6 +249,29 @@ class DecisionTree:
 
     def get_depth(self):
         return self.root.get_depth()
+    
+    def build_from_tree_helper(self, tree_helper):
+        self.reset()
+        node_stack = [(0, self.root)]
+        var_names = [v.name for v in self.variables]
+        var_domains = [v.domain for v in self.variables]
+        self.root.set_node_from_helper(tree_helper[0], var_names, var_domains, self.quotient.action_labels)
+        while node_stack:
+            node_id, node = node_stack.pop()
+            if tree_helper[node_id]["leaf"]:
+                continue
+            node.add_children_from_helper(tree_helper, tree_helper[node_id], var_names, var_domains, self.quotient.action_labels)
+            node_stack.append((tree_helper[node_id]["children"][0], node.child_true))
+            node_stack.append((tree_helper[node_id]["children"][1], node.child_false))
+
+        self.root.assign_identifiers()
+
+        # double check if identifiers correspond to the tree helper
+        nodes = self.collect_nodes()
+        for node_id, node in enumerate(nodes):
+            assert node.is_terminal == tree_helper[node.identifier]["leaf"], f"node {node_id} is terminal: {node.is_terminal}, expected: {tree_helper[node_id]['leaf']}"
+            assert node.identifier == tree_helper[node.identifier]["id"], f"node {node_id} has identifier {node.identifier}, expected: {tree_helper[node_id]['id']}"
+        
 
     def collect_nodes(self, node_condition=None):
         if node_condition is None:
@@ -242,12 +308,43 @@ class DecisionTree:
     def to_string(self):
         return self.root.to_string(self.variables,self.quotient.action_labels)
 
-    def to_graphviz(self):
+    def to_graphviz(self, highlight_nodes=[]):
         logging.getLogger("graphviz").setLevel(logging.WARNING)
         logging.getLogger("graphviz.sources").setLevel(logging.ERROR)
         graphviz_tree = graphviz.Digraph(comment="decision tree")
-        self.root.to_graphviz(graphviz_tree,self.variables,self.quotient.action_labels)
+        self.root.to_graphviz(graphviz_tree,self.variables,self.quotient.action_labels,highlight_nodes)
         return graphviz_tree
+    
+    def to_scheduler_json(self):
+        scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+        for state in range(self.quotient.quotient_mdp.nr_states):
+            action_index = self.root.get_action_for_state(self.quotient, state, self.state_valuations[state])
+            scheduler_choice = stormpy.storage.SchedulerChoice(action_index)
+            scheduler.set_choice(scheduler_choice, state)
+            
+        json_scheduler_full = json.loads(scheduler.to_json_str(self.quotient.quotient_mdp))
+        json_final = []
+        for entry in json_scheduler_full:
+            if entry["c"] == "undefined":
+                continue
+            json_final.append(entry)
+
+        json_str = json.dumps(json_final, indent=4)
+        return json_str
+
+    
+    def append_tree_as_subtree(self, main_tree, subtree_root_node_id):
+        subtree_root_node = self.collect_nodes(lambda node : node.identifier == subtree_root_node_id)
+        assert len(subtree_root_node) == 1, f"subtree root node id {subtree_root_node_id} not found in decision tree"
+        subtree_root_node = subtree_root_node[0]
+
+        parent = subtree_root_node.parent
+        
+        if parent.child_true.identifier is subtree_root_node.identifier:
+            parent.child_true = main_tree.root
+        else:
+            parent.child_false = main_tree.root
+
 
 
 class MdpQuotient(paynt.quotient.quotient.Quotient):
@@ -255,7 +352,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     # if true, an explicit action executing a random choice of an available action will be added to each state
     add_dont_care_action = False
 
-    def __init__(self, mdp, specification):
+    def __init__(self, mdp, specification, tree_helper=None):
         super().__init__(specification=specification)
         updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         if updated is not None: mdp = updated
@@ -278,7 +375,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             valuation = json.loads(str(sv.get_json(state)))
             valuation = [valuation[var_name] for var_name in variable_name]
             state_valuations.append(valuation)
-        variables = [Variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
+        variables = [Variable.create_variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
         variable_mask = [len(v.domain) > 1 for v in variables]
         variables = [v for index,v in enumerate(variables) if variable_mask[index]]
         for state,valuation in enumerate(state_valuations):
@@ -286,6 +383,8 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         self.variables = variables
         self.state_valuations = state_valuations
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
+
+        self.tree_helper = tree_helper
 
         self.decision_tree = None
         self.coloring = None
@@ -299,6 +398,88 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 return state
         else:
             assert False, "state valuation not found"
+
+    def get_variable_id(self, var):
+        for id, variable in enumerate(self.variables):
+            if variable.name == var:
+                break
+        return id
+
+    def get_states_satisfying_predicate(self, variable, bound, leq=True):
+        states = []
+        for state,state_valuation in enumerate(self.state_valuations):
+            for id, var in enumerate(self.variables):
+                if var.name == variable:
+                    break
+            if leq and state_valuation[id] <= bound:
+                states.append(state)
+            elif not leq and state_valuation[id] > bound:
+                states.append(state)
+        return states
+    
+    def get_state_space_for_tree_helper_node(self, node_id):
+        node = self.tree_helper[node_id]
+        current_node = node
+        states = list(range(self.quotient_mdp.nr_states))
+        while current_node['parent'] is not None:
+            parent_node = self.tree_helper[current_node['parent']]
+            if parent_node["children"].index(self.tree_helper.index(current_node)) == 0:
+                node_states = self.get_states_satisfying_predicate(parent_node["chosen"][0], parent_node["chosen"][1], leq=True)
+            else:
+                node_states = self.get_states_satisfying_predicate(parent_node["chosen"][0], parent_node["chosen"][1], leq=False)
+            states = list(set(states) & set(node_states))
+            current_node = parent_node
+        return states
+    
+    def get_open_variables_and_domains_for_tree_helper_node(self, node_id):
+        node = self.tree_helper[node_id]
+        current_node = node
+        open_variables = self.variables
+        variable_name = [v.name for v in open_variables]
+        variable_domains = [list(v.domain) for v in open_variables]
+        while current_node['parent'] is not None:
+            parent_node = self.tree_helper[current_node['parent']]
+            chosen_variable_index = variable_name.index(parent_node["chosen"][0])
+            # print(f'{parent_node["chosen"]}')
+            if parent_node["children"].index(self.tree_helper.index(current_node)) == 0:
+                variable_domains[chosen_variable_index] = [value for value in variable_domains[chosen_variable_index] if value <= parent_node["chosen"][1]]
+            else:
+                variable_domains[chosen_variable_index] = [value for value in variable_domains[chosen_variable_index] if value > parent_node["chosen"][1]]
+            current_node = parent_node
+
+        open_variables = [Variable(variable_name[i],variable_domains[i]) for i in range(len(variable_name)) if len(variable_domains[i]) > 1]
+        return open_variables
+    
+    def get_chosen_action_for_state_from_tree_helper(self, state):
+        state_valuation = self.state_valuations[state]
+        current_node = self.tree_helper[0]
+        while not current_node['leaf']:
+            var_id = self.get_variable_id(current_node["chosen"][0])
+            if state_valuation[var_id] <= current_node['chosen'][1]:
+                current_node = self.tree_helper[current_node['children'][0]]
+            else:
+                current_node = self.tree_helper[current_node['children'][1]]
+        return current_node['chosen'][0]
+    
+    def get_selected_choices_from_tree_helper(self, state_to_exclude=[]):
+        selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
+        for state in range(self.quotient_mdp.nr_states):
+            if state in state_to_exclude:
+                for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                    selected_choices.set(choice, True)
+                continue
+            chosen_action_label = self.get_chosen_action_for_state_from_tree_helper(state)
+            action_index = self.action_labels.index(chosen_action_label)
+            for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                if self.choice_to_action[choice] == action_index:
+                    selected_choices.set(choice, True)
+                    break
+            else:
+                # TODO check this for some models
+                assert False, f"no choice for state {state} even though action {chosen_action_label} was chosen"
+
+        return selected_choices
+
 
     def scheduler_json_to_choices(self, scheduler_json):
         ndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
@@ -324,6 +505,36 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         state_to_choice = self.discard_unreachable_choices(state_to_choice)
         choices = self.state_to_choice_to_choices(state_to_choice)
         return choices
+    
+    def build_tree_helper_tree(self, tree_helper=None):
+        if tree_helper is None:
+            tree_helper = self.tree_helper
+        helper_tree = DecisionTree(self,self.variables,self.state_valuations)
+        helper_tree.build_from_tree_helper(tree_helper)
+        return helper_tree
+    
+
+    def get_helper_choice_for_state(self, state):
+        state_valuations = self.state_valuations[state]
+        current_node = self.tree_helper[0]
+        while current_node["leaf"] != True:
+            (node_var, node_threshold) = current_node["chosen"]
+            var_id = self.get_variable_id(node_var)
+            if state_valuations[var_id] <= node_threshold:
+                current_node = self.tree_helper[current_node["children"][0]]
+            else:
+                current_node = self.tree_helper[current_node["children"][1]] 
+    
+
+    def get_submdp_from_unfixed_states(self, unfixed_states):
+        selected_choices = self.get_selected_choices_from_tree_helper(unfixed_states)
+        submdp = self.build_from_choice_mask(selected_choices)
+        # print(dir(submdp))
+        # res = submdp.check_specification(self.specification)
+        # print(res)
+        # exit()
+        return submdp
+
 
     def reset_tree(self, depth, enable_harmonization=True):
         '''
@@ -370,6 +581,72 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         self.decision_tree.root.associate_holes(node_hole_info)
 
 
+    def get_subtree_family(self, node_id, variables):
+        subtree_family = self.family.copy()
+        
+        variable_names = [v.name for v in variables]
+        variable_domains = [v.domain for v in variables]
+
+        for hole in range(subtree_family.num_holes):
+            hole_option_labels = subtree_family.hole_to_option_labels[hole]
+            if subtree_family.hole_name(hole).startswith('V_'):
+                chosen_options = []
+                for option in subtree_family.hole_options(hole):
+                    if hole_option_labels[option] in variable_names:
+                        chosen_options.append(option)
+                subtree_family.hole_set_options(hole, chosen_options)
+            else:
+                for id, variable_name in enumerate(variable_names):
+                    if subtree_family.hole_name(hole).startswith(variable_name + "_"):
+                        chosen_options = [option for option in subtree_family.hole_options(hole) if hole_option_labels[option] in variable_domains[id]]
+                        subtree_family.hole_set_options(hole, chosen_options)
+                        break
+                else: 
+                    if subtree_family.hole_name(hole).startswith('A_'):
+                        continue
+                    else:
+                        subtree_family.hole_set_options(hole, [subtree_family.hole_options(hole)[0]])
+
+        return subtree_family
+    
+    def get_subfamily_from_used_predicates(self, family):
+        used_predicates_dict = {}
+        for helper_node in self.tree_helper:
+            if helper_node['leaf']:
+                continue
+            if helper_node['chosen'][0] not in used_predicates_dict.keys():
+                used_predicates_dict[helper_node['chosen'][0]] = [helper_node['chosen'][1]]
+            elif helper_node['chosen'][1] not in used_predicates_dict[helper_node['chosen'][0]]:
+                used_predicates_dict[helper_node['chosen'][0]].append(helper_node['chosen'][1])
+
+        used_predicates_family = family.copy()
+        for hole in range(used_predicates_family.num_holes):
+            hole_option_labels = used_predicates_family.hole_to_option_labels[hole]
+            if used_predicates_family.hole_name(hole).startswith('V_'):
+                chosen_options = []
+                for option in used_predicates_family.hole_options(hole):
+                    if hole_option_labels[option] in used_predicates_dict.keys():
+                        chosen_options.append(option)
+                used_predicates_family.hole_set_options(hole, chosen_options)
+            else:
+                for variable_name in used_predicates_dict.keys():
+                    if used_predicates_family.hole_name(hole).startswith(variable_name + "_"):
+                        chosen_options = [option for option in used_predicates_family.hole_options(hole) if hole_option_labels[option] in used_predicates_dict[variable_name]]
+                        used_predicates_family.hole_set_options(hole, chosen_options)
+
+        logger.info(f"used tree helper to get subfamily from used predicates. Family size reduced from {family.size_or_order} to {used_predicates_family.size_or_order}")
+        # exit()
+
+        print()
+        print(family)
+        print("--------")
+        print(used_predicates_family)
+        print()
+        exit()
+
+        return used_predicates_family
+
+
     def build_unsat_result(self):
         spec_result = paynt.verification.property_result.MdpSpecificationResult()
         spec_result.constraints_result = paynt.verification.property_result.ConstraintsResult([])
@@ -400,7 +677,13 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
-        return self.coloring.areChoicesConsistent(choices, family.family)
+        relevant_choices = stormpy.BitVector(choices)
+        # TODO add more ways to determine relevant choices
+        for state in range(self.quotient_mdp.nr_states):
+            if self.quotient_mdp.get_nr_available_actions(state) <= 1:
+                for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                    relevant_choices.set(choice, False)
+        return self.coloring.areChoicesConsistent(choices, relevant_choices, family.family)
 
 
     def scheduler_is_consistent(self, mdp, prop, result):

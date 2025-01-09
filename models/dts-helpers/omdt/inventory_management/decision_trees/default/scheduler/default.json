@@ -1,0 +1,2851 @@
+{
+    "actual_label": null,
+    "children": [
+        {
+            "actual_label": null,
+            "children": [
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(Buy_12)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(Buy_11)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 0.0
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(Buy_9)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(Buy_8)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 2.5
+                                            },
+                                            "impurity": 0.0
+                                        }
+                                    ],
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 1.188721875540867
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 1.5
+                                    },
+                                    "impurity": 1.0
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 2.5
+                                    },
+                                    "impurity": 1.188721875540867
+                                }
+                            ],
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(Buy_7)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(Buy_6)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 4.5
+                                            },
+                                            "impurity": 0.0
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(Buy_5)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(Buy_4)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 6.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 6.5
+                                            },
+                                            "impurity": 0.0
+                                        }
+                                    ],
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 5.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 4.5
+                                    },
+                                    "impurity": 1.188721875540867
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 5.5
+                                    },
+                                    "impurity": 1.0
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 6.5
+                                    },
+                                    "impurity": 1.188721875540867
+                                }
+                            ],
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 2.4564355568004035
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 2.188721875540867
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 2.5
+                            },
+                            "impurity": 2.045565997075035
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 2.0
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 4.5
+                            },
+                            "impurity": 2.045565997075035
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 5.5
+                            },
+                            "impurity": 2.188721875540867
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 6.5
+                            },
+                            "impurity": 2.4564355568004035
+                        }
+                    ],
+                    "edge_label": "true"
+                },
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": [
+                                        "(Buy_3)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": [
+                                        "(Buy_2)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 8.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 8.5
+                                    },
+                                    "impurity": 0.0
+                                }
+                            ],
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": [
+                                                "(Buy_1)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": [
+                                                        "(Buy_3)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": [
+                                                        "(Buy_2)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 19.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "inventory"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 19.5
+                                                    },
+                                                    "impurity": 0.0
+                                                }
+                                            ],
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 18.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 10.5
+                                            },
+                                            "impurity": 0.838116449897602
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 11.5
+                                            },
+                                            "impurity": 0.8070764144161439
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 12.5
+                                            },
+                                            "impurity": 0.7718386359702786
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 13.5
+                                            },
+                                            "impurity": 0.7310767254514924
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 14.5
+                                            },
+                                            "impurity": 0.682706818575176
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 15.5
+                                            },
+                                            "impurity": 0.6231593611157585
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 16.5
+                                            },
+                                            "impurity": 0.5454545454545454
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 17.5
+                                            },
+                                            "impurity": 0.4322625001966789
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 18.5
+                                            },
+                                            "impurity": 0.18181818181818182
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "inventory"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 19.5
+                                            },
+                                            "impurity": 0.4263596305357102
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": [
+                                        "(Buy_1)"
+                                    ],
+                                    "children": [],
+                                    "split": null,
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 20.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 10.5
+                                    },
+                                    "impurity": 0.4166495433428647
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 11.5
+                                    },
+                                    "impurity": 0.413150171531484
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 12.5
+                                    },
+                                    "impurity": 0.4095185938015177
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 13.5
+                                    },
+                                    "impurity": 0.4057444218120215
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 14.5
+                                    },
+                                    "impurity": 0.40181599183522737
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 15.5
+                                    },
+                                    "impurity": 0.3977201469095737
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 16.5
+                                    },
+                                    "impurity": 0.3934419703652444
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 17.5
+                                    },
+                                    "impurity": 0.3889644570757764
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 18.5
+                                    },
+                                    "impurity": 0.38426810409752804
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 19.5
+                                    },
+                                    "impurity": 0.34726316927373124
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 20.5
+                                    },
+                                    "impurity": 0.3174807597343153
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 21.5
+                                    },
+                                    "impurity": 0.32667563532600835
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 22.5
+                                    },
+                                    "impurity": 0.33506561769413096
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 23.5
+                                    },
+                                    "impurity": 0.34278063000508613
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 24.5
+                                    },
+                                    "impurity": 0.3499214199431193
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 25.5
+                                    },
+                                    "impurity": 0.35656770303978474
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 26.5
+                                    },
+                                    "impurity": 0.36278364557093307
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 27.5
+                                    },
+                                    "impurity": 0.36862166753205405
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 28.5
+                                    },
+                                    "impurity": 0.3741251484724118
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 29.5
+                                    },
+                                    "impurity": 0.37933039572618743
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 30.5
+                                    },
+                                    "impurity": 0.38426810409752804
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 31.5
+                                    },
+                                    "impurity": 0.3889644570757764
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 32.5
+                                    },
+                                    "impurity": 0.3934419703652444
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 33.5
+                                    },
+                                    "impurity": 0.3977201469095737
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 34.5
+                                    },
+                                    "impurity": 0.40181599183522737
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 35.5
+                                    },
+                                    "impurity": 0.4057444218120215
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 36.5
+                                    },
+                                    "impurity": 0.4095185938015177
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 37.5
+                                    },
+                                    "impurity": 0.413150171531484
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "inventory"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 38.5
+                                    },
+                                    "impurity": 0.4166495433428647
+                                }
+                            ],
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 9.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 8.5
+                            },
+                            "impurity": 0.5304421188868818
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 9.5
+                            },
+                            "impurity": 0.4562743765825825
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 10.5
+                            },
+                            "impurity": 0.539199181326544
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 11.5
+                            },
+                            "impurity": 0.5748282858107662
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 12.5
+                            },
+                            "impurity": 0.5981347120724649
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 13.5
+                            },
+                            "impurity": 0.615065864333987
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 14.5
+                            },
+                            "impurity": 0.6280101167194762
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 15.5
+                            },
+                            "impurity": 0.6381821688425086
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 16.5
+                            },
+                            "impurity": 0.6462843646729661
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 17.5
+                            },
+                            "impurity": 0.6527567081608412
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 18.5
+                            },
+                            "impurity": 0.6578895598423531
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 19.5
+                            },
+                            "impurity": 0.5693176293122557
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 20.5
+                            },
+                            "impurity": 0.48676222883916836
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 21.5
+                            },
+                            "impurity": 0.502615248747901
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 22.5
+                            },
+                            "impurity": 0.5171753477849222
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 23.5
+                            },
+                            "impurity": 0.5306390622295665
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 24.5
+                            },
+                            "impurity": 0.5431609989194243
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 25.5
+                            },
+                            "impurity": 0.5548650349110988
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 26.5
+                            },
+                            "impurity": 0.5658519944156358
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 27.5
+                            },
+                            "impurity": 0.5762050593046014
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 28.5
+                            },
+                            "impurity": 0.5859936742843186
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 29.5
+                            },
+                            "impurity": 0.5952764245018412
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 30.5
+                            },
+                            "impurity": 0.6041031948088492
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 31.5
+                            },
+                            "impurity": 0.6125168162362656
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 32.5
+                            },
+                            "impurity": 0.6205543395629423
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 33.5
+                            },
+                            "impurity": 0.6282480331764956
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 34.5
+                            },
+                            "impurity": 0.6356261740344487
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 35.5
+                            },
+                            "impurity": 0.6427136812595364
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 36.5
+                            },
+                            "impurity": 0.6495326285728587
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 37.5
+                            },
+                            "impurity": 0.6561026623933487
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "inventory"
+                                },
+                                "op": "<=",
+                                "rhs": 38.5
+                            },
+                            "impurity": 0.6624413457368588
+                        }
+                    ],
+                    "edge_label": "false"
+                }
+            ],
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 7.5
+            },
+            "additional_splits": [
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 1.6881187179503694
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "impurity": 1.5703826923310833
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 2.5
+                    },
+                    "impurity": 1.4724681053205426
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 1.3877840558577583
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 1.313215206247443
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 5.5
+                    },
+                    "impurity": 1.246939344730639
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 6.5
+                    },
+                    "impurity": 1.1877638143904818
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 7.5
+                    },
+                    "impurity": 1.1348515545596771
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 8.5
+                    },
+                    "impurity": 1.1375868204340256
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 9.5
+                    },
+                    "impurity": 1.1455015249879066
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 10.5
+                    },
+                    "impurity": 1.2638308526324056
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 11.5
+                    },
+                    "impurity": 1.3353513788649596
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 12.5
+                    },
+                    "impurity": 1.3909096661929068
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 13.5
+                    },
+                    "impurity": 1.4368825390791775
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 14.5
+                    },
+                    "impurity": 1.4762049553686947
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 15.5
+                    },
+                    "impurity": 1.5105457350740068
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 16.5
+                    },
+                    "impurity": 1.5409660739452469
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 17.5
+                    },
+                    "impurity": 1.5681895934558732
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 18.5
+                    },
+                    "impurity": 1.5927335216343286
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 19.5
+                    },
+                    "impurity": 1.540929400677139
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 20.5
+                    },
+                    "impurity": 1.4927335216343292
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 21.5
+                    },
+                    "impurity": 1.522205366528673
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 22.5
+                    },
+                    "impurity": 1.5497044296075257
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 23.5
+                    },
+                    "impurity": 1.5754887502163468
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 24.5
+                    },
+                    "impurity": 1.599767210213348
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 25.5
+                    },
+                    "impurity": 1.6227115940715484
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 26.5
+                    },
+                    "impurity": 1.6444650906071467
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 27.5
+                    },
+                    "impurity": 1.665148445440323
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 28.5
+                    },
+                    "impurity": 1.6848645139360958
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 29.5
+                    },
+                    "impurity": 1.7037016960573483
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 30.5
+                    },
+                    "impurity": 1.721736571664125
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 31.5
+                    },
+                    "impurity": 1.7390359525563188
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 32.5
+                    },
+                    "impurity": 1.7556585015118749
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 33.5
+                    },
+                    "impurity": 1.7716560248122748
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 34.5
+                    },
+                    "impurity": 1.787074515094063
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 35.5
+                    },
+                    "impurity": 1.8019550008653875
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 36.5
+                    },
+                    "impurity": 1.816334244597576
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 37.5
+                    },
+                    "impurity": 1.830245320979696
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "inventory"
+                        },
+                        "op": "<=",
+                        "rhs": 38.5
+                    },
+                    "impurity": 1.8437180994303506
+                }
+            ],
+            "edge_label": "true"
+        },
+        {
+            "actual_label": [
+                "(Don't"
+            ],
+            "children": [],
+            "split": null,
+            "edge_label": "false"
+        }
+    ],
+    "split": {
+        "lhs": {
+            "coeff": 1,
+            "var": "inventory"
+        },
+        "op": "<=",
+        "rhs": 39.5
+    },
+    "additional_splits": [
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.6238089462230048
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 1.5
+            },
+            "impurity": 1.563617722563687
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 2.5
+            },
+            "impurity": 1.5110449189752957
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 3.5
+            },
+            "impurity": 1.4634715869624002
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 4.5
+            },
+            "impurity": 1.4196547043041468
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 5.5
+            },
+            "impurity": 1.3788627959090891
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 6.5
+            },
+            "impurity": 1.3406130802292295
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 7.5
+            },
+            "impurity": 1.3045629111296826
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 8.5
+            },
+            "impurity": 1.2902585105076934
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 9.5
+            },
+            "impurity": 1.2776997801782772
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 10.5
+            },
+            "impurity": 1.308550359652785
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 11.5
+            },
+            "impurity": 1.3205288623926614
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 12.5
+            },
+            "impurity": 1.3258359300796903
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 13.5
+            },
+            "impurity": 1.3269799548416041
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 14.5
+            },
+            "impurity": 1.3251047998358811
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 15.5
+            },
+            "impurity": 1.3208513006536742
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 16.5
+            },
+            "impurity": 1.3146178603027563
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 17.5
+            },
+            "impurity": 1.3066671617690402
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 18.5
+            },
+            "impurity": 1.2971778393501583
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 19.5
+            },
+            "impurity": 1.2569454135807612
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 20.5
+            },
+            "impurity": 1.2176038426692868
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 21.5
+            },
+            "impurity": 1.2084481797013895
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 22.5
+            },
+            "impurity": 1.1978980629996494
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 23.5
+            },
+            "impurity": 1.1860112480279725
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 24.5
+            },
+            "impurity": 1.1728202267800256
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 25.5
+            },
+            "impurity": 1.1583358321773316
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 26.5
+            },
+            "impurity": 1.1425490965708702
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 27.5
+            },
+            "impurity": 1.1254317130283589
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 28.5
+            },
+            "impurity": 1.1069352006430098
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 29.5
+            },
+            "impurity": 1.0869886612566007
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 30.5
+            },
+            "impurity": 1.0654947668157997
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 31.5
+            },
+            "impurity": 1.0423232478080233
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 32.5
+            },
+            "impurity": 1.0173005071263246
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 33.5
+            },
+            "impurity": 0.9901927144306808
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 34.5
+            },
+            "impurity": 0.9606769744123521
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 35.5
+            },
+            "impurity": 0.9282884187141482
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 36.5
+            },
+            "impurity": 0.8923119276277575
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 37.5
+            },
+            "impurity": 0.8515195091915497
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 38.5
+            },
+            "impurity": 0.8033061151471705
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 39.5
+            },
+            "impurity": 0.7353582770087286
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 40.5
+            },
+            "impurity": 0.8025118254626588
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 41.5
+            },
+            "impurity": 0.8502118211791586
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 42.5
+            },
+            "impurity": 0.890777813192216
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 43.5
+            },
+            "impurity": 0.9268223109151305
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 44.5
+            },
+            "impurity": 0.9595822875523331
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 45.5
+            },
+            "impurity": 0.9897835362047795
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 46.5
+            },
+            "impurity": 1.0179035025428995
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 47.5
+            },
+            "impurity": 1.0442798239307185
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 48.5
+            },
+            "impurity": 1.0691635597133808
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 49.5
+            },
+            "impurity": 1.0927484229925715
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 50.5
+            },
+            "impurity": 1.1151881863160702
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 51.5
+            },
+            "impurity": 1.1366076981888118
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 52.5
+            },
+            "impurity": 1.1571101974099254
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 53.5
+            },
+            "impurity": 1.1767823603010688
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 54.5
+            },
+            "impurity": 1.1956978959615405
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 55.5
+            },
+            "impurity": 1.2139201764120093
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 56.5
+            },
+            "impurity": 1.2315042048368474
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 57.5
+            },
+            "impurity": 1.2484981175626202
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 58.5
+            },
+            "impurity": 1.2649443498941346
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 59.5
+            },
+            "impurity": 1.2808805546648607
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 60.5
+            },
+            "impurity": 1.2963403355977148
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 61.5
+            },
+            "impurity": 1.311353839765869
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 62.5
+            },
+            "impurity": 1.3259482413224803
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 63.5
+            },
+            "impurity": 1.34014814024831
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 64.5
+            },
+            "impurity": 1.3539758939095892
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 65.5
+            },
+            "impurity": 1.367451894934422
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 66.5
+            },
+            "impurity": 1.3805948057885562
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 67.5
+            },
+            "impurity": 1.3934217581168047
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 68.5
+            },
+            "impurity": 1.4059485231819917
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 69.5
+            },
+            "impurity": 1.4181896584186056
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 70.5
+            },
+            "impurity": 1.4301586341111523
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 71.5
+            },
+            "impurity": 1.4418679434280552
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 72.5
+            },
+            "impurity": 1.4533291984336574
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 73.5
+            },
+            "impurity": 1.4645532142219586
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 74.5
+            },
+            "impurity": 1.4755500829356865
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 75.5
+            },
+            "impurity": 1.4863292391304588
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 76.5
+            },
+            "impurity": 1.4968995176992412
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 77.5
+            },
+            "impurity": 1.507269205374121
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 78.5
+            },
+            "impurity": 1.5174460866608965
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 79.5
+            },
+            "impurity": 1.5274374849295207
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 80.5
+            },
+            "impurity": 1.5372502992742603
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 81.5
+            },
+            "impurity": 1.5468910376669507
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 82.5
+            },
+            "impurity": 1.5563658468514021
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 83.5
+            },
+            "impurity": 1.5656805393639786
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 84.5
+            },
+            "impurity": 1.5748406180124392
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 85.5
+            },
+            "impurity": 1.5838512981004444
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 86.5
+            },
+            "impurity": 1.5927175276473018
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 87.5
+            },
+            "impurity": 1.6014440058203343
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 88.5
+            },
+            "impurity": 1.6100351997698148
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 89.5
+            },
+            "impurity": 1.618495360032887
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 90.5
+            },
+            "impurity": 1.6268285346526947
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 91.5
+            },
+            "impurity": 1.6350385821415396
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 92.5
+            },
+            "impurity": 1.6431291834018262
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 93.5
+            },
+            "impurity": 1.6511038527055222
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 94.5
+            },
+            "impurity": 1.6589659478214935
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 95.5
+            },
+            "impurity": 1.66671867937022
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 96.5
+            },
+            "impurity": 1.6743651194767146
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 97.5
+            },
+            "impurity": 1.6819082097849338
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 98.5
+            },
+            "impurity": 1.6893507688902951
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "inventory"
+                },
+                "op": "<=",
+                "rhs": 99.5
+            },
+            "impurity": 1.6966954992410737
+        }
+    ]
+}

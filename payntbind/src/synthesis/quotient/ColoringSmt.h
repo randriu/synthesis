@@ -62,7 +62,7 @@ public:
      * assignment if A holds, or a list of inconsistent hole assignments to be used for splitting.
      */
     std::pair<bool,std::vector<std::vector<uint64_t>>> areChoicesConsistent(
-        BitVector const& choices, Family const& subfamily
+        BitVector const& choices, BitVector const& relevantChoices, Family const& subfamily
     );
 
     std::map<std::string,storm::utility::Stopwatch> timers;

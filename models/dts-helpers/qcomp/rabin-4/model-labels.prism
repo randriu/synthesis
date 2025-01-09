@@ -1,0 +1,59 @@
+mdp
+const int K = 8;
+
+global c: [0..1] init 0;
+global b: [0..K] init 0;
+global r: [1..2] init 1;
+
+formula draw = ((p1 = 1) & ((b < b1) | (r != r1)));
+formula go = (((draw2 = 0) & (draw3 = 0)) & (draw4 = 0));
+
+module process1
+	p1: [0..2] init 0;
+	b1: [0..8] init 0;
+	r1: [0..2] init 0;
+	draw1: [0..1] init 0;
+	[process1_cmd_0] (((draw4 = 0) & (draw3 = 0)) & ((draw2 = 0) & (p1 = 0))) -> 1 : (p1' = 1);
+	[process1_cmd_1] ((((p1 = 1) & (draw3 = 0)) & (((b < b1) | (r != r1)) & (draw4 = 0))) & ((draw2 = 0) & (draw1 = 0))) -> 1 : (draw1' = 1);
+	[process1_cmd_2] (draw1 = 1) -> 1/2 : (b' = (max(b, 1))) & (b1' = 1) & (r1' = r) & (draw1' = 0) + 1/4 : (b' = (max(b, 2))) & (b1' = 2) & (r1' = r) & (draw1' = 0) + 1/8 : (b' = (max(b, 3))) & (b1' = 3) & (r1' = r) & (draw1' = 0) + 1/16 : (b' = (max(b, 4))) & (b1' = 4) & (r1' = r) & (draw1' = 0) + 1/32 : (b' = (max(b, 5))) & (b1' = 5) & (r1' = r) & (draw1' = 0) + 1/32 : (b' = (max(b, 6))) & (b1' = 6) & (r1' = r) & (draw1' = 0);
+	[process1_cmd_3] ((((b = b1) & (draw3 = 0)) & (draw2 = 0)) & (((draw4 = 0) & (c = 0)) & ((r = r1) & (p1 = 1)))) -> 1/2 : (c' = 1) & (b' = 0) & (r' = 1) & (p1' = 2) & (b1' = 0) & (r1' = 0) + 1/2 : (c' = 1) & (b' = 0) & (r' = 2) & (p1' = 2) & (b1' = 0) & (r1' = 0);
+	[process1_cmd_4] (((draw4 = 0) & (draw3 = 0)) & ((draw2 = 0) & (p1 = 2))) -> 1 : (c' = 0) & (p1' = 0);
+endmodule
+
+module process2
+	p2: [0..2] init 0;
+	b2: [0..8] init 0;
+	r2: [0..2] init 0;
+	draw2: [0..1] init 0;
+	[process2_cmd_5] (((draw4 = 0) & (draw3 = 0)) & ((draw1 = 0) & (p2 = 0))) -> 1 : (p2' = 1);
+	[process2_cmd_6] ((((p2 = 1) & (draw3 = 0)) & (((b < b2) | (r != r2)) & (draw4 = 0))) & ((draw1 = 0) & (draw2 = 0))) -> 1 : (draw2' = 1);
+	[process2_cmd_7] (draw2 = 1) -> 1/2 : (b' = (max(b, 1))) & (b2' = 1) & (r2' = r) & (draw2' = 0) + 1/4 : (b' = (max(b, 2))) & (b2' = 2) & (r2' = r) & (draw2' = 0) + 1/8 : (b' = (max(b, 3))) & (b2' = 3) & (r2' = r) & (draw2' = 0) + 1/16 : (b' = (max(b, 4))) & (b2' = 4) & (r2' = r) & (draw2' = 0) + 1/32 : (b' = (max(b, 5))) & (b2' = 5) & (r2' = r) & (draw2' = 0) + 1/32 : (b' = (max(b, 6))) & (b2' = 6) & (r2' = r) & (draw2' = 0);
+	[process2_cmd_8] ((((b = b2) & (draw3 = 0)) & (draw1 = 0)) & (((draw4 = 0) & (c = 0)) & ((r = r2) & (p2 = 1)))) -> 1/2 : (c' = 1) & (b' = 0) & (r' = 1) & (p2' = 2) & (b2' = 0) & (r2' = 0) + 1/2 : (c' = 1) & (b' = 0) & (r' = 2) & (p2' = 2) & (b2' = 0) & (r2' = 0);
+	[process2_cmd_9] (((draw4 = 0) & (draw3 = 0)) & ((draw1 = 0) & (p2 = 2))) -> 1 : (c' = 0) & (p2' = 0);
+endmodule
+
+module process3
+	p3: [0..2] init 0;
+	b3: [0..8] init 0;
+	r3: [0..2] init 0;
+	draw3: [0..1] init 0;
+	[process3_cmd_10] (((draw4 = 0) & (draw1 = 0)) & ((draw2 = 0) & (p3 = 0))) -> 1 : (p3' = 1);
+	[process3_cmd_11] ((((p3 = 1) & (draw1 = 0)) & (((b < b3) | (r != r3)) & (draw4 = 0))) & ((draw2 = 0) & (draw3 = 0))) -> 1 : (draw3' = 1);
+	[process3_cmd_12] (draw3 = 1) -> 1/2 : (b' = (max(b, 1))) & (b3' = 1) & (r3' = r) & (draw3' = 0) + 1/4 : (b' = (max(b, 2))) & (b3' = 2) & (r3' = r) & (draw3' = 0) + 1/8 : (b' = (max(b, 3))) & (b3' = 3) & (r3' = r) & (draw3' = 0) + 1/16 : (b' = (max(b, 4))) & (b3' = 4) & (r3' = r) & (draw3' = 0) + 1/32 : (b' = (max(b, 5))) & (b3' = 5) & (r3' = r) & (draw3' = 0) + 1/32 : (b' = (max(b, 6))) & (b3' = 6) & (r3' = r) & (draw3' = 0);
+	[process3_cmd_13] ((((b = b3) & (draw1 = 0)) & (draw2 = 0)) & (((draw4 = 0) & (c = 0)) & ((r = r3) & (p3 = 1)))) -> 1/2 : (c' = 1) & (b' = 0) & (r' = 1) & (p3' = 2) & (b3' = 0) & (r3' = 0) + 1/2 : (c' = 1) & (b' = 0) & (r' = 2) & (p3' = 2) & (b3' = 0) & (r3' = 0);
+	[process3_cmd_14] (((draw4 = 0) & (draw1 = 0)) & ((draw2 = 0) & (p3 = 2))) -> 1 : (c' = 0) & (p3' = 0);
+endmodule
+
+module process4
+	p4: [0..2] init 0;
+	b4: [0..8] init 0;
+	r4: [0..2] init 0;
+	draw4: [0..1] init 0;
+	[process4_cmd_15] (((draw1 = 0) & (draw3 = 0)) & ((draw2 = 0) & (p4 = 0))) -> 1 : (p4' = 1);
+	[process4_cmd_16] ((((p4 = 1) & (draw3 = 0)) & (((b < b4) | (r != r4)) & (draw1 = 0))) & ((draw2 = 0) & (draw4 = 0))) -> 1 : (draw4' = 1);
+	[process4_cmd_17] (draw4 = 1) -> 1/2 : (b' = (max(b, 1))) & (b4' = 1) & (r4' = r) & (draw4' = 0) + 1/4 : (b' = (max(b, 2))) & (b4' = 2) & (r4' = r) & (draw4' = 0) + 1/8 : (b' = (max(b, 3))) & (b4' = 3) & (r4' = r) & (draw4' = 0) + 1/16 : (b' = (max(b, 4))) & (b4' = 4) & (r4' = r) & (draw4' = 0) + 1/32 : (b' = (max(b, 5))) & (b4' = 5) & (r4' = r) & (draw4' = 0) + 1/32 : (b' = (max(b, 6))) & (b4' = 6) & (r4' = r) & (draw4' = 0);
+	[process4_cmd_18] ((((b = b4) & (draw3 = 0)) & (draw2 = 0)) & (((draw1 = 0) & (c = 0)) & ((r = r4) & (p4 = 1)))) -> 1/2 : (c' = 1) & (b' = 0) & (r' = 1) & (p4' = 2) & (b4' = 0) & (r4' = 0) + 1/2 : (c' = 1) & (b' = 0) & (r' = 2) & (p4' = 2) & (b4' = 0) & (r4' = 0);
+	[process4_cmd_19] (((draw1 = 0) & (draw3 = 0)) & ((draw2 = 0) & (p4 = 2))) -> 1 : (c' = 0) & (p4' = 0);
+endmodule
+
+label "goal" = ((((p1 = 2) | (p2 = 2)) | (p3 = 2)) | (p4 = 2));

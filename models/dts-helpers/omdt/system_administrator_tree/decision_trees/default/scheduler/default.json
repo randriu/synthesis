@@ -1,0 +1,702 @@
+{
+    "actual_label": null,
+    "children": [
+        {
+            "actual_label": [
+                "(reboot_computer_0)"
+            ],
+            "children": [],
+            "split": null,
+            "edge_label": "true"
+        },
+        {
+            "actual_label": null,
+            "children": [
+                {
+                    "actual_label": [
+                        "(reboot_computer_2)"
+                    ],
+                    "children": [],
+                    "split": null,
+                    "edge_label": "true"
+                },
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": [
+                                "(reboot_computer_1)"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": null,
+                            "children": [
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": null,
+                                                    "children": [
+                                                        {
+                                                            "actual_label": [
+                                                                "(reboot_computer_6)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "true"
+                                                        },
+                                                        {
+                                                            "actual_label": [
+                                                                "(reboot_computer_4)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "false"
+                                                        }
+                                                    ],
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_5_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "additional_splits": [
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "computer_5_running"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 0.5
+                                                            },
+                                                            "impurity": 0.0
+                                                        }
+                                                    ],
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": [
+                                                        "(reboot_computer_6)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_4_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_4_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "impurity": 0.5
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_5_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "impurity": 0.5
+                                                }
+                                            ],
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": [
+                                                "(reboot_computer_6)"
+                                            ],
+                                            "children": [],
+                                            "split": null,
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "computer_3_running"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_3_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 0.4056390622295664
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_4_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 0.4056390622295664
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_5_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 0.4056390622295664
+                                        }
+                                    ],
+                                    "edge_label": "true"
+                                },
+                                {
+                                    "actual_label": null,
+                                    "children": [
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": [
+                                                        "(reboot_computer_4)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": null,
+                                                    "children": [
+                                                        {
+                                                            "actual_label": [
+                                                                "(reboot_computer_5)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "true"
+                                                        },
+                                                        {
+                                                            "actual_label": [
+                                                                "(reboot_computer_4)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "false"
+                                                        }
+                                                    ],
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_5_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "additional_splits": [
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "computer_5_running"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 0.5
+                                                            },
+                                                            "impurity": 0.0
+                                                        }
+                                                    ],
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_3_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_3_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "impurity": 0.5
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_5_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "impurity": 0.5
+                                                }
+                                            ],
+                                            "edge_label": "true"
+                                        },
+                                        {
+                                            "actual_label": null,
+                                            "children": [
+                                                {
+                                                    "actual_label": [
+                                                        "(reboot_computer_5)"
+                                                    ],
+                                                    "children": [],
+                                                    "split": null,
+                                                    "edge_label": "true"
+                                                },
+                                                {
+                                                    "actual_label": null,
+                                                    "children": [
+                                                        {
+                                                            "actual_label": [
+                                                                "(reboot_computer_3)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "true"
+                                                        },
+                                                        {
+                                                            "actual_label": [
+                                                                "(reboot_computer_0)"
+                                                            ],
+                                                            "children": [],
+                                                            "split": null,
+                                                            "edge_label": "false"
+                                                        }
+                                                    ],
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_3_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "additional_splits": [
+                                                        {
+                                                            "split": {
+                                                                "lhs": {
+                                                                    "coeff": 1,
+                                                                    "var": "computer_3_running"
+                                                                },
+                                                                "op": "<=",
+                                                                "rhs": 0.5
+                                                            },
+                                                            "impurity": 0.0
+                                                        }
+                                                    ],
+                                                    "edge_label": "false"
+                                                }
+                                            ],
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_5_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "additional_splits": [
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_3_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "impurity": 1.0
+                                                },
+                                                {
+                                                    "split": {
+                                                        "lhs": {
+                                                            "coeff": 1,
+                                                            "var": "computer_5_running"
+                                                        },
+                                                        "op": "<=",
+                                                        "rhs": 0.5
+                                                    },
+                                                    "impurity": 0.5
+                                                }
+                                            ],
+                                            "edge_label": "false"
+                                        }
+                                    ],
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "computer_4_running"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "additional_splits": [
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_3_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 1.5
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_4_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 1.1556390622295665
+                                        },
+                                        {
+                                            "split": {
+                                                "lhs": {
+                                                    "coeff": 1,
+                                                    "var": "computer_5_running"
+                                                },
+                                                "op": "<=",
+                                                "rhs": 0.5
+                                            },
+                                            "impurity": 1.1556390622295665
+                                        }
+                                    ],
+                                    "edge_label": "false"
+                                }
+                            ],
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "computer_6_running"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "additional_splits": [
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "computer_3_running"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 1.7806390622295665
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "computer_4_running"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 1.5778195311147831
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "computer_5_running"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 1.6084585933443498
+                                },
+                                {
+                                    "split": {
+                                        "lhs": {
+                                            "coeff": 1,
+                                            "var": "computer_6_running"
+                                        },
+                                        "op": "<=",
+                                        "rhs": 0.5
+                                    },
+                                    "impurity": 1.1774212838293647
+                                }
+                            ],
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_1_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "computer_1_running"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 0.9873008763572906
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "computer_3_running"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 1.8903195311147831
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "computer_4_running"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 1.7889097655573916
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "computer_5_running"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 1.8042292966721747
+                        },
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "computer_6_running"
+                                },
+                                "op": "<=",
+                                "rhs": 0.5
+                            },
+                            "impurity": 1.5887106419146821
+                        }
+                    ],
+                    "edge_label": "false"
+                }
+            ],
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_2_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "additional_splits": [
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_1_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 1.4936504381786453
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_2_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.9936504381786453
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_3_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 1.9451597655573916
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_4_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 1.8944548827786958
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_5_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 1.9021146483360873
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "computer_6_running"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 1.794355320957341
+                }
+            ],
+            "edge_label": "false"
+        }
+    ],
+    "split": {
+        "lhs": {
+            "coeff": 1,
+            "var": "computer_0_running"
+        },
+        "op": "<=",
+        "rhs": 0.5
+    },
+    "additional_splits": [
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_0_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 0.9968252190893226
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_1_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.6963173601922215
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_2_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.4463173601922215
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_3_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.9220720238815945
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_4_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.8967195824922465
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_5_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.9005494652709425
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "computer_6_running"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 1.8466698015815692
+        }
+    ]
+}

@@ -1,0 +1,2946 @@
+[
+    {
+        "c": [
+            {
+                "index": 0,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 9,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 18,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 27,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 36,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 45,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 54,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 63,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 72,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 81,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 90,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 99,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 108,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 117,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 126,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 135,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 144,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 153,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 162,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 171,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 180,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 189,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 198,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 207,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 216,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 225,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 234,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 243,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 252,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 261,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 270,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 279,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 288,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 297,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 306,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 315,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 324,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 333,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 342,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 351,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 360,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 369,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 378,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 387,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 396,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 405,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 414,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 423,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 432,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 441,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 450,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 459,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 468,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 477,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 486,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 495,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 504,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 513,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 522,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 531,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 540,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 549,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 558,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 567,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 0,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 578,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 587,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 596,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 605,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 614,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 623,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 632,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 641,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 650,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 659,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 668,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 677,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 686,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 695,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 704,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 713,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 721,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 730,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 739,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 748,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 757,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 766,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 775,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 784,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 793,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 802,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 811,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 820,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 829,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 838,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 847,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 856,
+                "labels": [
+                    "(reboot_computer_1)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_1)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 0,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 866,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 875,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 884,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 893,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 902,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 911,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 920,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 929,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 938,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 947,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 956,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 965,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 974,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 983,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 992,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1001,
+                "labels": [
+                    "(reboot_computer_2)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_2)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 0,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1014,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1021,
+                "labels": [
+                    "(reboot_computer_4)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_4)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1030,
+                "labels": [
+                    "(reboot_computer_4)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_4)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1039,
+                "labels": [
+                    "(reboot_computer_4)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_4)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1050,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1058,
+                "labels": [
+                    "(reboot_computer_5)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_5)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1068,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1074,
+                "labels": [
+                    "(reboot_computer_3)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_3)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 0,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1086,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1094,
+                "labels": [
+                    "(reboot_computer_5)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_5)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1104,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1111,
+                "labels": [
+                    "(reboot_computer_4)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_4)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 0,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1122,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1130,
+                "labels": [
+                    "(reboot_computer_5)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_5)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 0,
+            "computer_6_running": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1140,
+                "labels": [
+                    "(reboot_computer_6)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_6)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1143,
+                "labels": [
+                    "(reboot_computer_0)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(reboot_computer_0)"
+                }
+            }
+        ],
+        "s": {
+            "computer_0_running": 1,
+            "computer_1_running": 1,
+            "computer_2_running": 1,
+            "computer_3_running": 1,
+            "computer_4_running": 1,
+            "computer_5_running": 1,
+            "computer_6_running": 1
+        }
+    }
+]

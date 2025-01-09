@@ -1,0 +1,69 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 147,
+          "inner nodes": 73,
+          "paths": 74,
+          "bandwidth": 7
+        },
+        "time": "00:00:00.073"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "X",
+          "Y"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0
+        ],
+        "max_inner": [
+          11.0,
+          11.0
+        ],
+        "max_outer": [
+          11.0,
+          11.0
+        ],
+        "step_size": [
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "(Down)",
+            "(Right)",
+            "(Left)",
+            "(Up)"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          3
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 144,
+        "num_flattened": 144,
+        "num_unique_labels": 4
+      }
+    }
+  }
+}

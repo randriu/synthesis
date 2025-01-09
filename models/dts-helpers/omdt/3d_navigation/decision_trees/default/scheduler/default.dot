@@ -1,0 +1,646 @@
+digraph {
+0 [label="x <= 2.5
+--------------
+
+x <= 0.5 : 2.011
+x <= 1.5 : 1.94
+x <= 2.5 : 1.703
+x <= 3.5 : 1.739
+y <= 0.5 : 2.147
+y <= 1.5 : 2.116
+y <= 2.5 : 2.124
+y <= 3.5 : 2.099
+z <= 0.5 : 2.119
+z <= 1.5 : 2.057
+z <= 2.5 : 1.963
+z <= 3.5 : 1.927"];
+1 [label="z <= 3.5
+--------------
+
+x <= 0.5 : 1.396
+x <= 1.5 : 1.435
+y <= 0.5 : 1.421
+y <= 1.5 : 1.4
+y <= 2.5 : 1.37
+y <= 3.5 : 1.421
+z <= 0.5 : 1.421
+z <= 1.5 : 1.346
+z <= 2.5 : 1.304
+z <= 3.5 : 1.27"];
+2 [label="y <= 2.5
+--------------
+
+x <= 0.5 : 1.219
+x <= 1.5 : 1.271
+y <= 0.5 : 1.244
+y <= 1.5 : 1.224
+y <= 2.5 : 1.171
+y <= 3.5 : 1.265
+z <= 0.5 : 1.248
+z <= 1.5 : 1.207
+z <= 2.5 : 1.23"];
+3 [label="z <= 2.5
+--------------
+
+x <= 0.5 : 0.834
+x <= 1.5 : 0.83
+y <= 0.5 : 0.83
+y <= 1.5 : 0.866
+z <= 0.5 : 0.873
+z <= 1.5 : 0.854
+z <= 2.5 : 0.82"];
+4 [label="x <= 0.5
+--------------
+
+x <= 0.5 : 0.612
+x <= 1.5 : 0.666
+y <= 0.5 : 0.764
+y <= 1.5 : 0.764
+z <= 0.5 : 0.764
+z <= 1.5 : 0.764"];
+5 [label="(right)"];
+4 -> 5 [label="True"];
+6 [label="x <= 1.5
+--------------
+
+x <= 1.5 : 0.878
+y <= 0.5 : 0.918
+y <= 1.5 : 0.918
+z <= 0.5 : 0.918
+z <= 1.5 : 0.918"];
+7 [label="y <= 1.5
+--------------
+
+y <= 0.5 : 0.739
+y <= 1.5 : 0.612
+z <= 0.5 : 0.612
+z <= 1.5 : 0.739"];
+8 [label="z <= 0.5
+--------------
+
+y <= 0.5 : 0.918
+z <= 0.5 : 0.667
+z <= 1.5 : 0.874"];
+9 [label="(right)"];
+8 -> 9 [label="True"];
+10 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 1.0
+z <= 1.5 : 1.0"];
+11 [label="z <= 1.5
+--------------
+
+z <= 1.5 : 0.0"];
+12 [label="(forward)"];
+11 -> 12 [label="True"];
+13 [label="(right)"];
+11 -> 13 [style="dashed", label="False"];
+10 -> 11 [label="True"];
+14 [label="z <= 1.5
+--------------
+
+z <= 1.5 : 0.0"];
+15 [label="(right)"];
+14 -> 15 [label="True"];
+16 [label="(forward)"];
+14 -> 16 [style="dashed", label="False"];
+10 -> 14 [style="dashed", label="False"];
+8 -> 10 [style="dashed", label="False"];
+7 -> 8 [label="True"];
+17 [label="(right)"];
+7 -> 17 [style="dashed", label="False"];
+6 -> 7 [label="True"];
+18 [label="y <= 1.5
+--------------
+
+y <= 0.5 : 0.973
+y <= 1.5 : 0.918
+z <= 0.5 : 0.918
+z <= 1.5 : 0.973"];
+19 [label="z <= 0.5
+--------------
+
+y <= 0.5 : 0.918
+z <= 0.5 : 0.874
+z <= 1.5 : 0.874"];
+20 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 0.0"];
+21 [label="(forward)"];
+20 -> 21 [label="True"];
+22 [label="(right)"];
+20 -> 22 [style="dashed", label="False"];
+19 -> 20 [label="True"];
+23 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 0.5
+z <= 1.5 : 0.5"];
+24 [label="(right)"];
+23 -> 24 [label="True"];
+25 [label="z <= 1.5
+--------------
+
+z <= 1.5 : 0.0"];
+26 [label="(right)"];
+25 -> 26 [label="True"];
+27 [label="(forward)"];
+25 -> 27 [style="dashed", label="False"];
+23 -> 25 [style="dashed", label="False"];
+19 -> 23 [style="dashed", label="False"];
+18 -> 19 [label="True"];
+28 [label="z <= 1.5
+--------------
+
+z <= 0.5 : 0.667
+z <= 1.5 : 0.0"];
+29 [label="(forward)"];
+28 -> 29 [label="True"];
+30 [label="(right)"];
+28 -> 30 [style="dashed", label="False"];
+18 -> 28 [style="dashed", label="False"];
+6 -> 18 [style="dashed", label="False"];
+4 -> 6 [style="dashed", label="False"];
+3 -> 4 [label="True"];
+31 [label="y <= 0.5
+--------------
+
+x <= 0.5 : 0.739
+x <= 1.5 : 0.834
+y <= 0.5 : 0.528
+y <= 1.5 : 0.834"];
+32 [label="x <= 0.5
+--------------
+
+x <= 0.5 : 0.667
+x <= 1.5 : 0.667"];
+33 [label="(forward)"];
+32 -> 33 [label="True"];
+34 [label="x <= 1.5
+--------------
+
+x <= 1.5 : 0.0"];
+35 [label="(up)"];
+34 -> 35 [label="True"];
+36 [label="(right)"];
+34 -> 36 [style="dashed", label="False"];
+32 -> 34 [style="dashed", label="False"];
+31 -> 32 [label="True"];
+37 [label="(right)"];
+31 -> 37 [style="dashed", label="False"];
+3 -> 31 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+38 [label="z <= 1.5
+--------------
+
+x <= 0.5 : 1.533
+x <= 1.5 : 1.501
+y <= 3.5 : 1.507
+z <= 0.5 : 1.379
+z <= 1.5 : 1.351
+z <= 2.5 : 1.473"];
+39 [label="z <= 0.5
+--------------
+
+x <= 0.5 : 1.667
+x <= 1.5 : 1.541
+y <= 3.5 : 1.522
+z <= 0.5 : 1.522"];
+40 [label="y <= 3.5
+--------------
+
+x <= 0.5 : 1.333
+x <= 1.5 : 1.0
+y <= 3.5 : 0.459"];
+41 [label="x <= 1.5
+--------------
+
+x <= 0.5 : 0.667
+x <= 1.5 : 0.0"];
+42 [label="(down)"];
+41 -> 42 [label="True"];
+43 [label="(up)"];
+41 -> 43 [style="dashed", label="False"];
+40 -> 41 [label="True"];
+44 [label="(right)"];
+40 -> 44 [style="dashed", label="False"];
+39 -> 40 [label="True"];
+45 [label="x <= 0.5
+--------------
+
+x <= 0.5 : 1.333
+x <= 1.5 : 1.333
+y <= 3.5 : 1.585"];
+46 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.0"];
+47 [label="(forward)"];
+46 -> 47 [label="True"];
+48 [label="(down)"];
+46 -> 48 [style="dashed", label="False"];
+45 -> 46 [label="True"];
+49 [label="x <= 1.5
+--------------
+
+x <= 1.5 : 1.0
+y <= 3.5 : 1.0"];
+50 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.0"];
+51 [label="(right)"];
+50 -> 51 [label="True"];
+52 [label="(forward)"];
+50 -> 52 [style="dashed", label="False"];
+49 -> 50 [label="True"];
+53 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.0"];
+54 [label="(down)"];
+53 -> 54 [label="True"];
+55 [label="(right)"];
+53 -> 55 [style="dashed", label="False"];
+49 -> 53 [style="dashed", label="False"];
+45 -> 49 [style="dashed", label="False"];
+39 -> 45 [style="dashed", label="False"];
+38 -> 39 [label="True"];
+56 [label="x <= 0.5
+--------------
+
+x <= 0.5 : 0.667
+x <= 1.5 : 0.907
+y <= 3.5 : 0.918
+z <= 2.5 : 0.825"];
+57 [label="(right)"];
+56 -> 57 [label="True"];
+58 [label="x <= 1.5
+--------------
+
+x <= 1.5 : 0.811
+y <= 3.5 : 1.0
+z <= 2.5 : 0.811"];
+59 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.5
+z <= 2.5 : 0.5"];
+60 [label="z <= 2.5
+--------------
+
+z <= 2.5 : 0.0"];
+61 [label="(forward)"];
+60 -> 61 [label="True"];
+62 [label="(right)"];
+60 -> 62 [style="dashed", label="False"];
+59 -> 60 [label="True"];
+63 [label="(forward)"];
+59 -> 63 [style="dashed", label="False"];
+58 -> 59 [label="True"];
+64 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.5
+z <= 2.5 : 0.5"];
+65 [label="z <= 2.5
+--------------
+
+z <= 2.5 : 0.0"];
+66 [label="(forward)"];
+65 -> 66 [label="True"];
+67 [label="(right)"];
+65 -> 67 [style="dashed", label="False"];
+64 -> 65 [label="True"];
+68 [label="(right)"];
+64 -> 68 [style="dashed", label="False"];
+58 -> 64 [style="dashed", label="False"];
+56 -> 58 [style="dashed", label="False"];
+38 -> 56 [style="dashed", label="False"];
+2 -> 38 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+69 [label="x <= 1.5
+--------------
+
+x <= 0.5 : 1.104
+x <= 1.5 : 1.095
+y <= 0.5 : 1.108
+y <= 1.5 : 1.102
+y <= 2.5 : 1.235
+y <= 3.5 : 1.108"];
+70 [label="y <= 1.5
+--------------
+
+x <= 0.5 : 1.046
+y <= 0.5 : 1.039
+y <= 1.5 : 0.875
+y <= 2.5 : 1.075
+y <= 3.5 : 1.039"];
+71 [label="x <= 0.5
+--------------
+
+x <= 0.5 : 0.5
+y <= 0.5 : 0.5"];
+72 [label="(right)"];
+71 -> 72 [label="True"];
+73 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 0.0"];
+74 [label="(right)"];
+73 -> 74 [label="True"];
+75 [label="(backward)"];
+73 -> 75 [style="dashed", label="False"];
+71 -> 73 [style="dashed", label="False"];
+70 -> 71 [label="True"];
+76 [label="y <= 3.5
+--------------
+
+x <= 0.5 : 0.918
+y <= 2.5 : 0.874
+y <= 3.5 : 0.667"];
+77 [label="x <= 0.5
+--------------
+
+x <= 0.5 : 1.0
+y <= 2.5 : 1.0"];
+78 [label="y <= 2.5
+--------------
+
+y <= 2.5 : 0.0"];
+79 [label="(up)"];
+78 -> 79 [label="True"];
+80 [label="(right)"];
+78 -> 80 [style="dashed", label="False"];
+77 -> 78 [label="True"];
+81 [label="y <= 2.5
+--------------
+
+y <= 2.5 : 0.0"];
+82 [label="(right)"];
+81 -> 82 [label="True"];
+83 [label="(up)"];
+81 -> 83 [style="dashed", label="False"];
+77 -> 81 [style="dashed", label="False"];
+76 -> 77 [label="True"];
+84 [label="(right)"];
+76 -> 84 [style="dashed", label="False"];
+70 -> 76 [style="dashed", label="False"];
+69 -> 70 [label="True"];
+85 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 0.8
+y <= 1.5 : 0.951
+y <= 2.5 : 0.951
+y <= 3.5 : 0.8"];
+86 [label="(right)"];
+85 -> 86 [label="True"];
+87 [label="y <= 1.5
+--------------
+
+y <= 1.5 : 0.689
+y <= 2.5 : 1.0
+y <= 3.5 : 0.689"];
+88 [label="(backward)"];
+87 -> 88 [label="True"];
+89 [label="y <= 2.5
+--------------
+
+y <= 2.5 : 0.667
+y <= 3.5 : 0.667"];
+90 [label="(right)"];
+89 -> 90 [label="True"];
+91 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.0"];
+92 [label="(backward)"];
+91 -> 92 [label="True"];
+93 [label="(right)"];
+91 -> 93 [style="dashed", label="False"];
+89 -> 91 [style="dashed", label="False"];
+87 -> 89 [style="dashed", label="False"];
+85 -> 87 [style="dashed", label="False"];
+69 -> 85 [style="dashed", label="False"];
+1 -> 69 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+94 [label="x <= 3.5
+--------------
+
+x <= 3.5 : 1.555
+y <= 0.5 : 2.05
+y <= 1.5 : 2.009
+y <= 2.5 : 1.952
+y <= 3.5 : 1.876
+z <= 0.5 : 1.978
+z <= 1.5 : 1.949
+z <= 2.5 : 1.757
+z <= 3.5 : 1.672"];
+95 [label="z <= 3.5
+--------------
+
+y <= 0.5 : 1.509
+y <= 1.5 : 1.468
+y <= 2.5 : 1.367
+y <= 3.5 : 1.297
+z <= 0.5 : 1.463
+z <= 1.5 : 1.358
+z <= 2.5 : 1.014
+z <= 3.5 : 0.979"];
+96 [label="z <= 2.5
+--------------
+
+y <= 0.5 : 0.879
+y <= 1.5 : 0.875
+y <= 2.5 : 0.869
+y <= 3.5 : 0.764
+z <= 0.5 : 0.869
+z <= 1.5 : 0.846
+z <= 2.5 : 0.605"];
+97 [label="y <= 2.5
+--------------
+
+y <= 0.5 : 0.52
+y <= 1.5 : 0.459
+y <= 2.5 : 0.367
+y <= 3.5 : 0.52
+z <= 0.5 : 0.553
+z <= 1.5 : 0.481"];
+98 [label="(forward)"];
+97 -> 98 [label="True"];
+99 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.459
+z <= 0.5 : 0.874
+z <= 1.5 : 0.667"];
+100 [label="z <= 1.5
+--------------
+
+z <= 0.5 : 0.667
+z <= 1.5 : 0.0"];
+101 [label="(up)"];
+100 -> 101 [label="True"];
+102 [label="(forward)"];
+100 -> 102 [style="dashed", label="False"];
+99 -> 100 [label="True"];
+103 [label="(forward)"];
+99 -> 103 [style="dashed", label="False"];
+97 -> 99 [style="dashed", label="False"];
+96 -> 97 [label="True"];
+104 [label="y <= 3.5
+--------------
+
+y <= 0.5 : 0.649
+y <= 1.5 : 0.551
+y <= 2.5 : 0.4
+y <= 3.5 : 0.0"];
+105 [label="(up)"];
+104 -> 105 [label="True"];
+106 [label="(forward)"];
+104 -> 106 [style="dashed", label="False"];
+96 -> 104 [style="dashed", label="False"];
+95 -> 96 [label="True"];
+107 [label="y <= 2.5
+--------------
+
+y <= 0.5 : 1.2
+y <= 1.5 : 0.951
+y <= 2.5 : 0.4
+y <= 3.5 : 0.649"];
+108 [label="(backward)"];
+107 -> 108 [label="True"];
+109 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.0"];
+110 [label="(up)"];
+109 -> 110 [label="True"];
+111 [label="(right)"];
+109 -> 111 [style="dashed", label="False"];
+107 -> 109 [style="dashed", label="False"];
+95 -> 107 [style="dashed", label="False"];
+94 -> 95 [label="True"];
+112 [label="z <= 3.5
+--------------
+
+y <= 0.5 : 1.501
+y <= 1.5 : 1.403
+y <= 2.5 : 1.306
+y <= 3.5 : 1.408
+z <= 0.5 : 1.44
+z <= 1.5 : 1.475
+z <= 2.5 : 1.416
+z <= 3.5 : 1.197"];
+113 [label="y <= 2.5
+--------------
+
+y <= 0.5 : 0.974
+y <= 1.5 : 0.931
+y <= 2.5 : 0.872
+y <= 3.5 : 1.111
+z <= 0.5 : 0.905
+z <= 1.5 : 1.039
+z <= 2.5 : 1.108"];
+114 [label="z <= 0.5
+--------------
+
+y <= 0.5 : 0.633
+y <= 1.5 : 0.633
+z <= 0.5 : 0.396
+z <= 1.5 : 0.626
+z <= 2.5 : 0.74"];
+115 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 0.667
+y <= 1.5 : 0.667"];
+116 [label="(up)"];
+115 -> 116 [label="True"];
+117 [label="y <= 1.5
+--------------
+
+y <= 1.5 : 0.0"];
+118 [label="(left)"];
+117 -> 118 [label="True"];
+119 [label="(down)"];
+117 -> 119 [style="dashed", label="False"];
+115 -> 117 [style="dashed", label="False"];
+114 -> 115 [label="True"];
+120 [label="(left)"];
+114 -> 120 [style="dashed", label="False"];
+113 -> 114 [label="True"];
+121 [label="y <= 3.5
+--------------
+
+y <= 3.5 : 0.906
+z <= 0.5 : 0.939
+z <= 1.5 : 0.906
+z <= 2.5 : 0.939"];
+122 [label="z <= 0.5
+--------------
+
+z <= 0.5 : 0.689
+z <= 1.5 : 1.0
+z <= 2.5 : 0.689"];
+123 [label="(forward)"];
+122 -> 123 [label="True"];
+124 [label="z <= 1.5
+--------------
+
+z <= 1.5 : 0.667
+z <= 2.5 : 0.667"];
+125 [label="(left)"];
+124 -> 125 [label="True"];
+126 [label="z <= 2.5
+--------------
+
+z <= 2.5 : 0.0"];
+127 [label="(forward)"];
+126 -> 127 [label="True"];
+128 [label="(left)"];
+126 -> 128 [style="dashed", label="False"];
+124 -> 126 [style="dashed", label="False"];
+122 -> 124 [style="dashed", label="False"];
+121 -> 122 [label="True"];
+129 [label="z <= 2.5
+--------------
+
+z <= 0.5 : 0.689
+z <= 1.5 : 0.5
+z <= 2.5 : 0.0"];
+130 [label="(left)"];
+129 -> 130 [label="True"];
+131 [label="(forward)"];
+129 -> 131 [style="dashed", label="False"];
+121 -> 129 [style="dashed", label="False"];
+113 -> 121 [style="dashed", label="False"];
+112 -> 113 [label="True"];
+132 [label="y <= 0.5
+--------------
+
+y <= 0.5 : 0.649
+y <= 1.5 : 0.951
+y <= 2.5 : 0.951
+y <= 3.5 : 0.649"];
+133 [label="(left)"];
+132 -> 133 [label="True"];
+134 [label="y <= 3.5
+--------------
+
+y <= 1.5 : 0.689
+y <= 2.5 : 0.5
+y <= 3.5 : 0.0"];
+135 [label="(up)"];
+134 -> 135 [label="True"];
+136 [label="(right)"];
+134 -> 136 [style="dashed", label="False"];
+132 -> 134 [style="dashed", label="False"];
+112 -> 132 [style="dashed", label="False"];
+94 -> 112 [style="dashed", label="False"];
+0 -> 94 [style="dashed", label="False"];
+
+}

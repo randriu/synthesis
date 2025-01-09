@@ -1,0 +1,417 @@
+digraph {
+0 [label="waiting_time <= 1.5
+--------------
+
+cars_left <= 0.5 : 0.805
+cars_left <= 1.5 : 0.845
+cars_left <= 2.5 : 0.838
+cars_left <= 3.5 : 0.845
+cars_left <= 4.5 : 0.847
+cars_right <= 0.5 : 0.815
+cars_right <= 1.5 : 0.833
+cars_right <= 2.5 : 0.836
+cars_right <= 3.5 : 0.843
+cars_right <= 4.5 : 0.849
+green_side <= 0.5 : 0.846
+waiting_time <= 0.5 : 0.846
+waiting_time <= 1.5 : 0.748
+waiting_time <= 2.5 : 0.756
+waiting_time <= 3.5 : 0.803
+waiting_time <= 4.5 : 0.832"];
+1 [label="green_side <= 0.5
+--------------
+
+cars_left <= 0.5 : 0.95
+cars_left <= 1.5 : 0.949
+cars_left <= 2.5 : 0.944
+cars_left <= 3.5 : 0.939
+cars_left <= 4.5 : 0.941
+cars_right <= 0.5 : 0.948
+cars_right <= 1.5 : 0.949
+cars_right <= 2.5 : 0.949
+cars_right <= 3.5 : 0.951
+cars_right <= 4.5 : 0.95
+green_side <= 0.5 : 0.919
+waiting_time <= 0.5 : 0.941"];
+2 [label="cars_left <= 1.5
+--------------
+
+cars_left <= 0.5 : 0.69
+cars_left <= 1.5 : 0.274
+cars_left <= 2.5 : 0.512
+cars_left <= 3.5 : 0.656
+cars_left <= 4.5 : 0.76
+cars_right <= 0.5 : 0.745
+cars_right <= 1.5 : 0.813
+cars_right <= 2.5 : 0.828
+cars_right <= 3.5 : 0.835
+cars_right <= 4.5 : 0.839
+waiting_time <= 0.5 : 0.829"];
+3 [label="cars_right <= 0.5
+--------------
+
+cars_left <= 0.5 : 0.765
+cars_right <= 0.5 : 0.0
+cars_right <= 1.5 : 0.373
+cars_right <= 2.5 : 0.531
+cars_right <= 3.5 : 0.636
+cars_right <= 4.5 : 0.715
+waiting_time <= 0.5 : 0.6"];
+4 [label="(wait)"];
+3 -> 4 [label="True"];
+5 [label="(switch_light)"];
+3 -> 5 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+6 [label="(wait)"];
+2 -> 6 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+7 [label="cars_left <= 2.5
+--------------
+
+cars_left <= 0.5 : 0.823
+cars_left <= 1.5 : 0.581
+cars_left <= 2.5 : 0.577
+cars_left <= 3.5 : 0.679
+cars_left <= 4.5 : 0.79
+cars_right <= 0.5 : 0.976
+cars_right <= 1.5 : 0.942
+cars_right <= 2.5 : 0.996
+cars_right <= 3.5 : 0.993
+cars_right <= 4.5 : 0.986"];
+8 [label="cars_left <= 1.5
+--------------
+
+cars_left <= 0.5 : 0.433
+cars_left <= 1.5 : 0.306
+cars_right <= 0.5 : 0.448
+cars_right <= 1.5 : 0.306
+cars_right <= 2.5 : 0.382
+cars_right <= 3.5 : 0.433
+cars_right <= 4.5 : 0.472"];
+9 [label="(wait)"];
+8 -> 9 [label="True"];
+10 [label="cars_right <= 1.5
+--------------
+
+cars_right <= 0.5 : 0.602
+cars_right <= 1.5 : 0.0
+cars_right <= 2.5 : 0.459
+cars_right <= 3.5 : 0.667
+cars_right <= 4.5 : 0.809"];
+11 [label="(switch_light)"];
+10 -> 11 [label="True"];
+12 [label="(wait)"];
+10 -> 12 [style="dashed", label="False"];
+8 -> 10 [style="dashed", label="False"];
+7 -> 8 [label="True"];
+13 [label="cars_left <= 4.5
+--------------
+
+cars_left <= 3.5 : 0.582
+cars_left <= 4.5 : 0.541
+cars_right <= 0.5 : 0.602
+cars_right <= 1.5 : 0.541
+cars_right <= 2.5 : 0.634
+cars_right <= 3.5 : 0.65
+cars_right <= 4.5 : 0.625"];
+14 [label="cars_right <= 1.5
+--------------
+
+cars_left <= 3.5 : 0.784
+cars_right <= 0.5 : 0.734
+cars_right <= 1.5 : 0.636
+cars_right <= 2.5 : 0.784
+cars_right <= 3.5 : 0.811
+cars_right <= 4.5 : 0.768"];
+15 [label="(switch_light)"];
+14 -> 15 [label="True"];
+16 [label="cars_right <= 2.5
+--------------
+
+cars_left <= 3.5 : 0.906
+cars_right <= 2.5 : 0.488
+cars_right <= 3.5 : 0.906
+cars_right <= 4.5 : 0.939"];
+17 [label="(wait)"];
+16 -> 17 [label="True"];
+18 [label="cars_right <= 4.5
+--------------
+
+cars_left <= 3.5 : 0.459
+cars_right <= 3.5 : 0.541
+cars_right <= 4.5 : 0.333"];
+19 [label="(switch_light)"];
+18 -> 19 [label="True"];
+20 [label="cars_left <= 3.5
+--------------
+
+cars_left <= 3.5 : 0.0"];
+21 [label="(wait)"];
+20 -> 21 [label="True"];
+22 [label="(switch_light)"];
+20 -> 22 [style="dashed", label="False"];
+18 -> 20 [style="dashed", label="False"];
+16 -> 18 [style="dashed", label="False"];
+14 -> 16 [style="dashed", label="False"];
+13 -> 14 [label="True"];
+23 [label="(switch_light)"];
+13 -> 23 [style="dashed", label="False"];
+7 -> 13 [style="dashed", label="False"];
+1 -> 7 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+24 [label="cars_left <= 0.5
+--------------
+
+cars_left <= 0.5 : 0.61
+cars_left <= 1.5 : 0.68
+cars_left <= 2.5 : 0.677
+cars_left <= 3.5 : 0.69
+cars_left <= 4.5 : 0.692
+cars_right <= 0.5 : 0.638
+cars_right <= 1.5 : 0.655
+cars_right <= 2.5 : 0.668
+cars_right <= 3.5 : 0.678
+cars_right <= 4.5 : 0.689
+green_side <= 0.5 : 0.694
+waiting_time <= 2.5 : 0.671
+waiting_time <= 3.5 : 0.685
+waiting_time <= 4.5 : 0.692"];
+25 [label="green_side <= 0.5
+--------------
+
+cars_right <= 0.5 : 0.992
+cars_right <= 1.5 : 0.996
+cars_right <= 2.5 : 0.997
+cars_right <= 3.5 : 0.998
+cars_right <= 4.5 : 0.998
+green_side <= 0.5 : 0.125
+waiting_time <= 2.5 : 0.995
+waiting_time <= 3.5 : 0.997
+waiting_time <= 4.5 : 0.998"];
+26 [label="cars_right <= 0.5
+--------------
+
+cars_right <= 0.5 : 0.135
+cars_right <= 1.5 : 0.181
+cars_right <= 2.5 : 0.207
+cars_right <= 3.5 : 0.225
+cars_right <= 4.5 : 0.239
+waiting_time <= 2.5 : 0.163
+waiting_time <= 3.5 : 0.207
+waiting_time <= 4.5 : 0.232"];
+27 [label="waiting_time <= 2.5
+--------------
+
+waiting_time <= 2.5 : 0.0
+waiting_time <= 3.5 : 0.5
+waiting_time <= 4.5 : 0.689"];
+28 [label="(wait)"];
+27 -> 28 [label="True"];
+29 [label="(switch_light)"];
+27 -> 29 [style="dashed", label="False"];
+26 -> 27 [label="True"];
+30 [label="(switch_light)"];
+26 -> 30 [style="dashed", label="False"];
+25 -> 26 [label="True"];
+31 [label="(wait)"];
+25 -> 31 [style="dashed", label="False"];
+24 -> 25 [label="True"];
+32 [label="green_side <= 0.5
+--------------
+
+cars_left <= 1.5 : 0.509
+cars_left <= 2.5 : 0.532
+cars_left <= 3.5 : 0.531
+cars_left <= 4.5 : 0.532
+cars_right <= 0.5 : 0.437
+cars_right <= 1.5 : 0.456
+cars_right <= 2.5 : 0.475
+cars_right <= 3.5 : 0.493
+cars_right <= 4.5 : 0.515
+green_side <= 0.5 : 0.399
+waiting_time <= 2.5 : 0.49
+waiting_time <= 3.5 : 0.511
+waiting_time <= 4.5 : 0.524"];
+33 [label="cars_right <= 0.5
+--------------
+
+cars_left <= 1.5 : 0.747
+cars_left <= 2.5 : 0.797
+cars_left <= 3.5 : 0.796
+cars_left <= 4.5 : 0.798
+cars_right <= 0.5 : 0.543
+cars_right <= 1.5 : 0.616
+cars_right <= 2.5 : 0.667
+cars_right <= 3.5 : 0.71
+cars_right <= 4.5 : 0.761
+waiting_time <= 2.5 : 0.696
+waiting_time <= 3.5 : 0.75
+waiting_time <= 4.5 : 0.781"];
+34 [label="cars_left <= 1.5
+--------------
+
+cars_left <= 1.5 : 0.162
+cars_left <= 2.5 : 0.382
+cars_left <= 3.5 : 0.487
+cars_left <= 4.5 : 0.557
+waiting_time <= 2.5 : 0.541
+waiting_time <= 3.5 : 0.595
+waiting_time <= 4.5 : 0.605"];
+35 [label="waiting_time <= 2.5
+--------------
+
+waiting_time <= 2.5 : 0.0
+waiting_time <= 3.5 : 0.5
+waiting_time <= 4.5 : 0.689"];
+36 [label="(wait)"];
+35 -> 36 [label="True"];
+37 [label="(switch_light)"];
+35 -> 37 [style="dashed", label="False"];
+34 -> 35 [label="True"];
+38 [label="(wait)"];
+34 -> 38 [style="dashed", label="False"];
+33 -> 34 [label="True"];
+39 [label="waiting_time <= 2.5
+--------------
+
+cars_left <= 1.5 : 0.488
+cars_left <= 2.5 : 0.525
+cars_left <= 3.5 : 0.529
+cars_left <= 4.5 : 0.529
+cars_right <= 1.5 : 0.505
+cars_right <= 2.5 : 0.501
+cars_right <= 3.5 : 0.505
+cars_right <= 4.5 : 0.519
+waiting_time <= 2.5 : 0.324
+waiting_time <= 3.5 : 0.398
+waiting_time <= 4.5 : 0.476"];
+40 [label="cars_left <= 1.5
+--------------
+
+cars_left <= 1.5 : 0.794
+cars_left <= 2.5 : 0.983
+cars_left <= 3.5 : 0.983
+cars_left <= 4.5 : 0.988
+cars_right <= 1.5 : 0.892
+cars_right <= 2.5 : 0.855
+cars_right <= 3.5 : 0.871
+cars_right <= 4.5 : 0.944"];
+41 [label="(switch_light)"];
+40 -> 41 [label="True"];
+42 [label="cars_left <= 2.5
+--------------
+
+cars_left <= 2.5 : 0.728
+cars_left <= 3.5 : 0.985
+cars_left <= 4.5 : 0.971
+cars_right <= 1.5 : 0.791
+cars_right <= 2.5 : 0.768
+cars_right <= 3.5 : 0.811
+cars_right <= 4.5 : 0.926"];
+43 [label="(wait)"];
+42 -> 43 [label="True"];
+44 [label="cars_right <= 3.5
+--------------
+
+cars_left <= 3.5 : 0.907
+cars_left <= 4.5 : 0.971
+cars_right <= 1.5 : 0.649
+cars_right <= 2.5 : 0.562
+cars_right <= 3.5 : 0.551
+cars_right <= 4.5 : 0.8"];
+45 [label="cars_right <= 1.5
+--------------
+
+cars_left <= 3.5 : 0.739
+cars_left <= 4.5 : 0.918
+cars_right <= 1.5 : 0.667
+cars_right <= 2.5 : 0.739"];
+46 [label="(wait)"];
+45 -> 46 [label="True"];
+47 [label="cars_left <= 3.5
+--------------
+
+cars_left <= 3.5 : 0.541
+cars_left <= 4.5 : 1.0
+cars_right <= 2.5 : 0.918"];
+48 [label="(switch_light)"];
+47 -> 48 [label="True"];
+49 [label="cars_left <= 4.5
+--------------
+
+cars_left <= 4.5 : 0.5
+cars_right <= 2.5 : 0.5"];
+50 [label="(wait)"];
+49 -> 50 [label="True"];
+51 [label="cars_right <= 2.5
+--------------
+
+cars_right <= 2.5 : 0.0"];
+52 [label="(wait)"];
+51 -> 52 [label="True"];
+53 [label="(switch_light)"];
+51 -> 53 [style="dashed", label="False"];
+49 -> 51 [style="dashed", label="False"];
+47 -> 49 [style="dashed", label="False"];
+45 -> 47 [style="dashed", label="False"];
+44 -> 45 [label="True"];
+54 [label="(switch_light)"];
+44 -> 54 [style="dashed", label="False"];
+42 -> 44 [style="dashed", label="False"];
+40 -> 42 [style="dashed", label="False"];
+39 -> 40 [label="True"];
+55 [label="cars_right <= 1.5
+--------------
+
+cars_left <= 1.5 : 0.098
+cars_left <= 2.5 : 0.084
+cars_left <= 3.5 : 0.092
+cars_left <= 4.5 : 0.098
+cars_right <= 1.5 : 0.071
+cars_right <= 2.5 : 0.084
+cars_right <= 3.5 : 0.092
+cars_right <= 4.5 : 0.098
+waiting_time <= 3.5 : 0.081
+waiting_time <= 4.5 : 0.094"];
+56 [label="waiting_time <= 3.5
+--------------
+
+cars_left <= 1.5 : 0.331
+cars_left <= 2.5 : 0.26
+cars_left <= 3.5 : 0.302
+cars_left <= 4.5 : 0.331
+waiting_time <= 3.5 : 0.241
+waiting_time <= 4.5 : 0.313"];
+57 [label="cars_left <= 2.5
+--------------
+
+cars_left <= 1.5 : 0.649
+cars_left <= 2.5 : 0.4
+cars_left <= 3.5 : 0.551
+cars_left <= 4.5 : 0.649"];
+58 [label="cars_left <= 1.5
+--------------
+
+cars_left <= 1.5 : 0.0"];
+59 [label="(switch_light)"];
+58 -> 59 [label="True"];
+60 [label="(wait)"];
+58 -> 60 [style="dashed", label="False"];
+57 -> 58 [label="True"];
+61 [label="(switch_light)"];
+57 -> 61 [style="dashed", label="False"];
+56 -> 57 [label="True"];
+62 [label="(switch_light)"];
+56 -> 62 [style="dashed", label="False"];
+55 -> 56 [label="True"];
+63 [label="(switch_light)"];
+55 -> 63 [style="dashed", label="False"];
+39 -> 55 [style="dashed", label="False"];
+33 -> 39 [style="dashed", label="False"];
+32 -> 33 [label="True"];
+64 [label="(switch_light)"];
+32 -> 64 [style="dashed", label="False"];
+24 -> 32 [style="dashed", label="False"];
+0 -> 24 [style="dashed", label="False"];
+
+}

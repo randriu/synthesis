@@ -1,0 +1,2 @@
+// Finally one of the philosophers manages to eat
+"eat": Pmax=? [ F (((p1>=8)&(p1<=9))|((p2>=8)&(p2<=9))|((p3>=8)&(p3<=9))|((p4>=8)&(p4<=9))) ];

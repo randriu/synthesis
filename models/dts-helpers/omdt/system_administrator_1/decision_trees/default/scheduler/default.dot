@@ -1,0 +1,700 @@
+digraph {
+0 [label="computer_6_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 1.98
+computer_1_running <= 0.5 : 2.096
+computer_2_running <= 0.5 : 2.067
+computer_3_running <= 0.5 : 2.153
+computer_4_running <= 0.5 : 1.996
+computer_5_running <= 0.5 : 1.985
+computer_6_running <= 0.5 : 1.89
+computer_7_running <= 0.5 : 2.012"];
+1 [label="computer_5_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 1.388
+computer_1_running <= 0.5 : 1.439
+computer_2_running <= 0.5 : 1.461
+computer_3_running <= 0.5 : 1.535
+computer_4_running <= 0.5 : 1.211
+computer_5_running <= 0.5 : 1.186
+computer_7_running <= 0.5 : 1.439"];
+2 [label="computer_0_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 0.322
+computer_1_running <= 0.5 : 0.322
+computer_2_running <= 0.5 : 0.322
+computer_3_running <= 0.5 : 0.369
+computer_4_running <= 0.5 : 0.369
+computer_7_running <= 0.5 : 0.322"];
+3 [label="(reboot_computer_0)"];
+2 -> 3 [label="True"];
+4 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.507
+computer_2_running <= 0.5 : 0.507
+computer_3_running <= 0.5 : 0.606
+computer_4_running <= 0.5 : 0.606
+computer_7_running <= 0.5 : 0.507"];
+5 [label="computer_2_running <= 0.5
+--------------
+
+computer_2_running <= 0.5 : 0.703
+computer_3_running <= 0.5 : 0.936
+computer_4_running <= 0.5 : 0.936
+computer_7_running <= 0.5 : 0.703"];
+6 [label="(reboot_computer_0)"];
+5 -> 6 [label="True"];
+7 [label="computer_7_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.25
+computer_4_running <= 0.5 : 1.25
+computer_7_running <= 0.5 : 0.406"];
+8 [label="computer_3_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 0.5
+computer_4_running <= 0.5 : 0.5"];
+9 [label="(reboot_computer_7)"];
+8 -> 9 [label="True"];
+10 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 0.0"];
+11 [label="(reboot_computer_7)"];
+10 -> 11 [label="True"];
+12 [label="(reboot_computer_6)"];
+10 -> 12 [style="dashed", label="False"];
+8 -> 10 [style="dashed", label="False"];
+7 -> 8 [label="True"];
+13 [label="(reboot_computer_0)"];
+7 -> 13 [style="dashed", label="False"];
+5 -> 7 [style="dashed", label="False"];
+4 -> 5 [label="True"];
+14 [label="(reboot_computer_0)"];
+4 -> 14 [style="dashed", label="False"];
+2 -> 4 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+15 [label="computer_4_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 1.618
+computer_1_running <= 0.5 : 1.835
+computer_2_running <= 0.5 : 1.878
+computer_3_running <= 0.5 : 1.984
+computer_4_running <= 0.5 : 1.288
+computer_7_running <= 0.5 : 1.835"];
+16 [label="computer_0_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 0.677
+computer_1_running <= 0.5 : 1.149
+computer_2_running <= 0.5 : 1.18
+computer_3_running <= 0.5 : 1.248
+computer_7_running <= 0.5 : 1.149"];
+17 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.5
+computer_2_running <= 0.5 : 0.811
+computer_3_running <= 0.5 : 0.811
+computer_7_running <= 0.5 : 0.5"];
+18 [label="computer_7_running <= 0.5
+--------------
+
+computer_2_running <= 0.5 : 1.0
+computer_3_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 0.0"];
+19 [label="(reboot_computer_0)"];
+18 -> 19 [label="True"];
+20 [label="(reboot_computer_4)"];
+18 -> 20 [style="dashed", label="False"];
+17 -> 18 [label="True"];
+21 [label="(reboot_computer_4)"];
+17 -> 21 [style="dashed", label="False"];
+16 -> 17 [label="True"];
+22 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.406
+computer_2_running <= 0.5 : 0.406
+computer_3_running <= 0.5 : 0.544
+computer_7_running <= 0.5 : 0.406"];
+23 [label="computer_2_running <= 0.5
+--------------
+
+computer_2_running <= 0.5 : 0.5
+computer_3_running <= 0.5 : 0.811
+computer_7_running <= 0.5 : 0.5"];
+24 [label="(reboot_computer_0)"];
+23 -> 24 [label="True"];
+25 [label="computer_7_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 0.0"];
+26 [label="(reboot_computer_7)"];
+25 -> 26 [label="True"];
+27 [label="(reboot_computer_0)"];
+25 -> 27 [style="dashed", label="False"];
+23 -> 25 [style="dashed", label="False"];
+22 -> 23 [label="True"];
+28 [label="(reboot_computer_0)"];
+22 -> 28 [style="dashed", label="False"];
+16 -> 22 [style="dashed", label="False"];
+15 -> 16 [label="True"];
+29 [label="computer_2_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 1.108
+computer_1_running <= 0.5 : 1.108
+computer_2_running <= 0.5 : 1.052
+computer_3_running <= 0.5 : 1.329
+computer_7_running <= 0.5 : 1.108"];
+30 [label="computer_0_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 0.811
+computer_1_running <= 0.5 : 1.25
+computer_3_running <= 0.5 : 1.561
+computer_7_running <= 0.5 : 1.25"];
+31 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.5
+computer_3_running <= 0.5 : 0.811
+computer_7_running <= 0.5 : 0.5"];
+32 [label="computer_7_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 0.0"];
+33 [label="(reboot_computer_5)"];
+32 -> 33 [label="True"];
+34 [label="(reboot_computer_6)"];
+32 -> 34 [style="dashed", label="False"];
+31 -> 32 [label="True"];
+35 [label="(reboot_computer_6)"];
+31 -> 35 [style="dashed", label="False"];
+30 -> 31 [label="True"];
+36 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.5
+computer_3_running <= 0.5 : 0.811
+computer_7_running <= 0.5 : 0.5"];
+37 [label="computer_7_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 0.0"];
+38 [label="(reboot_computer_5)"];
+37 -> 38 [label="True"];
+39 [label="(reboot_computer_0)"];
+37 -> 39 [style="dashed", label="False"];
+36 -> 37 [label="True"];
+40 [label="(reboot_computer_0)"];
+36 -> 40 [style="dashed", label="False"];
+30 -> 36 [style="dashed", label="False"];
+29 -> 30 [label="True"];
+41 [label="computer_0_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 0.406
+computer_1_running <= 0.5 : 0.406
+computer_3_running <= 0.5 : 0.544
+computer_7_running <= 0.5 : 0.406"];
+42 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.5
+computer_3_running <= 0.5 : 0.811
+computer_7_running <= 0.5 : 0.5"];
+43 [label="computer_7_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 0.0"];
+44 [label="(reboot_computer_5)"];
+43 -> 44 [label="True"];
+45 [label="(reboot_computer_6)"];
+43 -> 45 [style="dashed", label="False"];
+42 -> 43 [label="True"];
+46 [label="(reboot_computer_6)"];
+42 -> 46 [style="dashed", label="False"];
+41 -> 42 [label="True"];
+47 [label="(reboot_computer_6)"];
+41 -> 47 [style="dashed", label="False"];
+29 -> 41 [style="dashed", label="False"];
+15 -> 29 [style="dashed", label="False"];
+1 -> 15 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+48 [label="computer_0_running <= 0.5
+--------------
+
+computer_0_running <= 0.5 : 1.941
+computer_1_running <= 0.5 : 2.153
+computer_2_running <= 0.5 : 2.107
+computer_3_running <= 0.5 : 2.219
+computer_4_running <= 0.5 : 2.074
+computer_5_running <= 0.5 : 2.084
+computer_7_running <= 0.5 : 2.013"];
+49 [label="computer_2_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.353
+computer_2_running <= 0.5 : 1.3
+computer_3_running <= 0.5 : 1.338
+computer_4_running <= 0.5 : 1.3
+computer_5_running <= 0.5 : 1.3
+computer_7_running <= 0.5 : 1.353"];
+50 [label="computer_4_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.528
+computer_3_running <= 0.5 : 1.487
+computer_4_running <= 0.5 : 1.39
+computer_5_running <= 0.5 : 1.39
+computer_7_running <= 0.5 : 1.528"];
+51 [label="computer_5_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.0
+computer_3_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+52 [label="(reboot_computer_0)"];
+51 -> 52 [label="True"];
+53 [label="(reboot_computer_4)"];
+51 -> 53 [style="dashed", label="False"];
+50 -> 51 [label="True"];
+54 [label="computer_5_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.625
+computer_3_running <= 0.5 : 1.406
+computer_5_running <= 0.5 : 0.781
+computer_7_running <= 0.5 : 1.625"];
+55 [label="(reboot_computer_4)"];
+54 -> 55 [label="True"];
+56 [label="computer_3_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.25
+computer_3_running <= 0.5 : 0.811
+computer_7_running <= 0.5 : 1.25"];
+57 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.5
+computer_7_running <= 0.5 : 0.5"];
+58 [label="computer_7_running <= 0.5
+--------------
+
+computer_7_running <= 0.5 : 0.0"];
+59 [label="(reboot_computer_5)"];
+58 -> 59 [label="True"];
+60 [label="(reboot_computer_0)"];
+58 -> 60 [style="dashed", label="False"];
+57 -> 58 [label="True"];
+61 [label="(reboot_computer_0)"];
+57 -> 61 [style="dashed", label="False"];
+56 -> 57 [label="True"];
+62 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.5
+computer_7_running <= 0.5 : 0.5"];
+63 [label="computer_7_running <= 0.5
+--------------
+
+computer_7_running <= 0.5 : 0.0"];
+64 [label="(reboot_computer_5)"];
+63 -> 64 [label="True"];
+65 [label="(reboot_computer_2)"];
+63 -> 65 [style="dashed", label="False"];
+62 -> 63 [label="True"];
+66 [label="(reboot_computer_2)"];
+62 -> 66 [style="dashed", label="False"];
+56 -> 62 [style="dashed", label="False"];
+54 -> 56 [style="dashed", label="False"];
+50 -> 54 [style="dashed", label="False"];
+49 -> 50 [label="True"];
+67 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.0
+computer_3_running <= 0.5 : 1.0
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+68 [label="computer_3_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+69 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+70 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+71 [label="(reboot_computer_0)"];
+70 -> 71 [label="True"];
+72 [label="(reboot_computer_4)"];
+70 -> 72 [style="dashed", label="False"];
+69 -> 70 [label="True"];
+73 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+74 [label="(reboot_computer_4)"];
+73 -> 74 [label="True"];
+75 [label="(reboot_computer_0)"];
+73 -> 75 [style="dashed", label="False"];
+69 -> 73 [style="dashed", label="False"];
+68 -> 69 [label="True"];
+76 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+77 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+78 [label="(reboot_computer_0)"];
+77 -> 78 [label="True"];
+79 [label="(reboot_computer_4)"];
+77 -> 79 [style="dashed", label="False"];
+76 -> 77 [label="True"];
+80 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+81 [label="(reboot_computer_4)"];
+80 -> 81 [label="True"];
+82 [label="(reboot_computer_0)"];
+80 -> 82 [style="dashed", label="False"];
+76 -> 80 [style="dashed", label="False"];
+68 -> 76 [style="dashed", label="False"];
+67 -> 68 [label="True"];
+83 [label="computer_3_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+84 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+85 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+86 [label="(reboot_computer_0)"];
+85 -> 86 [label="True"];
+87 [label="(reboot_computer_4)"];
+85 -> 87 [style="dashed", label="False"];
+84 -> 85 [label="True"];
+88 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+89 [label="(reboot_computer_4)"];
+88 -> 89 [label="True"];
+90 [label="(reboot_computer_0)"];
+88 -> 90 [style="dashed", label="False"];
+84 -> 88 [style="dashed", label="False"];
+83 -> 84 [label="True"];
+91 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0
+computer_7_running <= 0.5 : 1.0"];
+92 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+93 [label="(reboot_computer_0)"];
+92 -> 93 [label="True"];
+94 [label="(reboot_computer_4)"];
+92 -> 94 [style="dashed", label="False"];
+91 -> 92 [label="True"];
+95 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0
+computer_7_running <= 0.5 : 1.0"];
+96 [label="(reboot_computer_4)"];
+95 -> 96 [label="True"];
+97 [label="(reboot_computer_0)"];
+95 -> 97 [style="dashed", label="False"];
+91 -> 95 [style="dashed", label="False"];
+83 -> 91 [style="dashed", label="False"];
+67 -> 83 [style="dashed", label="False"];
+49 -> 67 [style="dashed", label="False"];
+48 -> 49 [label="True"];
+98 [label="computer_7_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 2.273
+computer_2_running <= 0.5 : 2.121
+computer_3_running <= 0.5 : 2.442
+computer_4_running <= 0.5 : 2.134
+computer_5_running <= 0.5 : 2.14
+computer_7_running <= 0.5 : 1.995"];
+99 [label="computer_4_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.54
+computer_2_running <= 0.5 : 1.374
+computer_3_running <= 0.5 : 1.631
+computer_4_running <= 0.5 : 1.158
+computer_5_running <= 0.5 : 1.158"];
+100 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.406
+computer_2_running <= 0.5 : 0.406
+computer_3_running <= 0.5 : 0.544
+computer_5_running <= 0.5 : 0.406"];
+101 [label="(reboot_computer_7)"];
+100 -> 101 [label="True"];
+102 [label="computer_2_running <= 0.5
+--------------
+
+computer_2_running <= 0.5 : 0.5
+computer_3_running <= 0.5 : 0.811
+computer_5_running <= 0.5 : 0.5"];
+103 [label="computer_5_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 0.0"];
+104 [label="(reboot_computer_0)"];
+103 -> 104 [label="True"];
+105 [label="(reboot_computer_7)"];
+103 -> 105 [style="dashed", label="False"];
+102 -> 103 [label="True"];
+106 [label="(reboot_computer_7)"];
+102 -> 106 [style="dashed", label="False"];
+100 -> 102 [style="dashed", label="False"];
+99 -> 100 [label="True"];
+107 [label="computer_5_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.703
+computer_2_running <= 0.5 : 1.203
+computer_3_running <= 0.5 : 1.703
+computer_5_running <= 0.5 : 0.772"];
+108 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.406
+computer_2_running <= 0.5 : 0.406
+computer_3_running <= 0.5 : 0.406"];
+109 [label="(reboot_computer_4)"];
+108 -> 109 [label="True"];
+110 [label="computer_2_running <= 0.5
+--------------
+
+computer_2_running <= 0.5 : 0.5
+computer_3_running <= 0.5 : 0.5"];
+111 [label="computer_3_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 0.0"];
+112 [label="(reboot_computer_0)"];
+111 -> 112 [label="True"];
+113 [label="(reboot_computer_4)"];
+111 -> 113 [style="dashed", label="False"];
+110 -> 111 [label="True"];
+114 [label="(reboot_computer_4)"];
+110 -> 114 [style="dashed", label="False"];
+108 -> 110 [style="dashed", label="False"];
+107 -> 108 [label="True"];
+115 [label="computer_2_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.0
+computer_2_running <= 0.5 : 0.0
+computer_3_running <= 0.5 : 1.0"];
+116 [label="(reboot_computer_2)"];
+115 -> 116 [label="True"];
+117 [label="(reboot_computer_7)"];
+115 -> 117 [style="dashed", label="False"];
+107 -> 115 [style="dashed", label="False"];
+99 -> 107 [style="dashed", label="False"];
+98 -> 99 [label="True"];
+118 [label="computer_2_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.964
+computer_2_running <= 0.5 : 1.827
+computer_3_running <= 0.5 : 2.251
+computer_4_running <= 0.5 : 2.043
+computer_5_running <= 0.5 : 2.015"];
+119 [label="computer_5_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.358
+computer_3_running <= 0.5 : 1.524
+computer_4_running <= 0.5 : 1.108
+computer_5_running <= 0.5 : 1.022"];
+120 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.406
+computer_3_running <= 0.5 : 0.406
+computer_4_running <= 0.5 : 0.406"];
+121 [label="computer_3_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 0.5
+computer_4_running <= 0.5 : 0.5"];
+122 [label="(reboot_computer_0)"];
+121 -> 122 [label="True"];
+123 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 0.0"];
+124 [label="(reboot_computer_0)"];
+123 -> 124 [label="True"];
+125 [label="(reboot_computer_4)"];
+123 -> 125 [style="dashed", label="False"];
+121 -> 123 [style="dashed", label="False"];
+120 -> 121 [label="True"];
+126 [label="(reboot_computer_0)"];
+120 -> 126 [style="dashed", label="False"];
+119 -> 120 [label="True"];
+127 [label="computer_4_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.0
+computer_3_running <= 0.5 : 1.5
+computer_4_running <= 0.5 : 0.5"];
+128 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 0.0
+computer_3_running <= 0.5 : 1.0"];
+129 [label="(reboot_computer_1)"];
+128 -> 129 [label="True"];
+130 [label="(reboot_computer_0)"];
+128 -> 130 [style="dashed", label="False"];
+127 -> 128 [label="True"];
+131 [label="(reboot_computer_2)"];
+127 -> 131 [style="dashed", label="False"];
+119 -> 127 [style="dashed", label="False"];
+118 -> 119 [label="True"];
+132 [label="computer_1_running <= 0.5
+--------------
+
+computer_1_running <= 0.5 : 1.406
+computer_3_running <= 0.5 : 1.811
+computer_4_running <= 0.5 : 1.75
+computer_5_running <= 0.5 : 1.75"];
+133 [label="computer_4_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 0.811
+computer_4_running <= 0.5 : 0.5
+computer_5_running <= 0.5 : 0.5"];
+134 [label="(reboot_computer_1)"];
+133 -> 134 [label="True"];
+135 [label="computer_5_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 0.0"];
+136 [label="(reboot_computer_4)"];
+135 -> 136 [label="True"];
+137 [label="(reboot_computer_1)"];
+135 -> 137 [style="dashed", label="False"];
+133 -> 135 [style="dashed", label="False"];
+132 -> 133 [label="True"];
+138 [label="computer_3_running <= 0.5
+--------------
+
+computer_3_running <= 0.5 : 1.5
+computer_4_running <= 0.5 : 1.5
+computer_5_running <= 0.5 : 1.5"];
+139 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0"];
+140 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0"];
+141 [label="(reboot_computer_5)"];
+140 -> 141 [label="True"];
+142 [label="(reboot_computer_4)"];
+140 -> 142 [style="dashed", label="False"];
+139 -> 140 [label="True"];
+143 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0"];
+144 [label="(reboot_computer_4)"];
+143 -> 144 [label="True"];
+145 [label="(reboot_computer_3)"];
+143 -> 145 [style="dashed", label="False"];
+139 -> 143 [style="dashed", label="False"];
+138 -> 139 [label="True"];
+146 [label="computer_4_running <= 0.5
+--------------
+
+computer_4_running <= 0.5 : 1.0
+computer_5_running <= 0.5 : 1.0"];
+147 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0"];
+148 [label="(reboot_computer_6)"];
+147 -> 148 [label="True"];
+149 [label="(reboot_computer_4)"];
+147 -> 149 [style="dashed", label="False"];
+146 -> 147 [label="True"];
+150 [label="computer_5_running <= 0.5
+--------------
+
+computer_5_running <= 0.5 : 0.0"];
+151 [label="(reboot_computer_4)"];
+150 -> 151 [label="True"];
+152 [label="(reboot_computer_0)"];
+150 -> 152 [style="dashed", label="False"];
+146 -> 150 [style="dashed", label="False"];
+138 -> 146 [style="dashed", label="False"];
+132 -> 138 [style="dashed", label="False"];
+118 -> 132 [style="dashed", label="False"];
+98 -> 118 [style="dashed", label="False"];
+48 -> 98 [style="dashed", label="False"];
+0 -> 48 [style="dashed", label="False"];
+
+}

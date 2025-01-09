@@ -1,0 +1,7222 @@
+[
+    {
+        "c": [
+            {
+                "index": 1,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 7,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 9,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 12,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 15,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 18,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 21,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 24,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 27,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 30,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 33,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 36,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 39,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 42,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 45,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 48,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 51,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 54,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 57,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 60,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 63,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 66,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 69,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 72,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 75,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 78,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 81,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 84,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 87,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 90,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 94,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 97,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 99,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 102,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 105,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 108,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 111,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 114,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 117,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 120,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 123,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 126,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 129,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 132,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 135,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 138,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 141,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 144,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 147,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 150,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 153,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 156,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 159,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 162,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 165,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 168,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 171,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 174,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 177,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 180,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 184,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 187,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 190,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 193,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 196,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 199,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 202,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 205,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 207,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 210,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 214,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 217,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 219,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 222,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 225,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 229,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 232,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 234,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 237,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 240,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 244,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 247,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 249,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 252,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 255,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 259,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 262,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 264,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 267,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 270,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 274,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 277,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 280,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 283,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 286,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 289,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 292,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 294,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 297,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 300,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 304,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 306,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 309,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 312,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 315,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 319,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 321,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 324,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 327,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 330,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 334,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 336,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 339,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 342,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 345,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 349,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 351,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 354,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 357,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 360,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 364,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 367,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 370,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 373,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 376,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 379,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 382,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 384,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 387,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 390,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 394,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 397,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 399,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 402,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 405,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 409,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 412,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 414,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 417,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 420,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 424,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 426,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 429,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 432,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 435,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 439,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 441,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 444,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 447,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 450,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 454,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 457,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 460,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 463,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 466,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 469,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 472,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 474,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 477,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 480,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 484,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 487,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 489,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 492,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 495,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 499,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 501,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 504,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 507,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 510,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 514,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 516,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 519,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 522,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 525,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 529,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 531,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 534,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 537,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 540,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 0,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 544,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 547,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 550,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 553,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 556,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 559,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 562,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 565,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 568,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 571,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 574,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 577,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 580,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 583,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 586,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 589,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 592,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 595,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 598,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 601,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 604,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 607,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 610,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 613,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 616,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 619,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 622,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 625,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 628,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 631,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 0,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 634,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 636,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 639,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 642,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 645,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 649,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 651,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 654,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 657,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 660,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 664,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 666,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 669,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 672,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 675,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 679,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 681,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 684,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 687,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 690,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 694,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 696,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 699,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 702,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 705,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 709,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 711,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 714,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 717,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 720,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 1,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 723,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 726,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 729,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 732,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 735,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 738,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 741,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 744,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 747,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 750,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 754,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 756,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 759,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 762,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 765,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 769,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 771,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 774,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 777,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 780,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 784,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 786,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 789,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 792,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 795,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 799,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 801,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 804,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 807,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 810,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 2,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 813,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 816,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 819,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 822,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 825,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 828,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 831,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 834,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 837,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 840,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 844,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 846,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 849,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 852,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 855,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 858,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 861,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 864,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 867,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 870,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 873,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 876,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 879,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 882,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 885,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 889,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 891,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 894,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 897,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 900,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 3,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 903,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 906,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 909,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 912,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 915,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 918,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 921,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 924,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 927,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 930,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 934,
+                "labels": [
+                    "(wait)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(wait)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 936,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 939,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 942,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 945,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 948,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 951,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 954,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 957,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 960,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 963,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 966,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 969,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 972,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 975,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 978,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 981,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 984,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 987,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 990,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 4,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 993,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 996,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 999,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1002,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1005,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 0,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1008,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1011,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1014,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1017,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1020,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 1,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1023,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1026,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1029,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1032,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1035,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 2,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1038,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1041,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1044,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1047,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1050,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 3,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1053,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1056,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1059,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1062,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1065,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 4,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1068,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1071,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1074,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1077,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1080,
+                "labels": [
+                    "(switch_light)"
+                ],
+                "prob": 1.0,
+                "origin": {
+                    "action-label": "(switch_light)"
+                }
+            }
+        ],
+        "s": {
+            "cars_left": 5,
+            "cars_right": 5,
+            "green_side": 1,
+            "waiting_time": 5
+        }
+    }
+]
