@@ -15,12 +15,7 @@ class Variable:
         self.domain = domain
 
     @classmethod
-    def create_variable(cls, variable, name, state_valuations):
-        domain = set()
-        for state,valuation in enumerate(state_valuations):
-            value = valuation[variable]
-            domain.add(value)
-        domain = list(domain)
+    def create_variable(cls, variable, name, domain):
         # conversion of boolean variables to integers
         domain_new = []
         for value in domain:
@@ -177,13 +172,24 @@ class DecisionTreeNode:
             self.action = self.child_true.action
             self.child_true = self.child_false = None
 
+    def branch_expression(self, variables, true_branch=True):
+        var = variables[self.variable]
+        if true_branch:
+            return f"{var.name}<={var.domain[self.variable_bound]}"
+        else:
+            return f"{var.name}>{var.domain[self.variable_bound]}"
+
+    def path_expression(self, variables):
+        if self.parent is None:
+            return []
+        return self.parent.path_expression(variables) + [self.parent.branch_expression(variables,true_branch=self.is_true_child)]
+
     def to_string(self, variables, action_labels, indent_level=0, indent_size=2):
         indent = " "*indent_level*indent_size
         if self.is_terminal:
             return indent + f"{action_labels[self.action]}" + "\n"
-        var = variables[self.variable]
         s = ""
-        s += indent + f"if {var.name}<={var.domain[self.variable_bound]}:" + "\n"
+        s += indent + f"if {self.branch_expression(variables)}:" + "\n"
         s += self.child_true.to_string(variables,action_labels,indent_level+1)
         s += indent + f"else:" + "\n"
         s += self.child_false.to_string(variables,action_labels,indent_level+1)
@@ -231,9 +237,8 @@ class DecisionTreeNode:
 
 class DecisionTree:
 
-    def __init__(self, quotient, variables, state_valuations):
+    def __init__(self, quotient, variables):
         self.quotient = quotient
-        self.state_valuations = state_valuations
         self.variables = variables
         self.reset()
 
@@ -301,12 +306,28 @@ class DecisionTree:
             node_info[node.identifier] = (parent,child_true,child_false)
         return node_info
 
-    def simplify(self, target_state_mask):
-        state_valuations = [self.state_valuations[state] for state in ~target_state_mask]
+    def simplify(self, state_valuations):
         self.root.simplify(self.variables, state_valuations)
 
     def to_string(self):
         return self.root.to_string(self.variables,self.quotient.action_labels)
+
+    def to_prism(self, indent_size=2):
+        indent = " "*indent_size
+        s = ""
+        s += "module scheduler\n"
+        for terminal in self.collect_terminals():
+            action = f"{self.quotient.action_labels[terminal.action]}"
+            guard = " & ".join(terminal.path_expression(self.variables))
+            if guard == "":
+                guard = "true"
+            s += f"{indent}[{action}] {guard} -> true;\n"
+        # s += indent + f"if {var.name}<={var.domain[self.variable_bound]}:" + "\n"
+        # s += self.child_true.to_string(variables,action_labels,indent_level+1)
+        # s += indent + f"else:" + "\n"
+        # s += self.child_false.to_string(variables,action_labels,indent_level+1)
+        s += "endmodule\n"
+        return s
 
     def to_graphviz(self, highlight_nodes=[]):
         logging.getLogger("graphviz").setLevel(logging.WARNING)
@@ -318,7 +339,10 @@ class DecisionTree:
     def to_scheduler_json(self):
         scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
         for state in range(self.quotient.quotient_mdp.nr_states):
-            action_index = self.root.get_action_for_state(self.quotient, state, self.state_valuations[state])
+            if self.quotient.state_is_relevant_bv.get(state):
+                action_index = self.root.get_action_for_state(self.quotient, state, self.quotient.relevant_state_valuations[state])
+            else:
+                action_index = 0
             scheduler_choice = stormpy.storage.SchedulerChoice(action_index)
             scheduler.set_choice(scheduler_choice, state)
             
@@ -351,53 +375,91 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     # if true, an explicit action executing a random choice of an available action will be added to each state
     add_dont_care_action = False
+    # if true, irrelevant states will not be considered for tree mapping
+    filter_irrelevant_states = True
+
+    @classmethod
+    def get_state_valuations(cls, model):
+        ''' Identify variable names and extract state valuation in the same order. '''
+        assert model.has_state_valuations(), "model has no state valuations"
+        # get name
+        sv = model.state_valuations
+        variable_name = None
+        state_valuations = []
+        for state in range(model.nr_states):
+            valuation = json.loads(str(sv.get_json(state)))
+            if variable_name is None:
+                variable_name = list(valuation.keys())
+            valuation = [valuation[var_name] for var_name in variable_name]
+            state_valuations.append(valuation)
+        return variable_name,state_valuations
 
     def __init__(self, mdp, specification, tree_helper=None):
         super().__init__(specification=specification)
-        updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
-        if updated is not None: mdp = updated
+
+        # mask of relevant states: non-absorbing states with more than one action
+        self.state_is_relevant = None
+        # bitvector of relevant states
+        self.state_is_relevant_bv = None
+
+        # list of relevant variables: variables having at least two different options on relevant states
+        self.variables = None
+        # for every state, a valuation of relevant variables; contains empty list for irrelevant states
+        self.relevant_state_valuations = None
+        # decision tree obtained after reset_tree
+        self.decision_tree = None
+
+        # deprecated
+        # updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
+        # if updated is not None: mdp = updated
         action_labels,_ = payntbind.synthesis.extractActionLabels(mdp)
         if "__random__" not in action_labels and MdpQuotient.add_dont_care_action:
             logger.debug("adding explicit don't-care action to every state...")
             mdp = payntbind.synthesis.addDontCareAction(mdp)
 
+        # identify relevant states
+        self.state_is_relevant = [True for state in range(mdp.nr_states)]
+        if MdpQuotient.filter_irrelevant_states:
+            state_is_absorbing = self.identify_absorbing_states(mdp)
+            self.state_is_relevant = [self.state_is_relevant[state] and not absorbing for state,absorbing in enumerate(state_is_absorbing)]
+            state_has_actions = self.identify_states_with_actions(mdp)
+            self.state_is_relevant = [self.state_is_relevant[state] and has_actions for state,has_actions in enumerate(state_has_actions)]
+        self.state_is_relevant_bv = stormpy.BitVector(mdp.nr_states)
+        [self.state_is_relevant_bv.set(state,value) for state,value in enumerate(self.state_is_relevant)]
+        logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
+
         self.quotient_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(mdp)
         logger.info(f"MDP has {len(self.action_labels)} actions")
+        # TODO filter irrelevant actions?
 
-        assert mdp.has_state_valuations(), "model has no state valuations"
-        sv = mdp.state_valuations
-        valuation = json.loads(str(sv.get_json(0)))
-        variable_name = [var_name for var_name in valuation]
-        state_valuations = []
-        for state in range(mdp.nr_states):
-            valuation = json.loads(str(sv.get_json(state)))
-            valuation = [valuation[var_name] for var_name in variable_name]
-            state_valuations.append(valuation)
-        variables = [Variable.create_variable(var,var_name,state_valuations) for var,var_name in enumerate(variable_name)]
-        variable_mask = [len(v.domain) > 1 for v in variables]
-        variables = [v for index,v in enumerate(variables) if variable_mask[index]]
-        for state,valuation in enumerate(state_valuations):
-            state_valuations[state] = [value for index,value in enumerate(valuation) if variable_mask[index]]
-        self.variables = variables
-        self.state_valuations = state_valuations
+        # get variable domains on relevant states
+        variable_name,state_valuations = self.get_state_valuations(mdp)
+        num_variables = len(variable_name)
+        variable_domain = [set() for variable in range(num_variables)]
+        for state in self.state_is_relevant_bv:
+            valuation = state_valuations[state]
+            for variable in range(num_variables):
+                variable_domain[variable].add(valuation[variable])
+        variable_domain = [sorted(domain) for domain in variable_domain]
+
+        # filter variables having only one option
+        variable_mask = [len(domain) > 1 for domain in variable_domain]
+        variable_name = [value for variable,value in enumerate(variable_name) if variable_mask[variable]]
+        variable_domain = [value for variable,value in enumerate(variable_domain) if variable_mask[variable]]
+        # we filter unused variables from state valuations: this means that multiple states can now have the same "valuation"
+        state_valuations = [
+            [value for variable,value in enumerate(valuations) if variable_mask[variable]]
+            for valuations in state_valuations
+        ]
+
+        self.variables = [Variable.create_variable(variable,name,variable_domain[variable]) for variable,name in enumerate(variable_name)]
+        self.relevant_state_valuations = state_valuations
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
 
         self.tree_helper = tree_helper
 
-        self.decision_tree = None
-        self.coloring = None
-        self.family = None
-        self.splitter_count = None
-
-    def state_valuation_to_state(self, valuation):
-        valuation = [valuation[v.name] for v in self.variables]
-        for state,state_valuation in enumerate(self.state_valuations):
-            if valuation == state_valuation:
-                return state
-        else:
-            assert False, "state valuation not found"
 
     def get_variable_id(self, var):
         for id, variable in enumerate(self.variables):
@@ -407,7 +469,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def get_states_satisfying_predicate(self, variable, bound, leq=True):
         states = []
-        for state,state_valuation in enumerate(self.state_valuations):
+        for state,state_valuation in enumerate(self.relevant_state_valuations):
             for id, var in enumerate(self.variables):
                 if var.name == variable:
                     break
@@ -451,7 +513,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         return open_variables
     
     def get_chosen_action_for_state_from_tree_helper(self, state):
-        state_valuation = self.state_valuations[state]
+        state_valuation = self.relevant_state_valuations[state]
         current_node = self.tree_helper[0]
         while not current_node['leaf']:
             var_id = self.get_variable_id(current_node["chosen"][0])
@@ -464,7 +526,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def get_selected_choices_from_tree_helper(self, state_to_exclude=[]):
         selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
         for state in range(self.quotient_mdp.nr_states):
-            if state in state_to_exclude:
+            if state in state_to_exclude or self.state_is_relevant_bv.get(state) == False:
                 for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
                     selected_choices.set(choice, True)
                 continue
@@ -482,11 +544,18 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
 
     def scheduler_json_to_choices(self, scheduler_json):
+        variable_name,state_valuations = self.get_state_valuations(self.quotient_mdp)
         ndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
         assert self.quotient_mdp.nr_states == len(scheduler_json)
         state_to_choice = self.empty_scheduler()
         for state_decision in scheduler_json:
-            state = self.state_valuation_to_state(state_decision["s"])
+            valuation = [state_decision["s"][name] for name in variable_name]
+            for state,state_valuation in enumerate(state_valuations):
+                if valuation == state_valuation:
+                    break
+            else:
+                assert False, "state valuation not found"
+
             actions = state_decision["c"]
             assert len(actions) == 1
             action_labels = actions[0]["labels"]
@@ -509,7 +578,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     def build_tree_helper_tree(self, tree_helper=None):
         if tree_helper is None:
             tree_helper = self.tree_helper
-        helper_tree = DecisionTree(self,self.variables,self.state_valuations)
+        helper_tree = DecisionTree(self,self.variables)
         helper_tree.build_from_tree_helper(tree_helper)
         return helper_tree
     
@@ -541,7 +610,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         Rebuild the decision tree template, the design space and the coloring.
         '''
         logger.debug(f"building tree of depth {depth}")
-        self.decision_tree = DecisionTree(self,self.variables,self.state_valuations)
+        self.decision_tree = DecisionTree(self,self.variables)
         self.decision_tree.set_depth(depth)
 
         variables = self.decision_tree.variables
@@ -549,7 +618,8 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         variable_domain = [v.domain for v in variables]
         tree_list = self.decision_tree.to_list()
         self.coloring = payntbind.synthesis.ColoringSmt(
-            self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action, self.quotient_mdp.state_valuations,
+            self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action,
+            self.quotient_mdp.state_valuations, self.state_is_relevant_bv,
             variable_name, variable_domain, tree_list, enable_harmonization
         )
         self.coloring.enableStateExploration(self.quotient_mdp)
@@ -577,10 +647,9 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 variable = variable_name.index(hole_type)
                 option_labels = variables[variable].hole_domain
             self.family.add_hole(hole_name, option_labels)
-        self.splitter_count = [0] * self.family.num_holes
         self.decision_tree.root.associate_holes(node_hole_info)
 
-
+    # TODO: remove this method
     def get_subtree_family(self, node_id, variables):
         subtree_family = self.family.copy()
         
@@ -609,6 +678,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
         return subtree_family
     
+    # TODO: remove this method
     def get_subfamily_from_used_predicates(self, family):
         used_predicates_dict = {}
         for helper_node in self.tree_helper:
@@ -738,7 +808,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
         splitters = self.holes_with_max_score(scores)
         splitter = splitters[0]
-        self.splitter_count[splitter] += 1
         if self.is_action_hole[splitter] or self.is_decision_hole[splitter]:
             assert len(hole_assignments[splitter]) > 1
             core_suboptions,other_suboptions = self.suboptions_enumerate(mdp, splitter, hole_assignments[splitter])

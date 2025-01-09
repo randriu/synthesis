@@ -36,6 +36,7 @@ public:
         std::vector<uint64_t> const& row_groups,
         std::vector<uint64_t> const& choice_to_action,
         storm::storage::sparse::StateValuations const& state_valuations,
+        BitVector const& state_is_relevant,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain,
         std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
@@ -51,9 +52,11 @@ public:
     /** For each hole, get a list of name-type pairs.  */
     std::vector<std::tuple<uint64_t,std::string,std::string>> getFamilyInfo();
 
-    /** Get a mask of choices compatible with the family. */
+    /**
+     * Get a mask of choices compatible with the family. For irrelevant states, only the first choice will be enabled.
+     */
     BitVector selectCompatibleChoices(Family const& subfamily);
-    /** Get a mask of sub-choices of \p base_choices compatible with the family. */
+    /** Get a mask of sub-choices of \p base_choices compatible with the family.*/
     BitVector selectCompatibleChoices(Family const& subfamily, BitVector const& base_choices);
 
     /**
@@ -84,6 +87,8 @@ protected:
 
     /** Valuation of each state. */
     std::vector<std::vector<uint64_t>> state_valuation;
+    /** Only relevant states are taken into account when checking consistency. */
+    const BitVector state_is_relevant;
 
     /** Row groups of the quotient. */
     const std::vector<uint64_t> row_groups;
@@ -123,13 +128,11 @@ protected:
     Family family;
 
     /** Whether efficient state exploration has been enabled. */
-    bool enable_state_exploration = false;
+    bool state_exploration_enabled = false;
     /** The initial state. */
     uint64_t initial_state;
     /** For each state, a list of target states. */
     std::vector<std::vector<uint64_t>> choice_destinations;
-    /** Add unexplored destinations of the given choice to the queue and mark them as reached. */
-    void visitChoice(uint64_t choice, BitVector & state_reached, std::queue<uint64_t> & unexplored_states);
 
     /** Check the current SMT formula. */
     bool check();
@@ -151,8 +154,8 @@ protected:
     /** For each state, whether (in the last subfamily) the path was enabled. */
     std::vector<BitVector> state_path_enabled;
 
-    /** Check whether (in the subfamily) the choice is enabled. */
-    bool isChoiceEnabled(Family const& subfamily, uint64_t state, uint64_t choice);
+    /** Add unexplored destinations of the given choice to the queue and mark them as reached. */
+    void visitChoice(uint64_t choice, BitVector & state_reached, std::queue<uint64_t> & unexplored_states);
 
     bool PRINT_UNSAT_CORE = false;
     void loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily);

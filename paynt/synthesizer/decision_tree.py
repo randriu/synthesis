@@ -176,8 +176,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             # create new tree
             if subtree_synthesizer.best_tree is not None:
                 logger.info(f"admissible subtree found from node {node['id']}")
-                target_states = subtree_quotient.identify_target_states()
-                subtree_synthesizer.best_tree.simplify(target_states)
+                relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
+                subtree_synthesizer.best_tree.simplify(relevant_state_valuations)
                 tree_helper_tree.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"])
                 tree_helper_tree.root.assign_identifiers()
                 logger.info(f'new tree has depth {tree_helper_tree.get_depth()} and {len(tree_helper_tree.collect_nodes())} nodes')
@@ -186,8 +186,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 # create scheduler 
                 # print(tree_helper_tree.to_scheduler_json())
 
-                # os.makedirs("subtree_test", exist_ok=True)
-                # open("subtree_test/scheduler.storm.json", "w").write(tree_helper_tree.to_scheduler_json())
+                os.makedirs("subtree_test", exist_ok=True)
+                open("subtree_test/scheduler.storm.json", "w").write(tree_helper_tree.to_scheduler_json())
 
                 command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
                 subprocess.run(command, cwd="subtree_test")
@@ -202,7 +202,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                     logger.info(f"New DtControl tree is smaller")
                 else:
                     logger.info(f"Current PAYNT tree is smaller")
+                self.quotient.tree_helper = new_tree_helper
                 tree_helper_tree = new_tree_helper_tree
+                # print(tree_helper_tree.to_graphviz())
                 node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
 
                 # shutil.rmtree("subtree_test")
@@ -227,6 +229,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def synthesize_tree_sequence(self, opt_result_value, overall_timeout=None, max_depth=None):
         self.best_tree = self.best_tree_value = None
 
+        if max_depth is None:
+            max_depth = SynthesizerDecisionTree.tree_depth+1
         if overall_timeout is None:
             global_timeout = paynt.utils.timer.GlobalTimer.global_timer.time_limit_seconds
             if global_timeout is None: global_timeout = 900
@@ -235,9 +239,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         else:
             tree_sequence_timer = paynt.utils.timer.Timer(overall_timeout)
             tree_sequence_timer.start()
-        depth_timeout = overall_timeout / 2 / SynthesizerDecisionTree.tree_depth
-        if max_depth is None:
-            max_depth = SynthesizerDecisionTree.tree_depth+1
+        depth_timeout = overall_timeout / 2 / (max_depth-1)
         for depth in range(max_depth):
             print()
             self.quotient.reset_tree(depth)
@@ -345,8 +347,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if self.best_tree is None:
             logger.info("no admissible tree found")
         else:
-            target_states = self.quotient.identify_target_states()
-            self.best_tree.simplify(target_states)
+            relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
+            self.best_tree.simplify(relevant_state_valuations)
             depth = self.best_tree.get_depth()
             num_nodes = len(self.best_tree.collect_nonterminals())
             logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
@@ -355,6 +357,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
             # print(self.best_tree.to_graphviz())
+            # logger.info(f"printing the PRISM module below:")
+            # print(self.best_tree.to_prism())
 
             if self.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
