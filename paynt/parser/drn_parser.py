@@ -1,4 +1,3 @@
-from matplotlib import use
 import stormpy
 import payntbind
 
