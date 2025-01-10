@@ -19,6 +19,8 @@
 
 #include <storm/storage/Scheduler.h>
 
+#include <storm/adapters/RationalNumberAdapter.h>
+
 #include <z3++.h>
 
 namespace synthesis {
@@ -290,6 +292,8 @@ void bindings_coloring(py::module& m) {
     m.def("addChoiceLabelsFromJani", &synthesis::addChoiceLabelsFromJani<double>);
 
     m.def("schedulerToStateToGlobalChoice", &synthesis::schedulerToStateToGlobalChoice<double>);
+    m.def("schedulerToStateToGlobalChoiceExact", &synthesis::schedulerToStateToGlobalChoice<storm::RationalNumber>);
+
     m.def("computeInconsistentHoleVariance", &synthesis::computeInconsistentHoleVariance);
 
     m.def("policyToChoicesForFamily", &synthesis::policyToChoicesForFamily);

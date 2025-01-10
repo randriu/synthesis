@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PrismParser:
 
     @classmethod
-    def read_prism(cls, sketch_path, properties_path, relative_error):
+    def read_prism(cls, sketch_path, properties_path, relative_error, use_exact=False):
 
         # parse the program
         prism, hole_definitions = PrismParser.load_sketch_prism(sketch_path)
@@ -41,7 +41,7 @@ class PrismParser:
             prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
         prism = prism.label_unlabelled_commands({})
 
-        specification = PrismParser.parse_specification(properties_path, relative_error, prism)
+        specification = PrismParser.parse_specification(properties_path, relative_error, prism, use_exact=use_exact)
 
         # construct the quotient
         coloring = None
@@ -58,7 +58,7 @@ class PrismParser:
                 obs_evaluator = payntbind.synthesis.ObservationEvaluator(prism, quotient_mdp)
             quotient_mdp = payntbind.synthesis.addChoiceLabelsFromJani(quotient_mdp)
         else:
-            quotient_mdp = paynt.models.model_builder.ModelBuilder.from_prism(prism, specification)
+            quotient_mdp = paynt.models.model_builder.ModelBuilder.from_prism(prism, specification, use_exact)
 
         return prism, quotient_mdp, specification, family, coloring, jani_unfolder, obs_evaluator
 
@@ -192,7 +192,7 @@ class PrismParser:
         return props[0]
 
     @classmethod
-    def parse_specification(cls, properties_path, relative_error=0, prism=None):
+    def parse_specification(cls, properties_path, relative_error=0, prism=None, use_exact=False):
         '''
         Expecting one property per line. The line may be terminated with a semicolon.
         Empty lines or comments are allowed.
@@ -211,7 +211,7 @@ class PrismParser:
             formula = PrismParser.parse_property(line,prism)
             if formula is None:
                 continue
-            prop = paynt.verification.property.construct_property(formula, relative_error)
+            prop = paynt.verification.property.construct_property(formula, relative_error, use_exact)
             properties.append(prop)
 
         specification = paynt.verification.property.Specification(properties)
