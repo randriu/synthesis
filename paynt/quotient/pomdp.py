@@ -63,7 +63,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # ^ this also asserts that states with the same observation have the
         # same number and the same order of available actions
 
-        logger.info(f"constructed {'Exact' if self.pomdp.is_exact else ''} POMDP having {self.observations} observations.")
+        logger.info(f"constructed {'exact' if self.pomdp.is_exact else ''} POMDP having {self.observations} observations.")
 
         state_obs = self.pomdp.observations.copy()
 
