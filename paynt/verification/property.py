@@ -58,7 +58,7 @@ class Property:
     # model checking environment (method & precision)
     environment = None
     # model checking precision
-    model_checking_precision = 1e-6
+    model_checking_precision = 1e-4
 
     @classmethod
     def set_model_checking_precision(cls, precision):
