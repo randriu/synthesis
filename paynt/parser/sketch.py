@@ -132,7 +132,6 @@ class Sketch:
                 pass
 
         assert filetype is not None, "unknown format of input file"
-        logger.info(str(explicit_quotient))
         logger.info("sketch parsing OK")
 
         paynt.verification.property.Property.initialize()
