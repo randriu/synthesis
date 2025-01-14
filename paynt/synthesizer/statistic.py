@@ -74,9 +74,9 @@ class Statistic:
         ''' Identify the type of the model and count corresponding iteration. '''
         if isinstance(model, paynt.models.models.Mdp):
             model = model.model
-        if type(model) == stormpy.storage.SparseDtmc or type(model) == stormpy.storage.SparseExactDtmc:
+        if type(model) in [stormpy.storage.SparseDtmc, stormpy.storage.SparseExactDtmc]:
             self.iteration_dtmc(model.nr_states)
-        elif type(model) == stormpy.storage.SparseMdp or type(model) == stormpy.storage.SparseExactMdp:
+        elif type(model) in [stormpy.storage.SparseMdp, stormpy.storage.SparseExactMdp]:
             self.iteration_mdp(model.nr_states)
         else:
             logger.debug(f"unknown model type {type(model)}")
