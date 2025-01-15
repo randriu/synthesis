@@ -115,7 +115,6 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
             self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
 
-
     def synthesize_one(self, family):
         families = [family]
         while families:

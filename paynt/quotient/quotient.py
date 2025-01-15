@@ -96,6 +96,7 @@ class Quotient:
     def build_assignment(self, family):
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
+        assert choices.number_of_set_bits() > 0
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         model = Quotient.mdp_to_dtmc(mdp)
         return paynt.models.models.SubMdp(model,state_map,choice_map)

@@ -176,6 +176,14 @@ z3::expr TerminalNode::substituteActionExpression(std::vector<bool> const& path,
     return action_hole.solver_variable == (int)action;
 }
 
+z3::expr TerminalNode::substituteActionExpression(std::vector<bool> const& path, std::vector<uint64_t> const& actions) const {
+    z3::expr_vector clauses(ctx);
+    for(uint64_t action: actions) {
+        clauses.push_back(substituteActionExpression(path,action));
+    }
+    return z3::mk_or(clauses);
+}
+
 void TerminalNode::createPrefixSubstitutionsHarmonizing(z3::expr_vector const& state_valuation) {
     //
 }
@@ -185,9 +193,17 @@ void TerminalNode::substitutePrefixExpressionHarmonizing(std::vector<bool> const
 }
 
 z3::expr TerminalNode::substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const {
-    return action_hole.solver_variable == (int)action or (harmonizing_variable == (int)action_hole.hole and action_hole.solver_variable_harm == (int)action);
+    return substituteActionExpression(path,action) or (harmonizing_variable == (int)action_hole.hole and action_hole.solver_variable_harm == (int)action);
 }
 
+z3::expr TerminalNode::substituteActionExpressionHarmonizing(std::vector<bool> const& path, std::vector<uint64_t> const& actions, z3::expr const& harmonizing_variable) const {
+    z3::expr_vector clauses(ctx);
+    for(uint64_t action: actions) {
+        clauses.push_back(action_hole.solver_variable_harm == (int)action);
+    }
+    z3::expr harmonizing_options = z3::mk_or(clauses);
+    return substituteActionExpression(path,actions) or (harmonizing_variable == (int)action_hole.hole and harmonizing_options);
+}
 
 void TerminalNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver) const {
     action_hole.addDomainEncoding(subfamily,solver);
@@ -412,6 +428,10 @@ z3::expr InnerNode::substituteActionExpression(std::vector<bool> const& path, ui
     return getChild(path[depth])->substituteActionExpression(path,action);
 }
 
+z3::expr InnerNode::substituteActionExpression(std::vector<bool> const& path, std::vector<uint64_t> const& actions) const {
+    return getChild(path[depth])->substituteActionExpression(path,actions);
+}
+
 /*void InnerNode::substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector const& state_valuation, z3::expr_vector & substituted) const {
     bool step_to_true_child = path[depth];
     z3::expr step = step_to_true_child ? step_true_harm : step_false_harm;
@@ -433,9 +453,12 @@ void InnerNode::substitutePrefixExpressionHarmonizing(std::vector<bool> const& p
 }
 
 
-
 z3::expr InnerNode::substituteActionExpressionHarmonizing(std::vector<bool> const& path, uint64_t action, z3::expr const& harmonizing_variable) const {
     return getChild(path[depth])->substituteActionExpressionHarmonizing(path,action,harmonizing_variable);
+}
+
+z3::expr InnerNode::substituteActionExpressionHarmonizing(std::vector<bool> const& path, std::vector<uint64_t> const& actions, z3::expr const& harmonizing_variable) const {
+    return getChild(path[depth])->substituteActionExpressionHarmonizing(path,actions,harmonizing_variable);
 }
 
 

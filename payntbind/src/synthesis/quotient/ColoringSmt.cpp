@@ -14,13 +14,16 @@ template<typename ValueType>
 ColoringSmt<ValueType>::ColoringSmt(
     std::vector<uint64_t> const& row_groups,
     std::vector<uint64_t> const& choice_to_action,
+    uint64_t num_actions,
+    uint64_t dont_care_action,
     storm::storage::sparse::StateValuations const& state_valuations,
     BitVector const& state_is_relevant,
     std::vector<std::string> const& variable_name,
     std::vector<std::vector<int64_t>> const& variable_domain,
     std::vector<std::tuple<uint64_t,uint64_t,uint64_t>> const& tree_list,
     bool enable_harmonization
-) : state_is_relevant(state_is_relevant), row_groups(row_groups), choice_to_action(choice_to_action),
+) : row_groups(row_groups), choice_to_action(choice_to_action), num_actions(num_actions), dont_care_action(dont_care_action),
+    state_is_relevant(state_is_relevant),
     variable_name(variable_name), variable_domain(variable_domain),
     solver(ctx), harmonizing_variable(ctx), enable_harmonization(enable_harmonization) {
 
@@ -30,6 +33,15 @@ ColoringSmt<ValueType>::ColoringSmt(
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             choice_to_state.push_back(state);
         }
+    }
+
+    // identify available actions
+    for(uint64_t state = 0; state < numStates(); ++state) {
+        BitVector action_available(num_actions,false);
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+            action_available.set(this->choice_to_action[choice],true);
+        }
+        this->state_available_actions.push_back(action_available);
     }
 
     // extract variables in the order of variable_name
@@ -146,6 +158,15 @@ ColoringSmt<ValueType>::ColoringSmt(
         }
     }
 
+    std::vector<std::vector<uint64_t>> state_dont_care_actions(numStates());
+    for(uint64_t state: state_is_relevant) {
+        state_dont_care_actions[state].push_back(dont_care_action);
+        for(uint64_t action: ~state_available_actions[state]) {
+            state_dont_care_actions[state].push_back(action);
+        }
+    }
+
+
     for(uint64_t state = 0; state < numStates(); ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             choice_path_expresssion.push_back(z3::expr_vector(ctx));
@@ -154,7 +175,11 @@ ColoringSmt<ValueType>::ColoringSmt(
             }
             uint64_t action = choice_to_action[choice];
             for(uint64_t path = 0; path < numPaths(); ++path) {
-                choice_path_expresssion[choice].push_back(state_path_expression[state][path] or action_path_expression[action][path]);
+                z3::expr action_selection = action_path_expression[action][path];
+                if(action == dont_care_action) {
+                    action_selection = getRoot()->substituteActionExpression(getRoot()->paths[path], state_dont_care_actions[state]);
+                }
+                choice_path_expresssion[choice].push_back(state_path_expression[state][path] or action_selection);
             }
         }
     }
@@ -203,7 +228,11 @@ ColoringSmt<ValueType>::ColoringSmt(
             }
             uint64_t action = choice_to_action[choice];
             for(uint64_t path = 0; path < numPaths(); ++path) {
-                choice_path_expresssion_harm[choice].push_back(state_path_expression_harmonizing[state][path] or action_path_expression_harmonizing[action][path]);
+                z3::expr action_selection = action_path_expression_harmonizing[action][path];
+                if(action == dont_care_action) {
+                    action_selection = getRoot()->substituteActionExpressionHarmonizing(getRoot()->paths[path], state_dont_care_actions[state], harmonizing_variable);
+                }
+                choice_path_expresssion_harm[choice].push_back(state_path_expression_harmonizing[state][path] or action_selection);
             }
         }
     }
@@ -227,6 +256,11 @@ const uint64_t ColoringSmt<ValueType>::numStates() const {
 template<typename ValueType>
 const uint64_t ColoringSmt<ValueType>::numChoices() const {
     return row_groups.back();
+}
+
+template<typename ValueType>
+const bool ColoringSmt<ValueType>::dontCareActionDefined() const {
+    return dont_care_action < num_actions;
 }
 
 template<typename ValueType>
@@ -333,7 +367,9 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
             }
         }
         bool any_choice_enabled = false;
+        uint64_t num_choices_enabled = 0;
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+            uint64_t action = choice_to_action[choice];
             if(not base_choices[choice]) {
                 continue;
             }
@@ -342,33 +378,40 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
                 // enable the choice only if no choice has been enabled yet
                 choice_enabled = not any_choice_enabled;
             } else {
+                // iterate over paths
                 for(uint64_t path: state_path_enabled[state]) {
-                    if(subfamily.holeContains(path_action_hole[path],choice_to_action[choice])) {
-                        choice_enabled = true;
+                    uint64_t path_hole = path_action_hole[path];
+                    choice_enabled = subfamily.holeContains(path_hole,action);
+                    // enable the choice if this action is the family
+                    if(not choice_enabled and action == this->dont_care_action) {
+                        // don't-care action can also be enabled if any unavailable action is in the family
+                        for(uint64_t unavailable_action: ~state_available_actions[state]) {
+                            if(subfamily.holeContains(path_hole,unavailable_action)) {
+                                choice_enabled = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(choice_enabled) {
                         break;
                     }
                 }
             }
             if(choice_enabled) {
                 any_choice_enabled = true;
+                num_choices_enabled++;
                 selection.set(choice,true);
                 visitChoice(choice,state_reached,unexplored_states);
             }
         }
-        if(not any_choice_enabled) {
-            if(subfamily.isAssignment()) {
-                STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling last action...");
-                // uint64_t choice = row_groups[state]; // pick the first choice
-                uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
-                selection.set(choice,true);
-                visitChoice(choice,state_reached,unexplored_states);
-            } else {
-                selection.clear();
-                timers["selectCompatibleChoices::2 state exploration"].stop();
-                timers[__FUNCTION__].stop();
-                return selection;
+        STORM_LOG_THROW(any_choice_enabled, storm::exceptions::UnexpectedException, "no choice is available in the sub-MDP");
+        /*if(num_choices_enabled == 1) {
+            if(state_path_enabled[state].getNumberOfSetBits() == 1) {
+                uint64_t path = *state_path_enabled[state].begin();
+                uint64_t path_hole = path_action_hole[path];
+                std::cout << subfamily.holeOptions(path_hole).size() << " ";
             }
-        }
+        }*/
     }
 
     timers["selectCompatibleChoices::2 state exploration"].stop();
@@ -420,7 +463,7 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
     timers[__FUNCTION__].stop();
     return;
 
-    for(uint64_t index = 0; index < this->unsat_core.size()-1; ++index) {
+    /*for(uint64_t index = 0; index < this->unsat_core.size()-1; ++index) {
         auto [choice,path] = this->unsat_core[index];
         solver.push();
         solver.add(choice_path_expresssion[choice][path]);
@@ -436,13 +479,57 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
         this->unsat_core.pop_back();
         solver.pop();
     }
+    timers[__FUNCTION__].stop();*/
+}
+
+template<typename ValueType>
+void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_expr, Family const& subfamily, BitVector const& choices) {
+    timers[__FUNCTION__].start();
+    this->unsat_core.clear();
+    std::set<uint64_t> critical_states;
+    for(z3::expr expr: unsat_core_expr) {
+        std::istringstream iss(expr.decl().name().str());
+        char prefix; iss >> prefix;
+        if(prefix == 'h' or prefix == 'z') {
+            // uint64_t hole; iss >> prefix; iss >> hole;
+            continue;
+        }
+        // prefix == 'p'
+        uint64_t choice,path; iss >> choice; iss >> prefix; iss >> path;
+        uint64_t state = this->choice_to_state[choice];
+        critical_states.insert(state);
+    }
+    for(uint64_t state: critical_states) {
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+            if(not choices[choice]) {
+                continue;
+            }
+            for(uint64_t path: state_path_enabled[state]) {
+                this->unsat_core.emplace_back(choice,path);
+            }
+        }
+    }
+
     timers[__FUNCTION__].stop();
+    return;
 }
 
 template<typename ValueType>
 std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistent(BitVector const& choices, Family const& subfamily) {
     timers[__FUNCTION__].start();
     std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
+
+    /*for(uint64_t choice: choices) {
+        uint64_t action = choice_to_action[choice];
+        uint64_t state = choice_to_state[choice];
+        if(not state_is_relevant[state]) {
+            continue;
+        }
+        if(state_path_enabled[state].getNumberOfSetBits() == 1) {
+            std::cout << (action == this->dont_care_action);
+        }
+    }*/
+
 
     timers["areChoicesConsistent::1 is scheduler consistent?"].start();
     solver.push();
@@ -504,7 +591,8 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     }
     z3::expr_vector unsat_core_expr = solver.unsat_core();
     solver.pop();
-    loadUnsatCore(unsat_core_expr,subfamily);
+    // loadUnsatCore(unsat_core_expr,subfamily);
+    loadUnsatCore(unsat_core_expr,subfamily,choices);
     timers["areChoicesConsistent::2 better unsat core"].stop();
 
     if(PRINT_UNSAT_CORE)
@@ -539,21 +627,24 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
 
     solver.add(0 <= harmonizing_variable and harmonizing_variable < (int)(family.numHoles()), "harmonizing_domain");
     consistent = check();
-    STORM_LOG_THROW(consistent, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");
-    model = solver.get_model();
-
-    solver.pop();
-    uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
-
-    getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
-    getRoot()->loadHoleAssignmentFromModelHarmonizing(model,hole_options_vector,harmonizing_hole);
-    if(hole_options_vector[harmonizing_hole][0] > hole_options_vector[harmonizing_hole][1]) {
-        uint64_t tmp = hole_options_vector[harmonizing_hole][0];
-        hole_options_vector[harmonizing_hole][0] = hole_options_vector[harmonizing_hole][1];
-        hole_options_vector[harmonizing_hole][1] = tmp;
+    if(consistent) {
+        model = solver.get_model();
+        uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
+        getRoot()->loadHoleAssignmentFromModel(model,hole_options_vector);
+        getRoot()->loadHoleAssignmentFromModelHarmonizing(model,hole_options_vector,harmonizing_hole);
+        if(hole_options_vector[harmonizing_hole][0] > hole_options_vector[harmonizing_hole][1]) {
+            uint64_t tmp = hole_options_vector[harmonizing_hole][0];
+            hole_options_vector[harmonizing_hole][0] = hole_options_vector[harmonizing_hole][1];
+            hole_options_vector[harmonizing_hole][1] = tmp;
+        }
+    } else {
+        STORM_LOG_THROW(consistent, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");
     }
+    solver.pop();
+
     if(PRINT_UNSAT_CORE)
         std::cout << "-- unsat core end --" << std::endl;
+
     timers["areChoicesConsistent::3 unsat core analysis"].stop();
 
     timers[__FUNCTION__].stop();

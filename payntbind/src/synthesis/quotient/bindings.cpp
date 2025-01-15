@@ -325,6 +325,7 @@ void bindings_coloring(py::module& m) {
         .def(py::init<
             std::vector<uint64_t> const&,
             std::vector<uint64_t> const&,
+            uint64_t, uint64_t,
             storm::storage::sparse::StateValuations const&,
             storm::storage::BitVector const&,
             std::vector<std::string> const&,

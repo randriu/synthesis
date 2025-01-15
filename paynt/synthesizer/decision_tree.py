@@ -64,10 +64,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def verify_family(self, family):
         self.num_families_considered += 1
         self.quotient.build(family)
-        if family.mdp is None:
-            self.num_families_skipped += 1
-            return
 
+        self.stat.iteration(family.mdp)
         if family.parent_info is not None:
             for choice in family.parent_info.scheduler_choices:
                 if not family.selected_choices[choice]:
@@ -85,8 +83,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.num_families_model_checked += 1
         self.check_specification(family)
         if not family.analysis_result.can_improve:
-            return
-        if SynthesizerDecisionTree.scheduler_path is not None:
             return
         self.harmonize_inconsistent_scheduler(family)
 
@@ -204,10 +200,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.resource_limit_reached():
                 break
 
-        # self.counters_print()
-
     def run(self, optimum_threshold=None):
-
         scheduler_choices = None
         if SynthesizerDecisionTree.scheduler_path is None:
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
@@ -216,7 +209,18 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             opt_result_value = None
             with open(SynthesizerDecisionTree.scheduler_path, 'r') as f:
                 scheduler_json = json.load(f)
-            scheduler_choices = self.quotient.scheduler_json_to_choices(scheduler_json)
+            scheduler_choices,scheduler_json_relevant = self.quotient.scheduler_json_to_choices(scheduler_json, discard_unreachable_states=True)
+
+            # export transformed scheduler
+            # import os
+            # directory = os.path.dirname(SynthesizerDecisionTree.scheduler_path)
+            # transformed_name = f"scheduler-reachable.storm.json"
+            # scheduler_relevant_path = os.path.join(directory, transformed_name)
+            # with open(scheduler_relevant_path, 'w') as f:
+            #     json.dump(scheduler_json_relevant, f, indent=4)
+            # logger.debug(f"stored transformed scheduler to {scheduler_relevant_path}")
+            # exit()
+
             submdp = self.quotient.build_from_choice_mask(scheduler_choices)
             mc_result = submdp.model_check_property(self.quotient.get_property())
         opt_result_value = mc_result.value
@@ -261,9 +265,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
         logger.info(f"synthesis finished after {time_total} seconds")
 
-        # print()
-        # for name,time in self.quotient.coloring.getProfilingInfo():
-        #     time_percent = round(time/time_total*100,1)
-        #     print(f"{name} = {time} s ({time_percent} %)")
+        print()
+        for name,time in self.quotient.coloring.getProfilingInfo():
+            time_percent = round(time/time_total*100,1)
+            print(f"{name} = {time} s ({time_percent} %)")
 
         return self.best_tree

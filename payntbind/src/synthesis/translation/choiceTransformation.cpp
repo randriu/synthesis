@@ -351,7 +351,8 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInAbsorbi
 
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
-    storm::models::sparse::Model<ValueType> const& model
+    storm::models::sparse::Model<ValueType> const& model,
+    storm::storage::BitVector const& state_mask
 ) {
     auto [action_labels,choice_to_action] = synthesis::extractActionLabels<ValueType>(model);
     auto it = std::find(action_labels.begin(),action_labels.end(),DONT_CARE_ACTION_LABEL);
@@ -371,14 +372,17 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     // translate choices
     std::vector<uint64_t> translated_to_original_choice;
     std::vector<uint64_t> row_groups_new;
+    std::vector<uint64_t> const& row_groups = model.getTransitionMatrix().getRowGroupIndices();
     for(uint64_t state = 0; state < num_states; ++state) {
         row_groups_new.push_back(translated_to_original_choice.size());
         // copy existing choices
-        for(uint64_t choice: model.getTransitionMatrix().getRowGroupIndices(state)) {
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             translated_to_original_choice.push_back(choice);
         }
-        // add don't care action
-        translated_to_original_choice.push_back(num_choices);
+        if(state_mask[state]) {
+            // add don't care action
+            translated_to_original_choice.push_back(num_choices);
+        }
     }
     row_groups_new.push_back(translated_to_original_choice.size());
     uint64_t num_translated_choices = translated_to_original_choice.size();
@@ -396,22 +400,24 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     storm::storage::SparseMatrixBuilder<ValueType> builder(num_translated_choices, num_states, 0, true, true, num_states);
     for(uint64_t state = 0; state < num_states; ++state) {
         builder.newRowGroup(row_groups_new[state]);
+        uint64_t state_num_choices = row_groups[state+1]-row_groups[state]; // the original number of choices
         // copy existing choices
         std::map<uint64_t,ValueType> dont_care_transitions;
-        uint64_t new_translated_choice = row_groups_new[state+1]-1;
-        uint64_t state_num_choices = new_translated_choice-row_groups_new[state];
-        for(uint64_t translated_choice = row_groups_new[state]; translated_choice < new_translated_choice; ++translated_choice) {
-            uint64_t choice = translated_to_original_choice[translated_choice];
+        uint64_t translated_choice = row_groups_new[state];
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             for(auto entry: model.getTransitionMatrix().getRow(choice)) {
                 uint64_t dst = entry.getColumn();
                 ValueType prob = entry.getValue();
                 builder.addNextValue(translated_choice, dst, prob);
                 dont_care_transitions[dst] += prob/state_num_choices;
             }
+            ++translated_choice;
         }
-        // add don't care action
-        for(auto [dst,prob]: dont_care_transitions) {
-            builder.addNextValue(new_translated_choice,dst,prob);
+        if(state_mask[state]) {
+            // add don't care action
+            for(auto [dst,prob]: dont_care_transitions) {
+                builder.addNextValue(translated_choice,dst,prob);
+            }
         }
     }
     components.transitionMatrix =  builder.build();
@@ -419,13 +425,16 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     for(auto & [name,reward_model]: rewardModels) {
         std::vector<ValueType> & choice_reward = reward_model.getStateActionRewardVector();
         for(uint64_t state = 0; state < num_states; ++state) {
+            if(not state_mask[state]) {
+                continue;
+            }
             ValueType reward_sum = 0;
-            uint64_t new_translated_choice = row_groups_new[state+1]-1;
-            uint64_t state_num_choices = new_translated_choice-row_groups_new[state];
-            for(uint64_t translated_choice = row_groups_new[state]; translated_choice < new_translated_choice; ++translated_choice) {
+            uint64_t dont_care_translated_choice = row_groups_new[state+1]-1;
+            uint64_t state_num_choices = dont_care_translated_choice-row_groups_new[state];
+            for(uint64_t translated_choice = row_groups_new[state]; translated_choice < dont_care_translated_choice; ++translated_choice) {
                 reward_sum += choice_reward[translated_choice];
             }
-            choice_reward[new_translated_choice] = reward_sum / state_num_choices;
+            choice_reward[dont_care_translated_choice] = reward_sum / state_num_choices;
         }
     }
     components.rewardModels = rewardModels;
@@ -587,7 +596,8 @@ template std::shared_ptr<storm::models::sparse::Model<double>> removeAction<doub
 template std::shared_ptr<storm::models::sparse::Model<double>> restoreActionsInAbsorbingStates<double>(
     storm::models::sparse::Model<double> const& model);
 template std::shared_ptr<storm::models::sparse::Model<double>> addDontCareAction<double>(
-    storm::models::sparse::Model<double> const& model);
+    storm::models::sparse::Model<double> const& model,
+    storm::storage::BitVector const& state_mask);
 template std::shared_ptr<storm::models::sparse::Model<double>> createModelUnion(
     std::vector<std::shared_ptr<storm::models::sparse::Model<double>>> const&
 );

@@ -273,10 +273,12 @@ class DecisionTree:
 
 class MdpQuotient(paynt.quotient.quotient.Quotient):
 
+    # label for action executing a random action selection
+    DONT_CARE_ACTION_LABEL = "__random__"
     # if true, an explicit action executing a random choice of an available action will be added to each state
     add_dont_care_action = False
     # if true, irrelevant states will not be considered for tree mapping
-    filter_irrelevant_states = True
+    filter_deterministic_states = False
 
     @classmethod
     def get_state_valuations(cls, model):
@@ -304,7 +306,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
         # list of relevant variables: variables having at least two different options on relevant states
         self.variables = None
-        # for every state, a valuation of relevant variables; contains empty list for irrelevant states
+        # for every state, a valuation of relevant variables
         self.relevant_state_valuations = None
         # decision tree obtained after reset_tree
         self.decision_tree = None
@@ -312,21 +314,23 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         # deprecated
         # updated = payntbind.synthesis.restoreActionsInAbsorbingStates(mdp)
         # if updated is not None: mdp = updated
-        action_labels,_ = payntbind.synthesis.extractActionLabels(mdp)
-        if "__random__" not in action_labels and MdpQuotient.add_dont_care_action:
-            logger.debug("adding explicit don't-care action to every state...")
-            mdp = payntbind.synthesis.addDontCareAction(mdp)
 
         # identify relevant states
         self.state_is_relevant = [True for state in range(mdp.nr_states)]
-        if MdpQuotient.filter_irrelevant_states:
-            state_is_absorbing = self.identify_absorbing_states(mdp)
-            self.state_is_relevant = [self.state_is_relevant[state] and not absorbing for state,absorbing in enumerate(state_is_absorbing)]
+        state_is_absorbing = self.identify_absorbing_states(mdp)
+        self.state_is_relevant = [relevant and not state_is_absorbing[state] for state,relevant in enumerate(self.state_is_relevant)]
+
+        if MdpQuotient.filter_deterministic_states:
             state_has_actions = self.identify_states_with_actions(mdp)
-            self.state_is_relevant = [self.state_is_relevant[state] and has_actions for state,has_actions in enumerate(state_has_actions)]
+            self.state_is_relevant = [relevant and state_has_actions[state] for state,relevant in enumerate(self.state_is_relevant)]
         self.state_is_relevant_bv = stormpy.BitVector(mdp.nr_states)
         [self.state_is_relevant_bv.set(state,value) for state,value in enumerate(self.state_is_relevant)]
         logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
+
+        action_labels,_ = payntbind.synthesis.extractActionLabels(mdp)
+        if MdpQuotient.DONT_CARE_ACTION_LABEL not in action_labels and MdpQuotient.add_dont_care_action:
+            logger.debug("adding explicit don't-care action to relevant states...")
+            mdp = payntbind.synthesis.addDontCareAction(mdp,self.state_is_relevant_bv)
 
         self.quotient_mdp = mdp
         self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(mdp)
@@ -359,9 +363,9 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         logger.debug(f"found the following {len(self.variables)} variables: {[str(v) for v in self.variables]}")
 
 
-    def scheduler_json_to_choices(self, scheduler_json):
+    def scheduler_json_to_choices(self, scheduler_json, discard_unreachable_states=False):
         variable_name,state_valuations = self.get_state_valuations(self.quotient_mdp)
-        ndi = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
         assert self.quotient_mdp.nr_states == len(scheduler_json)
         state_to_choice = self.empty_scheduler()
         for state_decision in scheduler_json:
@@ -377,25 +381,52 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             action_labels = actions[0]["labels"]
             assert len(action_labels) <= 1
             if len(action_labels) == 0:
-                state_to_choice[state] = ndi[state]
+                state_to_choice[state] = nci[state]
                 continue
             action = self.action_labels.index(action_labels[0])
             # find a choice that executes this action
-            for choice in range(ndi[state],ndi[state+1]):
+            for choice in range(nci[state],nci[state+1]):
                 if self.choice_to_action[choice] == action:
                     state_to_choice[state] = choice
                     break
             else:
                 assert False, "action is not available in the state"
-        state_to_choice = self.discard_unreachable_choices(state_to_choice)
+        # enable implicit actions
+        for state,choice in enumerate(state_to_choice):
+            if choice is None:
+                logger.warning(f"WARNING: scheduler has no action for state {state}")
+                state_to_choice[state] = nci[state]
+
+        if discard_unreachable_states:
+            state_to_choice = self.discard_unreachable_choices(state_to_choice)
+        # keep only relevant states
+        state_to_choice = [choice if self.state_is_relevant[state] else None for state,choice in enumerate(state_to_choice)]
         choices = self.state_to_choice_to_choices(state_to_choice)
-        return choices
+
+        scheduler_json_relevant = []
+        for state_decision in scheduler_json:
+            valuation = [state_decision["s"][name] for name in variable_name]
+            for state,state_valuation in enumerate(state_valuations):
+                if valuation == state_valuation:
+                    break
+            if state_to_choice[state] is None:
+                continue
+            scheduler_json_relevant.append(state_decision)
+
+        return choices,scheduler_json_relevant
+
 
     def reset_tree(self, depth, enable_harmonization=True):
         '''
         Rebuild the decision tree template, the design space and the coloring.
         '''
         logger.debug(f"building tree of depth {depth}")
+
+        num_actions = len(self.action_labels)
+        dont_care_action = num_actions
+        if MdpQuotient.DONT_CARE_ACTION_LABEL in self.action_labels:
+            dont_care_action = self.action_labels.index(MdpQuotient.DONT_CARE_ACTION_LABEL)
+
         self.decision_tree = DecisionTree(self,self.variables)
         self.decision_tree.set_depth(depth)
 
@@ -405,6 +436,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         tree_list = self.decision_tree.to_list()
         self.coloring = payntbind.synthesis.ColoringSmt(
             self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action,
+            num_actions, dont_care_action,
             self.quotient_mdp.state_valuations, self.state_is_relevant_bv,
             variable_name, variable_domain, tree_list, enable_harmonization
         )
@@ -453,10 +485,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             choices = self.coloring.selectCompatibleChoices(family.family)
         else:
             choices = self.coloring.selectCompatibleChoices(family.family, family.parent_info.selected_choices)
-        if choices.number_of_set_bits() == 0:
-            family.mdp = None
-            family.analysis_result = self.build_unsat_result()
-            return
+        assert choices.number_of_set_bits() > 0
 
         # proceed as before
         family.selected_choices = choices
