@@ -5,6 +5,7 @@ import paynt.utils.timer
 import stormpy
 import payntbind
 
+import os
 import json
 
 import logging
@@ -107,6 +108,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def export_decision_tree(self, decision_tree, export_filename_base):
         tree = decision_tree.to_graphviz()
         tree_filename = export_filename_base + ".dot"
+        directory = os.path.dirname(tree_filename)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
         with open(tree_filename, 'w') as file:
             file.write(tree.source)
         logger.info(f"exported decision tree to {tree_filename}")
