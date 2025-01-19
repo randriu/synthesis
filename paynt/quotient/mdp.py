@@ -38,8 +38,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def __init__(self, mdp, specification):
         super().__init__(specification=specification)
-        """ cilove maji akci no label, dat jine akce (most used treba)"""
-        """take quotient, find (identify_absorping_states) states -> if there's __no_label__ change for other available action"""
 
         # mask of relevant states: non-absorbing states with more than one action
         self.state_is_relevant = None
@@ -192,7 +190,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         if MdpQuotient.DONT_CARE_ACTION_LABEL in self.action_labels:
             dont_care_action = self.action_labels.index(MdpQuotient.DONT_CARE_ACTION_LABEL)
 
-        self.decision_tree = paynt.quotient.utils.decision_tree.DecisionTree(self,self.variables,self.state_valuations)
+        self.decision_tree = paynt.quotient.utils.decision_tree.DecisionTree(self,self.variables)
         self.decision_tree.set_depth(depth)
 
         variables = self.decision_tree.variables
