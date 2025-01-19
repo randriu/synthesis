@@ -1,5 +1,6 @@
 import payntbind
 
+import stormpy
 import paynt.family.family
 import paynt.quotient.quotient
 import paynt.models.models
@@ -12,6 +13,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
+
+    # label for action executing a random action selection
+    DONT_CARE_ACTION_LABEL = "__random__"
+    # if true, an explicit action executing a random choice of an available action will be added to each state
+    add_dont_care_action = False
+    # if true, irrelevant states will not be considered for tree mapping
+    filter_deterministic_states = True # TODO: change to false
 
     @staticmethod
     def map_state_action_to_choices(mdp, num_actions, choice_to_action):
@@ -35,6 +43,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             state_to_actions.append(available_actions)
         return state_to_actions
 
+
+
     
     def __init__(self, quotient_mdp, family, coloring, specification):
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
@@ -51,6 +61,23 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_to_actions = None
         # list of irrelevant variables, filled by extract_policies call
         self.irrelevant_variables = None
+
+        # identify relevant states
+        self.state_is_relevant = [True for state in range(quotient_mdp.nr_states)]
+        state_is_absorbing = self.identify_absorbing_states(quotient_mdp)
+        self.state_is_relevant = [relevant and not state_is_absorbing[state] for state,relevant in enumerate(self.state_is_relevant)]
+
+        if MdpFamilyQuotient.filter_deterministic_states:
+            state_has_actions = self.identify_states_with_actions(quotient_mdp)
+            self.state_is_relevant = [relevant and state_has_actions[state] for state,relevant in enumerate(self.state_is_relevant)]
+        self.state_is_relevant_bv = stormpy.BitVector(quotient_mdp.nr_states)
+        [self.state_is_relevant_bv.set(state,value) for state,value in enumerate(self.state_is_relevant)]
+        logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
+
+        action_labels,_ = payntbind.synthesis.extractActionLabels(quotient_mdp)
+        if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL not in action_labels and MdpFamilyQuotient.add_dont_care_action:
+            logger.debug("adding explicit don't-care action to relevant states...")
+            quotient_mdp = payntbind.synthesis.addDontCareAction(quotient_mdp,self.state_is_relevant_bv)
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.num_actions = len(self.action_labels)
@@ -75,6 +102,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             state_valuations[state] = [value for index, value in enumerate(valuation) if variable_mask[index]]
         self.variables = variables
         self.state_valuations = state_valuations
+        self.relevant_state_valuations = state_valuations
 
     def empty_policy(self):
         return self.empty_scheduler()
@@ -107,7 +135,13 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         Rebuild the decision tree template, the design space and the coloring.
         '''
         logger.debug(f"building tree of depth {depth}")
-        self.decision_tree = paynt.quotient.utils.decision_tree.DecisionTree(self,self.variables,self.state_valuations)
+
+        num_actions = len(self.action_labels)
+        dont_care_action = num_actions
+        if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL in self.action_labels:
+            dont_care_action = self.action_labels.index(MdpFamilyQuotient.DONT_CARE_ACTION_LABEL)
+
+        self.decision_tree = paynt.quotient.utils.decision_tree.DecisionTree(self,self.variables)
         self.decision_tree.set_depth(depth)
 
         variables = self.decision_tree.variables
@@ -115,7 +149,9 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         variable_domain = [v.domain for v in variables]
         tree_list = self.decision_tree.to_list()
         self.coloring = payntbind.synthesis.ColoringSmt(
-            self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action, self.quotient_mdp.state_valuations,
+            self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action,
+            num_actions, dont_care_action,
+            self.quotient_mdp.state_valuations, self.state_is_relevant_bv,
             variable_name, variable_domain, tree_list, enable_harmonization
         )
         self.coloring.enableStateExploration(self.quotient_mdp)
@@ -293,3 +329,15 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         model,state_map,choice_map = self.restrict_quotient(choices)
         # model = MdpFamilyQuotient.mdp_to_dtmc(model)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
+
+    def mark_irrelevant_states(self, variable: str):
+        """mark state irrelevant wrt variable if value not minimal within domain"""
+        for i,var in enumerate(self.variables):
+            if var.name == variable:
+                index, min_domain = i, var.domain_min
+                for i in range(len(self.state_valuations)):
+                    if not self.state_is_relevant_bv[i]:
+                        continue  # already marked
+
+                    if self.state_valuations[i][index] != min_domain:
+                        self.state_is_relevant_bv.set(i,False)

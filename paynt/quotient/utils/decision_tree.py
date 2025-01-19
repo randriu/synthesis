@@ -1,30 +1,14 @@
 import logging
+import graphviz
+
 logger = logging.getLogger(__name__)
 
 class DecisionTree:
 
-    def __init__(self, quotient, variables, state_valuations):
+    def __init__(self, quotient, variables):
         self.quotient = quotient
-        self.state_valuations = state_valuations
         self.variables = variables
         self.reset()
-
-    def mark_irrelevant_states_for_removal(self, variable: str):
-        """removal itself happens on the call of simplify"""
-        index,min_domain = None, None
-        for i,var in enumerate(self.variables):
-            if var.name == variable:
-                index, min_domain = i, var.domain_min
-                break
-        # reduce all state valuations to the minimal domain
-        # mark all state valuations for removal if they 're not minimal
-        for i in range(len(self.state_valuations)):
-            if not self.state_valuations[i]:
-                continue  # already marked
-
-            if self.state_valuations[i][index] != min_domain:
-                self.state_valuations[i] = None
-            #state_valuation[index] = min_domain
 
     def reset(self):
         self.root = DecisionTreeNode(None)
@@ -67,16 +51,13 @@ class DecisionTree:
             node_info[node.identifier] = (parent,child_true,child_false)
         return node_info
 
-    def simplify(self, target_state_mask):
-        state_valuations = [self.state_valuations[state] for state in ~target_state_mask]
-        state_valuations = [state for state in state_valuations if state is not None]
+    def simplify(self, state_valuations):
         self.root.simplify(self.variables, state_valuations)
 
     def to_string(self):
         return self.root.to_string(self.variables,self.quotient.action_labels)
 
     def to_graphviz(self):
-        import graphviz
         logging.getLogger("graphviz").setLevel(logging.WARNING)
         logging.getLogger("graphviz.sources").setLevel(logging.ERROR)
         graphviz_tree = graphviz.Digraph(comment="decision tree")

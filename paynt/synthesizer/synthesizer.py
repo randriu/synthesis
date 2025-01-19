@@ -180,11 +180,14 @@ class Synthesizer:
                 state_valuations = [ self.quotient.state_valuations[i] for i in range(len(self.quotient.state_valuations))]
 
                 irrelevant_variables = self.quotient.irrelevant_variables
+                if irrelevant_variables:
+                    for variable in irrelevant_variables:
+                        self.quotient.mark_irrelevant_states(variable)
 
                 dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
                 # unique export name for each policy
                 dt_map_synthetiser.export_synthesis_filename_base = base_export_name + f"_p{counter}" if base_export_name else None
-                dt_map_synthetiser.run(policy=choices,irrelevant_variables=irrelevant_variables)
+                dt_map_synthetiser.run(policy=choices)
 
         if print_stats:
             self.stat.print()

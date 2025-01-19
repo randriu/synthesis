@@ -589,7 +589,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
         # self.counters_print()
 
-    def run(self, optimum_threshold=None, policy=None,irrelevant_variables=None):
+    def run(self, optimum_threshold=None, policy=None):
 
         scheduler_choices = None
         if policy is not None:
@@ -654,11 +654,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info("no admissible tree found")
         else:
             relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
-
-            if irrelevant_variables:
-                # remove irrelevant states from the tree
-                for variable in irrelevant_variables:
-                    self.best_tree.mark_irrelevant_states_for_removal(variable)
 
             self.best_tree.simplify(relevant_state_valuations)
             depth = self.best_tree.get_depth()

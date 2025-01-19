@@ -4,6 +4,8 @@ import stormpy
 import payntbind
 import json
 import graphviz
+import paynt.quotient.utils.variable
+import paynt.quotient.utils.decision_tree
 
 import logging
 logger = logging.getLogger(__name__)
