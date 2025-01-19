@@ -59,7 +59,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_action_choices = None
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
-        # list of irrelevant variables, filled by extract_policies call
+        # dict of irrelevant variables, filled by extract_policies call with their defaults
         self.irrelevant_variables = None
 
         # identify relevant states
@@ -148,6 +148,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         variable_name = [v.name for v in variables]
         variable_domain = [v.domain for v in variables]
         tree_list = self.decision_tree.to_list()
+
         self.coloring = payntbind.synthesis.ColoringSmt(
             self.quotient_mdp.nondeterministic_choice_indices, self.choice_to_action,
             num_actions, dont_care_action,
@@ -233,7 +234,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             ({variable:value for variable,value in valuation.items() if variable not in irrelevant_variables},action)
             for valuation,action in state_valuation_to_action
         ]
-        self.irrelevant_variables = irrelevant_variables
+        self.irrelevant_variables = {variable:default_valuation[variable] for variable in irrelevant_variables}
         return state_valuation_to_action
 
     def policy_to_json(self, state_valuation_to_action, dt_control=False):
@@ -330,14 +331,12 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         # model = MdpFamilyQuotient.mdp_to_dtmc(model)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
 
-    def mark_irrelevant_states(self, variable: str):
-        """mark state irrelevant wrt variable if value not minimal within domain"""
-        for i,var in enumerate(self.variables):
+    def mark_irrelevant_states(self, variable: str, default_value):
+        """mark state irrelevant wrt variable if not default_value for given domain"""
+        for index,var in enumerate(self.variables):
             if var.name == variable:
-                index, min_domain = i, var.domain_min
-                for i in range(len(self.state_valuations)):
-                    if not self.state_is_relevant_bv[i]:
+                for j in range(len(self.state_valuations)):
+                    if not self.state_is_relevant_bv[j]:
                         continue  # already marked
-
-                    if self.state_valuations[i][index] != min_domain:
-                        self.state_is_relevant_bv.set(i,False)
+                    if self.state_valuations[j][index] != default_value:
+                        self.state_is_relevant_bv.set(j,False)

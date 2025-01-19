@@ -181,8 +181,8 @@ class Synthesizer:
 
                 irrelevant_variables = self.quotient.irrelevant_variables
                 if irrelevant_variables:
-                    for variable in irrelevant_variables:
-                        self.quotient.mark_irrelevant_states(variable)
+                    for variable, default in irrelevant_variables.items():
+                        self.quotient.mark_irrelevant_states(variable,default)
 
                 dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
                 # unique export name for each policy
