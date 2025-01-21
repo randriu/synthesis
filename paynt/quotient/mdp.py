@@ -414,6 +414,25 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             scheduler_json_relevant.append(state_decision)
 
         return choices,scheduler_json_relevant
+    
+    # gets all choices that represent random action, used to compute the value of uniformly random scheduler
+    def get_random_choices(self):
+        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        state_to_choice = self.empty_scheduler()
+        random_action = self.action_labels.index(MdpQuotient.DONT_CARE_ACTION_LABEL)
+        for state in range(self.quotient_mdp.nr_states):
+            # find a choice that executes this action
+            for choice in range(nci[state],nci[state+1]):
+                if self.choice_to_action[choice] == random_action:
+                    state_to_choice[state] = choice
+                    break
+        for state,choice in enumerate(state_to_choice):
+            if choice is None:
+                state_to_choice[state] = nci[state]
+
+        choices = self.state_to_choice_to_choices(state_to_choice)
+
+        return choices
 
 
     def reset_tree(self, depth, enable_harmonization=True):

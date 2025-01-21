@@ -230,6 +230,14 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         opt_result_value = mc_result.value
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
 
+        if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+            random_choices = self.quotient.get_random_choices()
+            submdp_random = self.quotient.build_from_choice_mask(random_choices)
+            mc_result_random = submdp_random.model_check_property(self.quotient.get_property())
+            random_result_value = mc_result_random.value
+            logger.info(f"the random scheduler has value: {random_result_value}")
+            # self.set_optimality_threshold(random_result_value)
+
         self.best_assignment = self.best_assignment_value = None
         self.best_tree = self.best_tree_value = None
         if scheduler_choices is not None:
@@ -249,6 +257,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.synthesize_tree_sequence(opt_result_value)
 
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
+        if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+            logger.info(f"the random scheduler has value: {random_result_value}")
         if self.best_tree is None:
             logger.info("no admissible tree found")
         else:
@@ -259,6 +269,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
             if self.quotient.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
+            if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+                logger.info(f"the synthesized tree has relative value: {(self.best_tree_value-random_result_value)/(opt_result_value-random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
             # logger.info(f"printing the PRISM module below:")
