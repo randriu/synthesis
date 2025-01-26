@@ -8,6 +8,7 @@ import paynt.utils.tree_helper
 import stormpy
 import payntbind
 
+import os
 import json
 
 import os
@@ -72,10 +73,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def verify_family(self, family):
         self.num_families_considered += 1
         self.quotient.build(family)
-        if family.mdp is None:
-            self.num_families_skipped += 1
-            return
 
+        self.stat.iteration(family.mdp)
         if family.parent_info is not None:
             for choice in family.parent_info.scheduler_choices:
                 if not family.selected_choices[choice]:
@@ -93,8 +92,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.num_families_model_checked += 1
         self.check_specification(family)
         if not family.analysis_result.can_improve:
-            return
-        if SynthesizerDecisionTree.scheduler_path is not None:
             return
         self.harmonize_inconsistent_scheduler(family)
 
@@ -119,6 +116,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def export_decision_tree(self, decision_tree, export_filename_base):
         tree = decision_tree.to_graphviz()
         tree_filename = export_filename_base + ".dot"
+        directory = os.path.dirname(tree_filename)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
         with open(tree_filename, 'w') as file:
             file.write(tree.source)
         logger.info(f"exported decision tree to {tree_filename}")
@@ -399,10 +399,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.resource_limit_reached():
                 break
 
-        # self.counters_print()
-
     def run(self, optimum_threshold=None):
-
         scheduler_choices = None
         if SynthesizerDecisionTree.scheduler_path is None:
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
@@ -411,11 +408,30 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             opt_result_value = None
             with open(SynthesizerDecisionTree.scheduler_path, 'r') as f:
                 scheduler_json = json.load(f)
-            scheduler_choices = self.quotient.scheduler_json_to_choices(scheduler_json)
+            scheduler_choices,scheduler_json_relevant = self.quotient.scheduler_json_to_choices(scheduler_json, discard_unreachable_states=True)
+
+            # export transformed scheduler
+            # import os
+            # directory = os.path.dirname(SynthesizerDecisionTree.scheduler_path)
+            # transformed_name = f"scheduler-reachable.storm.json"
+            # scheduler_relevant_path = os.path.join(directory, transformed_name)
+            # with open(scheduler_relevant_path, 'w') as f:
+            #     json.dump(scheduler_json_relevant, f, indent=4)
+            # logger.debug(f"stored transformed scheduler to {scheduler_relevant_path}")
+            # exit()
+
             submdp = self.quotient.build_from_choice_mask(scheduler_choices)
             mc_result = submdp.model_check_property(self.quotient.get_property())
         opt_result_value = mc_result.value
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
+
+        if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+            random_choices = self.quotient.get_random_choices()
+            submdp_random = self.quotient.build_from_choice_mask(random_choices)
+            mc_result_random = submdp_random.model_check_property(self.quotient.get_property())
+            random_result_value = mc_result_random.value
+            logger.info(f"the random scheduler has value: {random_result_value}")
+            # self.set_optimality_threshold(random_result_value)
 
         self.best_assignment = self.best_assignment_value = None
         self.best_tree = self.best_tree_value = None
@@ -438,6 +454,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.synthesize_tree_sequence(opt_result_value)
 
         logger.info(f"the optimal scheduler has value: {opt_result_value}")
+        if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+            logger.info(f"the random scheduler has value: {random_result_value}")
         if self.best_tree is None:
             logger.info("no admissible tree found")
         else:
@@ -448,6 +466,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info(f"synthesized tree of depth {depth} with {num_nodes} decision nodes")
             if self.quotient.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
+            if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
+                logger.info(f"the synthesized tree has relative value: {(self.best_tree_value-random_result_value)/(opt_result_value-random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
             print(self.best_tree.to_string())
             # print(self.best_tree.to_graphviz())
@@ -459,9 +479,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
         logger.info(f"synthesis finished after {time_total} seconds")
 
-        # print()
-        # for name,time in self.quotient.coloring.getProfilingInfo():
-        #     time_percent = round(time/time_total*100,1)
-        #     print(f"{name} = {time} s ({time_percent} %)")
+        print()
+        for name,time in self.quotient.coloring.getProfilingInfo():
+            time_percent = round(time/time_total*100,1)
+            print(f"{name} = {time} s ({time_percent} %)")
 
         return self.best_tree
