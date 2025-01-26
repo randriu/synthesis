@@ -404,27 +404,12 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
                 visitChoice(choice,state_reached,unexplored_states);
             }
         }
-<<<<<<< HEAD
-        if(not any_choice_enabled) {
-            if(subfamily.isAssignment()) {
-                //STORM_LOG_WARN("Hole assignment does not induce a DTMC, enabling last action...");
-                // uint64_t choice = row_groups[state]; // pick the first choice
-                uint64_t choice = row_groups[state+1]-1; // pick the last choice executing the random choice
-                selection.set(choice,true);
-                visitChoice(choice,state_reached,unexplored_states);
-            } else {
-                selection.clear();
-                timers["selectCompatibleChoices::2 state exploration"].stop();
-                timers[__FUNCTION__].stop();
-                return selection;
-=======
         STORM_LOG_THROW(any_choice_enabled, storm::exceptions::UnexpectedException, "no choice is available in the sub-MDP");
         /*if(num_choices_enabled == 1) {
             if(state_path_enabled[state].getNumberOfSetBits() == 1) {
                 uint64_t path = *state_path_enabled[state].begin();
                 uint64_t path_hole = path_action_hole[path];
                 std::cout << subfamily.holeOptions(path_hole).size() << " ";
->>>>>>> upstream/master
             }
         }*/
     }
