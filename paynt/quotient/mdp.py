@@ -86,6 +86,10 @@ class DecisionTreeNode:
             self.action = action_labels.index(tree_helper_node["chosen"][0])
         else:
             self.variable = variable_names.index(tree_helper_node["chosen"][0])
+            # dtControl uses values that are not necessarily in the domain, e.g. let's say our domain is [0,2,3]
+            # and we want to split [0] and [2,3], dtControl can choose 0,5 or 1,5. We expect it will be 0 in this case.
+            while tree_helper_node["chosen"][1] not in variable_domains[self.variable]:
+                tree_helper_node["chosen"] = (tree_helper_node["chosen"][0], tree_helper_node["chosen"][1]-1)
             self.variable_bound = variable_domains[self.variable].index(tree_helper_node["chosen"][1])
 
     def add_children_from_helper(self, tree_helper, helper_node, variable_names, variable_domains, action_labels):
@@ -107,12 +111,14 @@ class DecisionTreeNode:
             return 0
         return 1 + sum([child.get_number_of_descendants() for child in self.child_nodes])
 
-    def assign_identifiers(self, identifier=0):
+    def assign_identifiers(self, identifier=0, keep_old=False):
+        if keep_old:
+            self.old_identifier = self.identifier
         self.identifier = identifier
         if self.is_terminal:
             return self.identifier
-        identifier = self.child_true.assign_identifiers(identifier+1)
-        identifier = self.child_false.assign_identifiers(identifier+1)
+        identifier = self.child_true.assign_identifiers(identifier+1, keep_old=keep_old)
+        identifier = self.child_false.assign_identifiers(identifier+1, keep_old=keep_old)
         return identifier
 
     def associate_holes(self, node_hole_info):
@@ -183,6 +189,19 @@ class DecisionTreeNode:
         if self.parent is None:
             return []
         return self.parent.path_expression(variables) + [self.parent.branch_expression(variables,true_branch=self.is_true_child)]
+    
+    def copy(self, parent):
+        node_copy = DecisionTreeNode(parent)
+        node_copy.identifier = self.identifier
+        node_copy.holes = self.holes
+        if self.is_terminal:
+            node_copy.action = self.action
+        else:
+            node_copy.variable = self.variable
+            node_copy.variable_bound = self.variable_bound
+            node_copy.child_true = self.child_true.copy(node_copy)
+            node_copy.child_false = self.child_false.copy(node_copy)
+        return node_copy
 
     def to_string(self, variables, action_labels, indent_level=0, indent_size=2):
         indent = " "*indent_level*indent_size
@@ -226,12 +245,42 @@ class DecisionTreeNode:
                 if quotient.choice_to_action[choice] == action_index:
                     return index
                 index += 1
+            else:
+                # TODO as far as I know this happens only because of unreachable states not being included in the tree
+                # for now we will treat this by using the __random__ action but it can lead to strange behaviour
+                index = 0
+                for choice in range(quotient.quotient_mdp.nondeterministic_choice_indices[state],quotient.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                    if quotient.action_labels[quotient.choice_to_action[choice]] == "__random__":
+                        return index
+                    index += 1
+                assert False
         var = quotient.variables[self.variable]
         bound = var.domain[self.variable_bound]
         if state_valuation[self.variable] <= bound:
             return self.child_true.get_action_for_state(quotient, state, state_valuation)
         else:
             return self.child_false.get_action_for_state(quotient, state, state_valuation)
+        
+    # after subtree synthesis the tree nodes contain identifiers to objects from subtree_quotient
+    # this needs to be fixed to match the objects in the original quotient
+    def fix_with_respect_to_quotient(self, quotient, new_quotient):
+        if self.is_terminal:
+            old_index = self.action
+            self.action = new_quotient.action_labels.index(quotient.action_labels[old_index])
+            return
+        
+        var = quotient.variables[self.variable]
+        var_name = var.name
+        var_bound = var.domain[self.variable_bound]
+        for var_id, new_var in enumerate(new_quotient.variables):
+            if new_var.name == var_name:
+                break
+        bound_id = new_var.domain.index(var_bound)
+        self.variable = var_id
+        self.variable_bound = bound_id
+
+        self.child_true.fix_with_respect_to_quotient(quotient, new_quotient)
+        self.child_false.fix_with_respect_to_quotient(quotient, new_quotient)
 
 
 
@@ -244,6 +293,11 @@ class DecisionTree:
 
     def reset(self):
         self.root = DecisionTreeNode(None)
+
+    def copy(self):
+        new_tree = DecisionTree(self.quotient, self.variables)
+        new_tree.root = self.root.copy(None)
+        return new_tree
 
     def set_depth(self, depth:int):
         self.reset()
@@ -336,13 +390,14 @@ class DecisionTree:
         self.root.to_graphviz(graphviz_tree,self.variables,self.quotient.action_labels,highlight_nodes)
         return graphviz_tree
     
-    def to_scheduler_json(self):
+    def to_scheduler_json(self, reachable_states):
         scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
         for state in range(self.quotient.quotient_mdp.nr_states):
-            if self.quotient.state_is_relevant_bv.get(state):
+            if self.quotient.state_is_relevant_bv.get(state) and state in reachable_states:
                 action_index = self.root.get_action_for_state(self.quotient, state, self.quotient.relevant_state_valuations[state])
             else:
-                action_index = 0
+                # this should leave undefined in the scheduler and will be filtered below
+                continue
             scheduler_choice = stormpy.storage.SchedulerChoice(action_index)
             scheduler.set_choice(scheduler_choice, state)
             
@@ -357,17 +412,20 @@ class DecisionTree:
         return json_str
 
     
-    def append_tree_as_subtree(self, main_tree, subtree_root_node_id):
+    def append_tree_as_subtree(self, new_subtree, subtree_root_node_id, subtree_quotient):
         subtree_root_node = self.collect_nodes(lambda node : node.identifier == subtree_root_node_id)
         assert len(subtree_root_node) == 1, f"subtree root node id {subtree_root_node_id} not found in decision tree"
         subtree_root_node = subtree_root_node[0]
 
+        all_current_nodes = self.collect_nodes()
+        new_subtree.root.assign_identifiers(identifier=len(all_current_nodes)+1)
+        new_subtree.root.fix_with_respect_to_quotient(subtree_quotient, self.quotient)
+
         parent = subtree_root_node.parent
-        
-        if parent.child_true.identifier is subtree_root_node.identifier:
-            parent.child_true = main_tree.root
+        if parent.child_true.identifier == subtree_root_node.identifier:
+            parent.child_true = new_subtree.root
         else:
-            parent.child_false = main_tree.root
+            parent.child_false = new_subtree.root
 
 
 
@@ -376,7 +434,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     # if true, an explicit action executing a random choice of an available action will be added to each state
     add_dont_care_action = False
     # if true, irrelevant states will not be considered for tree mapping
-    filter_irrelevant_states = True
+    filter_irrelevant_states = False
 
     @classmethod
     def get_state_valuations(cls, model):
@@ -467,7 +525,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 break
         return id
 
-    def get_states_satisfying_predicate(self, variable, bound, leq=True):
+    def get_states_satisfying_predicate_old(self, variable, bound, leq=True):
         states = []
         for state,state_valuation in enumerate(self.relevant_state_valuations):
             for id, var in enumerate(self.variables):
@@ -479,20 +537,46 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 states.append(state)
         return states
     
-    def get_state_space_for_tree_helper_node(self, node_id):
+
+    def get_states_satisfying_predicate(self, node, leq=True):
+        states = []
+        bound = self.variables[node.variable].domain[node.variable_bound]
+        for state,state_valuation in enumerate(self.relevant_state_valuations):
+            if leq and state_valuation[node.variable] <= bound:
+                states.append(state)
+            elif not leq and state_valuation[node.variable] > bound:
+                states.append(state)
+        return states
+    
+    def get_state_space_for_tree_helper_node_old(self, node_id):
         node = self.tree_helper[node_id]
         current_node = node
         states = list(range(self.quotient_mdp.nr_states))
         while current_node['parent'] is not None:
             parent_node = self.tree_helper[current_node['parent']]
             if parent_node["children"].index(self.tree_helper.index(current_node)) == 0:
-                node_states = self.get_states_satisfying_predicate(parent_node["chosen"][0], parent_node["chosen"][1], leq=True)
+                node_states = self.get_states_satisfying_predicate_old(parent_node["chosen"][0], parent_node["chosen"][1], leq=True)
             else:
-                node_states = self.get_states_satisfying_predicate(parent_node["chosen"][0], parent_node["chosen"][1], leq=False)
+                node_states = self.get_states_satisfying_predicate_old(parent_node["chosen"][0], parent_node["chosen"][1], leq=False)
             states = list(set(states) & set(node_states))
             current_node = parent_node
         return states
     
+    def get_state_space_for_tree_helper_node(self, node_id):
+        node = self.tree_helper_tree.collect_nodes(lambda node : node.identifier == node_id)[0]
+        current_node = node
+        states = list(range(self.quotient_mdp.nr_states))
+        while current_node.parent is not None:
+            parent_node = current_node.parent
+            if parent_node.child_true.identifier == current_node.identifier:
+                node_states = self.get_states_satisfying_predicate(parent_node, leq=True)
+            else:
+                node_states = self.get_states_satisfying_predicate(parent_node, leq=False)
+            states = list(set(states) & set(node_states))
+            current_node = parent_node
+        return states
+    
+    # TODO remove this
     def get_open_variables_and_domains_for_tree_helper_node(self, node_id):
         node = self.tree_helper[node_id]
         current_node = node
@@ -512,7 +596,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         open_variables = [Variable(variable_name[i],variable_domains[i]) for i in range(len(variable_name)) if len(variable_domains[i]) > 1]
         return open_variables
     
-    def get_chosen_action_for_state_from_tree_helper(self, state):
+    def get_chosen_action_for_state_from_tree_helper_old(self, state):
         state_valuation = self.relevant_state_valuations[state]
         current_node = self.tree_helper[0]
         while not current_node['leaf']:
@@ -522,6 +606,17 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             else:
                 current_node = self.tree_helper[current_node['children'][1]]
         return current_node['chosen'][0]
+    
+    def get_chosen_action_for_state_from_tree_helper(self, state):
+        state_valuation = self.relevant_state_valuations[state]
+        current_node = self.tree_helper_tree.root
+        while not current_node.is_terminal:
+            bound = self.variables[current_node.variable].domain[current_node.variable_bound]
+            if state_valuation[current_node.variable] <= bound:
+                current_node = current_node.child_true
+            else:
+                current_node = current_node.child_false
+        return self.action_labels[current_node.action]
     
     def get_selected_choices_from_tree_helper(self, state_to_exclude=[]):
         selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
@@ -537,7 +632,13 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                     selected_choices.set(choice, True)
                     break
             else:
-                # TODO check this for some models
+                # TODO as far as I know this happens only because of unreachable states not being included in the tree
+                # for now we will treat this by using the __random__ action but it can lead to strange behaviour
+                for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                    if self.action_labels[self.choice_to_action[choice]] == "__random__":
+                        selected_choices.set(choice, True)
+                        break
+                continue
                 assert False, f"no choice for state {state} even though action {chosen_action_label} was chosen"
 
         return selected_choices
@@ -582,7 +683,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         helper_tree.build_from_tree_helper(tree_helper)
         return helper_tree
     
-
+    # TODO remove this
     def get_helper_choice_for_state(self, state):
         state_valuations = self.state_valuations[state]
         current_node = self.tree_helper[0]

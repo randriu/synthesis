@@ -15,6 +15,7 @@ import shutil
 import subprocess
 
 import logging
+from datetime import datetime
 logger = logging.getLogger(__name__)
 
 class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
@@ -130,7 +131,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
     def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6):
         nodes = helper_tree.collect_nodes(lambda node : node.get_depth() == desired_depth)
         if nodes is None or len(nodes) == 0:
-            return None
+            return []
         helper_nodes = [self.quotient.tree_helper[node.identifier] for node in nodes]
         helper_node_stats = []
         for helper_node in helper_nodes:
@@ -139,6 +140,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             helper_tree_node = helper_tree.collect_nodes(lambda node : node.identifier == helper_node["id"])[0]
             stats = {"id": helper_node["id"], "states": self.quotient.get_state_space_for_tree_helper_node(helper_node["id"]), "nodes": helper_tree_node.get_number_of_descendants(), "predicates": {pred : eval for pred, eval in helper_node["evaluations"].items() if eval <= list(helper_node["evaluations"].values())[0]*1.05}}
             helper_node_stats.append(stats)
+
+            # TODO remove this
+            assert stats["states"] == self.quotient.get_state_space_for_tree_helper_node_old(helper_node["id"]), "new implementation does not match old implementation"
 
         if len(helper_node_stats) == 0:
             return []
@@ -149,70 +153,160 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         return helper_node_stats
     
 
-    def synthesize_subtrees(self, eps_optimum_threshold):
+    def synthesize_subtrees(self, opt_result_value):
+
+        # SETTINGS
+        subtree_depth = 6
+        max_iter = 100
+        epsilon = 0.01
+        timeout = 600
+        depth_fine_tuning = False # experimental
 
         # complete init
         self.counters_reset()
+        mc_result_positive = opt_result_value > 0
+        if self.quotient.specification.optimality.maximizing == mc_result_positive:
+            epsilon *= -1
+        eps_optimum_threshold = opt_result_value * (1 + epsilon)
+        self.synthesis_timer = paynt.utils.timer.Timer(timeout)
+        self.synthesis_timer.start()
 
         # initialize from external tree
-        tree_helper_tree = self.quotient.build_tree_helper_tree()
-        logger.info(f'initial external tree has depth {tree_helper_tree.get_depth()} and {len(tree_helper_tree.collect_nodes())} nodes')
-        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
-
-        while len(node_queue) > 0:
+        self.quotient.tree_helper_tree = self.quotient.build_tree_helper_tree()
+        tree_helper_tree = self.quotient.tree_helper_tree
+        logger.info(f'initial external tree has depth {tree_helper_tree.get_depth()} and {len(tree_helper_tree.collect_nonterminals())} nodes')
         
-            node = node_queue.pop(0)
-            # print(tree_helper_tree.to_graphviz([node["id"]]))
+        current_iter = 0
+        current_depth = subtree_depth
 
-            # subtree synthesis
-            submdp = self.quotient.get_submdp_from_unfixed_states(node["states"])
-            logger.info(f"subtree quotient has {submdp.model.nr_states} states and {submdp.model.nr_choices} choices")
-            subtree_quotient = paynt.quotient.mdp.MdpQuotient(submdp.model, self.quotient.specification)
-            subtree_synthesizer = SynthesizerDecisionTree(subtree_quotient)
-            # depth = 2
-            # subtree_synthesizer.synthesize_tree(depth)
-            subtree_synthesizer.synthesize_tree_sequence(eps_optimum_threshold, overall_timeout=60, max_depth=6)
+        # TODO think about this fine tuning more...
+        while (depth_fine_tuning and current_depth > 0) or (current_depth == subtree_depth):
 
-            # create new tree
-            if subtree_synthesizer.best_tree is not None:
-                logger.info(f"admissible subtree found from node {node['id']}")
-                relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
-                subtree_synthesizer.best_tree.simplify(relevant_state_valuations)
-                tree_helper_tree.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"])
-                tree_helper_tree.root.assign_identifiers()
-                logger.info(f'new tree has depth {tree_helper_tree.get_depth()} and {len(tree_helper_tree.collect_nodes())} nodes')
+            logger.info(f"starting iteration with subtree depth {current_depth}")
+            # TODO this is not guaranteed to work in subsequent iterations when the PAYNT tree is used
+            node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth)
+
+            while len(node_queue) > 0 and current_iter < max_iter:
+
+                if self.synthesis_timer.time_limit_reached():
+                    logger.info(f"timeout reached")
+                    break
+
+                logger.info(f"starting iteration {current_iter} with {len(node_queue)} nodes in node queue")
+                logger.info(f"current tree size: {len(tree_helper_tree.collect_nodes())} nodes")
+            
+                current_iter += 1
+                node = node_queue.pop(0)
+
                 # print(tree_helper_tree.to_graphviz([node["id"]]))
 
-                # create scheduler 
-                # print(tree_helper_tree.to_scheduler_json())
+                # subtree synthesis
+                submdp = self.quotient.get_submdp_from_unfixed_states(node["states"])
+                logger.info(f"subtree quotient has {submdp.model.nr_states} states and {submdp.model.nr_choices} choices")
+                subtree_spec = self.quotient.specification.copy()
+                subtree_quotient = paynt.quotient.mdp.MdpQuotient(submdp.model, subtree_spec)
+                # if subtree_quotient.self.state_is_relevant_bv.number_of_set_bits() == 0:
+                #     logger.info(f"no relevant states in subtree quotient")
+                #     continue
+                subtree_quotient.specification.optimality.update_optimum(eps_optimum_threshold)
+                subtree_synthesizer = SynthesizerDecisionTree(subtree_quotient)
+                # depth = 2
+                # subtree_synthesizer.synthesize_tree(depth)
+                subtree_synthesizer.synthesize_tree_sequence(opt_result_value, overall_timeout=60, max_depth=current_depth)
 
-                os.makedirs("subtree_test", exist_ok=True)
-                open("subtree_test/scheduler.storm.json", "w").write(tree_helper_tree.to_scheduler_json())
+                # create new tree
+                if subtree_synthesizer.best_tree is not None:
+                    logger.info(f"admissible subtree found from node {node['id']}")
+                    relevant_state_valuations = [self.quotient.relevant_state_valuations[state] for state in self.quotient.state_is_relevant_bv]
+                    subtree_synthesizer.best_tree.simplify(relevant_state_valuations)
+                    tree_helper_tree_copy = tree_helper_tree.copy()
+                    tree_helper_tree_copy.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"], subtree_quotient)
+                    tree_helper_tree_copy.root.assign_identifiers(keep_old=True)
+                    logger.info(f'new tree has depth {tree_helper_tree_copy.get_depth()} and {len(tree_helper_tree_copy.collect_nonterminals())} nodes')
 
-                command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-                subprocess.run(command, cwd="subtree_test")
+                    self.quotient.tree_helper_tree = tree_helper_tree_copy
 
-                new_tree_helper = paynt.utils.tree_helper.parse_tree_helper("subtree_test/decision_trees/default/scheduler/default.json")
-                new_tree_helper_tree = self.quotient.build_tree_helper_tree(new_tree_helper)
-                logger.info(f'new dtcontrol tree has depth {new_tree_helper_tree.get_depth()} and {len(new_tree_helper_tree.collect_nodes())} nodes')
+                    submdp = self.quotient.get_submdp_from_unfixed_states([])
+                    # double check
+                    res = submdp.check_specification(self.quotient.specification)
+                    print(res)
+                    if opt_result_value < eps_optimum_threshold:
+                        assert res.optimality_result.value <= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not below threshold {eps_optimum_threshold}"
+                    else:
+                        assert res.optimality_result.value >= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not above threshold {eps_optimum_threshold}"
+                    reachable_states = []
+                    for state in range(submdp.model.nr_states):
+                        reachable_states.append(submdp.quotient_state_map[state])
 
-                # TODO for now I will always switch to the tree produced by dtControl as it contains all the information I need
-                # however, for the future I should compare the trees and choose the one that is smaller
-                if len(new_tree_helper_tree.collect_nodes()) < len(tree_helper_tree.collect_nodes()):
-                    logger.info(f"New DtControl tree is smaller")
+                    # print(tree_helper_tree.to_graphviz([node["id"]]))
+
+                    # create scheduler 
+                    # print(tree_helper_tree.to_scheduler_json())
+
+                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+                    temp_file_name = "subtree_test" + timestamp
+                    os.makedirs(temp_file_name, exist_ok=True)
+                    open(f"{temp_file_name}/scheduler.storm.json", "w").write(tree_helper_tree_copy.to_scheduler_json(reachable_states))
+
+                    command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+                    subprocess.run(command, cwd=f"{temp_file_name}")
+
+                    new_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+                    new_tree_helper_tree = self.quotient.build_tree_helper_tree(new_tree_helper)
+                    logger.info(f'new dtcontrol tree has depth {new_tree_helper_tree.get_depth()} and {len(new_tree_helper_tree.collect_nonterminals())} nodes')
+
+                    # TODO if none of the trees produced are smaller here I would like to revert to the original tree
+                    if len(new_tree_helper_tree.collect_nonterminals()) <= len(tree_helper_tree_copy.collect_nonterminals()) and len(new_tree_helper_tree.collect_nonterminals()) < len(tree_helper_tree.collect_nonterminals()):
+                        logger.info(f"New DtControl tree is smaller")
+                        self.quotient.tree_helper = new_tree_helper
+                        self.quotient.tree_helper_tree = new_tree_helper_tree
+                        tree_helper_tree = new_tree_helper_tree
+                        # print(tree_helper_tree.to_graphviz())
+                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                    elif len(tree_helper_tree_copy.collect_nonterminals()) < len(tree_helper_tree.collect_nonterminals()):
+                        logger.info(f"Current PAYNT tree is smaller")
+                        tree_helper_tree = tree_helper_tree_copy
+                        self.quotient.tree_helper_tree = tree_helper_tree
+                        for node in node_queue:
+                            nodes = self.quotient.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node["id"])
+                            assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node["id"]}'
+                            new_node = nodes[0]
+                            node["id"] = new_node.identifier
+                    else:
+                        logger.info(f"None of the new trees are smaller, continuing with current tree")
+                        self.quotient.tree_helper_tree = tree_helper_tree
+                    
+                    shutil.rmtree(f"{temp_file_name}")
+                    # exit()
                 else:
-                    logger.info(f"Current PAYNT tree is smaller")
-                self.quotient.tree_helper = new_tree_helper
-                tree_helper_tree = new_tree_helper_tree
-                # print(tree_helper_tree.to_graphviz())
-                node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                    logger.info(f"no admissible subtree found from node {node['id']}")
 
-                # shutil.rmtree("subtree_test")
-                exit()
-            else:
-                logger.info(f"no admissible subtree found from node {node['id']}")
-            
-            exit()
+            current_depth -= 1
+
+        self.quotient.tree_helper_tree = tree_helper_tree
+        
+        # print(self.quotient.tree_helper_tree.to_graphviz())
+        
+        self.synthesis_timer.stop()
+
+        # double check
+        dtmc = self.quotient.get_submdp_from_unfixed_states([])
+        # TODO why would it not be a DTMC here???
+        if dtmc.model.nr_states != dtmc.model.nr_choices:
+            logger.info(f"tree did not induce dtmc?")
+        # assert dtmc.model.nr_states == dtmc.model.nr_choices, "tree did not induce dtmc"
+        result = dtmc.check_specification(self.quotient.specification)
+
+        if opt_result_value < eps_optimum_threshold:
+            assert result.optimality_result.value <= eps_optimum_threshold, f"optimum value {result.optimality_result.value} is not below threshold {eps_optimum_threshold}"
+        else:
+            assert result.optimality_result.value >= eps_optimum_threshold, f"optimum value {result.optimality_result.value} is not above threshold {eps_optimum_threshold}"
+
+        logger.info(f'final tree has value {result.optimality_result.value} with depth {self.quotient.tree_helper_tree.get_depth()} and {len(self.quotient.tree_helper_tree.collect_nonterminals())} nodes')
+
+        print(result.optimality_result.value, round(self.synthesis_timer.read(), 2), self.quotient.tree_helper_tree.get_depth(), len(self.quotient.tree_helper_tree.collect_nonterminals()))
+
+        exit()
 
     def synthesize_tree(self, depth:int, family=None):
         self.counters_reset()
@@ -249,7 +343,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             self.counters_reset()
             self.stat = paynt.synthesizer.statistic.Statistic(self)
             self.stat.start(family)
-            timeout = depth_timeout if depth < max_depth-1 else None
+            timeout = depth_timeout if depth < max_depth-1 else overall_timeout / 2 # second half of the time for the last depth
             self.synthesis_timer = paynt.utils.timer.Timer(timeout)
             self.synthesis_timer.start()
             families = [family]
@@ -334,10 +428,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 if self.quotient.specification.optimality.maximizing == mc_result_positive:
                     epsilon *= -1
                 optimum_threshold = opt_result_value * (1 + epsilon)
-            self.set_optimality_threshold(optimum_threshold)
+            # self.set_optimality_threshold(optimum_threshold)
 
             if self.quotient.tree_helper is not None:
-                self.synthesize_subtrees(optimum_threshold)
+                self.synthesize_subtrees(opt_result_value)
             elif not SynthesizerDecisionTree.tree_enumeration:
                 self.synthesize_tree(SynthesizerDecisionTree.tree_depth)
             else:
