@@ -134,7 +134,7 @@ class Sketch:
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
-        paynt.verification.property.Property.initialize()
+        paynt.verification.property.Property.initialize(use_exact)
         if explicit_quotient.is_exact:
             updated = payntbind.synthesis.addMissingChoiceLabelsExact(explicit_quotient)
         else:

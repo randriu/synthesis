@@ -67,7 +67,7 @@ class Property:
         payntbind.synthesis.set_precision_minmax(cls.environment.solver_environment.minmax_solver_environment, precision)
 
     @classmethod
-    def initialize(cls):
+    def initialize(cls, use_exact=False):
         cls.environment = stormpy.Environment()
         cls.set_model_checking_precision(cls.model_checking_precision)
 
@@ -76,12 +76,10 @@ class Property:
         # se.set_linear_equation_solver_type(stormpy.EquationSolverType.gmmxx)
         se.set_linear_equation_solver_type(stormpy.EquationSolverType.eigen)
 
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.value_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.sound_value_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.interval_iteration
-        se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
-        # se.minmax_solver_environment.method = stormpy.MinMaxMethod.topological
+        if use_exact:
+            se.minmax_solver_environment.method = stormpy.MinMaxMethod.policy_iteration
+        else:
+            se.minmax_solver_environment.method = stormpy.MinMaxMethod.optimistic_value_iteration
 
     @classmethod
     def model_check(cls, model, formula):
