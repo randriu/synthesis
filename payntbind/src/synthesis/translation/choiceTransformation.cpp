@@ -624,7 +624,8 @@ template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> re
 template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> restoreActionsInAbsorbingStates<storm::RationalNumber>(
     storm::models::sparse::Model<storm::RationalNumber> const& model);
 template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> addDontCareAction<storm::RationalNumber>(
-    storm::models::sparse::Model<storm::RationalNumber> const& model);
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    storm::storage::BitVector const& state_mask);
 template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> createModelUnion(
     std::vector<std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>>> const&
 );
