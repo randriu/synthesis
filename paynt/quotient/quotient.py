@@ -89,9 +89,14 @@ class Quotient:
         tm = mdp.transition_matrix
         tm.make_row_grouping_trivial()
         assert tm.nr_columns == tm.nr_rows, "expected transition matrix without non-trivial row groups"
-        components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
-        dtmc = stormpy.storage.SparseDtmc(components)
-        return dtmc
+        if mdp.is_exact:
+            components = stormpy.storage.SparseExactModelComponents(tm, mdp.labeling, mdp.reward_models)
+            dtmc = stormpy.storage.SparseExactDtmc(components)
+            return dtmc
+        else:
+            components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
+            dtmc = stormpy.storage.SparseDtmc(components)
+            return dtmc
 
     def build_assignment(self, family):
         assert family.size == 1, "expecting family of size 1"
@@ -121,7 +126,10 @@ class Quotient:
         return state_to_choice_reachable
 
     def scheduler_to_state_to_choice(self, submdp, scheduler, discard_unreachable_choices=True):
-        state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, submdp.model, submdp.quotient_choice_map)
+        if submdp.model.is_exact:
+            state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoiceExact(scheduler, submdp.model, submdp.quotient_choice_map)
+        else:
+            state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, submdp.model, submdp.quotient_choice_map)
         state_to_choice = self.empty_scheduler()
         for state in range(submdp.model.nr_states):
             quotient_choice = state_to_quotient_choice[state]
@@ -159,7 +167,10 @@ class Quotient:
         '''
 
         # multiply probability with model checking results
-        choice_values = payntbind.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
+        if mdp.is_exact:
+            choice_values = payntbind.synthesis.multiply_with_vector_exact(mdp.transition_matrix, state_values)
+        else:
+            choice_values = payntbind.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
         choice_values = Quotient.make_vector_defined(choice_values)
 
         # if the associated reward model has state-action rewards, then these must be added to choice values

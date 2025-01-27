@@ -1,6 +1,7 @@
 #include "SubPomdpBuilder.h"
 
 #include "src/synthesis/translation/componentTranslations.h"
+#include "storm/adapters/RationalNumberAdapter.h"
 
 #include <stack>
 
@@ -107,4 +108,5 @@ namespace synthesis {
     }
 
     template class SubPomdpBuilder<double>;
+    template class SubPomdpBuilder<storm::RationalNumber>;
 }

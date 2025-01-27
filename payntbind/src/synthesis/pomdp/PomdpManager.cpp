@@ -5,6 +5,7 @@
 #include "storm/storage/sparse/ModelComponents.h"
 #include "storm/storage/SparseMatrix.h"
 #include "storm/models/sparse/StandardRewardModel.h"
+#include "storm/adapters/RationalNumberAdapter.h"
 
 namespace synthesis {
    
@@ -314,5 +315,6 @@ void PomdpManager<ValueType>::setGlobalMemorySize(uint64_t memory_size) {
 
 
 template class PomdpManager<double>;
+template class PomdpManager<storm::RationalNumber>;
 
 }

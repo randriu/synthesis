@@ -74,9 +74,9 @@ class Statistic:
         ''' Identify the type of the model and count corresponding iteration. '''
         if isinstance(model, paynt.models.models.Mdp):
             model = model.model
-        if type(model) == stormpy.storage.SparseDtmc:
+        if type(model) in [stormpy.storage.SparseDtmc, stormpy.storage.SparseExactDtmc]:
             self.iteration_dtmc(model.nr_states)
-        elif type(model) == stormpy.storage.SparseMdp:
+        elif type(model) in [stormpy.storage.SparseMdp, stormpy.storage.SparseExactMdp]:
             self.iteration_mdp(model.nr_states)
         else:
             logger.debug(f"unknown model type {type(model)}")
@@ -150,7 +150,9 @@ class Statistic:
             if opt is None:
                 opt = spec.optimality.optimum
             if opt is not None:
-                ret_str += f", opt = {round(opt,4)}"
+                if not isinstance(opt, stormpy.Rational):
+                    opt = round(opt, 4)
+                ret_str += f", opt = {opt}"
         return ret_str
 
 
@@ -202,7 +204,10 @@ class Statistic:
     def get_summary_synthesis(self):
         spec = self.quotient.specification
         if spec.has_optimality and spec.optimality.optimum is not None:
-            optimum = round(spec.optimality.optimum, 6)
+            if isinstance(spec.optimality.optimum, stormpy.Rational):
+                optimum = spec.optimality.optimum
+            else:
+                optimum = round(spec.optimality.optimum, 6)
             return f"optimum: {optimum}"
         else:
             feasible = "yes" if self.synthesized_assignment is not None else "no"
