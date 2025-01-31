@@ -69,26 +69,52 @@ bool assertChoiceLabelingIsCanonic(
     storm::models::sparse::ChoiceLabeling const& choice_labeling,
     bool throw_on_fail
 ) {
-    std::set<std::string> state_labels;
+    // collect action labels
+    std::set<std::string> action_labels_set = choice_labeling.getLabels();
+    std::vector<std::string> action_labels;
+    action_labels.assign(action_labels_set.begin(), action_labels_set.end());
+    uint64_t num_actions = action_labels.size();
+
+    // associate choices with actions, check uniqueness
+    std::vector<uint64_t> choice_to_action(row_groups.back(), num_actions);
+    for(uint64_t action = 0; action < action_labels.size(); ++action) {
+        std::string const& action_label = action_labels[action];
+        for(uint64_t choice: choice_labeling.getChoices(action_label)) {
+            if(choice_to_action[choice] != num_actions) {
+                if(throw_on_fail) {
+                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "multiple labels for choice " << choice);
+                } else {
+                    return false;
+                }
+            }
+            choice_to_action[choice] = action;
+        }
+    }
+
+    // check existence
+    for(uint64_t action: choice_to_action) {
+        if(action == num_actions) {
+            if(throw_on_fail) {
+                STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "a choice has no labels");
+            } else {
+                return false;
+            }
+        }
+    }
+
+    // check uniqueness for a state
+    storm::storage::BitVector state_labels(num_actions, false);
     for(uint64_t state = 0; state < row_groups.size()-1; ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            auto const& labels = choice_labeling.getLabelsOfChoice(choice);
-            if(labels.size() != 1) {
+            uint64_t action = choice_to_action[choice];
+            if(state_labels[action]) {
                 if(throw_on_fail) {
-                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "expected exactly 1 label for choice " << choice);
+                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "a label is used twice for choices in state " << state);
                 } else {
                     return false;
                 }
             }
-            std::string const& label = *(labels.begin());
-            if(state_labels.find(label) != state_labels.end()) {
-                if(throw_on_fail) {
-                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "label " << label << " is used twice for choices in state " << state);
-                } else {
-                    return false;
-                }
-            }
-            state_labels.insert(label);
+            state_labels.set(action,true);
         }
         state_labels.clear();
     }
