@@ -132,34 +132,22 @@ std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels(
 ) {
     // collect action labels
     storm::models::sparse::ChoiceLabeling const& choice_labeling = model.getChoiceLabeling();
-    std::set<std::string> action_labels_set;
-    for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
-        for(std::string const& label: choice_labeling.getLabelsOfChoice(choice)) {
-            action_labels_set.insert(label);
+    std::set<std::string> action_labels_set = choice_labeling.getLabels();
+    std::vector<std::string> action_labels;
+    action_labels.assign(action_labels_set.begin(), action_labels_set.end());
+    // sort action labels to ensure order determinism (why did we think this was necessary?)
+    std::sort(action_labels.begin(),action_labels.end());
+
+    assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling, false);
+
+    std::vector<uint64_t> choice_to_action(model.getNumberOfChoices());
+    for(uint64_t action = 0; action < action_labels.size(); ++action) {
+        std::string const& action_label = action_labels[action];
+        for(uint64_t choice: choice_labeling.getChoices(action_label)) {
+            choice_to_action[choice] = action;
         }
     }
 
-    // sort action labels to ensure order determinism
-    std::vector<std::string> action_labels;
-    for(std::string const& label: action_labels_set) {
-        action_labels.push_back(label);
-    }
-    std::sort(action_labels.begin(),action_labels.end());
-
-    // map action labels to actions
-    std::map<std::string,uint64_t> action_label_to_action;
-    for(uint64_t action = 0; action < action_labels.size(); ++action) {
-        action_label_to_action[action_labels[action]] = action;
-    }
-
-    assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling, false);
-    std::vector<uint64_t> choice_to_action(model.getNumberOfChoices());
-    for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
-        auto const& labels = choice_labeling.getLabelsOfChoice(choice);
-        std::string const& label = *(labels.begin());
-        uint64_t action = action_label_to_action[label];
-        choice_to_action[choice] = action;
-    }
     return std::make_pair(action_labels,choice_to_action);
 }
 
