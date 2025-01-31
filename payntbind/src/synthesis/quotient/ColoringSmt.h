@@ -48,6 +48,8 @@ public:
         bool enable_harmonization
     );
 
+    ~ColoringSmt();
+
     /**
      * Enable efficient state exploration of reachable states.
      * @note this is required for harmonization

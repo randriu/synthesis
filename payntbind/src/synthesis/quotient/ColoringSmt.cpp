@@ -238,6 +238,11 @@ ColoringSmt<ValueType>::ColoringSmt(
 }
 
 template<typename ValueType>
+ColoringSmt<ValueType>::~ColoringSmt() {
+    tree.clear();
+}
+
+template<typename ValueType>
 void ColoringSmt<ValueType>::enableStateExploration(storm::models::sparse::NondeterministicModel<ValueType> const& model) {
     this->state_exploration_enabled = true;
     this->initial_state = *model.getInitialStates().begin();
