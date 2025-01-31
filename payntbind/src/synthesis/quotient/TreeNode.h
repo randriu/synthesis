@@ -166,12 +166,9 @@ public:
 class TerminalNode: public TreeNode {
 public:
     const uint64_t num_actions;
-    z3::expr action_substitution_variable;
     Hole action_hole;
 
     // cache
-    z3::expr action_expr;
-    z3::expr action_expr_harm;
     z3::expr_vector action_expression;
     z3::expr_vector action_expression_harmonizing;
 
@@ -179,8 +176,7 @@ public:
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
         std::vector<std::vector<int64_t>> const& variable_domain,
-        uint64_t num_actions,
-        z3::expr const& action_substitution_variable
+        uint64_t num_actions
     );
 
     const TerminalNode *getTerminal(std::vector<bool> const& path) const override;
@@ -229,13 +225,13 @@ public:
 
     Hole decision_hole;
     std::vector<Hole> variable_hole;
-    z3::expr_vector state_substitution_variables;
 
     /** Auxiliary vector to be reused to store expressions. */
     z3::expr_vector clauses;
 
     // cache
     z3::expr_vector decision_is_variable;
+    z3::expr_vector decision_harm_is_variable;
     z3::expr_vector harm_is_hole;
     z3::expr harm_decision_true;
     z3::expr harm_decision_false;
@@ -245,8 +241,7 @@ public:
     InnerNode(
         uint64_t identifier, z3::context & ctx,
         std::vector<std::string> const& variable_name,
-        std::vector<std::vector<int64_t>> const& variable_domain,
-        z3::expr_vector const& state_substitution_variables
+        std::vector<std::vector<int64_t>> const& variable_domain
     );
 
     const TerminalNode *getTerminal(std::vector<bool> const& path) const override;

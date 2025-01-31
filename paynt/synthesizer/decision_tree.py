@@ -205,6 +205,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 break
 
     def run(self, optimum_threshold=None):
+        # self.quotient.reset_tree(SynthesizerDecisionTree.tree_depth,enable_harmonization=False)
         scheduler_choices = None
         if SynthesizerDecisionTree.scheduler_path is None:
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
@@ -278,6 +279,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
             if self.export_synthesis_filename_base is not None:
                 self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
+
         time_total = round(paynt.utils.timer.GlobalTimer.read(),2)
         logger.info(f"synthesis finished after {time_total} seconds")
 

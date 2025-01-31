@@ -64,17 +64,6 @@ ColoringSmt<ValueType>::ColoringSmt(
         STORM_LOG_THROW(variable_found, storm::exceptions::UnexpectedException, "Unexpected variable name.");
     }
 
-    // create substitution variables
-    z3::expr_vector state_substitution_variables(ctx);
-    z3::expr_vector choice_substitution_variables(ctx);
-    for(auto const& name: variable_name) {
-        z3::expr variable = ctx.int_const(name.c_str());
-        state_substitution_variables.push_back(variable);
-        choice_substitution_variables.push_back(variable);
-    }
-    z3::expr action_substitution_variable = ctx.int_const("act");
-    choice_substitution_variables.push_back(action_substitution_variable);
-
     // create the tree
     uint64_t num_nodes = tree_list.size();
     this->num_actions = *std::max_element(choice_to_action.begin(),choice_to_action.end())+1;
@@ -85,9 +74,9 @@ ColoringSmt<ValueType>::ColoringSmt(
             "Inner node has only one child."
         );
         if(child_true != num_nodes) {
-            tree.push_back(std::make_shared<InnerNode>(node,ctx,this->variable_name,this->variable_domain,state_substitution_variables));
+            tree.push_back(std::make_shared<InnerNode>(node,ctx,this->variable_name,this->variable_domain));
         } else {
-            tree.push_back(std::make_shared<TerminalNode>(node,ctx,this->variable_name,this->variable_domain,this->num_actions,action_substitution_variable));
+            tree.push_back(std::make_shared<TerminalNode>(node,ctx,this->variable_name,this->variable_domain,this->num_actions));
         }
     }
     getRoot()->createTree(tree_list,tree);
@@ -209,10 +198,13 @@ ColoringSmt<ValueType>::ColoringSmt(
 
         timers["ColoringSmt::2-3"].start();
         for(uint64_t path = 0; path < numPaths(); ++path) {
+            timers["ColoringSmt::2-3-1"].start();
             getRoot()->substitutePrefixExpressionHarmonizing(getRoot()->paths[path], clauses);
             z3::expr path_expression = z3::mk_or(clauses);
             clauses.resize(0);
+            timers["ColoringSmt::2-3-1"].stop();
 
+            timers["ColoringSmt::2-3-2"].start();
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
                 uint64_t action = choice_to_action[choice];
                 z3::expr action_selection = terminals[path]->action_expression_harmonizing[action];
@@ -226,6 +218,7 @@ ColoringSmt<ValueType>::ColoringSmt(
                 }
                 choice_path_expresssion_harm[choice].push_back(path_expression or action_selection);
             }
+            timers["ColoringSmt::2-3-2"].stop();
         }
         timers["ColoringSmt::2-3"].stop();
     }

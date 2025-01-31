@@ -75,7 +75,7 @@ bool assertChoiceLabelingIsCanonic(
     action_labels.assign(action_labels_set.begin(), action_labels_set.end());
     uint64_t num_actions = action_labels.size();
 
-    // associate choices with actions, check uniqueness
+    // associate choices with actions, check uniqueness for a choice
     std::vector<uint64_t> choice_to_action(row_groups.back(), num_actions);
     for(uint64_t action = 0; action < action_labels.size(); ++action) {
         std::string const& action_label = action_labels[action];
@@ -91,7 +91,7 @@ bool assertChoiceLabelingIsCanonic(
         }
     }
 
-    // check existence
+    // check existence for a choice
     for(uint64_t action: choice_to_action) {
         if(action == num_actions) {
             if(throw_on_fail) {
