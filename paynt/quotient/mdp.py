@@ -390,11 +390,13 @@ class DecisionTree:
         self.root.to_graphviz(graphviz_tree,self.variables,self.quotient.action_labels,highlight_nodes)
         return graphviz_tree
     
-    def to_scheduler_json(self, reachable_states):
+    def to_scheduler_json(self, reachable_states=None):
+        if reachable_states is None:
+            reachable_states = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, True)
         scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
         nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
         for state in range(self.quotient.quotient_mdp.nr_states):
-            if self.quotient.state_is_relevant_bv.get(state) and state in reachable_states:
+            if self.quotient.state_is_relevant_bv.get(state) and reachable_states.get(state):
                 action_index = self.root.get_action_for_state(self.quotient, state, self.quotient.relevant_state_valuations[state], nci)
             else:
                 # this should leave undefined in the scheduler and will be filtered below
@@ -793,6 +795,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 current_node = self.tree_helper[current_node["children"][1]] 
     
 
+    # unfixed_states is a bitvector of states that should be left unfixed in the submdp
     def get_submdp_from_unfixed_states(self, unfixed_states=None):
         if unfixed_states is None:
             unfixed_states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, False)
@@ -952,14 +955,14 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
-        relevant_choices = stormpy.BitVector(choices)
-        # TODO add more ways to determine relevant choices
-        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
-        for state in range(self.quotient_mdp.nr_states):
-            if self.quotient_mdp.get_nr_available_actions(state) <= 1:
-                for choice in range(nci[state],nci[state+1]):
-                    relevant_choices.set(choice, False)
-        return self.coloring.areChoicesConsistent(choices, relevant_choices, family.family)
+        # relevant_choices = stormpy.BitVector(choices)
+        # # TODO add more ways to determine relevant choices
+        # nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        # for state in range(self.quotient_mdp.nr_states):
+        #     if self.quotient_mdp.get_nr_available_actions(state) <= 1:
+        #         for choice in range(nci[state],nci[state+1]):
+        #             relevant_choices.set(choice, False)
+        return self.coloring.areChoicesConsistent(choices, family.family)
 
 
     def scheduler_is_consistent(self, mdp, prop, result):

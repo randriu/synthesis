@@ -178,6 +178,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         timeout = 1200
         depth_fine_tuning = True # experimental
         break_on_small_tree = True
+        use_dtcontrol = True
 
         # complete init
         self.counters_reset()
@@ -254,7 +255,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
                     self.quotient.tree_helper_tree = tree_helper_tree_copy
 
-                    submdp = self.quotient.get_submdp_from_unfixed_states()
+                    submdp_for_tree = self.quotient.get_submdp_from_unfixed_states()
                     # double check
                     # res = submdp.check_specification(self.quotient.specification)
                     # print(res)
@@ -263,32 +264,36 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                     #     assert res.optimality_result.value <= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not below threshold {eps_optimum_threshold}"
                     # else:
                     #     assert res.optimality_result.value >= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not above threshold {eps_optimum_threshold}"
-                    reachable_states = []
-                    for state in range(submdp.model.nr_states):
-                        reachable_states.append(submdp.quotient_state_map[state])
+                    reachable_states = stormpy.BitVector(submdp_for_tree.model.nr_states, False)
+                    for state in range(submdp_for_tree.model.nr_states):
+                        reachable_states.set(submdp_for_tree.quotient_state_map[state], True)
 
                     # print(tree_helper_tree.to_graphviz([node["id"]]))
 
                     # create scheduler 
                     # print(tree_helper_tree.to_scheduler_json())
 
-                    self.dtcontrol_calls += 1
-                    timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                    temp_file_name = "subtree_test" + timestamp
-                    os.makedirs(temp_file_name, exist_ok=True)
-                    open(f"{temp_file_name}/scheduler.storm.json", "w").write(tree_helper_tree_copy.to_scheduler_json(reachable_states))
+                    # calling dtcontrol
+                    if use_dtcontrol:
+                        self.dtcontrol_calls += 1
+                        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+                        temp_file_name = "subtree_test" + timestamp
+                        os.makedirs(temp_file_name, exist_ok=True)
+                        open(f"{temp_file_name}/scheduler.storm.json", "w").write(tree_helper_tree_copy.to_scheduler_json(reachable_states))
 
-                    command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
-                    subprocess.run(command, cwd=f"{temp_file_name}")
+                        command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+                        subprocess.run(command, cwd=f"{temp_file_name}")
 
-                    logger.info(f"parsing new dtcontrol tree")
-                    new_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
-                    new_tree_helper_tree = self.quotient.build_tree_helper_tree(new_tree_helper)
-                    logger.info(f'new dtcontrol tree has depth {new_tree_helper_tree.get_depth()} and {len(new_tree_helper_tree.collect_nonterminals())} nodes')
+                        logger.info(f"parsing new dtcontrol tree")
+                        new_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+                        new_tree_helper_tree = self.quotient.build_tree_helper_tree(new_tree_helper)
+                        logger.info(f'new dtcontrol tree has depth {new_tree_helper_tree.get_depth()} and {len(new_tree_helper_tree.collect_nonterminals())} nodes')
+
+                        shutil.rmtree(f"{temp_file_name}")
 
                     # TODO if none of the trees produced are smaller here I would like to revert to the original tree
                     # if False: # TODO remove this
-                    if len(new_tree_helper_tree.collect_nonterminals()) <= len(tree_helper_tree_copy.collect_nonterminals()) and len(new_tree_helper_tree.collect_nonterminals()) < len(tree_helper_tree.collect_nonterminals()):
+                    if use_dtcontrol and len(new_tree_helper_tree.collect_nonterminals()) <= len(tree_helper_tree_copy.collect_nonterminals()) and len(new_tree_helper_tree.collect_nonterminals()) < len(tree_helper_tree.collect_nonterminals()):
                         logger.info(f"New DtControl tree is smaller")
                         self.dtcontrol_successes += 1
                         self.quotient.tree_helper = new_tree_helper
@@ -311,7 +316,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.both_larger += 1
                         self.quotient.tree_helper_tree = tree_helper_tree
                     
-                    shutil.rmtree(f"{temp_file_name}")
                     # exit()
                 else:
                     logger.info(f"no admissible subtree found from node {node['id']}")

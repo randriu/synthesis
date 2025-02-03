@@ -515,7 +515,7 @@ void ColoringSmt<ValueType>::loadUnsatCore(z3::expr_vector const& unsat_core_exp
 }
 
 template<typename ValueType>
-std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistent(BitVector const& choices, BitVector const& relevantChoices, Family const& subfamily) {
+std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areChoicesConsistent(BitVector const& choices, Family const& subfamily) {
     timers[__FUNCTION__].start();
     std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
 
@@ -535,7 +535,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     solver.push();
     getRoot()->addFamilyEncoding(subfamily,solver);
     solver.push();
-    for(uint64_t choice: relevantChoices) {
+    for(uint64_t choice: choices) {
         uint64_t state = choice_to_state[choice];
         for(uint64_t path: state_path_enabled[state]) {
             const char *label = choice_path_label[choice][path].c_str();
@@ -577,7 +577,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
             if(not choices[choice]) {
                 continue;
             }
-            if (relevantChoices[choice]) {
+            if (state_is_relevant[state]) {
                 for(uint64_t path: state_path_enabled[state]) {
                     const char *label = choice_path_label[choice][path].c_str();
                     solver.add(choice_path_expresssion[choice][path], label);
