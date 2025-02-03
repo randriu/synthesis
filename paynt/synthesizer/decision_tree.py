@@ -205,7 +205,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 break
 
     def run(self, optimum_threshold=None):
-        # self.quotient.reset_tree(SynthesizerDecisionTree.tree_depth,enable_harmonization=False)
+        # self.quotient.reset_tree(SynthesizerDecisionTree.tree_depth,enable_harmonization=True)
         scheduler_choices = None
         if SynthesizerDecisionTree.scheduler_path is None:
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)

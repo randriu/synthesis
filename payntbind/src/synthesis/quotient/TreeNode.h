@@ -82,6 +82,8 @@ public:
     uint64_t depth;
     /** Every possible path (a sequence of condition steps) that can be taken from this node. */
     std::vector<std::vector<bool>> paths;
+    /** Every possible path (a sequence of nodes) that can be taken from this node. */
+    // std::vector<std::vector<std::shared_ptr<TreeNode>>> paths_ptr;
 
     /** Create a tree node with the unique identifier. */
     TreeNode(
@@ -121,14 +123,14 @@ public:
     virtual uint64_t getPathActionHole(std::vector<bool> const& path) {return 0;}
 
     /** Add a step expression evaluated for a given state valuation. */
-    virtual void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation) {};
-    virtual void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector & substituted) const {};
+    virtual void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation, z3::expr_vector const& state_valuation_int) {};
+    virtual void substitutePrefixExpression(std::vector<bool> const& path, z3::array<Z3_ast> & substituted) const {};
     /** Add an action expression evaluated for a given state valuation. */
     virtual void substituteActionExpressions() {};
 
     /** Add a step expression evaluated for a given state valuation (harmonizing). */
-    virtual void createPrefixSubstitutionsHarmonizing(std::vector<uint64_t> const& state_valuation, z3::expr const& harmonizing_variable) {};
-    virtual void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & substituted) const {};
+    virtual void createPrefixSubstitutionsHarmonizing(std::vector<uint64_t> const& state_valuation, z3::expr_vector const& state_valuation_int, z3::expr const& harmonizing_variable) {};
+    virtual void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::array<Z3_ast> & substituted) const {};
     /** Add an action expression evaluated for a given state valuation (harmonizing). */
     virtual void substituteActionExpressionsHarmonizing(z3::expr const& harmonizing_variable) {};
 
@@ -186,12 +188,7 @@ public:
     void createPaths(z3::expr const& harmonizing_variable) override;
     uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation) override;
-    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
     void substituteActionExpressions() override;
-
-    void createPrefixSubstitutionsHarmonizing(std::vector<uint64_t> const& state_valuation, z3::expr const& harmonizing_variable) override;
-    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
     void substituteActionExpressionsHarmonizing(z3::expr const& harmonizing_variable) override;
 
     void clearCache() override;
@@ -226,10 +223,10 @@ public:
     Hole decision_hole;
     std::vector<Hole> variable_hole;
 
-    /** Auxiliary vector to be reused to store expressions. */
     z3::expr_vector clauses;
 
-    // cache
+    // Auxiliary variables to be reused during initalization for memory efficiency.
+    // Calling \p clearCache clears these variables.
     z3::expr_vector decision_is_variable;
     z3::expr_vector decision_harm_is_variable;
     z3::expr_vector harm_is_hole;
@@ -237,6 +234,10 @@ public:
     z3::expr harm_decision_false;
     z3::expr substituted_true;
     z3::expr substituted_false;
+    std::vector<z3::expr> clauses_true;
+    z3::array<Z3_ast> array_true;
+    std::vector<z3::expr> clauses_false;
+    z3::array<Z3_ast> array_false;
 
     InnerNode(
         uint64_t identifier, z3::context & ctx,
@@ -251,12 +252,12 @@ public:
     void createPaths(z3::expr const& harmonizing_variable) override;
     uint64_t getPathActionHole(std::vector<bool> const& path);
 
-    void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation) override;
-    void substitutePrefixExpression(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
+    void createPrefixSubstitutions(std::vector<uint64_t> const& state_valuation, z3::expr_vector const& state_valuation_int) override;
+    void substitutePrefixExpression(std::vector<bool> const& path, z3::array<Z3_ast> & substituted) const override;
     void substituteActionExpressions() override;
 
-    void createPrefixSubstitutionsHarmonizing(std::vector<uint64_t> const& state_valuation, z3::expr const& harmonizing_variable) override;
-    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::expr_vector & substituted) const override;
+    void createPrefixSubstitutionsHarmonizing(std::vector<uint64_t> const& state_valuation, z3::expr_vector const& state_valuation_int, z3::expr const& harmonizing_variable) override;
+    void substitutePrefixExpressionHarmonizing(std::vector<bool> const& path, z3::array<Z3_ast> & substituted) const override;
     void substituteActionExpressionsHarmonizing(z3::expr const& harmonizing_variable) override;
 
     void clearCache() override;

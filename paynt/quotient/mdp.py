@@ -459,6 +459,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             self.quotient_mdp.state_valuations, self.state_is_relevant_bv,
             variable_name, variable_domain, tree_list, enable_harmonization
         )
+        # return
         self.coloring.enableStateExploration(self.quotient_mdp)
 
         # reconstruct the family

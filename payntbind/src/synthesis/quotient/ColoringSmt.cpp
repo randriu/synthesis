@@ -30,9 +30,6 @@ ColoringSmt<ValueType>::ColoringSmt(
     timers[__FUNCTION__].start();
     timers["ColoringSmt::0"].start();
 
-    // auxiliary vector to be reused to store expressions
-    z3::expr_vector clauses(ctx);
-
     for(uint64_t state = 0; state < numStates(); ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             choice_to_state.push_back(state);
@@ -129,45 +126,58 @@ ColoringSmt<ValueType>::ColoringSmt(
         }
     }
 
-    getRoot()->substituteActionExpressions();
     std::vector<const TerminalNode*> terminals;
     for(uint64_t path = 0; path < numPaths(); ++path) {
         terminals.push_back(getRoot()->getTerminal(getRoot()->paths[path]));
     }
 
-    for(uint64_t state = 0; state < numStates(); ++state) {
-        timers["ColoringSmt::1-1"].start();
-        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            choice_path_expresssion.push_back(z3::expr_vector(ctx));
-        }
-        timers["ColoringSmt::1-1"].stop();
+    // allocate array for path expressions
+    uint64_t longest_path = 0;
+    for(uint64_t path = 0; path < numPaths(); ++path) {
+        longest_path = std::max(longest_path,getRoot()->paths[path].size());
+    }
+    z3::expr_vector state_valuation_int(ctx);
+    z3::array<Z3_ast> clause_array(longest_path-1+num_actions);
 
+    getRoot()->substituteActionExpressions();
+    choice_path_expresssion.resize(numChoices());
+    for(uint64_t state = 0; state < numStates(); ++state) {
         if(not state_is_relevant[state]) {
             continue;
         }
+
+        for(uint64_t value: state_valuation[state]) {
+            state_valuation_int.push_back(ctx.int_val(value));
+        }
         timers["ColoringSmt::1-2 createPrefixSubstitutions"].start();
-        getRoot()->createPrefixSubstitutions(state_valuation[state]);
+        getRoot()->createPrefixSubstitutions(state_valuation[state], state_valuation_int);
         timers["ColoringSmt::1-2 createPrefixSubstitutions"].stop();
+        state_valuation_int.resize(0);
 
         timers["ColoringSmt::1-3"].start();
         for(uint64_t path = 0; path < numPaths(); ++path) {
-            getRoot()->substitutePrefixExpression(getRoot()->paths[path], clauses);
-            z3::expr path_expression = z3::mk_or(clauses);
-            clauses.resize(0);
+            timers["ColoringSmt::1-3-1"].start();
+            getRoot()->substitutePrefixExpression(getRoot()->paths[path], clause_array);
+            timers["ColoringSmt::1-3-1"].stop();
 
+            timers["ColoringSmt::1-3-2"].start();
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+                timers["ColoringSmt::1-3-2-1"].start();
+                uint64_t num_clauses = getRoot()->paths[path].size()-1;
                 uint64_t action = choice_to_action[choice];
-                z3::expr action_selection = terminals[path]->action_expression[action];
+                clause_array[num_clauses++] = terminals[path]->action_expression[action];
+                timers["ColoringSmt::1-3-2-1"].stop();
+                timers["ColoringSmt::1-3-2-2"].start();
                 if(action == dont_care_action) {
-                    clauses.push_back(action_selection);
                     for(uint64_t unavailable_action: ~state_available_actions[state]) {
-                        clauses.push_back(terminals[path]->action_expression[unavailable_action]);
+                        clause_array[num_clauses++] = terminals[path]->action_expression[unavailable_action];
                     }
-                    action_selection = z3::mk_or(clauses);
-                    clauses.resize(0);
                 }
-                choice_path_expresssion[choice].push_back(path_expression or action_selection);
+                timers["ColoringSmt::1-3-2-2"].stop();
+                choice_path_expresssion[choice].push_back(z3::expr(ctx, Z3_mk_or(ctx, num_clauses, clause_array.ptr())));
+                // choice_path_expresssion[choice].push_back(Z3_mk_or(ctx, num_clauses, clause_array.ptr()));
             }
+            timers["ColoringSmt::1-3-2"].stop();
         }
         timers["ColoringSmt::1-3"].stop();
     }
@@ -182,41 +192,38 @@ ColoringSmt<ValueType>::ColoringSmt(
     // std::cout << "ColoringSmt::2 create harmonizing variants" << std::endl << std::flush;
 
     getRoot()->substituteActionExpressionsHarmonizing(harmonizing_variable);
+    choice_path_expresssion_harm.resize(numChoices());
     for(uint64_t state = 0; state < numStates(); ++state) {
-        timers["ColoringSmt::2-1"].start();
-        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            choice_path_expresssion_harm.push_back(z3::expr_vector(ctx));
-        }
-        timers["ColoringSmt::2-1"].stop();
-
         if(not state_is_relevant[state]) {
             continue;
         }
+
+        for(uint64_t value: state_valuation[state]) {
+            state_valuation_int.push_back(ctx.int_val(value));
+        }
         timers["ColoringSmt::2-2 createPrefixSubstitutionsHarmonizing"].start();
-        getRoot()->createPrefixSubstitutionsHarmonizing(state_valuation[state], harmonizing_variable);
+        getRoot()->createPrefixSubstitutionsHarmonizing(state_valuation[state], state_valuation_int, harmonizing_variable);
         timers["ColoringSmt::2-2 createPrefixSubstitutionsHarmonizing"].stop();
+        state_valuation_int.resize(0);
 
         timers["ColoringSmt::2-3"].start();
         for(uint64_t path = 0; path < numPaths(); ++path) {
             timers["ColoringSmt::2-3-1"].start();
-            getRoot()->substitutePrefixExpressionHarmonizing(getRoot()->paths[path], clauses);
-            z3::expr path_expression = z3::mk_or(clauses);
-            clauses.resize(0);
+            getRoot()->substitutePrefixExpressionHarmonizing(getRoot()->paths[path], clause_array);
             timers["ColoringSmt::2-3-1"].stop();
 
             timers["ColoringSmt::2-3-2"].start();
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
                 uint64_t action = choice_to_action[choice];
-                z3::expr action_selection = terminals[path]->action_expression_harmonizing[action];
+                uint64_t num_clauses = getRoot()->paths[path].size()-1;
+                clause_array[num_clauses++] = terminals[path]->action_expression_harmonizing[action];
                 if(action == dont_care_action) {
-                    clauses.push_back(action_selection);
                     for(uint64_t unavailable_action: ~state_available_actions[state]) {
-                        clauses.push_back(terminals[path]->action_expression_harmonizing[unavailable_action]);
+                        clause_array[num_clauses++] = terminals[path]->action_expression_harmonizing[unavailable_action];
                     }
-                    action_selection = z3::mk_or(clauses);
-                    clauses.resize(0);
                 }
-                choice_path_expresssion_harm[choice].push_back(path_expression or action_selection);
+                choice_path_expresssion_harm[choice].push_back(z3::expr(ctx, Z3_mk_or(ctx, num_clauses, clause_array.ptr())));
+                // choice_path_expresssion_harm[choice].push_back(Z3_mk_or(ctx, num_clauses, clause_array.ptr()));
             }
             timers["ColoringSmt::2-3-2"].stop();
         }
@@ -225,7 +232,6 @@ ColoringSmt<ValueType>::ColoringSmt(
     timers["ColoringSmt::2 create harmonizing variants"].stop();
 
     getRoot()->clearCache();
-    // std::cout << "ColoringSmt:: done" << std::endl << std::flush;
 
     timers[__FUNCTION__].stop();
 }
@@ -524,7 +530,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         }
     }*/
 
-
     timers["areChoicesConsistent::1 is scheduler consistent?"].start();
     solver.push();
     getRoot()->addFamilyEncoding(subfamily,solver);
@@ -537,6 +542,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         for(uint64_t path: state_path_enabled[state]) {
             const char *label = choice_path_label[choice][path].c_str();
             solver.add(choice_path_expresssion[choice][path], label);
+            // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion[choice][path], ctx.bool_const(label));
         }
     }
     bool consistent = check();
@@ -578,6 +584,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
                 for(uint64_t path: state_path_enabled[state]) {
                     const char *label = choice_path_label[choice][path].c_str();
                     solver.add(choice_path_expresssion[choice][path], label);
+                    // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion[choice][path], ctx.bool_const(label));
                 }
                 consistent = check();
             }
@@ -597,6 +604,7 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     for(auto [choice,path]: this->unsat_core) {
         const char *label = choice_path_label[choice][path].c_str();
         solver.add(choice_path_expresssion_harm[choice][path], label);
+        // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion_harm[choice][path], ctx.bool_const(label));
     }
 
     z3::model model(ctx);
