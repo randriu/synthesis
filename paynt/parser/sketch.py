@@ -148,7 +148,6 @@ class Sketch:
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
-<<<<<<< HEAD
         tree_helper = None
         if tree_helper_path is not None:
             tree_helper = paynt.utils.tree_helper.parse_tree_helper(tree_helper_path)
@@ -157,13 +156,11 @@ class Sketch:
 
         paynt.verification.property.Property.initialize()
         updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
-=======
         paynt.verification.property.Property.initialize(use_exact)
         if explicit_quotient.is_exact:
             updated = payntbind.synthesis.addMissingChoiceLabelsExact(explicit_quotient)
         else:
             updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
->>>>>>> upstream/master
         if updated is not None: explicit_quotient = updated
         if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
             logger.warning("WARNING: choice labeling for the quotient is not canonic")
