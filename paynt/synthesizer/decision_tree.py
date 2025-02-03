@@ -177,6 +177,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         epsilon = 0.05
         timeout = 1200
         depth_fine_tuning = True # experimental
+        break_on_small_tree = True
 
         # complete init
         self.counters_reset()
@@ -238,7 +239,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 # depth = 2
                 # subtree_synthesizer.synthesize_tree(depth)
                 self.paynt_calls += 1
-                subtree_synthesizer.synthesize_tree_sequence(opt_result_value, overall_timeout=60, max_depth=current_depth)
+                subtree_synthesizer.synthesize_tree_sequence(opt_result_value, overall_timeout=60, max_depth=current_depth, break_if_found=break_on_small_tree)
 
                 # create new tree
                 if subtree_synthesizer.best_tree is not None:
@@ -363,7 +364,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         self.best_assignment = self.best_assignment_value = None
         self.counters_print()
 
-    def synthesize_tree_sequence(self, opt_result_value, overall_timeout=None, max_depth=None):
+    def synthesize_tree_sequence(self, opt_result_value, overall_timeout=None, max_depth=None, break_if_found=False):
         self.best_tree = self.best_tree_value = None
 
         if max_depth is None:
@@ -417,7 +418,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 self.best_tree.root.associate_assignment(self.best_assignment)
                 self.best_tree_value = self.best_assignment_value
 
-                if abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3:
+                if break_if_found or abs( (self.best_assignment_value-opt_result_value)/opt_result_value ) < 1e-3:
                     break
 
             if self.resource_limit_reached() or tree_sequence_timer is not None and tree_sequence_timer.time_limit_reached():
