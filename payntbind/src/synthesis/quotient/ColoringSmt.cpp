@@ -537,6 +537,9 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     solver.push();
     for(uint64_t choice: choices) {
         uint64_t state = choice_to_state[choice];
+        if(not state_is_relevant[state]) {
+            continue;
+        }
         for(uint64_t path: state_path_enabled[state]) {
             const char *label = choice_path_label[choice][path].c_str();
             solver.add(choice_path_expresssion[choice][path], label);
@@ -577,13 +580,12 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
             if(not choices[choice]) {
                 continue;
             }
-            for(uint64_t path: state_path_enabled[state]) {
-                const char *label = choice_path_label[choice][path].c_str();
-                solver.add(choice_path_expresssion[choice][path], label);
-            }
-            consistent = check();
-            if(not consistent) {
-                break;
+            if(state_is_relevant[state]) {
+                for(uint64_t path: state_path_enabled[state]) {
+                    const char *label = choice_path_label[choice][path].c_str();
+                    solver.add(choice_path_expresssion[choice][path], label);
+                }
+                consistent = check();
             }
             visitChoice(choice,state_reached,unexplored_states);
             break;
