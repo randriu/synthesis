@@ -237,11 +237,11 @@ class DecisionTreeNode:
             graphviz_tree.edge(self.graphviz_id,self.child_true.graphviz_id,label="T")
             graphviz_tree.edge(self.graphviz_id,self.child_false.graphviz_id,label="F")
 
-    def get_action_for_state(self, quotient, state, state_valuation):
+    def get_action_for_state(self, quotient, state, state_valuation, nci):
         if self.is_terminal:
             action_index = self.action
             index = 0
-            for choice in range(quotient.quotient_mdp.nondeterministic_choice_indices[state],quotient.quotient_mdp.nondeterministic_choice_indices[state+1]):
+            for choice in range(nci[state],nci[state+1]):
                 if quotient.choice_to_action[choice] == action_index:
                     return index
                 index += 1
@@ -249,7 +249,7 @@ class DecisionTreeNode:
                 # TODO as far as I know this happens only because of unreachable states not being included in the tree
                 # for now we will treat this by using the __random__ action but it can lead to strange behaviour
                 index = 0
-                for choice in range(quotient.quotient_mdp.nondeterministic_choice_indices[state],quotient.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                for choice in range(nci[state],nci[state+1]):
                     if quotient.action_labels[quotient.choice_to_action[choice]] == "__random__":
                         return index
                     index += 1
@@ -257,9 +257,9 @@ class DecisionTreeNode:
         var = quotient.variables[self.variable]
         bound = var.domain[self.variable_bound]
         if state_valuation[self.variable] <= bound:
-            return self.child_true.get_action_for_state(quotient, state, state_valuation)
+            return self.child_true.get_action_for_state(quotient, state, state_valuation, nci)
         else:
-            return self.child_false.get_action_for_state(quotient, state, state_valuation)
+            return self.child_false.get_action_for_state(quotient, state, state_valuation, nci)
         
     # after subtree synthesis the tree nodes contain identifiers to objects from subtree_quotient
     # this needs to be fixed to match the objects in the original quotient
@@ -392,19 +392,23 @@ class DecisionTree:
     
     def to_scheduler_json(self, reachable_states):
         scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+        nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
         for state in range(self.quotient.quotient_mdp.nr_states):
             if self.quotient.state_is_relevant_bv.get(state) and state in reachable_states:
-                action_index = self.root.get_action_for_state(self.quotient, state, self.quotient.relevant_state_valuations[state])
+                action_index = self.root.get_action_for_state(self.quotient, state, self.quotient.relevant_state_valuations[state], nci)
             else:
                 # this should leave undefined in the scheduler and will be filtered below
+                payntbind.synthesis.set_dont_care_state_for_scheduler(scheduler, state, 0, False) # trying to filter out these states through Storm
                 continue
             scheduler_choice = stormpy.storage.SchedulerChoice(action_index)
             scheduler.set_choice(scheduler_choice, state)
             
-        json_scheduler_full = json.loads(scheduler.to_json_str(self.quotient.quotient_mdp))
+        json_scheduler_full = json.loads(scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
         json_final = []
         for entry in json_scheduler_full:
             if entry["c"] == "undefined":
+                # TODO remove this eventually (keeping it for testing), the fix above makes this unnecessary
+                assert False
                 continue
             json_final.append(entry)
 
@@ -439,6 +443,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     filter_deterministic_states = True
 
     @classmethod
+    # TODO only get this for relevant states for the integration if possible
     def get_state_valuations(cls, model):
         ''' Identify variable names and extract state valuation in the same order. '''
         assert model.has_state_valuations(), "model has no state valuations"
@@ -529,7 +534,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 break
         return id
 
-    def get_states_satisfying_predicate_old(self, variable, bound, leq=True):
+    def get_states_satisfying_predicate_old_old(self, variable, bound, leq=True):
         states = []
         for state,state_valuation in enumerate(self.relevant_state_valuations):
             for id, var in enumerate(self.variables):
@@ -542,17 +547,30 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         return states
     
 
-    def get_states_satisfying_predicate(self, node, leq=True):
-        states = []
+    def get_states_satisfying_predicate_old(self, node, current_states, leq=True):
+        states = set()
         bound = self.variables[node.variable].domain[node.variable_bound]
         for state,state_valuation in enumerate(self.relevant_state_valuations):
+            if state not in current_states:
+                continue
             if leq and state_valuation[node.variable] <= bound:
-                states.append(state)
+                states.add(state)
             elif not leq and state_valuation[node.variable] > bound:
-                states.append(state)
+                states.add(state)
         return states
     
-    def get_state_space_for_tree_helper_node_old(self, node_id):
+    def get_states_satisfying_predicate(self, node, current_states, leq=True):
+        bound = self.variables[node.variable].domain[node.variable_bound]
+        for state,state_valuation in enumerate(self.relevant_state_valuations):
+            if not current_states.get(state):
+                continue
+            if leq and state_valuation[node.variable] > bound:
+                current_states.set(state, False)
+            elif not leq and state_valuation[node.variable] <= bound:
+                current_states.set(state, False)
+        return current_states
+    
+    def get_state_space_for_tree_helper_node_old_old(self, node_id):
         node = self.tree_helper[node_id]
         current_node = node
         states = list(range(self.quotient_mdp.nr_states))
@@ -566,17 +584,29 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             current_node = parent_node
         return states
     
-    def get_state_space_for_tree_helper_node(self, node_id):
+    def get_state_space_for_tree_helper_node_old(self, node_id):
         node = self.tree_helper_tree.collect_nodes(lambda node : node.identifier == node_id)[0]
         current_node = node
-        states = list(range(self.quotient_mdp.nr_states))
+        states = set(range(self.quotient_mdp.nr_states))
         while current_node.parent is not None:
             parent_node = current_node.parent
             if parent_node.child_true.identifier == current_node.identifier:
-                node_states = self.get_states_satisfying_predicate(parent_node, leq=True)
+                states = self.get_states_satisfying_predicate(parent_node, states, leq=True)
             else:
-                node_states = self.get_states_satisfying_predicate(parent_node, leq=False)
-            states = list(set(states) & set(node_states))
+                states = self.get_states_satisfying_predicate(parent_node, states, leq=False)
+            current_node = parent_node
+        return list(states)
+    
+    def get_state_space_for_tree_helper_node(self, node_id):
+        node = self.tree_helper_tree.collect_nodes(lambda node : node.identifier == node_id)[0]
+        current_node = node
+        states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, True)
+        while current_node.parent is not None:
+            parent_node = current_node.parent
+            if parent_node.child_true.identifier == current_node.identifier:
+                states = self.get_states_satisfying_predicate(parent_node, states, leq=True)
+            else:
+                states = self.get_states_satisfying_predicate(parent_node, states, leq=False)
             current_node = parent_node
         return states
     
@@ -622,28 +652,52 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 current_node = current_node.child_false
         return self.action_labels[current_node.action]
     
-    def get_selected_choices_from_tree_helper(self, state_to_exclude=[]):
+    def get_selected_choices_from_tree_helper(self, state_to_exclude):
         selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
+        mdp_nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
         for state in range(self.quotient_mdp.nr_states):
-            if state in state_to_exclude or self.state_is_relevant_bv.get(state) == False:
-                for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+            if state_to_exclude.get(state) or self.state_is_relevant_bv.get(state) == False:
+                for choice in range(mdp_nci[state],mdp_nci[state+1]):
                     selected_choices.set(choice, True)
                 continue
             chosen_action_label = self.get_chosen_action_for_state_from_tree_helper(state)
             action_index = self.action_labels.index(chosen_action_label)
-            for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+            for choice in range(mdp_nci[state],mdp_nci[state+1]):
                 if self.choice_to_action[choice] == action_index:
                     selected_choices.set(choice, True)
                     break
             else:
                 # TODO as far as I know this happens only because of unreachable states not being included in the tree
                 # for now we will treat this by using the __random__ action but it can lead to strange behaviour
-                for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                for choice in range(mdp_nci[state],mdp_nci[state+1]):
                     if self.action_labels[self.choice_to_action[choice]] == "__random__":
                         selected_choices.set(choice, True)
                         break
                 continue
                 assert False, f"no choice for state {state} even though action {chosen_action_label} was chosen"
+
+        # TODO another implementation, both suck!
+        # selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, True)
+        # mdp_nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        # for state in range(self.quotient_mdp.nr_states):
+        #     if self.state_is_relevant_bv.get(state) and state not in state_to_exclude:
+        #         chosen_action_label = self.get_chosen_action_for_state_from_tree_helper(state)
+        #         action_index = self.action_labels.index(chosen_action_label)
+        #         one_choice_set = False
+        #         for choice in range(mdp_nci[state],mdp_nci[state+1]):
+        #             if self.choice_to_action[choice] != action_index:
+        #                 selected_choices.set(choice, False)
+        #             else:
+        #                 assert not one_choice_set, f"multiple choices for state {state}"
+        #                 one_choice_set = True
+        #         if not one_choice_set:
+        #             for choice in reversed(range(mdp_nci[state],mdp_nci[state+1])):
+        #                 if self.action_labels[self.choice_to_action[choice]] == "__random__":
+        #                     selected_choices.set(choice, True)
+        #                     break
+        #             continue
+        #             assert False, f"no choice for state {state} even though action {chosen_action_label} was chosen"
+
 
         return selected_choices
 
@@ -739,7 +793,9 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
                 current_node = self.tree_helper[current_node["children"][1]] 
     
 
-    def get_submdp_from_unfixed_states(self, unfixed_states):
+    def get_submdp_from_unfixed_states(self, unfixed_states=None):
+        if unfixed_states is None:
+            unfixed_states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, False)
         selected_choices = self.get_selected_choices_from_tree_helper(unfixed_states)
         submdp = self.build_from_choice_mask(selected_choices)
         # print(dir(submdp))
@@ -898,9 +954,10 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         ''' Separate method for profiling purposes. '''
         relevant_choices = stormpy.BitVector(choices)
         # TODO add more ways to determine relevant choices
+        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
         for state in range(self.quotient_mdp.nr_states):
             if self.quotient_mdp.get_nr_available_actions(state) <= 1:
-                for choice in range(self.quotient_mdp.nondeterministic_choice_indices[state],self.quotient_mdp.nondeterministic_choice_indices[state+1]):
+                for choice in range(nci[state],nci[state+1]):
                     relevant_choices.set(choice, False)
         return self.coloring.areChoicesConsistent(choices, relevant_choices, family.family)
 
