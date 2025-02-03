@@ -2,6 +2,7 @@
 
 #include "src/synthesis/translation/componentTranslations.h"
 
+#include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/exceptions/InvalidArgumentException.h>
 #include <storm/exceptions/InvalidModelException.h>
 #include <storm/exceptions/NotSupportedException.h>
@@ -600,6 +601,33 @@ template std::shared_ptr<storm::models::sparse::Model<double>> addDontCareAction
     storm::storage::BitVector const& state_mask);
 template std::shared_ptr<storm::models::sparse::Model<double>> createModelUnion(
     std::vector<std::shared_ptr<storm::models::sparse::Model<double>>> const&
+);
+
+template std::vector<std::vector<uint64_t>> computeChoiceDestinations<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model);
+template std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model);
+template void addMissingChoiceLabelsLabeling<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    storm::models::sparse::ChoiceLabeling& choice_labeling);
+template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> addMissingChoiceLabelsModel<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model);
+template std::pair<std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>>,std::vector<uint64_t>> enableAllActions(
+    storm::models::sparse::Model<storm::RationalNumber> const& model);
+template std::pair<std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>>,std::vector<uint64_t>> enableAllActions<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    storm::storage::BitVector const& state_mask);
+template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> removeAction<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    std::string const& action_to_remove_label,
+    storm::storage::BitVector const& state_mask);
+template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> restoreActionsInAbsorbingStates<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model);
+template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> addDontCareAction<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    storm::storage::BitVector const& state_mask);
+template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> createModelUnion(
+    std::vector<std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>>> const&
 );
 
 }

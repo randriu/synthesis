@@ -32,7 +32,7 @@ def setup_logger(log_path = None):
     # root.setLevel(logging.INFO)
 
     # formatter = logging.Formatter('%(asctime)s %(threadName)s - %(name)s - %(levelname)s - %(message)s')
-    formatter = logging.Formatter('%(asctime)s - %(filename)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(message)s')
 
     handlers = []
     if log_path is not None:
@@ -61,6 +61,8 @@ def setup_logger(log_path = None):
     help="known optimum bound")
 @click.option("--precision", type=click.FLOAT, default=1e-4,
     help="model checking precision")
+@click.option("--exact", is_flag=True, default=False,
+    help="use exact synthesis (very limited at the moment)")
 @click.option("--timeout", type=int,
     help="timeout (s)")
 
@@ -138,7 +140,7 @@ def setup_logger(log_path = None):
     help="run profiling")
 
 def paynt_run(
-    project, sketch, props, relative_error, optimum_threshold, precision, timeout,
+    project, sketch, props, relative_error, optimum_threshold, precision, exact, timeout,
     export,
     method,
     disable_expected_visits,
@@ -189,7 +191,7 @@ def paynt_run(
     properties_path = os.path.join(project, props)
     tree_helper_path = os.path.join(project, "decision_trees/default/scheduler/default.json")
     assert os.path.exists(tree_helper_path), f"Tree helper path {tree_helper_path} does not exist."
-    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, tree_helper_path)
+    quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, tree_helper_path, exact)
     synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
     synthesizer.run(optimum_threshold)
 

@@ -52,15 +52,20 @@ def make_rewards_action_based(model):
             for action in range(tm.get_row_group_start(state),tm.get_row_group_end(state)):
                 action_reward[action] += state_reward
 
-        payntbind.synthesis.remove_reward_model(model,name)
-        new_reward_model = stormpy.storage.SparseRewardModel(optional_state_action_reward_vector=action_reward)
-        model.add_reward_model(name, new_reward_model)
+        if model.is_exact:
+            payntbind.synthesis.remove_reward_model_exact(model,name)
+            new_reward_model = stormpy.storage.SparseExactRewardModel(optional_state_action_reward_vector=action_reward)
+            model.add_reward_model(name, new_reward_model)
+        else:
+            payntbind.synthesis.remove_reward_model(model,name)
+            new_reward_model = stormpy.storage.SparseRewardModel(optional_state_action_reward_vector=action_reward)
+            model.add_reward_model(name, new_reward_model)
 
 class Sketch:
 
     @classmethod
     def load_sketch(cls, sketch_path, properties_path,
-        export=None, relative_error=0, precision=1e-4, constraint_bound=None, tree_helper_path = None):
+        export=None, relative_error=0, precision=1e-4, constraint_bound=None, tree_helper_path = None, use_exact=False):
 
         prism = None
         explicit_quotient = None
@@ -82,15 +87,15 @@ class Sketch:
         try:
             logger.info(f"assuming sketch in PRISM format...")
             prism, explicit_quotient, specification, family, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
-                        sketch_path, properties_path, relative_error)
+                        sketch_path, properties_path, relative_error, use_exact)
             filetype = "prism"
         except SyntaxError:
             pass
         if filetype is None:
             try:
                 logger.info(f"assuming sketch in DRN format...")
-                explicit_quotient = paynt.models.model_builder.ModelBuilder.from_drn(sketch_path)
-                specification = PrismParser.parse_specification(properties_path, relative_error)
+                explicit_quotient = paynt.models.model_builder.ModelBuilder.from_drn(sketch_path, use_exact)
+                specification = PrismParser.parse_specification(properties_path, relative_error, use_exact=use_exact)
                 filetype = "drn"
                 project_path = os.path.dirname(sketch_path)
                 valuations_filename = "state-valuations.json"
@@ -100,6 +105,8 @@ class Sketch:
                     with open(valuations_path) as file:
                         state_valuations = json.load(file)
                 if state_valuations is not None:
+                    if use_exact:
+                        raise Exception("exact synthesis is not supported with state valuations")
                     logger.info(f"found state valuations in {valuations_path}, adding to the model...")
                     explicit_quotient = payntbind.synthesis.addStateValuations(explicit_quotient,state_valuations)
             except Exception as e:
@@ -141,6 +148,7 @@ class Sketch:
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
+<<<<<<< HEAD
         tree_helper = None
         if tree_helper_path is not None:
             tree_helper = paynt.utils.tree_helper.parse_tree_helper(tree_helper_path)
@@ -149,6 +157,13 @@ class Sketch:
 
         paynt.verification.property.Property.initialize()
         updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+=======
+        paynt.verification.property.Property.initialize(use_exact)
+        if explicit_quotient.is_exact:
+            updated = payntbind.synthesis.addMissingChoiceLabelsExact(explicit_quotient)
+        else:
+            updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+>>>>>>> upstream/master
         if updated is not None: explicit_quotient = updated
         if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
             logger.warning("WARNING: choice labeling for the quotient is not canonic")
