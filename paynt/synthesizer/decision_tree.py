@@ -147,14 +147,14 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         return sorted_nodes[0][0]
     
 
-    def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6):
+    def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6, nodes_to_skip=[]):
         nodes = helper_tree.collect_nodes(lambda node : node.get_depth() == desired_depth)
         if nodes is None or len(nodes) == 0:
             return []
         helper_nodes = [self.quotient.tree_helper[node.identifier] for node in nodes]
         helper_node_stats = []
         for helper_node in helper_nodes:
-            if helper_node["id"] == 0:
+            if helper_node["id"] == 0 or helper_node["id"] in nodes_to_skip:
                 continue
             helper_tree_node = helper_tree.collect_nodes(lambda node : node.identifier == helper_node["id"])[0]
             # stats = {"id": helper_node["id"], "states": self.quotient.get_state_space_for_tree_helper_node(helper_node["id"]), "nodes": helper_tree_node.get_number_of_descendants()}
@@ -201,7 +201,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             eps_optimum_threshold = opt_result_value * (1 + epsilon)
         else: # this should result in normalised value of the produced tree being within espilon
             opt_random_diff = opt_result_value - random_result_value
-            eps_optimum_threshold = opt_result_value - 0.01 * opt_random_diff
+            eps_optimum_threshold = opt_result_value - epsilon * opt_random_diff
         self.synthesis_timer = paynt.utils.timer.Timer(timeout)
         self.synthesis_timer.start()
 
@@ -223,6 +223,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info(f"starting iteration with subtree depth {current_depth}")
             # TODO this is not guaranteed to work in subsequent iterations when the PAYNT tree is used
             node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth)
+            nodes_to_skip = [] # this will include nodes that were already processed
 
             while len(node_queue) > 0 and (True or (current_iter < max_iter)):
 
@@ -347,6 +348,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                     # if False: # TODO remove this
                     if chosen_tree == "current":
                         logger.info(f"None of the new trees are smaller, continuing with current tree")
+                        # nodes_to_skip.append(node["id"])
                         self.all_larger += 1
                         self.quotient.tree_helper_tree = tree_helper_tree
                     elif chosen_tree == "paynt":
@@ -359,6 +361,17 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                             assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node["id"]}'
                             new_node = nodes[0]
                             node["id"] = new_node.identifier
+                        new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue])
+                        node_queue += new_nodes
+                        # new_nodes_to_skip = []
+                        # for node_skip_id in nodes_to_skip:
+                        #     nodes = self.quotient.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node_skip_id)
+                        #     if len(nodes) == 0:
+                        #         continue
+                        #     assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node_skip_id}'
+                        #     new_node = nodes[0]
+                        #     new_nodes_to_skip.append(new_node.identifier)
+                        # nodes_to_skip = new_nodes_to_skip
                     elif use_dtcontrol and chosen_tree == "dtcontrol":
                         logger.info(f"New DtControl tree is smallest")
                         self.dtcontrol_successes += 1
@@ -366,6 +379,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.quotient.tree_helper_tree = new_dtcontrol_tree_helper_tree
                         tree_helper_tree = new_dtcontrol_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                        nodes_to_skip = []
                     elif use_dtcontrol and recompute_scheduler and chosen_tree == "recomputed":
                         logger.info(f"New DtControl tree for recomputed scheduler is smallest")
                         self.dtcontrol_recomputed_successes += 1
@@ -373,10 +387,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.quotient.tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                        nodes_to_skip = []
                     
                     # exit()
                 else:
                     logger.info(f"no admissible subtree found from node {node['id']}")
+                    # nodes_to_skip.append(node["id"])
 
             current_depth -= 1
 
@@ -586,7 +602,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 logger.info(f"paynt calls: {self.paynt_calls}")
                 logger.info(f"paynt successes smaller: {self.paynt_successes_smaller}")
                 logger.info(f"paynt tree found: {self.paynt_tree_found}")
-                logger.info(f"both larger: {self.all_larger}")
+                logger.info(f"all larger: {self.all_larger}")
 
             # print(self.best_tree.to_string())
             # print(self.best_tree.to_graphviz())

@@ -1,0 +1,2996 @@
+digraph {
+0 [label="x <= 3.5
+--------------
+
+picked0 <= 0.5 : 1.75
+picked1 <= 0.5 : 1.826
+picked2 <= 0.5 : 1.843
+picked3 <= 0.5 : 1.843
+picked4 <= 0.5 : 1.834
+picked5 <= 0.5 : 1.845
+picked6 <= 0.5 : 1.792
+x <= 0.5 : 1.737
+x <= 1.5 : 1.734
+x <= 2.5 : 1.72
+x <= 3.5 : 1.663
+x <= 4.5 : 1.684
+x <= 5.5 : 1.709
+x <= 6.5 : 1.698
+x <= 7.5 : 1.689
+x <= 8.5 : 1.678
+x <= 9.5 : 1.674
+x <= 10.5 : 1.737
+x <= 11.5 : 1.771
+x <= 12.5 : 1.767
+x <= 13.5 : 1.787
+y <= 0.5 : 1.807
+y <= 1.5 : 1.763
+y <= 2.5 : 1.766
+y <= 3.5 : 1.81
+y <= 4.5 : 1.821
+y <= 5.5 : 1.763"];
+1 [label="y <= 5.5
+--------------
+
+picked0 <= 0.5 : 1.278
+picked1 <= 0.5 : 1.381
+picked2 <= 0.5 : 1.387
+picked3 <= 0.5 : 1.387
+picked4 <= 0.5 : 1.386
+picked5 <= 0.5 : 1.389
+picked6 <= 0.5 : 1.32
+x <= 0.5 : 1.238
+x <= 1.5 : 1.281
+x <= 2.5 : 1.356
+y <= 0.5 : 1.355
+y <= 1.5 : 1.28
+y <= 2.5 : 1.298
+y <= 3.5 : 1.377
+y <= 4.5 : 1.374
+y <= 5.5 : 1.221"];
+2 [label="x <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.286
+picked1 <= 0.5 : 1.395
+picked2 <= 0.5 : 1.402
+picked3 <= 0.5 : 1.402
+picked4 <= 0.5 : 1.401
+picked5 <= 0.5 : 1.399
+picked6 <= 0.5 : 1.331
+x <= 0.5 : 1.198
+x <= 1.5 : 1.28
+x <= 2.5 : 1.336
+y <= 0.5 : 1.361
+y <= 1.5 : 1.311
+y <= 2.5 : 1.204
+y <= 3.5 : 1.35
+y <= 4.5 : 1.272"];
+3 [label="y <= 3.0
+--------------
+
+picked0 <= 0.5 : 0.576
+picked1 <= 0.5 : 0.627
+picked2 <= 0.5 : 0.627
+picked3 <= 0.5 : 0.627
+picked4 <= 0.5 : 0.627
+picked5 <= 0.5 : 0.624
+picked6 <= 0.5 : 0.623
+y <= 0.5 : 0.583
+y <= 1.5 : 0.528
+y <= 3.0 : 0.442
+y <= 4.5 : 0.553"];
+4 [label="y <= 1.5
+--------------
+
+picked1 <= 0.5 : 0.906
+picked2 <= 0.5 : 0.905
+picked3 <= 0.5 : 0.906
+picked4 <= 0.5 : 0.905
+picked6 <= 0.5 : 0.905
+y <= 0.5 : 0.666
+y <= 1.5 : 0.074"];
+5 [label="u"];
+4 -> 5 [label="True"];
+6 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.193
+picked2 <= 0.5 : 0.186
+picked3 <= 0.5 : 0.193
+picked4 <= 0.5 : 0.177
+picked6 <= 0.5 : 0.186"];
+7 [label="r"];
+6 -> 7 [label="True"];
+8 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.362
+picked2 <= 0.5 : 0.325
+picked3 <= 0.5 : 0.362
+picked6 <= 0.5 : 0.325"];
+9 [label="r"];
+8 -> 9 [label="True"];
+10 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459"];
+11 [label="r"];
+10 -> 11 [label="True"];
+12 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+13 [label="r"];
+12 -> 13 [label="True"];
+14 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+15 [label="r"];
+14 -> 15 [label="True"];
+16 [label="u"];
+14 -> 16 [style="dashed", label="False"];
+12 -> 14 [style="dashed", label="False"];
+10 -> 12 [style="dashed", label="False"];
+8 -> 10 [style="dashed", label="False"];
+6 -> 8 [style="dashed", label="False"];
+4 -> 6 [style="dashed", label="False"];
+3 -> 4 [label="True"];
+17 [label="u"];
+3 -> 17 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+18 [label="y <= 2.5
+--------------
+
+picked0 <= 0.5 : 1.229
+picked1 <= 0.5 : 1.436
+picked2 <= 0.5 : 1.454
+picked3 <= 0.5 : 1.452
+picked4 <= 0.5 : 1.451
+picked6 <= 0.5 : 1.337
+x <= 1.5 : 1.329
+x <= 2.5 : 1.323
+y <= 0.5 : 1.386
+y <= 1.5 : 1.332
+y <= 2.5 : 1.208
+y <= 3.5 : 1.409
+y <= 4.5 : 1.325"];
+19 [label="x <= 2.5
+--------------
+
+picked0 <= 0.5 : 0.886
+picked1 <= 0.5 : 0.898
+picked2 <= 0.5 : 0.904
+picked3 <= 0.5 : 0.903
+picked4 <= 0.5 : 0.904
+picked6 <= 0.5 : 0.906
+x <= 1.5 : 0.782
+x <= 2.5 : 0.558
+y <= 0.5 : 0.904
+y <= 1.5 : 0.752"];
+20 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.193
+picked2 <= 0.5 : 0.186
+picked3 <= 0.5 : 0.193
+picked4 <= 0.5 : 0.177
+picked6 <= 0.5 : 0.186
+x <= 1.5 : 0.222
+y <= 1.0 : 0.222"];
+21 [label="r"];
+20 -> 21 [label="True"];
+22 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.362
+picked2 <= 0.5 : 0.325
+picked3 <= 0.5 : 0.362
+picked6 <= 0.5 : 0.325
+x <= 1.5 : 0.414
+y <= 1.0 : 0.414"];
+23 [label="r"];
+22 -> 23 [label="True"];
+24 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459
+x <= 1.5 : 0.65
+y <= 1.0 : 0.65"];
+25 [label="r"];
+24 -> 25 [label="True"];
+26 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667
+x <= 1.5 : 0.918
+y <= 1.0 : 0.918"];
+27 [label="r"];
+26 -> 27 [label="True"];
+28 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+x <= 1.5 : 1.0
+y <= 1.0 : 1.0"];
+29 [label="r"];
+28 -> 29 [label="True"];
+30 [label="u"];
+28 -> 30 [style="dashed", label="False"];
+26 -> 28 [style="dashed", label="False"];
+24 -> 26 [style="dashed", label="False"];
+22 -> 24 [style="dashed", label="False"];
+20 -> 22 [style="dashed", label="False"];
+19 -> 20 [label="True"];
+31 [label="y <= 1.5
+--------------
+
+picked0 <= 0.5 : 0.742
+picked1 <= 0.5 : 0.918
+picked2 <= 0.5 : 0.935
+picked3 <= 0.5 : 0.933
+picked4 <= 0.5 : 0.936
+picked6 <= 0.5 : 0.885
+y <= 0.5 : 0.717
+y <= 1.5 : 0.301"];
+32 [label="u"];
+31 -> 32 [label="True"];
+33 [label="picked1 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.652
+picked1 <= 0.5 : 0.513
+picked2 <= 0.5 : 0.681
+picked3 <= 0.5 : 0.667
+picked4 <= 0.5 : 0.689
+picked6 <= 0.5 : 0.58"];
+34 [label="r"];
+33 -> 34 [label="True"];
+35 [label="picked6 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.84
+picked2 <= 0.5 : 0.896
+picked3 <= 0.5 : 0.825
+picked4 <= 0.5 : 0.918
+picked6 <= 0.5 : 0.633"];
+36 [label="picked3 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.811
+picked3 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.5"];
+37 [label="picked4 <= 0.5
+--------------
+
+picked2 <= 0.5 : 1.0
+picked4 <= 0.5 : 0.0"];
+38 [label="u"];
+37 -> 38 [label="True"];
+39 [label="r"];
+37 -> 39 [style="dashed", label="False"];
+36 -> 37 [label="True"];
+40 [label="u"];
+36 -> 40 [style="dashed", label="False"];
+35 -> 36 [label="True"];
+41 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.544
+picked2 <= 0.5 : 0.406
+picked3 <= 0.5 : 0.406
+picked4 <= 0.5 : 0.406"];
+42 [label="r"];
+41 -> 42 [label="True"];
+43 [label="picked3 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.811
+picked3 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.5"];
+44 [label="r"];
+43 -> 44 [label="True"];
+45 [label="picked4 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.0
+picked4 <= 0.5 : 0.0"];
+46 [label="r"];
+45 -> 46 [label="True"];
+47 [label="u"];
+45 -> 47 [style="dashed", label="False"];
+43 -> 45 [style="dashed", label="False"];
+41 -> 43 [style="dashed", label="False"];
+35 -> 41 [style="dashed", label="False"];
+33 -> 35 [style="dashed", label="False"];
+31 -> 33 [style="dashed", label="False"];
+19 -> 31 [style="dashed", label="False"];
+18 -> 19 [label="True"];
+48 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.258
+picked1 <= 0.5 : 1.543
+picked2 <= 0.5 : 1.575
+picked3 <= 0.5 : 1.575
+picked4 <= 0.5 : 1.571
+picked6 <= 0.5 : 1.318
+x <= 2.5 : 1.481
+y <= 3.5 : 1.412
+y <= 4.5 : 1.392"];
+49 [label="x <= 2.5
+--------------
+
+picked1 <= 0.5 : 0.811
+picked2 <= 0.5 : 0.811
+picked3 <= 0.5 : 0.811
+picked4 <= 0.5 : 0.811
+picked6 <= 0.5 : 0.811
+x <= 2.5 : 0.5
+y <= 3.5 : 0.689
+y <= 4.5 : 0.689"];
+50 [label="y <= 4.5
+--------------
+
+picked1 <= 0.5 : 1.0
+picked2 <= 0.5 : 1.0
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.0
+picked6 <= 0.5 : 1.0
+y <= 4.5 : 0.0"];
+51 [label="r"];
+50 -> 51 [label="True"];
+52 [label="d"];
+50 -> 52 [style="dashed", label="False"];
+49 -> 50 [label="True"];
+53 [label="d"];
+49 -> 53 [style="dashed", label="False"];
+48 -> 49 [label="True"];
+54 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.422
+picked2 <= 0.5 : 1.487
+picked3 <= 0.5 : 1.495
+picked4 <= 0.5 : 1.488
+picked6 <= 0.5 : 1.258
+x <= 2.5 : 1.388
+y <= 3.5 : 1.296
+y <= 4.5 : 1.26"];
+55 [label="y <= 3.5
+--------------
+
+picked1 <= 0.5 : 0.892
+picked2 <= 0.5 : 0.94
+picked3 <= 0.5 : 0.939
+picked4 <= 0.5 : 0.939
+x <= 2.5 : 0.875
+y <= 3.5 : 0.749
+y <= 4.5 : 0.749"];
+56 [label="u"];
+55 -> 56 [label="True"];
+57 [label="x <= 2.5
+--------------
+
+picked1 <= 0.5 : 0.918
+picked2 <= 0.5 : 0.998
+picked3 <= 0.5 : 0.996
+picked4 <= 0.5 : 0.996
+x <= 2.5 : 0.5
+y <= 4.5 : 0.575"];
+58 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.429
+picked2 <= 0.5 : 0.75
+picked3 <= 0.5 : 0.742
+picked4 <= 0.5 : 0.742
+y <= 4.5 : 0.493"];
+59 [label="y <= 4.5
+--------------
+
+picked2 <= 0.5 : 1.0
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.0
+y <= 4.5 : 0.0"];
+60 [label="r"];
+59 -> 60 [label="True"];
+61 [label="u"];
+59 -> 61 [style="dashed", label="False"];
+58 -> 59 [label="True"];
+62 [label="u"];
+58 -> 62 [style="dashed", label="False"];
+57 -> 58 [label="True"];
+63 [label="r"];
+57 -> 63 [style="dashed", label="False"];
+55 -> 57 [style="dashed", label="False"];
+54 -> 55 [label="True"];
+64 [label="y <= 4.5
+--------------
+
+picked1 <= 0.5 : 1.419
+picked2 <= 0.5 : 1.551
+picked3 <= 0.5 : 1.555
+picked4 <= 0.5 : 1.551
+x <= 2.5 : 1.335
+y <= 3.5 : 1.338
+y <= 4.5 : 1.243"];
+65 [label="x <= 2.5
+--------------
+
+picked1 <= 0.5 : 1.222
+picked2 <= 0.5 : 1.392
+picked3 <= 0.5 : 1.298
+picked4 <= 0.5 : 1.346
+x <= 2.5 : 0.982
+y <= 3.5 : 1.018"];
+66 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.311
+picked2 <= 0.5 : 0.296
+picked3 <= 0.5 : 0.311
+picked4 <= 0.5 : 0.279"];
+67 [label="r"];
+66 -> 67 [label="True"];
+68 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541"];
+69 [label="r"];
+68 -> 69 [label="True"];
+70 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+71 [label="r"];
+70 -> 71 [label="True"];
+72 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+73 [label="r"];
+72 -> 73 [label="True"];
+74 [label="u"];
+72 -> 74 [style="dashed", label="False"];
+70 -> 72 [style="dashed", label="False"];
+68 -> 70 [style="dashed", label="False"];
+66 -> 68 [style="dashed", label="False"];
+65 -> 66 [label="True"];
+75 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.892
+picked2 <= 0.5 : 1.264
+picked3 <= 0.5 : 1.136
+picked4 <= 0.5 : 1.222
+y <= 3.5 : 1.023"];
+76 [label="d"];
+75 -> 76 [label="True"];
+77 [label="y <= 3.5
+--------------
+
+picked2 <= 0.5 : 1.5
+picked3 <= 0.5 : 1.25
+picked4 <= 0.5 : 1.483
+y <= 3.5 : 1.008"];
+78 [label="picked3 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.906
+picked3 <= 0.5 : 0.406
+picked4 <= 0.5 : 0.906"];
+79 [label="d"];
+78 -> 79 [label="True"];
+80 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.5"];
+81 [label="u"];
+80 -> 81 [label="True"];
+82 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+83 [label="d"];
+82 -> 83 [label="True"];
+84 [label="u"];
+82 -> 84 [style="dashed", label="False"];
+80 -> 82 [style="dashed", label="False"];
+78 -> 80 [style="dashed", label="False"];
+77 -> 78 [label="True"];
+85 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.75
+picked3 <= 0.5 : 0.75
+picked4 <= 0.5 : 0.811"];
+86 [label="r"];
+85 -> 86 [label="True"];
+87 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.5
+picked4 <= 0.5 : 1.0"];
+88 [label="r"];
+87 -> 88 [label="True"];
+89 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+90 [label="d"];
+89 -> 90 [label="True"];
+91 [label="u"];
+89 -> 91 [style="dashed", label="False"];
+87 -> 89 [style="dashed", label="False"];
+85 -> 87 [style="dashed", label="False"];
+77 -> 85 [style="dashed", label="False"];
+75 -> 77 [style="dashed", label="False"];
+65 -> 75 [style="dashed", label="False"];
+64 -> 65 [label="True"];
+92 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.429
+picked2 <= 0.5 : 0.493
+picked3 <= 0.5 : 0.742
+picked4 <= 0.5 : 0.742"];
+93 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.0
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.0"];
+94 [label="u"];
+93 -> 94 [label="True"];
+95 [label="d"];
+93 -> 95 [style="dashed", label="False"];
+92 -> 93 [label="True"];
+96 [label="u"];
+92 -> 96 [style="dashed", label="False"];
+64 -> 92 [style="dashed", label="False"];
+54 -> 64 [style="dashed", label="False"];
+48 -> 54 [style="dashed", label="False"];
+18 -> 48 [style="dashed", label="False"];
+2 -> 18 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+97 [label="x <= 1.5
+--------------
+
+picked0 <= 0.5 : 0.54
+picked1 <= 0.5 : 0.619
+picked2 <= 0.5 : 0.611
+picked3 <= 0.5 : 0.617
+picked4 <= 0.5 : 0.607
+picked5 <= 0.5 : 0.642
+picked6 <= 0.5 : 0.561
+x <= 0.5 : 0.602
+x <= 1.5 : 0.539
+x <= 2.5 : 0.595"];
+98 [label="picked4 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.141
+picked1 <= 0.5 : 0.136
+picked2 <= 0.5 : 0.132
+picked3 <= 0.5 : 0.136
+picked4 <= 0.5 : 0.127
+picked5 <= 0.5 : 0.156
+picked6 <= 0.5 : 0.141
+x <= 0.5 : 0.156"];
+99 [label="r"];
+98 -> 99 [label="True"];
+100 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.276
+picked1 <= 0.5 : 0.276
+picked2 <= 0.5 : 0.252
+picked3 <= 0.5 : 0.276
+picked6 <= 0.5 : 0.276
+x <= 0.5 : 0.31"];
+101 [label="r"];
+100 -> 101 [label="True"];
+102 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.433
+picked1 <= 0.5 : 0.433
+picked3 <= 0.5 : 0.433
+picked6 <= 0.5 : 0.433
+x <= 0.5 : 0.503"];
+103 [label="r"];
+102 -> 103 [label="True"];
+104 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459
+x <= 0.5 : 0.65"];
+105 [label="r"];
+104 -> 105 [label="True"];
+106 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667
+x <= 0.5 : 0.918"];
+107 [label="r"];
+106 -> 107 [label="True"];
+108 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+x <= 0.5 : 1.0"];
+109 [label="r"];
+108 -> 109 [label="True"];
+110 [label="u"];
+108 -> 110 [style="dashed", label="False"];
+106 -> 108 [style="dashed", label="False"];
+104 -> 106 [style="dashed", label="False"];
+102 -> 104 [style="dashed", label="False"];
+100 -> 102 [style="dashed", label="False"];
+98 -> 100 [style="dashed", label="False"];
+97 -> 98 [label="True"];
+111 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.702
+picked1 <= 0.5 : 0.895
+picked2 <= 0.5 : 0.883
+picked3 <= 0.5 : 0.891
+picked4 <= 0.5 : 0.88
+picked5 <= 0.5 : 0.922
+picked6 <= 0.5 : 0.764
+x <= 2.5 : 0.707"];
+112 [label="x <= 2.5
+--------------
+
+picked1 <= 0.5 : 1.126
+picked2 <= 0.5 : 1.121
+picked3 <= 0.5 : 1.126
+picked4 <= 0.5 : 1.115
+picked5 <= 0.5 : 1.139
+picked6 <= 0.5 : 1.071
+x <= 2.5 : 0.452"];
+113 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.406
+picked2 <= 0.5 : 0.43
+picked3 <= 0.5 : 0.406
+picked4 <= 0.5 : 0.451
+picked5 <= 0.5 : 0.331
+picked6 <= 0.5 : 0.0"];
+114 [label="r"];
+113 -> 114 [label="True"];
+115 [label="d"];
+113 -> 115 [style="dashed", label="False"];
+112 -> 113 [label="True"];
+116 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.29
+picked2 <= 0.5 : 0.276
+picked3 <= 0.5 : 0.29
+picked4 <= 0.5 : 0.26
+picked6 <= 0.5 : 0.346"];
+117 [label="r"];
+116 -> 117 [label="True"];
+118 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541"];
+119 [label="r"];
+118 -> 119 [label="True"];
+120 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+121 [label="r"];
+120 -> 121 [label="True"];
+122 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+123 [label="r"];
+122 -> 123 [label="True"];
+124 [label="l"];
+122 -> 124 [style="dashed", label="False"];
+120 -> 122 [style="dashed", label="False"];
+118 -> 120 [style="dashed", label="False"];
+116 -> 118 [style="dashed", label="False"];
+112 -> 116 [style="dashed", label="False"];
+111 -> 112 [label="True"];
+125 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.37
+picked2 <= 0.5 : 0.367
+picked3 <= 0.5 : 0.382
+picked4 <= 0.5 : 0.397
+picked6 <= 0.5 : 0.367
+x <= 2.5 : 0.406"];
+126 [label="r"];
+125 -> 126 [label="True"];
+127 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.589
+picked3 <= 0.5 : 0.606
+picked4 <= 0.5 : 0.639
+picked6 <= 0.5 : 0.574
+x <= 2.5 : 0.659"];
+128 [label="r"];
+127 -> 128 [label="True"];
+129 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.857
+picked3 <= 0.5 : 0.857
+picked4 <= 0.5 : 0.936
+x <= 2.5 : 0.985"];
+130 [label="x <= 2.5
+--------------
+
+picked3 <= 0.5 : 0.667
+picked4 <= 0.5 : 0.874
+x <= 2.5 : 0.459"];
+131 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+picked4 <= 0.5 : 0.667"];
+132 [label="r"];
+131 -> 132 [label="True"];
+133 [label="d"];
+131 -> 133 [style="dashed", label="False"];
+130 -> 131 [label="True"];
+134 [label="r"];
+130 -> 134 [style="dashed", label="False"];
+129 -> 130 [label="True"];
+135 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.5
+x <= 2.5 : 0.811"];
+136 [label="r"];
+135 -> 136 [label="True"];
+137 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0
+x <= 2.5 : 1.0"];
+138 [label="r"];
+137 -> 138 [label="True"];
+139 [label="u"];
+137 -> 139 [style="dashed", label="False"];
+135 -> 137 [style="dashed", label="False"];
+129 -> 135 [style="dashed", label="False"];
+127 -> 129 [style="dashed", label="False"];
+125 -> 127 [style="dashed", label="False"];
+111 -> 125 [style="dashed", label="False"];
+97 -> 111 [style="dashed", label="False"];
+1 -> 97 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+140 [label="x <= 9.5
+--------------
+
+picked0 <= 0.5 : 1.739
+picked1 <= 0.5 : 1.775
+picked2 <= 0.5 : 1.809
+picked3 <= 0.5 : 1.811
+picked4 <= 0.5 : 1.793
+picked6 <= 0.5 : 1.775
+x <= 4.5 : 1.784
+x <= 5.5 : 1.799
+x <= 6.5 : 1.762
+x <= 7.5 : 1.709
+x <= 8.5 : 1.692
+x <= 9.5 : 1.68
+x <= 10.5 : 1.731
+x <= 11.5 : 1.749
+x <= 12.5 : 1.741
+x <= 13.5 : 1.752
+y <= 2.5 : 1.746
+y <= 3.5 : 1.78
+y <= 4.5 : 1.765
+y <= 5.5 : 1.764"];
+141 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.663
+picked1 <= 0.5 : 1.78
+picked2 <= 0.5 : 1.806
+picked3 <= 0.5 : 1.804
+picked4 <= 0.5 : 1.807
+picked6 <= 0.5 : 1.744
+x <= 4.5 : 1.779
+x <= 5.5 : 1.805
+x <= 6.5 : 1.783
+x <= 7.5 : 1.702
+x <= 8.5 : 1.772
+y <= 2.5 : 1.706
+y <= 3.5 : 1.782
+y <= 4.5 : 1.725
+y <= 5.5 : 1.752"];
+142 [label="y <= 4.5
+--------------
+
+picked1 <= 0.5 : 1.732
+picked2 <= 0.5 : 1.761
+picked3 <= 0.5 : 1.729
+picked4 <= 0.5 : 1.76
+picked6 <= 0.5 : 1.751
+x <= 4.5 : 1.63
+x <= 5.5 : 1.625
+x <= 6.5 : 1.696
+x <= 7.5 : 1.664
+x <= 8.5 : 1.666
+y <= 2.5 : 1.612
+y <= 3.5 : 1.636
+y <= 4.5 : 1.574
+y <= 5.5 : 1.718"];
+143 [label="x <= 8.5
+--------------
+
+picked1 <= 0.5 : 1.471
+picked2 <= 0.5 : 1.517
+picked3 <= 0.5 : 1.501
+picked4 <= 0.5 : 1.539
+picked6 <= 0.5 : 1.537
+x <= 4.5 : 1.358
+x <= 5.5 : 1.245
+x <= 6.5 : 1.322
+x <= 7.5 : 1.276
+x <= 8.5 : 1.184
+y <= 2.5 : 1.454
+y <= 3.5 : 1.44"];
+144 [label="x <= 5.5
+--------------
+
+picked1 <= 0.5 : 0.928
+picked2 <= 0.5 : 0.912
+picked3 <= 0.5 : 0.933
+picked4 <= 0.5 : 0.938
+picked6 <= 0.5 : 0.933
+x <= 4.5 : 0.768
+x <= 5.5 : 0.659
+x <= 6.5 : 0.838
+x <= 7.5 : 0.883
+y <= 3.0 : 0.89"];
+145 [label="l"];
+144 -> 145 [label="True"];
+146 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.973
+picked2 <= 0.5 : 0.946
+picked3 <= 0.5 : 0.984
+picked4 <= 0.5 : 0.996
+x <= 6.5 : 0.994
+x <= 7.5 : 0.989
+y <= 3.0 : 0.946"];
+147 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.953
+picked3 <= 0.5 : 0.953
+picked4 <= 0.5 : 0.973
+x <= 6.5 : 0.96
+x <= 7.5 : 0.97
+y <= 3.0 : 0.958"];
+148 [label="y <= 3.0
+--------------
+
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.0
+x <= 6.5 : 1.0
+x <= 7.5 : 1.0
+y <= 3.0 : 0.918"];
+149 [label="x <= 6.5
+--------------
+
+picked3 <= 0.5 : 0.918
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.0
+x <= 7.5 : 0.667"];
+150 [label="l"];
+149 -> 150 [label="True"];
+151 [label="r"];
+149 -> 151 [style="dashed", label="False"];
+148 -> 149 [label="True"];
+152 [label="x <= 6.5
+--------------
+
+picked3 <= 0.5 : 0.918
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.0
+x <= 7.5 : 0.667"];
+153 [label="r"];
+152 -> 153 [label="True"];
+154 [label="l"];
+152 -> 154 [style="dashed", label="False"];
+148 -> 152 [style="dashed", label="False"];
+147 -> 148 [label="True"];
+155 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.825
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.874
+x <= 7.5 : 0.907
+y <= 3.0 : 0.918"];
+156 [label="y <= 3.0
+--------------
+
+picked4 <= 0.5 : 1.0
+x <= 6.5 : 1.0
+x <= 7.5 : 1.0
+y <= 3.0 : 0.918"];
+157 [label="x <= 6.5
+--------------
+
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.0
+x <= 7.5 : 0.667"];
+158 [label="l"];
+157 -> 158 [label="True"];
+159 [label="r"];
+157 -> 159 [style="dashed", label="False"];
+156 -> 157 [label="True"];
+160 [label="x <= 6.5
+--------------
+
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.0
+x <= 7.5 : 0.667"];
+161 [label="r"];
+160 -> 161 [label="True"];
+162 [label="l"];
+160 -> 162 [style="dashed", label="False"];
+156 -> 160 [style="dashed", label="False"];
+155 -> 156 [label="True"];
+163 [label="x <= 6.5
+--------------
+
+picked4 <= 0.5 : 0.65
+x <= 6.5 : 0.333
+x <= 7.5 : 0.541
+y <= 3.0 : 0.459"];
+164 [label="y <= 3.0
+--------------
+
+picked4 <= 0.5 : 1.0
+y <= 3.0 : 0.0"];
+165 [label="l"];
+164 -> 165 [label="True"];
+166 [label="r"];
+164 -> 166 [style="dashed", label="False"];
+163 -> 164 [label="True"];
+167 [label="l"];
+163 -> 167 [style="dashed", label="False"];
+155 -> 163 [style="dashed", label="False"];
+147 -> 155 [style="dashed", label="False"];
+146 -> 147 [label="True"];
+168 [label="y <= 3.0
+--------------
+
+picked1 <= 0.5 : 0.887
+picked3 <= 0.5 : 0.911
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.874
+x <= 7.5 : 0.854
+y <= 3.0 : 0.459"];
+169 [label="x <= 6.5
+--------------
+
+picked1 <= 0.5 : 0.796
+picked3 <= 0.5 : 0.888
+picked4 <= 0.5 : 0.918
+x <= 6.5 : 0.667
+x <= 7.5 : 0.682"];
+170 [label="l"];
+169 -> 170 [label="True"];
+171 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.742
+picked3 <= 0.5 : 0.939
+picked4 <= 0.5 : 1.0
+x <= 7.5 : 0.863"];
+172 [label="x <= 7.5
+--------------
+
+picked3 <= 0.5 : 0.541
+picked4 <= 0.5 : 0.541
+x <= 7.5 : 0.459"];
+173 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.667
+picked4 <= 0.5 : 0.667"];
+174 [label="r"];
+173 -> 174 [label="True"];
+175 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+176 [label="l"];
+175 -> 176 [label="True"];
+177 [label="r"];
+175 -> 177 [style="dashed", label="False"];
+173 -> 175 [style="dashed", label="False"];
+172 -> 173 [label="True"];
+178 [label="r"];
+172 -> 178 [style="dashed", label="False"];
+171 -> 172 [label="True"];
+179 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.811
+x <= 7.5 : 0.5"];
+180 [label="x <= 7.5
+--------------
+
+picked4 <= 0.5 : 1.0
+x <= 7.5 : 0.0"];
+181 [label="l"];
+180 -> 181 [label="True"];
+182 [label="r"];
+180 -> 182 [style="dashed", label="False"];
+179 -> 180 [label="True"];
+183 [label="l"];
+179 -> 183 [style="dashed", label="False"];
+171 -> 179 [style="dashed", label="False"];
+169 -> 171 [style="dashed", label="False"];
+168 -> 169 [label="True"];
+184 [label="r"];
+168 -> 184 [style="dashed", label="False"];
+146 -> 168 [style="dashed", label="False"];
+144 -> 146 [style="dashed", label="False"];
+143 -> 144 [label="True"];
+185 [label="y <= 3.5
+--------------
+
+picked1 <= 0.5 : 1.66
+picked2 <= 0.5 : 1.894
+picked3 <= 0.5 : 1.663
+picked4 <= 0.5 : 1.903
+y <= 2.5 : 1.779
+y <= 3.5 : 1.647"];
+186 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.064
+picked2 <= 0.5 : 1.646
+picked3 <= 0.5 : 1.545
+picked4 <= 0.5 : 1.714
+y <= 2.5 : 1.217"];
+187 [label="y <= 2.5
+--------------
+
+picked2 <= 0.5 : 1.23
+picked3 <= 0.5 : 1.167
+picked4 <= 0.5 : 1.27
+y <= 2.5 : 0.325"];
+188 [label="r"];
+187 -> 188 [label="True"];
+189 [label="picked3 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.333
+picked4 <= 0.5 : 0.541"];
+190 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.0"];
+191 [label="d"];
+190 -> 191 [label="True"];
+192 [label="u"];
+190 -> 192 [style="dashed", label="False"];
+189 -> 190 [label="True"];
+193 [label="d"];
+189 -> 193 [style="dashed", label="False"];
+187 -> 189 [style="dashed", label="False"];
+186 -> 187 [label="True"];
+194 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.649
+picked3 <= 0.5 : 0.649
+picked4 <= 0.5 : 0.802
+y <= 2.5 : 0.677"];
+195 [label="u"];
+194 -> 195 [label="True"];
+196 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.75
+picked4 <= 0.5 : 1.156
+y <= 2.5 : 0.906"];
+197 [label="u"];
+196 -> 197 [label="True"];
+198 [label="y <= 2.5
+--------------
+
+picked4 <= 0.5 : 1.0
+y <= 2.5 : 0.5"];
+199 [label="l"];
+198 -> 199 [label="True"];
+200 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+201 [label="u"];
+200 -> 201 [label="True"];
+202 [label="d"];
+200 -> 202 [style="dashed", label="False"];
+198 -> 200 [style="dashed", label="False"];
+196 -> 198 [style="dashed", label="False"];
+194 -> 196 [style="dashed", label="False"];
+186 -> 194 [style="dashed", label="False"];
+185 -> 186 [label="True"];
+203 [label="picked3 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.421
+picked2 <= 0.5 : 0.985
+picked3 <= 0.5 : 0.803
+picked4 <= 0.5 : 1.421"];
+204 [label="r"];
+203 -> 204 [label="True"];
+205 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.25
+picked2 <= 0.5 : 0.406
+picked4 <= 0.5 : 1.25"];
+206 [label="l"];
+205 -> 206 [label="True"];
+207 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.5"];
+208 [label="d"];
+207 -> 208 [label="True"];
+209 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+210 [label="r"];
+209 -> 210 [label="True"];
+211 [label="d"];
+209 -> 211 [style="dashed", label="False"];
+207 -> 209 [style="dashed", label="False"];
+205 -> 207 [style="dashed", label="False"];
+203 -> 205 [style="dashed", label="False"];
+185 -> 203 [style="dashed", label="False"];
+143 -> 185 [style="dashed", label="False"];
+142 -> 143 [label="True"];
+212 [label="y <= 5.5
+--------------
+
+picked1 <= 0.5 : 1.617
+picked2 <= 0.5 : 1.553
+picked3 <= 0.5 : 1.556
+picked4 <= 0.5 : 1.615
+picked6 <= 0.5 : 1.548
+x <= 4.5 : 1.337
+x <= 5.5 : 1.561
+x <= 6.5 : 1.614
+x <= 7.5 : 1.434
+x <= 8.5 : 1.369
+y <= 5.5 : 1.281"];
+213 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.361
+picked2 <= 0.5 : 0.362
+picked3 <= 0.5 : 0.361
+picked4 <= 0.5 : 0.36
+picked6 <= 0.5 : 0.215
+x <= 6.0 : 0.362"];
+214 [label="u"];
+213 -> 214 [label="True"];
+215 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.193
+picked2 <= 0.5 : 0.186
+picked3 <= 0.5 : 0.193
+picked4 <= 0.5 : 0.177
+x <= 6.0 : 0.186"];
+216 [label="d"];
+215 -> 216 [label="True"];
+217 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.362
+picked2 <= 0.5 : 0.325
+picked3 <= 0.5 : 0.362
+x <= 6.0 : 0.325"];
+218 [label="d"];
+217 -> 218 [label="True"];
+219 [label="x <= 6.0
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+x <= 6.0 : 0.459"];
+220 [label="d"];
+219 -> 220 [label="True"];
+221 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+222 [label="d"];
+221 -> 222 [label="True"];
+223 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+224 [label="d"];
+223 -> 224 [label="True"];
+225 [label="u"];
+223 -> 225 [style="dashed", label="False"];
+221 -> 223 [style="dashed", label="False"];
+219 -> 221 [style="dashed", label="False"];
+217 -> 219 [style="dashed", label="False"];
+215 -> 217 [style="dashed", label="False"];
+213 -> 215 [style="dashed", label="False"];
+212 -> 213 [label="True"];
+226 [label="x <= 4.5
+--------------
+
+picked1 <= 0.5 : 1.578
+picked2 <= 0.5 : 1.492
+picked3 <= 0.5 : 1.497
+picked4 <= 0.5 : 1.575
+picked6 <= 0.5 : 1.524
+x <= 4.5 : 1.311
+x <= 5.5 : 1.527
+x <= 6.5 : 1.574
+x <= 7.5 : 1.353
+x <= 8.5 : 1.317"];
+227 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.276
+picked2 <= 0.5 : 0.29
+picked3 <= 0.5 : 0.276
+picked4 <= 0.5 : 0.302
+picked6 <= 0.5 : 0.0"];
+228 [label="r"];
+227 -> 228 [label="True"];
+229 [label="d"];
+227 -> 229 [style="dashed", label="False"];
+226 -> 227 [label="True"];
+230 [label="x <= 7.5
+--------------
+
+picked1 <= 0.5 : 1.502
+picked2 <= 0.5 : 1.404
+picked3 <= 0.5 : 1.411
+picked4 <= 0.5 : 1.499
+picked6 <= 0.5 : 1.455
+x <= 5.5 : 1.408
+x <= 6.5 : 1.336
+x <= 7.5 : 0.982
+x <= 8.5 : 1.243"];
+231 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.97
+picked2 <= 0.5 : 0.775
+picked3 <= 0.5 : 0.785
+picked4 <= 0.5 : 0.967
+picked6 <= 0.5 : 0.92
+x <= 5.5 : 0.801
+x <= 6.5 : 0.907"];
+232 [label="x <= 5.5
+--------------
+
+picked1 <= 0.5 : 0.65
+picked3 <= 0.5 : 0.459
+picked4 <= 0.5 : 0.641
+picked6 <= 0.5 : 0.615
+x <= 5.5 : 0.333
+x <= 6.5 : 0.541"];
+233 [label="picked3 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.0
+picked3 <= 0.5 : 0.0
+picked4 <= 0.5 : 0.951
+picked6 <= 0.5 : 0.862"];
+234 [label="r"];
+233 -> 234 [label="True"];
+235 [label="l"];
+233 -> 235 [style="dashed", label="False"];
+232 -> 233 [label="True"];
+236 [label="r"];
+232 -> 236 [style="dashed", label="False"];
+231 -> 232 [label="True"];
+237 [label="picked3 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.918
+picked3 <= 0.5 : 0.63
+picked4 <= 0.5 : 0.918
+x <= 5.5 : 0.667
+x <= 6.5 : 0.828"];
+238 [label="x <= 5.5
+--------------
+
+picked1 <= 0.5 : 0.918
+picked4 <= 0.5 : 0.918
+x <= 5.5 : 0.0
+x <= 6.5 : 0.667"];
+239 [label="l"];
+238 -> 239 [label="True"];
+240 [label="r"];
+238 -> 240 [style="dashed", label="False"];
+237 -> 238 [label="True"];
+241 [label="x <= 6.5
+--------------
+
+picked1 <= 0.5 : 0.325
+picked4 <= 0.5 : 0.325
+x <= 5.5 : 0.362
+x <= 6.5 : 0.27"];
+242 [label="l"];
+241 -> 242 [label="True"];
+243 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.5
+picked4 <= 0.5 : 0.5"];
+244 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+245 [label="l"];
+244 -> 245 [label="True"];
+246 [label="r"];
+244 -> 246 [style="dashed", label="False"];
+243 -> 244 [label="True"];
+247 [label="l"];
+243 -> 247 [style="dashed", label="False"];
+241 -> 243 [style="dashed", label="False"];
+237 -> 241 [style="dashed", label="False"];
+231 -> 237 [style="dashed", label="False"];
+230 -> 231 [label="True"];
+248 [label="x <= 8.5
+--------------
+
+picked1 <= 0.5 : 0.992
+picked2 <= 0.5 : 0.991
+picked3 <= 0.5 : 0.992
+picked4 <= 0.5 : 0.99
+picked6 <= 0.5 : 0.962
+x <= 8.5 : 0.183"];
+249 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.29
+picked2 <= 0.5 : 0.276
+picked3 <= 0.5 : 0.29
+picked4 <= 0.5 : 0.26
+picked6 <= 0.5 : 0.346"];
+250 [label="d"];
+249 -> 250 [label="True"];
+251 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541"];
+252 [label="d"];
+251 -> 252 [label="True"];
+253 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+254 [label="d"];
+253 -> 254 [label="True"];
+255 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+256 [label="d"];
+255 -> 256 [label="True"];
+257 [label="l"];
+255 -> 257 [style="dashed", label="False"];
+253 -> 255 [style="dashed", label="False"];
+251 -> 253 [style="dashed", label="False"];
+249 -> 251 [style="dashed", label="False"];
+248 -> 249 [label="True"];
+258 [label="l"];
+248 -> 258 [style="dashed", label="False"];
+230 -> 248 [style="dashed", label="False"];
+226 -> 230 [style="dashed", label="False"];
+212 -> 226 [style="dashed", label="False"];
+142 -> 212 [style="dashed", label="False"];
+141 -> 142 [label="True"];
+259 [label="x <= 7.5
+--------------
+
+picked1 <= 0.5 : 1.57
+picked2 <= 0.5 : 1.583
+picked3 <= 0.5 : 1.606
+picked4 <= 0.5 : 1.601
+picked6 <= 0.5 : 1.6
+x <= 4.5 : 1.533
+x <= 5.5 : 1.529
+x <= 6.5 : 1.449
+x <= 7.5 : 1.385
+x <= 8.5 : 1.542
+y <= 2.5 : 1.438
+y <= 3.5 : 1.515
+y <= 4.5 : 1.564
+y <= 5.5 : 1.539"];
+260 [label="x <= 4.5
+--------------
+
+picked1 <= 0.5 : 0.996
+picked2 <= 0.5 : 0.99
+picked3 <= 0.5 : 1.006
+picked4 <= 0.5 : 1.006
+picked6 <= 0.5 : 1.004
+x <= 4.5 : 0.805
+x <= 5.5 : 0.888
+x <= 6.5 : 0.919
+y <= 3.0 : 0.905
+y <= 4.5 : 0.964
+y <= 5.5 : 0.905"];
+261 [label="y <= 3.0
+--------------
+
+picked1 <= 0.5 : 1.2
+picked2 <= 0.5 : 1.216
+picked3 <= 0.5 : 1.246
+picked4 <= 0.5 : 1.259
+picked6 <= 0.5 : 1.216
+y <= 3.0 : 0.997
+y <= 4.5 : 1.217
+y <= 5.5 : 0.997"];
+262 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.193
+picked2 <= 0.5 : 0.186
+picked3 <= 0.5 : 0.193
+picked4 <= 0.5 : 0.177
+picked6 <= 0.5 : 0.186"];
+263 [label="r"];
+262 -> 263 [label="True"];
+264 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.362
+picked2 <= 0.5 : 0.325
+picked3 <= 0.5 : 0.362
+picked6 <= 0.5 : 0.325"];
+265 [label="r"];
+264 -> 265 [label="True"];
+266 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459"];
+267 [label="r"];
+266 -> 267 [label="True"];
+268 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+269 [label="r"];
+268 -> 269 [label="True"];
+270 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+271 [label="r"];
+270 -> 271 [label="True"];
+272 [label="u"];
+270 -> 272 [style="dashed", label="False"];
+268 -> 270 [style="dashed", label="False"];
+266 -> 268 [style="dashed", label="False"];
+264 -> 266 [style="dashed", label="False"];
+262 -> 264 [style="dashed", label="False"];
+261 -> 262 [label="True"];
+273 [label="y <= 5.5
+--------------
+
+picked1 <= 0.5 : 1.174
+picked2 <= 0.5 : 1.192
+picked3 <= 0.5 : 1.234
+picked4 <= 0.5 : 1.253
+picked6 <= 0.5 : 1.192
+y <= 4.5 : 0.955
+y <= 5.5 : 0.421"];
+274 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.403
+picked2 <= 0.5 : 0.425
+picked3 <= 0.5 : 0.489
+picked4 <= 0.5 : 0.519
+picked6 <= 0.5 : 0.425
+y <= 4.5 : 0.431"];
+275 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.692
+picked3 <= 0.5 : 0.889
+picked4 <= 0.5 : 0.933
+picked6 <= 0.5 : 0.692
+y <= 4.5 : 0.731"];
+276 [label="u"];
+275 -> 276 [label="True"];
+277 [label="picked6 <= 0.5
+--------------
+
+picked3 <= 0.5 : 1.27
+picked4 <= 0.5 : 1.366
+picked6 <= 0.5 : 0.73
+y <= 4.5 : 0.959"];
+278 [label="u"];
+277 -> 278 [label="True"];
+279 [label="y <= 4.5
+--------------
+
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.333
+y <= 4.5 : 0.459"];
+280 [label="l"];
+279 -> 280 [label="True"];
+281 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+picked4 <= 0.5 : 0.667"];
+282 [label="u"];
+281 -> 282 [label="True"];
+283 [label="d"];
+281 -> 283 [style="dashed", label="False"];
+279 -> 281 [style="dashed", label="False"];
+277 -> 279 [style="dashed", label="False"];
+275 -> 277 [style="dashed", label="False"];
+274 -> 275 [label="True"];
+284 [label="u"];
+274 -> 284 [style="dashed", label="False"];
+273 -> 274 [label="True"];
+285 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.193
+picked2 <= 0.5 : 0.186
+picked3 <= 0.5 : 0.193
+picked4 <= 0.5 : 0.177
+picked6 <= 0.5 : 0.186"];
+286 [label="r"];
+285 -> 286 [label="True"];
+287 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.362
+picked2 <= 0.5 : 0.325
+picked3 <= 0.5 : 0.362
+picked6 <= 0.5 : 0.325"];
+288 [label="r"];
+287 -> 288 [label="True"];
+289 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459"];
+290 [label="r"];
+289 -> 290 [label="True"];
+291 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+292 [label="r"];
+291 -> 292 [label="True"];
+293 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+294 [label="r"];
+293 -> 294 [label="True"];
+295 [label="u"];
+293 -> 295 [style="dashed", label="False"];
+291 -> 293 [style="dashed", label="False"];
+289 -> 291 [style="dashed", label="False"];
+287 -> 289 [style="dashed", label="False"];
+285 -> 287 [style="dashed", label="False"];
+273 -> 285 [style="dashed", label="False"];
+261 -> 273 [style="dashed", label="False"];
+260 -> 261 [label="True"];
+296 [label="x <= 6.5
+--------------
+
+picked1 <= 0.5 : 0.543
+picked2 <= 0.5 : 0.493
+picked3 <= 0.5 : 0.543
+picked4 <= 0.5 : 0.526
+picked6 <= 0.5 : 0.535
+x <= 5.5 : 0.549
+x <= 6.5 : 0.483
+y <= 3.0 : 0.532
+y <= 5.0 : 0.532"];
+297 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.22
+picked2 <= 0.5 : 0.24
+picked3 <= 0.5 : 0.22
+picked4 <= 0.5 : 0.201
+picked6 <= 0.5 : 0.211
+x <= 5.5 : 0.255
+y <= 3.0 : 0.255
+y <= 5.0 : 0.255"];
+298 [label="r"];
+297 -> 298 [label="True"];
+299 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.407
+picked2 <= 0.5 : 0.43
+picked3 <= 0.5 : 0.407
+picked6 <= 0.5 : 0.361
+x <= 5.5 : 0.467
+y <= 3.0 : 0.467
+y <= 5.0 : 0.467"];
+300 [label="r"];
+299 -> 300 [label="True"];
+301 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.588
+picked2 <= 0.5 : 0.636
+picked3 <= 0.5 : 0.588
+x <= 5.5 : 0.719
+y <= 3.0 : 0.719
+y <= 5.0 : 0.719"];
+302 [label="r"];
+301 -> 302 [label="True"];
+303 [label="picked3 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.734
+picked3 <= 0.5 : 0.485
+x <= 5.5 : 0.875
+y <= 3.0 : 0.875
+y <= 5.0 : 0.875"];
+304 [label="r"];
+303 -> 304 [label="True"];
+305 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.361
+x <= 5.5 : 0.951
+y <= 3.0 : 0.951
+y <= 5.0 : 0.951"];
+306 [label="x <= 5.5
+--------------
+
+x <= 5.5 : 0.551
+y <= 3.0 : 0.551
+y <= 5.0 : 0.551"];
+307 [label="r"];
+306 -> 307 [label="True"];
+308 [label="y <= 3.0
+--------------
+
+y <= 3.0 : 0.667
+y <= 5.0 : 0.667"];
+309 [label="r"];
+308 -> 309 [label="True"];
+310 [label="y <= 5.0
+--------------
+
+y <= 5.0 : 0.0"];
+311 [label="u"];
+310 -> 311 [label="True"];
+312 [label="r"];
+310 -> 312 [style="dashed", label="False"];
+308 -> 310 [style="dashed", label="False"];
+306 -> 308 [style="dashed", label="False"];
+305 -> 306 [label="True"];
+313 [label="u"];
+305 -> 313 [style="dashed", label="False"];
+303 -> 305 [style="dashed", label="False"];
+301 -> 303 [style="dashed", label="False"];
+299 -> 301 [style="dashed", label="False"];
+297 -> 299 [style="dashed", label="False"];
+296 -> 297 [label="True"];
+314 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.833
+picked2 <= 0.5 : 0.645
+picked3 <= 0.5 : 0.833
+picked4 <= 0.5 : 0.818
+picked6 <= 0.5 : 0.826
+y <= 3.0 : 0.753
+y <= 5.0 : 0.753"];
+315 [label="y <= 3.0
+--------------
+
+picked1 <= 0.5 : 0.918
+picked3 <= 0.5 : 0.918
+picked4 <= 0.5 : 0.918
+picked6 <= 0.5 : 0.918
+y <= 3.0 : 0.667
+y <= 5.0 : 0.667"];
+316 [label="r"];
+315 -> 316 [label="True"];
+317 [label="y <= 5.0
+--------------
+
+picked1 <= 0.5 : 1.0
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.0
+picked6 <= 0.5 : 1.0
+y <= 5.0 : 0.0"];
+318 [label="l"];
+317 -> 318 [label="True"];
+319 [label="r"];
+317 -> 319 [style="dashed", label="False"];
+315 -> 317 [style="dashed", label="False"];
+314 -> 315 [label="True"];
+320 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.311
+picked3 <= 0.5 : 0.311
+picked4 <= 0.5 : 0.279
+picked6 <= 0.5 : 0.296
+y <= 3.0 : 0.371
+y <= 5.0 : 0.371"];
+321 [label="r"];
+320 -> 321 [label="True"];
+322 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459
+y <= 3.0 : 0.65
+y <= 5.0 : 0.65"];
+323 [label="r"];
+322 -> 323 [label="True"];
+324 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667
+y <= 3.0 : 0.918
+y <= 5.0 : 0.918"];
+325 [label="r"];
+324 -> 325 [label="True"];
+326 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+y <= 3.0 : 1.0
+y <= 5.0 : 1.0"];
+327 [label="r"];
+326 -> 327 [label="True"];
+328 [label="u"];
+326 -> 328 [style="dashed", label="False"];
+324 -> 326 [style="dashed", label="False"];
+322 -> 324 [style="dashed", label="False"];
+320 -> 322 [style="dashed", label="False"];
+314 -> 320 [style="dashed", label="False"];
+296 -> 314 [style="dashed", label="False"];
+260 -> 296 [style="dashed", label="False"];
+259 -> 260 [label="True"];
+329 [label="y <= 2.5
+--------------
+
+picked1 <= 0.5 : 1.875
+picked2 <= 0.5 : 1.928
+picked3 <= 0.5 : 1.964
+picked4 <= 0.5 : 1.963
+picked6 <= 0.5 : 1.941
+x <= 8.5 : 1.93
+y <= 2.5 : 1.634
+y <= 3.5 : 1.739
+y <= 4.5 : 1.697
+y <= 5.5 : 1.763"];
+330 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.571
+picked2 <= 0.5 : 0.863
+picked3 <= 0.5 : 0.857
+picked4 <= 0.5 : 0.842
+picked6 <= 0.5 : 0.863
+x <= 8.5 : 0.609"];
+331 [label="r"];
+330 -> 331 [label="True"];
+332 [label="x <= 8.5
+--------------
+
+picked2 <= 0.5 : 1.0
+picked3 <= 0.5 : 1.0
+picked4 <= 0.5 : 0.989
+picked6 <= 0.5 : 1.0
+x <= 8.5 : 0.337"];
+333 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.272
+picked3 <= 0.5 : 0.272
+picked4 <= 0.5 : 0.272
+picked6 <= 0.5 : 0.272"];
+334 [label="r"];
+333 -> 334 [label="True"];
+335 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.406
+picked4 <= 0.5 : 0.406
+picked6 <= 0.5 : 0.406"];
+336 [label="r"];
+335 -> 336 [label="True"];
+337 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.5
+picked6 <= 0.5 : 0.5"];
+338 [label="r"];
+337 -> 338 [label="True"];
+339 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0"];
+340 [label="r"];
+339 -> 340 [label="True"];
+341 [label="u"];
+339 -> 341 [style="dashed", label="False"];
+337 -> 339 [style="dashed", label="False"];
+335 -> 337 [style="dashed", label="False"];
+333 -> 335 [style="dashed", label="False"];
+332 -> 333 [label="True"];
+342 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.272
+picked3 <= 0.5 : 0.272
+picked4 <= 0.5 : 0.272
+picked6 <= 0.5 : 0.272"];
+343 [label="u"];
+342 -> 343 [label="True"];
+344 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.406
+picked4 <= 0.5 : 0.406
+picked6 <= 0.5 : 0.406"];
+345 [label="u"];
+344 -> 345 [label="True"];
+346 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.5
+picked6 <= 0.5 : 0.5"];
+347 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0"];
+348 [label="u"];
+347 -> 348 [label="True"];
+349 [label="r"];
+347 -> 349 [style="dashed", label="False"];
+346 -> 347 [label="True"];
+350 [label="u"];
+346 -> 350 [style="dashed", label="False"];
+344 -> 346 [style="dashed", label="False"];
+342 -> 344 [style="dashed", label="False"];
+332 -> 342 [style="dashed", label="False"];
+330 -> 332 [style="dashed", label="False"];
+329 -> 330 [label="True"];
+351 [label="y <= 4.5
+--------------
+
+picked1 <= 0.5 : 1.836
+picked2 <= 0.5 : 1.832
+picked3 <= 0.5 : 1.855
+picked4 <= 0.5 : 1.899
+picked6 <= 0.5 : 1.846
+x <= 8.5 : 1.839
+y <= 3.5 : 1.764
+y <= 4.5 : 1.722
+y <= 5.5 : 1.75"];
+352 [label="y <= 3.5
+--------------
+
+picked1 <= 0.5 : 1.651
+picked2 <= 0.5 : 1.773
+picked3 <= 0.5 : 1.833
+picked4 <= 0.5 : 1.953
+picked6 <= 0.5 : 1.935
+x <= 8.5 : 1.819
+y <= 3.5 : 1.461"];
+353 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.0
+picked2 <= 0.5 : 0.985
+picked3 <= 0.5 : 0.965
+picked4 <= 0.5 : 0.965
+picked6 <= 0.5 : 0.985"];
+354 [label="d"];
+353 -> 354 [label="True"];
+355 [label="u"];
+353 -> 355 [style="dashed", label="False"];
+352 -> 353 [label="True"];
+356 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.625
+picked2 <= 0.5 : 1.24
+picked3 <= 0.5 : 1.468
+picked4 <= 0.5 : 1.669
+picked6 <= 0.5 : 1.618
+x <= 8.5 : 1.527"];
+357 [label="picked3 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.742
+picked3 <= 0.5 : 0.429
+picked4 <= 0.5 : 0.742
+picked6 <= 0.5 : 0.75
+x <= 8.5 : 0.493"];
+358 [label="x <= 8.5
+--------------
+
+picked1 <= 0.5 : 1.0
+picked4 <= 0.5 : 1.0
+picked6 <= 0.5 : 1.0
+x <= 8.5 : 0.0"];
+359 [label="l"];
+358 -> 359 [label="True"];
+360 [label="r"];
+358 -> 360 [style="dashed", label="False"];
+357 -> 358 [label="True"];
+361 [label="l"];
+357 -> 361 [style="dashed", label="False"];
+356 -> 357 [label="True"];
+362 [label="x <= 8.5
+--------------
+
+picked1 <= 0.5 : 1.585
+picked3 <= 0.5 : 1.454
+picked4 <= 0.5 : 1.674
+picked6 <= 0.5 : 1.437
+x <= 8.5 : 1.355"];
+363 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.974
+picked3 <= 0.5 : 0.974
+picked4 <= 0.5 : 0.965
+picked6 <= 0.5 : 0.296"];
+364 [label="u"];
+363 -> 364 [label="True"];
+365 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.464
+picked3 <= 0.5 : 0.464
+picked4 <= 0.5 : 0.394"];
+366 [label="r"];
+365 -> 366 [label="True"];
+367 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+368 [label="r"];
+367 -> 368 [label="True"];
+369 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+370 [label="r"];
+369 -> 370 [label="True"];
+371 [label="u"];
+369 -> 371 [style="dashed", label="False"];
+367 -> 369 [style="dashed", label="False"];
+365 -> 367 [style="dashed", label="False"];
+363 -> 365 [style="dashed", label="False"];
+362 -> 363 [label="True"];
+372 [label="picked3 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.368
+picked3 <= 0.5 : 1.035
+picked4 <= 0.5 : 1.564
+picked6 <= 0.5 : 1.414"];
+373 [label="r"];
+372 -> 373 [label="True"];
+374 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.156
+picked4 <= 0.5 : 1.5
+picked6 <= 0.5 : 1.156"];
+375 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.5
+picked6 <= 0.5 : 0.5"];
+376 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0"];
+377 [label="l"];
+376 -> 377 [label="True"];
+378 [label="d"];
+376 -> 378 [style="dashed", label="False"];
+375 -> 376 [label="True"];
+379 [label="d"];
+375 -> 379 [style="dashed", label="False"];
+374 -> 375 [label="True"];
+380 [label="picked6 <= 0.5
+--------------
+
+picked4 <= 0.5 : 1.0
+picked6 <= 0.5 : 0.5"];
+381 [label="l"];
+380 -> 381 [label="True"];
+382 [label="picked4 <= 0.5
+--------------
+
+picked4 <= 0.5 : 0.0"];
+383 [label="r"];
+382 -> 383 [label="True"];
+384 [label="u"];
+382 -> 384 [style="dashed", label="False"];
+380 -> 382 [style="dashed", label="False"];
+374 -> 380 [style="dashed", label="False"];
+372 -> 374 [style="dashed", label="False"];
+362 -> 372 [style="dashed", label="False"];
+356 -> 362 [style="dashed", label="False"];
+352 -> 356 [style="dashed", label="False"];
+351 -> 352 [label="True"];
+385 [label="x <= 8.5
+--------------
+
+picked1 <= 0.5 : 1.416
+picked2 <= 0.5 : 1.413
+picked3 <= 0.5 : 1.416
+picked4 <= 0.5 : 1.409
+picked6 <= 0.5 : 1.133
+x <= 8.5 : 0.783
+y <= 5.5 : 1.133"];
+386 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.878
+picked2 <= 0.5 : 0.876
+picked3 <= 0.5 : 0.878
+picked4 <= 0.5 : 0.873
+picked6 <= 0.5 : 0.684
+y <= 5.5 : 0.684"];
+387 [label="y <= 5.5
+--------------
+
+picked1 <= 0.5 : 0.994
+picked2 <= 0.5 : 0.993
+picked3 <= 0.5 : 0.994
+picked4 <= 0.5 : 0.991
+y <= 5.5 : 0.186"];
+388 [label="u"];
+387 -> 388 [label="True"];
+389 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.311
+picked2 <= 0.5 : 0.296
+picked3 <= 0.5 : 0.311
+picked4 <= 0.5 : 0.279"];
+390 [label="d"];
+389 -> 390 [label="True"];
+391 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541"];
+392 [label="d"];
+391 -> 392 [label="True"];
+393 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+394 [label="d"];
+393 -> 394 [label="True"];
+395 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+396 [label="d"];
+395 -> 396 [label="True"];
+397 [label="u"];
+395 -> 397 [style="dashed", label="False"];
+393 -> 395 [style="dashed", label="False"];
+391 -> 393 [style="dashed", label="False"];
+389 -> 391 [style="dashed", label="False"];
+387 -> 389 [style="dashed", label="False"];
+386 -> 387 [label="True"];
+398 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.311
+picked2 <= 0.5 : 0.296
+picked3 <= 0.5 : 0.311
+picked4 <= 0.5 : 0.279
+y <= 5.5 : 0.371"];
+399 [label="d"];
+398 -> 399 [label="True"];
+400 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541
+y <= 5.5 : 0.65"];
+401 [label="d"];
+400 -> 401 [label="True"];
+402 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667
+y <= 5.5 : 0.918"];
+403 [label="d"];
+402 -> 403 [label="True"];
+404 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+y <= 5.5 : 1.0"];
+405 [label="d"];
+404 -> 405 [label="True"];
+406 [label="u"];
+404 -> 406 [style="dashed", label="False"];
+402 -> 404 [style="dashed", label="False"];
+400 -> 402 [style="dashed", label="False"];
+398 -> 400 [style="dashed", label="False"];
+386 -> 398 [style="dashed", label="False"];
+385 -> 386 [label="True"];
+407 [label="picked4 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.311
+picked2 <= 0.5 : 0.296
+picked3 <= 0.5 : 0.311
+picked4 <= 0.5 : 0.279"];
+408 [label="l"];
+407 -> 408 [label="True"];
+409 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541"];
+410 [label="l"];
+409 -> 410 [label="True"];
+411 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+412 [label="l"];
+411 -> 412 [label="True"];
+413 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+414 [label="l"];
+413 -> 414 [label="True"];
+415 [label="u"];
+413 -> 415 [style="dashed", label="False"];
+411 -> 413 [style="dashed", label="False"];
+409 -> 411 [style="dashed", label="False"];
+407 -> 409 [style="dashed", label="False"];
+385 -> 407 [style="dashed", label="False"];
+351 -> 385 [style="dashed", label="False"];
+329 -> 351 [style="dashed", label="False"];
+259 -> 329 [style="dashed", label="False"];
+141 -> 259 [style="dashed", label="False"];
+140 -> 141 [label="True"];
+416 [label="y <= 5.0
+--------------
+
+picked0 <= 0.5 : 1.433
+picked1 <= 0.5 : 1.37
+picked2 <= 0.5 : 1.437
+picked3 <= 0.5 : 1.421
+picked4 <= 0.5 : 1.306
+picked6 <= 0.5 : 1.441
+x <= 10.5 : 1.411
+x <= 11.5 : 1.348
+x <= 12.5 : 1.387
+x <= 13.5 : 1.371
+y <= 2.5 : 1.417
+y <= 3.5 : 1.31
+y <= 5.0 : 1.247"];
+417 [label="picked4 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.67
+picked1 <= 0.5 : 1.58
+picked2 <= 0.5 : 1.665
+picked3 <= 0.5 : 1.641
+picked4 <= 0.5 : 1.437
+picked6 <= 0.5 : 1.668
+x <= 10.5 : 1.617
+x <= 11.5 : 1.521
+x <= 12.5 : 1.611
+x <= 13.5 : 1.579
+y <= 2.5 : 1.638
+y <= 3.5 : 1.537"];
+418 [label="y <= 3.5
+--------------
+
+picked0 <= 0.5 : 1.511
+picked1 <= 0.5 : 1.453
+picked2 <= 0.5 : 1.514
+picked3 <= 0.5 : 1.492
+picked6 <= 0.5 : 1.508
+x <= 10.5 : 1.426
+x <= 11.5 : 1.323
+x <= 12.5 : 1.469
+x <= 13.5 : 1.351
+y <= 2.5 : 1.472
+y <= 3.5 : 1.283"];
+419 [label="x <= 11.5
+--------------
+
+picked0 <= 0.5 : 1.692
+picked1 <= 0.5 : 1.459
+picked2 <= 0.5 : 1.706
+picked3 <= 0.5 : 1.672
+picked6 <= 0.5 : 1.701
+x <= 10.5 : 1.431
+x <= 11.5 : 0.973
+y <= 2.5 : 1.284"];
+420 [label="picked1 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.995
+picked1 <= 0.5 : 0.863
+picked2 <= 0.5 : 0.992
+picked3 <= 0.5 : 0.918
+picked6 <= 0.5 : 0.985
+x <= 10.5 : 0.953"];
+421 [label="picked3 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.847
+picked2 <= 0.5 : 0.841
+picked3 <= 0.5 : 0.653
+picked6 <= 0.5 : 0.829
+x <= 10.5 : 0.653"];
+422 [label="l"];
+421 -> 422 [label="True"];
+423 [label="x <= 10.5
+--------------
+
+picked0 <= 0.5 : 0.97
+picked2 <= 0.5 : 0.959
+picked6 <= 0.5 : 0.937
+x <= 10.5 : 0.325"];
+424 [label="picked6 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked6 <= 0.5 : 0.333"];
+425 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.0"];
+426 [label="l"];
+425 -> 426 [label="True"];
+427 [label="r"];
+425 -> 427 [style="dashed", label="False"];
+424 -> 425 [label="True"];
+428 [label="r"];
+424 -> 428 [style="dashed", label="False"];
+423 -> 424 [label="True"];
+429 [label="l"];
+423 -> 429 [style="dashed", label="False"];
+421 -> 423 [style="dashed", label="False"];
+420 -> 421 [label="True"];
+430 [label="x <= 10.5
+--------------
+
+picked0 <= 0.5 : 0.868
+picked2 <= 0.5 : 0.865
+picked3 <= 0.5 : 0.707
+picked6 <= 0.5 : 0.859
+x <= 10.5 : 0.49"];
+431 [label="picked3 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.97
+picked2 <= 0.5 : 0.959
+picked3 <= 0.5 : 0.325
+picked6 <= 0.5 : 0.937"];
+432 [label="l"];
+431 -> 432 [label="True"];
+433 [label="picked6 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked6 <= 0.5 : 0.333"];
+434 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.0"];
+435 [label="l"];
+434 -> 435 [label="True"];
+436 [label="r"];
+434 -> 436 [style="dashed", label="False"];
+433 -> 434 [label="True"];
+437 [label="r"];
+433 -> 437 [style="dashed", label="False"];
+431 -> 433 [style="dashed", label="False"];
+430 -> 431 [label="True"];
+438 [label="r"];
+430 -> 438 [style="dashed", label="False"];
+420 -> 430 [style="dashed", label="False"];
+419 -> 420 [label="True"];
+439 [label="picked1 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.911
+picked1 <= 0.5 : 0.486
+picked2 <= 0.5 : 0.944
+picked3 <= 0.5 : 0.792
+picked6 <= 0.5 : 0.939
+y <= 2.5 : 0.711"];
+440 [label="y <= 2.5
+--------------
+
+picked0 <= 0.5 : 1.333
+picked2 <= 0.5 : 1.459
+picked6 <= 0.5 : 1.437
+y <= 2.5 : 0.459"];
+441 [label="l"];
+440 -> 441 [label="True"];
+442 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.667
+picked2 <= 0.5 : 0.918
+picked6 <= 0.5 : 0.874"];
+443 [label="u"];
+442 -> 443 [label="True"];
+444 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 1.0
+picked6 <= 0.5 : 1.0"];
+445 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0"];
+446 [label="d"];
+445 -> 446 [label="True"];
+447 [label="u"];
+445 -> 447 [style="dashed", label="False"];
+444 -> 445 [label="True"];
+448 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0"];
+449 [label="u"];
+448 -> 449 [label="True"];
+450 [label="d"];
+448 -> 450 [style="dashed", label="False"];
+444 -> 448 [style="dashed", label="False"];
+442 -> 444 [style="dashed", label="False"];
+440 -> 442 [style="dashed", label="False"];
+439 -> 440 [label="True"];
+451 [label="u"];
+439 -> 451 [style="dashed", label="False"];
+419 -> 439 [style="dashed", label="False"];
+418 -> 419 [label="True"];
+452 [label="x <= 13.5
+--------------
+
+picked0 <= 0.5 : 0.927
+picked1 <= 0.5 : 0.92
+picked2 <= 0.5 : 0.917
+picked3 <= 0.5 : 0.906
+picked6 <= 0.5 : 0.915
+x <= 10.5 : 0.914
+x <= 11.5 : 0.921
+x <= 12.5 : 0.839
+x <= 13.5 : 0.507"];
+453 [label="x <= 11.5
+--------------
+
+picked0 <= 0.5 : 0.543
+picked1 <= 0.5 : 0.536
+picked2 <= 0.5 : 0.535
+picked3 <= 0.5 : 0.476
+picked6 <= 0.5 : 0.521
+x <= 10.5 : 0.548
+x <= 11.5 : 0.426
+x <= 12.5 : 0.5"];
+454 [label="picked3 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.773
+picked1 <= 0.5 : 0.74
+picked2 <= 0.5 : 0.755
+picked3 <= 0.5 : 0.661
+picked6 <= 0.5 : 0.723
+x <= 10.5 : 0.765"];
+455 [label="x <= 10.5
+--------------
+
+picked0 <= 0.5 : 0.973
+picked1 <= 0.5 : 0.87
+picked2 <= 0.5 : 0.955
+picked6 <= 0.5 : 0.918
+x <= 10.5 : 0.433"];
+456 [label="picked6 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.541
+picked1 <= 0.5 : 0.65
+picked2 <= 0.5 : 0.459
+picked6 <= 0.5 : 0.333"];
+457 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 1.0
+picked2 <= 0.5 : 0.0"];
+458 [label="l"];
+457 -> 458 [label="True"];
+459 [label="r"];
+457 -> 459 [style="dashed", label="False"];
+456 -> 457 [label="True"];
+460 [label="r"];
+456 -> 460 [style="dashed", label="False"];
+455 -> 456 [label="True"];
+461 [label="l"];
+455 -> 461 [style="dashed", label="False"];
+454 -> 455 [label="True"];
+462 [label="picked6 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.362
+picked1 <= 0.5 : 0.414
+picked2 <= 0.5 : 0.325
+picked6 <= 0.5 : 0.27
+x <= 10.5 : 0.325"];
+463 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.811
+picked2 <= 0.5 : 0.5
+x <= 10.5 : 0.5"];
+464 [label="x <= 10.5
+--------------
+
+picked1 <= 0.5 : 1.0
+x <= 10.5 : 0.0"];
+465 [label="l"];
+464 -> 465 [label="True"];
+466 [label="r"];
+464 -> 466 [style="dashed", label="False"];
+463 -> 464 [label="True"];
+467 [label="r"];
+463 -> 467 [style="dashed", label="False"];
+462 -> 463 [label="True"];
+468 [label="r"];
+462 -> 468 [style="dashed", label="False"];
+454 -> 462 [style="dashed", label="False"];
+453 -> 454 [label="True"];
+469 [label="r"];
+453 -> 469 [style="dashed", label="False"];
+452 -> 453 [label="True"];
+470 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.276
+picked1 <= 0.5 : 0.276
+picked2 <= 0.5 : 0.252
+picked3 <= 0.5 : 0.276
+picked6 <= 0.5 : 0.276"];
+471 [label="l"];
+470 -> 471 [label="True"];
+472 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.433
+picked1 <= 0.5 : 0.433
+picked3 <= 0.5 : 0.433
+picked6 <= 0.5 : 0.433"];
+473 [label="l"];
+472 -> 473 [label="True"];
+474 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459"];
+475 [label="l"];
+474 -> 475 [label="True"];
+476 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667"];
+477 [label="l"];
+476 -> 477 [label="True"];
+478 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0"];
+479 [label="l"];
+478 -> 479 [label="True"];
+480 [label="u"];
+478 -> 480 [style="dashed", label="False"];
+476 -> 478 [style="dashed", label="False"];
+474 -> 476 [style="dashed", label="False"];
+472 -> 474 [style="dashed", label="False"];
+470 -> 472 [style="dashed", label="False"];
+452 -> 470 [style="dashed", label="False"];
+418 -> 452 [style="dashed", label="False"];
+417 -> 418 [label="True"];
+481 [label="x <= 11.5
+--------------
+
+picked0 <= 0.5 : 1.326
+picked1 <= 0.5 : 1.198
+picked2 <= 0.5 : 1.33
+picked3 <= 0.5 : 1.267
+picked6 <= 0.5 : 1.343
+x <= 10.5 : 1.281
+x <= 11.5 : 1.17
+x <= 12.5 : 1.256
+x <= 13.5 : 1.307
+y <= 2.5 : 1.267
+y <= 3.5 : 1.231"];
+482 [label="x <= 10.5
+--------------
+
+picked0 <= 0.5 : 0.851
+picked1 <= 0.5 : 0.889
+picked2 <= 0.5 : 0.803
+picked3 <= 0.5 : 0.831
+picked6 <= 0.5 : 0.845
+x <= 10.5 : 0.778
+y <= 3.0 : 0.879"];
+483 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.433
+picked1 <= 0.5 : 0.5
+picked2 <= 0.5 : 0.382
+picked3 <= 0.5 : 0.5
+picked6 <= 0.5 : 0.433
+y <= 3.0 : 0.503"];
+484 [label="l"];
+483 -> 484 [label="True"];
+485 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.612
+picked1 <= 0.5 : 0.758
+picked3 <= 0.5 : 0.758
+picked6 <= 0.5 : 0.612
+y <= 3.0 : 0.764"];
+486 [label="l"];
+485 -> 486 [label="True"];
+487 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.907
+picked3 <= 0.5 : 0.907
+picked6 <= 0.5 : 0.459
+y <= 3.0 : 0.918"];
+488 [label="l"];
+487 -> 488 [label="True"];
+489 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.874
+picked3 <= 0.5 : 0.874
+y <= 3.0 : 0.918"];
+490 [label="y <= 3.0
+--------------
+
+y <= 3.0 : 0.0"];
+491 [label="u"];
+490 -> 491 [label="True"];
+492 [label="l"];
+490 -> 492 [style="dashed", label="False"];
+489 -> 490 [label="True"];
+493 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.5
+y <= 3.0 : 0.5"];
+494 [label="y <= 3.0
+--------------
+
+y <= 3.0 : 0.0"];
+495 [label="l"];
+494 -> 495 [label="True"];
+496 [label="u"];
+494 -> 496 [style="dashed", label="False"];
+493 -> 494 [label="True"];
+497 [label="u"];
+493 -> 497 [style="dashed", label="False"];
+489 -> 493 [style="dashed", label="False"];
+487 -> 489 [style="dashed", label="False"];
+485 -> 487 [style="dashed", label="False"];
+483 -> 485 [style="dashed", label="False"];
+482 -> 483 [label="True"];
+498 [label="picked3 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.019
+picked1 <= 0.5 : 1.009
+picked2 <= 0.5 : 0.975
+picked3 <= 0.5 : 0.878
+picked6 <= 0.5 : 1.009
+y <= 3.0 : 0.999"];
+499 [label="y <= 3.0
+--------------
+
+picked0 <= 0.5 : 1.0
+picked2 <= 0.5 : 1.0
+picked6 <= 0.5 : 1.0
+y <= 3.0 : 0.0"];
+500 [label="r"];
+499 -> 500 [label="True"];
+501 [label="l"];
+499 -> 501 [style="dashed", label="False"];
+498 -> 499 [label="True"];
+502 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.76
+picked1 <= 0.5 : 0.65
+picked2 <= 0.5 : 0.626
+picked6 <= 0.5 : 0.708
+y <= 3.0 : 0.727"];
+503 [label="l"];
+502 -> 503 [label="True"];
+504 [label="picked1 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.136
+picked1 <= 0.5 : 0.918
+picked6 <= 0.5 : 1.0
+y <= 3.0 : 1.055"];
+505 [label="y <= 3.0
+--------------
+
+picked0 <= 0.5 : 0.874
+picked6 <= 0.5 : 0.667
+y <= 3.0 : 0.459"];
+506 [label="l"];
+505 -> 506 [label="True"];
+507 [label="picked6 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.667
+picked6 <= 0.5 : 0.0"];
+508 [label="l"];
+507 -> 508 [label="True"];
+509 [label="r"];
+507 -> 509 [style="dashed", label="False"];
+505 -> 507 [style="dashed", label="False"];
+504 -> 505 [label="True"];
+510 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.667
+picked6 <= 0.5 : 0.667
+y <= 3.0 : 0.918"];
+511 [label="l"];
+510 -> 511 [label="True"];
+512 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0
+y <= 3.0 : 1.0"];
+513 [label="l"];
+512 -> 513 [label="True"];
+514 [label="u"];
+512 -> 514 [style="dashed", label="False"];
+510 -> 512 [style="dashed", label="False"];
+504 -> 510 [style="dashed", label="False"];
+502 -> 504 [style="dashed", label="False"];
+498 -> 502 [style="dashed", label="False"];
+482 -> 498 [style="dashed", label="False"];
+481 -> 482 [label="True"];
+515 [label="x <= 12.5
+--------------
+
+picked0 <= 0.5 : 1.362
+picked1 <= 0.5 : 1.095
+picked2 <= 0.5 : 1.377
+picked3 <= 0.5 : 1.269
+picked6 <= 0.5 : 1.382
+x <= 12.5 : 1.06
+x <= 13.5 : 1.255
+y <= 2.5 : 1.281
+y <= 3.5 : 1.071"];
+516 [label="picked1 <= 0.5
+--------------
+
+picked0 <= 0.5 : 1.535
+picked1 <= 0.5 : 1.102
+picked2 <= 0.5 : 1.554
+picked3 <= 0.5 : 1.354
+picked6 <= 0.5 : 1.558
+y <= 2.5 : 1.378
+y <= 3.5 : 1.341"];
+517 [label="y <= 2.5
+--------------
+
+picked0 <= 0.5 : 0.918
+picked2 <= 0.5 : 0.918
+picked6 <= 0.5 : 0.918
+y <= 2.5 : 0.0
+y <= 3.5 : 0.667"];
+518 [label="l"];
+517 -> 518 [label="True"];
+519 [label="d"];
+517 -> 519 [style="dashed", label="False"];
+516 -> 517 [label="True"];
+520 [label="y <= 3.5
+--------------
+
+picked0 <= 0.5 : 1.075
+picked2 <= 0.5 : 1.132
+picked3 <= 0.5 : 1.135
+picked6 <= 0.5 : 1.16
+y <= 2.5 : 1.1
+y <= 3.5 : 0.711"];
+521 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.433
+picked2 <= 0.5 : 0.615
+picked3 <= 0.5 : 0.52
+picked6 <= 0.5 : 0.579
+y <= 2.5 : 0.532"];
+522 [label="picked3 <= 0.5
+--------------
+
+picked2 <= 0.5 : 1.156
+picked3 <= 0.5 : 0.75
+y <= 2.5 : 0.906"];
+523 [label="u"];
+522 -> 523 [label="True"];
+524 [label="y <= 2.5
+--------------
+
+picked2 <= 0.5 : 1.0
+y <= 2.5 : 0.5"];
+525 [label="l"];
+524 -> 525 [label="True"];
+526 [label="picked2 <= 0.5
+--------------
+
+picked2 <= 0.5 : 0.0"];
+527 [label="u"];
+526 -> 527 [label="True"];
+528 [label="d"];
+526 -> 528 [style="dashed", label="False"];
+524 -> 526 [style="dashed", label="False"];
+522 -> 524 [style="dashed", label="False"];
+521 -> 522 [label="True"];
+529 [label="u"];
+521 -> 529 [style="dashed", label="False"];
+520 -> 521 [label="True"];
+530 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.633
+picked2 <= 0.5 : 0.626
+picked3 <= 0.5 : 0.626
+picked6 <= 0.5 : 0.708"];
+531 [label="l"];
+530 -> 531 [label="True"];
+532 [label="picked3 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.874
+picked3 <= 0.5 : 0.792
+picked6 <= 0.5 : 1.0"];
+533 [label="l"];
+532 -> 533 [label="True"];
+534 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.667
+picked6 <= 0.5 : 0.667"];
+535 [label="d"];
+534 -> 535 [label="True"];
+536 [label="picked6 <= 0.5
+--------------
+
+picked6 <= 0.5 : 0.0"];
+537 [label="l"];
+536 -> 537 [label="True"];
+538 [label="u"];
+536 -> 538 [style="dashed", label="False"];
+534 -> 536 [style="dashed", label="False"];
+532 -> 534 [style="dashed", label="False"];
+530 -> 532 [style="dashed", label="False"];
+520 -> 530 [style="dashed", label="False"];
+516 -> 520 [style="dashed", label="False"];
+515 -> 516 [label="True"];
+539 [label="picked2 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.276
+picked1 <= 0.5 : 0.276
+picked2 <= 0.5 : 0.252
+picked3 <= 0.5 : 0.276
+picked6 <= 0.5 : 0.276
+x <= 13.5 : 0.31"];
+540 [label="l"];
+539 -> 540 [label="True"];
+541 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.433
+picked1 <= 0.5 : 0.433
+picked3 <= 0.5 : 0.433
+picked6 <= 0.5 : 0.433
+x <= 13.5 : 0.503"];
+542 [label="l"];
+541 -> 542 [label="True"];
+543 [label="picked6 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked3 <= 0.5 : 0.541
+picked6 <= 0.5 : 0.459
+x <= 13.5 : 0.65"];
+544 [label="l"];
+543 -> 544 [label="True"];
+545 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667
+x <= 13.5 : 0.918"];
+546 [label="l"];
+545 -> 546 [label="True"];
+547 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+x <= 13.5 : 1.0"];
+548 [label="l"];
+547 -> 548 [label="True"];
+549 [label="u"];
+547 -> 549 [style="dashed", label="False"];
+545 -> 547 [style="dashed", label="False"];
+543 -> 545 [style="dashed", label="False"];
+541 -> 543 [style="dashed", label="False"];
+539 -> 541 [style="dashed", label="False"];
+515 -> 539 [style="dashed", label="False"];
+481 -> 515 [style="dashed", label="False"];
+417 -> 481 [style="dashed", label="False"];
+416 -> 417 [label="True"];
+550 [label="picked4 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.186
+picked1 <= 0.5 : 0.193
+picked2 <= 0.5 : 0.186
+picked3 <= 0.5 : 0.193
+picked4 <= 0.5 : 0.177
+x <= 10.5 : 0.222
+x <= 11.5 : 0.222
+x <= 12.5 : 0.222
+x <= 13.5 : 0.222"];
+551 [label="l"];
+550 -> 551 [label="True"];
+552 [label="picked0 <= 0.5
+--------------
+
+picked0 <= 0.5 : 0.325
+picked1 <= 0.5 : 0.362
+picked2 <= 0.5 : 0.325
+picked3 <= 0.5 : 0.362
+x <= 10.5 : 0.414
+x <= 11.5 : 0.414
+x <= 12.5 : 0.414
+x <= 13.5 : 0.414"];
+553 [label="l"];
+552 -> 553 [label="True"];
+554 [label="picked2 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.541
+picked2 <= 0.5 : 0.459
+picked3 <= 0.5 : 0.541
+x <= 10.5 : 0.65
+x <= 11.5 : 0.65
+x <= 12.5 : 0.65
+x <= 13.5 : 0.65"];
+555 [label="l"];
+554 -> 555 [label="True"];
+556 [label="picked1 <= 0.5
+--------------
+
+picked1 <= 0.5 : 0.667
+picked3 <= 0.5 : 0.667
+x <= 10.5 : 0.918
+x <= 11.5 : 0.918
+x <= 12.5 : 0.918
+x <= 13.5 : 0.918"];
+557 [label="l"];
+556 -> 557 [label="True"];
+558 [label="picked3 <= 0.5
+--------------
+
+picked3 <= 0.5 : 0.0
+x <= 10.5 : 1.0
+x <= 11.5 : 1.0
+x <= 12.5 : 1.0
+x <= 13.5 : 1.0"];
+559 [label="l"];
+558 -> 559 [label="True"];
+560 [label="u"];
+558 -> 560 [style="dashed", label="False"];
+556 -> 558 [style="dashed", label="False"];
+554 -> 556 [style="dashed", label="False"];
+552 -> 554 [style="dashed", label="False"];
+550 -> 552 [style="dashed", label="False"];
+416 -> 550 [style="dashed", label="False"];
+140 -> 416 [style="dashed", label="False"];
+0 -> 140 [style="dashed", label="False"];
+
+}

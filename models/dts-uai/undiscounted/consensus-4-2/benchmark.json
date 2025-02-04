@@ -1,0 +1,132 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 141,
+          "inner nodes": 70,
+          "paths": 71,
+          "bandwidth": 7
+        },
+        "time": "00:00:00.079"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "coin1",
+          "coin2",
+          "coin3",
+          "coin4",
+          "counter",
+          "pc1",
+          "pc2",
+          "pc3",
+          "pc4"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_inner": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          23.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ],
+        "max_outer": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          23.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "process1_cmd_0",
+            "process1_cmd_1",
+            "process1_cmd_2",
+            "process1_cmd_5",
+            "process2_cmd_12",
+            "process3_cmd_19",
+            "process2_cmd_9",
+            "process3_cmd_16",
+            "process4_cmd_26",
+            "process2_cmd_8",
+            "process3_cmd_15",
+            "process2_cmd_7",
+            "process3_cmd_14",
+            "process4_cmd_21",
+            "process1_cmd_3",
+            "process4_cmd_23",
+            "process4_cmd_22",
+            "process1_cmd_4",
+            "process2_cmd_10",
+            "process2_cmd_11",
+            "process3_cmd_17",
+            "process3_cmd_18",
+            "process4_cmd_24",
+            "process4_cmd_25",
+            "__no_label__"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          24
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 690,
+        "num_flattened": 690,
+        "num_unique_labels": 25
+      }
+    }
+  }
+}

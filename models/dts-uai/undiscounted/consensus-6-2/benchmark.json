@@ -1,0 +1,168 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 425,
+          "inner nodes": 212,
+          "paths": 213,
+          "bandwidth": 8
+        },
+        "time": "00:00:00.320"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "coin1",
+          "coin2",
+          "coin3",
+          "coin4",
+          "coin5",
+          "coin6",
+          "counter",
+          "pc1",
+          "pc2",
+          "pc3",
+          "pc4",
+          "pc5",
+          "pc6"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_inner": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          35.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ],
+        "max_outer": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          35.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "process1_cmd_0",
+            "process1_cmd_1",
+            "process1_cmd_2",
+            "process1_cmd_5",
+            "process2_cmd_12",
+            "process3_cmd_19",
+            "process4_cmd_26",
+            "process5_cmd_33",
+            "process2_cmd_9",
+            "process3_cmd_16",
+            "process4_cmd_23",
+            "process5_cmd_30",
+            "process2_cmd_8",
+            "process3_cmd_15",
+            "process4_cmd_22",
+            "process5_cmd_29",
+            "process6_cmd_40",
+            "process2_cmd_7",
+            "process3_cmd_14",
+            "process4_cmd_21",
+            "process5_cmd_28",
+            "process6_cmd_35",
+            "process1_cmd_3",
+            "process6_cmd_37",
+            "process6_cmd_36",
+            "process1_cmd_4",
+            "process2_cmd_10",
+            "process2_cmd_11",
+            "process3_cmd_17",
+            "process3_cmd_18",
+            "process4_cmd_24",
+            "process4_cmd_25",
+            "process5_cmd_31",
+            "process5_cmd_32",
+            "process6_cmd_38",
+            "process6_cmd_39",
+            "__no_label__"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          36
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 5506,
+        "num_flattened": 5506,
+        "num_unique_labels": 37
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+// C1: With probability 1, all processes finish the protocol
+//"c1": P>=1 [ F "finished" ];
+// C2: minimum probability that the protocol finishes with all coins equal to v=1
+//"c2": Pmin=? [ F "finished"&"all_coins_equal_1" ];
+// Max probability of finishing protocol with coins not all equal
+//"disagree": Pmax=? [ F "finished"&!"agree" ];
+// Maximum expected steps to finish
+"steps_max": R{"steps"}max=? [ F "finished" ];
+// Minimum expected steps to finish
+//"steps_min": R{"steps"}min=? [ F "finished" ];

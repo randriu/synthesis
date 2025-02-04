@@ -1,0 +1,252 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 609,
+          "inner nodes": 304,
+          "paths": 305,
+          "bandwidth": 9
+        },
+        "time": "00:00:00.669"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "dG0",
+          "dG1",
+          "dP",
+          "pMove",
+          "steps",
+          "xG0",
+          "xG1",
+          "xP",
+          "yG0",
+          "yG1",
+          "yP"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "max_inner": [
+          3.0,
+          3.0,
+          3.0,
+          2.0,
+          30.0,
+          10.0,
+          10.0,
+          10.0,
+          6.0,
+          6.0,
+          6.0
+        ],
+        "max_outer": [
+          3.0,
+          3.0,
+          3.0,
+          2.0,
+          30.0,
+          10.0,
+          10.0,
+          10.0,
+          6.0,
+          6.0,
+          6.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "g0",
+            "g1",
+            "p",
+            "__no_label__",
+            "left",
+            "right",
+            "up",
+            "down",
+            "stop0",
+            "stop1",
+            "arbiter_cmd_9"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          10
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 4253,
+        "num_flattened": 4253,
+        "num_unique_labels": 11
+      }
+    }
+  },
+  "scheduler-relevant": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 289,
+          "inner nodes": 144,
+          "paths": 145,
+          "bandwidth": 8
+        },
+        "time": "00:00:00.340"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "dG0",
+          "dG1",
+          "dP",
+          "pMove",
+          "steps",
+          "xG0",
+          "xG1",
+          "xP",
+          "yG0",
+          "yG1",
+          "yP"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          2.0,
+          2.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          2.0,
+          2.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "max_inner": [
+          3.0,
+          3.0,
+          3.0,
+          2.0,
+          29.0,
+          10.0,
+          10.0,
+          10.0,
+          6.0,
+          6.0,
+          6.0
+        ],
+        "max_outer": [
+          3.0,
+          3.0,
+          3.0,
+          2.0,
+          29.0,
+          10.0,
+          10.0,
+          10.0,
+          6.0,
+          6.0,
+          6.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "left",
+            "right",
+            "up",
+            "down",
+            "arbiter_cmd_9"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          4
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 673,
+        "num_flattened": 673,
+        "num_unique_labels": 5
+      }
+    }
+  }
+}

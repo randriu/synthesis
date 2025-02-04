@@ -1,0 +1,305 @@
+{
+    "actual_label": null,
+    "children": [
+        {
+            "actual_label": null,
+            "children": [
+                {
+                    "actual_label": [
+                        "phil1_cmd_1"
+                    ],
+                    "children": [],
+                    "split": null,
+                    "edge_label": "true"
+                },
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": [
+                                "phil1_cmd_2"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": [
+                                "phil1_cmd_3"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "p1"
+                                },
+                                "op": "<=",
+                                "rhs": 1.5
+                            },
+                            "impurity": 0.0
+                        }
+                    ],
+                    "edge_label": "false"
+                }
+            ],
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "additional_splits": [
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 0.5
+                    },
+                    "impurity": 0.6666666666666666
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 1.5
+                    },
+                    "impurity": 0.6666666666666666
+                }
+            ],
+            "edge_label": "true"
+        },
+        {
+            "actual_label": null,
+            "children": [
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": [
+                                "phil1_cmd_5"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": [
+                                "phil1_cmd_7"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "p1"
+                                },
+                                "op": "<=",
+                                "rhs": 3.5
+                            },
+                            "impurity": 0.0
+                        }
+                    ],
+                    "edge_label": "true"
+                },
+                {
+                    "actual_label": null,
+                    "children": [
+                        {
+                            "actual_label": [
+                                "phil1_cmd_9"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "true"
+                        },
+                        {
+                            "actual_label": [
+                                "__random__"
+                            ],
+                            "children": [],
+                            "split": null,
+                            "edge_label": "false"
+                        }
+                    ],
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 6.5
+                    },
+                    "additional_splits": [
+                        {
+                            "split": {
+                                "lhs": {
+                                    "coeff": 1,
+                                    "var": "p1"
+                                },
+                                "op": "<=",
+                                "rhs": 6.5
+                            },
+                            "impurity": 0.0
+                        }
+                    ],
+                    "edge_label": "false"
+                }
+            ],
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 4.5
+            },
+            "additional_splits": [
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 3.5
+                    },
+                    "impurity": 1.188721875540867
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 4.5
+                    },
+                    "impurity": 1.0
+                },
+                {
+                    "split": {
+                        "lhs": {
+                            "coeff": 1,
+                            "var": "p1"
+                        },
+                        "op": "<=",
+                        "rhs": 6.5
+                    },
+                    "impurity": 1.188721875540867
+                }
+            ],
+            "edge_label": "false"
+        }
+    ],
+    "split": {
+        "lhs": {
+            "coeff": 1,
+            "var": "p1"
+        },
+        "op": "<=",
+        "rhs": 2.5
+    },
+    "additional_splits": [
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 0.5
+            },
+            "impurity": 2.2156821434752767
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 1.5
+            },
+            "impurity": 1.9442343534909732
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 2.5
+            },
+            "impurity": 1.8221267860233525
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 3.5
+            },
+            "impurity": 1.8221267860233525
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 4.5
+            },
+            "impurity": 1.9442343534909732
+        },
+        {
+            "split": {
+                "lhs": {
+                    "coeff": 1,
+                    "var": "p1"
+                },
+                "op": "<=",
+                "rhs": 6.5
+            },
+            "impurity": 2.2156821434752767
+        }
+    ]
+}

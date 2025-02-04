@@ -1,0 +1,120 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 25,
+          "inner nodes": 12,
+          "paths": 13,
+          "bandwidth": 4
+        },
+        "time": "00:00:00.147"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "s1",
+          "s2",
+          "w12",
+          "w21",
+          "x1",
+          "x2",
+          "y1",
+          "y2",
+          "z1",
+          "z2"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_inner": [
+          7.0,
+          7.0,
+          5.0,
+          5.0,
+          167.0,
+          167.0,
+          36.0,
+          36.0,
+          36.0,
+          36.0
+        ],
+        "max_outer": [
+          7.0,
+          7.0,
+          5.0,
+          5.0,
+          167.0,
+          167.0,
+          36.0,
+          36.0,
+          36.0,
+          36.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "snd_idle12",
+            "rec_idle12",
+            "time",
+            "snd_req12",
+            "snd_req21",
+            "rec_req12",
+            "rec_req21"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          6
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 376,
+        "num_flattened": 376,
+        "num_unique_labels": 7
+      }
+    }
+  }
+}
