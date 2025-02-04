@@ -406,15 +406,15 @@ class DecisionTree:
             scheduler.set_choice(scheduler_choice, state)
             
         json_scheduler_full = json.loads(scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
-        json_final = []
-        for entry in json_scheduler_full:
-            if entry["c"] == "undefined":
-                # TODO remove this eventually (keeping it for testing), the fix above makes this unnecessary
-                assert False
-                continue
-            json_final.append(entry)
+        # json_final = []
+        # for entry in json_scheduler_full:
+        #     if entry["c"] == "undefined":
+        #         # TODO remove this eventually (keeping it for testing), the fix above makes this unnecessary
+        #         assert False
+        #         continue
+        #     json_final.append(entry)
 
-        json_str = json.dumps(json_final, indent=4)
+        json_str = json.dumps(json_scheduler_full, indent=4)
         return json_str
 
     

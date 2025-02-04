@@ -107,10 +107,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         # integration stats
         self.dtcontrol_calls = 0
         self.dtcontrol_successes = 0
+        self.dtcontrol_recomputed_calls = 0
+        self.dtcontrol_recomputed_successes = 0
         self.paynt_calls = 0
         self.paynt_successes_smaller = 0
         self.paynt_tree_found = 0
-        self.both_larger = 0
+        self.all_larger = 0
 
     def counters_print(self):
         logger.info(f"families considered: {self.num_families_considered}")
@@ -134,6 +136,15 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         tree_visualization_filename = export_filename_base + ".png"
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported decision tree visualization to {tree_visualization_filename}")
+
+
+    def choose_tree_to_use(self, current_tree, paynt_tree, dtcontrol_tree, recomputed_scheduler_tree):
+        # this also defines the priority in case of a tie, therefore: current > paynt > dtcontrol > recomputed
+        nodes = {"current": len(current_tree.collect_nonterminals()), "paynt": len(paynt_tree.collect_nonterminals()), "dtcontrol": len(dtcontrol_tree.collect_nonterminals()) if dtcontrol_tree is not None else None, "recomputed": len(recomputed_scheduler_tree.collect_nonterminals()) if recomputed_scheduler_tree is not None else None}
+        nodes = {k: v for k, v in nodes.items() if v is not None}
+        sorted_nodes = sorted(nodes.items(), key=lambda item: item[1])
+        print(sorted_nodes)
+        return sorted_nodes[0][0]
     
 
     def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6):
@@ -179,6 +190,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         depth_fine_tuning = True # experimental
         break_on_small_tree = True
         use_dtcontrol = True
+        recompute_scheduler = True # experimental
 
         # complete init
         self.counters_reset()
@@ -248,30 +260,49 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                     self.paynt_tree_found += 1
                     relevant_state_valuations = [subtree_quotient.relevant_state_valuations[state] for state in subtree_quotient.state_is_relevant_bv]
                     subtree_synthesizer.best_tree.simplify(relevant_state_valuations)
-                    tree_helper_tree_copy = tree_helper_tree.copy()
-                    tree_helper_tree_copy.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"], subtree_quotient)
-                    tree_helper_tree_copy.root.assign_identifiers(keep_old=True)
-                    logger.info(f'new tree has depth {tree_helper_tree_copy.get_depth()} and {len(tree_helper_tree_copy.collect_nonterminals())} nodes')
+                    paynt_subtree_helper_tree_copy = tree_helper_tree.copy()
+                    paynt_subtree_helper_tree_copy.append_tree_as_subtree(subtree_synthesizer.best_tree, node["id"], subtree_quotient)
+                    paynt_subtree_helper_tree_copy.root.assign_identifiers(keep_old=True)
+                    logger.info(f'new tree has depth {paynt_subtree_helper_tree_copy.get_depth()} and {len(paynt_subtree_helper_tree_copy.collect_nonterminals())} nodes')
 
-                    self.quotient.tree_helper_tree = tree_helper_tree_copy
+                    self.quotient.tree_helper_tree = paynt_subtree_helper_tree_copy
 
-                    submdp_for_tree = self.quotient.get_submdp_from_unfixed_states()
-                    # double check
-                    # res = submdp.check_specification(self.quotient.specification)
-                    # print(res)
-                    # TODO debugging the value getting below eps_optimum_threshold
-                    # if opt_result_value < eps_optimum_threshold:
-                    #     assert res.optimality_result.value <= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not below threshold {eps_optimum_threshold}"
-                    # else:
-                    #     assert res.optimality_result.value >= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not above threshold {eps_optimum_threshold}"
-                    reachable_states = stormpy.BitVector(submdp_for_tree.model.nr_states, False)
-                    for state in range(submdp_for_tree.model.nr_states):
-                        reachable_states.set(submdp_for_tree.quotient_state_map[state], True)
+                    new_dtcontrol_tree_helper_tree = None
+                    recomputed_scheduler_tree_helper_tree = None
 
-                    # print(tree_helper_tree.to_graphviz([node["id"]]))
+                    if use_dtcontrol:
+                        submdp_for_tree = self.quotient.get_submdp_from_unfixed_states()
+                        # double check
+                        # res = submdp.check_specification(self.quotient.specification)
+                        # print(res)
+                        # TODO debugging the value getting below eps_optimum_threshold
+                        # if opt_result_value < eps_optimum_threshold:
+                        #     assert res.optimality_result.value <= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not below threshold {eps_optimum_threshold}"
+                        # else:
+                        #     assert res.optimality_result.value >= eps_optimum_threshold, f"optimum value {res.optimality_result.value} is not above threshold {eps_optimum_threshold}"
+                        reachable_states = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, False)
+                        for state in range(submdp_for_tree.model.nr_states):
+                            reachable_states.set(submdp_for_tree.quotient_state_map[state], True)
 
-                    # create scheduler 
-                    # print(tree_helper_tree.to_scheduler_json())
+                    if use_dtcontrol and recompute_scheduler:
+                        submpd_outside_of_subtree = self.quotient.get_submdp_from_unfixed_states(~node_states)
+                        oos_result = submpd_outside_of_subtree.check_specification(self.quotient.specification) 
+                        recomputed_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
+                        quotient_mdp_nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
+                        new_scheduler = oos_result.optimality_result.result.scheduler
+                        state_to_choice = self.quotient.scheduler_to_state_to_choice(submpd_outside_of_subtree, new_scheduler)
+                        for state in range(self.quotient.quotient_mdp.nr_states):
+                            quotient_choice = state_to_choice[state]
+                            if quotient_choice is None or not self.quotient.state_is_relevant_bv.get(state):
+                                payntbind.synthesis.set_dont_care_state_for_scheduler(recomputed_scheduler, state, 0, False)
+                                index = 0
+                            else:
+                                index = quotient_choice - quotient_mdp_nci[state]
+                            scheduler_choice = stormpy.storage.SchedulerChoice(index)
+                            recomputed_scheduler.set_choice(scheduler_choice, state)
+
+                        recomputed_json_scheduler_full = json.loads(recomputed_scheduler.to_json_str(self.quotient.quotient_mdp, skip_dont_care_states=True))
+                        recomputed_json_str = json.dumps(recomputed_json_scheduler_full, indent=4)
 
                     # calling dtcontrol
                     if use_dtcontrol:
@@ -279,42 +310,69 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
                         temp_file_name = "subtree_test" + timestamp
                         os.makedirs(temp_file_name, exist_ok=True)
-                        open(f"{temp_file_name}/scheduler.storm.json", "w").write(tree_helper_tree_copy.to_scheduler_json(reachable_states))
+                        open(f"{temp_file_name}/scheduler.storm.json", "w").write(paynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states))
 
                         command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
                         subprocess.run(command, cwd=f"{temp_file_name}")
 
                         logger.info(f"parsing new dtcontrol tree")
-                        new_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
-                        new_tree_helper_tree = self.quotient.build_tree_helper_tree(new_tree_helper)
-                        logger.info(f'new dtcontrol tree has depth {new_tree_helper_tree.get_depth()} and {len(new_tree_helper_tree.collect_nonterminals())} nodes')
+                        new_dtcontrol_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+                        new_dtcontrol_tree_helper_tree = self.quotient.build_tree_helper_tree(new_dtcontrol_tree_helper)
+                        logger.info(f'new dtcontrol tree has depth {new_dtcontrol_tree_helper_tree.get_depth()} and {len(new_dtcontrol_tree_helper_tree.collect_nonterminals())} nodes')
 
                         shutil.rmtree(f"{temp_file_name}")
 
-                    # TODO if none of the trees produced are smaller here I would like to revert to the original tree
+                        if recompute_scheduler:
+                            self.dtcontrol_recomputed_calls += 1
+                            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+                            temp_file_name = "subtree_test" + timestamp
+                            os.makedirs(temp_file_name, exist_ok=True)
+
+                            open(f"{temp_file_name}/scheduler.storm.json", "w").write(recomputed_json_str)
+
+                            command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+                            subprocess.run(command, cwd=f"{temp_file_name}")
+
+                            logger.info(f"parsing new dtcontrol tree")
+                            recomputed_scheduler_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/default/scheduler/default.json")
+                            recomputed_scheduler_tree_helper_tree = self.quotient.build_tree_helper_tree(recomputed_scheduler_tree_helper)
+                            logger.info(f'new dtcontrol tree based on recomputed scheduler has depth {recomputed_scheduler_tree_helper_tree.get_depth()} and {len(recomputed_scheduler_tree_helper_tree.collect_nonterminals())} nodes')
+
+                            shutil.rmtree(f"{temp_file_name}")
+
+                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, paynt_subtree_helper_tree_copy, new_dtcontrol_tree_helper_tree, recomputed_scheduler_tree_helper_tree)
+
+                    print(f"{chosen_tree} tree was chosen")
+                            
                     # if False: # TODO remove this
-                    if use_dtcontrol and len(new_tree_helper_tree.collect_nonterminals()) <= len(tree_helper_tree_copy.collect_nonterminals()) and len(new_tree_helper_tree.collect_nonterminals()) < len(tree_helper_tree.collect_nonterminals()):
-                        logger.info(f"New DtControl tree is smaller")
-                        self.dtcontrol_successes += 1
-                        self.quotient.tree_helper = new_tree_helper
-                        self.quotient.tree_helper_tree = new_tree_helper_tree
-                        tree_helper_tree = new_tree_helper_tree
-                        # print(tree_helper_tree.to_graphviz())
-                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
-                    elif len(tree_helper_tree_copy.collect_nonterminals()) < len(tree_helper_tree.collect_nonterminals()):
-                        logger.info(f"Current PAYNT tree is smaller")
+                    if chosen_tree == "current":
+                        logger.info(f"None of the new trees are smaller, continuing with current tree")
+                        self.all_larger += 1
+                        self.quotient.tree_helper_tree = tree_helper_tree
+                    elif chosen_tree == "paynt":
+                        logger.info(f"New PAYNT tree is smallest")
                         self.paynt_successes_smaller += 1
-                        tree_helper_tree = tree_helper_tree_copy
+                        tree_helper_tree = paynt_subtree_helper_tree_copy
                         self.quotient.tree_helper_tree = tree_helper_tree
                         for node in node_queue:
                             nodes = self.quotient.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node["id"])
                             assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node["id"]}'
                             new_node = nodes[0]
                             node["id"] = new_node.identifier
-                    else:
-                        logger.info(f"None of the new trees are smaller, continuing with current tree")
-                        self.both_larger += 1
-                        self.quotient.tree_helper_tree = tree_helper_tree
+                    elif use_dtcontrol and chosen_tree == "dtcontrol":
+                        logger.info(f"New DtControl tree is smallest")
+                        self.dtcontrol_successes += 1
+                        self.quotient.tree_helper = new_dtcontrol_tree_helper
+                        self.quotient.tree_helper_tree = new_dtcontrol_tree_helper_tree
+                        tree_helper_tree = new_dtcontrol_tree_helper_tree
+                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                    elif use_dtcontrol and recompute_scheduler and chosen_tree == "recomputed":
+                        logger.info(f"New DtControl tree for recomputed scheduler is smallest")
+                        self.dtcontrol_recomputed_successes += 1
+                        self.quotient.tree_helper = recomputed_scheduler_tree_helper
+                        self.quotient.tree_helper_tree = recomputed_scheduler_tree_helper_tree
+                        tree_helper_tree = recomputed_scheduler_tree_helper_tree
+                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
                     
                     # exit()
                 else:
@@ -522,10 +580,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.quotient.tree_helper is not None:
                 logger.info(f"dtcontrol calls: {self.dtcontrol_calls}")
                 logger.info(f"dtcontrol successes: {self.dtcontrol_successes}")
+                logger.info(f"dtcontrol recomputed calls: {self.dtcontrol_recomputed_calls}")
+                logger.info(f"dtcontrol recomputed successes: {self.dtcontrol_recomputed_successes}")
                 logger.info(f"paynt calls: {self.paynt_calls}")
                 logger.info(f"paynt successes smaller: {self.paynt_successes_smaller}")
                 logger.info(f"paynt tree found: {self.paynt_tree_found}")
-                logger.info(f"both larger: {self.both_larger}")
+                logger.info(f"both larger: {self.all_larger}")
 
             # print(self.best_tree.to_string())
             # print(self.best_tree.to_graphviz())
