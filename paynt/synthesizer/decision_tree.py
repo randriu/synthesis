@@ -140,9 +140,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def choose_tree_to_use(self, current_tree, paynt_tree, dtcontrol_tree, recomputed_scheduler_tree):
         # this also defines the priority in case of a tie, therefore: current > paynt > dtcontrol > recomputed
-        nodes = {"current": len(current_tree.collect_nonterminals()), "paynt": len(paynt_tree.collect_nonterminals()), "dtcontrol": len(dtcontrol_tree.collect_nonterminals()) if dtcontrol_tree is not None else None, "recomputed": len(recomputed_scheduler_tree.collect_nonterminals()) if recomputed_scheduler_tree is not None else None}
+        # nodes = {"current": len(current_tree.collect_nonterminals()), "paynt": len(paynt_tree.collect_nonterminals()), "dtcontrol": len(dtcontrol_tree.collect_nonterminals()) if dtcontrol_tree is not None else None, "recomputed": len(recomputed_scheduler_tree.collect_nonterminals()) if recomputed_scheduler_tree is not None else None}
+        nodes = {"current": (len(current_tree.collect_nonterminals()), current_tree.get_depth()), "recomputed": (len(recomputed_scheduler_tree.collect_nonterminals()), recomputed_scheduler_tree.get_depth()) if recomputed_scheduler_tree is not None else None, "dtcontrol": (len(dtcontrol_tree.collect_nonterminals()), dtcontrol_tree.get_depth()) if dtcontrol_tree is not None else None, "paynt": (len(paynt_tree.collect_nonterminals()), paynt_tree.get_depth())}
         nodes = {k: v for k, v in nodes.items() if v is not None}
-        sorted_nodes = sorted(nodes.items(), key=lambda item: item[1])
+        sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][1])
+        sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][0])
         print(sorted_nodes)
         return sorted_nodes[0][0]
     
