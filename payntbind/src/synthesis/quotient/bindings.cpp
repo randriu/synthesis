@@ -325,7 +325,7 @@ void bindings_coloring(py::module& m) {
         .def("collectHoleOptions", &synthesis::Coloring::collectHoleOptions)
         ;
 
-    py::class_<synthesis::ColoringSmt<>>(m, "ColoringSmt")
+    py::class_<synthesis::ColoringSmt<>, std::shared_ptr<synthesis::ColoringSmt<>>>(m, "ColoringSmt")
         .def(py::init<
             std::vector<uint64_t> const&,
             std::vector<uint64_t> const&,
