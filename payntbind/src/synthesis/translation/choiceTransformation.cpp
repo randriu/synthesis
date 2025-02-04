@@ -69,26 +69,52 @@ bool assertChoiceLabelingIsCanonic(
     storm::models::sparse::ChoiceLabeling const& choice_labeling,
     bool throw_on_fail
 ) {
-    std::set<std::string> state_labels;
+    // collect action labels
+    std::set<std::string> action_labels_set = choice_labeling.getLabels();
+    std::vector<std::string> action_labels;
+    action_labels.assign(action_labels_set.begin(), action_labels_set.end());
+    uint64_t num_actions = action_labels.size();
+
+    // associate choices with actions, check uniqueness for a choice
+    std::vector<uint64_t> choice_to_action(row_groups.back(), num_actions);
+    for(uint64_t action = 0; action < action_labels.size(); ++action) {
+        std::string const& action_label = action_labels[action];
+        for(uint64_t choice: choice_labeling.getChoices(action_label)) {
+            if(choice_to_action[choice] != num_actions) {
+                if(throw_on_fail) {
+                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "multiple labels for choice " << choice);
+                } else {
+                    return false;
+                }
+            }
+            choice_to_action[choice] = action;
+        }
+    }
+
+    // check existence for a choice
+    for(uint64_t action: choice_to_action) {
+        if(action == num_actions) {
+            if(throw_on_fail) {
+                STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "a choice has no labels");
+            } else {
+                return false;
+            }
+        }
+    }
+
+    // check uniqueness for a state
+    storm::storage::BitVector state_labels(num_actions, false);
     for(uint64_t state = 0; state < row_groups.size()-1; ++state) {
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-            auto const& labels = choice_labeling.getLabelsOfChoice(choice);
-            if(labels.size() != 1) {
+            uint64_t action = choice_to_action[choice];
+            if(state_labels[action]) {
                 if(throw_on_fail) {
-                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "expected exactly 1 label for choice " << choice);
+                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "a label is used twice for choices in state " << state);
                 } else {
                     return false;
                 }
             }
-            std::string const& label = *(labels.begin());
-            if(state_labels.find(label) != state_labels.end()) {
-                if(throw_on_fail) {
-                    STORM_LOG_THROW(false, storm::exceptions::InvalidModelException, "label " << label << " is used twice for choices in state " << state);
-                } else {
-                    return false;
-                }
-            }
-            state_labels.insert(label);
+            state_labels.set(action,true);
         }
         state_labels.clear();
     }
@@ -132,34 +158,22 @@ std::pair<std::vector<std::string>,std::vector<uint64_t>> extractActionLabels(
 ) {
     // collect action labels
     storm::models::sparse::ChoiceLabeling const& choice_labeling = model.getChoiceLabeling();
-    std::set<std::string> action_labels_set;
-    for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
-        for(std::string const& label: choice_labeling.getLabelsOfChoice(choice)) {
-            action_labels_set.insert(label);
+    std::set<std::string> action_labels_set = choice_labeling.getLabels();
+    std::vector<std::string> action_labels;
+    action_labels.assign(action_labels_set.begin(), action_labels_set.end());
+    // sort action labels to ensure order determinism (why did we think this was necessary?)
+    std::sort(action_labels.begin(),action_labels.end());
+
+    assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling, false);
+
+    std::vector<uint64_t> choice_to_action(model.getNumberOfChoices());
+    for(uint64_t action = 0; action < action_labels.size(); ++action) {
+        std::string const& action_label = action_labels[action];
+        for(uint64_t choice: choice_labeling.getChoices(action_label)) {
+            choice_to_action[choice] = action;
         }
     }
 
-    // sort action labels to ensure order determinism
-    std::vector<std::string> action_labels;
-    for(std::string const& label: action_labels_set) {
-        action_labels.push_back(label);
-    }
-    std::sort(action_labels.begin(),action_labels.end());
-
-    // map action labels to actions
-    std::map<std::string,uint64_t> action_label_to_action;
-    for(uint64_t action = 0; action < action_labels.size(); ++action) {
-        action_label_to_action[action_labels[action]] = action;
-    }
-
-    assertChoiceLabelingIsCanonic(model.getTransitionMatrix().getRowGroupIndices(), choice_labeling, false);
-    std::vector<uint64_t> choice_to_action(model.getNumberOfChoices());
-    for(uint64_t choice = 0; choice < model.getNumberOfChoices(); ++choice) {
-        auto const& labels = choice_labeling.getLabelsOfChoice(choice);
-        std::string const& label = *(labels.begin());
-        uint64_t action = action_label_to_action[label];
-        choice_to_action[choice] = action;
-    }
     return std::make_pair(action_labels,choice_to_action);
 }
 

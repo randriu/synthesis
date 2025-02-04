@@ -48,6 +48,8 @@ public:
         bool enable_harmonization
     );
 
+    ~ColoringSmt();
+
     /**
      * Enable efficient state exploration of reachable states.
      * @note this is required for harmonization
@@ -156,14 +158,17 @@ protected:
     /** For each choice and path, a label passed to SMT solver. */
     std::vector<std::vector<std::string>> choice_path_label;
     /** For each choice, its color expressed as a conjunction of all path implications. */
-    std::vector<z3::expr_vector> choice_path_expresssion;
+    std::vector<std::vector<z3::expr>> choice_path_expresssion;
+    // std::vector<std::vector<Z3_ast>> choice_path_expresssion;
+
 
     /** Whether harmonization is required. */
     const bool enable_harmonization;
     /** SMT variable refering to harmonizing hole. */
     z3::expr harmonizing_variable;
     /** For each choice, its color expressed as a conjunction of all path implications. */
-    std::vector<z3::expr_vector> choice_path_expresssion_harm;
+    std::vector<std::vector<z3::expr>> choice_path_expresssion_harm;
+    // std::vector<std::vector<Z3_ast>> choice_path_expresssion_harm;
 
     /** For each state, whether (in the last subfamily) the path was enabled. */
     std::vector<BitVector> state_path_enabled;
