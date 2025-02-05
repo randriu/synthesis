@@ -132,6 +132,11 @@ def setup_logger(log_path = None):
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
 )
 
+@click.option("--dt-setting",
+    type=click.Choice(['default', 'gini', 'entropy', 'maxminority']), default="default", show_default=True,
+    help="dtcontrol setting",
+)
+
 @click.option(
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
     help="counterexample generator",
@@ -151,6 +156,7 @@ def paynt_run(
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
+    dt_setting,
     ce_generator,
     profiling
 ):
@@ -189,7 +195,7 @@ def paynt_run(
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    tree_helper_path = os.path.join(project, "decision_trees/default/scheduler/default.json")
+    tree_helper_path = os.path.join(project, f"decision_trees/{dt_setting}/scheduler/{dt_setting}.json")
     assert os.path.exists(tree_helper_path), f"Tree helper path {tree_helper_path} does not exist."
     quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, tree_helper_path, exact)
     synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
