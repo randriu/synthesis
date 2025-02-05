@@ -95,6 +95,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             return
         self.harmonize_inconsistent_scheduler(family)
 
+    def compute_normalized_value(self, value, opt, random):
+        return (value-random)/(opt-random) if opt-random != 0 else 1.0
 
     def counters_reset(self):
         self.num_families_considered = 0
@@ -138,19 +140,23 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         logger.info(f"exported decision tree visualization to {tree_visualization_filename}")
 
 
-    def choose_tree_to_use(self, current_tree, paynt_tree, dtcontrol_trees, recomputed_scheduler_trees):
+    def choose_tree_to_use(self, current_tree, paynt_tree, dtcontrol_trees, recomputed_scheduler_trees, values=[1,1,1], maximize=True):
         # this also defines the priority in case of a tie, therefore: current > paynt > dtcontrol > recomputed
         # nodes = {"current": len(current_tree.collect_nonterminals()), "paynt": len(paynt_tree.collect_nonterminals()), "dtcontrol": len(dtcontrol_tree.collect_nonterminals()) if dtcontrol_tree is not None else None, "recomputed": len(recomputed_scheduler_tree.collect_nonterminals()) if recomputed_scheduler_tree is not None else None}
         # nodes = {"current": (len(current_tree.collect_nonterminals()), current_tree.get_depth()), "recomputed": (len(recomputed_scheduler_tree.collect_nonterminals()), recomputed_scheduler_tree.get_depth()) if recomputed_scheduler_tree is not None else None, "dtcontrol": (len(dtcontrol_tree.collect_nonterminals()), dtcontrol_tree.get_depth()) if dtcontrol_tree is not None else None, "paynt": (len(paynt_tree.collect_nonterminals()), paynt_tree.get_depth())}
-        nodes = {"current": (len(current_tree.collect_nonterminals()), current_tree.get_depth())}
+        current_nodes = len(current_tree.collect_nonterminals())
+        nodes = {"current": [current_nodes, current_tree.get_depth(), 1 / values[0]]}
         for setting, dtcontrol_tree in recomputed_scheduler_trees.items():
-            nodes["recomputed-"+setting] = (len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth())
+            nodes["recomputed-"+setting] = [len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth(), self.compute_normalized_value(len(dtcontrol_tree[1].collect_nonterminals()), current_nodes, 0) / values[2]]
         for setting, dtcontrol_tree in dtcontrol_trees.items():
-            nodes["dtcontrol-"+setting] = (len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth())
-        nodes["paynt"] = (len(paynt_tree.collect_nonterminals()), paynt_tree.get_depth())
+            nodes["dtcontrol-"+setting] = [len(dtcontrol_tree[1].collect_nonterminals()), dtcontrol_tree[1].get_depth(), self.compute_normalized_value(len(dtcontrol_tree[1].collect_nonterminals()), current_nodes, 0) / values[1]]
+        nodes["paynt"] = [len(paynt_tree.collect_nonterminals()), paynt_tree.get_depth(), self.compute_normalized_value(len(paynt_tree.collect_nonterminals()), current_nodes, 0) / values[1]]
         nodes = {k: v for k, v in nodes.items() if v is not None}
         sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][1])
         sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][0])
+        # TODO experimental sort by value
+        sorted_nodes = sorted(nodes.items(), key=lambda item: item[1][2])
+
         print(sorted_nodes)
         return sorted_nodes[0][0]
     
@@ -222,6 +228,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         
         current_iter = 0
         current_depth = subtree_depth
+        current_value = opt_result_value
 
         # TODO think about this fine tuning more...
         while (depth_fine_tuning and current_depth > 1) or (current_depth == subtree_depth):
@@ -283,6 +290,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                     dtcontrol_trees = {}
                     recomputed_dtcontrol_trees = {}
 
+                    paynt_subtree_value = subtree_synthesizer.best_tree_value
+
                     if use_dtcontrol:
                         submdp_for_tree = self.quotient.get_submdp_from_unfixed_states()
                         # double check
@@ -299,7 +308,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
                     if use_dtcontrol and recompute_scheduler:
                         submpd_outside_of_subtree = self.quotient.get_submdp_from_unfixed_states(~node_states)
-                        oos_result = submpd_outside_of_subtree.check_specification(self.quotient.specification) 
+                        oos_result = submpd_outside_of_subtree.check_specification(self.quotient.specification)
+
+                        recompute_scheduler_value = oos_result.optimality_result.result.at(0)
+
                         recomputed_scheduler = payntbind.synthesis.create_scheduler(self.quotient.quotient_mdp.nr_states)
                         quotient_mdp_nci = self.quotient.quotient_mdp.nondeterministic_choice_indices.copy()
                         new_scheduler = oos_result.optimality_result.result.scheduler
@@ -366,7 +378,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
                             shutil.rmtree(f"{temp_file_name}")
 
-                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, paynt_subtree_helper_tree_copy, dtcontrol_trees, recomputed_dtcontrol_trees)
+                    current_normalized_value = self.compute_normalized_value(current_value, opt_result_value, random_result_value)
+                    paynt_subtree_normalized_value = self.compute_normalized_value(paynt_subtree_value, opt_result_value, random_result_value)
+                    recompute_scheduler_normalized_value = self.compute_normalized_value(recompute_scheduler_value, opt_result_value, random_result_value)
+
+                    chosen_tree = self.choose_tree_to_use(tree_helper_tree, paynt_subtree_helper_tree_copy, dtcontrol_trees, recomputed_dtcontrol_trees, values=[self.compute_normalized_value(current_normalized_value, 1, 1-2*epsilon), self.compute_normalized_value(paynt_subtree_normalized_value, 1, 1-2*epsilon), self.compute_normalized_value(recompute_scheduler_normalized_value, 1, 1-2*epsilon)])
 
                     print(f"{chosen_tree} tree was chosen")
                             
@@ -388,6 +404,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                             node["id"] = new_node.identifier
                         new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue])
                         node_queue += new_nodes
+                        current_value = paynt_subtree_value
                         # new_nodes_to_skip = []
                         # for node_skip_id in nodes_to_skip:
                         #     nodes = self.quotient.tree_helper_tree.collect_nodes(lambda x : x.old_identifier == node_skip_id)
@@ -407,6 +424,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.quotient.tree_helper_tree = new_dtcontrol_tree_helper_tree
                         tree_helper_tree = new_dtcontrol_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                        current_value = paynt_subtree_value
                         nodes_to_skip = []
                     elif use_dtcontrol and recompute_scheduler and chosen_tree.startswith("recomputed"):
                         logger.info(f"New DtControl tree ({chosen_tree}) for recomputed scheduler is smallest")
@@ -418,6 +436,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.quotient.tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                        current_value = recompute_scheduler_value
                         nodes_to_skip = []
                     
                     # exit()
@@ -621,7 +640,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if self.quotient.specification.has_optimality:
                 logger.info(f"the synthesized tree has value {self.best_tree_value}")
             if self.quotient.DONT_CARE_ACTION_LABEL in self.quotient.action_labels:
-                logger.info(f"the synthesized tree has relative value: {(self.best_tree_value-random_result_value)/(opt_result_value-random_result_value) if opt_result_value-random_result_value != 0 else None}")
+                logger.info(f"the synthesized tree has relative value: {self.compute_normalized_value(self.best_tree_value, opt_result_value, random_result_value)}")
             logger.info(f"printing the synthesized tree below:")
 
             # integration logs
