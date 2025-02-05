@@ -1,0 +1,2008 @@
+digraph {
+0 [label="x1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.744
+backoff1 <= 1.5 : 0.748
+backoff1 <= 2.5 : 0.751
+backoff1 <= 3.5 : 0.753
+backoff1 <= 4.5 : 0.754
+backoff1 <= 5.5 : 0.755
+backoff1 <= 6.5 : 0.756
+backoff1 <= 7.5 : 0.76
+backoff1 <= 8.5 : 0.763
+backoff1 <= 9.5 : 0.763
+backoff1 <= 10.5 : 0.762
+backoff1 <= 11.5 : 0.76
+backoff1 <= 12.5 : 0.762
+backoff1 <= 13.5 : 0.761
+backoff1 <= 14.5 : 0.767
+backoff2 <= 0.5 : 0.748
+backoff2 <= 1.5 : 0.753
+backoff2 <= 2.5 : 0.757
+backoff2 <= 3.5 : 0.76
+backoff2 <= 4.5 : 0.762
+backoff2 <= 5.5 : 0.764
+backoff2 <= 6.5 : 0.765
+backoff2 <= 7.5 : 0.767
+backoff2 <= 8.5 : 0.768
+backoff2 <= 9.5 : 0.769
+backoff2 <= 10.5 : 0.769
+backoff2 <= 11.5 : 0.77
+backoff2 <= 12.5 : 0.771
+backoff2 <= 13.5 : 0.771
+backoff2 <= 14.5 : 0.771
+bc1 <= 0.5 : 0.764
+bc2 <= 0.5 : 0.765
+c1 <= 0.5 : 0.749
+c1 <= 1.5 : 0.772
+c2 <= 0.5 : 0.75
+c2 <= 1.5 : 0.772
+col <= 0.5 : 0.773
+col <= 1.5 : 0.772
+s1 <= 2.0 : 0.773
+s1 <= 3.5 : 0.772
+s1 <= 4.5 : 0.772
+s1 <= 5.5 : 0.718
+s1 <= 6.5 : 0.741
+s1 <= 7.5 : 0.746
+s1 <= 8.5 : 0.744
+s1 <= 9.5 : 0.757
+s1 <= 10.5 : 0.765
+s1 <= 11.5 : 0.765
+s2 <= 2.0 : 0.773
+s2 <= 3.5 : 0.768
+s2 <= 4.5 : 0.766
+s2 <= 5.5 : 0.716
+s2 <= 6.5 : 0.741
+s2 <= 7.5 : 0.747
+s2 <= 8.5 : 0.747
+s2 <= 9.5 : 0.759
+s2 <= 10.5 : 0.767
+s2 <= 11.5 : 0.767
+x1 <= 0.5 : 0.638
+x1 <= 1.5 : 0.759
+x1 <= 2.5 : 0.758
+x1 <= 3.5 : 0.762
+x1 <= 4.5 : 0.773
+x1 <= 5.5 : 0.772
+x2 <= 0.5 : 0.688
+x2 <= 1.5 : 0.761
+x2 <= 2.5 : 0.761
+x2 <= 3.5 : 0.764
+x2 <= 4.5 : 0.773
+x2 <= 5.5 : 0.772"];
+1 [label="x2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.685
+backoff1 <= 1.5 : 0.688
+backoff1 <= 2.5 : 0.69
+backoff1 <= 3.5 : 0.692
+backoff1 <= 4.5 : 0.693
+backoff1 <= 5.5 : 0.694
+backoff1 <= 6.5 : 0.695
+backoff1 <= 7.5 : 0.696
+backoff1 <= 8.5 : 0.697
+backoff1 <= 9.5 : 0.697
+backoff1 <= 10.5 : 0.697
+backoff1 <= 11.5 : 0.698
+backoff1 <= 12.5 : 0.697
+backoff1 <= 13.5 : 0.693
+backoff1 <= 14.5 : 0.699
+backoff2 <= 0.5 : 0.659
+backoff2 <= 1.5 : 0.666
+backoff2 <= 2.5 : 0.672
+backoff2 <= 3.5 : 0.676
+backoff2 <= 4.5 : 0.68
+backoff2 <= 5.5 : 0.683
+backoff2 <= 6.5 : 0.686
+backoff2 <= 7.5 : 0.688
+backoff2 <= 8.5 : 0.69
+backoff2 <= 9.5 : 0.692
+backoff2 <= 10.5 : 0.693
+backoff2 <= 11.5 : 0.694
+backoff2 <= 12.5 : 0.696
+backoff2 <= 13.5 : 0.697
+backoff2 <= 14.5 : 0.697
+bc1 <= 0.5 : 0.694
+bc2 <= 0.5 : 0.689
+c1 <= 0.5 : 0.689
+c1 <= 1.5 : 0.699
+c2 <= 0.5 : 0.675
+c2 <= 1.5 : 0.699
+col <= 0.5 : 0.698
+col <= 1.5 : 0.698
+s1 <= 2.0 : 0.699
+s1 <= 3.5 : 0.699
+s1 <= 4.5 : 0.699
+s1 <= 5.5 : 0.668
+s1 <= 6.5 : 0.678
+s1 <= 7.5 : 0.681
+s1 <= 8.5 : 0.684
+s1 <= 9.5 : 0.686
+s1 <= 10.5 : 0.694
+s1 <= 11.5 : 0.694
+s2 <= 2.0 : 0.699
+s2 <= 3.5 : 0.693
+s2 <= 4.5 : 0.691
+s2 <= 5.5 : 0.651
+s2 <= 6.5 : 0.66
+s2 <= 7.5 : 0.667
+s2 <= 8.5 : 0.67
+s2 <= 9.5 : 0.681
+s2 <= 10.5 : 0.691
+s2 <= 11.5 : 0.691
+x2 <= 0.5 : 0.567
+x2 <= 1.5 : 0.681
+x2 <= 2.5 : 0.676
+x2 <= 3.5 : 0.68
+x2 <= 5.0 : 0.698"];
+2 [label="s1 <= 5.5
+--------------
+
+backoff1 <= 0.5 : 0.508
+backoff1 <= 1.5 : 0.515
+backoff1 <= 2.5 : 0.52
+backoff1 <= 3.5 : 0.524
+backoff1 <= 4.5 : 0.527
+backoff1 <= 5.5 : 0.53
+backoff1 <= 6.5 : 0.532
+backoff1 <= 7.5 : 0.534
+backoff1 <= 8.5 : 0.536
+backoff1 <= 9.5 : 0.537
+backoff1 <= 10.5 : 0.539
+backoff1 <= 11.5 : 0.54
+backoff1 <= 12.5 : 0.54
+backoff1 <= 13.5 : 0.54
+backoff2 <= 0.5 : 0.504
+backoff2 <= 1.5 : 0.511
+backoff2 <= 2.5 : 0.517
+backoff2 <= 3.5 : 0.521
+backoff2 <= 4.5 : 0.525
+backoff2 <= 5.5 : 0.528
+backoff2 <= 6.5 : 0.53
+backoff2 <= 7.5 : 0.532
+backoff2 <= 8.5 : 0.534
+backoff2 <= 9.5 : 0.536
+backoff2 <= 10.5 : 0.537
+backoff2 <= 11.5 : 0.539
+backoff2 <= 12.5 : 0.54
+backoff2 <= 13.5 : 0.54
+backoff2 <= 14.5 : 0.54
+bc1 <= 0.5 : 0.538
+bc2 <= 0.5 : 0.538
+c1 <= 0.5 : 0.528
+c1 <= 1.5 : 0.543
+c2 <= 0.5 : 0.53
+c2 <= 1.5 : 0.543
+col <= 0.5 : 0.542
+col <= 1.5 : 0.541
+s1 <= 2.0 : 0.543
+s1 <= 4.0 : 0.543
+s1 <= 5.5 : 0.479
+s1 <= 6.5 : 0.486
+s1 <= 7.5 : 0.497
+s1 <= 8.5 : 0.515
+s1 <= 9.5 : 0.516
+s1 <= 10.5 : 0.537
+s1 <= 11.5 : 0.537
+s2 <= 2.0 : 0.543
+s2 <= 3.5 : 0.543
+s2 <= 4.5 : 0.52
+s2 <= 5.5 : 0.481
+s2 <= 6.5 : 0.488
+s2 <= 7.5 : 0.5
+s2 <= 8.5 : 0.517
+s2 <= 9.5 : 0.517
+s2 <= 10.5 : 0.538
+s2 <= 11.5 : 0.538"];
+3 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.23
+backoff1 <= 1.5 : 0.23
+backoff1 <= 2.5 : 0.23
+backoff1 <= 3.5 : 0.23
+backoff1 <= 4.5 : 0.23
+backoff1 <= 5.5 : 0.23
+backoff1 <= 6.5 : 0.231
+backoff1 <= 7.5 : 0.231
+backoff1 <= 8.5 : 0.231
+backoff1 <= 9.5 : 0.23
+backoff1 <= 10.5 : 0.23
+backoff1 <= 11.5 : 0.23
+backoff1 <= 12.5 : 0.23
+backoff1 <= 13.5 : 0.229
+backoff2 <= 0.5 : 0.162
+backoff2 <= 1.5 : 0.178
+backoff2 <= 2.5 : 0.189
+backoff2 <= 3.5 : 0.197
+backoff2 <= 4.5 : 0.204
+backoff2 <= 5.5 : 0.209
+backoff2 <= 6.5 : 0.213
+backoff2 <= 7.5 : 0.216
+backoff2 <= 8.5 : 0.219
+backoff2 <= 9.5 : 0.221
+backoff2 <= 10.5 : 0.223
+backoff2 <= 11.5 : 0.225
+backoff2 <= 12.5 : 0.227
+backoff2 <= 13.5 : 0.228
+backoff2 <= 14.5 : 0.229
+bc1 <= 0.5 : 0.23
+bc2 <= 0.5 : 0.229
+c2 <= 0.5 : 0.153
+col <= 0.5 : 0.23
+s1 <= 2.0 : 0.23
+s1 <= 4.0 : 0.23
+s2 <= 2.0 : 0.23
+s2 <= 3.5 : 0.23
+s2 <= 4.5 : 0.176
+s2 <= 6.5 : 0.164
+s2 <= 8.5 : 0.198
+s2 <= 10.5 : 0.229"];
+4 [label="s2 <= 4.5
+--------------
+
+backoff1 <= 0.5 : 0.16
+backoff1 <= 1.5 : 0.16
+backoff1 <= 2.5 : 0.16
+backoff1 <= 3.5 : 0.16
+backoff1 <= 4.5 : 0.16
+backoff1 <= 5.5 : 0.16
+backoff1 <= 6.5 : 0.16
+backoff1 <= 7.5 : 0.16
+backoff1 <= 8.5 : 0.16
+backoff1 <= 9.5 : 0.16
+backoff1 <= 10.5 : 0.16
+backoff1 <= 11.5 : 0.16
+backoff1 <= 12.5 : 0.16
+backoff1 <= 13.5 : 0.159
+backoff2 <= 0.5 : 0.116
+backoff2 <= 1.5 : 0.127
+backoff2 <= 2.5 : 0.135
+backoff2 <= 3.5 : 0.14
+backoff2 <= 4.5 : 0.144
+backoff2 <= 5.5 : 0.147
+backoff2 <= 6.5 : 0.15
+backoff2 <= 7.5 : 0.152
+backoff2 <= 8.5 : 0.153
+backoff2 <= 9.5 : 0.155
+backoff2 <= 10.5 : 0.156
+backoff2 <= 11.5 : 0.157
+backoff2 <= 12.5 : 0.158
+backoff2 <= 13.5 : 0.159
+backoff2 <= 14.5 : 0.159
+bc1 <= 0.5 : 0.16
+bc2 <= 0.5 : 0.159
+col <= 0.5 : 0.16
+s1 <= 2.0 : 0.16
+s1 <= 4.0 : 0.16
+s2 <= 2.0 : 0.16
+s2 <= 3.5 : 0.16
+s2 <= 4.5 : 0.1
+s2 <= 6.5 : 0.124
+s2 <= 10.0 : 0.159"];
+5 [label="bc1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.103
+backoff1 <= 1.5 : 0.154
+backoff1 <= 2.5 : 0.185
+backoff1 <= 3.5 : 0.205
+backoff1 <= 4.5 : 0.22
+backoff1 <= 6.5 : 0.231
+backoff1 <= 8.5 : 0.239
+backoff1 <= 9.5 : 0.246
+backoff1 <= 11.0 : 0.252
+backoff1 <= 12.5 : 0.256
+bc1 <= 0.5 : 0.0
+bc2 <= 0.5 : 0.0
+col <= 0.5 : 0.141
+s1 <= 2.0 : 0.141
+s1 <= 4.0 : 0.0
+s2 <= 2.0 : 0.141
+s2 <= 3.5 : 0.0"];
+6 [label="time"];
+5 -> 6 [label="True"];
+7 [label="station2_cmd_50"];
+5 -> 7 [style="dashed", label="False"];
+4 -> 5 [label="True"];
+8 [label="s2 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 0.092
+backoff1 <= 1.5 : 0.092
+backoff1 <= 2.5 : 0.092
+backoff1 <= 3.5 : 0.092
+backoff1 <= 4.5 : 0.092
+backoff1 <= 5.5 : 0.092
+backoff1 <= 6.5 : 0.092
+backoff1 <= 7.5 : 0.092
+backoff1 <= 8.5 : 0.092
+backoff1 <= 9.5 : 0.092
+backoff1 <= 10.5 : 0.092
+backoff1 <= 11.5 : 0.092
+backoff1 <= 12.5 : 0.092
+backoff1 <= 13.5 : 0.092
+backoff2 <= 0.5 : 0.068
+backoff2 <= 1.5 : 0.075
+backoff2 <= 2.5 : 0.08
+backoff2 <= 3.5 : 0.083
+backoff2 <= 4.5 : 0.085
+backoff2 <= 5.5 : 0.086
+backoff2 <= 6.5 : 0.088
+backoff2 <= 7.5 : 0.088
+backoff2 <= 8.5 : 0.089
+backoff2 <= 9.5 : 0.09
+backoff2 <= 10.5 : 0.09
+backoff2 <= 11.5 : 0.091
+backoff2 <= 12.5 : 0.091
+backoff2 <= 13.5 : 0.092
+backoff2 <= 14.5 : 0.092
+bc2 <= 0.5 : 0.092
+s2 <= 6.5 : 0.052
+s2 <= 10.0 : 0.092"];
+9 [label="time"];
+8 -> 9 [label="True"];
+10 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.464
+backoff1 <= 1.5 : 0.482
+backoff1 <= 2.5 : 0.488
+backoff1 <= 3.5 : 0.491
+backoff1 <= 4.5 : 0.493
+backoff1 <= 5.5 : 0.494
+backoff1 <= 6.5 : 0.495
+backoff1 <= 7.5 : 0.496
+backoff1 <= 8.5 : 0.496
+backoff1 <= 9.5 : 0.496
+backoff1 <= 10.5 : 0.497
+backoff1 <= 11.5 : 0.497
+backoff1 <= 12.5 : 0.497
+bc2 <= 0.5 : 0.066
+s2 <= 10.0 : 0.066"];
+11 [label="time"];
+10 -> 11 [label="True"];
+12 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.0
+backoff1 <= 1.5 : 0.071
+backoff1 <= 2.5 : 0.095
+backoff1 <= 3.5 : 0.107
+backoff1 <= 4.5 : 0.114
+backoff1 <= 5.5 : 0.119
+backoff1 <= 6.5 : 0.122
+backoff1 <= 7.5 : 0.125
+backoff1 <= 8.5 : 0.127
+backoff1 <= 9.5 : 0.129
+backoff1 <= 10.5 : 0.13
+backoff1 <= 11.5 : 0.131
+backoff1 <= 12.5 : 0.132"];
+13 [label="time"];
+12 -> 13 [label="True"];
+14 [label="send2"];
+12 -> 14 [style="dashed", label="False"];
+10 -> 12 [style="dashed", label="False"];
+8 -> 10 [style="dashed", label="False"];
+4 -> 8 [style="dashed", label="False"];
+3 -> 4 [label="True"];
+15 [label="station1_cmd_20"];
+3 -> 15 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+16 [label="s1 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 0.724
+backoff1 <= 1.5 : 0.73
+backoff1 <= 2.5 : 0.735
+backoff1 <= 3.5 : 0.74
+backoff1 <= 4.5 : 0.744
+backoff1 <= 5.5 : 0.748
+backoff1 <= 6.5 : 0.752
+backoff1 <= 7.5 : 0.755
+backoff1 <= 8.5 : 0.758
+backoff1 <= 9.5 : 0.761
+backoff1 <= 10.5 : 0.764
+backoff1 <= 11.5 : 0.767
+backoff1 <= 12.5 : 0.769
+backoff2 <= 0.5 : 0.727
+backoff2 <= 1.5 : 0.733
+backoff2 <= 2.5 : 0.739
+backoff2 <= 3.5 : 0.744
+backoff2 <= 4.5 : 0.748
+backoff2 <= 5.5 : 0.752
+backoff2 <= 6.5 : 0.755
+backoff2 <= 7.5 : 0.758
+backoff2 <= 8.5 : 0.761
+backoff2 <= 9.5 : 0.763
+backoff2 <= 10.5 : 0.765
+backoff2 <= 11.5 : 0.767
+backoff2 <= 12.5 : 0.769
+backoff2 <= 13.5 : 0.77
+bc1 <= 0.5 : 0.742
+bc2 <= 0.5 : 0.754
+c1 <= 0.5 : 0.736
+c1 <= 1.5 : 0.769
+c2 <= 0.5 : 0.734
+c2 <= 1.5 : 0.769
+col <= 0.5 : 0.767
+col <= 1.5 : 0.767
+s1 <= 6.5 : 0.717
+s1 <= 7.5 : 0.724
+s1 <= 8.5 : 0.735
+s1 <= 9.5 : 0.735
+s1 <= 10.5 : 0.739
+s1 <= 11.5 : 0.74
+s2 <= 5.5 : 0.741
+s2 <= 6.5 : 0.733
+s2 <= 7.5 : 0.727
+s2 <= 8.5 : 0.727
+s2 <= 9.5 : 0.724
+s2 <= 10.5 : 0.752
+s2 <= 11.5 : 0.752"];
+17 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 1.5 : 0.5
+backoff1 <= 2.5 : 0.5
+backoff1 <= 3.5 : 0.5
+backoff1 <= 4.5 : 0.5
+backoff1 <= 5.5 : 0.5
+backoff1 <= 6.5 : 0.5
+backoff1 <= 7.5 : 0.5
+backoff1 <= 8.5 : 0.5
+backoff1 <= 9.5 : 0.5
+backoff1 <= 10.5 : 0.5
+backoff1 <= 11.5 : 0.5
+backoff1 <= 12.5 : 0.5
+bc2 <= 0.5 : 0.333
+c2 <= 0.5 : 0.0
+s2 <= 9.5 : 0.333
+s2 <= 11.0 : 0.333"];
+18 [label="station1_cmd_22"];
+17 -> 18 [label="True"];
+19 [label="time"];
+17 -> 19 [style="dashed", label="False"];
+16 -> 17 [label="True"];
+20 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.727
+backoff1 <= 1.5 : 0.732
+backoff1 <= 2.5 : 0.736
+backoff1 <= 3.5 : 0.74
+backoff1 <= 4.5 : 0.744
+backoff1 <= 5.5 : 0.748
+backoff1 <= 6.5 : 0.752
+backoff1 <= 7.5 : 0.755
+backoff1 <= 8.5 : 0.759
+backoff1 <= 9.5 : 0.762
+backoff1 <= 10.5 : 0.765
+backoff1 <= 11.5 : 0.769
+backoff1 <= 12.5 : 0.772
+backoff2 <= 0.5 : 0.73
+backoff2 <= 1.5 : 0.739
+backoff2 <= 2.5 : 0.746
+backoff2 <= 3.5 : 0.752
+backoff2 <= 4.5 : 0.756
+backoff2 <= 5.5 : 0.759
+backoff2 <= 6.5 : 0.762
+backoff2 <= 7.5 : 0.765
+backoff2 <= 8.5 : 0.767
+backoff2 <= 9.5 : 0.769
+backoff2 <= 10.5 : 0.77
+backoff2 <= 11.5 : 0.771
+backoff2 <= 12.5 : 0.773
+backoff2 <= 13.5 : 0.774
+bc1 <= 0.5 : 0.732
+bc2 <= 0.5 : 0.748
+c1 <= 0.5 : 0.723
+c1 <= 1.5 : 0.771
+c2 <= 0.5 : 0.718
+c2 <= 1.5 : 0.771
+col <= 0.5 : 0.77
+col <= 1.5 : 0.769
+s1 <= 7.5 : 0.727
+s1 <= 8.5 : 0.727
+s1 <= 9.5 : 0.733
+s1 <= 10.5 : 0.728
+s1 <= 11.5 : 0.73
+s2 <= 5.5 : 0.739
+s2 <= 6.5 : 0.73
+s2 <= 7.5 : 0.729
+s2 <= 8.5 : 0.734
+s2 <= 9.5 : 0.733
+s2 <= 10.5 : 0.743
+s2 <= 11.5 : 0.746"];
+21 [label="c1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.709
+backoff1 <= 1.5 : 0.713
+backoff1 <= 2.5 : 0.716
+backoff1 <= 3.5 : 0.72
+backoff1 <= 4.5 : 0.723
+backoff1 <= 5.5 : 0.726
+backoff1 <= 6.5 : 0.729
+backoff1 <= 7.5 : 0.732
+backoff1 <= 8.5 : 0.735
+backoff1 <= 9.5 : 0.738
+backoff1 <= 10.5 : 0.741
+backoff1 <= 11.5 : 0.744
+backoff1 <= 12.5 : 0.747
+backoff2 <= 0.5 : 0.705
+backoff2 <= 1.5 : 0.717
+backoff2 <= 2.5 : 0.724
+backoff2 <= 3.5 : 0.73
+backoff2 <= 4.5 : 0.734
+backoff2 <= 5.5 : 0.737
+backoff2 <= 6.5 : 0.739
+backoff2 <= 7.5 : 0.742
+backoff2 <= 8.5 : 0.743
+backoff2 <= 9.5 : 0.745
+backoff2 <= 10.5 : 0.746
+backoff2 <= 11.5 : 0.747
+backoff2 <= 12.5 : 0.748
+backoff2 <= 13.5 : 0.749
+bc1 <= 0.5 : 0.712
+bc2 <= 0.5 : 0.724
+c1 <= 0.5 : 0.692
+col <= 0.5 : 0.744
+s1 <= 7.5 : 0.709
+s1 <= 8.5 : 0.708
+s1 <= 9.5 : 0.709
+s1 <= 10.5 : 0.705
+s1 <= 11.5 : 0.707
+s2 <= 5.5 : 0.711
+s2 <= 6.5 : 0.704
+s2 <= 7.5 : 0.705
+s2 <= 9.0 : 0.712
+s2 <= 10.5 : 0.717
+s2 <= 11.5 : 0.719"];
+22 [label="s1 <= 10.5
+--------------
+
+backoff1 <= 0.5 : 0.64
+backoff1 <= 1.5 : 0.648
+backoff1 <= 2.5 : 0.655
+backoff1 <= 3.5 : 0.662
+backoff1 <= 4.5 : 0.668
+backoff1 <= 5.5 : 0.675
+backoff1 <= 6.5 : 0.681
+backoff1 <= 7.5 : 0.687
+backoff1 <= 8.5 : 0.693
+backoff1 <= 9.5 : 0.698
+backoff1 <= 10.5 : 0.703
+backoff1 <= 11.5 : 0.708
+backoff1 <= 12.5 : 0.713
+backoff2 <= 0.5 : 0.644
+backoff2 <= 1.5 : 0.659
+backoff2 <= 2.5 : 0.67
+backoff2 <= 3.5 : 0.679
+backoff2 <= 4.5 : 0.686
+backoff2 <= 5.5 : 0.692
+backoff2 <= 6.5 : 0.697
+backoff2 <= 7.5 : 0.701
+backoff2 <= 8.5 : 0.705
+backoff2 <= 9.5 : 0.708
+backoff2 <= 10.5 : 0.71
+backoff2 <= 11.5 : 0.713
+backoff2 <= 12.5 : 0.715
+backoff2 <= 13.5 : 0.717
+bc1 <= 0.5 : 0.622
+bc2 <= 0.5 : 0.667
+col <= 0.5 : 0.712
+s1 <= 7.5 : 0.64
+s1 <= 9.0 : 0.66
+s1 <= 10.5 : 0.613
+s1 <= 11.5 : 0.619
+s2 <= 5.5 : 0.673
+s2 <= 6.5 : 0.636
+s2 <= 7.5 : 0.647
+s2 <= 9.0 : 0.644
+s2 <= 10.5 : 0.66
+s2 <= 11.5 : 0.666"];
+23 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.466
+backoff1 <= 1.5 : 0.493
+backoff1 <= 2.5 : 0.518
+backoff1 <= 3.5 : 0.541
+backoff1 <= 4.5 : 0.563
+backoff1 <= 5.5 : 0.583
+backoff1 <= 6.5 : 0.601
+backoff1 <= 7.5 : 0.618
+backoff1 <= 8.5 : 0.635
+backoff1 <= 9.5 : 0.65
+backoff1 <= 10.5 : 0.664
+backoff1 <= 11.5 : 0.678
+backoff1 <= 12.5 : 0.691
+backoff2 <= 0.5 : 0.512
+backoff2 <= 1.5 : 0.541
+backoff2 <= 2.5 : 0.566
+backoff2 <= 3.5 : 0.587
+backoff2 <= 4.5 : 0.604
+backoff2 <= 5.5 : 0.62
+backoff2 <= 6.5 : 0.634
+backoff2 <= 7.5 : 0.646
+backoff2 <= 8.5 : 0.657
+backoff2 <= 9.5 : 0.666
+backoff2 <= 10.5 : 0.675
+backoff2 <= 11.5 : 0.683
+backoff2 <= 12.5 : 0.69
+backoff2 <= 13.5 : 0.697
+bc1 <= 0.5 : 0.697
+bc2 <= 0.5 : 0.558
+col <= 0.5 : 0.697
+s1 <= 7.5 : 0.466
+s1 <= 9.0 : 0.598
+s2 <= 5.5 : 0.617
+s2 <= 6.5 : 0.608
+s2 <= 7.5 : 0.526
+s2 <= 9.0 : 0.499
+s2 <= 11.0 : 0.543"];
+24 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 0.5 : 0.431
+backoff2 <= 1.5 : 0.438
+backoff2 <= 2.5 : 0.441
+backoff2 <= 3.5 : 0.443
+backoff2 <= 4.5 : 0.444
+backoff2 <= 5.5 : 0.445
+backoff2 <= 6.5 : 0.445
+backoff2 <= 7.5 : 0.446
+backoff2 <= 8.5 : 0.446
+backoff2 <= 9.5 : 0.446
+backoff2 <= 10.5 : 0.447
+backoff2 <= 11.5 : 0.447
+backoff2 <= 12.5 : 0.447
+backoff2 <= 13.5 : 0.447
+bc1 <= 0.5 : 0.443
+bc2 <= 0.5 : 0.434
+col <= 0.5 : 0.443
+s1 <= 9.0 : 0.348
+s2 <= 5.5 : 0.375
+s2 <= 6.5 : 0.329
+s2 <= 7.5 : 0.429
+s2 <= 10.0 : 0.439"];
+25 [label="s1 <= 9.0
+--------------
+
+backoff2 <= 0.5 : 0.483
+backoff2 <= 1.5 : 0.517
+backoff2 <= 2.5 : 0.524
+backoff2 <= 3.5 : 0.527
+backoff2 <= 4.5 : 0.529
+backoff2 <= 5.5 : 0.53
+backoff2 <= 6.5 : 0.531
+backoff2 <= 7.5 : 0.531
+backoff2 <= 8.5 : 0.531
+backoff2 <= 9.5 : 0.532
+backoff2 <= 10.5 : 0.532
+backoff2 <= 11.5 : 0.532
+backoff2 <= 12.5 : 0.532
+backoff2 <= 13.5 : 0.533
+s1 <= 9.0 : 0.064
+s2 <= 5.5 : 0.064"];
+26 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 0.0
+backoff2 <= 1.5 : 0.067
+backoff2 <= 2.5 : 0.089
+backoff2 <= 3.5 : 0.1
+backoff2 <= 4.5 : 0.107
+backoff2 <= 5.5 : 0.111
+backoff2 <= 6.5 : 0.114
+backoff2 <= 7.5 : 0.117
+backoff2 <= 8.5 : 0.119
+backoff2 <= 9.5 : 0.12
+backoff2 <= 10.5 : 0.121
+backoff2 <= 11.5 : 0.122
+backoff2 <= 12.5 : 0.123
+backoff2 <= 13.5 : 0.124"];
+27 [label="time"];
+26 -> 27 [label="True"];
+28 [label="send1"];
+26 -> 28 [style="dashed", label="False"];
+25 -> 26 [label="True"];
+29 [label="station2_cmd_57"];
+25 -> 29 [style="dashed", label="False"];
+24 -> 25 [label="True"];
+30 [label="send1"];
+24 -> 30 [style="dashed", label="False"];
+23 -> 24 [label="True"];
+31 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 1.5 : 0.5
+backoff1 <= 2.5 : 0.5
+backoff1 <= 3.5 : 0.5
+backoff1 <= 4.5 : 0.5
+backoff1 <= 5.5 : 0.5
+backoff1 <= 6.5 : 0.5
+backoff1 <= 7.5 : 0.5
+backoff1 <= 8.5 : 0.5
+backoff1 <= 9.5 : 0.5
+backoff1 <= 10.5 : 0.5
+backoff1 <= 11.5 : 0.5
+backoff1 <= 12.5 : 0.5
+bc2 <= 0.5 : 0.0
+s2 <= 11.0 : 0.0"];
+32 [label="time"];
+31 -> 32 [label="True"];
+33 [label="send2"];
+31 -> 33 [style="dashed", label="False"];
+23 -> 31 [style="dashed", label="False"];
+22 -> 23 [label="True"];
+34 [label="s2 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 0.448
+backoff2 <= 1.5 : 0.459
+backoff2 <= 2.5 : 0.464
+backoff2 <= 3.5 : 0.467
+backoff2 <= 4.5 : 0.469
+backoff2 <= 5.5 : 0.47
+backoff2 <= 6.5 : 0.471
+backoff2 <= 7.5 : 0.472
+backoff2 <= 8.5 : 0.472
+backoff2 <= 9.5 : 0.473
+backoff2 <= 10.5 : 0.473
+backoff2 <= 11.5 : 0.474
+backoff2 <= 12.5 : 0.474
+backoff2 <= 13.5 : 0.474
+bc2 <= 0.5 : 0.465
+s1 <= 11.5 : 0.47
+s2 <= 5.5 : 0.378
+s2 <= 6.5 : 0.384
+s2 <= 7.5 : 0.444
+s2 <= 9.0 : 0.463
+s2 <= 10.5 : 0.465
+s2 <= 11.5 : 0.47"];
+35 [label="time"];
+34 -> 35 [label="True"];
+36 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 0.5 : 0.5
+backoff2 <= 1.5 : 0.521
+backoff2 <= 2.5 : 0.531
+backoff2 <= 3.5 : 0.537
+backoff2 <= 4.5 : 0.542
+backoff2 <= 5.5 : 0.545
+backoff2 <= 6.5 : 0.547
+backoff2 <= 7.5 : 0.549
+backoff2 <= 8.5 : 0.55
+backoff2 <= 9.5 : 0.551
+backoff2 <= 10.5 : 0.552
+backoff2 <= 11.5 : 0.553
+backoff2 <= 12.5 : 0.554
+backoff2 <= 13.5 : 0.554
+bc2 <= 0.5 : 0.525
+s1 <= 11.5 : 0.54
+s2 <= 6.5 : 0.111
+s2 <= 7.5 : 0.5
+s2 <= 9.0 : 0.524
+s2 <= 10.5 : 0.525
+s2 <= 11.5 : 0.54"];
+37 [label="station2_cmd_57"];
+36 -> 37 [label="True"];
+38 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 0.111
+backoff2 <= 1.5 : 0.133
+backoff2 <= 2.5 : 0.148
+backoff2 <= 3.5 : 0.159
+backoff2 <= 4.5 : 0.167
+backoff2 <= 5.5 : 0.173
+backoff2 <= 6.5 : 0.178
+backoff2 <= 7.5 : 0.182
+backoff2 <= 8.5 : 0.185
+backoff2 <= 9.5 : 0.188
+backoff2 <= 10.5 : 0.19
+backoff2 <= 11.5 : 0.193
+backoff2 <= 12.5 : 0.194
+backoff2 <= 13.5 : 0.196
+bc2 <= 0.5 : 0.194
+s1 <= 11.5 : 0.196
+s2 <= 7.5 : 0.111
+s2 <= 9.0 : 0.178
+s2 <= 10.5 : 0.194
+s2 <= 11.5 : 0.196"];
+39 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 0.0
+s1 <= 11.5 : 0.333
+s2 <= 9.0 : 0.333
+s2 <= 10.5 : 0.0
+s2 <= 11.5 : 0.333"];
+40 [label="time"];
+39 -> 40 [label="True"];
+41 [label="send2"];
+39 -> 41 [style="dashed", label="False"];
+38 -> 39 [label="True"];
+42 [label="time"];
+38 -> 42 [style="dashed", label="False"];
+36 -> 38 [style="dashed", label="False"];
+34 -> 36 [style="dashed", label="False"];
+22 -> 34 [style="dashed", label="False"];
+21 -> 22 [label="True"];
+43 [label="s2 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 0.617
+backoff2 <= 1.5 : 0.629
+backoff2 <= 2.5 : 0.633
+backoff2 <= 3.5 : 0.635
+backoff2 <= 4.5 : 0.637
+backoff2 <= 5.5 : 0.637
+backoff2 <= 6.5 : 0.638
+backoff2 <= 7.5 : 0.639
+backoff2 <= 8.5 : 0.639
+backoff2 <= 9.5 : 0.639
+backoff2 <= 10.5 : 0.639
+backoff2 <= 11.5 : 0.64
+backoff2 <= 12.5 : 0.64
+backoff2 <= 13.5 : 0.64
+bc1 <= 0.5 : 0.618
+bc2 <= 0.5 : 0.628
+col <= 0.5 : 0.618
+s1 <= 9.5 : 0.53
+s2 <= 5.5 : 0.368
+s2 <= 6.5 : 0.422
+s2 <= 7.5 : 0.617
+s2 <= 10.0 : 0.628"];
+44 [label="station2_cmd_55"];
+43 -> 44 [label="True"];
+45 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 0.5 : 0.449
+backoff2 <= 1.5 : 0.464
+backoff2 <= 2.5 : 0.47
+backoff2 <= 3.5 : 0.473
+backoff2 <= 4.5 : 0.475
+backoff2 <= 5.5 : 0.476
+backoff2 <= 6.5 : 0.477
+backoff2 <= 7.5 : 0.478
+backoff2 <= 8.5 : 0.478
+backoff2 <= 9.5 : 0.479
+backoff2 <= 10.5 : 0.479
+backoff2 <= 11.5 : 0.479
+backoff2 <= 12.5 : 0.48
+backoff2 <= 13.5 : 0.48
+bc1 <= 0.5 : 0.448
+bc2 <= 0.5 : 0.468
+col <= 0.5 : 0.448
+s1 <= 9.5 : 0.392
+s2 <= 6.5 : 0.145
+s2 <= 7.5 : 0.449
+s2 <= 10.0 : 0.47"];
+46 [label="time"];
+45 -> 46 [label="True"];
+47 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 0.111
+backoff2 <= 1.5 : 0.178
+backoff2 <= 2.5 : 0.222
+backoff2 <= 3.5 : 0.254
+backoff2 <= 4.5 : 0.278
+backoff2 <= 5.5 : 0.296
+backoff2 <= 6.5 : 0.311
+backoff2 <= 7.5 : 0.323
+backoff2 <= 8.5 : 0.333
+backoff2 <= 9.5 : 0.342
+backoff2 <= 10.5 : 0.349
+backoff2 <= 11.5 : 0.356
+backoff2 <= 12.5 : 0.361
+backoff2 <= 13.5 : 0.366
+bc1 <= 0.5 : 0.288
+bc2 <= 0.5 : 0.178
+col <= 0.5 : 0.288
+s1 <= 9.5 : 0.178
+s2 <= 7.5 : 0.111
+s2 <= 10.0 : 0.194"];
+48 [label="s2 <= 10.0
+--------------
+
+bc1 <= 0.5 : 0.333
+bc2 <= 0.5 : 0.333
+col <= 0.5 : 0.333
+s1 <= 9.5 : 0.333
+s2 <= 10.0 : 0.0"];
+49 [label="send2"];
+48 -> 49 [label="True"];
+50 [label="time"];
+48 -> 50 [style="dashed", label="False"];
+47 -> 48 [label="True"];
+51 [label="station2_cmd_60"];
+47 -> 51 [style="dashed", label="False"];
+45 -> 47 [style="dashed", label="False"];
+43 -> 45 [style="dashed", label="False"];
+21 -> 43 [style="dashed", label="False"];
+20 -> 21 [label="True"];
+52 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.088
+backoff1 <= 1.5 : 0.165
+backoff1 <= 2.5 : 0.216
+backoff1 <= 3.5 : 0.252
+backoff1 <= 4.5 : 0.279
+backoff1 <= 5.5 : 0.301
+backoff1 <= 6.5 : 0.318
+backoff1 <= 7.5 : 0.332
+backoff1 <= 8.5 : 0.343
+backoff1 <= 9.5 : 0.353
+backoff1 <= 10.5 : 0.361
+backoff1 <= 11.5 : 0.369
+backoff1 <= 12.5 : 0.375
+bc1 <= 0.5 : 0.109
+bc2 <= 0.5 : 0.301
+c1 <= 1.0 : 0.263
+c2 <= 1.5 : 0.263
+col <= 1.5 : 0.287
+s1 <= 8.0 : 0.088
+s1 <= 10.5 : 0.212
+s2 <= 9.5 : 0.188"];
+53 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 0.0
+bc2 <= 0.5 : 0.333
+c1 <= 1.0 : 0.25
+c2 <= 1.5 : 0.25
+col <= 1.5 : 0.0
+s1 <= 10.5 : 0.25
+s2 <= 9.5 : 0.333"];
+54 [label="time"];
+53 -> 54 [label="True"];
+55 [label="finish1"];
+53 -> 55 [style="dashed", label="False"];
+52 -> 53 [label="True"];
+56 [label="station1_cmd_25"];
+52 -> 56 [style="dashed", label="False"];
+20 -> 52 [style="dashed", label="False"];
+16 -> 20 [style="dashed", label="False"];
+2 -> 16 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+57 [label="backoff2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.59
+backoff1 <= 1.5 : 0.591
+backoff1 <= 2.5 : 0.593
+backoff1 <= 3.5 : 0.593
+backoff1 <= 4.5 : 0.594
+backoff1 <= 5.5 : 0.595
+backoff1 <= 6.5 : 0.595
+backoff1 <= 7.5 : 0.596
+backoff1 <= 8.5 : 0.596
+backoff1 <= 9.5 : 0.596
+backoff1 <= 10.5 : 0.596
+backoff1 <= 11.5 : 0.596
+backoff1 <= 12.5 : 0.596
+backoff1 <= 13.5 : 0.592
+backoff1 <= 14.5 : 0.594
+backoff2 <= 0.5 : 0.336
+backoff2 <= 1.5 : 0.38
+backoff2 <= 2.5 : 0.416
+backoff2 <= 3.5 : 0.444
+backoff2 <= 4.5 : 0.468
+backoff2 <= 5.5 : 0.489
+backoff2 <= 6.5 : 0.506
+backoff2 <= 7.5 : 0.521
+backoff2 <= 8.5 : 0.534
+backoff2 <= 9.5 : 0.546
+backoff2 <= 10.5 : 0.556
+backoff2 <= 11.5 : 0.565
+backoff2 <= 12.5 : 0.574
+backoff2 <= 13.5 : 0.581
+backoff2 <= 14.5 : 0.588
+bc1 <= 0.5 : 0.572
+bc2 <= 0.5 : 0.558
+c1 <= 0.5 : 0.593
+c2 <= 0.5 : 0.403
+c2 <= 1.5 : 0.594
+col <= 0.5 : 0.593
+s1 <= 3.5 : 0.593
+s1 <= 4.5 : 0.592
+s1 <= 5.5 : 0.431
+s1 <= 7.0 : 0.585
+s1 <= 8.5 : 0.572
+s1 <= 10.0 : 0.572
+s1 <= 11.5 : 0.573
+s2 <= 2.0 : 0.593
+s2 <= 4.0 : 0.558
+s2 <= 6.0 : 0.349
+s2 <= 7.5 : 0.403
+s2 <= 8.5 : 0.403
+s2 <= 9.5 : 0.529
+s2 <= 10.5 : 0.593
+x2 <= 1.5 : 0.426
+x2 <= 2.5 : 0.51
+x2 <= 3.5 : 0.55
+x2 <= 5.0 : 0.593"];
+58 [label="x2 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 0.588
+backoff1 <= 1.5 : 0.589
+backoff1 <= 2.5 : 0.592
+backoff1 <= 3.5 : 0.594
+backoff1 <= 4.5 : 0.595
+backoff1 <= 5.5 : 0.595
+backoff1 <= 6.5 : 0.597
+backoff1 <= 7.5 : 0.599
+backoff1 <= 8.5 : 0.599
+backoff1 <= 9.5 : 0.598
+backoff1 <= 10.5 : 0.598
+backoff1 <= 11.5 : 0.599
+backoff1 <= 12.5 : 0.6
+backoff1 <= 13.5 : 0.598
+backoff1 <= 14.5 : 0.6
+bc1 <= 0.5 : 0.598
+bc2 <= 0.5 : 0.57
+c1 <= 0.5 : 0.592
+c2 <= 0.5 : 0.511
+c2 <= 1.5 : 0.595
+col <= 0.5 : 0.592
+s1 <= 3.5 : 0.592
+s1 <= 4.5 : 0.589
+s1 <= 5.5 : 0.53
+s1 <= 7.0 : 0.596
+s1 <= 8.5 : 0.599
+s1 <= 10.0 : 0.6
+s1 <= 11.5 : 0.601
+s2 <= 2.0 : 0.592
+s2 <= 4.0 : 0.567
+s2 <= 6.5 : 0.517
+s2 <= 8.5 : 0.513
+s2 <= 9.5 : 0.586
+s2 <= 10.5 : 0.592
+x2 <= 1.5 : 0.554
+x2 <= 2.5 : 0.463
+x2 <= 3.5 : 0.489
+x2 <= 5.0 : 0.592"];
+59 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.358
+backoff1 <= 1.5 : 0.361
+backoff1 <= 2.5 : 0.37
+backoff1 <= 3.5 : 0.375
+backoff1 <= 4.5 : 0.379
+backoff1 <= 5.5 : 0.381
+backoff1 <= 6.5 : 0.383
+backoff1 <= 7.5 : 0.384
+backoff1 <= 8.5 : 0.386
+backoff1 <= 9.5 : 0.386
+backoff1 <= 10.5 : 0.387
+backoff1 <= 11.5 : 0.388
+backoff1 <= 12.5 : 0.388
+backoff1 <= 13.5 : 0.388
+backoff1 <= 14.5 : 0.389
+bc1 <= 0.5 : 0.388
+bc2 <= 0.5 : 0.379
+c1 <= 0.5 : 0.372
+c2 <= 0.5 : 0.252
+col <= 0.5 : 0.372
+s1 <= 4.5 : 0.372
+s1 <= 5.5 : 0.301
+s1 <= 7.0 : 0.375
+s1 <= 8.5 : 0.388
+s1 <= 10.5 : 0.39
+s2 <= 2.0 : 0.372
+s2 <= 4.0 : 0.379
+s2 <= 6.5 : 0.265
+s2 <= 8.5 : 0.252
+s2 <= 9.5 : 0.351
+x2 <= 1.5 : 0.336"];
+60 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.588
+backoff1 <= 1.5 : 0.57
+backoff1 <= 2.5 : 0.586
+backoff1 <= 3.5 : 0.597
+backoff1 <= 4.5 : 0.605
+backoff1 <= 5.5 : 0.611
+backoff1 <= 6.5 : 0.616
+backoff1 <= 7.5 : 0.62
+backoff1 <= 8.5 : 0.623
+backoff1 <= 9.5 : 0.625
+backoff1 <= 10.5 : 0.626
+backoff1 <= 11.5 : 0.626
+backoff1 <= 12.5 : 0.623
+backoff1 <= 13.5 : 0.611
+backoff1 <= 14.5 : 0.629
+bc1 <= 0.5 : 0.623
+bc2 <= 0.5 : 0.29
+c1 <= 0.5 : 0.608
+col <= 0.5 : 0.608
+s1 <= 4.5 : 0.608
+s1 <= 6.5 : 0.605
+s1 <= 8.5 : 0.623
+s1 <= 10.5 : 0.632
+s2 <= 2.0 : 0.608
+s2 <= 4.0 : 0.29
+s2 <= 6.5 : 0.598
+x2 <= 1.5 : 0.29"];
+61 [label="backoff1 <= 1.5
+--------------
+
+backoff1 <= 0.5 : 0.215
+backoff1 <= 1.5 : 0.139
+backoff1 <= 2.5 : 0.2
+backoff1 <= 3.5 : 0.241
+backoff1 <= 4.5 : 0.27
+backoff1 <= 5.5 : 0.292
+backoff1 <= 6.5 : 0.309
+backoff1 <= 7.5 : 0.322
+backoff1 <= 8.5 : 0.333
+backoff1 <= 9.5 : 0.343
+backoff1 <= 10.5 : 0.35
+backoff1 <= 11.5 : 0.357
+backoff1 <= 12.5 : 0.363
+backoff1 <= 13.5 : 0.368
+backoff1 <= 14.5 : 0.373
+bc1 <= 0.5 : 0.288
+col <= 0.5 : 0.288
+s1 <= 4.5 : 0.288
+s1 <= 6.5 : 0.288
+s2 <= 2.0 : 0.288"];
+62 [label="bc1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.5
+bc1 <= 0.5 : 0.333
+col <= 0.5 : 0.333
+s1 <= 4.5 : 0.333
+s1 <= 6.5 : 0.333
+s2 <= 2.0 : 0.333"];
+63 [label="station2_cmd_42"];
+62 -> 63 [label="True"];
+64 [label="s1 <= 4.5
+--------------
+
+backoff1 <= 0.5 : 0.333
+s1 <= 4.5 : 0.0"];
+65 [label="station1_cmd_15"];
+64 -> 65 [label="True"];
+66 [label="station2_cmd_48"];
+64 -> 66 [style="dashed", label="False"];
+62 -> 64 [style="dashed", label="False"];
+61 -> 62 [label="True"];
+67 [label="time"];
+61 -> 67 [style="dashed", label="False"];
+60 -> 61 [label="True"];
+68 [label="s2 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 0.156
+backoff1 <= 1.5 : 0.167
+backoff1 <= 2.5 : 0.175
+backoff1 <= 3.5 : 0.181
+backoff1 <= 4.5 : 0.185
+backoff1 <= 5.5 : 0.189
+backoff1 <= 6.5 : 0.192
+backoff1 <= 7.5 : 0.194
+backoff1 <= 8.5 : 0.197
+backoff1 <= 9.5 : 0.198
+backoff1 <= 10.5 : 0.2
+backoff1 <= 11.5 : 0.201
+backoff1 <= 12.5 : 0.203
+bc1 <= 0.5 : 0.203
+c1 <= 0.5 : 0.105
+s1 <= 6.5 : 0.139
+s1 <= 8.5 : 0.16
+s1 <= 10.5 : 0.203
+s2 <= 6.5 : 0.056"];
+69 [label="station2_cmd_54"];
+68 -> 69 [label="True"];
+70 [label="c1 <= 0.5
+--------------
+
+c1 <= 0.5 : 0.0
+s1 <= 8.5 : 0.0"];
+71 [label="send1"];
+70 -> 71 [label="True"];
+72 [label="send2"];
+70 -> 72 [style="dashed", label="False"];
+68 -> 70 [style="dashed", label="False"];
+60 -> 68 [style="dashed", label="False"];
+59 -> 60 [label="True"];
+73 [label="time"];
+59 -> 73 [style="dashed", label="False"];
+58 -> 59 [label="True"];
+74 [label="s2 <= 6.0
+--------------
+
+backoff1 <= 0.5 : 0.586
+backoff1 <= 1.5 : 0.59
+backoff1 <= 2.5 : 0.591
+backoff1 <= 3.5 : 0.59
+backoff1 <= 4.5 : 0.59
+backoff1 <= 5.5 : 0.588
+backoff1 <= 6.5 : 0.59
+backoff1 <= 7.5 : 0.592
+backoff1 <= 8.5 : 0.591
+backoff1 <= 9.5 : 0.589
+backoff1 <= 10.5 : 0.584
+backoff1 <= 11.5 : 0.587
+backoff1 <= 12.5 : 0.59
+bc1 <= 0.5 : 0.586
+bc2 <= 0.5 : 0.424
+c2 <= 0.5 : 0.397
+c2 <= 1.5 : 0.587
+s1 <= 4.0 : 0.566
+s1 <= 5.5 : 0.397
+s1 <= 8.5 : 0.587
+s1 <= 11.5 : 0.59
+s2 <= 6.0 : 0.392
+s2 <= 9.5 : 0.495
+s2 <= 10.5 : 0.566
+x2 <= 3.5 : 0.485
+x2 <= 5.0 : 0.566"];
+75 [label="station2_cmd_48"];
+74 -> 75 [label="True"];
+76 [label="x2 <= 3.5
+--------------
+
+backoff1 <= 0.5 : 0.458
+backoff1 <= 1.5 : 0.46
+backoff1 <= 2.5 : 0.461
+backoff1 <= 3.5 : 0.462
+backoff1 <= 4.5 : 0.463
+backoff1 <= 5.5 : 0.463
+backoff1 <= 6.5 : 0.463
+backoff1 <= 7.5 : 0.463
+backoff1 <= 8.5 : 0.463
+backoff1 <= 9.5 : 0.464
+backoff1 <= 10.5 : 0.464
+backoff1 <= 11.5 : 0.464
+backoff1 <= 12.5 : 0.464
+bc1 <= 0.5 : 0.458
+bc2 <= 0.5 : 0.447
+c2 <= 0.5 : 0.429
+c2 <= 1.5 : 0.459
+s1 <= 4.5 : 0.429
+s1 <= 8.5 : 0.462
+s1 <= 11.5 : 0.464
+s2 <= 9.5 : 0.372
+s2 <= 10.5 : 0.429
+x2 <= 3.5 : 0.361
+x2 <= 5.0 : 0.429"];
+77 [label="s2 <= 9.5
+--------------
+
+backoff1 <= 0.5 : 0.5
+backoff1 <= 1.5 : 0.5
+backoff1 <= 2.5 : 0.5
+backoff1 <= 3.5 : 0.5
+backoff1 <= 4.5 : 0.5
+backoff1 <= 5.5 : 0.5
+backoff1 <= 6.5 : 0.5
+backoff1 <= 7.5 : 0.5
+backoff1 <= 8.5 : 0.5
+backoff1 <= 9.5 : 0.5
+backoff1 <= 10.5 : 0.5
+backoff1 <= 11.5 : 0.5
+backoff1 <= 12.5 : 0.5
+bc1 <= 0.5 : 0.5
+s1 <= 9.0 : 0.5
+s2 <= 9.5 : 0.0"];
+78 [label="time"];
+77 -> 78 [label="True"];
+79 [label="finish2"];
+77 -> 79 [style="dashed", label="False"];
+76 -> 77 [label="True"];
+80 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.083
+backoff1 <= 1.5 : 0.094
+backoff1 <= 2.5 : 0.1
+backoff1 <= 3.5 : 0.104
+backoff1 <= 4.5 : 0.107
+backoff1 <= 5.5 : 0.109
+backoff1 <= 6.5 : 0.111
+backoff1 <= 7.5 : 0.112
+backoff1 <= 8.5 : 0.114
+backoff1 <= 9.5 : 0.115
+backoff1 <= 10.5 : 0.115
+backoff1 <= 11.5 : 0.116
+backoff1 <= 12.5 : 0.117
+bc1 <= 0.5 : 0.083
+bc2 <= 0.5 : 0.062
+c2 <= 0.5 : 0.0
+c2 <= 1.5 : 0.117
+s1 <= 4.5 : 0.0
+s1 <= 8.5 : 0.116
+s1 <= 11.5 : 0.117
+s2 <= 10.0 : 0.0
+x2 <= 5.0 : 0.0"];
+81 [label="station2_cmd_74"];
+80 -> 81 [label="True"];
+82 [label="finish2"];
+80 -> 82 [style="dashed", label="False"];
+76 -> 80 [style="dashed", label="False"];
+74 -> 76 [style="dashed", label="False"];
+58 -> 74 [style="dashed", label="False"];
+57 -> 58 [label="True"];
+83 [label="s2 <= 6.0
+--------------
+
+backoff1 <= 0.5 : 0.149
+backoff1 <= 1.5 : 0.159
+backoff1 <= 2.5 : 0.167
+backoff1 <= 3.5 : 0.172
+backoff1 <= 4.5 : 0.176
+backoff1 <= 5.5 : 0.18
+backoff1 <= 6.5 : 0.183
+backoff1 <= 7.5 : 0.185
+backoff1 <= 8.5 : 0.187
+backoff1 <= 9.5 : 0.188
+backoff1 <= 10.5 : 0.19
+backoff1 <= 11.5 : 0.191
+backoff1 <= 12.5 : 0.192
+backoff2 <= 1.5 : 0.193
+backoff2 <= 2.5 : 0.193
+backoff2 <= 3.5 : 0.193
+backoff2 <= 4.5 : 0.193
+backoff2 <= 5.5 : 0.193
+backoff2 <= 6.5 : 0.193
+backoff2 <= 7.5 : 0.193
+backoff2 <= 8.5 : 0.193
+backoff2 <= 9.5 : 0.193
+backoff2 <= 10.5 : 0.193
+backoff2 <= 11.5 : 0.193
+backoff2 <= 12.5 : 0.193
+backoff2 <= 13.5 : 0.193
+backoff2 <= 14.5 : 0.192
+bc1 <= 0.5 : 0.105
+s1 <= 6.5 : 0.132
+s1 <= 10.0 : 0.105
+s2 <= 6.0 : 0.052
+x2 <= 1.5 : 0.099"];
+84 [label="station2_cmd_52"];
+83 -> 84 [label="True"];
+85 [label="x2 <= 1.5
+--------------
+
+backoff2 <= 1.5 : 0.5
+backoff2 <= 2.5 : 0.5
+backoff2 <= 3.5 : 0.5
+backoff2 <= 4.5 : 0.5
+backoff2 <= 5.5 : 0.5
+backoff2 <= 6.5 : 0.5
+backoff2 <= 7.5 : 0.5
+backoff2 <= 8.5 : 0.5
+backoff2 <= 9.5 : 0.5
+backoff2 <= 10.5 : 0.5
+backoff2 <= 11.5 : 0.5
+backoff2 <= 12.5 : 0.5
+backoff2 <= 13.5 : 0.5
+x2 <= 1.5 : 0.0"];
+86 [label="time"];
+85 -> 86 [label="True"];
+87 [label="station2_cmd_59"];
+85 -> 87 [style="dashed", label="False"];
+83 -> 85 [style="dashed", label="False"];
+57 -> 83 [style="dashed", label="False"];
+1 -> 57 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+88 [label="s1 <= 6.0
+--------------
+
+backoff1 <= 0.5 : 0.287
+backoff1 <= 1.5 : 0.326
+backoff1 <= 2.5 : 0.357
+backoff1 <= 3.5 : 0.383
+backoff1 <= 4.5 : 0.403
+backoff1 <= 5.5 : 0.42
+backoff1 <= 6.5 : 0.435
+backoff1 <= 7.5 : 0.457
+backoff1 <= 8.5 : 0.474
+backoff1 <= 9.5 : 0.482
+backoff1 <= 10.5 : 0.488
+backoff1 <= 11.5 : 0.494
+backoff1 <= 12.5 : 0.504
+backoff1 <= 13.5 : 0.513
+backoff1 <= 14.5 : 0.522
+backoff2 <= 0.5 : 0.502
+backoff2 <= 1.5 : 0.508
+backoff2 <= 2.5 : 0.511
+backoff2 <= 3.5 : 0.514
+backoff2 <= 4.5 : 0.516
+backoff2 <= 5.5 : 0.517
+backoff2 <= 6.5 : 0.519
+backoff2 <= 7.5 : 0.52
+backoff2 <= 8.5 : 0.52
+backoff2 <= 9.5 : 0.521
+backoff2 <= 10.5 : 0.521
+backoff2 <= 11.5 : 0.522
+backoff2 <= 12.5 : 0.522
+backoff2 <= 13.5 : 0.522
+backoff2 <= 14.5 : 0.52
+bc1 <= 0.5 : 0.505
+bc2 <= 0.5 : 0.49
+c1 <= 0.5 : 0.322
+c1 <= 1.5 : 0.519
+c2 <= 1.0 : 0.519
+col <= 0.5 : 0.522
+s1 <= 2.0 : 0.522
+s1 <= 4.0 : 0.52
+s1 <= 6.0 : 0.26
+s1 <= 7.5 : 0.307
+s1 <= 8.5 : 0.307
+s1 <= 9.5 : 0.445
+s1 <= 10.5 : 0.515
+s2 <= 2.0 : 0.522
+s2 <= 3.5 : 0.519
+s2 <= 4.5 : 0.515
+s2 <= 5.5 : 0.294
+s2 <= 7.0 : 0.487
+s2 <= 8.5 : 0.488
+s2 <= 10.0 : 0.493
+s2 <= 11.5 : 0.501
+x1 <= 1.5 : 0.38
+x1 <= 2.5 : 0.441
+x1 <= 3.5 : 0.485
+x1 <= 4.5 : 0.522
+x1 <= 5.5 : 0.522
+x2 <= 0.5 : 0.451
+x2 <= 1.5 : 0.517
+x2 <= 2.5 : 0.519
+x2 <= 3.5 : 0.52
+x2 <= 4.5 : 0.522
+x2 <= 5.5 : 0.522"];
+89 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.081
+backoff1 <= 1.5 : 0.124
+backoff1 <= 2.5 : 0.142
+backoff1 <= 3.5 : 0.151
+backoff1 <= 4.5 : 0.156
+backoff1 <= 5.5 : 0.16
+backoff1 <= 6.5 : 0.162
+backoff1 <= 7.5 : 0.165
+backoff1 <= 8.5 : 0.166
+backoff1 <= 9.5 : 0.167
+backoff1 <= 10.5 : 0.168
+backoff1 <= 11.5 : 0.169
+backoff1 <= 12.5 : 0.169
+backoff1 <= 13.5 : 0.17
+backoff1 <= 14.5 : 0.17
+backoff2 <= 0.5 : 0.158
+backoff2 <= 1.5 : 0.162
+backoff2 <= 2.5 : 0.164
+backoff2 <= 3.5 : 0.166
+backoff2 <= 4.5 : 0.167
+backoff2 <= 5.5 : 0.167
+backoff2 <= 6.5 : 0.168
+backoff2 <= 7.5 : 0.169
+backoff2 <= 8.5 : 0.169
+backoff2 <= 9.5 : 0.169
+backoff2 <= 10.5 : 0.169
+backoff2 <= 11.5 : 0.17
+backoff2 <= 12.5 : 0.17
+backoff2 <= 13.5 : 0.17
+backoff2 <= 14.5 : 0.17
+bc1 <= 0.5 : 0.157
+bc2 <= 0.5 : 0.161
+col <= 0.5 : 0.163
+s1 <= 2.0 : 0.163
+s1 <= 4.0 : 0.157
+s2 <= 2.0 : 0.163
+s2 <= 3.5 : 0.153
+s2 <= 4.5 : 0.141
+s2 <= 6.5 : 0.17
+s2 <= 10.0 : 0.17
+x1 <= 1.5 : 0.163
+x2 <= 0.5 : 0.169
+x2 <= 1.5 : 0.157
+x2 <= 2.5 : 0.159"];
+90 [label="bc1 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 0.221
+backoff2 <= 1.5 : 0.239
+backoff2 <= 2.5 : 0.253
+backoff2 <= 3.5 : 0.264
+backoff2 <= 4.5 : 0.273
+backoff2 <= 5.5 : 0.28
+backoff2 <= 6.5 : 0.287
+backoff2 <= 7.5 : 0.292
+backoff2 <= 8.5 : 0.297
+backoff2 <= 9.5 : 0.301
+backoff2 <= 10.5 : 0.305
+backoff2 <= 11.5 : 0.308
+backoff2 <= 12.5 : 0.311
+backoff2 <= 13.5 : 0.314
+backoff2 <= 14.5 : 0.316
+bc1 <= 0.5 : 0.114
+bc2 <= 0.5 : 0.164
+col <= 0.5 : 0.214
+s1 <= 2.0 : 0.214
+s1 <= 4.0 : 0.114
+s2 <= 2.0 : 0.214
+s2 <= 4.0 : 0.114
+s2 <= 6.5 : 0.314
+s2 <= 10.0 : 0.316
+x1 <= 1.5 : 0.209
+x2 <= 0.5 : 0.316
+x2 <= 1.5 : 0.209"];
+91 [label="x1 <= 1.5
+--------------
+
+col <= 0.5 : 0.5
+s1 <= 2.0 : 0.5
+s2 <= 2.0 : 0.5
+x1 <= 1.5 : 0.25
+x2 <= 1.5 : 0.25"];
+92 [label="time"];
+91 -> 92 [label="True"];
+93 [label="col <= 0.5
+--------------
+
+col <= 0.5 : 0.0
+s1 <= 2.0 : 0.0
+s2 <= 2.0 : 0.0"];
+94 [label="station1_cmd_7"];
+93 -> 94 [label="True"];
+95 [label="station1_cmd_13"];
+93 -> 95 [style="dashed", label="False"];
+91 -> 93 [style="dashed", label="False"];
+90 -> 91 [label="True"];
+96 [label="station1_cmd_19"];
+90 -> 96 [style="dashed", label="False"];
+89 -> 90 [label="True"];
+97 [label="s2 <= 4.5
+--------------
+
+backoff1 <= 1.5 : 0.066
+backoff1 <= 2.5 : 0.066
+backoff1 <= 3.5 : 0.066
+backoff1 <= 4.5 : 0.066
+backoff1 <= 5.5 : 0.066
+backoff1 <= 6.5 : 0.066
+backoff1 <= 7.5 : 0.066
+backoff1 <= 8.5 : 0.066
+backoff1 <= 9.5 : 0.066
+backoff1 <= 10.5 : 0.066
+backoff1 <= 11.5 : 0.066
+backoff1 <= 12.5 : 0.066
+backoff1 <= 13.5 : 0.066
+backoff1 <= 14.5 : 0.066
+backoff2 <= 0.5 : 0.057
+backoff2 <= 1.5 : 0.06
+backoff2 <= 2.5 : 0.062
+backoff2 <= 3.5 : 0.063
+backoff2 <= 4.5 : 0.064
+backoff2 <= 5.5 : 0.064
+backoff2 <= 6.5 : 0.065
+backoff2 <= 7.5 : 0.065
+backoff2 <= 8.5 : 0.065
+backoff2 <= 9.5 : 0.066
+backoff2 <= 10.5 : 0.066
+backoff2 <= 11.5 : 0.066
+backoff2 <= 12.5 : 0.066
+backoff2 <= 13.5 : 0.066
+backoff2 <= 14.5 : 0.066
+bc2 <= 0.5 : 0.06
+s2 <= 3.5 : 0.053
+s2 <= 4.5 : 0.04
+s2 <= 8.5 : 0.066
+x2 <= 0.5 : 0.066
+x2 <= 2.0 : 0.053"];
+98 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 2.5 : 0.674
+backoff1 <= 3.5 : 0.644
+backoff1 <= 4.5 : 0.612
+backoff1 <= 5.5 : 0.575
+backoff1 <= 6.5 : 0.533
+backoff1 <= 7.5 : 0.626
+backoff1 <= 8.5 : 0.667
+backoff1 <= 9.5 : 0.64
+backoff1 <= 10.5 : 0.602
+backoff1 <= 11.5 : 0.55
+backoff1 <= 12.5 : 0.59
+backoff1 <= 13.5 : 0.644
+backoff1 <= 14.5 : 0.667
+bc2 <= 0.5 : 0.476
+s2 <= 3.5 : 0.476
+x2 <= 1.5 : 0.476"];
+99 [label="backoff1 <= 11.5
+--------------
+
+backoff1 <= 2.5 : 0.462
+backoff1 <= 3.5 : 0.429
+backoff1 <= 4.5 : 0.39
+backoff1 <= 5.5 : 0.343
+backoff1 <= 6.5 : 0.286
+backoff1 <= 7.5 : 0.387
+backoff1 <= 8.5 : 0.449
+backoff1 <= 9.5 : 0.405
+backoff1 <= 10.5 : 0.337
+backoff1 <= 11.5 : 0.229
+backoff1 <= 12.5 : 0.312
+backoff1 <= 13.5 : 0.381
+backoff1 <= 14.5 : 0.44"];
+100 [label="backoff1 <= 6.5
+--------------
+
+backoff1 <= 2.5 : 0.311
+backoff1 <= 3.5 : 0.3
+backoff1 <= 4.5 : 0.286
+backoff1 <= 5.5 : 0.267
+backoff1 <= 6.5 : 0.24
+backoff1 <= 7.5 : 0.317
+backoff1 <= 8.5 : 0.286
+backoff1 <= 9.5 : 0.3
+backoff1 <= 10.5 : 0.311"];
+101 [label="station1_cmd_17"];
+100 -> 101 [label="True"];
+102 [label="backoff1 <= 8.5
+--------------
+
+backoff1 <= 7.5 : 0.3
+backoff1 <= 8.5 : 0.0
+backoff1 <= 9.5 : 0.267
+backoff1 <= 10.5 : 0.4"];
+103 [label="station2_cmd_48"];
+102 -> 103 [label="True"];
+104 [label="station1_cmd_17"];
+102 -> 104 [style="dashed", label="False"];
+100 -> 102 [style="dashed", label="False"];
+99 -> 100 [label="True"];
+105 [label="station2_cmd_48"];
+99 -> 105 [style="dashed", label="False"];
+98 -> 99 [label="True"];
+106 [label="backoff1 <= 12.5
+--------------
+
+backoff1 <= 7.5 : 0.4
+backoff1 <= 10.0 : 0.333
+backoff1 <= 12.5 : 0.222
+backoff1 <= 13.5 : 0.417
+backoff1 <= 14.5 : 0.4"];
+107 [label="station2_cmd_50"];
+106 -> 107 [label="True"];
+108 [label="backoff1 <= 14.5
+--------------
+
+backoff1 <= 13.5 : 0.333
+backoff1 <= 14.5 : 0.0"];
+109 [label="__random__"];
+108 -> 109 [label="True"];
+110 [label="station2_cmd_50"];
+108 -> 110 [style="dashed", label="False"];
+106 -> 108 [style="dashed", label="False"];
+98 -> 106 [style="dashed", label="False"];
+97 -> 98 [label="True"];
+111 [label="station1_cmd_17"];
+97 -> 111 [style="dashed", label="False"];
+89 -> 97 [style="dashed", label="False"];
+88 -> 89 [label="True"];
+112 [label="x1 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 0.44
+backoff1 <= 1.5 : 0.445
+backoff1 <= 2.5 : 0.45
+backoff1 <= 3.5 : 0.454
+backoff1 <= 4.5 : 0.459
+backoff1 <= 5.5 : 0.463
+backoff1 <= 6.5 : 0.467
+backoff1 <= 7.5 : 0.472
+backoff1 <= 8.5 : 0.476
+backoff1 <= 9.5 : 0.479
+backoff1 <= 10.5 : 0.483
+backoff1 <= 11.5 : 0.487
+backoff1 <= 12.5 : 0.49
+backoff2 <= 0.5 : 0.461
+backoff2 <= 1.5 : 0.468
+backoff2 <= 2.5 : 0.473
+backoff2 <= 3.5 : 0.476
+backoff2 <= 4.5 : 0.48
+backoff2 <= 5.5 : 0.482
+backoff2 <= 6.5 : 0.484
+backoff2 <= 7.5 : 0.486
+backoff2 <= 8.5 : 0.488
+backoff2 <= 9.5 : 0.489
+backoff2 <= 10.5 : 0.49
+backoff2 <= 11.5 : 0.491
+backoff2 <= 12.5 : 0.492
+backoff2 <= 13.5 : 0.493
+bc1 <= 0.5 : 0.49
+bc2 <= 0.5 : 0.463
+c1 <= 0.5 : 0.446
+c1 <= 1.5 : 0.493
+c2 <= 1.0 : 0.493
+s1 <= 7.5 : 0.44
+s1 <= 8.5 : 0.438
+s1 <= 9.5 : 0.486
+s1 <= 10.5 : 0.489
+s2 <= 5.5 : 0.483
+s2 <= 7.0 : 0.462
+s2 <= 8.5 : 0.463
+s2 <= 10.0 : 0.459
+s2 <= 11.5 : 0.454
+x1 <= 1.5 : 0.427
+x1 <= 2.5 : 0.355
+x1 <= 3.5 : 0.383
+x1 <= 4.5 : 0.489
+x1 <= 5.5 : 0.483
+x2 <= 0.5 : 0.49
+x2 <= 1.5 : 0.492
+x2 <= 2.5 : 0.492
+x2 <= 3.5 : 0.491
+x2 <= 4.5 : 0.489
+x2 <= 5.5 : 0.483"];
+113 [label="s1 <= 8.5
+--------------
+
+backoff1 <= 0.5 : 0.184
+backoff1 <= 1.5 : 0.194
+backoff1 <= 2.5 : 0.203
+backoff1 <= 3.5 : 0.212
+backoff1 <= 4.5 : 0.22
+backoff1 <= 5.5 : 0.228
+backoff1 <= 6.5 : 0.236
+backoff1 <= 7.5 : 0.243
+backoff1 <= 8.5 : 0.25
+backoff1 <= 9.5 : 0.256
+backoff1 <= 10.5 : 0.262
+backoff1 <= 11.5 : 0.268
+backoff1 <= 12.5 : 0.274
+backoff2 <= 0.5 : 0.207
+backoff2 <= 1.5 : 0.218
+backoff2 <= 2.5 : 0.228
+backoff2 <= 3.5 : 0.236
+backoff2 <= 4.5 : 0.243
+backoff2 <= 5.5 : 0.249
+backoff2 <= 6.5 : 0.254
+backoff2 <= 7.5 : 0.259
+backoff2 <= 8.5 : 0.263
+backoff2 <= 9.5 : 0.266
+backoff2 <= 10.5 : 0.269
+backoff2 <= 11.5 : 0.272
+backoff2 <= 12.5 : 0.275
+backoff2 <= 13.5 : 0.277
+bc1 <= 0.5 : 0.277
+bc2 <= 0.5 : 0.217
+c1 <= 0.5 : 0.183
+c1 <= 1.5 : 0.278
+c2 <= 1.0 : 0.278
+s1 <= 7.5 : 0.184
+s1 <= 8.5 : 0.172
+s1 <= 9.5 : 0.254
+s1 <= 10.5 : 0.278
+s2 <= 5.5 : 0.261
+s2 <= 7.0 : 0.212
+s2 <= 8.5 : 0.217
+s2 <= 10.0 : 0.21
+s2 <= 11.5 : 0.203
+x1 <= 1.5 : 0.243
+x2 <= 0.5 : 0.276
+x2 <= 1.5 : 0.278"];
+114 [label="x1 <= 1.5
+--------------
+
+backoff1 <= 0.5 : 0.5
+backoff1 <= 1.5 : 0.536
+backoff1 <= 2.5 : 0.548
+backoff1 <= 3.5 : 0.554
+backoff1 <= 4.5 : 0.557
+backoff1 <= 5.5 : 0.56
+backoff1 <= 6.5 : 0.561
+backoff1 <= 7.5 : 0.562
+backoff1 <= 8.5 : 0.563
+backoff1 <= 9.5 : 0.564
+backoff1 <= 10.5 : 0.565
+backoff1 <= 11.5 : 0.565
+backoff1 <= 12.5 : 0.566
+bc2 <= 0.5 : 0.5
+s1 <= 7.5 : 0.5
+s2 <= 6.5 : 0.516
+s2 <= 10.0 : 0.5
+x1 <= 1.5 : 0.129
+x2 <= 0.5 : 0.516"];
+115 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0.067
+backoff1 <= 1.5 : 0.133
+backoff1 <= 2.5 : 0.167
+backoff1 <= 3.5 : 0.187
+backoff1 <= 4.5 : 0.2
+backoff1 <= 5.5 : 0.21
+backoff1 <= 6.5 : 0.217
+backoff1 <= 7.5 : 0.222
+backoff1 <= 8.5 : 0.227
+backoff1 <= 9.5 : 0.23
+backoff1 <= 10.5 : 0.233
+backoff1 <= 11.5 : 0.236
+backoff1 <= 12.5 : 0.238
+bc2 <= 0.5 : 0.067
+s1 <= 7.5 : 0.067
+s2 <= 6.5 : 0.124
+s2 <= 10.0 : 0.067
+x2 <= 0.5 : 0.124"];
+116 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0.0
+x2 <= 0.5 : 0.0"];
+117 [label="station2_cmd_54"];
+116 -> 117 [label="True"];
+118 [label="send1"];
+116 -> 118 [style="dashed", label="False"];
+115 -> 116 [label="True"];
+119 [label="time"];
+115 -> 119 [style="dashed", label="False"];
+114 -> 115 [label="True"];
+120 [label="station1_cmd_24"];
+114 -> 120 [style="dashed", label="False"];
+113 -> 114 [label="True"];
+121 [label="time"];
+113 -> 121 [style="dashed", label="False"];
+112 -> 113 [label="True"];
+122 [label="x1 <= 3.5
+--------------
+
+backoff2 <= 0.5 : 0.466
+backoff2 <= 1.5 : 0.474
+backoff2 <= 2.5 : 0.478
+backoff2 <= 3.5 : 0.481
+backoff2 <= 4.5 : 0.484
+backoff2 <= 5.5 : 0.485
+backoff2 <= 6.5 : 0.487
+backoff2 <= 7.5 : 0.488
+backoff2 <= 8.5 : 0.488
+backoff2 <= 9.5 : 0.489
+backoff2 <= 10.5 : 0.49
+backoff2 <= 11.5 : 0.49
+backoff2 <= 12.5 : 0.491
+backoff2 <= 13.5 : 0.491
+bc1 <= 0.5 : 0.451
+bc2 <= 0.5 : 0.466
+c1 <= 0.5 : 0.443
+c1 <= 1.5 : 0.49
+c2 <= 1.0 : 0.49
+s1 <= 9.5 : 0.444
+s1 <= 10.5 : 0.443
+s2 <= 7.5 : 0.466
+s2 <= 10.0 : 0.466
+s2 <= 11.5 : 0.491
+x1 <= 3.5 : 0.416
+x1 <= 4.5 : 0.466
+x1 <= 5.5 : 0.462
+x2 <= 1.5 : 0.451
+x2 <= 3.5 : 0.475
+x2 <= 4.5 : 0.466
+x2 <= 5.5 : 0.462"];
+123 [label="s1 <= 9.5
+--------------
+
+backoff2 <= 0.5 : 0.484
+backoff2 <= 1.5 : 0.49
+backoff2 <= 2.5 : 0.492
+backoff2 <= 3.5 : 0.494
+backoff2 <= 4.5 : 0.495
+backoff2 <= 5.5 : 0.496
+backoff2 <= 6.5 : 0.496
+backoff2 <= 7.5 : 0.497
+backoff2 <= 8.5 : 0.497
+backoff2 <= 9.5 : 0.497
+backoff2 <= 10.5 : 0.497
+backoff2 <= 11.5 : 0.498
+backoff2 <= 12.5 : 0.498
+backoff2 <= 13.5 : 0.498
+bc1 <= 0.5 : 0.469
+bc2 <= 0.5 : 0.484
+c1 <= 0.5 : 0.484
+c1 <= 1.5 : 0.484
+c2 <= 1.0 : 0.484
+s1 <= 9.5 : 0.059
+s1 <= 10.5 : 0.484
+s2 <= 7.5 : 0.484
+s2 <= 10.0 : 0.494
+s2 <= 11.5 : 0.498
+x2 <= 1.5 : 0.469"];
+124 [label="time"];
+123 -> 124 [label="True"];
+125 [label="bc1 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 0.062
+backoff2 <= 1.5 : 0.083
+backoff2 <= 2.5 : 0.094
+backoff2 <= 3.5 : 0.1
+backoff2 <= 4.5 : 0.104
+backoff2 <= 5.5 : 0.107
+backoff2 <= 6.5 : 0.109
+backoff2 <= 7.5 : 0.111
+backoff2 <= 8.5 : 0.112
+backoff2 <= 9.5 : 0.114
+backoff2 <= 10.5 : 0.115
+backoff2 <= 11.5 : 0.115
+backoff2 <= 12.5 : 0.116
+backoff2 <= 13.5 : 0.117
+bc1 <= 0.5 : 0.0
+bc2 <= 0.5 : 0.062
+c1 <= 0.5 : 0.0
+s1 <= 10.5 : 0.0
+s2 <= 8.5 : 0.062
+s2 <= 11.5 : 0.117
+x2 <= 1.5 : 0.0"];
+126 [label="time"];
+125 -> 126 [label="True"];
+127 [label="finish1"];
+125 -> 127 [style="dashed", label="False"];
+123 -> 125 [style="dashed", label="False"];
+122 -> 123 [label="True"];
+128 [label="c1 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 0.168
+backoff2 <= 1.5 : 0.193
+backoff2 <= 2.5 : 0.211
+backoff2 <= 3.5 : 0.224
+backoff2 <= 4.5 : 0.234
+backoff2 <= 5.5 : 0.242
+backoff2 <= 6.5 : 0.249
+backoff2 <= 7.5 : 0.254
+backoff2 <= 8.5 : 0.259
+backoff2 <= 9.5 : 0.263
+backoff2 <= 10.5 : 0.267
+backoff2 <= 11.5 : 0.27
+backoff2 <= 12.5 : 0.272
+backoff2 <= 13.5 : 0.275
+bc1 <= 0.5 : 0.132
+bc2 <= 0.5 : 0.168
+c1 <= 0.5 : 0.07
+c1 <= 1.5 : 0.275
+c2 <= 1.0 : 0.275
+s1 <= 10.0 : 0.07
+s2 <= 7.5 : 0.168
+s2 <= 10.0 : 0.132
+s2 <= 11.5 : 0.275
+x1 <= 4.5 : 0.152
+x1 <= 5.5 : 0.187
+x2 <= 2.0 : 0.132
+x2 <= 4.5 : 0.152
+x2 <= 5.5 : 0.187"];
+129 [label="x1 <= 5.5
+--------------
+
+x1 <= 4.5 : 0.333
+x1 <= 5.5 : 0.0
+x2 <= 4.5 : 0.333
+x2 <= 5.5 : 0.0"];
+130 [label="time"];
+129 -> 130 [label="True"];
+131 [label="station1_cmd_39"];
+129 -> 131 [style="dashed", label="False"];
+128 -> 129 [label="True"];
+132 [label="finish1"];
+128 -> 132 [style="dashed", label="False"];
+122 -> 128 [style="dashed", label="False"];
+112 -> 122 [style="dashed", label="False"];
+88 -> 112 [style="dashed", label="False"];
+0 -> 88 [style="dashed", label="False"];
+
+}

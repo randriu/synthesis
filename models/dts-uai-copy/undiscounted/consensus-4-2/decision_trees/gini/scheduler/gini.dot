@@ -1,0 +1,1018 @@
+digraph {
+0 [label="pc1 <= 1.5
+--------------
+
+coin1 <= 0.5 : 0.592
+coin2 <= 0.5 : 0.792
+coin3 <= 0.5 : 0.792
+coin4 <= 0.5 : 0.789
+counter <= 1.5 : 0.791
+counter <= 2.5 : 0.79
+counter <= 3.5 : 0.789
+counter <= 4.5 : 0.786
+counter <= 5.5 : 0.789
+counter <= 6.5 : 0.791
+counter <= 7.5 : 0.792
+counter <= 8.5 : 0.792
+counter <= 9.5 : 0.792
+counter <= 10.5 : 0.792
+counter <= 11.5 : 0.792
+counter <= 12.5 : 0.792
+counter <= 13.5 : 0.792
+counter <= 14.5 : 0.792
+counter <= 15.5 : 0.792
+counter <= 16.5 : 0.792
+counter <= 17.5 : 0.791
+counter <= 18.5 : 0.789
+counter <= 19.5 : 0.786
+counter <= 20.5 : 0.789
+counter <= 21.5 : 0.79
+counter <= 22.5 : 0.791
+pc1 <= 0.5 : 0.59
+pc1 <= 1.5 : 0.583
+pc1 <= 2.5 : 0.787
+pc2 <= 0.5 : 0.792
+pc2 <= 1.5 : 0.792
+pc2 <= 2.5 : 0.788
+pc3 <= 0.5 : 0.792
+pc3 <= 1.5 : 0.792
+pc3 <= 2.5 : 0.789
+pc4 <= 0.5 : 0.791
+pc4 <= 1.5 : 0.792
+pc4 <= 2.5 : 0.789"];
+1 [label="coin1 <= 0.5
+--------------
+
+coin1 <= 0.5 : 0.416
+coin2 <= 0.5 : 0.708
+coin3 <= 0.5 : 0.708
+counter <= 5.5 : 0.706
+counter <= 6.5 : 0.707
+counter <= 7.5 : 0.708
+counter <= 8.5 : 0.708
+counter <= 9.5 : 0.708
+counter <= 10.5 : 0.708
+counter <= 11.5 : 0.708
+counter <= 12.5 : 0.708
+counter <= 13.5 : 0.708
+counter <= 14.5 : 0.708
+counter <= 15.5 : 0.708
+counter <= 16.5 : 0.708
+counter <= 17.5 : 0.707
+counter <= 18.5 : 0.706
+pc1 <= 0.5 : 0.419
+pc2 <= 0.5 : 0.708
+pc2 <= 1.5 : 0.707
+pc3 <= 0.5 : 0.708
+pc3 <= 1.5 : 0.708
+pc4 <= 1.0 : 0.707"];
+2 [label="pc1 <= 0.5
+--------------
+
+coin2 <= 0.5 : 0.571
+coin3 <= 0.5 : 0.572
+counter <= 5.5 : 0.566
+counter <= 6.5 : 0.57
+counter <= 7.5 : 0.571
+counter <= 8.5 : 0.571
+counter <= 9.5 : 0.571
+counter <= 10.5 : 0.571
+counter <= 11.5 : 0.571
+counter <= 12.5 : 0.57
+counter <= 13.5 : 0.57
+counter <= 14.5 : 0.57
+counter <= 15.5 : 0.571
+counter <= 16.5 : 0.571
+counter <= 17.5 : 0.571
+counter <= 18.5 : 0.572
+pc1 <= 0.5 : 0.144
+pc2 <= 0.5 : 0.571
+pc2 <= 1.5 : 0.57
+pc3 <= 0.5 : 0.571
+pc3 <= 1.5 : 0.571
+pc4 <= 1.0 : 0.571"];
+3 [label="counter <= 8.5
+--------------
+
+coin2 <= 0.5 : 0.195
+coin3 <= 0.5 : 0.195
+counter <= 5.5 : 0.195
+counter <= 6.5 : 0.194
+counter <= 7.5 : 0.193
+counter <= 8.5 : 0.192
+counter <= 9.5 : 0.192
+counter <= 10.5 : 0.193
+counter <= 11.5 : 0.193
+counter <= 12.5 : 0.193
+counter <= 13.5 : 0.193
+counter <= 14.5 : 0.192
+counter <= 15.5 : 0.192
+counter <= 16.5 : 0.193
+counter <= 17.5 : 0.194
+counter <= 18.5 : 0.195
+pc2 <= 0.5 : 0.194
+pc2 <= 1.5 : 0.193
+pc3 <= 0.5 : 0.194
+pc3 <= 1.5 : 0.194
+pc4 <= 1.0 : 0.194"];
+4 [label="process1_cmd_0"];
+3 -> 4 [label="True"];
+5 [label="counter <= 12.5
+--------------
+
+coin2 <= 0.5 : 0.248
+coin3 <= 0.5 : 0.248
+counter <= 9.5 : 0.248
+counter <= 10.5 : 0.247
+counter <= 11.5 : 0.248
+counter <= 12.5 : 0.239
+counter <= 13.5 : 0.241
+counter <= 14.5 : 0.239
+counter <= 15.5 : 0.24
+counter <= 16.5 : 0.243
+counter <= 17.5 : 0.246
+counter <= 18.5 : 0.248
+pc2 <= 0.5 : 0.247
+pc2 <= 1.5 : 0.245
+pc3 <= 0.5 : 0.247
+pc3 <= 1.5 : 0.247
+pc4 <= 1.0 : 0.247"];
+6 [label="counter <= 11.5
+--------------
+
+coin2 <= 0.5 : 0.388
+coin3 <= 0.5 : 0.391
+counter <= 9.5 : 0.401
+counter <= 10.5 : 0.393
+counter <= 11.5 : 0.359
+pc2 <= 0.5 : 0.403
+pc2 <= 1.5 : 0.391
+pc3 <= 0.5 : 0.404
+pc3 <= 1.5 : 0.396
+pc4 <= 1.0 : 0.394"];
+7 [label="coin2 <= 0.5
+--------------
+
+coin2 <= 0.5 : 0.195
+coin3 <= 0.5 : 0.2
+counter <= 9.5 : 0.232
+counter <= 10.5 : 0.228
+pc2 <= 0.5 : 0.232
+pc2 <= 1.5 : 0.23
+pc3 <= 0.5 : 0.232
+pc3 <= 1.5 : 0.23
+pc4 <= 1.0 : 0.232"];
+8 [label="coin3 <= 0.5
+--------------
+
+coin3 <= 0.5 : 0.124
+counter <= 9.5 : 0.159
+counter <= 10.5 : 0.157
+pc2 <= 0.5 : 0.159
+pc2 <= 1.5 : 0.155
+pc3 <= 0.5 : 0.156
+pc3 <= 1.5 : 0.156
+pc4 <= 1.0 : 0.159"];
+9 [label="pc2 <= 1.5
+--------------
+
+counter <= 9.5 : 0.063
+counter <= 10.5 : 0.06
+pc2 <= 0.5 : 0.063
+pc2 <= 1.5 : 0.059
+pc3 <= 0.5 : 0.063
+pc3 <= 1.5 : 0.059
+pc4 <= 1.0 : 0.064"];
+10 [label="process1_cmd_0"];
+9 -> 10 [label="True"];
+11 [label="counter <= 10.5
+--------------
+
+counter <= 9.5 : 0.185
+counter <= 10.5 : 0.148
+pc3 <= 0.5 : 0.185
+pc3 <= 1.5 : 0.148"];
+12 [label="process1_cmd_0"];
+11 -> 12 [label="True"];
+13 [label="pc3 <= 1.5
+--------------
+
+pc3 <= 0.5 : 0.333
+pc3 <= 1.5 : 0.0"];
+14 [label="process1_cmd_0"];
+13 -> 14 [label="True"];
+15 [label="process2_cmd_12"];
+13 -> 15 [style="dashed", label="False"];
+11 -> 13 [style="dashed", label="False"];
+9 -> 11 [style="dashed", label="False"];
+8 -> 9 [label="True"];
+16 [label="counter <= 10.5
+--------------
+
+counter <= 9.5 : 0.3
+counter <= 10.5 : 0.267
+pc2 <= 1.0 : 0.467"];
+17 [label="counter <= 9.5
+--------------
+
+counter <= 9.5 : 0.333
+pc2 <= 1.0 : 0.333"];
+18 [label="process3_cmd_16"];
+17 -> 18 [label="True"];
+19 [label="pc2 <= 1.0
+--------------
+
+pc2 <= 1.0 : 0.0"];
+20 [label="process3_cmd_16"];
+19 -> 20 [label="True"];
+21 [label="process1_cmd_0"];
+19 -> 21 [style="dashed", label="False"];
+17 -> 19 [style="dashed", label="False"];
+16 -> 17 [label="True"];
+22 [label="process1_cmd_0"];
+16 -> 22 [style="dashed", label="False"];
+8 -> 16 [style="dashed", label="False"];
+7 -> 8 [label="True"];
+23 [label="counter <= 10.5
+--------------
+
+coin3 <= 0.5 : 0.5
+counter <= 10.5 : 0.0
+pc3 <= 0.5 : 0.5"];
+24 [label="process2_cmd_9"];
+23 -> 24 [label="True"];
+25 [label="process1_cmd_0"];
+23 -> 25 [style="dashed", label="False"];
+7 -> 23 [style="dashed", label="False"];
+6 -> 7 [label="True"];
+26 [label="pc2 <= 1.5
+--------------
+
+coin2 <= 0.5 : 0.664
+coin3 <= 0.5 : 0.664
+pc2 <= 0.5 : 0.633
+pc2 <= 1.5 : 0.456
+pc3 <= 0.5 : 0.633
+pc3 <= 1.5 : 0.456
+pc4 <= 1.0 : 0.523"];
+27 [label="pc3 <= 1.5
+--------------
+
+coin2 <= 0.5 : 0.562
+coin3 <= 0.5 : 0.537
+pc2 <= 0.5 : 0.542
+pc3 <= 0.5 : 0.481
+pc3 <= 1.5 : 0.259
+pc4 <= 1.0 : 0.35"];
+28 [label="pc4 <= 1.0
+--------------
+
+coin2 <= 0.5 : 0.333
+coin3 <= 0.5 : 0.333
+pc2 <= 0.5 : 0.296
+pc3 <= 0.5 : 0.296
+pc4 <= 1.0 : 0.0"];
+29 [label="process1_cmd_0"];
+28 -> 29 [label="True"];
+30 [label="process4_cmd_26"];
+28 -> 30 [style="dashed", label="False"];
+27 -> 28 [label="True"];
+31 [label="process3_cmd_19"];
+27 -> 31 [style="dashed", label="False"];
+26 -> 27 [label="True"];
+32 [label="process2_cmd_12"];
+26 -> 32 [style="dashed", label="False"];
+6 -> 26 [style="dashed", label="False"];
+5 -> 6 [label="True"];
+33 [label="counter <= 15.5
+--------------
+
+coin2 <= 0.5 : 0.118
+coin3 <= 0.5 : 0.118
+counter <= 13.5 : 0.12
+counter <= 14.5 : 0.116
+counter <= 15.5 : 0.116
+counter <= 16.5 : 0.118
+counter <= 17.5 : 0.119
+counter <= 18.5 : 0.12
+pc2 <= 0.5 : 0.121
+pc2 <= 1.5 : 0.12
+pc3 <= 0.5 : 0.121
+pc3 <= 1.5 : 0.12
+pc4 <= 1.0 : 0.121"];
+34 [label="coin2 <= 0.5
+--------------
+
+coin2 <= 0.5 : 0.224
+coin3 <= 0.5 : 0.224
+counter <= 13.5 : 0.228
+counter <= 14.5 : 0.232
+pc2 <= 0.5 : 0.232
+pc2 <= 1.5 : 0.23
+pc3 <= 0.5 : 0.232
+pc3 <= 1.5 : 0.23
+pc4 <= 1.0 : 0.232"];
+35 [label="coin3 <= 0.5
+--------------
+
+coin3 <= 0.5 : 0.31
+counter <= 13.5 : 0.311
+counter <= 14.5 : 0.319
+pc2 <= 0.5 : 0.313
+pc2 <= 1.5 : 0.317
+pc3 <= 0.5 : 0.318
+pc3 <= 1.5 : 0.316"];
+36 [label="counter <= 13.5
+--------------
+
+counter <= 13.5 : 0.376
+counter <= 14.5 : 0.392
+pc2 <= 0.5 : 0.384
+pc2 <= 1.5 : 0.389
+pc3 <= 0.5 : 0.384
+pc3 <= 1.5 : 0.384"];
+37 [label="pc3 <= 1.5
+--------------
+
+pc2 <= 0.5 : 0.2
+pc2 <= 1.5 : 0.167
+pc3 <= 0.5 : 0.2
+pc3 <= 1.5 : 0.125"];
+38 [label="process1_cmd_0"];
+37 -> 38 [label="True"];
+39 [label="pc2 <= 1.0
+--------------
+
+pc2 <= 1.0 : 0.0"];
+40 [label="process1_cmd_0"];
+39 -> 40 [label="True"];
+41 [label="process2_cmd_12"];
+39 -> 41 [style="dashed", label="False"];
+37 -> 39 [style="dashed", label="False"];
+36 -> 37 [label="True"];
+42 [label="pc3 <= 1.5
+--------------
+
+counter <= 14.5 : 0.45
+pc2 <= 0.5 : 0.45
+pc2 <= 1.5 : 0.436
+pc3 <= 0.5 : 0.45
+pc3 <= 1.5 : 0.41"];
+43 [label="pc3 <= 0.5
+--------------
+
+counter <= 14.5 : 0.556
+pc2 <= 0.5 : 0.556
+pc2 <= 1.5 : 0.522
+pc3 <= 0.5 : 0.456"];
+44 [label="counter <= 14.5
+--------------
+
+counter <= 14.5 : 0.267
+pc2 <= 0.5 : 0.267
+pc2 <= 1.5 : 0.267"];
+45 [label="pc2 <= 0.5
+--------------
+
+pc2 <= 0.5 : 0.333
+pc2 <= 1.5 : 0.333"];
+46 [label="process1_cmd_0"];
+45 -> 46 [label="True"];
+47 [label="pc2 <= 1.5
+--------------
+
+pc2 <= 1.5 : 0.0"];
+48 [label="process2_cmd_8"];
+47 -> 48 [label="True"];
+49 [label="process1_cmd_0"];
+47 -> 49 [style="dashed", label="False"];
+45 -> 47 [style="dashed", label="False"];
+44 -> 45 [label="True"];
+50 [label="process1_cmd_0"];
+44 -> 50 [style="dashed", label="False"];
+43 -> 44 [label="True"];
+51 [label="counter <= 14.5
+--------------
+
+counter <= 14.5 : 0.5
+pc2 <= 0.5 : 0.5
+pc2 <= 1.5 : 0.5"];
+52 [label="pc2 <= 0.5
+--------------
+
+pc2 <= 0.5 : 0.333
+pc2 <= 1.5 : 0.333"];
+53 [label="process3_cmd_15"];
+52 -> 53 [label="True"];
+54 [label="pc2 <= 1.5
+--------------
+
+pc2 <= 1.5 : 0.0"];
+55 [label="process2_cmd_8"];
+54 -> 55 [label="True"];
+56 [label="process1_cmd_0"];
+54 -> 56 [style="dashed", label="False"];
+52 -> 54 [style="dashed", label="False"];
+51 -> 52 [label="True"];
+57 [label="process3_cmd_15"];
+51 -> 57 [style="dashed", label="False"];
+43 -> 51 [style="dashed", label="False"];
+42 -> 43 [label="True"];
+58 [label="process1_cmd_0"];
+42 -> 58 [style="dashed", label="False"];
+36 -> 42 [style="dashed", label="False"];
+35 -> 36 [label="True"];
+59 [label="process1_cmd_0"];
+35 -> 59 [style="dashed", label="False"];
+34 -> 35 [label="True"];
+60 [label="process1_cmd_0"];
+34 -> 60 [style="dashed", label="False"];
+33 -> 34 [label="True"];
+61 [label="process1_cmd_0"];
+33 -> 61 [style="dashed", label="False"];
+5 -> 33 [style="dashed", label="False"];
+3 -> 5 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+62 [label="counter <= 5.5
+--------------
+
+coin2 <= 0.5 : 0.087
+coin3 <= 0.5 : 0.086
+counter <= 5.5 : 0.054
+counter <= 6.5 : 0.071
+counter <= 7.5 : 0.077
+counter <= 8.5 : 0.08
+counter <= 9.5 : 0.082
+counter <= 10.5 : 0.083
+counter <= 11.5 : 0.084
+counter <= 12.5 : 0.085
+counter <= 13.5 : 0.086
+counter <= 14.5 : 0.086
+counter <= 15.5 : 0.086
+counter <= 16.5 : 0.087
+counter <= 17.5 : 0.087
+counter <= 18.5 : 0.087
+pc2 <= 0.5 : 0.087
+pc2 <= 1.5 : 0.086
+pc3 <= 0.5 : 0.087
+pc3 <= 1.5 : 0.086
+pc4 <= 1.0 : 0.087"];
+63 [label="pc2 <= 1.5
+--------------
+
+coin2 <= 0.5 : 0.655
+pc2 <= 0.5 : 0.667
+pc2 <= 1.5 : 0.5
+pc3 <= 0.5 : 0.712
+pc3 <= 1.5 : 0.636
+pc4 <= 1.0 : 0.655"];
+64 [label="pc3 <= 1.5
+--------------
+
+coin2 <= 0.5 : 0.536
+pc2 <= 0.5 : 0.617
+pc3 <= 0.5 : 0.583
+pc3 <= 1.5 : 0.45
+pc4 <= 1.0 : 0.536"];
+65 [label="pc4 <= 1.0
+--------------
+
+pc2 <= 0.5 : 0.267
+pc3 <= 0.5 : 0.267
+pc4 <= 1.0 : 0.0"];
+66 [label="process1_cmd_1"];
+65 -> 66 [label="True"];
+67 [label="process4_cmd_26"];
+65 -> 67 [style="dashed", label="False"];
+64 -> 65 [label="True"];
+68 [label="coin2 <= 0.5
+--------------
+
+coin2 <= 0.5 : 0.333
+pc2 <= 0.5 : 0.333"];
+69 [label="pc2 <= 0.5
+--------------
+
+pc2 <= 0.5 : 0.0"];
+70 [label="process2_cmd_7"];
+69 -> 70 [label="True"];
+71 [label="process3_cmd_19"];
+69 -> 71 [style="dashed", label="False"];
+68 -> 69 [label="True"];
+72 [label="process2_cmd_9"];
+68 -> 72 [style="dashed", label="False"];
+64 -> 68 [style="dashed", label="False"];
+63 -> 64 [label="True"];
+73 [label="process2_cmd_12"];
+63 -> 73 [style="dashed", label="False"];
+62 -> 63 [label="True"];
+74 [label="process1_cmd_1"];
+62 -> 74 [style="dashed", label="False"];
+2 -> 62 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+75 [label="counter <= 18.5
+--------------
+
+coin2 <= 0.5 : 0.087
+coin3 <= 0.5 : 0.087
+counter <= 5.5 : 0.087
+counter <= 6.5 : 0.087
+counter <= 7.5 : 0.087
+counter <= 8.5 : 0.086
+counter <= 9.5 : 0.086
+counter <= 10.5 : 0.086
+counter <= 11.5 : 0.085
+counter <= 12.5 : 0.084
+counter <= 13.5 : 0.083
+counter <= 14.5 : 0.082
+counter <= 15.5 : 0.08
+counter <= 16.5 : 0.077
+counter <= 17.5 : 0.071
+counter <= 18.5 : 0.054
+pc2 <= 0.5 : 0.087
+pc2 <= 1.5 : 0.086
+pc3 <= 0.5 : 0.087
+pc3 <= 1.5 : 0.086
+pc4 <= 1.0 : 0.087"];
+76 [label="process1_cmd_2"];
+75 -> 76 [label="True"];
+77 [label="pc2 <= 1.5
+--------------
+
+coin2 <= 0.5 : 0.669
+coin3 <= 0.5 : 0.721
+pc2 <= 0.5 : 0.667
+pc2 <= 1.5 : 0.5
+pc3 <= 0.5 : 0.712
+pc3 <= 1.5 : 0.636
+pc4 <= 1.0 : 0.655"];
+78 [label="pc3 <= 1.5
+--------------
+
+coin2 <= 0.5 : 0.625
+coin3 <= 0.5 : 0.617
+pc2 <= 0.5 : 0.617
+pc3 <= 0.5 : 0.583
+pc3 <= 1.5 : 0.45
+pc4 <= 1.0 : 0.536"];
+79 [label="pc4 <= 1.0
+--------------
+
+coin2 <= 0.5 : 0.267
+coin3 <= 0.5 : 0.267
+pc2 <= 0.5 : 0.267
+pc3 <= 0.5 : 0.267
+pc4 <= 1.0 : 0.0"];
+80 [label="process1_cmd_2"];
+79 -> 80 [label="True"];
+81 [label="process4_cmd_26"];
+79 -> 81 [style="dashed", label="False"];
+78 -> 79 [label="True"];
+82 [label="coin2 <= 0.5
+--------------
+
+coin2 <= 0.5 : 0.333
+pc2 <= 0.5 : 0.333"];
+83 [label="pc2 <= 0.5
+--------------
+
+pc2 <= 0.5 : 0.0"];
+84 [label="process2_cmd_7"];
+83 -> 84 [label="True"];
+85 [label="process2_cmd_8"];
+83 -> 85 [style="dashed", label="False"];
+82 -> 83 [label="True"];
+86 [label="process3_cmd_19"];
+82 -> 86 [style="dashed", label="False"];
+78 -> 82 [style="dashed", label="False"];
+77 -> 78 [label="True"];
+87 [label="process2_cmd_12"];
+77 -> 87 [style="dashed", label="False"];
+75 -> 77 [style="dashed", label="False"];
+1 -> 75 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+88 [label="counter <= 4.5
+--------------
+
+coin1 <= 0.5 : 0.256
+coin2 <= 0.5 : 0.281
+coin3 <= 0.5 : 0.283
+coin4 <= 0.5 : 0.252
+counter <= 1.5 : 0.274
+counter <= 2.5 : 0.267
+counter <= 3.5 : 0.26
+counter <= 4.5 : 0.221
+counter <= 5.5 : 0.253
+counter <= 6.5 : 0.267
+counter <= 7.5 : 0.274
+counter <= 8.5 : 0.279
+counter <= 9.5 : 0.282
+counter <= 10.5 : 0.285
+counter <= 11.5 : 0.286
+counter <= 12.5 : 0.286
+counter <= 13.5 : 0.285
+counter <= 14.5 : 0.282
+counter <= 15.5 : 0.279
+counter <= 16.5 : 0.274
+counter <= 17.5 : 0.267
+counter <= 18.5 : 0.253
+counter <= 19.5 : 0.221
+counter <= 20.5 : 0.26
+counter <= 21.5 : 0.267
+counter <= 22.5 : 0.274
+pc1 <= 2.5 : 0.229
+pc2 <= 0.5 : 0.282
+pc2 <= 1.5 : 0.285
+pc2 <= 2.5 : 0.244
+pc3 <= 0.5 : 0.285
+pc3 <= 1.5 : 0.285
+pc3 <= 2.5 : 0.258
+pc4 <= 0.5 : 0.256
+pc4 <= 1.5 : 0.284
+pc4 <= 2.5 : 0.269"];
+89 [label="coin2 <= 0.5
+--------------
+
+coin2 <= 0.5 : 0.804
+coin3 <= 0.5 : 0.858
+coin4 <= 0.5 : 0.858
+counter <= 1.5 : 0.857
+counter <= 2.5 : 0.854
+counter <= 3.5 : 0.85
+pc1 <= 2.5 : 0.847
+pc2 <= 0.5 : 0.804
+pc2 <= 1.5 : 0.85
+pc2 <= 2.5 : 0.852
+pc3 <= 0.5 : 0.875
+pc3 <= 1.5 : 0.854
+pc3 <= 2.5 : 0.856
+pc4 <= 0.5 : 0.839
+pc4 <= 1.5 : 0.857
+pc4 <= 2.5 : 0.858"];
+90 [label="pc2 <= 0.5
+--------------
+
+coin3 <= 0.5 : 0.846
+coin4 <= 0.5 : 0.846
+counter <= 1.5 : 0.845
+counter <= 2.5 : 0.843
+counter <= 3.5 : 0.839
+pc1 <= 2.5 : 0.837
+pc2 <= 0.5 : 0.786
+pc2 <= 1.5 : 0.839
+pc2 <= 2.5 : 0.841
+pc3 <= 0.5 : 0.857
+pc3 <= 1.5 : 0.843
+pc3 <= 2.5 : 0.844
+pc4 <= 0.5 : 0.829
+pc4 <= 1.5 : 0.845
+pc4 <= 2.5 : 0.846"];
+91 [label="process2_cmd_7"];
+90 -> 91 [label="True"];
+92 [label="coin3 <= 0.5
+--------------
+
+coin3 <= 0.5 : 0.833
+coin4 <= 0.5 : 0.833
+counter <= 1.5 : 0.833
+counter <= 2.5 : 0.833
+counter <= 3.5 : 0.833
+pc1 <= 2.5 : 0.833
+pc2 <= 1.5 : 0.833
+pc2 <= 2.5 : 0.833
+pc3 <= 0.5 : 0.833
+pc3 <= 1.5 : 0.833
+pc3 <= 2.5 : 0.833
+pc4 <= 0.5 : 0.833
+pc4 <= 1.5 : 0.833
+pc4 <= 2.5 : 0.833"];
+93 [label="coin4 <= 0.5
+--------------
+
+coin4 <= 0.5 : 0.818
+counter <= 1.5 : 0.818
+counter <= 2.5 : 0.818
+counter <= 3.5 : 0.818
+pc1 <= 2.5 : 0.818
+pc2 <= 1.5 : 0.818
+pc2 <= 2.5 : 0.818
+pc3 <= 0.5 : 0.818
+pc3 <= 1.5 : 0.818
+pc3 <= 2.5 : 0.818
+pc4 <= 0.5 : 0.818
+pc4 <= 1.5 : 0.818
+pc4 <= 2.5 : 0.818"];
+94 [label="pc2 <= 2.5
+--------------
+
+counter <= 1.5 : 0.8
+counter <= 2.5 : 0.8
+counter <= 3.5 : 0.8
+pc1 <= 2.5 : 0.8
+pc2 <= 1.5 : 0.8
+pc2 <= 2.5 : 0.8
+pc3 <= 0.5 : 0.8
+pc3 <= 1.5 : 0.8
+pc3 <= 2.5 : 0.8
+pc4 <= 0.5 : 0.8
+pc4 <= 1.5 : 0.8
+pc4 <= 2.5 : 0.8"];
+95 [label="counter <= 3.5
+--------------
+
+counter <= 3.5 : 0.6
+pc1 <= 2.5 : 0.6
+pc2 <= 1.5 : 0.6
+pc3 <= 0.5 : 0.6
+pc4 <= 0.5 : 0.6"];
+96 [label="process2_cmd_10"];
+95 -> 96 [label="True"];
+97 [label="pc1 <= 2.5
+--------------
+
+pc1 <= 2.5 : 0.5
+pc3 <= 0.5 : 0.5
+pc4 <= 0.5 : 0.5"];
+98 [label="pc3 <= 0.5
+--------------
+
+pc3 <= 0.5 : 0.333
+pc4 <= 0.5 : 0.333"];
+99 [label="process3_cmd_14"];
+98 -> 99 [label="True"];
+100 [label="pc4 <= 0.5
+--------------
+
+pc4 <= 0.5 : 0.0"];
+101 [label="process4_cmd_21"];
+100 -> 101 [label="True"];
+102 [label="process1_cmd_3"];
+100 -> 102 [style="dashed", label="False"];
+98 -> 100 [style="dashed", label="False"];
+97 -> 98 [label="True"];
+103 [label="process2_cmd_8"];
+97 -> 103 [style="dashed", label="False"];
+95 -> 97 [style="dashed", label="False"];
+94 -> 95 [label="True"];
+104 [label="counter <= 1.5
+--------------
+
+counter <= 1.5 : 0.6
+counter <= 2.5 : 0.6
+pc3 <= 1.5 : 0.6
+pc3 <= 2.5 : 0.6
+pc4 <= 1.5 : 0.6
+pc4 <= 2.5 : 0.6"];
+105 [label="pc4 <= 2.5
+--------------
+
+pc4 <= 2.5 : 0.0"];
+106 [label="process4_cmd_24"];
+105 -> 106 [label="True"];
+107 [label="__no_label__"];
+105 -> 107 [style="dashed", label="False"];
+104 -> 105 [label="True"];
+108 [label="counter <= 2.5
+--------------
+
+counter <= 2.5 : 0.333
+pc3 <= 1.5 : 0.333
+pc3 <= 2.5 : 0.333"];
+109 [label="pc3 <= 2.5
+--------------
+
+pc3 <= 2.5 : 0.0"];
+110 [label="process3_cmd_17"];
+109 -> 110 [label="True"];
+111 [label="process4_cmd_22"];
+109 -> 111 [style="dashed", label="False"];
+108 -> 109 [label="True"];
+112 [label="process3_cmd_15"];
+108 -> 112 [style="dashed", label="False"];
+104 -> 108 [style="dashed", label="False"];
+94 -> 104 [style="dashed", label="False"];
+93 -> 94 [label="True"];
+113 [label="process4_cmd_23"];
+93 -> 113 [style="dashed", label="False"];
+92 -> 93 [label="True"];
+114 [label="process3_cmd_16"];
+92 -> 114 [style="dashed", label="False"];
+90 -> 92 [style="dashed", label="False"];
+89 -> 90 [label="True"];
+115 [label="process2_cmd_9"];
+89 -> 115 [style="dashed", label="False"];
+88 -> 89 [label="True"];
+116 [label="counter <= 19.5
+--------------
+
+coin1 <= 0.5 : 0.124
+coin2 <= 0.5 : 0.153
+coin3 <= 0.5 : 0.154
+coin4 <= 0.5 : 0.124
+counter <= 5.5 : 0.161
+counter <= 6.5 : 0.161
+counter <= 7.5 : 0.16
+counter <= 8.5 : 0.16
+counter <= 9.5 : 0.159
+counter <= 10.5 : 0.158
+counter <= 11.5 : 0.156
+counter <= 12.5 : 0.154
+counter <= 13.5 : 0.151
+counter <= 14.5 : 0.148
+counter <= 15.5 : 0.143
+counter <= 16.5 : 0.138
+counter <= 17.5 : 0.129
+counter <= 18.5 : 0.113
+counter <= 19.5 : 0.078
+counter <= 20.5 : 0.129
+counter <= 21.5 : 0.138
+counter <= 22.5 : 0.147
+pc1 <= 2.5 : 0.124
+pc2 <= 0.5 : 0.16
+pc2 <= 1.5 : 0.161
+pc2 <= 2.5 : 0.134
+pc3 <= 0.5 : 0.161
+pc3 <= 1.5 : 0.161
+pc3 <= 2.5 : 0.143
+pc4 <= 0.5 : 0.148
+pc4 <= 1.5 : 0.161
+pc4 <= 2.5 : 0.152"];
+117 [label="process1_cmd_5"];
+116 -> 117 [label="True"];
+118 [label="pc2 <= 0.5
+--------------
+
+coin1 <= 0.5 : 0.847
+coin2 <= 0.5 : 0.825
+coin3 <= 0.5 : 0.875
+coin4 <= 0.5 : 0.847
+counter <= 20.5 : 0.85
+counter <= 21.5 : 0.854
+counter <= 22.5 : 0.857
+pc1 <= 2.5 : 0.847
+pc2 <= 0.5 : 0.804
+pc2 <= 1.5 : 0.85
+pc2 <= 2.5 : 0.852
+pc3 <= 0.5 : 0.875
+pc3 <= 1.5 : 0.854
+pc3 <= 2.5 : 0.856
+pc4 <= 0.5 : 0.839
+pc4 <= 1.5 : 0.857
+pc4 <= 2.5 : 0.858"];
+119 [label="process2_cmd_7"];
+118 -> 119 [label="True"];
+120 [label="coin2 <= 0.5
+--------------
+
+coin1 <= 0.5 : 0.837
+coin2 <= 0.5 : 0.81
+coin3 <= 0.5 : 0.857
+coin4 <= 0.5 : 0.837
+counter <= 20.5 : 0.839
+counter <= 21.5 : 0.843
+counter <= 22.5 : 0.845
+pc1 <= 2.5 : 0.837
+pc2 <= 1.5 : 0.839
+pc2 <= 2.5 : 0.841
+pc3 <= 0.5 : 0.857
+pc3 <= 1.5 : 0.843
+pc3 <= 2.5 : 0.844
+pc4 <= 0.5 : 0.829
+pc4 <= 1.5 : 0.845
+pc4 <= 2.5 : 0.846"];
+121 [label="coin1 <= 0.5
+--------------
+
+coin1 <= 0.5 : 0.0
+coin3 <= 0.5 : 0.333
+coin4 <= 0.5 : 0.0
+counter <= 20.5 : 0.0
+pc1 <= 2.5 : 0.0
+pc2 <= 1.5 : 0.0
+pc3 <= 0.5 : 0.333
+pc4 <= 0.5 : 0.0"];
+122 [label="process2_cmd_8"];
+121 -> 122 [label="True"];
+123 [label="process2_cmd_11"];
+121 -> 123 [style="dashed", label="False"];
+120 -> 121 [label="True"];
+124 [label="coin1 <= 0.5
+--------------
+
+coin1 <= 0.5 : 0.818
+coin3 <= 0.5 : 0.818
+coin4 <= 0.5 : 0.818
+counter <= 20.5 : 0.818
+counter <= 21.5 : 0.818
+counter <= 22.5 : 0.818
+pc1 <= 2.5 : 0.818
+pc2 <= 2.0 : 0.818
+pc3 <= 0.5 : 0.818
+pc3 <= 1.5 : 0.818
+pc3 <= 2.5 : 0.818
+pc4 <= 0.5 : 0.818
+pc4 <= 1.5 : 0.818
+pc4 <= 2.5 : 0.818"];
+125 [label="coin3 <= 0.5
+--------------
+
+coin3 <= 0.5 : 0.6
+coin4 <= 0.5 : 0.6
+pc3 <= 0.5 : 0.6
+pc4 <= 0.5 : 0.6"];
+126 [label="pc3 <= 0.5
+--------------
+
+pc3 <= 0.5 : 0.0"];
+127 [label="process3_cmd_14"];
+126 -> 127 [label="True"];
+128 [label="process3_cmd_15"];
+126 -> 128 [style="dashed", label="False"];
+125 -> 126 [label="True"];
+129 [label="coin4 <= 0.5
+--------------
+
+coin4 <= 0.5 : 0.333
+pc4 <= 0.5 : 0.333"];
+130 [label="pc4 <= 0.5
+--------------
+
+pc4 <= 0.5 : 0.0"];
+131 [label="process4_cmd_21"];
+130 -> 131 [label="True"];
+132 [label="process4_cmd_22"];
+130 -> 132 [style="dashed", label="False"];
+129 -> 130 [label="True"];
+133 [label="process1_cmd_4"];
+129 -> 133 [style="dashed", label="False"];
+125 -> 129 [style="dashed", label="False"];
+124 -> 125 [label="True"];
+134 [label="coin3 <= 0.5
+--------------
+
+coin3 <= 0.5 : 0.667
+coin4 <= 0.5 : 0.667
+counter <= 20.5 : 0.667
+counter <= 21.5 : 0.667
+counter <= 22.5 : 0.667
+pc2 <= 2.0 : 0.667
+pc3 <= 1.5 : 0.667
+pc3 <= 2.5 : 0.667
+pc4 <= 1.5 : 0.667
+pc4 <= 2.5 : 0.667"];
+135 [label="process3_cmd_18"];
+134 -> 135 [label="True"];
+136 [label="coin4 <= 0.5
+--------------
+
+coin4 <= 0.5 : 0.6
+counter <= 20.5 : 0.6
+counter <= 21.5 : 0.6
+counter <= 22.5 : 0.6
+pc2 <= 2.0 : 0.6
+pc3 <= 2.0 : 0.6
+pc4 <= 1.5 : 0.6
+pc4 <= 2.5 : 0.6"];
+137 [label="process4_cmd_25"];
+136 -> 137 [label="True"];
+138 [label="counter <= 20.5
+--------------
+
+counter <= 20.5 : 0.5
+counter <= 21.5 : 0.5
+counter <= 22.5 : 0.5
+pc2 <= 2.0 : 0.5
+pc3 <= 2.0 : 0.5
+pc4 <= 2.0 : 0.5"];
+139 [label="process2_cmd_9"];
+138 -> 139 [label="True"];
+140 [label="counter <= 21.5
+--------------
+
+counter <= 21.5 : 0.333
+counter <= 22.5 : 0.333
+pc3 <= 2.0 : 0.333
+pc4 <= 2.0 : 0.333"];
+141 [label="process3_cmd_16"];
+140 -> 141 [label="True"];
+142 [label="counter <= 22.5
+--------------
+
+counter <= 22.5 : 0.0
+pc4 <= 2.0 : 0.0"];
+143 [label="process4_cmd_23"];
+142 -> 143 [label="True"];
+144 [label="__no_label__"];
+142 -> 144 [style="dashed", label="False"];
+140 -> 142 [style="dashed", label="False"];
+138 -> 140 [style="dashed", label="False"];
+136 -> 138 [style="dashed", label="False"];
+134 -> 136 [style="dashed", label="False"];
+124 -> 134 [style="dashed", label="False"];
+120 -> 124 [style="dashed", label="False"];
+118 -> 120 [style="dashed", label="False"];
+116 -> 118 [style="dashed", label="False"];
+88 -> 116 [style="dashed", label="False"];
+0 -> 88 [style="dashed", label="False"];
+
+}

@@ -1,0 +1,184 @@
+{
+  "scheduler": {
+    "classifiers": {
+      "default": {
+        "stats": {
+          "nodes": 137,
+          "inner nodes": 68,
+          "paths": 69,
+          "bandwidth": 7
+        },
+        "time": "00:00:00.224"
+      },
+      "gini": {
+        "stats": {
+          "nodes": 133,
+          "inner nodes": 66,
+          "paths": 67,
+          "bandwidth": 7
+        },
+        "time": "00:00:00.105"
+      },
+      "entropy": {
+        "stats": {
+          "nodes": 137,
+          "inner nodes": 68,
+          "paths": 69,
+          "bandwidth": 7
+        },
+        "time": "00:00:00.140"
+      },
+      "maxminority": {
+        "stats": {
+          "nodes": 643,
+          "inner nodes": 321,
+          "paths": 322,
+          "bandwidth": 9
+        },
+        "time": "00:00:00.158"
+      }
+    },
+    "metadata": {
+      "X_metadata": {
+        "variables": [
+          "backoff1",
+          "backoff2",
+          "bc1",
+          "bc2",
+          "c1",
+          "c2",
+          "col",
+          "s1",
+          "s2",
+          "slot1",
+          "slot2",
+          "x1",
+          "x2"
+        ],
+        "categorical": [],
+        "min_inner": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "min_outer": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_inner": [
+          15.0,
+          15.0,
+          1.0,
+          1.0,
+          2.0,
+          2.0,
+          2.0,
+          12.0,
+          12.0,
+          0.0,
+          0.0,
+          6.0,
+          6.0
+        ],
+        "max_outer": [
+          15.0,
+          15.0,
+          1.0,
+          1.0,
+          2.0,
+          2.0,
+          2.0,
+          12.0,
+          12.0,
+          0.0,
+          0.0,
+          6.0,
+          6.0
+        ],
+        "step_size": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "Y_metadata": {
+        "categorical": [
+          0
+        ],
+        "category_names": {
+          "0": [
+            "time",
+            "station1_cmd_7",
+            "station2_cmd_42",
+            "send1",
+            "send2",
+            "finish1",
+            "finish2",
+            "station1_cmd_39",
+            "station2_cmd_74",
+            "station1_cmd_13",
+            "station1_cmd_15",
+            "station2_cmd_48",
+            "station2_cmd_50",
+            "station1_cmd_17",
+            "__random__",
+            "station1_cmd_19",
+            "station2_cmd_54",
+            "station2_cmd_52",
+            "station2_cmd_55",
+            "station1_cmd_20",
+            "station2_cmd_57",
+            "station1_cmd_22",
+            "station2_cmd_60",
+            "station1_cmd_25",
+            "station2_cmd_59",
+            "station1_cmd_24"
+          ]
+        },
+        "min": [
+          0
+        ],
+        "max": [
+          25
+        ],
+        "step_size": [
+          1
+        ],
+        "num_rows": 1472,
+        "num_flattened": 1472,
+        "num_unique_labels": 26
+      }
+    }
+  }
+}

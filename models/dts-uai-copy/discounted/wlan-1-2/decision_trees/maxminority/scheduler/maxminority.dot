@@ -1,0 +1,5200 @@
+digraph {
+0 [label="x2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 697
+backoff1 <= 1.5 : 652
+backoff1 <= 2.5 : 607
+backoff1 <= 3.5 : 562
+backoff1 <= 4.5 : 508
+backoff1 <= 5.5 : 454
+backoff1 <= 6.5 : 486
+backoff1 <= 7.5 : 546
+backoff1 <= 8.5 : 608
+backoff1 <= 9.5 : 653
+backoff1 <= 10.5 : 698
+backoff1 <= 11.5 : 741
+backoff1 <= 12.5 : 802
+backoff1 <= 13.5 : 863
+backoff1 <= 14.5 : 897
+backoff2 <= 0.5 : 680
+backoff2 <= 1.5 : 634
+backoff2 <= 2.5 : 588
+backoff2 <= 3.5 : 542
+backoff2 <= 4.5 : 496
+backoff2 <= 5.5 : 465
+backoff2 <= 6.5 : 511
+backoff2 <= 7.5 : 557
+backoff2 <= 8.5 : 603
+backoff2 <= 9.5 : 649
+backoff2 <= 10.5 : 695
+backoff2 <= 11.5 : 741
+backoff2 <= 12.5 : 787
+backoff2 <= 13.5 : 833
+backoff2 <= 14.5 : 879
+bc1 <= 0.5 : 859
+bc2 <= 0.5 : 837
+c1 <= 0.5 : 852
+c1 <= 1.5 : 913
+c2 <= 0.5 : 858
+c2 <= 1.5 : 912
+col <= 0.5 : 911
+col <= 1.5 : 914
+s1 <= 2.0 : 914
+s1 <= 3.5 : 912
+s1 <= 4.5 : 911
+s1 <= 5.5 : 578
+s1 <= 6.5 : 698
+s1 <= 7.5 : 737
+s1 <= 8.5 : 774
+s1 <= 9.5 : 808
+s1 <= 10.5 : 866
+s1 <= 11.5 : 868
+s2 <= 2.0 : 913
+s2 <= 3.5 : 887
+s2 <= 4.5 : 870
+s2 <= 5.5 : 611
+s2 <= 6.5 : 721
+s2 <= 7.5 : 763
+s2 <= 8.5 : 785
+s2 <= 9.5 : 815
+s2 <= 10.5 : 869
+s2 <= 11.5 : 871
+x1 <= 0.5 : 495
+x1 <= 1.5 : 868
+x1 <= 2.5 : 883
+x1 <= 3.5 : 898
+x1 <= 4.5 : 914
+x1 <= 5.5 : 914
+x2 <= 0.5 : 442
+x2 <= 1.5 : 841
+x2 <= 2.5 : 861
+x2 <= 3.5 : 897
+x2 <= 4.5 : 913
+x2 <= 5.5 : 913"];
+1 [label="backoff1 <= 5.5
+--------------
+
+backoff1 <= 0.5 : 216
+backoff1 <= 1.5 : 207
+backoff1 <= 2.5 : 198
+backoff1 <= 3.5 : 189
+backoff1 <= 4.5 : 180
+backoff1 <= 5.5 : 171
+backoff1 <= 6.5 : 179
+backoff1 <= 7.5 : 204
+backoff1 <= 8.5 : 230
+backoff1 <= 9.5 : 239
+backoff1 <= 10.5 : 248
+backoff1 <= 11.5 : 256
+backoff1 <= 12.5 : 282
+backoff1 <= 13.5 : 308
+backoff1 <= 14.5 : 325
+backoff2 <= 0.5 : 202
+backoff2 <= 1.5 : 188
+backoff2 <= 2.5 : 174
+backoff2 <= 3.5 : 182
+backoff2 <= 4.5 : 196
+backoff2 <= 5.5 : 210
+backoff2 <= 6.5 : 224
+backoff2 <= 7.5 : 238
+backoff2 <= 8.5 : 252
+backoff2 <= 9.5 : 266
+backoff2 <= 10.5 : 280
+backoff2 <= 11.5 : 294
+backoff2 <= 12.5 : 308
+backoff2 <= 13.5 : 322
+backoff2 <= 14.5 : 336
+bc1 <= 0.5 : 324
+bc2 <= 0.5 : 296
+c1 <= 0.5 : 281
+c1 <= 1.5 : 341
+c2 <= 0.5 : 315
+c2 <= 1.5 : 341
+col <= 0.5 : 340
+col <= 1.5 : 341
+s1 <= 2.0 : 342
+s1 <= 4.0 : 342
+s1 <= 5.5 : 189
+s1 <= 6.5 : 179
+s1 <= 7.5 : 218
+s1 <= 8.5 : 236
+s1 <= 9.5 : 268
+s1 <= 10.5 : 326
+s1 <= 11.5 : 326
+s2 <= 2.0 : 342
+s2 <= 3.5 : 342
+s2 <= 4.5 : 325
+s2 <= 5.5 : 201
+s2 <= 6.5 : 197
+s2 <= 7.5 : 225
+s2 <= 8.5 : 244
+s2 <= 9.5 : 258
+s2 <= 10.5 : 298
+s2 <= 11.5 : 298
+x1 <= 0.5 : 182
+x1 <= 1.5 : 299
+x1 <= 2.5 : 312
+x1 <= 3.5 : 327"];
+2 [label="backoff2 <= 3.5
+--------------
+
+backoff1 <= 0.5 : 126
+backoff1 <= 1.5 : 135
+backoff1 <= 2.5 : 144
+backoff1 <= 3.5 : 153
+backoff1 <= 4.5 : 162
+backoff2 <= 0.5 : 112
+backoff2 <= 1.5 : 104
+backoff2 <= 2.5 : 96
+backoff2 <= 3.5 : 88
+backoff2 <= 4.5 : 91
+backoff2 <= 5.5 : 99
+backoff2 <= 6.5 : 107
+backoff2 <= 7.5 : 115
+backoff2 <= 8.5 : 123
+backoff2 <= 9.5 : 131
+backoff2 <= 10.5 : 139
+backoff2 <= 11.5 : 147
+backoff2 <= 12.5 : 155
+backoff2 <= 13.5 : 163
+backoff2 <= 14.5 : 171
+bc1 <= 0.5 : 153
+bc2 <= 0.5 : 149
+c1 <= 0.5 : 110
+c1 <= 1.5 : 170
+c2 <= 0.5 : 160
+c2 <= 1.5 : 170
+col <= 0.5 : 169
+col <= 1.5 : 170
+s1 <= 2.0 : 171
+s1 <= 4.0 : 171
+s1 <= 5.5 : 149
+s1 <= 6.5 : 139
+s1 <= 7.5 : 124
+s1 <= 8.5 : 106
+s1 <= 9.5 : 97
+s1 <= 10.5 : 155
+s1 <= 11.5 : 155
+s2 <= 2.0 : 171
+s2 <= 3.5 : 171
+s2 <= 4.5 : 165
+s2 <= 5.5 : 137
+s2 <= 6.5 : 90
+s2 <= 7.5 : 118
+s2 <= 8.5 : 129
+s2 <= 9.5 : 135
+s2 <= 10.5 : 151
+s2 <= 11.5 : 151
+x1 <= 0.5 : 129
+x1 <= 1.5 : 136
+x1 <= 2.5 : 141
+x1 <= 3.5 : 156"];
+3 [label="s2 <= 8.5
+--------------
+
+backoff1 <= 0.5 : 45
+backoff1 <= 1.5 : 47
+backoff1 <= 2.5 : 56
+backoff1 <= 3.5 : 65
+backoff1 <= 4.5 : 74
+backoff2 <= 0.5 : 59
+backoff2 <= 1.5 : 67
+backoff2 <= 2.5 : 75
+bc1 <= 0.5 : 76
+bc2 <= 0.5 : 61
+c1 <= 0.5 : 66
+c1 <= 1.5 : 82
+c2 <= 0.5 : 72
+c2 <= 1.5 : 82
+col <= 0.5 : 81
+col <= 1.5 : 82
+s1 <= 2.0 : 83
+s1 <= 4.0 : 83
+s1 <= 5.5 : 61
+s1 <= 6.5 : 51
+s1 <= 7.5 : 47
+s1 <= 8.5 : 54
+s1 <= 9.5 : 64
+s1 <= 10.5 : 78
+s1 <= 11.5 : 78
+s2 <= 2.0 : 83
+s2 <= 3.5 : 83
+s2 <= 4.5 : 77
+s2 <= 5.5 : 71
+s2 <= 6.5 : 59
+s2 <= 7.5 : 53
+s2 <= 8.5 : 42
+s2 <= 9.5 : 47
+s2 <= 10.5 : 63
+s2 <= 11.5 : 63
+x1 <= 0.5 : 63
+x1 <= 1.5 : 70
+x1 <= 2.5 : 75
+x1 <= 3.5 : 79"];
+4 [label="backoff2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 31
+backoff1 <= 1.5 : 33
+backoff1 <= 2.5 : 35
+backoff1 <= 3.5 : 37
+backoff1 <= 4.5 : 39
+backoff2 <= 0.5 : 24
+backoff2 <= 1.5 : 25
+backoff2 <= 2.5 : 33
+bc1 <= 0.5 : 35
+bc2 <= 0.5 : 39
+c1 <= 0.5 : 27
+col <= 0.5 : 39
+s1 <= 2.0 : 41
+s1 <= 4.0 : 41
+s1 <= 6.5 : 30
+s1 <= 8.5 : 24
+s1 <= 9.5 : 25
+s1 <= 11.0 : 37
+s2 <= 2.0 : 41
+s2 <= 3.5 : 41
+s2 <= 4.5 : 35
+s2 <= 5.5 : 29
+s2 <= 6.5 : 24
+s2 <= 7.5 : 30
+x1 <= 0.5 : 34
+x1 <= 1.5 : 35
+x1 <= 2.5 : 35
+x1 <= 3.5 : 38"];
+5 [label="s2 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 10
+backoff1 <= 1.5 : 9
+backoff1 <= 2.5 : 11
+backoff1 <= 3.5 : 13
+backoff1 <= 4.5 : 15
+bc1 <= 0.5 : 14
+bc2 <= 0.5 : 15
+c1 <= 0.5 : 15
+col <= 0.5 : 15
+s1 <= 2.0 : 17
+s1 <= 4.0 : 17
+s1 <= 6.5 : 11
+s1 <= 8.5 : 14
+s1 <= 10.5 : 16
+s2 <= 2.0 : 17
+s2 <= 3.5 : 17
+s2 <= 4.5 : 11
+s2 <= 6.5 : 6
+x1 <= 0.5 : 16"];
+6 [label="s2 <= 4.5
+--------------
+
+backoff1 <= 0.5 : 5
+backoff1 <= 1.5 : 4
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 4
+backoff1 <= 4.5 : 5
+bc1 <= 0.5 : 6
+bc2 <= 0.5 : 6
+col <= 0.5 : 6
+s1 <= 2.0 : 6
+s1 <= 4.0 : 6
+s1 <= 6.5 : 6
+s1 <= 10.0 : 6
+s2 <= 2.0 : 6
+s2 <= 3.5 : 6
+s2 <= 4.5 : 2"];
+7 [label="bc1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+bc1 <= 0.5 : 0
+bc2 <= 0.5 : 0
+col <= 0.5 : 1
+s1 <= 2.0 : 1
+s1 <= 4.0 : 0
+s2 <= 2.0 : 1
+s2 <= 3.5 : 0"];
+8 [label="time"];
+7 -> 8 [label="True"];
+9 [label="station2_cmd_50"];
+7 -> 9 [style="dashed", label="False"];
+6 -> 7 [label="True"];
+10 [label="time"];
+6 -> 10 [style="dashed", label="False"];
+5 -> 6 [label="True"];
+11 [label="bc1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 4
+backoff1 <= 1.5 : 4
+backoff1 <= 2.5 : 4
+backoff1 <= 3.5 : 4
+backoff1 <= 4.5 : 4
+bc1 <= 0.5 : 3
+bc2 <= 0.5 : 3
+c1 <= 0.5 : 4
+col <= 0.5 : 3
+s1 <= 6.5 : 3
+s1 <= 8.5 : 4
+s1 <= 10.5 : 4
+x1 <= 0.5 : 3"];
+12 [label="s1 <= 8.5
+--------------
+
+bc2 <= 0.5 : 1
+c1 <= 0.5 : 1
+col <= 0.5 : 1
+s1 <= 8.5 : 0
+s1 <= 10.5 : 1"];
+13 [label="send1"];
+12 -> 13 [label="True"];
+14 [label="send2"];
+12 -> 14 [style="dashed", label="False"];
+11 -> 12 [label="True"];
+15 [label="s1 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 3
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 3
+backoff1 <= 4.5 : 3
+c1 <= 0.5 : 3
+s1 <= 6.5 : 1
+s1 <= 8.5 : 3
+x1 <= 0.5 : 2"];
+16 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 0
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1"];
+17 [label="time"];
+16 -> 17 [label="True"];
+18 [label="send2"];
+16 -> 18 [style="dashed", label="False"];
+15 -> 16 [label="True"];
+19 [label="c1 <= 0.5
+--------------
+
+c1 <= 0.5 : 0
+s1 <= 8.5 : 0
+x1 <= 0.5 : 1"];
+20 [label="send1"];
+19 -> 20 [label="True"];
+21 [label="send2"];
+19 -> 21 [style="dashed", label="False"];
+15 -> 19 [style="dashed", label="False"];
+11 -> 15 [style="dashed", label="False"];
+5 -> 11 [style="dashed", label="False"];
+4 -> 5 [label="True"];
+22 [label="c1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 24
+backoff1 <= 1.5 : 24
+backoff1 <= 2.5 : 24
+backoff1 <= 3.5 : 24
+backoff1 <= 4.5 : 24
+backoff2 <= 1.5 : 16
+backoff2 <= 2.5 : 16
+bc1 <= 0.5 : 21
+c1 <= 0.5 : 12
+s1 <= 6.5 : 24
+s1 <= 8.5 : 21
+s1 <= 9.5 : 15
+s1 <= 11.0 : 21
+s2 <= 5.5 : 18
+s2 <= 6.5 : 18
+x1 <= 0.5 : 18
+x1 <= 1.5 : 18
+x1 <= 2.5 : 18
+x1 <= 3.5 : 21"];
+23 [label="s2 <= 5.5
+--------------
+
+backoff1 <= 0.5 : 12
+backoff1 <= 1.5 : 12
+backoff1 <= 2.5 : 12
+backoff1 <= 3.5 : 12
+backoff1 <= 4.5 : 12
+backoff2 <= 1.5 : 8
+backoff2 <= 2.5 : 8
+bc1 <= 0.5 : 9
+s1 <= 6.5 : 12
+s1 <= 9.0 : 9
+s1 <= 11.0 : 9
+s2 <= 5.5 : 6
+s2 <= 6.5 : 9"];
+24 [label="backoff2 <= 1.5
+--------------
+
+backoff1 <= 0.5 : 3
+backoff1 <= 1.5 : 3
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 3
+backoff1 <= 4.5 : 3
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+bc1 <= 0.5 : 3
+s1 <= 6.5 : 3
+s1 <= 10.0 : 3"];
+25 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+26 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+27 [label="time"];
+26 -> 27 [label="True"];
+28 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+29 [label="time"];
+28 -> 29 [label="True"];
+30 [label="send1"];
+28 -> 30 [style="dashed", label="False"];
+26 -> 28 [style="dashed", label="False"];
+25 -> 26 [label="True"];
+31 [label="time"];
+25 -> 31 [style="dashed", label="False"];
+24 -> 25 [label="True"];
+32 [label="backoff2 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+backoff2 <= 2.5 : 1
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 2
+s1 <= 10.0 : 2"];
+33 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+34 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+35 [label="time"];
+34 -> 35 [label="True"];
+36 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+37 [label="time"];
+36 -> 37 [label="True"];
+38 [label="send1"];
+36 -> 38 [style="dashed", label="False"];
+34 -> 36 [style="dashed", label="False"];
+33 -> 34 [label="True"];
+39 [label="time"];
+33 -> 39 [style="dashed", label="False"];
+32 -> 33 [label="True"];
+40 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+41 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+42 [label="time"];
+41 -> 42 [label="True"];
+43 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+44 [label="time"];
+43 -> 44 [label="True"];
+45 [label="send1"];
+43 -> 45 [style="dashed", label="False"];
+41 -> 43 [style="dashed", label="False"];
+40 -> 41 [label="True"];
+46 [label="time"];
+40 -> 46 [style="dashed", label="False"];
+32 -> 40 [style="dashed", label="False"];
+24 -> 32 [style="dashed", label="False"];
+23 -> 24 [label="True"];
+47 [label="bc1 <= 0.5
+--------------
+
+backoff2 <= 1.5 : 4
+backoff2 <= 2.5 : 4
+bc1 <= 0.5 : 3
+s1 <= 11.0 : 3
+s2 <= 6.5 : 3"];
+48 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+s2 <= 6.5 : 0"];
+49 [label="station2_cmd_57"];
+48 -> 49 [label="True"];
+50 [label="time"];
+48 -> 50 [style="dashed", label="False"];
+47 -> 48 [label="True"];
+51 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+s2 <= 6.5 : 0"];
+52 [label="station2_cmd_57"];
+51 -> 52 [label="True"];
+53 [label="send1"];
+51 -> 53 [style="dashed", label="False"];
+47 -> 51 [style="dashed", label="False"];
+23 -> 47 [style="dashed", label="False"];
+22 -> 23 [label="True"];
+54 [label="s1 <= 9.5
+--------------
+
+backoff2 <= 1.5 : 8
+backoff2 <= 2.5 : 8
+s1 <= 9.5 : 6
+s2 <= 5.5 : 9
+s2 <= 6.5 : 9
+x1 <= 0.5 : 6
+x1 <= 1.5 : 6
+x1 <= 2.5 : 6
+x1 <= 3.5 : 9"];
+55 [label="s2 <= 5.5
+--------------
+
+backoff2 <= 1.5 : 4
+backoff2 <= 2.5 : 4
+s2 <= 5.5 : 3
+x1 <= 0.5 : 3
+x1 <= 1.5 : 3
+x1 <= 2.5 : 3
+x1 <= 3.5 : 3"];
+56 [label="station2_cmd_55"];
+55 -> 56 [label="True"];
+57 [label="x1 <= 3.5
+--------------
+
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+x1 <= 0.5 : 3
+x1 <= 1.5 : 3
+x1 <= 2.5 : 3
+x1 <= 3.5 : 0"];
+58 [label="time"];
+57 -> 58 [label="True"];
+59 [label="finish1"];
+57 -> 59 [style="dashed", label="False"];
+55 -> 57 [style="dashed", label="False"];
+54 -> 55 [label="True"];
+60 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 1.5 : 4
+backoff2 <= 2.5 : 4
+s2 <= 6.5 : 3
+x1 <= 0.5 : 3
+x1 <= 1.5 : 3
+x1 <= 2.5 : 3"];
+61 [label="x1 <= 2.5
+--------------
+
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+x1 <= 0.5 : 3
+x1 <= 1.5 : 3
+x1 <= 2.5 : 0"];
+62 [label="time"];
+61 -> 62 [label="True"];
+63 [label="finish1"];
+61 -> 63 [style="dashed", label="False"];
+60 -> 61 [label="True"];
+64 [label="station2_cmd_60"];
+60 -> 64 [style="dashed", label="False"];
+54 -> 60 [style="dashed", label="False"];
+22 -> 54 [style="dashed", label="False"];
+4 -> 22 [style="dashed", label="False"];
+3 -> 4 [label="True"];
+65 [label="backoff1 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 35
+backoff1 <= 1.5 : 28
+backoff1 <= 2.5 : 21
+backoff1 <= 3.5 : 28
+backoff1 <= 4.5 : 35
+bc1 <= 0.5 : 41
+bc2 <= 0.5 : 22
+c1 <= 0.5 : 39
+c1 <= 1.5 : 41
+c2 <= 0.5 : 31
+c2 <= 1.5 : 41
+col <= 1.5 : 41
+s1 <= 5.5 : 31
+s1 <= 6.5 : 21
+s1 <= 7.5 : 36
+s1 <= 8.5 : 37
+s1 <= 9.5 : 39
+s1 <= 10.5 : 41
+s1 <= 11.5 : 41
+s2 <= 9.5 : 36
+s2 <= 10.5 : 22
+s2 <= 11.5 : 22
+x1 <= 0.5 : 29
+x1 <= 1.5 : 35
+x1 <= 2.5 : 40
+x1 <= 3.5 : 41"];
+66 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 14
+backoff1 <= 1.5 : 14
+bc1 <= 0.5 : 20
+bc2 <= 0.5 : 11
+c1 <= 0.5 : 18
+c1 <= 1.5 : 20
+c2 <= 0.5 : 16
+c2 <= 1.5 : 20
+col <= 1.5 : 20
+s1 <= 5.5 : 16
+s1 <= 6.5 : 12
+s1 <= 7.5 : 15
+s1 <= 8.5 : 16
+s1 <= 9.5 : 18
+s1 <= 10.5 : 20
+s1 <= 11.5 : 20
+s2 <= 9.5 : 18
+s2 <= 10.5 : 11
+s2 <= 11.5 : 11
+x1 <= 0.5 : 14
+x1 <= 1.5 : 17
+x1 <= 2.5 : 19
+x1 <= 3.5 : 20"];
+67 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 6
+backoff1 <= 1.5 : 8
+bc1 <= 0.5 : 11
+c1 <= 0.5 : 9
+c1 <= 1.5 : 11
+c2 <= 1.0 : 11
+s1 <= 5.5 : 8
+s1 <= 6.5 : 6
+s1 <= 7.5 : 7
+s1 <= 8.5 : 8
+s1 <= 9.5 : 9
+s1 <= 10.5 : 11
+s1 <= 11.5 : 11
+s2 <= 10.0 : 11
+s2 <= 11.5 : 11
+x1 <= 0.5 : 7
+x1 <= 1.5 : 7
+x1 <= 2.5 : 9
+x1 <= 3.5 : 10"];
+68 [label="c1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 5
+c1 <= 0.5 : 3
+c1 <= 1.5 : 5
+c2 <= 1.0 : 5
+s1 <= 6.5 : 4
+s1 <= 8.5 : 3
+s1 <= 9.5 : 3
+s1 <= 10.5 : 5
+s1 <= 11.5 : 5
+s2 <= 10.0 : 5
+s2 <= 11.5 : 5
+x1 <= 0.5 : 3
+x1 <= 1.5 : 3
+x1 <= 2.5 : 3
+x1 <= 3.5 : 4"];
+69 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 2
+s1 <= 9.0 : 2
+s1 <= 10.5 : 2
+s1 <= 11.5 : 3
+s2 <= 11.5 : 3
+x1 <= 0.5 : 2"];
+70 [label="time"];
+69 -> 70 [label="True"];
+71 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 1
+s1 <= 9.0 : 2
+x1 <= 0.5 : 1"];
+72 [label="x1 <= 0.5
+--------------
+
+x1 <= 0.5 : 0"];
+73 [label="time"];
+72 -> 73 [label="True"];
+74 [label="station1_cmd_19"];
+72 -> 74 [style="dashed", label="False"];
+71 -> 72 [label="True"];
+75 [label="send1"];
+71 -> 75 [style="dashed", label="False"];
+69 -> 71 [style="dashed", label="False"];
+68 -> 69 [label="True"];
+76 [label="s1 <= 9.5
+--------------
+
+bc1 <= 0.5 : 2
+c1 <= 1.5 : 2
+c2 <= 1.0 : 2
+s1 <= 9.5 : 1
+s2 <= 10.5 : 2
+x1 <= 0.5 : 2
+x1 <= 1.5 : 2
+x1 <= 2.5 : 1
+x1 <= 3.5 : 1"];
+77 [label="x1 <= 3.5
+--------------
+
+bc1 <= 0.5 : 1
+c1 <= 1.5 : 1
+c2 <= 1.0 : 1
+s2 <= 10.5 : 1
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1
+x1 <= 2.5 : 1
+x1 <= 3.5 : 0"];
+78 [label="time"];
+77 -> 78 [label="True"];
+79 [label="finish1"];
+77 -> 79 [style="dashed", label="False"];
+76 -> 77 [label="True"];
+80 [label="x1 <= 2.5
+--------------
+
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1
+x1 <= 2.5 : 0"];
+81 [label="time"];
+80 -> 81 [label="True"];
+82 [label="finish1"];
+80 -> 82 [style="dashed", label="False"];
+76 -> 80 [style="dashed", label="False"];
+68 -> 76 [style="dashed", label="False"];
+67 -> 68 [label="True"];
+83 [label="backoff1 <= 1.5
+--------------
+
+backoff1 <= 1.5 : 3
+s1 <= 5.5 : 4
+s1 <= 6.5 : 4
+x1 <= 0.5 : 4
+x1 <= 1.5 : 4"];
+84 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 2
+s1 <= 6.5 : 2
+x1 <= 0.5 : 2
+x1 <= 1.5 : 2"];
+85 [label="x1 <= 0.5
+--------------
+
+x1 <= 0.5 : 0"];
+86 [label="time"];
+85 -> 86 [label="True"];
+87 [label="station1_cmd_17"];
+85 -> 87 [style="dashed", label="False"];
+84 -> 85 [label="True"];
+88 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 1
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1"];
+89 [label="station1_cmd_22"];
+88 -> 89 [label="True"];
+90 [label="x1 <= 1.5
+--------------
+
+x1 <= 0.5 : 1
+x1 <= 1.5 : 0"];
+91 [label="time"];
+90 -> 91 [label="True"];
+92 [label="station1_cmd_24"];
+90 -> 92 [style="dashed", label="False"];
+88 -> 90 [style="dashed", label="False"];
+84 -> 88 [style="dashed", label="False"];
+83 -> 84 [label="True"];
+93 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 2
+s1 <= 6.5 : 2
+x1 <= 0.5 : 2
+x1 <= 1.5 : 2"];
+94 [label="x1 <= 0.5
+--------------
+
+x1 <= 0.5 : 0"];
+95 [label="time"];
+94 -> 95 [label="True"];
+96 [label="station1_cmd_17"];
+94 -> 96 [style="dashed", label="False"];
+93 -> 94 [label="True"];
+97 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 1
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1"];
+98 [label="station1_cmd_22"];
+97 -> 98 [label="True"];
+99 [label="x1 <= 1.5
+--------------
+
+x1 <= 0.5 : 1
+x1 <= 1.5 : 0"];
+100 [label="time"];
+99 -> 100 [label="True"];
+101 [label="station1_cmd_24"];
+99 -> 101 [style="dashed", label="False"];
+97 -> 99 [style="dashed", label="False"];
+93 -> 97 [style="dashed", label="False"];
+83 -> 93 [style="dashed", label="False"];
+67 -> 83 [style="dashed", label="False"];
+66 -> 67 [label="True"];
+102 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 8
+backoff1 <= 1.5 : 6
+bc1 <= 0.5 : 9
+c1 <= 1.0 : 9
+c2 <= 0.5 : 5
+c2 <= 1.5 : 9
+col <= 1.5 : 9
+s1 <= 5.5 : 8
+s1 <= 6.5 : 5
+s1 <= 8.0 : 8
+s1 <= 10.5 : 9
+s2 <= 9.5 : 7"];
+103 [label="s1 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 1
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 0
+s1 <= 9.5 : 2"];
+104 [label="station1_cmd_22"];
+103 -> 104 [label="True"];
+105 [label="send2"];
+103 -> 105 [style="dashed", label="False"];
+102 -> 103 [label="True"];
+106 [label="backoff1 <= 1.5
+--------------
+
+backoff1 <= 0.5 : 4
+backoff1 <= 1.5 : 3
+bc1 <= 0.5 : 5
+c1 <= 1.0 : 4
+c2 <= 1.5 : 4
+col <= 1.5 : 4
+s1 <= 5.5 : 3
+s1 <= 6.5 : 3
+s1 <= 8.0 : 4
+s1 <= 10.5 : 5
+s2 <= 9.5 : 3"];
+107 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 2
+bc1 <= 0.5 : 3
+c1 <= 1.0 : 2
+c2 <= 1.5 : 2
+col <= 1.5 : 2
+s1 <= 5.5 : 2
+s1 <= 6.5 : 2
+s1 <= 8.0 : 2
+s1 <= 10.5 : 3
+s2 <= 9.5 : 2"];
+108 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 0
+c1 <= 1.0 : 0
+c2 <= 1.5 : 0
+col <= 1.5 : 0
+s1 <= 10.5 : 0
+s2 <= 9.5 : 1"];
+109 [label="time"];
+108 -> 109 [label="True"];
+110 [label="finish1"];
+108 -> 110 [style="dashed", label="False"];
+107 -> 108 [label="True"];
+111 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 1
+s1 <= 6.5 : 1
+s2 <= 9.5 : 1"];
+112 [label="station1_cmd_20"];
+111 -> 112 [label="True"];
+113 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+114 [label="time"];
+113 -> 114 [label="True"];
+115 [label="station1_cmd_25"];
+113 -> 115 [style="dashed", label="False"];
+111 -> 113 [style="dashed", label="False"];
+107 -> 111 [style="dashed", label="False"];
+106 -> 107 [label="True"];
+116 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 1
+s1 <= 6.5 : 1
+s2 <= 9.5 : 1"];
+117 [label="station1_cmd_20"];
+116 -> 117 [label="True"];
+118 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+119 [label="time"];
+118 -> 119 [label="True"];
+120 [label="station1_cmd_25"];
+118 -> 120 [style="dashed", label="False"];
+116 -> 118 [style="dashed", label="False"];
+106 -> 116 [style="dashed", label="False"];
+102 -> 106 [style="dashed", label="False"];
+66 -> 102 [style="dashed", label="False"];
+65 -> 66 [label="True"];
+121 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 3.5 : 14
+backoff1 <= 4.5 : 14
+bc2 <= 0.5 : 12
+c2 <= 0.5 : 15
+s1 <= 5.5 : 15
+s1 <= 6.5 : 12
+s2 <= 9.5 : 18
+s2 <= 11.0 : 12
+x1 <= 0.5 : 15
+x1 <= 1.5 : 18"];
+122 [label="backoff1 <= 3.5
+--------------
+
+backoff1 <= 3.5 : 6
+backoff1 <= 4.5 : 6
+s1 <= 5.5 : 6
+s1 <= 6.5 : 6
+x1 <= 0.5 : 6
+x1 <= 1.5 : 6"];
+123 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 2
+s1 <= 6.5 : 2
+x1 <= 0.5 : 2
+x1 <= 1.5 : 2"];
+124 [label="x1 <= 0.5
+--------------
+
+x1 <= 0.5 : 0"];
+125 [label="time"];
+124 -> 125 [label="True"];
+126 [label="station1_cmd_17"];
+124 -> 126 [style="dashed", label="False"];
+123 -> 124 [label="True"];
+127 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 1
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1"];
+128 [label="station1_cmd_22"];
+127 -> 128 [label="True"];
+129 [label="x1 <= 1.5
+--------------
+
+x1 <= 0.5 : 1
+x1 <= 1.5 : 0"];
+130 [label="time"];
+129 -> 130 [label="True"];
+131 [label="station1_cmd_24"];
+129 -> 131 [style="dashed", label="False"];
+127 -> 129 [style="dashed", label="False"];
+123 -> 127 [style="dashed", label="False"];
+122 -> 123 [label="True"];
+132 [label="backoff1 <= 4.5
+--------------
+
+backoff1 <= 4.5 : 3
+s1 <= 5.5 : 4
+s1 <= 6.5 : 4
+x1 <= 0.5 : 4
+x1 <= 1.5 : 4"];
+133 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 2
+s1 <= 6.5 : 2
+x1 <= 0.5 : 2
+x1 <= 1.5 : 2"];
+134 [label="x1 <= 0.5
+--------------
+
+x1 <= 0.5 : 0"];
+135 [label="time"];
+134 -> 135 [label="True"];
+136 [label="station1_cmd_17"];
+134 -> 136 [style="dashed", label="False"];
+133 -> 134 [label="True"];
+137 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 1
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1"];
+138 [label="station1_cmd_22"];
+137 -> 138 [label="True"];
+139 [label="x1 <= 1.5
+--------------
+
+x1 <= 0.5 : 1
+x1 <= 1.5 : 0"];
+140 [label="time"];
+139 -> 140 [label="True"];
+141 [label="station1_cmd_24"];
+139 -> 141 [style="dashed", label="False"];
+137 -> 139 [style="dashed", label="False"];
+133 -> 137 [style="dashed", label="False"];
+132 -> 133 [label="True"];
+142 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 2
+s1 <= 6.5 : 2
+x1 <= 0.5 : 2
+x1 <= 1.5 : 2"];
+143 [label="x1 <= 0.5
+--------------
+
+x1 <= 0.5 : 0"];
+144 [label="time"];
+143 -> 144 [label="True"];
+145 [label="station1_cmd_17"];
+143 -> 145 [style="dashed", label="False"];
+142 -> 143 [label="True"];
+146 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 1
+x1 <= 0.5 : 1
+x1 <= 1.5 : 1"];
+147 [label="station1_cmd_22"];
+146 -> 147 [label="True"];
+148 [label="x1 <= 1.5
+--------------
+
+x1 <= 0.5 : 1
+x1 <= 1.5 : 0"];
+149 [label="time"];
+148 -> 149 [label="True"];
+150 [label="station1_cmd_24"];
+148 -> 150 [style="dashed", label="False"];
+146 -> 148 [style="dashed", label="False"];
+142 -> 146 [style="dashed", label="False"];
+132 -> 142 [style="dashed", label="False"];
+122 -> 132 [style="dashed", label="False"];
+121 -> 122 [label="True"];
+151 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 3.5 : 8
+backoff1 <= 4.5 : 8
+c2 <= 0.5 : 6
+s1 <= 5.5 : 9
+s1 <= 6.5 : 6
+s2 <= 9.5 : 9"];
+152 [label="s1 <= 6.5
+--------------
+
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+s1 <= 6.5 : 0"];
+153 [label="station1_cmd_22"];
+152 -> 153 [label="True"];
+154 [label="send2"];
+152 -> 154 [style="dashed", label="False"];
+151 -> 152 [label="True"];
+155 [label="s1 <= 5.5
+--------------
+
+backoff1 <= 3.5 : 4
+backoff1 <= 4.5 : 4
+s1 <= 5.5 : 3
+s1 <= 6.5 : 3
+s2 <= 9.5 : 3"];
+156 [label="station1_cmd_20"];
+155 -> 156 [label="True"];
+157 [label="s1 <= 6.5
+--------------
+
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+s1 <= 6.5 : 0
+s2 <= 9.5 : 3"];
+158 [label="time"];
+157 -> 158 [label="True"];
+159 [label="station1_cmd_25"];
+157 -> 159 [style="dashed", label="False"];
+155 -> 157 [style="dashed", label="False"];
+151 -> 155 [style="dashed", label="False"];
+121 -> 151 [style="dashed", label="False"];
+65 -> 121 [style="dashed", label="False"];
+3 -> 65 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+160 [label="c1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 88
+backoff1 <= 1.5 : 88
+backoff1 <= 2.5 : 88
+backoff1 <= 3.5 : 88
+backoff1 <= 4.5 : 88
+backoff2 <= 4.5 : 80
+backoff2 <= 5.5 : 72
+backoff2 <= 6.5 : 64
+backoff2 <= 7.5 : 56
+backoff2 <= 8.5 : 48
+backoff2 <= 9.5 : 48
+backoff2 <= 10.5 : 56
+backoff2 <= 11.5 : 64
+backoff2 <= 12.5 : 72
+backoff2 <= 13.5 : 80
+backoff2 <= 14.5 : 88
+bc1 <= 0.5 : 77
+c1 <= 0.5 : 44
+s1 <= 6.5 : 88
+s1 <= 8.5 : 77
+s1 <= 9.5 : 55
+s1 <= 11.0 : 77
+s2 <= 5.5 : 66
+s2 <= 6.5 : 66
+x1 <= 0.5 : 66
+x1 <= 1.5 : 66
+x1 <= 2.5 : 66
+x1 <= 3.5 : 77"];
+161 [label="s2 <= 5.5
+--------------
+
+backoff1 <= 0.5 : 44
+backoff1 <= 1.5 : 44
+backoff1 <= 2.5 : 44
+backoff1 <= 3.5 : 44
+backoff1 <= 4.5 : 44
+backoff2 <= 4.5 : 40
+backoff2 <= 5.5 : 36
+backoff2 <= 6.5 : 32
+backoff2 <= 7.5 : 28
+backoff2 <= 8.5 : 24
+backoff2 <= 9.5 : 24
+backoff2 <= 10.5 : 28
+backoff2 <= 11.5 : 32
+backoff2 <= 12.5 : 36
+backoff2 <= 13.5 : 40
+backoff2 <= 14.5 : 44
+bc1 <= 0.5 : 33
+s1 <= 6.5 : 44
+s1 <= 9.0 : 33
+s1 <= 11.0 : 33
+s2 <= 5.5 : 22
+s2 <= 6.5 : 33"];
+162 [label="backoff2 <= 8.5
+--------------
+
+backoff1 <= 0.5 : 11
+backoff1 <= 1.5 : 11
+backoff1 <= 2.5 : 11
+backoff1 <= 3.5 : 11
+backoff1 <= 4.5 : 11
+backoff2 <= 4.5 : 10
+backoff2 <= 5.5 : 9
+backoff2 <= 6.5 : 8
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 8
+backoff2 <= 12.5 : 9
+backoff2 <= 13.5 : 10
+backoff2 <= 14.5 : 11
+bc1 <= 0.5 : 11
+s1 <= 6.5 : 11
+s1 <= 10.0 : 11"];
+163 [label="backoff2 <= 5.5
+--------------
+
+backoff1 <= 0.5 : 5
+backoff1 <= 1.5 : 5
+backoff1 <= 2.5 : 5
+backoff1 <= 3.5 : 5
+backoff1 <= 4.5 : 5
+backoff2 <= 4.5 : 4
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 4
+bc1 <= 0.5 : 5
+s1 <= 6.5 : 5
+s1 <= 10.0 : 5"];
+164 [label="backoff2 <= 4.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+backoff2 <= 4.5 : 1
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 2
+s1 <= 10.0 : 2"];
+165 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+166 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+167 [label="time"];
+166 -> 167 [label="True"];
+168 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+169 [label="time"];
+168 -> 169 [label="True"];
+170 [label="send1"];
+168 -> 170 [style="dashed", label="False"];
+166 -> 168 [style="dashed", label="False"];
+165 -> 166 [label="True"];
+171 [label="time"];
+165 -> 171 [style="dashed", label="False"];
+164 -> 165 [label="True"];
+172 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+173 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+174 [label="time"];
+173 -> 174 [label="True"];
+175 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+176 [label="time"];
+175 -> 176 [label="True"];
+177 [label="send1"];
+175 -> 177 [style="dashed", label="False"];
+173 -> 175 [style="dashed", label="False"];
+172 -> 173 [label="True"];
+178 [label="time"];
+172 -> 178 [style="dashed", label="False"];
+164 -> 172 [style="dashed", label="False"];
+163 -> 164 [label="True"];
+179 [label="backoff2 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 3
+backoff1 <= 1.5 : 3
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 3
+backoff1 <= 4.5 : 3
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+bc1 <= 0.5 : 3
+s1 <= 6.5 : 3
+s1 <= 10.0 : 3"];
+180 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+181 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+182 [label="time"];
+181 -> 182 [label="True"];
+183 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+184 [label="time"];
+183 -> 184 [label="True"];
+185 [label="send1"];
+183 -> 185 [style="dashed", label="False"];
+181 -> 183 [style="dashed", label="False"];
+180 -> 181 [label="True"];
+186 [label="time"];
+180 -> 186 [style="dashed", label="False"];
+179 -> 180 [label="True"];
+187 [label="backoff2 <= 7.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+backoff2 <= 7.5 : 1
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 2
+s1 <= 10.0 : 2"];
+188 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+189 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+190 [label="time"];
+189 -> 190 [label="True"];
+191 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+192 [label="time"];
+191 -> 192 [label="True"];
+193 [label="send1"];
+191 -> 193 [style="dashed", label="False"];
+189 -> 191 [style="dashed", label="False"];
+188 -> 189 [label="True"];
+194 [label="time"];
+188 -> 194 [style="dashed", label="False"];
+187 -> 188 [label="True"];
+195 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+196 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+197 [label="time"];
+196 -> 197 [label="True"];
+198 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+199 [label="time"];
+198 -> 199 [label="True"];
+200 [label="send1"];
+198 -> 200 [style="dashed", label="False"];
+196 -> 198 [style="dashed", label="False"];
+195 -> 196 [label="True"];
+201 [label="time"];
+195 -> 201 [style="dashed", label="False"];
+187 -> 195 [style="dashed", label="False"];
+179 -> 187 [style="dashed", label="False"];
+163 -> 179 [style="dashed", label="False"];
+162 -> 163 [label="True"];
+202 [label="backoff2 <= 11.5
+--------------
+
+backoff1 <= 0.5 : 6
+backoff1 <= 1.5 : 6
+backoff1 <= 2.5 : 6
+backoff1 <= 3.5 : 6
+backoff1 <= 4.5 : 6
+backoff2 <= 9.5 : 5
+backoff2 <= 10.5 : 4
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 4
+backoff2 <= 13.5 : 5
+backoff2 <= 14.5 : 6
+bc1 <= 0.5 : 6
+s1 <= 6.5 : 6
+s1 <= 10.0 : 6"];
+203 [label="backoff2 <= 9.5
+--------------
+
+backoff1 <= 0.5 : 3
+backoff1 <= 1.5 : 3
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 3
+backoff1 <= 4.5 : 3
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+bc1 <= 0.5 : 3
+s1 <= 6.5 : 3
+s1 <= 10.0 : 3"];
+204 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+205 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+206 [label="time"];
+205 -> 206 [label="True"];
+207 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+208 [label="time"];
+207 -> 208 [label="True"];
+209 [label="send1"];
+207 -> 209 [style="dashed", label="False"];
+205 -> 207 [style="dashed", label="False"];
+204 -> 205 [label="True"];
+210 [label="time"];
+204 -> 210 [style="dashed", label="False"];
+203 -> 204 [label="True"];
+211 [label="backoff2 <= 10.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+backoff2 <= 10.5 : 1
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 2
+s1 <= 10.0 : 2"];
+212 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+213 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+214 [label="time"];
+213 -> 214 [label="True"];
+215 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+216 [label="time"];
+215 -> 216 [label="True"];
+217 [label="send1"];
+215 -> 217 [style="dashed", label="False"];
+213 -> 215 [style="dashed", label="False"];
+212 -> 213 [label="True"];
+218 [label="time"];
+212 -> 218 [style="dashed", label="False"];
+211 -> 212 [label="True"];
+219 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+220 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+221 [label="time"];
+220 -> 221 [label="True"];
+222 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+223 [label="time"];
+222 -> 223 [label="True"];
+224 [label="send1"];
+222 -> 224 [style="dashed", label="False"];
+220 -> 222 [style="dashed", label="False"];
+219 -> 220 [label="True"];
+225 [label="time"];
+219 -> 225 [style="dashed", label="False"];
+211 -> 219 [style="dashed", label="False"];
+203 -> 211 [style="dashed", label="False"];
+202 -> 203 [label="True"];
+226 [label="backoff2 <= 12.5
+--------------
+
+backoff1 <= 0.5 : 3
+backoff1 <= 1.5 : 3
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 3
+backoff1 <= 4.5 : 3
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 3
+bc1 <= 0.5 : 3
+s1 <= 6.5 : 3
+s1 <= 10.0 : 3"];
+227 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+228 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+229 [label="time"];
+228 -> 229 [label="True"];
+230 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+231 [label="time"];
+230 -> 231 [label="True"];
+232 [label="send1"];
+230 -> 232 [style="dashed", label="False"];
+228 -> 230 [style="dashed", label="False"];
+227 -> 228 [label="True"];
+233 [label="time"];
+227 -> 233 [style="dashed", label="False"];
+226 -> 227 [label="True"];
+234 [label="backoff2 <= 13.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 2
+bc1 <= 0.5 : 2
+s1 <= 6.5 : 2
+s1 <= 10.0 : 2"];
+235 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+236 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+237 [label="time"];
+236 -> 237 [label="True"];
+238 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+239 [label="time"];
+238 -> 239 [label="True"];
+240 [label="send1"];
+238 -> 240 [style="dashed", label="False"];
+236 -> 238 [style="dashed", label="False"];
+235 -> 236 [label="True"];
+241 [label="time"];
+235 -> 241 [style="dashed", label="False"];
+234 -> 235 [label="True"];
+242 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+backoff2 <= 14.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+243 [label="backoff2 <= 14.5
+--------------
+
+backoff2 <= 14.5 : 1
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+244 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+s1 <= 6.5 : 1
+s1 <= 10.0 : 1"];
+245 [label="time"];
+244 -> 245 [label="True"];
+246 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+247 [label="time"];
+246 -> 247 [label="True"];
+248 [label="send1"];
+246 -> 248 [style="dashed", label="False"];
+244 -> 246 [style="dashed", label="False"];
+243 -> 244 [label="True"];
+249 [label="time"];
+243 -> 249 [style="dashed", label="False"];
+242 -> 243 [label="True"];
+250 [label="time"];
+242 -> 250 [style="dashed", label="False"];
+234 -> 242 [style="dashed", label="False"];
+226 -> 234 [style="dashed", label="False"];
+202 -> 226 [style="dashed", label="False"];
+162 -> 202 [style="dashed", label="False"];
+161 -> 162 [label="True"];
+251 [label="bc1 <= 0.5
+--------------
+
+backoff2 <= 4.5 : 20
+backoff2 <= 5.5 : 18
+backoff2 <= 6.5 : 16
+backoff2 <= 7.5 : 14
+backoff2 <= 8.5 : 12
+backoff2 <= 9.5 : 12
+backoff2 <= 10.5 : 14
+backoff2 <= 11.5 : 16
+backoff2 <= 12.5 : 18
+backoff2 <= 13.5 : 20
+bc1 <= 0.5 : 11
+s1 <= 11.0 : 11
+s2 <= 6.5 : 11"];
+252 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 4.5 : 10
+backoff2 <= 5.5 : 9
+backoff2 <= 6.5 : 8
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 8
+backoff2 <= 12.5 : 9
+backoff2 <= 13.5 : 10
+s2 <= 6.5 : 0"];
+253 [label="station2_cmd_57"];
+252 -> 253 [label="True"];
+254 [label="time"];
+252 -> 254 [style="dashed", label="False"];
+251 -> 252 [label="True"];
+255 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 4.5 : 10
+backoff2 <= 5.5 : 9
+backoff2 <= 6.5 : 8
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 8
+backoff2 <= 12.5 : 9
+backoff2 <= 13.5 : 10
+s2 <= 6.5 : 0"];
+256 [label="station2_cmd_57"];
+255 -> 256 [label="True"];
+257 [label="send1"];
+255 -> 257 [style="dashed", label="False"];
+251 -> 255 [style="dashed", label="False"];
+161 -> 251 [style="dashed", label="False"];
+160 -> 161 [label="True"];
+258 [label="s1 <= 9.5
+--------------
+
+backoff2 <= 4.5 : 40
+backoff2 <= 5.5 : 36
+backoff2 <= 6.5 : 32
+backoff2 <= 7.5 : 28
+backoff2 <= 8.5 : 24
+backoff2 <= 9.5 : 24
+backoff2 <= 10.5 : 28
+backoff2 <= 11.5 : 32
+backoff2 <= 12.5 : 36
+backoff2 <= 13.5 : 40
+s1 <= 9.5 : 22
+s2 <= 5.5 : 33
+s2 <= 6.5 : 33
+x1 <= 0.5 : 22
+x1 <= 1.5 : 22
+x1 <= 2.5 : 22
+x1 <= 3.5 : 33"];
+259 [label="s2 <= 5.5
+--------------
+
+backoff2 <= 4.5 : 20
+backoff2 <= 5.5 : 18
+backoff2 <= 6.5 : 16
+backoff2 <= 7.5 : 14
+backoff2 <= 8.5 : 12
+backoff2 <= 9.5 : 12
+backoff2 <= 10.5 : 14
+backoff2 <= 11.5 : 16
+backoff2 <= 12.5 : 18
+backoff2 <= 13.5 : 20
+s2 <= 5.5 : 11
+x1 <= 0.5 : 11
+x1 <= 1.5 : 11
+x1 <= 2.5 : 11
+x1 <= 3.5 : 11"];
+260 [label="station2_cmd_55"];
+259 -> 260 [label="True"];
+261 [label="x1 <= 3.5
+--------------
+
+backoff2 <= 4.5 : 10
+backoff2 <= 5.5 : 9
+backoff2 <= 6.5 : 8
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 8
+backoff2 <= 12.5 : 9
+backoff2 <= 13.5 : 10
+x1 <= 0.5 : 11
+x1 <= 1.5 : 11
+x1 <= 2.5 : 11
+x1 <= 3.5 : 0"];
+262 [label="time"];
+261 -> 262 [label="True"];
+263 [label="finish1"];
+261 -> 263 [style="dashed", label="False"];
+259 -> 261 [style="dashed", label="False"];
+258 -> 259 [label="True"];
+264 [label="s2 <= 6.5
+--------------
+
+backoff2 <= 4.5 : 20
+backoff2 <= 5.5 : 18
+backoff2 <= 6.5 : 16
+backoff2 <= 7.5 : 14
+backoff2 <= 8.5 : 12
+backoff2 <= 9.5 : 12
+backoff2 <= 10.5 : 14
+backoff2 <= 11.5 : 16
+backoff2 <= 12.5 : 18
+backoff2 <= 13.5 : 20
+s2 <= 6.5 : 11
+x1 <= 0.5 : 11
+x1 <= 1.5 : 11
+x1 <= 2.5 : 11"];
+265 [label="x1 <= 2.5
+--------------
+
+backoff2 <= 4.5 : 10
+backoff2 <= 5.5 : 9
+backoff2 <= 6.5 : 8
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 8
+backoff2 <= 12.5 : 9
+backoff2 <= 13.5 : 10
+x1 <= 0.5 : 11
+x1 <= 1.5 : 11
+x1 <= 2.5 : 0"];
+266 [label="time"];
+265 -> 266 [label="True"];
+267 [label="finish1"];
+265 -> 267 [style="dashed", label="False"];
+264 -> 265 [label="True"];
+268 [label="station2_cmd_60"];
+264 -> 268 [style="dashed", label="False"];
+258 -> 264 [style="dashed", label="False"];
+160 -> 258 [style="dashed", label="False"];
+2 -> 160 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+269 [label="x1 <= 0.5
+--------------
+
+backoff1 <= 6.5 : 163
+backoff1 <= 7.5 : 138
+backoff1 <= 8.5 : 112
+backoff1 <= 9.5 : 103
+backoff1 <= 10.5 : 94
+backoff1 <= 11.5 : 85
+backoff1 <= 12.5 : 111
+backoff1 <= 13.5 : 137
+backoff1 <= 14.5 : 154
+backoff2 <= 0.5 : 90
+backoff2 <= 1.5 : 87
+backoff2 <= 2.5 : 93
+backoff2 <= 3.5 : 99
+backoff2 <= 4.5 : 105
+backoff2 <= 5.5 : 111
+backoff2 <= 6.5 : 117
+backoff2 <= 7.5 : 123
+backoff2 <= 8.5 : 129
+backoff2 <= 9.5 : 135
+backoff2 <= 10.5 : 141
+backoff2 <= 11.5 : 147
+backoff2 <= 12.5 : 153
+backoff2 <= 13.5 : 159
+backoff2 <= 14.5 : 165
+bc2 <= 0.5 : 147
+c2 <= 0.5 : 155
+s1 <= 5.5 : 131
+s1 <= 6.5 : 147
+s2 <= 4.5 : 160
+s2 <= 6.5 : 107
+s2 <= 8.5 : 115
+s2 <= 9.5 : 123
+s2 <= 11.0 : 147
+x1 <= 0.5 : 53
+x1 <= 1.5 : 163"];
+270 [label="backoff1 <= 9.5
+--------------
+
+backoff1 <= 6.5 : 47
+backoff1 <= 7.5 : 41
+backoff1 <= 8.5 : 34
+backoff1 <= 9.5 : 27
+backoff1 <= 10.5 : 33
+backoff1 <= 11.5 : 39
+backoff1 <= 12.5 : 46
+backoff1 <= 13.5 : 53
+backoff2 <= 0.5 : 53
+backoff2 <= 1.5 : 53
+backoff2 <= 2.5 : 53
+backoff2 <= 3.5 : 53
+backoff2 <= 4.5 : 53
+backoff2 <= 5.5 : 53
+backoff2 <= 6.5 : 53
+backoff2 <= 7.5 : 53
+backoff2 <= 8.5 : 53
+backoff2 <= 9.5 : 53
+backoff2 <= 10.5 : 53
+backoff2 <= 11.5 : 53
+backoff2 <= 12.5 : 53
+backoff2 <= 13.5 : 53
+backoff2 <= 14.5 : 53
+bc2 <= 0.5 : 45
+c2 <= 0.5 : 37
+s1 <= 5.5 : 32
+s1 <= 6.5 : 37
+s2 <= 4.5 : 48
+s2 <= 6.5 : 48
+s2 <= 8.5 : 40
+s2 <= 9.5 : 32
+s2 <= 11.0 : 45"];
+271 [label="backoff1 <= 7.5
+--------------
+
+backoff1 <= 6.5 : 20
+backoff1 <= 7.5 : 14
+backoff1 <= 8.5 : 19
+backoff2 <= 0.5 : 26
+backoff2 <= 1.5 : 26
+backoff2 <= 2.5 : 26
+backoff2 <= 3.5 : 26
+backoff2 <= 4.5 : 26
+backoff2 <= 5.5 : 26
+backoff2 <= 6.5 : 26
+backoff2 <= 7.5 : 26
+backoff2 <= 8.5 : 26
+backoff2 <= 9.5 : 26
+backoff2 <= 10.5 : 26
+backoff2 <= 11.5 : 26
+backoff2 <= 12.5 : 26
+backoff2 <= 13.5 : 26
+backoff2 <= 14.5 : 26
+bc2 <= 0.5 : 22
+c2 <= 0.5 : 18
+s1 <= 5.5 : 16
+s1 <= 6.5 : 18
+s2 <= 4.5 : 24
+s2 <= 6.5 : 24
+s2 <= 8.5 : 20
+s2 <= 9.5 : 16
+s2 <= 11.0 : 22"];
+272 [label="backoff1 <= 6.5
+--------------
+
+backoff1 <= 6.5 : 6
+backoff2 <= 0.5 : 12
+backoff2 <= 1.5 : 12
+backoff2 <= 2.5 : 12
+backoff2 <= 3.5 : 12
+backoff2 <= 4.5 : 12
+backoff2 <= 5.5 : 12
+backoff2 <= 6.5 : 12
+backoff2 <= 7.5 : 12
+backoff2 <= 8.5 : 12
+backoff2 <= 9.5 : 12
+backoff2 <= 10.5 : 12
+backoff2 <= 11.5 : 12
+backoff2 <= 12.5 : 12
+backoff2 <= 13.5 : 12
+backoff2 <= 14.5 : 12
+bc2 <= 0.5 : 10
+c2 <= 0.5 : 8
+s1 <= 5.5 : 8
+s1 <= 6.5 : 8
+s2 <= 6.5 : 12
+s2 <= 8.5 : 10
+s2 <= 9.5 : 8
+s2 <= 11.0 : 10"];
+273 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 6
+backoff2 <= 1.5 : 6
+backoff2 <= 2.5 : 6
+backoff2 <= 3.5 : 6
+backoff2 <= 4.5 : 6
+backoff2 <= 5.5 : 6
+backoff2 <= 6.5 : 6
+backoff2 <= 7.5 : 6
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 6
+backoff2 <= 11.5 : 6
+backoff2 <= 12.5 : 6
+backoff2 <= 13.5 : 6
+backoff2 <= 14.5 : 6
+bc2 <= 0.5 : 5
+c2 <= 0.5 : 4
+s1 <= 5.5 : 4
+s1 <= 6.5 : 4
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 5"];
+274 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 4
+backoff2 <= 1.5 : 4
+backoff2 <= 2.5 : 4
+backoff2 <= 3.5 : 4
+backoff2 <= 4.5 : 4
+backoff2 <= 5.5 : 4
+backoff2 <= 6.5 : 4
+backoff2 <= 7.5 : 4
+backoff2 <= 8.5 : 4
+backoff2 <= 9.5 : 4
+backoff2 <= 10.5 : 4
+backoff2 <= 11.5 : 4
+backoff2 <= 12.5 : 4
+backoff2 <= 13.5 : 4
+backoff2 <= 14.5 : 4
+bc2 <= 0.5 : 3
+s1 <= 5.5 : 2
+s1 <= 6.5 : 3
+s2 <= 6.5 : 4
+s2 <= 9.0 : 3
+s2 <= 11.0 : 3"];
+275 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+276 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+277 [label="time"];
+276 -> 277 [label="True"];
+278 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+279 [label="time"];
+278 -> 279 [label="True"];
+280 [label="send2"];
+278 -> 280 [style="dashed", label="False"];
+276 -> 278 [style="dashed", label="False"];
+275 -> 276 [label="True"];
+281 [label="time"];
+275 -> 281 [style="dashed", label="False"];
+274 -> 275 [label="True"];
+282 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+283 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+284 [label="station1_cmd_22"];
+283 -> 284 [label="True"];
+285 [label="time"];
+283 -> 285 [style="dashed", label="False"];
+282 -> 283 [label="True"];
+286 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+287 [label="station1_cmd_22"];
+286 -> 287 [label="True"];
+288 [label="send2"];
+286 -> 288 [style="dashed", label="False"];
+282 -> 286 [style="dashed", label="False"];
+274 -> 282 [style="dashed", label="False"];
+273 -> 274 [label="True"];
+289 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 1
+s1 <= 6.5 : 1
+s2 <= 9.5 : 1"];
+290 [label="station1_cmd_20"];
+289 -> 290 [label="True"];
+291 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+292 [label="time"];
+291 -> 292 [label="True"];
+293 [label="station1_cmd_25"];
+291 -> 293 [style="dashed", label="False"];
+289 -> 291 [style="dashed", label="False"];
+273 -> 289 [style="dashed", label="False"];
+272 -> 273 [label="True"];
+294 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 6
+backoff2 <= 1.5 : 6
+backoff2 <= 2.5 : 6
+backoff2 <= 3.5 : 6
+backoff2 <= 4.5 : 6
+backoff2 <= 5.5 : 6
+backoff2 <= 6.5 : 6
+backoff2 <= 7.5 : 6
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 6
+backoff2 <= 11.5 : 6
+backoff2 <= 12.5 : 6
+backoff2 <= 13.5 : 6
+backoff2 <= 14.5 : 6
+bc2 <= 0.5 : 5
+c2 <= 0.5 : 4
+s1 <= 5.5 : 4
+s1 <= 6.5 : 4
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 5"];
+295 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 4
+backoff2 <= 1.5 : 4
+backoff2 <= 2.5 : 4
+backoff2 <= 3.5 : 4
+backoff2 <= 4.5 : 4
+backoff2 <= 5.5 : 4
+backoff2 <= 6.5 : 4
+backoff2 <= 7.5 : 4
+backoff2 <= 8.5 : 4
+backoff2 <= 9.5 : 4
+backoff2 <= 10.5 : 4
+backoff2 <= 11.5 : 4
+backoff2 <= 12.5 : 4
+backoff2 <= 13.5 : 4
+backoff2 <= 14.5 : 4
+bc2 <= 0.5 : 3
+s1 <= 5.5 : 2
+s1 <= 6.5 : 3
+s2 <= 6.5 : 4
+s2 <= 9.0 : 3
+s2 <= 11.0 : 3"];
+296 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+297 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+298 [label="time"];
+297 -> 298 [label="True"];
+299 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+300 [label="time"];
+299 -> 300 [label="True"];
+301 [label="send2"];
+299 -> 301 [style="dashed", label="False"];
+297 -> 299 [style="dashed", label="False"];
+296 -> 297 [label="True"];
+302 [label="time"];
+296 -> 302 [style="dashed", label="False"];
+295 -> 296 [label="True"];
+303 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+304 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+305 [label="station1_cmd_22"];
+304 -> 305 [label="True"];
+306 [label="time"];
+304 -> 306 [style="dashed", label="False"];
+303 -> 304 [label="True"];
+307 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+308 [label="station1_cmd_22"];
+307 -> 308 [label="True"];
+309 [label="send2"];
+307 -> 309 [style="dashed", label="False"];
+303 -> 307 [style="dashed", label="False"];
+295 -> 303 [style="dashed", label="False"];
+294 -> 295 [label="True"];
+310 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 1
+s1 <= 6.5 : 1
+s2 <= 9.5 : 1"];
+311 [label="station1_cmd_20"];
+310 -> 311 [label="True"];
+312 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+313 [label="time"];
+312 -> 313 [label="True"];
+314 [label="station1_cmd_25"];
+312 -> 314 [style="dashed", label="False"];
+310 -> 312 [style="dashed", label="False"];
+294 -> 310 [style="dashed", label="False"];
+272 -> 294 [style="dashed", label="False"];
+271 -> 272 [label="True"];
+315 [label="backoff1 <= 8.5
+--------------
+
+backoff1 <= 8.5 : 7
+backoff2 <= 0.5 : 14
+backoff2 <= 1.5 : 14
+backoff2 <= 2.5 : 14
+backoff2 <= 3.5 : 14
+backoff2 <= 4.5 : 14
+backoff2 <= 5.5 : 14
+backoff2 <= 6.5 : 14
+backoff2 <= 7.5 : 14
+backoff2 <= 8.5 : 14
+backoff2 <= 9.5 : 14
+backoff2 <= 10.5 : 14
+backoff2 <= 11.5 : 14
+backoff2 <= 12.5 : 14
+backoff2 <= 13.5 : 14
+backoff2 <= 14.5 : 14
+bc2 <= 0.5 : 12
+c2 <= 0.5 : 10
+s1 <= 5.5 : 8
+s1 <= 6.5 : 10
+s2 <= 4.5 : 12
+s2 <= 6.5 : 12
+s2 <= 8.5 : 10
+s2 <= 9.5 : 8
+s2 <= 11.0 : 12"];
+316 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 7
+backoff2 <= 1.5 : 7
+backoff2 <= 2.5 : 7
+backoff2 <= 3.5 : 7
+backoff2 <= 4.5 : 7
+backoff2 <= 5.5 : 7
+backoff2 <= 6.5 : 7
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 7
+backoff2 <= 9.5 : 7
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 7
+backoff2 <= 12.5 : 7
+backoff2 <= 13.5 : 7
+backoff2 <= 14.5 : 7
+bc2 <= 0.5 : 6
+c2 <= 0.5 : 5
+s1 <= 5.5 : 4
+s1 <= 6.5 : 5
+s2 <= 4.5 : 6
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 6"];
+317 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 3
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s2 <= 4.5 : 2
+s2 <= 6.5 : 2
+s2 <= 8.5 : 2
+s2 <= 10.5 : 3"];
+318 [label="s2 <= 4.5
+--------------
+
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+backoff2 <= 3.5 : 2
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 2
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+backoff2 <= 8.5 : 2
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+backoff2 <= 11.5 : 2
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 2
+bc2 <= 0.5 : 2
+s2 <= 4.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 2"];
+319 [label="station2_cmd_50"];
+318 -> 319 [label="True"];
+320 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+321 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+322 [label="time"];
+321 -> 322 [label="True"];
+323 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+324 [label="time"];
+323 -> 324 [label="True"];
+325 [label="send2"];
+323 -> 325 [style="dashed", label="False"];
+321 -> 323 [style="dashed", label="False"];
+320 -> 321 [label="True"];
+326 [label="time"];
+320 -> 326 [style="dashed", label="False"];
+318 -> 320 [style="dashed", label="False"];
+317 -> 318 [label="True"];
+327 [label="station1_cmd_20"];
+317 -> 327 [style="dashed", label="False"];
+316 -> 317 [label="True"];
+328 [label="c2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s1 <= 6.5 : 2
+s2 <= 9.5 : 4
+s2 <= 11.0 : 3"];
+329 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+330 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+331 [label="station1_cmd_22"];
+330 -> 331 [label="True"];
+332 [label="time"];
+330 -> 332 [style="dashed", label="False"];
+329 -> 330 [label="True"];
+333 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+334 [label="station1_cmd_22"];
+333 -> 334 [label="True"];
+335 [label="send2"];
+333 -> 335 [style="dashed", label="False"];
+329 -> 333 [style="dashed", label="False"];
+328 -> 329 [label="True"];
+336 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+337 [label="time"];
+336 -> 337 [label="True"];
+338 [label="station1_cmd_25"];
+336 -> 338 [style="dashed", label="False"];
+328 -> 336 [style="dashed", label="False"];
+316 -> 328 [style="dashed", label="False"];
+315 -> 316 [label="True"];
+339 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 7
+backoff2 <= 1.5 : 7
+backoff2 <= 2.5 : 7
+backoff2 <= 3.5 : 7
+backoff2 <= 4.5 : 7
+backoff2 <= 5.5 : 7
+backoff2 <= 6.5 : 7
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 7
+backoff2 <= 9.5 : 7
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 7
+backoff2 <= 12.5 : 7
+backoff2 <= 13.5 : 7
+backoff2 <= 14.5 : 7
+bc2 <= 0.5 : 6
+c2 <= 0.5 : 5
+s1 <= 5.5 : 4
+s1 <= 6.5 : 5
+s2 <= 4.5 : 6
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 6"];
+340 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 3
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s2 <= 4.5 : 2
+s2 <= 6.5 : 2
+s2 <= 8.5 : 2
+s2 <= 10.5 : 3"];
+341 [label="s2 <= 4.5
+--------------
+
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+backoff2 <= 3.5 : 2
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 2
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+backoff2 <= 8.5 : 2
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+backoff2 <= 11.5 : 2
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 2
+bc2 <= 0.5 : 2
+s2 <= 4.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 2"];
+342 [label="station2_cmd_50"];
+341 -> 342 [label="True"];
+343 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+344 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+345 [label="time"];
+344 -> 345 [label="True"];
+346 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+347 [label="time"];
+346 -> 347 [label="True"];
+348 [label="send2"];
+346 -> 348 [style="dashed", label="False"];
+344 -> 346 [style="dashed", label="False"];
+343 -> 344 [label="True"];
+349 [label="time"];
+343 -> 349 [style="dashed", label="False"];
+341 -> 343 [style="dashed", label="False"];
+340 -> 341 [label="True"];
+350 [label="station1_cmd_20"];
+340 -> 350 [style="dashed", label="False"];
+339 -> 340 [label="True"];
+351 [label="c2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s1 <= 6.5 : 2
+s2 <= 9.5 : 4
+s2 <= 11.0 : 3"];
+352 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+353 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+354 [label="station1_cmd_22"];
+353 -> 354 [label="True"];
+355 [label="time"];
+353 -> 355 [style="dashed", label="False"];
+352 -> 353 [label="True"];
+356 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+357 [label="station1_cmd_22"];
+356 -> 357 [label="True"];
+358 [label="send2"];
+356 -> 358 [style="dashed", label="False"];
+352 -> 356 [style="dashed", label="False"];
+351 -> 352 [label="True"];
+359 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+360 [label="time"];
+359 -> 360 [label="True"];
+361 [label="station1_cmd_25"];
+359 -> 361 [style="dashed", label="False"];
+351 -> 359 [style="dashed", label="False"];
+339 -> 351 [style="dashed", label="False"];
+315 -> 339 [style="dashed", label="False"];
+271 -> 315 [style="dashed", label="False"];
+270 -> 271 [label="True"];
+362 [label="backoff1 <= 11.5
+--------------
+
+backoff1 <= 10.5 : 20
+backoff1 <= 11.5 : 14
+backoff1 <= 12.5 : 20
+backoff1 <= 13.5 : 27
+backoff2 <= 0.5 : 27
+backoff2 <= 1.5 : 27
+backoff2 <= 2.5 : 27
+backoff2 <= 3.5 : 27
+backoff2 <= 4.5 : 27
+backoff2 <= 5.5 : 27
+backoff2 <= 6.5 : 27
+backoff2 <= 7.5 : 27
+backoff2 <= 8.5 : 27
+backoff2 <= 9.5 : 27
+backoff2 <= 10.5 : 27
+backoff2 <= 11.5 : 27
+backoff2 <= 12.5 : 27
+backoff2 <= 13.5 : 27
+backoff2 <= 14.5 : 27
+bc2 <= 0.5 : 23
+c2 <= 0.5 : 19
+s1 <= 5.5 : 16
+s1 <= 6.5 : 19
+s2 <= 4.5 : 24
+s2 <= 6.5 : 24
+s2 <= 8.5 : 20
+s2 <= 9.5 : 16
+s2 <= 11.0 : 23"];
+363 [label="backoff1 <= 10.5
+--------------
+
+backoff1 <= 10.5 : 7
+backoff2 <= 0.5 : 13
+backoff2 <= 1.5 : 13
+backoff2 <= 2.5 : 13
+backoff2 <= 3.5 : 13
+backoff2 <= 4.5 : 13
+backoff2 <= 5.5 : 13
+backoff2 <= 6.5 : 13
+backoff2 <= 7.5 : 13
+backoff2 <= 8.5 : 13
+backoff2 <= 9.5 : 13
+backoff2 <= 10.5 : 13
+backoff2 <= 11.5 : 13
+backoff2 <= 12.5 : 13
+backoff2 <= 13.5 : 13
+backoff2 <= 14.5 : 13
+bc2 <= 0.5 : 11
+c2 <= 0.5 : 9
+s1 <= 5.5 : 8
+s1 <= 6.5 : 9
+s2 <= 4.5 : 12
+s2 <= 6.5 : 12
+s2 <= 8.5 : 10
+s2 <= 9.5 : 8
+s2 <= 11.0 : 11"];
+364 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 7
+backoff2 <= 1.5 : 7
+backoff2 <= 2.5 : 7
+backoff2 <= 3.5 : 7
+backoff2 <= 4.5 : 7
+backoff2 <= 5.5 : 7
+backoff2 <= 6.5 : 7
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 7
+backoff2 <= 9.5 : 7
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 7
+backoff2 <= 12.5 : 7
+backoff2 <= 13.5 : 7
+backoff2 <= 14.5 : 7
+bc2 <= 0.5 : 6
+c2 <= 0.5 : 5
+s1 <= 5.5 : 4
+s1 <= 6.5 : 5
+s2 <= 4.5 : 6
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 6"];
+365 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 3
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s2 <= 4.5 : 2
+s2 <= 6.5 : 2
+s2 <= 8.5 : 2
+s2 <= 10.5 : 3"];
+366 [label="s2 <= 4.5
+--------------
+
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+backoff2 <= 3.5 : 2
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 2
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+backoff2 <= 8.5 : 2
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+backoff2 <= 11.5 : 2
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 2
+bc2 <= 0.5 : 2
+s2 <= 4.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 2"];
+367 [label="station2_cmd_50"];
+366 -> 367 [label="True"];
+368 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+369 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+370 [label="time"];
+369 -> 370 [label="True"];
+371 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+372 [label="time"];
+371 -> 372 [label="True"];
+373 [label="send2"];
+371 -> 373 [style="dashed", label="False"];
+369 -> 371 [style="dashed", label="False"];
+368 -> 369 [label="True"];
+374 [label="time"];
+368 -> 374 [style="dashed", label="False"];
+366 -> 368 [style="dashed", label="False"];
+365 -> 366 [label="True"];
+375 [label="station1_cmd_20"];
+365 -> 375 [style="dashed", label="False"];
+364 -> 365 [label="True"];
+376 [label="c2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s1 <= 6.5 : 2
+s2 <= 9.5 : 4
+s2 <= 11.0 : 3"];
+377 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+378 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+379 [label="station1_cmd_22"];
+378 -> 379 [label="True"];
+380 [label="time"];
+378 -> 380 [style="dashed", label="False"];
+377 -> 378 [label="True"];
+381 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+382 [label="station1_cmd_22"];
+381 -> 382 [label="True"];
+383 [label="send2"];
+381 -> 383 [style="dashed", label="False"];
+377 -> 381 [style="dashed", label="False"];
+376 -> 377 [label="True"];
+384 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+385 [label="time"];
+384 -> 385 [label="True"];
+386 [label="station1_cmd_25"];
+384 -> 386 [style="dashed", label="False"];
+376 -> 384 [style="dashed", label="False"];
+364 -> 376 [style="dashed", label="False"];
+363 -> 364 [label="True"];
+387 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 6
+backoff2 <= 1.5 : 6
+backoff2 <= 2.5 : 6
+backoff2 <= 3.5 : 6
+backoff2 <= 4.5 : 6
+backoff2 <= 5.5 : 6
+backoff2 <= 6.5 : 6
+backoff2 <= 7.5 : 6
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 6
+backoff2 <= 11.5 : 6
+backoff2 <= 12.5 : 6
+backoff2 <= 13.5 : 6
+backoff2 <= 14.5 : 6
+bc2 <= 0.5 : 5
+c2 <= 0.5 : 4
+s1 <= 5.5 : 4
+s1 <= 6.5 : 4
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 5"];
+388 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 4
+backoff2 <= 1.5 : 4
+backoff2 <= 2.5 : 4
+backoff2 <= 3.5 : 4
+backoff2 <= 4.5 : 4
+backoff2 <= 5.5 : 4
+backoff2 <= 6.5 : 4
+backoff2 <= 7.5 : 4
+backoff2 <= 8.5 : 4
+backoff2 <= 9.5 : 4
+backoff2 <= 10.5 : 4
+backoff2 <= 11.5 : 4
+backoff2 <= 12.5 : 4
+backoff2 <= 13.5 : 4
+backoff2 <= 14.5 : 4
+bc2 <= 0.5 : 3
+s1 <= 5.5 : 2
+s1 <= 6.5 : 3
+s2 <= 6.5 : 4
+s2 <= 9.0 : 3
+s2 <= 11.0 : 3"];
+389 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+390 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+391 [label="time"];
+390 -> 391 [label="True"];
+392 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+393 [label="time"];
+392 -> 393 [label="True"];
+394 [label="send2"];
+392 -> 394 [style="dashed", label="False"];
+390 -> 392 [style="dashed", label="False"];
+389 -> 390 [label="True"];
+395 [label="time"];
+389 -> 395 [style="dashed", label="False"];
+388 -> 389 [label="True"];
+396 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+397 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+398 [label="station1_cmd_22"];
+397 -> 398 [label="True"];
+399 [label="time"];
+397 -> 399 [style="dashed", label="False"];
+396 -> 397 [label="True"];
+400 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+401 [label="station1_cmd_22"];
+400 -> 401 [label="True"];
+402 [label="send2"];
+400 -> 402 [style="dashed", label="False"];
+396 -> 400 [style="dashed", label="False"];
+388 -> 396 [style="dashed", label="False"];
+387 -> 388 [label="True"];
+403 [label="s1 <= 5.5
+--------------
+
+s1 <= 5.5 : 1
+s1 <= 6.5 : 1
+s2 <= 9.5 : 1"];
+404 [label="station1_cmd_20"];
+403 -> 404 [label="True"];
+405 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+406 [label="time"];
+405 -> 406 [label="True"];
+407 [label="station1_cmd_25"];
+405 -> 407 [style="dashed", label="False"];
+403 -> 405 [style="dashed", label="False"];
+387 -> 403 [style="dashed", label="False"];
+363 -> 387 [style="dashed", label="False"];
+362 -> 363 [label="True"];
+408 [label="backoff1 <= 12.5
+--------------
+
+backoff1 <= 12.5 : 7
+backoff1 <= 13.5 : 14
+backoff2 <= 0.5 : 14
+backoff2 <= 1.5 : 14
+backoff2 <= 2.5 : 14
+backoff2 <= 3.5 : 14
+backoff2 <= 4.5 : 14
+backoff2 <= 5.5 : 14
+backoff2 <= 6.5 : 14
+backoff2 <= 7.5 : 14
+backoff2 <= 8.5 : 14
+backoff2 <= 9.5 : 14
+backoff2 <= 10.5 : 14
+backoff2 <= 11.5 : 14
+backoff2 <= 12.5 : 14
+backoff2 <= 13.5 : 14
+backoff2 <= 14.5 : 14
+bc2 <= 0.5 : 12
+c2 <= 0.5 : 10
+s1 <= 5.5 : 8
+s1 <= 6.5 : 10
+s2 <= 4.5 : 12
+s2 <= 6.5 : 12
+s2 <= 8.5 : 10
+s2 <= 9.5 : 8
+s2 <= 11.0 : 12"];
+409 [label="s1 <= 5.5
+--------------
+
+backoff2 <= 0.5 : 7
+backoff2 <= 1.5 : 7
+backoff2 <= 2.5 : 7
+backoff2 <= 3.5 : 7
+backoff2 <= 4.5 : 7
+backoff2 <= 5.5 : 7
+backoff2 <= 6.5 : 7
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 7
+backoff2 <= 9.5 : 7
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 7
+backoff2 <= 12.5 : 7
+backoff2 <= 13.5 : 7
+backoff2 <= 14.5 : 7
+bc2 <= 0.5 : 6
+c2 <= 0.5 : 5
+s1 <= 5.5 : 4
+s1 <= 6.5 : 5
+s2 <= 4.5 : 6
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 6"];
+410 [label="c2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 3
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s2 <= 4.5 : 2
+s2 <= 6.5 : 2
+s2 <= 8.5 : 2
+s2 <= 10.5 : 3"];
+411 [label="s2 <= 4.5
+--------------
+
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+backoff2 <= 3.5 : 2
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 2
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+backoff2 <= 8.5 : 2
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+backoff2 <= 11.5 : 2
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 2
+bc2 <= 0.5 : 2
+s2 <= 4.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 2"];
+412 [label="station2_cmd_50"];
+411 -> 412 [label="True"];
+413 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+414 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+415 [label="time"];
+414 -> 415 [label="True"];
+416 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+417 [label="time"];
+416 -> 417 [label="True"];
+418 [label="send2"];
+416 -> 418 [style="dashed", label="False"];
+414 -> 416 [style="dashed", label="False"];
+413 -> 414 [label="True"];
+419 [label="time"];
+413 -> 419 [style="dashed", label="False"];
+411 -> 413 [style="dashed", label="False"];
+410 -> 411 [label="True"];
+420 [label="station1_cmd_20"];
+410 -> 420 [style="dashed", label="False"];
+409 -> 410 [label="True"];
+421 [label="c2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s1 <= 6.5 : 2
+s2 <= 9.5 : 4
+s2 <= 11.0 : 3"];
+422 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+423 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+424 [label="station1_cmd_22"];
+423 -> 424 [label="True"];
+425 [label="time"];
+423 -> 425 [style="dashed", label="False"];
+422 -> 423 [label="True"];
+426 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+427 [label="station1_cmd_22"];
+426 -> 427 [label="True"];
+428 [label="send2"];
+426 -> 428 [style="dashed", label="False"];
+422 -> 426 [style="dashed", label="False"];
+421 -> 422 [label="True"];
+429 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+430 [label="time"];
+429 -> 430 [label="True"];
+431 [label="station1_cmd_25"];
+429 -> 431 [style="dashed", label="False"];
+421 -> 429 [style="dashed", label="False"];
+409 -> 421 [style="dashed", label="False"];
+408 -> 409 [label="True"];
+432 [label="s1 <= 5.5
+--------------
+
+backoff1 <= 13.5 : 7
+backoff2 <= 0.5 : 7
+backoff2 <= 1.5 : 7
+backoff2 <= 2.5 : 7
+backoff2 <= 3.5 : 7
+backoff2 <= 4.5 : 7
+backoff2 <= 5.5 : 7
+backoff2 <= 6.5 : 7
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 7
+backoff2 <= 9.5 : 7
+backoff2 <= 10.5 : 7
+backoff2 <= 11.5 : 7
+backoff2 <= 12.5 : 7
+backoff2 <= 13.5 : 7
+backoff2 <= 14.5 : 7
+bc2 <= 0.5 : 6
+c2 <= 0.5 : 5
+s1 <= 5.5 : 4
+s1 <= 6.5 : 5
+s2 <= 4.5 : 6
+s2 <= 6.5 : 6
+s2 <= 8.5 : 5
+s2 <= 9.5 : 4
+s2 <= 11.0 : 6"];
+433 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 13.5 : 3
+backoff2 <= 0.5 : 3
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s2 <= 4.5 : 2
+s2 <= 6.5 : 2
+s2 <= 8.5 : 2
+s2 <= 10.5 : 3"];
+434 [label="s2 <= 4.5
+--------------
+
+backoff1 <= 13.5 : 2
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+backoff2 <= 3.5 : 2
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 2
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+backoff2 <= 8.5 : 2
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+backoff2 <= 11.5 : 2
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 2
+bc2 <= 0.5 : 2
+s2 <= 4.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 2"];
+435 [label="station2_cmd_50"];
+434 -> 435 [label="True"];
+436 [label="backoff1 <= 13.5
+--------------
+
+backoff1 <= 13.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+437 [label="backoff2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+438 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s2 <= 6.5 : 1
+s2 <= 10.0 : 1"];
+439 [label="time"];
+438 -> 439 [label="True"];
+440 [label="s2 <= 6.5
+--------------
+
+s2 <= 6.5 : 0"];
+441 [label="time"];
+440 -> 441 [label="True"];
+442 [label="send2"];
+440 -> 442 [style="dashed", label="False"];
+438 -> 440 [style="dashed", label="False"];
+437 -> 438 [label="True"];
+443 [label="time"];
+437 -> 443 [style="dashed", label="False"];
+436 -> 437 [label="True"];
+444 [label="time"];
+436 -> 444 [style="dashed", label="False"];
+434 -> 436 [style="dashed", label="False"];
+433 -> 434 [label="True"];
+445 [label="station1_cmd_20"];
+433 -> 445 [style="dashed", label="False"];
+432 -> 433 [label="True"];
+446 [label="c2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 3
+c2 <= 0.5 : 2
+s1 <= 6.5 : 2
+s2 <= 9.5 : 4
+s2 <= 11.0 : 3"];
+447 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+s1 <= 6.5 : 1
+s2 <= 11.0 : 1"];
+448 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+449 [label="station1_cmd_22"];
+448 -> 449 [label="True"];
+450 [label="time"];
+448 -> 450 [style="dashed", label="False"];
+447 -> 448 [label="True"];
+451 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0"];
+452 [label="station1_cmd_22"];
+451 -> 452 [label="True"];
+453 [label="send2"];
+451 -> 453 [style="dashed", label="False"];
+447 -> 451 [style="dashed", label="False"];
+446 -> 447 [label="True"];
+454 [label="s1 <= 6.5
+--------------
+
+s1 <= 6.5 : 0
+s2 <= 9.5 : 1"];
+455 [label="time"];
+454 -> 455 [label="True"];
+456 [label="station1_cmd_25"];
+454 -> 456 [style="dashed", label="False"];
+446 -> 454 [style="dashed", label="False"];
+432 -> 446 [style="dashed", label="False"];
+408 -> 432 [style="dashed", label="False"];
+362 -> 408 [style="dashed", label="False"];
+270 -> 362 [style="dashed", label="False"];
+269 -> 270 [label="True"];
+457 [label="s1 <= 6.0
+--------------
+
+backoff1 <= 6.5 : 20
+backoff1 <= 7.5 : 17
+backoff1 <= 8.5 : 14
+backoff1 <= 9.5 : 12
+backoff1 <= 10.5 : 12
+backoff1 <= 11.5 : 14
+backoff1 <= 12.5 : 17
+backoff1 <= 13.5 : 20
+backoff1 <= 14.5 : 21
+backoff2 <= 0.5 : 22
+backoff2 <= 1.5 : 22
+backoff2 <= 2.5 : 22
+backoff2 <= 3.5 : 22
+backoff2 <= 4.5 : 22
+backoff2 <= 5.5 : 22
+backoff2 <= 6.5 : 22
+backoff2 <= 7.5 : 22
+backoff2 <= 8.5 : 22
+backoff2 <= 9.5 : 22
+backoff2 <= 10.5 : 22
+backoff2 <= 11.5 : 22
+backoff2 <= 12.5 : 22
+backoff2 <= 13.5 : 22
+backoff2 <= 14.5 : 22
+bc2 <= 0.5 : 16
+s1 <= 6.0 : 8
+s2 <= 4.5 : 16
+s2 <= 8.5 : 16
+x1 <= 1.5 : 14"];
+458 [label="s2 <= 4.5
+--------------
+
+backoff1 <= 6.5 : 6
+backoff1 <= 7.5 : 5
+backoff1 <= 8.5 : 4
+backoff1 <= 9.5 : 4
+backoff1 <= 10.5 : 4
+backoff1 <= 11.5 : 4
+backoff1 <= 12.5 : 3
+backoff1 <= 13.5 : 4
+backoff1 <= 14.5 : 5
+backoff2 <= 0.5 : 6
+backoff2 <= 1.5 : 6
+backoff2 <= 2.5 : 6
+backoff2 <= 3.5 : 6
+backoff2 <= 4.5 : 6
+backoff2 <= 5.5 : 6
+backoff2 <= 6.5 : 6
+backoff2 <= 7.5 : 6
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 6
+backoff2 <= 11.5 : 6
+backoff2 <= 12.5 : 6
+backoff2 <= 13.5 : 6
+backoff2 <= 14.5 : 6
+bc2 <= 0.5 : 6
+s2 <= 4.5 : 2
+s2 <= 8.5 : 6"];
+459 [label="backoff1 <= 12.5
+--------------
+
+backoff1 <= 7.5 : 2
+backoff1 <= 10.0 : 2
+backoff1 <= 12.5 : 1
+backoff1 <= 13.5 : 1
+backoff1 <= 14.5 : 2"];
+460 [label="station2_cmd_50"];
+459 -> 460 [label="True"];
+461 [label="backoff1 <= 14.5
+--------------
+
+backoff1 <= 13.5 : 1
+backoff1 <= 14.5 : 0"];
+462 [label="__random__"];
+461 -> 462 [label="True"];
+463 [label="station2_cmd_50"];
+461 -> 463 [style="dashed", label="False"];
+459 -> 461 [style="dashed", label="False"];
+458 -> 459 [label="True"];
+464 [label="station1_cmd_17"];
+458 -> 464 [style="dashed", label="False"];
+457 -> 458 [label="True"];
+465 [label="x1 <= 1.5
+--------------
+
+backoff1 <= 6.5 : 7
+backoff1 <= 7.5 : 6
+backoff1 <= 8.5 : 5
+backoff1 <= 9.5 : 4
+backoff1 <= 10.5 : 5
+backoff1 <= 11.5 : 6
+backoff1 <= 12.5 : 7
+x1 <= 1.5 : 0"];
+466 [label="time"];
+465 -> 466 [label="True"];
+467 [label="station1_cmd_24"];
+465 -> 467 [style="dashed", label="False"];
+457 -> 465 [style="dashed", label="False"];
+269 -> 457 [style="dashed", label="False"];
+1 -> 269 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+468 [label="x1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 328
+backoff1 <= 1.5 : 303
+backoff1 <= 2.5 : 278
+backoff1 <= 3.5 : 253
+backoff1 <= 4.5 : 228
+backoff1 <= 5.5 : 211
+backoff1 <= 6.5 : 237
+backoff1 <= 7.5 : 263
+backoff1 <= 8.5 : 290
+backoff1 <= 9.5 : 317
+backoff1 <= 10.5 : 344
+backoff1 <= 11.5 : 370
+backoff1 <= 12.5 : 396
+backoff1 <= 13.5 : 422
+backoff1 <= 14.5 : 440
+backoff2 <= 0.5 : 253
+backoff2 <= 1.5 : 236
+backoff2 <= 2.5 : 219
+backoff2 <= 3.5 : 202
+backoff2 <= 4.5 : 223
+backoff2 <= 5.5 : 255
+backoff2 <= 6.5 : 281
+backoff2 <= 7.5 : 300
+backoff2 <= 8.5 : 319
+backoff2 <= 9.5 : 338
+backoff2 <= 10.5 : 357
+backoff2 <= 11.5 : 376
+backoff2 <= 12.5 : 393
+backoff2 <= 13.5 : 410
+backoff2 <= 14.5 : 427
+bc1 <= 0.5 : 382
+bc2 <= 0.5 : 386
+c1 <= 0.5 : 437
+c1 <= 1.5 : 438
+c2 <= 0.5 : 339
+c2 <= 1.5 : 437
+col <= 0.5 : 439
+s1 <= 2.0 : 440
+s1 <= 3.5 : 437
+s1 <= 4.5 : 436
+s1 <= 5.5 : 277
+s1 <= 7.0 : 368
+s1 <= 8.5 : 387
+s1 <= 10.0 : 392
+s1 <= 11.5 : 399
+s2 <= 2.0 : 439
+s2 <= 4.0 : 398
+s2 <= 6.0 : 301
+s2 <= 7.5 : 329
+s2 <= 8.5 : 332
+s2 <= 9.5 : 393
+s2 <= 10.5 : 435
+x1 <= 0.5 : 172
+x1 <= 1.5 : 432
+x1 <= 2.5 : 436
+x1 <= 3.5 : 438
+x1 <= 4.5 : 440
+x1 <= 5.5 : 441
+x2 <= 1.5 : 306
+x2 <= 2.5 : 370
+x2 <= 3.5 : 422
+x2 <= 4.5 : 439
+x2 <= 5.5 : 440"];
+469 [label="s2 <= 6.0
+--------------
+
+backoff1 <= 0.5 : 127
+backoff1 <= 1.5 : 117
+backoff1 <= 2.5 : 107
+backoff1 <= 3.5 : 97
+backoff1 <= 4.5 : 87
+backoff1 <= 5.5 : 95
+backoff1 <= 6.5 : 104
+backoff1 <= 7.5 : 113
+backoff1 <= 8.5 : 123
+backoff1 <= 9.5 : 133
+backoff1 <= 10.5 : 143
+backoff1 <= 11.5 : 152
+backoff1 <= 12.5 : 161
+backoff1 <= 13.5 : 170
+backoff1 <= 14.5 : 171
+backoff2 <= 0.5 : 60
+backoff2 <= 1.5 : 77
+backoff2 <= 2.5 : 94
+backoff2 <= 3.5 : 111
+backoff2 <= 4.5 : 128
+backoff2 <= 5.5 : 145
+backoff2 <= 6.5 : 156
+backoff2 <= 7.5 : 158
+backoff2 <= 8.5 : 160
+backoff2 <= 9.5 : 162
+backoff2 <= 10.5 : 164
+backoff2 <= 11.5 : 166
+backoff2 <= 12.5 : 168
+backoff2 <= 13.5 : 170
+backoff2 <= 14.5 : 172
+bc1 <= 0.5 : 133
+bc2 <= 0.5 : 144
+c1 <= 0.5 : 171
+c2 <= 0.5 : 73
+c2 <= 1.5 : 171
+col <= 0.5 : 171
+s1 <= 3.5 : 171
+s1 <= 4.5 : 170
+s1 <= 5.5 : 77
+s1 <= 7.0 : 131
+s1 <= 8.5 : 134
+s1 <= 10.0 : 135
+s1 <= 11.5 : 136
+s2 <= 2.0 : 171
+s2 <= 4.0 : 146
+s2 <= 6.0 : 46
+s2 <= 7.5 : 70
+s2 <= 8.5 : 72
+s2 <= 9.5 : 129
+s2 <= 10.5 : 171
+x2 <= 1.5 : 60
+x2 <= 2.5 : 120
+x2 <= 3.5 : 156
+x2 <= 5.0 : 171"];
+470 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 36
+backoff1 <= 1.5 : 33
+backoff1 <= 2.5 : 30
+backoff1 <= 3.5 : 27
+backoff1 <= 4.5 : 24
+backoff1 <= 5.5 : 21
+backoff1 <= 6.5 : 23
+backoff1 <= 7.5 : 25
+backoff1 <= 8.5 : 28
+backoff1 <= 9.5 : 31
+backoff1 <= 10.5 : 34
+backoff1 <= 11.5 : 36
+backoff1 <= 12.5 : 38
+backoff1 <= 13.5 : 40
+backoff1 <= 14.5 : 41
+backoff2 <= 0.5 : 26
+backoff2 <= 1.5 : 42
+backoff2 <= 2.5 : 42
+backoff2 <= 3.5 : 42
+backoff2 <= 4.5 : 42
+backoff2 <= 5.5 : 42
+backoff2 <= 6.5 : 42
+backoff2 <= 7.5 : 42
+backoff2 <= 8.5 : 42
+backoff2 <= 9.5 : 42
+backoff2 <= 10.5 : 42
+backoff2 <= 11.5 : 42
+backoff2 <= 12.5 : 42
+backoff2 <= 13.5 : 42
+backoff2 <= 14.5 : 42
+bc1 <= 0.5 : 40
+bc2 <= 0.5 : 16
+col <= 0.5 : 41
+s1 <= 4.5 : 41
+s1 <= 6.5 : 39
+s1 <= 10.0 : 41
+s2 <= 2.0 : 41
+s2 <= 4.0 : 16
+x2 <= 1.5 : 16
+x2 <= 2.5 : 34"];
+471 [label="x2 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 9
+backoff1 <= 1.5 : 7
+backoff1 <= 2.5 : 6
+backoff1 <= 3.5 : 5
+backoff1 <= 4.5 : 5
+backoff1 <= 5.5 : 6
+backoff1 <= 6.5 : 7
+backoff1 <= 7.5 : 8
+backoff1 <= 8.5 : 9
+backoff1 <= 9.5 : 10
+backoff1 <= 10.5 : 11
+backoff1 <= 11.5 : 12
+backoff1 <= 12.5 : 12
+backoff1 <= 13.5 : 12
+backoff1 <= 14.5 : 12
+bc1 <= 0.5 : 11
+col <= 0.5 : 11
+s1 <= 4.5 : 11
+s1 <= 6.5 : 11
+s2 <= 2.0 : 11
+x2 <= 2.5 : 4"];
+472 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 4
+backoff1 <= 4.5 : 4
+backoff1 <= 5.5 : 4
+backoff1 <= 6.5 : 4
+backoff1 <= 7.5 : 4
+backoff1 <= 8.5 : 4
+backoff1 <= 9.5 : 4
+backoff1 <= 10.5 : 4
+backoff1 <= 11.5 : 4
+backoff1 <= 12.5 : 4
+backoff1 <= 13.5 : 4
+backoff1 <= 14.5 : 4
+bc1 <= 0.5 : 3
+col <= 0.5 : 3
+s1 <= 4.5 : 3
+s1 <= 6.5 : 3
+s2 <= 2.0 : 3"];
+473 [label="bc1 <= 0.5
+--------------
+
+bc1 <= 0.5 : 1
+col <= 0.5 : 1
+s1 <= 4.5 : 1
+s1 <= 6.5 : 1
+s2 <= 2.0 : 1"];
+474 [label="station2_cmd_42"];
+473 -> 474 [label="True"];
+475 [label="s1 <= 4.5
+--------------
+
+s1 <= 4.5 : 0"];
+476 [label="station1_cmd_15"];
+475 -> 476 [label="True"];
+477 [label="station2_cmd_48"];
+475 -> 477 [style="dashed", label="False"];
+473 -> 475 [style="dashed", label="False"];
+472 -> 473 [label="True"];
+478 [label="backoff1 <= 1.5
+--------------
+
+backoff1 <= 1.5 : 0
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff1 <= 7.5 : 1
+backoff1 <= 8.5 : 1
+backoff1 <= 9.5 : 1
+backoff1 <= 10.5 : 1
+backoff1 <= 11.5 : 1
+backoff1 <= 12.5 : 1
+backoff1 <= 13.5 : 1
+backoff1 <= 14.5 : 1"];
+479 [label="station2_cmd_48"];
+478 -> 479 [label="True"];
+480 [label="time"];
+478 -> 480 [style="dashed", label="False"];
+472 -> 478 [style="dashed", label="False"];
+471 -> 472 [label="True"];
+481 [label="station2_cmd_48"];
+471 -> 481 [style="dashed", label="False"];
+470 -> 471 [label="True"];
+482 [label="backoff2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 13
+backoff1 <= 1.5 : 12
+backoff1 <= 2.5 : 11
+backoff1 <= 3.5 : 10
+backoff1 <= 4.5 : 9
+backoff1 <= 5.5 : 8
+backoff1 <= 6.5 : 9
+backoff1 <= 7.5 : 10
+backoff1 <= 8.5 : 11
+backoff1 <= 9.5 : 12
+backoff1 <= 10.5 : 13
+backoff1 <= 11.5 : 14
+backoff1 <= 12.5 : 15
+backoff2 <= 0.5 : 0
+backoff2 <= 1.5 : 16
+backoff2 <= 2.5 : 16
+backoff2 <= 3.5 : 16
+backoff2 <= 4.5 : 16
+backoff2 <= 5.5 : 16
+backoff2 <= 6.5 : 16
+backoff2 <= 7.5 : 16
+backoff2 <= 8.5 : 16
+backoff2 <= 9.5 : 16
+backoff2 <= 10.5 : 16
+backoff2 <= 11.5 : 16
+backoff2 <= 12.5 : 16
+backoff2 <= 13.5 : 16
+backoff2 <= 14.5 : 16
+bc1 <= 0.5 : 15
+s1 <= 6.5 : 14
+s1 <= 10.0 : 15"];
+483 [label="station2_cmd_54"];
+482 -> 483 [label="True"];
+484 [label="station2_cmd_52"];
+482 -> 484 [style="dashed", label="False"];
+470 -> 482 [style="dashed", label="False"];
+469 -> 470 [label="True"];
+485 [label="x2 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 26
+backoff1 <= 1.5 : 24
+backoff1 <= 2.5 : 24
+backoff1 <= 3.5 : 26
+backoff1 <= 4.5 : 28
+backoff1 <= 5.5 : 30
+backoff1 <= 6.5 : 32
+backoff1 <= 7.5 : 34
+backoff1 <= 8.5 : 36
+backoff1 <= 9.5 : 38
+backoff1 <= 10.5 : 40
+backoff1 <= 11.5 : 42
+backoff1 <= 12.5 : 44
+backoff2 <= 0.5 : 32
+backoff2 <= 1.5 : 33
+backoff2 <= 2.5 : 34
+backoff2 <= 3.5 : 35
+backoff2 <= 4.5 : 36
+backoff2 <= 5.5 : 37
+backoff2 <= 6.5 : 38
+backoff2 <= 7.5 : 39
+backoff2 <= 8.5 : 40
+backoff2 <= 9.5 : 41
+backoff2 <= 10.5 : 42
+backoff2 <= 11.5 : 43
+backoff2 <= 12.5 : 44
+backoff2 <= 13.5 : 45
+bc1 <= 0.5 : 28
+bc2 <= 0.5 : 44
+c1 <= 0.5 : 45
+c2 <= 0.5 : 29
+c2 <= 1.5 : 45
+s1 <= 4.5 : 45
+s1 <= 7.0 : 27
+s1 <= 8.5 : 28
+s1 <= 10.0 : 29
+s1 <= 11.5 : 30
+s2 <= 7.5 : 32
+s2 <= 8.5 : 30
+s2 <= 9.5 : 31
+s2 <= 10.5 : 45
+x2 <= 1.5 : 44
+x2 <= 2.5 : 16
+x2 <= 3.5 : 30
+x2 <= 5.0 : 45"];
+486 [label="backoff2 <= 6.5
+--------------
+
+backoff1 <= 0.5 : 16
+backoff1 <= 1.5 : 16
+backoff1 <= 2.5 : 16
+backoff1 <= 3.5 : 16
+backoff1 <= 4.5 : 16
+backoff1 <= 5.5 : 16
+backoff1 <= 6.5 : 16
+backoff1 <= 7.5 : 16
+backoff1 <= 8.5 : 16
+backoff1 <= 9.5 : 16
+backoff1 <= 10.5 : 16
+backoff1 <= 11.5 : 16
+backoff1 <= 12.5 : 16
+backoff2 <= 0.5 : 14
+backoff2 <= 1.5 : 13
+backoff2 <= 2.5 : 12
+backoff2 <= 3.5 : 11
+backoff2 <= 4.5 : 10
+backoff2 <= 5.5 : 9
+backoff2 <= 6.5 : 8
+backoff2 <= 7.5 : 9
+backoff2 <= 8.5 : 10
+backoff2 <= 9.5 : 11
+backoff2 <= 10.5 : 12
+backoff2 <= 11.5 : 13
+backoff2 <= 12.5 : 14
+backoff2 <= 13.5 : 15
+bc1 <= 0.5 : 14
+c1 <= 0.5 : 15
+c2 <= 0.5 : 16
+s1 <= 7.0 : 16
+s1 <= 8.5 : 15
+s1 <= 10.5 : 14
+s2 <= 7.5 : 14
+s2 <= 8.5 : 16
+s2 <= 9.5 : 16
+x2 <= 1.5 : 14"];
+487 [label="backoff2 <= 2.5
+--------------
+
+backoff1 <= 0.5 : 8
+backoff1 <= 1.5 : 8
+backoff1 <= 2.5 : 8
+backoff1 <= 3.5 : 8
+backoff1 <= 4.5 : 8
+backoff1 <= 5.5 : 8
+backoff1 <= 6.5 : 8
+backoff1 <= 7.5 : 8
+backoff1 <= 8.5 : 8
+backoff1 <= 9.5 : 8
+backoff1 <= 10.5 : 8
+backoff1 <= 11.5 : 8
+backoff1 <= 12.5 : 8
+backoff2 <= 0.5 : 6
+backoff2 <= 1.5 : 5
+backoff2 <= 2.5 : 4
+backoff2 <= 3.5 : 5
+backoff2 <= 4.5 : 6
+backoff2 <= 5.5 : 7
+bc1 <= 0.5 : 6
+c1 <= 0.5 : 7
+c2 <= 0.5 : 8
+s1 <= 7.0 : 8
+s1 <= 8.5 : 7
+s1 <= 10.5 : 6
+s2 <= 7.5 : 6
+s2 <= 8.5 : 8
+s2 <= 9.5 : 8
+x2 <= 1.5 : 6"];
+488 [label="backoff2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 4
+backoff1 <= 1.5 : 4
+backoff1 <= 2.5 : 4
+backoff1 <= 3.5 : 4
+backoff1 <= 4.5 : 4
+backoff1 <= 5.5 : 4
+backoff1 <= 6.5 : 4
+backoff1 <= 7.5 : 4
+backoff1 <= 8.5 : 4
+backoff1 <= 9.5 : 4
+backoff1 <= 10.5 : 4
+backoff1 <= 11.5 : 4
+backoff1 <= 12.5 : 4
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 3
+bc1 <= 0.5 : 2
+c1 <= 0.5 : 3
+c2 <= 0.5 : 4
+s1 <= 7.0 : 4
+s1 <= 8.5 : 3
+s1 <= 10.5 : 2
+s2 <= 7.5 : 2
+s2 <= 8.5 : 4
+s2 <= 9.5 : 4
+x2 <= 1.5 : 2"];
+489 [label="c1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 2
+backoff1 <= 1.5 : 2
+backoff1 <= 2.5 : 2
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 2
+backoff1 <= 5.5 : 2
+backoff1 <= 6.5 : 2
+backoff1 <= 7.5 : 2
+backoff1 <= 8.5 : 2
+backoff1 <= 9.5 : 2
+backoff1 <= 10.5 : 2
+backoff1 <= 11.5 : 2
+backoff1 <= 12.5 : 2
+bc1 <= 0.5 : 2
+c1 <= 0.5 : 1
+c2 <= 0.5 : 1
+s1 <= 7.0 : 2
+s1 <= 8.5 : 1
+s1 <= 10.5 : 2
+s2 <= 8.5 : 1
+s2 <= 9.5 : 2
+x2 <= 1.5 : 2"];
+490 [label="c2 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 1
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff1 <= 7.5 : 1
+backoff1 <= 8.5 : 1
+backoff1 <= 9.5 : 1
+backoff1 <= 10.5 : 1
+backoff1 <= 11.5 : 1
+backoff1 <= 12.5 : 1
+bc1 <= 0.5 : 1
+c2 <= 0.5 : 0
+s1 <= 7.0 : 1
+s1 <= 10.0 : 1
+s2 <= 8.5 : 0
+s2 <= 9.5 : 1
+x2 <= 1.5 : 1"];
+491 [label="send1"];
+490 -> 491 [label="True"];
+492 [label="time"];
+490 -> 492 [style="dashed", label="False"];
+489 -> 490 [label="True"];
+493 [label="send2"];
+489 -> 493 [style="dashed", label="False"];
+488 -> 489 [label="True"];
+494 [label="x2 <= 1.5
+--------------
+
+backoff2 <= 1.5 : 1
+x2 <= 1.5 : 0"];
+495 [label="time"];
+494 -> 495 [label="True"];
+496 [label="station2_cmd_59"];
+494 -> 496 [style="dashed", label="False"];
+488 -> 494 [style="dashed", label="False"];
+487 -> 488 [label="True"];
+497 [label="x2 <= 1.5
+--------------
+
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 3
+x2 <= 1.5 : 0"];
+498 [label="time"];
+497 -> 498 [label="True"];
+499 [label="station2_cmd_59"];
+497 -> 499 [style="dashed", label="False"];
+487 -> 497 [style="dashed", label="False"];
+486 -> 487 [label="True"];
+500 [label="x2 <= 1.5
+--------------
+
+backoff2 <= 7.5 : 7
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 5
+backoff2 <= 10.5 : 4
+backoff2 <= 11.5 : 5
+backoff2 <= 12.5 : 6
+backoff2 <= 13.5 : 7
+x2 <= 1.5 : 0"];
+501 [label="time"];
+500 -> 501 [label="True"];
+502 [label="station2_cmd_59"];
+500 -> 502 [style="dashed", label="False"];
+486 -> 500 [style="dashed", label="False"];
+485 -> 486 [label="True"];
+503 [label="backoff1 <= 5.5
+--------------
+
+backoff1 <= 0.5 : 13
+backoff1 <= 1.5 : 12
+backoff1 <= 2.5 : 11
+backoff1 <= 3.5 : 10
+backoff1 <= 4.5 : 9
+backoff1 <= 5.5 : 8
+backoff1 <= 6.5 : 8
+backoff1 <= 7.5 : 9
+backoff1 <= 8.5 : 10
+backoff1 <= 9.5 : 11
+backoff1 <= 10.5 : 12
+backoff1 <= 11.5 : 13
+backoff1 <= 12.5 : 14
+bc1 <= 0.5 : 13
+bc2 <= 0.5 : 14
+c2 <= 0.5 : 14
+c2 <= 1.5 : 15
+s1 <= 4.5 : 14
+s1 <= 8.5 : 14
+s1 <= 11.5 : 14
+s2 <= 9.5 : 14
+s2 <= 10.5 : 14
+x2 <= 3.5 : 14
+x2 <= 5.0 : 14"];
+504 [label="backoff1 <= 1.5
+--------------
+
+backoff1 <= 0.5 : 5
+backoff1 <= 1.5 : 4
+backoff1 <= 2.5 : 4
+backoff1 <= 3.5 : 5
+backoff1 <= 4.5 : 6
+bc1 <= 0.5 : 5
+bc2 <= 0.5 : 6
+c2 <= 0.5 : 6
+c2 <= 1.5 : 7
+s1 <= 4.5 : 6
+s1 <= 8.5 : 6
+s1 <= 11.5 : 6
+s2 <= 9.5 : 6
+s2 <= 10.5 : 6
+x2 <= 3.5 : 6
+x2 <= 5.0 : 6"];
+505 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 2
+bc1 <= 0.5 : 2
+bc2 <= 0.5 : 2
+c2 <= 0.5 : 2
+c2 <= 1.5 : 3
+s1 <= 4.5 : 2
+s1 <= 8.5 : 2
+s1 <= 11.5 : 2
+s2 <= 9.5 : 2
+s2 <= 10.5 : 2
+x2 <= 3.5 : 2
+x2 <= 5.0 : 2"];
+506 [label="bc2 <= 0.5
+--------------
+
+bc2 <= 0.5 : 1
+c2 <= 0.5 : 1
+c2 <= 1.5 : 2
+s1 <= 7.0 : 1
+s1 <= 11.5 : 1
+s2 <= 9.5 : 1
+s2 <= 10.5 : 1
+x2 <= 3.5 : 1
+x2 <= 5.0 : 1"];
+507 [label="c2 <= 1.0
+--------------
+
+c2 <= 1.0 : 0
+s1 <= 7.0 : 0
+s2 <= 10.0 : 0
+x2 <= 5.0 : 0"];
+508 [label="station2_cmd_74"];
+507 -> 508 [label="True"];
+509 [label="finish2"];
+507 -> 509 [style="dashed", label="False"];
+506 -> 507 [label="True"];
+510 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+511 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+512 [label="time"];
+511 -> 512 [label="True"];
+513 [label="finish2"];
+511 -> 513 [style="dashed", label="False"];
+510 -> 511 [label="True"];
+514 [label="finish2"];
+510 -> 514 [style="dashed", label="False"];
+506 -> 510 [style="dashed", label="False"];
+505 -> 506 [label="True"];
+515 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+516 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+517 [label="time"];
+516 -> 517 [label="True"];
+518 [label="finish2"];
+516 -> 518 [style="dashed", label="False"];
+515 -> 516 [label="True"];
+519 [label="finish2"];
+515 -> 519 [style="dashed", label="False"];
+505 -> 515 [style="dashed", label="False"];
+504 -> 505 [label="True"];
+520 [label="backoff1 <= 3.5
+--------------
+
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 2
+backoff1 <= 4.5 : 3
+s2 <= 9.5 : 4
+x2 <= 3.5 : 4"];
+521 [label="backoff1 <= 2.5
+--------------
+
+backoff1 <= 2.5 : 1
+s2 <= 9.5 : 2
+x2 <= 3.5 : 2"];
+522 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+523 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+524 [label="time"];
+523 -> 524 [label="True"];
+525 [label="finish2"];
+523 -> 525 [style="dashed", label="False"];
+522 -> 523 [label="True"];
+526 [label="finish2"];
+522 -> 526 [style="dashed", label="False"];
+521 -> 522 [label="True"];
+527 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+528 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+529 [label="time"];
+528 -> 529 [label="True"];
+530 [label="finish2"];
+528 -> 530 [style="dashed", label="False"];
+527 -> 528 [label="True"];
+531 [label="finish2"];
+527 -> 531 [style="dashed", label="False"];
+521 -> 527 [style="dashed", label="False"];
+520 -> 521 [label="True"];
+532 [label="backoff1 <= 4.5
+--------------
+
+backoff1 <= 4.5 : 1
+s2 <= 9.5 : 2
+x2 <= 3.5 : 2"];
+533 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+534 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+535 [label="time"];
+534 -> 535 [label="True"];
+536 [label="finish2"];
+534 -> 536 [style="dashed", label="False"];
+533 -> 534 [label="True"];
+537 [label="finish2"];
+533 -> 537 [style="dashed", label="False"];
+532 -> 533 [label="True"];
+538 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+539 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+540 [label="time"];
+539 -> 540 [label="True"];
+541 [label="finish2"];
+539 -> 541 [style="dashed", label="False"];
+538 -> 539 [label="True"];
+542 [label="finish2"];
+538 -> 542 [style="dashed", label="False"];
+532 -> 538 [style="dashed", label="False"];
+520 -> 532 [style="dashed", label="False"];
+504 -> 520 [style="dashed", label="False"];
+503 -> 504 [label="True"];
+543 [label="backoff1 <= 9.5
+--------------
+
+backoff1 <= 6.5 : 7
+backoff1 <= 7.5 : 6
+backoff1 <= 8.5 : 5
+backoff1 <= 9.5 : 4
+backoff1 <= 10.5 : 5
+backoff1 <= 11.5 : 6
+backoff1 <= 12.5 : 7
+s2 <= 9.5 : 8
+x2 <= 3.5 : 8"];
+544 [label="backoff1 <= 7.5
+--------------
+
+backoff1 <= 6.5 : 3
+backoff1 <= 7.5 : 2
+backoff1 <= 8.5 : 3
+s2 <= 9.5 : 4
+x2 <= 3.5 : 4"];
+545 [label="backoff1 <= 6.5
+--------------
+
+backoff1 <= 6.5 : 1
+s2 <= 9.5 : 2
+x2 <= 3.5 : 2"];
+546 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+547 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+548 [label="time"];
+547 -> 548 [label="True"];
+549 [label="finish2"];
+547 -> 549 [style="dashed", label="False"];
+546 -> 547 [label="True"];
+550 [label="finish2"];
+546 -> 550 [style="dashed", label="False"];
+545 -> 546 [label="True"];
+551 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+552 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+553 [label="time"];
+552 -> 553 [label="True"];
+554 [label="finish2"];
+552 -> 554 [style="dashed", label="False"];
+551 -> 552 [label="True"];
+555 [label="finish2"];
+551 -> 555 [style="dashed", label="False"];
+545 -> 551 [style="dashed", label="False"];
+544 -> 545 [label="True"];
+556 [label="backoff1 <= 8.5
+--------------
+
+backoff1 <= 8.5 : 1
+s2 <= 9.5 : 2
+x2 <= 3.5 : 2"];
+557 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+558 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+559 [label="time"];
+558 -> 559 [label="True"];
+560 [label="finish2"];
+558 -> 560 [style="dashed", label="False"];
+557 -> 558 [label="True"];
+561 [label="finish2"];
+557 -> 561 [style="dashed", label="False"];
+556 -> 557 [label="True"];
+562 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+563 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+564 [label="time"];
+563 -> 564 [label="True"];
+565 [label="finish2"];
+563 -> 565 [style="dashed", label="False"];
+562 -> 563 [label="True"];
+566 [label="finish2"];
+562 -> 566 [style="dashed", label="False"];
+556 -> 562 [style="dashed", label="False"];
+544 -> 556 [style="dashed", label="False"];
+543 -> 544 [label="True"];
+567 [label="backoff1 <= 11.5
+--------------
+
+backoff1 <= 10.5 : 3
+backoff1 <= 11.5 : 2
+backoff1 <= 12.5 : 3
+s2 <= 9.5 : 4
+x2 <= 3.5 : 4"];
+568 [label="backoff1 <= 10.5
+--------------
+
+backoff1 <= 10.5 : 1
+s2 <= 9.5 : 2
+x2 <= 3.5 : 2"];
+569 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+570 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+571 [label="time"];
+570 -> 571 [label="True"];
+572 [label="finish2"];
+570 -> 572 [style="dashed", label="False"];
+569 -> 570 [label="True"];
+573 [label="finish2"];
+569 -> 573 [style="dashed", label="False"];
+568 -> 569 [label="True"];
+574 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+575 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+576 [label="time"];
+575 -> 576 [label="True"];
+577 [label="finish2"];
+575 -> 577 [style="dashed", label="False"];
+574 -> 575 [label="True"];
+578 [label="finish2"];
+574 -> 578 [style="dashed", label="False"];
+568 -> 574 [style="dashed", label="False"];
+567 -> 568 [label="True"];
+579 [label="backoff1 <= 12.5
+--------------
+
+backoff1 <= 12.5 : 1
+s2 <= 9.5 : 2
+x2 <= 3.5 : 2"];
+580 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+581 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+582 [label="time"];
+581 -> 582 [label="True"];
+583 [label="finish2"];
+581 -> 583 [style="dashed", label="False"];
+580 -> 581 [label="True"];
+584 [label="finish2"];
+580 -> 584 [style="dashed", label="False"];
+579 -> 580 [label="True"];
+585 [label="s2 <= 9.5
+--------------
+
+s2 <= 9.5 : 1
+x2 <= 3.5 : 1"];
+586 [label="x2 <= 3.5
+--------------
+
+x2 <= 3.5 : 0"];
+587 [label="time"];
+586 -> 587 [label="True"];
+588 [label="finish2"];
+586 -> 588 [style="dashed", label="False"];
+585 -> 586 [label="True"];
+589 [label="finish2"];
+585 -> 589 [style="dashed", label="False"];
+579 -> 585 [style="dashed", label="False"];
+567 -> 579 [style="dashed", label="False"];
+543 -> 567 [style="dashed", label="False"];
+503 -> 543 [style="dashed", label="False"];
+485 -> 503 [style="dashed", label="False"];
+469 -> 485 [style="dashed", label="False"];
+468 -> 469 [label="True"];
+590 [label="backoff1 <= 0.5
+--------------
+
+backoff1 <= 0.5 : 15
+backoff1 <= 1.5 : 31
+backoff1 <= 2.5 : 32
+backoff1 <= 3.5 : 32
+backoff1 <= 4.5 : 32
+backoff1 <= 5.5 : 32
+backoff1 <= 6.5 : 32
+backoff1 <= 7.5 : 33
+backoff1 <= 8.5 : 34
+backoff1 <= 9.5 : 34
+backoff1 <= 10.5 : 34
+backoff1 <= 11.5 : 34
+backoff1 <= 12.5 : 35
+backoff1 <= 13.5 : 36
+backoff1 <= 14.5 : 37
+backoff2 <= 0.5 : 23
+backoff2 <= 1.5 : 24
+backoff2 <= 2.5 : 25
+backoff2 <= 3.5 : 26
+backoff2 <= 4.5 : 27
+backoff2 <= 5.5 : 28
+backoff2 <= 6.5 : 29
+backoff2 <= 7.5 : 30
+backoff2 <= 8.5 : 31
+backoff2 <= 9.5 : 32
+backoff2 <= 10.5 : 33
+backoff2 <= 11.5 : 34
+backoff2 <= 12.5 : 35
+backoff2 <= 13.5 : 36
+backoff2 <= 14.5 : 37
+bc1 <= 0.5 : 24
+bc2 <= 0.5 : 18
+c1 <= 1.0 : 34
+c2 <= 1.0 : 34
+col <= 0.5 : 36
+s1 <= 2.0 : 36
+s1 <= 4.0 : 34
+s1 <= 6.5 : 27
+s1 <= 8.5 : 28
+s1 <= 10.0 : 32
+s2 <= 2.0 : 36
+s2 <= 4.0 : 28
+s2 <= 6.5 : 27
+s2 <= 8.5 : 28
+s2 <= 10.0 : 32
+x1 <= 1.5 : 28
+x1 <= 2.5 : 32
+x1 <= 3.5 : 34
+x1 <= 4.5 : 36
+x1 <= 5.5 : 37
+x2 <= 1.5 : 22
+x2 <= 2.5 : 26
+x2 <= 3.5 : 34
+x2 <= 4.5 : 36
+x2 <= 5.5 : 37"];
+591 [label="bc1 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 7
+backoff2 <= 1.5 : 8
+backoff2 <= 2.5 : 9
+backoff2 <= 3.5 : 10
+backoff2 <= 4.5 : 11
+backoff2 <= 5.5 : 12
+backoff2 <= 6.5 : 13
+backoff2 <= 7.5 : 14
+backoff2 <= 8.5 : 15
+backoff2 <= 9.5 : 15
+backoff2 <= 10.5 : 15
+backoff2 <= 11.5 : 15
+backoff2 <= 12.5 : 15
+backoff2 <= 13.5 : 15
+backoff2 <= 14.5 : 15
+bc1 <= 0.5 : 4
+bc2 <= 0.5 : 4
+c1 <= 1.0 : 11
+c2 <= 1.0 : 11
+col <= 0.5 : 13
+s1 <= 2.0 : 13
+s1 <= 4.0 : 11
+s1 <= 6.5 : 4
+s1 <= 8.5 : 5
+s1 <= 10.0 : 9
+s2 <= 2.0 : 13
+s2 <= 4.0 : 11
+s2 <= 6.5 : 5
+s2 <= 8.5 : 5
+s2 <= 10.0 : 9
+x1 <= 1.5 : 5
+x1 <= 2.5 : 9
+x1 <= 3.5 : 11
+x1 <= 4.5 : 13
+x1 <= 5.5 : 14
+x2 <= 1.5 : 5
+x2 <= 2.5 : 9
+x2 <= 3.5 : 11
+x2 <= 4.5 : 13
+x2 <= 5.5 : 14"];
+592 [label="s1 <= 6.0
+--------------
+
+c1 <= 1.0 : 3
+c2 <= 1.0 : 3
+col <= 0.5 : 3
+s1 <= 2.0 : 3
+s1 <= 6.0 : 2
+s1 <= 10.0 : 3
+s2 <= 2.0 : 3
+s2 <= 6.0 : 2
+s2 <= 10.0 : 3
+x1 <= 1.5 : 4
+x1 <= 2.5 : 2
+x1 <= 3.5 : 2
+x1 <= 4.5 : 3
+x1 <= 5.5 : 3
+x2 <= 1.5 : 4
+x2 <= 2.5 : 2
+x2 <= 3.5 : 2
+x2 <= 4.5 : 3
+x2 <= 5.5 : 3"];
+593 [label="col <= 0.5
+--------------
+
+col <= 0.5 : 1
+s1 <= 2.0 : 1
+s2 <= 2.0 : 1
+x1 <= 1.5 : 1
+x2 <= 1.5 : 1"];
+594 [label="x1 <= 1.5
+--------------
+
+x1 <= 1.5 : 0
+x2 <= 1.5 : 0"];
+595 [label="time"];
+594 -> 595 [label="True"];
+596 [label="station1_cmd_7"];
+594 -> 596 [style="dashed", label="False"];
+593 -> 594 [label="True"];
+597 [label="x1 <= 1.5
+--------------
+
+x1 <= 1.5 : 0
+x2 <= 1.5 : 0"];
+598 [label="time"];
+597 -> 598 [label="True"];
+599 [label="station1_cmd_13"];
+597 -> 599 [style="dashed", label="False"];
+593 -> 597 [style="dashed", label="False"];
+592 -> 593 [label="True"];
+600 [label="c1 <= 1.0
+--------------
+
+c1 <= 1.0 : 1
+c2 <= 1.0 : 1
+s1 <= 10.0 : 1
+s2 <= 10.0 : 1
+x1 <= 1.5 : 2
+x1 <= 2.5 : 2
+x1 <= 3.5 : 2
+x1 <= 4.5 : 1
+x1 <= 5.5 : 1
+x2 <= 1.5 : 2
+x2 <= 2.5 : 2
+x2 <= 3.5 : 2
+x2 <= 4.5 : 1
+x2 <= 5.5 : 1"];
+601 [label="x1 <= 5.5
+--------------
+
+x1 <= 1.5 : 1
+x1 <= 2.5 : 1
+x1 <= 3.5 : 1
+x1 <= 4.5 : 1
+x1 <= 5.5 : 0
+x2 <= 1.5 : 1
+x2 <= 2.5 : 1
+x2 <= 3.5 : 1
+x2 <= 4.5 : 1
+x2 <= 5.5 : 0"];
+602 [label="time"];
+601 -> 602 [label="True"];
+603 [label="station1_cmd_39"];
+601 -> 603 [style="dashed", label="False"];
+600 -> 601 [label="True"];
+604 [label="x1 <= 3.5
+--------------
+
+x1 <= 1.5 : 1
+x1 <= 2.5 : 1
+x1 <= 3.5 : 0
+x2 <= 1.5 : 1
+x2 <= 2.5 : 1
+x2 <= 3.5 : 0"];
+605 [label="time"];
+604 -> 605 [label="True"];
+606 [label="finish1"];
+604 -> 606 [style="dashed", label="False"];
+600 -> 604 [style="dashed", label="False"];
+592 -> 600 [style="dashed", label="False"];
+591 -> 592 [label="True"];
+607 [label="s1 <= 6.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+s1 <= 6.5 : 0
+s2 <= 6.5 : 1"];
+608 [label="station1_cmd_19"];
+607 -> 608 [label="True"];
+609 [label="station2_cmd_54"];
+607 -> 609 [style="dashed", label="False"];
+591 -> 607 [style="dashed", label="False"];
+590 -> 591 [label="True"];
+610 [label="backoff1 <= 12.5
+--------------
+
+backoff1 <= 1.5 : 6
+backoff1 <= 2.5 : 6
+backoff1 <= 3.5 : 6
+backoff1 <= 4.5 : 6
+backoff1 <= 5.5 : 6
+backoff1 <= 6.5 : 6
+backoff1 <= 7.5 : 5
+backoff1 <= 8.5 : 4
+backoff1 <= 9.5 : 4
+backoff1 <= 10.5 : 4
+backoff1 <= 11.5 : 4
+backoff1 <= 12.5 : 3
+backoff1 <= 13.5 : 4
+backoff1 <= 14.5 : 5
+backoff2 <= 0.5 : 6
+backoff2 <= 1.5 : 6
+backoff2 <= 2.5 : 6
+backoff2 <= 3.5 : 6
+backoff2 <= 4.5 : 6
+backoff2 <= 5.5 : 6
+backoff2 <= 6.5 : 6
+backoff2 <= 7.5 : 6
+backoff2 <= 8.5 : 6
+backoff2 <= 9.5 : 6
+backoff2 <= 10.5 : 6
+backoff2 <= 11.5 : 6
+backoff2 <= 12.5 : 6
+backoff2 <= 13.5 : 6
+backoff2 <= 14.5 : 6
+bc2 <= 0.5 : 6
+s2 <= 4.0 : 6
+x2 <= 2.0 : 6"];
+611 [label="backoff1 <= 7.5
+--------------
+
+backoff1 <= 1.5 : 3
+backoff1 <= 2.5 : 3
+backoff1 <= 3.5 : 3
+backoff1 <= 4.5 : 3
+backoff1 <= 5.5 : 3
+backoff1 <= 6.5 : 3
+backoff1 <= 7.5 : 2
+backoff1 <= 8.5 : 2
+backoff1 <= 9.5 : 2
+backoff1 <= 10.5 : 2
+backoff1 <= 11.5 : 2
+backoff2 <= 0.5 : 3
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 3
+s2 <= 4.0 : 3
+x2 <= 2.0 : 3"];
+612 [label="backoff1 <= 1.5
+--------------
+
+backoff1 <= 1.5 : 1
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+613 [label="station1_cmd_17"];
+612 -> 613 [label="True"];
+614 [label="backoff1 <= 2.5
+--------------
+
+backoff1 <= 2.5 : 1
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+615 [label="station1_cmd_17"];
+614 -> 615 [label="True"];
+616 [label="backoff1 <= 3.5
+--------------
+
+backoff1 <= 3.5 : 1
+backoff1 <= 4.5 : 1
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+617 [label="station1_cmd_17"];
+616 -> 617 [label="True"];
+618 [label="backoff1 <= 4.5
+--------------
+
+backoff1 <= 4.5 : 1
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+619 [label="station1_cmd_17"];
+618 -> 619 [label="True"];
+620 [label="backoff1 <= 5.5
+--------------
+
+backoff1 <= 5.5 : 1
+backoff1 <= 6.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+621 [label="station1_cmd_17"];
+620 -> 621 [label="True"];
+622 [label="backoff1 <= 6.5
+--------------
+
+backoff1 <= 6.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+623 [label="station1_cmd_17"];
+622 -> 623 [label="True"];
+624 [label="bc2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 0
+s2 <= 4.0 : 0
+x2 <= 2.0 : 0"];
+625 [label="station2_cmd_48"];
+624 -> 625 [label="True"];
+626 [label="station1_cmd_17"];
+624 -> 626 [style="dashed", label="False"];
+622 -> 624 [style="dashed", label="False"];
+620 -> 622 [style="dashed", label="False"];
+618 -> 620 [style="dashed", label="False"];
+616 -> 618 [style="dashed", label="False"];
+614 -> 616 [style="dashed", label="False"];
+612 -> 614 [style="dashed", label="False"];
+611 -> 612 [label="True"];
+627 [label="backoff1 <= 8.5
+--------------
+
+backoff1 <= 8.5 : 1
+backoff1 <= 9.5 : 1
+backoff1 <= 10.5 : 1
+backoff1 <= 11.5 : 1
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 2
+backoff2 <= 2.5 : 2
+backoff2 <= 3.5 : 2
+backoff2 <= 4.5 : 2
+backoff2 <= 5.5 : 2
+backoff2 <= 6.5 : 2
+backoff2 <= 7.5 : 2
+backoff2 <= 8.5 : 2
+backoff2 <= 9.5 : 2
+backoff2 <= 10.5 : 2
+backoff2 <= 11.5 : 2
+backoff2 <= 12.5 : 2
+backoff2 <= 13.5 : 2
+backoff2 <= 14.5 : 2
+bc2 <= 0.5 : 2
+s2 <= 4.0 : 2
+x2 <= 2.0 : 2"];
+628 [label="bc2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 0
+s2 <= 4.0 : 0
+x2 <= 2.0 : 0"];
+629 [label="station2_cmd_48"];
+628 -> 629 [label="True"];
+630 [label="station1_cmd_17"];
+628 -> 630 [style="dashed", label="False"];
+627 -> 628 [label="True"];
+631 [label="backoff1 <= 9.5
+--------------
+
+backoff1 <= 9.5 : 1
+backoff1 <= 10.5 : 1
+backoff1 <= 11.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+632 [label="station1_cmd_17"];
+631 -> 632 [label="True"];
+633 [label="backoff1 <= 10.5
+--------------
+
+backoff1 <= 10.5 : 1
+backoff1 <= 11.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+634 [label="station1_cmd_17"];
+633 -> 634 [label="True"];
+635 [label="backoff1 <= 11.5
+--------------
+
+backoff1 <= 11.5 : 1
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 1
+s2 <= 4.0 : 1
+x2 <= 2.0 : 1"];
+636 [label="station1_cmd_17"];
+635 -> 636 [label="True"];
+637 [label="bc2 <= 0.5
+--------------
+
+backoff2 <= 0.5 : 1
+backoff2 <= 1.5 : 1
+backoff2 <= 2.5 : 1
+backoff2 <= 3.5 : 1
+backoff2 <= 4.5 : 1
+backoff2 <= 5.5 : 1
+backoff2 <= 6.5 : 1
+backoff2 <= 7.5 : 1
+backoff2 <= 8.5 : 1
+backoff2 <= 9.5 : 1
+backoff2 <= 10.5 : 1
+backoff2 <= 11.5 : 1
+backoff2 <= 12.5 : 1
+backoff2 <= 13.5 : 1
+backoff2 <= 14.5 : 1
+bc2 <= 0.5 : 0
+s2 <= 4.0 : 0
+x2 <= 2.0 : 0"];
+638 [label="station2_cmd_48"];
+637 -> 638 [label="True"];
+639 [label="station1_cmd_17"];
+637 -> 639 [style="dashed", label="False"];
+635 -> 637 [style="dashed", label="False"];
+633 -> 635 [style="dashed", label="False"];
+631 -> 633 [style="dashed", label="False"];
+627 -> 631 [style="dashed", label="False"];
+611 -> 627 [style="dashed", label="False"];
+610 -> 611 [label="True"];
+640 [label="bc2 <= 0.5
+--------------
+
+backoff1 <= 13.5 : 2
+backoff1 <= 14.5 : 2
+backoff2 <= 0.5 : 2
+backoff2 <= 1.5 : 3
+backoff2 <= 2.5 : 3
+backoff2 <= 3.5 : 3
+backoff2 <= 4.5 : 3
+backoff2 <= 5.5 : 3
+backoff2 <= 6.5 : 3
+backoff2 <= 7.5 : 3
+backoff2 <= 8.5 : 3
+backoff2 <= 9.5 : 3
+backoff2 <= 10.5 : 3
+backoff2 <= 11.5 : 3
+backoff2 <= 12.5 : 3
+backoff2 <= 13.5 : 3
+backoff2 <= 14.5 : 3
+bc2 <= 0.5 : 0
+s2 <= 4.0 : 0
+x2 <= 2.0 : 0"];
+641 [label="station2_cmd_48"];
+640 -> 641 [label="True"];
+642 [label="station1_cmd_17"];
+640 -> 642 [style="dashed", label="False"];
+610 -> 640 [style="dashed", label="False"];
+590 -> 610 [style="dashed", label="False"];
+468 -> 590 [style="dashed", label="False"];
+0 -> 468 [style="dashed", label="False"];
+
+}
