@@ -424,7 +424,7 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
                 uint64_t dst = entry.getColumn();
                 ValueType prob = entry.getValue();
                 builder.addNextValue(translated_choice, dst, prob);
-                dont_care_transitions[dst] += prob/state_num_choices;
+                dont_care_transitions[dst] += prob/storm::utility::convertNumber<ValueType>(state_num_choices);
             }
             ++translated_choice;
         }
@@ -449,7 +449,7 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
             for(uint64_t translated_choice = row_groups_new[state]; translated_choice < dont_care_translated_choice; ++translated_choice) {
                 reward_sum += choice_reward[translated_choice];
             }
-            choice_reward[dont_care_translated_choice] = reward_sum / state_num_choices;
+            choice_reward[dont_care_translated_choice] = reward_sum / storm::utility::convertNumber<ValueType>(state_num_choices);
         }
     }
     components.rewardModels = rewardModels;
