@@ -161,7 +161,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         return sorted_nodes[0][0]
     
 
-    def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6, nodes_to_skip=[]):
+    def create_tree_node_queue_heuristic(self, helper_tree, desired_depth=6, nodes_to_skip=[], use_states_for_node_priority=False):
         nodes = helper_tree.collect_nodes(lambda node : node.get_depth() == desired_depth)
         if nodes is None or len(nodes) == 0:
             return []
@@ -171,8 +171,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             if helper_node["id"] == 0 or helper_node["id"] in nodes_to_skip:
                 continue
             helper_tree_node = helper_tree.collect_nodes(lambda node : node.identifier == helper_node["id"])[0]
-            # stats = {"id": helper_node["id"], "states": self.quotient.get_state_space_for_tree_helper_node(helper_node["id"]), "nodes": helper_tree_node.get_number_of_descendants()}
-            stats = {"id": helper_node["id"], "nodes": helper_tree_node.get_number_of_descendants()}
+            if use_states_for_node_priority:
+                stats = {"id": helper_node["id"], "states": self.quotient.get_state_space_for_tree_helper_node(helper_node["id"]), "nodes": helper_tree_node.get_number_of_descendants()}
+            else:
+                stats = {"id": helper_node["id"], "nodes": helper_tree_node.get_number_of_descendants()}
 
             # this happens for nodes created outside of DtControl
             if "evaluations" not in helper_node.keys():
@@ -187,9 +189,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         if len(helper_node_stats) == 0:
             return []
 
-        # helper_node_stats = sorted(helper_node_stats, key=lambda x : x["states"].number_of_set_bits()/x["nodes"])
         helper_node_stats = sorted(helper_node_stats, key=lambda x : x["nodes"], reverse=True)
         helper_node_stats = sorted(helper_node_stats, key=lambda x : len(x["predicates"]), reverse=True)
+        if use_states_for_node_priority:
+            helper_node_stats = sorted(helper_node_stats, key=lambda x : x["states"].number_of_set_bits()/x["nodes"])
 
         return helper_node_stats
     
@@ -207,6 +210,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         recompute_scheduler = True # experimental
         dtcontrol_settings = ["default"] # this defines the different settings we run dtcontrol with
         # dtcontrol_settings = ["default", "gini", "entropy", "maxminority"]
+        use_states_for_node_priority = False
 
         # complete init
         self.counters_reset()
@@ -239,7 +243,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
             logger.info(f"starting iteration with subtree depth {current_depth}")
             # TODO this is not guaranteed to work in subsequent iterations when the PAYNT tree is used
-            node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth)
+            node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, use_states_for_node_priority=use_states_for_node_priority)
             nodes_to_skip = [] # this will include nodes that were already processed
 
             while len(node_queue) > 0 and (True or (current_iter < max_iter)):
@@ -257,7 +261,10 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 # print(tree_helper_tree.to_graphviz([node["id"]]))
 
                 # subtree synthesis
-                node_states = self.quotient.get_state_space_for_tree_helper_node(node["id"])
+                if use_states_for_node_priority:
+                    node_states = node["states"]
+                else:
+                    node_states = self.quotient.get_state_space_for_tree_helper_node(node["id"])
                 submdp = self.quotient.get_submdp_from_unfixed_states(node_states)
                 logger.info(f"subtree quotient has {submdp.model.nr_states} states and {submdp.model.nr_choices} choices")
                 subtree_spec = self.quotient.specification.copy()
@@ -405,7 +412,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                             assert len(nodes) == 1, f'only one node should have the old_identifier equal to {node["id"]}'
                             new_node = nodes[0]
                             node["id"] = new_node.identifier
-                        new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue])
+                        new_nodes = self.create_tree_node_queue_heuristic(tree_helper_tree, desired_depth=current_depth, nodes_to_skip=[node["id"] for node in node_queue], use_states_for_node_priority=use_states_for_node_priority)
                         node_queue += new_nodes
                         # current_value = paynt_subtree_value
                         # new_nodes_to_skip = []
@@ -426,7 +433,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.quotient.tree_helper = new_dtcontrol_tree_helper
                         self.quotient.tree_helper_tree = new_dtcontrol_tree_helper_tree
                         tree_helper_tree = new_dtcontrol_tree_helper_tree
-                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, use_states_for_node_priority=use_states_for_node_priority)
                         # current_value = paynt_subtree_value
                         # nodes_to_skip = []
                     elif use_dtcontrol and recompute_scheduler and chosen_tree.startswith("recomputed"):
@@ -438,7 +445,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                         self.quotient.tree_helper = recomputed_scheduler_tree_helper
                         self.quotient.tree_helper_tree = recomputed_scheduler_tree_helper_tree
                         tree_helper_tree = recomputed_scheduler_tree_helper_tree
-                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree)
+                        node_queue = self.create_tree_node_queue_heuristic(tree_helper_tree, use_states_for_node_priority=use_states_for_node_priority)
                         # current_value = recompute_scheduler_value
                         # nodes_to_skip = []
                     
