@@ -294,6 +294,10 @@ class DecisionTree:
     def reset(self):
         self.root = DecisionTreeNode(None)
 
+    def random_tree(self):
+        self.root = DecisionTreeNode(None)
+        self.root.action = self.quotient.action_labels.index("__random__")
+
     def copy(self):
         new_tree = DecisionTree(self.quotient, self.variables)
         new_tree.root = self.root.copy(None)
@@ -806,6 +810,11 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         # print(res)
         # exit()
         return submdp
+    
+    def create_uniform_random_tree(self):
+        decision_tree = DecisionTree(self,self.variables)
+        decision_tree.random_tree()
+        return decision_tree
 
 
 

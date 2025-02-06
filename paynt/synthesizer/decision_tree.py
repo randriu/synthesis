@@ -267,10 +267,13 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 #     continue
                 subtree_quotient.specification.optimality.update_optimum(eps_optimum_threshold)
                 subtree_synthesizer = SynthesizerDecisionTree(subtree_quotient)
-                # depth = 2
-                # subtree_synthesizer.synthesize_tree(depth)
                 self.paynt_calls += 1
-                subtree_synthesizer.synthesize_tree_sequence(opt_result_value, overall_timeout=60, max_depth=current_depth, break_if_found=break_on_small_tree)
+                
+                if subtree_quotient.state_is_relevant_bv.number_of_set_bits() == 0:
+                    random_tree = subtree_quotient.create_uniform_random_tree()
+                    subtree_synthesizer.best_tree = random_tree
+                else:
+                    subtree_synthesizer.synthesize_tree_sequence(opt_result_value, overall_timeout=60, max_depth=current_depth, break_if_found=break_on_small_tree)
 
                 # create new tree
                 if subtree_synthesizer.best_tree is not None:
