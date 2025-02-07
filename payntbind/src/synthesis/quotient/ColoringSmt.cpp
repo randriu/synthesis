@@ -162,18 +162,14 @@ ColoringSmt<ValueType>::ColoringSmt(
 
             timers["ColoringSmt::1-3-2"].start();
             for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
-                timers["ColoringSmt::1-3-2-1"].start();
                 uint64_t num_clauses = getRoot()->paths[path].size()-1;
                 uint64_t action = choice_to_action[choice];
                 clause_array[num_clauses++] = terminals[path]->action_expression[action];
-                timers["ColoringSmt::1-3-2-1"].stop();
-                timers["ColoringSmt::1-3-2-2"].start();
                 if(action == dont_care_action) {
                     for(uint64_t unavailable_action: ~state_available_actions[state]) {
                         clause_array[num_clauses++] = terminals[path]->action_expression[unavailable_action];
                     }
                 }
-                timers["ColoringSmt::1-3-2-2"].stop();
                 choice_path_expresssion[choice].push_back(z3::expr(ctx, Z3_mk_or(ctx, num_clauses, clause_array.ptr())));
                 // choice_path_expresssion[choice].push_back(Z3_mk_or(ctx, num_clauses, clause_array.ptr()));
             }
@@ -381,8 +377,8 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
                 // iterate over paths
                 for(uint64_t path: state_path_enabled[state]) {
                     uint64_t path_hole = path_action_hole[path];
-                    choice_enabled = subfamily.holeContains(path_hole,action);
                     // enable the choice if this action is the family
+                    choice_enabled = subfamily.holeContains(path_hole,action);
                     if(not choice_enabled and action == this->dont_care_action) {
                         // don't-care action can also be enabled if any unavailable action is in the family
                         for(uint64_t unavailable_action: ~state_available_actions[state]) {
@@ -655,6 +651,8 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     return std::make_pair(false,hole_options_vector);
 }
 
+template<typename ValueType>
+std::map<std::string,storm::utility::Stopwatch> ColoringSmt<ValueType>::timers;
 
 template class ColoringSmt<>;
 
