@@ -1,0 +1,559 @@
+digraph {
+0 [label="top_center_free <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.85
+bottom_center_free <= 0.5 : 0.85
+bottom_left_circle <= 0.5 : 0.831
+bottom_left_cross <= 0.5 : 0.825
+bottom_left_free <= 0.5 : 0.821
+bottom_right_circle <= 0.5 : 0.825
+bottom_right_cross <= 0.5 : 0.819
+bottom_right_free <= 0.5 : 0.82
+center_circle <= 0.5 : 0.829
+center_cross <= 0.5 : 0.766
+center_free <= 0.5 : 0.807
+center_left_circle <= 0.5 : 0.844
+center_left_cross <= 0.5 : 0.841
+center_left_free <= 0.5 : 0.841
+center_right_circle <= 0.5 : 0.844
+center_right_cross <= 0.5 : 0.798
+center_right_free <= 0.5 : 0.829
+top_center_circle <= 0.5 : 0.768
+top_center_cross <= 0.5 : 0.819
+top_center_free <= 0.5 : 0.766
+top_left_circle <= 0.5 : 0.812
+top_left_cross <= 0.5 : 0.792
+top_left_free <= 0.5 : 0.793
+top_right_cross <= 0.5 : 0.839
+top_right_free <= 0.5 : 0.839"];
+1 [label="center_free <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.812
+bottom_center_free <= 0.5 : 0.812
+bottom_left_circle <= 0.5 : 0.761
+bottom_left_cross <= 0.5 : 0.777
+bottom_left_free <= 0.5 : 0.739
+bottom_right_circle <= 0.5 : 0.778
+bottom_right_cross <= 0.5 : 0.772
+bottom_right_free <= 0.5 : 0.783
+center_circle <= 0.5 : 0.746
+center_cross <= 0.5 : 0.73
+center_free <= 0.5 : 0.72
+center_left_circle <= 0.5 : 0.805
+center_left_cross <= 0.5 : 0.803
+center_left_free <= 0.5 : 0.801
+center_right_circle <= 0.5 : 0.807
+center_right_cross <= 0.5 : 0.76
+center_right_free <= 0.5 : 0.792
+top_center_circle <= 0.5 : 0.752
+top_center_cross <= 0.5 : 0.752
+top_left_circle <= 0.5 : 0.792
+top_left_cross <= 0.5 : 0.784
+top_left_free <= 0.5 : 0.786"];
+2 [label="bottom_left_free <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.761
+bottom_center_free <= 0.5 : 0.761
+bottom_left_circle <= 0.5 : 0.679
+bottom_left_cross <= 0.5 : 0.752
+bottom_left_free <= 0.5 : 0.666
+bottom_right_circle <= 0.5 : 0.746
+bottom_right_cross <= 0.5 : 0.706
+bottom_right_free <= 0.5 : 0.737
+center_circle <= 0.5 : 0.673
+center_cross <= 0.5 : 0.673
+center_left_circle <= 0.5 : 0.758
+center_left_cross <= 0.5 : 0.757
+center_left_free <= 0.5 : 0.751
+center_right_circle <= 0.5 : 0.751
+center_right_cross <= 0.5 : 0.682
+center_right_free <= 0.5 : 0.735
+top_center_circle <= 0.5 : 0.685
+top_center_cross <= 0.5 : 0.685
+top_left_circle <= 0.5 : 0.741
+top_left_cross <= 0.5 : 0.738
+top_left_free <= 0.5 : 0.735"];
+3 [label="bottom_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.72
+bottom_center_free <= 0.5 : 0.72
+bottom_left_circle <= 0.5 : 0.692
+bottom_left_cross <= 0.5 : 0.692
+bottom_right_circle <= 0.5 : 0.629
+bottom_right_cross <= 0.5 : 0.61
+bottom_right_free <= 0.5 : 0.65
+center_circle <= 0.5 : 0.642
+center_cross <= 0.5 : 0.642
+center_left_circle <= 0.5 : 0.629
+center_left_cross <= 0.5 : 0.654
+center_left_free <= 0.5 : 0.641
+center_right_circle <= 0.5 : 0.678
+center_right_cross <= 0.5 : 0.628
+center_right_free <= 0.5 : 0.656
+top_center_circle <= 0.5 : 0.646
+top_center_cross <= 0.5 : 0.646
+top_left_circle <= 0.5 : 0.692
+top_left_cross <= 0.5 : 0.677
+top_left_free <= 0.5 : 0.719"];
+4 [label="bottom_right_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.65
+bottom_center_free <= 0.5 : 0.65
+bottom_left_circle <= 0.5 : 0.6
+bottom_left_cross <= 0.5 : 0.6
+bottom_right_circle <= 0.5 : 0.525
+bottom_right_free <= 0.5 : 0.525
+center_circle <= 0.5 : 0.575
+center_cross <= 0.5 : 0.575
+center_left_circle <= 0.5 : 0.525
+center_left_free <= 0.5 : 0.525
+center_right_circle <= 0.5 : 0.6
+center_right_cross <= 0.5 : 0.55
+center_right_free <= 0.5 : 0.6
+top_center_circle <= 0.5 : 0.533
+top_center_cross <= 0.5 : 0.533
+top_left_circle <= 0.5 : 0.6
+top_left_cross <= 0.5 : 0.55
+top_left_free <= 0.5 : 0.6"];
+5 [label="top_left_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.625
+bottom_center_free <= 0.5 : 0.625
+center_circle <= 0.5 : 0.5
+center_cross <= 0.5 : 0.5
+center_left_circle <= 0.5 : 0.542
+center_left_free <= 0.5 : 0.542
+center_right_circle <= 0.5 : 0.607
+center_right_cross <= 0.5 : 0.517
+center_right_free <= 0.5 : 0.562
+top_center_circle <= 0.5 : 0.5
+top_center_cross <= 0.5 : 0.5
+top_left_circle <= 0.5 : 0.536
+top_left_cross <= 0.5 : 0.45
+top_left_free <= 0.5 : 0.562"];
+6 [label="center_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.6
+bottom_center_free <= 0.5 : 0.6
+center_circle <= 0.5 : 0.5
+center_cross <= 0.5 : 0.5
+center_left_circle <= 0.5 : 0.5
+center_left_free <= 0.5 : 0.5
+center_right_cross <= 0.5 : 0.467
+center_right_free <= 0.5 : 0.467
+top_center_circle <= 0.5 : 0.5
+top_center_cross <= 0.5 : 0.5
+top_left_circle <= 0.5 : 0.6
+top_left_free <= 0.5 : 0.6"];
+7 [label="center_circle <= 0.5
+--------------
+
+center_circle <= 0.5 : 0.0
+center_cross <= 0.5 : 0.0
+top_center_circle <= 0.5 : 0.0
+top_center_cross <= 0.5 : 0.0"];
+8 [label="(center_right)"];
+7 -> 8 [label="True"];
+9 [label="(top_left)"];
+7 -> 9 [style="dashed", label="False"];
+6 -> 7 [label="True"];
+10 [label="center_left_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.333
+bottom_center_free <= 0.5 : 0.333
+center_left_circle <= 0.5 : 0.0
+center_left_free <= 0.5 : 0.0
+top_left_circle <= 0.5 : 0.333
+top_left_free <= 0.5 : 0.333"];
+11 [label="(center_left)"];
+10 -> 11 [label="True"];
+12 [label="(bottom_right)"];
+10 -> 12 [style="dashed", label="False"];
+6 -> 10 [style="dashed", label="False"];
+5 -> 6 [label="True"];
+13 [label="(bottom_right)"];
+5 -> 13 [style="dashed", label="False"];
+4 -> 5 [label="True"];
+14 [label="(center_left)"];
+4 -> 14 [style="dashed", label="False"];
+3 -> 4 [label="True"];
+15 [label="center_left_cross <= 0.5
+--------------
+
+center_left_cross <= 0.5 : 0.0
+center_left_free <= 0.5 : 0.0
+center_right_circle <= 0.5 : 0.0
+center_right_free <= 0.5 : 0.0
+top_center_circle <= 0.5 : 0.333
+top_center_cross <= 0.5 : 0.333
+top_left_circle <= 0.5 : 0.333
+top_left_cross <= 0.5 : 0.333"];
+16 [label="(center_right)"];
+15 -> 16 [label="True"];
+17 [label="(bottom_center)"];
+15 -> 17 [style="dashed", label="False"];
+3 -> 15 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+18 [label="center_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.599
+bottom_center_free <= 0.5 : 0.599
+bottom_right_circle <= 0.5 : 0.606
+bottom_right_cross <= 0.5 : 0.539
+bottom_right_free <= 0.5 : 0.583
+center_circle <= 0.5 : 0.394
+center_cross <= 0.5 : 0.394
+center_left_circle <= 0.5 : 0.606
+center_left_cross <= 0.5 : 0.605
+center_left_free <= 0.5 : 0.599
+center_right_circle <= 0.5 : 0.599
+center_right_cross <= 0.5 : 0.557
+center_right_free <= 0.5 : 0.591
+top_center_circle <= 0.5 : 0.394
+top_center_cross <= 0.5 : 0.394
+top_left_circle <= 0.5 : 0.517
+top_left_cross <= 0.5 : 0.521
+top_left_free <= 0.5 : 0.542"];
+19 [label="center_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.146
+bottom_center_free <= 0.5 : 0.146
+bottom_right_circle <= 0.5 : 0.133
+bottom_right_free <= 0.5 : 0.133
+center_left_circle <= 0.5 : 0.146
+center_left_free <= 0.5 : 0.146
+center_right_circle <= 0.5 : 0.146
+center_right_cross <= 0.5 : 0.0
+center_right_free <= 0.5 : 0.133
+top_left_circle <= 0.5 : 0.083
+top_left_cross <= 0.5 : 0.139
+top_left_free <= 0.5 : 0.146"];
+20 [label="(bottom_left)"];
+19 -> 20 [label="True"];
+21 [label="(center_left)"];
+19 -> 21 [style="dashed", label="False"];
+18 -> 19 [label="True"];
+22 [label="top_left_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.667
+bottom_center_free <= 0.5 : 0.667
+bottom_right_circle <= 0.5 : 0.667
+bottom_right_cross <= 0.5 : 0.456
+bottom_right_free <= 0.5 : 0.567
+center_left_circle <= 0.5 : 0.683
+center_left_cross <= 0.5 : 0.583
+center_left_free <= 0.5 : 0.667
+center_right_circle <= 0.5 : 0.63
+center_right_free <= 0.5 : 0.63
+top_left_circle <= 0.5 : 0.4
+top_left_free <= 0.5 : 0.4"];
+23 [label="(top_left)"];
+22 -> 23 [label="True"];
+24 [label="center_right_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.6
+bottom_center_free <= 0.5 : 0.6
+bottom_right_cross <= 0.5 : 0.5
+bottom_right_free <= 0.5 : 0.5
+center_left_circle <= 0.5 : 0.6
+center_left_cross <= 0.5 : 0.5
+center_left_free <= 0.5 : 0.6
+center_right_circle <= 0.5 : 0.467
+center_right_free <= 0.5 : 0.467"];
+25 [label="bottom_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.333
+bottom_center_free <= 0.5 : 0.333
+bottom_right_cross <= 0.5 : 0.0
+bottom_right_free <= 0.5 : 0.0
+center_left_circle <= 0.5 : 0.333
+center_left_free <= 0.5 : 0.333"];
+26 [label="(bottom_right)"];
+25 -> 26 [label="True"];
+27 [label="(center_right)"];
+25 -> 27 [style="dashed", label="False"];
+24 -> 25 [label="True"];
+28 [label="bottom_center_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.0
+bottom_center_free <= 0.5 : 0.0
+center_left_cross <= 0.5 : 0.0
+center_left_free <= 0.5 : 0.0"];
+29 [label="(center_left)"];
+28 -> 29 [label="True"];
+30 [label="(bottom_left)"];
+28 -> 30 [style="dashed", label="False"];
+24 -> 28 [style="dashed", label="False"];
+22 -> 24 [style="dashed", label="False"];
+18 -> 22 [style="dashed", label="False"];
+2 -> 18 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+31 [label="bottom_right_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.549
+bottom_center_free <= 0.5 : 0.549
+bottom_left_circle <= 0.5 : 0.543
+bottom_left_cross <= 0.5 : 0.456
+bottom_left_free <= 0.5 : 0.538
+bottom_right_circle <= 0.5 : 0.432
+bottom_right_cross <= 0.5 : 0.508
+bottom_right_free <= 0.5 : 0.513
+center_left_circle <= 0.5 : 0.508
+center_left_free <= 0.5 : 0.508
+center_right_circle <= 0.5 : 0.549
+center_right_cross <= 0.5 : 0.474
+center_right_free <= 0.5 : 0.551
+top_left_circle <= 0.5 : 0.474
+top_left_cross <= 0.5 : 0.538
+top_left_free <= 0.5 : 0.551"];
+32 [label="center_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.317
+bottom_center_free <= 0.5 : 0.317
+bottom_left_circle <= 0.5 : 0.344
+bottom_left_free <= 0.5 : 0.344
+bottom_right_cross <= 0.5 : 0.296
+bottom_right_free <= 0.5 : 0.296
+center_left_circle <= 0.5 : 0.317
+center_left_free <= 0.5 : 0.317
+center_right_circle <= 0.5 : 0.317
+center_right_cross <= 0.5 : 0.194
+center_right_free <= 0.5 : 0.333
+top_left_circle <= 0.5 : 0.194
+top_left_cross <= 0.5 : 0.302
+top_left_free <= 0.5 : 0.333"];
+33 [label="bottom_left_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.208
+bottom_center_free <= 0.5 : 0.208
+bottom_left_circle <= 0.5 : 0.188
+bottom_left_free <= 0.5 : 0.188
+bottom_right_cross <= 0.5 : 0.2
+bottom_right_free <= 0.5 : 0.2
+center_left_circle <= 0.5 : 0.208
+center_left_free <= 0.5 : 0.208
+center_right_circle <= 0.5 : 0.208
+center_right_free <= 0.5 : 0.208
+top_left_cross <= 0.5 : 0.214
+top_left_free <= 0.5 : 0.214"];
+34 [label="(center)"];
+33 -> 34 [label="True"];
+35 [label="bottom_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.333
+bottom_center_free <= 0.5 : 0.333
+bottom_right_cross <= 0.5 : 0.0
+bottom_right_free <= 0.5 : 0.0
+center_left_circle <= 0.5 : 0.333
+center_left_free <= 0.5 : 0.333
+center_right_circle <= 0.5 : 0.333
+center_right_free <= 0.5 : 0.333"];
+36 [label="(bottom_right)"];
+35 -> 36 [label="True"];
+37 [label="(center)"];
+35 -> 37 [style="dashed", label="False"];
+33 -> 35 [style="dashed", label="False"];
+32 -> 33 [label="True"];
+38 [label="(bottom_right)"];
+32 -> 38 [style="dashed", label="False"];
+31 -> 32 [label="True"];
+39 [label="bottom_left_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.5
+bottom_center_free <= 0.5 : 0.5
+bottom_left_cross <= 0.5 : 0.333
+bottom_left_free <= 0.5 : 0.333
+center_left_circle <= 0.5 : 0.333
+center_left_free <= 0.5 : 0.333
+center_right_circle <= 0.5 : 0.5
+center_right_free <= 0.5 : 0.5"];
+40 [label="(bottom_left)"];
+39 -> 40 [label="True"];
+41 [label="center_left_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.333
+bottom_center_free <= 0.5 : 0.333
+center_left_circle <= 0.5 : 0.0
+center_left_free <= 0.5 : 0.0
+center_right_circle <= 0.5 : 0.333
+center_right_free <= 0.5 : 0.333"];
+42 [label="(center_left)"];
+41 -> 42 [label="True"];
+43 [label="(center)"];
+41 -> 43 [style="dashed", label="False"];
+39 -> 41 [style="dashed", label="False"];
+31 -> 39 [style="dashed", label="False"];
+1 -> 31 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+44 [label="top_left_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.675
+bottom_center_free <= 0.5 : 0.675
+bottom_left_circle <= 0.5 : 0.675
+bottom_left_free <= 0.5 : 0.675
+bottom_right_circle <= 0.5 : 0.659
+bottom_right_free <= 0.5 : 0.659
+center_circle <= 0.5 : 0.639
+center_cross <= 0.5 : 0.601
+center_free <= 0.5 : 0.654
+center_left_circle <= 0.5 : 0.673
+center_left_free <= 0.5 : 0.673
+center_right_circle <= 0.5 : 0.652
+center_right_cross <= 0.5 : 0.514
+center_right_free <= 0.5 : 0.626
+top_left_circle <= 0.5 : 0.504
+top_left_cross <= 0.5 : 0.415
+top_left_free <= 0.5 : 0.542
+top_right_cross <= 0.5 : 0.641
+top_right_free <= 0.5 : 0.641"];
+45 [label="top_left_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.788
+bottom_center_free <= 0.5 : 0.788
+bottom_left_circle <= 0.5 : 0.788
+bottom_left_free <= 0.5 : 0.788
+bottom_right_circle <= 0.5 : 0.714
+bottom_right_free <= 0.5 : 0.714
+center_circle <= 0.5 : 0.75
+center_cross <= 0.5 : 0.679
+center_free <= 0.5 : 0.702
+center_left_circle <= 0.5 : 0.779
+center_left_free <= 0.5 : 0.779
+center_right_circle <= 0.5 : 0.767
+center_right_cross <= 0.5 : 0.609
+center_right_free <= 0.5 : 0.671
+top_left_circle <= 0.5 : 0.599
+top_left_free <= 0.5 : 0.599
+top_right_cross <= 0.5 : 0.733
+top_right_free <= 0.5 : 0.733"];
+46 [label="center_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.429
+bottom_center_free <= 0.5 : 0.429
+bottom_left_circle <= 0.5 : 0.429
+bottom_left_free <= 0.5 : 0.429
+bottom_right_circle <= 0.5 : 0.429
+bottom_right_free <= 0.5 : 0.429
+center_circle <= 0.5 : 0.238
+center_free <= 0.5 : 0.238
+center_left_circle <= 0.5 : 0.429
+center_left_free <= 0.5 : 0.429
+center_right_circle <= 0.5 : 0.429
+center_right_free <= 0.5 : 0.429
+top_right_cross <= 0.5 : 0.238
+top_right_free <= 0.5 : 0.238"];
+47 [label="top_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.267
+bottom_center_free <= 0.5 : 0.267
+bottom_left_circle <= 0.5 : 0.267
+bottom_left_free <= 0.5 : 0.267
+bottom_right_circle <= 0.5 : 0.267
+bottom_right_free <= 0.5 : 0.267
+center_left_circle <= 0.5 : 0.267
+center_left_free <= 0.5 : 0.267
+center_right_circle <= 0.5 : 0.267
+center_right_free <= 0.5 : 0.267
+top_right_cross <= 0.5 : 0.0
+top_right_free <= 0.5 : 0.0"];
+48 [label="(top_right)"];
+47 -> 48 [label="True"];
+49 [label="(top_left)"];
+47 -> 49 [style="dashed", label="False"];
+46 -> 47 [label="True"];
+50 [label="(top_center)"];
+46 -> 50 [style="dashed", label="False"];
+45 -> 46 [label="True"];
+51 [label="bottom_right_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.683
+bottom_center_free <= 0.5 : 0.683
+bottom_left_circle <= 0.5 : 0.683
+bottom_left_free <= 0.5 : 0.683
+bottom_right_circle <= 0.5 : 0.456
+bottom_right_free <= 0.5 : 0.456
+center_circle <= 0.5 : 0.667
+center_cross <= 0.5 : 0.481
+center_free <= 0.5 : 0.589
+center_left_circle <= 0.5 : 0.651
+center_left_free <= 0.5 : 0.651
+center_right_cross <= 0.5 : 0.583
+center_right_free <= 0.5 : 0.583"];
+52 [label="center_right_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.3
+bottom_center_free <= 0.5 : 0.3
+bottom_left_circle <= 0.5 : 0.3
+bottom_left_free <= 0.5 : 0.3
+center_circle <= 0.5 : 0.3
+center_free <= 0.5 : 0.3
+center_left_circle <= 0.5 : 0.3
+center_left_free <= 0.5 : 0.3
+center_right_cross <= 0.5 : 0.0
+center_right_free <= 0.5 : 0.0"];
+53 [label="(center_right)"];
+52 -> 53 [label="True"];
+54 [label="(bottom_right)"];
+52 -> 54 [style="dashed", label="False"];
+51 -> 52 [label="True"];
+55 [label="center_cross <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.5
+bottom_center_free <= 0.5 : 0.5
+bottom_left_circle <= 0.5 : 0.5
+bottom_left_free <= 0.5 : 0.5
+center_cross <= 0.5 : 0.333
+center_free <= 0.5 : 0.333
+center_left_circle <= 0.5 : 0.333
+center_left_free <= 0.5 : 0.333"];
+56 [label="(center)"];
+55 -> 56 [label="True"];
+57 [label="center_left_circle <= 0.5
+--------------
+
+bottom_center_circle <= 0.5 : 0.333
+bottom_center_free <= 0.5 : 0.333
+bottom_left_circle <= 0.5 : 0.333
+bottom_left_free <= 0.5 : 0.333
+center_left_circle <= 0.5 : 0.0
+center_left_free <= 0.5 : 0.0"];
+58 [label="(center_left)"];
+57 -> 58 [label="True"];
+59 [label="(bottom_left)"];
+57 -> 59 [style="dashed", label="False"];
+55 -> 57 [style="dashed", label="False"];
+51 -> 55 [style="dashed", label="False"];
+45 -> 51 [style="dashed", label="False"];
+44 -> 45 [label="True"];
+60 [label="(top_center)"];
+44 -> 60 [style="dashed", label="False"];
+0 -> 44 [style="dashed", label="False"];
+
+}
