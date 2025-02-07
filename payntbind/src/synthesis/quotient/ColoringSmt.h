@@ -78,7 +78,7 @@ public:
         BitVector const& choices, Family const& subfamily
     );
 
-    std::map<std::string,storm::utility::Stopwatch> timers;
+    static std::map<std::string,storm::utility::Stopwatch> timers;
     std::vector<std::pair<std::string,double>> getProfilingInfo() {
         std::vector<std::pair<std::string,double>> profiling;
         for(auto const& [method,timer]: timers) {

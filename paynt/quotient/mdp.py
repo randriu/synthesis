@@ -278,7 +278,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
     # if true, an explicit action executing a random choice of an available action will be added to each state
     add_dont_care_action = False
     # if true, irrelevant states will not be considered for tree mapping
-    filter_deterministic_states = False
+    filter_deterministic_states = True
 
     @classmethod
     def get_state_valuations(cls, model):
@@ -497,10 +497,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         return spec_result
 
     def build(self, family):
-        # logger.debug("building sub-MDP...")
-        # print("\nfamily = ", family, flush=True)
-        # family.parent_info = None
-
         if family.parent_info is None:
             choices = self.coloring.selectCompatibleChoices(family.family)
         else:
@@ -515,12 +511,17 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
-        return self.coloring.areChoicesConsistent(choices, family.family)
+        consistent,hole_selection = self.coloring.areChoicesConsistent(choices, family.family)
+        for hole,options in enumerate(hole_selection):
+            assert len(options) == len(set(options)), str(hole_selection)
+            for option in options:
+                assert option in family.hole_options(hole), \
+                f"option {option} for hole {hole} ({mdp.family.hole_name(hole)}) is not in the family"
+        return consistent,hole_selection
 
 
     def scheduler_is_consistent(self, mdp, prop, result):
         ''' Get hole options involved in the scheduler selection. '''
-
         scheduler = result.scheduler
         assert scheduler.memoryless and scheduler.deterministic
         state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler)
@@ -528,12 +529,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         if self.specification.is_single_property:
             mdp.family.scheduler_choices = choices
         consistent,hole_selection = self.are_choices_consistent(choices, mdp.family)
-
-        for hole,options in enumerate(hole_selection):
-            for option in options:
-                assert option in mdp.family.hole_options(hole), \
-                f"option {option} for hole {hole} ({mdp.family.hole_name(hole)}) is not in the family"
-
         return hole_selection, consistent
 
 
@@ -600,6 +595,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         parent_info.scheduler_choices = family.scheduler_choices
         # parent_info.unsat_core_hint = self.coloring.unsat_core.copy()
         subfamilies = family.split(splitter,suboptions)
+        assert family.size == sum([family.size for family in subfamilies])
         for subfamily in subfamilies:
             subfamily.add_parent_info(parent_info)
         return subfamilies
