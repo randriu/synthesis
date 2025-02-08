@@ -170,7 +170,7 @@ protected:
     std::vector<std::vector<z3::expr>> choice_path_expresssion_harm;
     // std::vector<std::vector<Z3_ast>> choice_path_expresssion_harm;
 
-    /** For each state, whether (in the last subfamily) the path was enabled. */
+    /** For each state, whether (in the last subfamily) the path is enabled. */
     std::vector<BitVector> state_path_enabled;
 
     /** Add unexplored destinations of the given choice to the queue and mark them as reached. */

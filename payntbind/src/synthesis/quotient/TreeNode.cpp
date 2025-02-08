@@ -198,12 +198,6 @@ void TerminalNode::loadHoleAssignmentFromModelHarmonizing(
     }
 }
 
-bool TerminalNode::isPathEnabledInState(
-    std::vector<bool> const& path, Family const& subfamily, std::vector<uint64_t> const& state_valuation
-) const {
-    return true;
-}
-
 void TerminalNode::unsatCoreAnalysis(
     Family const& subfamily,
     std::vector<bool> const& path,
@@ -451,22 +445,29 @@ void InnerNode::addFamilyEncoding(Family const& subfamily, z3::solver& solver) c
     child_false->addFamilyEncoding(subfamily,solver);
 }
 
-bool InnerNode::isPathEnabledInState(
-    std::vector<bool> const& path, Family const& subfamily, std::vector<uint64_t> const& state_valuation
-) const {
-    bool step_to_true_child = path[depth];
-    for(uint64_t variable = 0; variable < numVariables(); ++variable) {
-        if(not subfamily.holeContains(decision_hole.hole,variable)) {
-            continue;
-        }
-        z3::expr const& vv = variable_hole[variable].solver_variable;
+void InnerNode::arePathsEnabledInState(Family const& subfamily, std::vector<uint64_t> const& state_valuation) {
+   true_branch_enabled = false;
+   false_branch_enabled = false;
+    for(uint64_t variable: subfamily.holeOptions(decision_hole.hole)) {
         uint64_t value = state_valuation[variable];
         std::vector<uint64_t> const& domain = subfamily.holeOptions(variable_hole[variable].hole);
-        if( (step_to_true_child and value <= domain.back()) or (not step_to_true_child and value > domain.front()) ) {
-            return getChild(step_to_true_child)->isPathEnabledInState(path,subfamily,state_valuation);
+        if(value <= domain.back()) {
+            true_branch_enabled = true;
+        }
+        if(value > domain.front()) {
+            false_branch_enabled = true;
         }
     }
-    return false;
+    child_true->arePathsEnabledInState(subfamily,state_valuation);
+    child_false->arePathsEnabledInState(subfamily,state_valuation);
+}
+
+bool InnerNode::isPathEnabled(std::vector<bool> const& path) const {
+    bool step_to_true_child = path[depth];
+    if( (step_to_true_child and not true_branch_enabled) or (not step_to_true_child and not false_branch_enabled) ) {
+        return false;
+    }
+    return getChild(step_to_true_child)->isPathEnabled(path);
 }
 
 void InnerNode::loadHoleAssignmentFromModel(z3::model const& model, std::vector<std::vector<uint64_t>> & hole_options) const {
