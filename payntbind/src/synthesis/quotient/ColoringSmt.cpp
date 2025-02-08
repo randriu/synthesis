@@ -329,19 +329,10 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         );
     }
 
-    // for every action, compute for every path whether it admits this acitons
-    /*std::vector<BitVector> action_path_enabled;
-    for(uint64_t action = 0; action < num_actions; ++action) {
-        action_path_enabled.push_back(BitVector(numPaths(),false));
-        for(uint64_t path = 0; path < numPaths(); ++path) {
-            action_path_enabled[action].set(path,subfamily.holeContains(path_action_hole[path],action));
-        }
-    }*/
-
     // check individual choices
     timers["selectCompatibleChoices::2 state exploration"].start();
 
-    BitVector selection(numChoices(),false);
+    BitVector choice_selection(numChoices(),false);
     std::queue<uint64_t> unexplored_states;
     BitVector state_reached(numStates(),false);
     if(this->state_exploration_enabled) {
@@ -355,59 +346,56 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
 
     while(not unexplored_states.empty()) {
         uint64_t state = unexplored_states.front(); unexplored_states.pop();
-        if(state_is_relevant[state]) {
-            state_path_enabled[state].clear();
-            for(uint64_t path = 0; path < numPaths(); ++path) {
-                bool path_enabled = getRoot()->isPathEnabledInState(getRoot()->paths[path],subfamily,state_valuation[state]);
-                state_path_enabled[state].set(path,path_enabled);
+        if(not state_is_relevant[state]) {
+            // enable the first choice
+            for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+                if(not base_choices[choice]) {
+                    continue;
+                }
+                choice_selection.set(choice,true);
+                visitChoice(choice,state_reached,unexplored_states);
+                break;
             }
+            continue;
         }
+        state_path_enabled[state].clear();
+        getRoot()->arePathsEnabledInState(subfamily,state_valuation[state]);
+        for(uint64_t path = 0; path < numPaths(); ++path) {
+            bool path_enabled = getRoot()->isPathEnabled(getRoot()->paths[path]);
+            state_path_enabled[state].set(path,path_enabled);
+        }
+
         bool any_choice_enabled = false;
-        uint64_t num_choices_enabled = 0;
         for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
             uint64_t action = choice_to_action[choice];
             if(not base_choices[choice]) {
                 continue;
             }
             bool choice_enabled = false;
-            if(not state_is_relevant[state]) {
-                // enable the choice only if no choice has been enabled yet
-                choice_enabled = not any_choice_enabled;
-            } else {
-                // iterate over paths
-                for(uint64_t path: state_path_enabled[state]) {
-                    uint64_t path_hole = path_action_hole[path];
-                    // enable the choice if this action is the family
-                    choice_enabled = subfamily.holeContains(path_hole,action);
-                    if(not choice_enabled and action == this->dont_care_action) {
-                        // don't-care action can also be enabled if any unavailable action is in the family
-                        for(uint64_t unavailable_action: ~state_available_actions[state]) {
-                            if(subfamily.holeContains(path_hole,unavailable_action)) {
-                                choice_enabled = true;
-                                break;
-                            }
+            for(uint64_t path: state_path_enabled[state]) {
+                uint64_t path_hole = path_action_hole[path];
+                // enable the choice if this action is the family
+                choice_enabled = subfamily.holeContains(path_hole,action);
+                if(not choice_enabled and action == this->dont_care_action) {
+                    // don't-care action can also be enabled if any unavailable action is in the family
+                    for(uint64_t unavailable_action: ~state_available_actions[state]) {
+                        if(subfamily.holeContains(path_hole,unavailable_action)) {
+                            choice_enabled = true;
+                            break;
                         }
                     }
-                    if(choice_enabled) {
-                        break;
-                    }
+                }
+                if(choice_enabled) {
+                    break;
                 }
             }
             if(choice_enabled) {
                 any_choice_enabled = true;
-                num_choices_enabled++;
-                selection.set(choice,true);
+                choice_selection.set(choice,true);
                 visitChoice(choice,state_reached,unexplored_states);
             }
         }
         STORM_LOG_THROW(any_choice_enabled, storm::exceptions::UnexpectedException, "no choice is available in the sub-MDP");
-        /*if(num_choices_enabled == 1) {
-            if(state_path_enabled[state].getNumberOfSetBits() == 1) {
-                uint64_t path = *state_path_enabled[state].begin();
-                uint64_t path_hole = path_action_hole[path];
-                std::cout << subfamily.holeOptions(path_hole).size() << " ";
-            }
-        }*/
     }
 
     timers["selectCompatibleChoices::2 state exploration"].stop();
@@ -427,13 +415,13 @@ BitVector ColoringSmt<ValueType>::selectCompatibleChoices(Family const& subfamil
         bool consistent_scheduler_exists = check();
         if(not consistent_scheduler_exists) {
             STORM_LOG_WARN_COND(not subfamily.isAssignment(), "Hole assignment does not induce a DTMC.");
-            selection.clear();
+            choice_selection.clear();
         }
         solver.pop();
     }*/
 
     timers[__FUNCTION__].stop();
-    return selection;
+    return choice_selection;
 }
 
 template<typename ValueType>
@@ -515,17 +503,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     timers[__FUNCTION__].start();
     std::vector<std::vector<uint64_t>> hole_options_vector(family.numHoles());
 
-    /*for(uint64_t choice: choices) {
-        uint64_t action = choice_to_action[choice];
-        uint64_t state = choice_to_state[choice];
-        if(not state_is_relevant[state]) {
-            continue;
-        }
-        if(state_path_enabled[state].getNumberOfSetBits() == 1) {
-            std::cout << (action == this->dont_care_action);
-        }
-    }*/
-
     timers["areChoicesConsistent::1 is scheduler consistent?"].start();
     solver.push();
     getRoot()->addFamilyEncoding(subfamily,solver);
@@ -538,10 +515,12 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
         for(uint64_t path: state_path_enabled[state]) {
             const char *label = choice_path_label[choice][path].c_str();
             solver.add(choice_path_expresssion[choice][path], label);
-            // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion[choice][path], ctx.bool_const(label));
+            // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion[choice][path], choice_path_label_expr[choice][path]);
         }
     }
+    timers["areChoicesConsistent::1 (check)"].start();
     bool consistent = check();
+    timers["areChoicesConsistent::1 (check)"].stop();
     timers["areChoicesConsistent::1 is scheduler consistent?"].stop();
 
     if(consistent) {
@@ -580,9 +559,10 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
                 for(uint64_t path: state_path_enabled[state]) {
                     const char *label = choice_path_label[choice][path].c_str();
                     solver.add(choice_path_expresssion[choice][path], label);
-                    // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion[choice][path], ctx.bool_const(label));
                 }
+                timers["areChoicesConsistent::2 (check)"].start();
                 consistent = check();
+                timers["areChoicesConsistent::2 (check)"].stop();
             }
             visitChoice(choice,state_reached,unexplored_states);
             break;
@@ -600,7 +580,6 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     for(auto [choice,path]: this->unsat_core) {
         const char *label = choice_path_label[choice][path].c_str();
         solver.add(choice_path_expresssion_harm[choice][path], label);
-        // Z3_solver_assert_and_track(ctx, solver.operator Z3_solver(), choice_path_expresssion_harm[choice][path], ctx.bool_const(label));
     }
 
     z3::model model(ctx);
@@ -626,7 +605,9 @@ std::pair<bool,std::vector<std::vector<uint64_t>>> ColoringSmt<ValueType>::areCh
     STORM_LOG_THROW(harmonizing_hole_found, storm::exceptions::UnexpectedException, "harmonized UNSAT core is not SAT");*/
 
     solver.add(0 <= harmonizing_variable and harmonizing_variable < (int)(family.numHoles()), "harmonizing_domain");
+    timers["areChoicesConsistent::3 (check)"].start();
     consistent = check();
+    timers["areChoicesConsistent::3 (check)"].stop();
     if(consistent) {
         model = solver.get_model();
         uint64_t harmonizing_hole = model.eval(harmonizing_variable).get_numeral_uint64();
