@@ -244,6 +244,15 @@ class PolicyTreeNode:
         for child in reversed(self.child_nodes):
             child.add_nodes_to_graphviz_tree(graphviz_tree)
 
+    def get_policy_family_from_index(self, index: int):
+        if self.policy_index == index:
+            return self.family # have to do node_id
+        for child in self.child_nodes:
+            family = child.get_policy_family_from_index(index)
+            if family is not None:
+                return family
+        return None
+
     def add_edges_to_graphviz_tree(self, graphviz_tree):
         if self.splitter is None:
             return
@@ -452,9 +461,9 @@ class PolicyTree:
         return time
 
     
-    def extract_policies(self, quotient):
+    def extract_policies(self, quotient, keep_family=False):
         return {
-            f"p{policy_index}" : quotient.policy_to_state_valuation_actions(policy)
+            f"p{policy_index}" : quotient.policy_to_state_valuation_actions(policy, self.root.get_policy_family_from_index(policy_index) if keep_family else None)
             for policy_index,policy in enumerate(self.policies)
         }
 
@@ -737,12 +746,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     def export_evaluation_result(self, evaluations, export_filename_base):
         import json
-        policies = self.policy_tree.extract_policies(self.quotient)
-        policies_json = {}
+        policies = self.policy_tree.extract_policies(self.quotient, keep_family=self.ldokoupi_flag)
+        policies_json = [] if self.ldokoupi_flag else {}
         for index,key_value in enumerate(policies.items()):
             policy_id,policy = key_value
             policy_json = self.quotient.policy_to_json(policy, dt_control=self.ldokoupi_flag)
-            policies_json[policy_id] = policy_json
+
+            if not self.ldokoupi_flag:
+                policies_json[policy_id] = policy_json
+            else:
+                # for merging policy tree & DTs create long list as classification problem for DTCONTROL
+                policies_json.extend(policy_json)
+
         policies_string = json.dumps(policies_json, indent=4)
 
         policies_filename = export_filename_base + ".json"

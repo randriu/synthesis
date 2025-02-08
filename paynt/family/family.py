@@ -95,6 +95,24 @@ class Family:
         else:
             return name + ": {" + ",".join(labels) + "}"
 
+    @property
+    def holes_options(self):
+        # try cast to int/float
+        def cast_hole_option(value):
+            for cast in (int, float):
+                try:
+                    return cast(value)
+                except ValueError:
+                    continue
+            return value
+
+        res = []
+        for hole in range(self.num_holes):
+            options = self.hole_options(hole)
+            labels = [cast_hole_option(self.hole_to_option_labels[hole][option]) for option in options]
+            res.append(labels)
+        return res
+
     def __str__(self):
         hole_strings = []
         for hole in range(self.num_holes):
