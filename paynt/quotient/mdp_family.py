@@ -195,7 +195,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         ''' Separate method for profiling purposes. '''
         return self.coloring.areChoicesConsistent(choices, family.family)
 
-    def policy_to_state_valuation_actions(self, policy):
+    def policy_to_state_valuation_actions(self, policy, family = None):
         '''
         Create a representation for a policy that associated action labels with state valuations. States with only
         one available action are omitted.
@@ -220,7 +220,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                 if "_loc_prism2jani_" in variable:
                     continue
                 valuation[variable] = value
-
             state_valuation_to_action.append( (valuation,action) )
 
         # omit variables that are assigned to the same value
@@ -230,11 +229,23 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             for variable in list(irrelevant_variables):
                 if valuation[variable] != default_valuation[variable]:
                     irrelevant_variables.remove(variable)
+
+        self.irrelevant_variables = {variable: default_valuation[variable] for variable in irrelevant_variables}
+
+        # add family to state valuation
+        if family:
+            hole_names = family.hole_to_name
+            # get first option for each hole
+            hole_options = [h[0] for h in family.holes_options]
+
+            for valuation, action in state_valuation_to_action:
+                for hole, val in zip(hole_names, hole_options):
+                    valuation[hole] = val
+
         state_valuation_to_action = [
             ({variable:value for variable,value in valuation.items() if variable not in irrelevant_variables},action)
-            for valuation,action in state_valuation_to_action
+            for valuation, action in state_valuation_to_action
         ]
-        self.irrelevant_variables = {variable:default_valuation[variable] for variable in irrelevant_variables}
         return state_valuation_to_action
 
     def policy_to_json(self, state_valuation_to_action, dt_control=False):
