@@ -63,7 +63,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         # ^ this also asserts that states with the same observation have the
         # same number and the same order of available actions
 
-        logger.info(f"constructed POMDP having {self.observations} observations.")
+        logger.info(f"constructed {'exact' if self.pomdp.is_exact else ''} POMDP having {self.observations} observations.")
 
         state_obs = self.pomdp.observations.copy()
 
@@ -116,10 +116,16 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             self.observation_states[state_obs[state]] += 1
 
         # initialize POMDP manager
-        if not PomdpQuotient.posterior_aware:
-            self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp)
+        if self.pomdp.is_exact:
+            if not PomdpQuotient.posterior_aware:
+                self.pomdp_manager = payntbind.synthesis.ExactPomdpManager(self.pomdp)
+            else:
+                self.pomdp_manager = payntbind.synthesis.ExactPomdpManagerAposteriori(self.pomdp)
         else:
-            self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
+            if not PomdpQuotient.posterior_aware:
+                self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp)
+            else:
+                self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
 
         # do initial unfolding
         self.set_imperfect_memory_size(PomdpQuotient.initial_memory_size)
@@ -339,7 +345,10 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         logger.debug("unfolding {}-FSC template into POMDP...".format(max(self.observation_memory_size)))
         self.quotient_mdp = self.pomdp_manager.construct_mdp()
-        self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
+        if self.quotient_mdp.is_exact:
+            self.choice_destinations = payntbind.synthesis.computeChoiceDestinationsExact(self.quotient_mdp)
+        else:
+            self.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient_mdp)
         logger.debug(f"constructed quotient MDP having {self.quotient_mdp.nr_states} states and {self.quotient_mdp.nr_choices} actions.")
 
         self.family, choice_to_hole_options = self.create_coloring()
@@ -719,21 +728,18 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
 
         # convert hole assignment to FSC
         for obs,holes in enumerate(self.observation_action_holes):
-            for memory,hole in enumerate(holes):
+            for node,hole in enumerate(holes):
                 option = assignment.hole_options(hole)[0]
                 action_label = self.action_labels_at_observation[obs][option]
                 action = action_label_indices[action_label]
-                fsc.action_function[memory][obs] = action
+                fsc.action_function[node][obs] = action
         for obs,holes in enumerate(self.observation_memory_holes):
-            for memory,hole in enumerate(holes):
+            for node,hole in enumerate(holes):
                 option = assignment.hole_options(hole)[0]
-                fsc.update_function[memory][obs] = option
+                fsc.update_function[node][obs] = option
 
-        # fixing the FSC for not fully unrolled quotients
         fsc.fill_implicit_actions_and_updates()
-
         fsc.check(observation_to_actions)
-
         return fsc
 
 

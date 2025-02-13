@@ -89,13 +89,19 @@ class Quotient:
         tm = mdp.transition_matrix
         tm.make_row_grouping_trivial()
         assert tm.nr_columns == tm.nr_rows, "expected transition matrix without non-trivial row groups"
-        components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
-        dtmc = stormpy.storage.SparseDtmc(components)
-        return dtmc
+        if mdp.is_exact:
+            components = stormpy.storage.SparseExactModelComponents(tm, mdp.labeling, mdp.reward_models)
+            dtmc = stormpy.storage.SparseExactDtmc(components)
+            return dtmc
+        else:
+            components = stormpy.storage.SparseModelComponents(tm, mdp.labeling, mdp.reward_models)
+            dtmc = stormpy.storage.SparseDtmc(components)
+            return dtmc
 
     def build_assignment(self, family):
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
+        assert choices.number_of_set_bits() > 0
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         model = Quotient.mdp_to_dtmc(mdp)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
@@ -120,7 +126,10 @@ class Quotient:
         return state_to_choice_reachable
 
     def scheduler_to_state_to_choice(self, submdp, scheduler, discard_unreachable_choices=True):
-        state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, submdp.model, submdp.quotient_choice_map)
+        if submdp.model.is_exact:
+            state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoiceExact(scheduler, submdp.model, submdp.quotient_choice_map)
+        else:
+            state_to_quotient_choice = payntbind.synthesis.schedulerToStateToGlobalChoice(scheduler, submdp.model, submdp.quotient_choice_map)
         state_to_choice = self.empty_scheduler()
         for state in range(submdp.model.nr_states):
             quotient_choice = state_to_quotient_choice[state]
@@ -158,7 +167,10 @@ class Quotient:
         '''
 
         # multiply probability with model checking results
-        choice_values = payntbind.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
+        if mdp.is_exact:
+            choice_values = payntbind.synthesis.multiply_with_vector_exact(mdp.transition_matrix, state_values)
+        else:
+            choice_values = payntbind.synthesis.multiply_with_vector(mdp.transition_matrix, state_values)
         choice_values = Quotient.make_vector_defined(choice_values)
 
         # if the associated reward model has state-action rewards, then these must be added to choice values
@@ -309,7 +321,8 @@ class Quotient:
         assert self.specification.num_properties == 1, "expecting a single property"
         return self.specification.all_properties()[0]
 
-    def identify_absorbing_states(self, model):
+    @classmethod
+    def identify_absorbing_states(cls, model):
         state_is_absorbing = [True] * model.nr_states
         tm = model.transition_matrix
         for state in range(model.nr_states):
@@ -321,6 +334,16 @@ class Quotient:
                 if not state_is_absorbing[state]:
                     break
         return state_is_absorbing
+
+    @classmethod
+    def identify_states_with_actions(cls, model):
+        ''' Get a mask of states having more than one action. '''
+        state_has_actions = [None] * model.nr_states
+        ndi = model.nondeterministic_choice_indices
+        for state in range(model.nr_states):
+            num_actions = ndi[state+1]-ndi[state]
+            state_has_actions[state] = (num_actions>1)
+        return state_has_actions
 
     def identify_target_states(self, model=None, prop=None):
         if model is None:

@@ -60,6 +60,37 @@ class FSC:
         fsc.update_function = json["update_function"]
         return fsc
 
+    def reorder_nodes(self, node_old_to_new):
+        action_function = [None for node in range(self.num_nodes)]
+        update_function = [None for node in range(self.num_nodes)]
+        for node_old,node_new in enumerate(node_old_to_new):
+            action_function[node_new] = self.action_function[node_old]
+            update_function[node_new] = [node_old_to_new[node] for node in self.update_function[node_old]]
+        self.action_function = action_function
+        self.update_function = update_function
+
+    def reorder_actions(self, action_labels):
+        for node in range(self.num_nodes):
+            for obs in range(self.num_observations):
+                if self.is_deterministic:
+                    action = self.action_function[node][obs]
+                    self.action_function[node][obs] = action_labels.index(self.action_labels[action])
+                else:
+                    action_function = {}
+                    for action,prob in self.action_function[node][obs].items():
+                        action_function[action_labels.index(self.action_labels[action])] = prob
+                    self.action_function[node][obs] = action_function
+        self.action_labels = action_labels.copy()
+
+    def make_stochastic(self):
+        if not self.is_deterministic:
+            return
+        for node in range(self.num_nodes):
+            for obs in range(self.num_observations):
+                self.action_function[node][obs] = {self.action_function[node][obs] : 1.0}
+                self.update_function[node][obs] = {self.update_function[node][obs] : 1.0}
+        self.is_deterministic = False
+
     def check_action_function(self, observation_to_actions):
         assert len(self.action_function) == self.num_nodes, "FSC action function is not defined for all memory nodes"
         for node in range(self.num_nodes):
@@ -114,11 +145,12 @@ class FSC:
         for node in range(self.num_nodes):
             self.update_function[node] = [0] * self.num_observations
 
-    # this fixes FSCs contructed from not fully unfolded quotients
-    # this can only be used when the current state of the FSC is correct
     def fill_implicit_actions_and_updates(self):
+        '''
+        For an FSC with an irregular memory model, make action and updates explicit.
+        '''
         for node in range(self.num_nodes):
             for obs in range(self.num_observations):
-                if self.action_function[node][obs] == None:
+                if self.action_function[node][obs] is None:
                     self.action_function[node][obs] = self.action_function[0][obs]
                     self.update_function[node][obs] = self.update_function[0][obs]

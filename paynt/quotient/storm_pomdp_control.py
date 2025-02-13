@@ -94,6 +94,13 @@ class StormPOMDPControl:
         if self.s_queue is not None:
             self.s_queue.put((self.result_dict, self.storm_bounds))
 
+    def store_storm_result(self, result):
+        self.latest_storm_result = result
+        if self.quotient.specification.optimality.minimizing:
+            self.storm_bounds = self.latest_storm_result.upper_bound
+        else:
+            self.storm_bounds = self.latest_storm_result.lower_bound
+
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
     def run_storm_analysis(self):
@@ -138,28 +145,23 @@ class StormPOMDPControl:
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
         size = self.get_belief_controller_size(result, self.paynt_fsc_size)
 
+
+        print(f'-----------Storm-----------')
+        print(f'Value = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}', flush=True)
         if self.get_result is not None:
             # TODO not important for the paper but it would be nice to have correct FSC here as well
-            
             if self.storm_options == "overapp":
-                print(f'-----------Storm----------- \
-                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\n', flush=True)
                 #print(".....")
                 #print(result.upper_bound)
                 #print(result.lower_bound)
+                pass
             else:
-                print(f'-----------Storm----------- \
-                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+                print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
             exit()
 
-        print(f'-----------Storm----------- \
-              \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+        # print(f'\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
 
-        self.latest_storm_result = result
-        if self.quotient.specification.optimality.minimizing:
-            self.storm_bounds = self.latest_storm_result.upper_bound
-        else:
-            self.storm_bounds = self.latest_storm_result.lower_bound
+        self.store_storm_result(result)
 
     # setup interactive Storm belief model checker
     def interactive_storm_setup(self):
@@ -217,11 +219,7 @@ class StormPOMDPControl:
                     print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
                     text_file.close()
 
-            self.latest_storm_result = result
-            if self.quotient.specification.optimality.minimizing:
-                self.storm_bounds = self.latest_storm_result.upper_bound
-            else:
-                self.storm_bounds = self.latest_storm_result.lower_bound
+            self.store_storm_result(result)
             self.parse_results(self.quotient)
             self.update_data()
 
@@ -270,11 +268,7 @@ class StormPOMDPControl:
                 print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
                 text_file.close()
 
-        self.latest_storm_result = result
-        if self.quotient.specification.optimality.minimizing:
-            self.storm_bounds = self.latest_storm_result.upper_bound
-        else:
-            self.storm_bounds = self.latest_storm_result.lower_bound
+        self.store_storm_result(result)
         self.parse_results(self.quotient)
         self.update_data()
 
@@ -380,7 +374,7 @@ class StormPOMDPControl:
         # to make the code cleaner
         get_choice_label = self.latest_storm_result.induced_mc_from_scheduler.choice_labeling.get_labels_of_choice
 
-        cutoff_epxloration = [x for x in range(len(self.latest_storm_result.cutoff_schedulers))]
+        cutoff_epxloration = list(range(len(self.latest_storm_result.cutoff_schedulers)))
         finite_mem = False
 
         result = {x:[] for x in range(quotient.observations)}
@@ -394,46 +388,31 @@ class StormPOMDPControl:
             # parse non cut-off states
             if 'cutoff' not in state.labels and 'clipping' not in state.labels:
                 for label in state.labels:
-                    # observation based on prism observables
+                    observation = None
                     if '[' in label:
+                        # observation based on prism observables
                         observation = self.quotient.observation_labels.index(label)
-
-                        index = -1
-
-                        choice_label = list(get_choice_label(state.id))[0]
-                        for i in range(len(quotient.action_labels_at_observation[int(observation)])):
-                            if choice_label == quotient.action_labels_at_observation[int(observation)][i]:
-                                index = i
-                                break
-
-                        if index >= 0 and index not in result[int(observation)]:
-                            result[int(observation)].append(index)
-
-                        if index >= 0 and index not in result_no_cutoffs[int(observation)]:
-                            result_no_cutoffs[int(observation)].append(index)
-                    # explicit observation index
                     elif 'obs_' in label:
-                        _, observation = label.split('_')
-
-                        index = -1
+                        # explicit observation index
+                        _,observation = label.split('_')
+                    if observation is not None:
+                        observation = int(observation)
                         choice_label = list(get_choice_label(state.id))[0]
-                        for i in range(len(quotient.action_labels_at_observation[int(observation)])):
-                            if choice_label == quotient.action_labels_at_observation[int(observation)][i]:
-                                index = i
+                        for index,action_label in enumerate(quotient.action_labels_at_observation[observation]):
+                            if choice_label == action_label:
+                                if index not in result[observation]:
+                                    result[observation].append(index)
+                                if index not in result_no_cutoffs[observation]:
+                                    result_no_cutoffs[observation].append(index)
                                 break
-
-                        if index >= 0 and index not in result[int(observation)]:
-                            result[int(observation)].append(index)
-
-                        if index >= 0 and index not in result_no_cutoffs[int(observation)]:
-                            result_no_cutoffs[int(observation)].append(index)
                         
+
             # parse cut-off states
             else:
                 if 'finite_mem' in state.labels and not finite_mem:
                     finite_mem = True
                     self.parse_paynt_result(self.quotient)
-                    for obs, actions in self.result_dict_paynt.items():
+                    for obs,actions in self.result_dict_paynt.items():
                         for action in actions:
                             if action not in result_no_cutoffs[obs]:
                                 result_no_cutoffs[obs].append(action)
@@ -462,7 +441,6 @@ class StormPOMDPControl:
                             for action in actions:
                                 if action not in result[observation]:
                                     result[observation].append(action)
-    
                         cutoff_epxloration.remove(int(scheduler_index))
 
         # removing unrestricted observations
@@ -484,19 +462,14 @@ class StormPOMDPControl:
         chars = '}{]['
         for c in chars:
             choice_string = choice_string.replace(c, '')
-        
         choice_string = choice_string.strip(', ')
-
         choices = choice_string.split(',')
 
         result = []
-
         for choice in choices:
             probability, action = choice.split(':')
             # probability bound
-
             action = int(action.strip())
-            
             result.append(action)
 
         return result
@@ -593,14 +566,14 @@ class StormPOMDPControl:
 
         subfamilies = []
 
-        for i in range(len(restrictions)):
+        for i,restriction in enumerate(restrictions):
             restricted_family = family.copy()
 
-            actions = [action for action in family.hole_options(restrictions[i]["hole"]) if action not in restrictions[i]["restriction"]]
+            actions = [action for action in family.hole_options(restriction["hole"]) if action not in restriction["restriction"]]
             if len(actions) == 0:
-                actions = [family.hole_options(restrictions[i]["hole"])[0]]
+                actions = [family.hole_options(restriction["hole"])[0]]
 
-            restricted_family.hole_set_options(restrictions[i]['hole'],actions)
+            restricted_family.hole_set_options(restriction['hole'],actions)
 
             for j in range(i):
                 restricted_family.hole_set_options(restrictions[j]['hole'],restrictions[j]["restriction"])
