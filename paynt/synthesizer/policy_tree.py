@@ -156,10 +156,14 @@ class PolicyTreeNode:
             i += 1
 
     def make_policies_compatible(quotient, prop, node1, node2, policies):
+        if node1.changed:
+            return None
+
         policy1 = policies[node1.policy_index]
         policy2 = policies[node2.policy_index]
         policy = merge_policies(policy1,policy2)
         if policy is not None:
+            node1.changed = True
             return policy
         
         policy12,policy21 = merge_policies_exclusively(policy1,policy2)
@@ -169,6 +173,7 @@ class PolicyTreeNode:
         policy_result = mdp.model_check_property(prop, alt=True)
         PolicyTreeNode.mdps_model_checked += 1
         if policy_result.sat:
+            node1.changed = True
             return policy
 
         # try policy2 for family1
@@ -176,6 +181,7 @@ class PolicyTreeNode:
         policy_result = mdp.model_check_property(prop, alt=True)
         PolicyTreeNode.mdps_model_checked += 2
         if policy_result.sat:
+            node1.changed = True
             return policy
 
         # neither fits
@@ -187,6 +193,7 @@ class PolicyTreeNode:
         i = 0
         while i < len(self.child_nodes):
             child1 = self.child_nodes[i]
+            child1.changed = False  # policy can change only once, son moves to future for further merging
             if child1.sat is not True:
                 i += 1
                 continue
