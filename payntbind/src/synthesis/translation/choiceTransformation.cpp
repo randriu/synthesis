@@ -424,7 +424,13 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
                 uint64_t dst = entry.getColumn();
                 ValueType prob = entry.getValue();
                 builder.addNextValue(translated_choice, dst, prob);
-                dont_care_transitions[dst] += prob/state_num_choices;
+                // it seems like we have no choice but to add explicit cast to unsigned long since gmp does not
+                // support convrsion of unsigned long long to mpq_class which caused problems on ARM
+                if constexpr (std::is_same_v<ValueType, mpq_class>) {
+                    dont_care_transitions[dst] += prob / static_cast<unsigned long>(state_num_choices);
+                } else {
+                    dont_care_transitions[dst] += prob / state_num_choices;
+                }
             }
             ++translated_choice;
         }
@@ -449,7 +455,13 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
             for(uint64_t translated_choice = row_groups_new[state]; translated_choice < dont_care_translated_choice; ++translated_choice) {
                 reward_sum += choice_reward[translated_choice];
             }
-            choice_reward[dont_care_translated_choice] = reward_sum / state_num_choices;
+            // it seems like we have no choice but to add explicit cast to unsigned long since gmp does not
+            // support convrsion of unsigned long long to mpq_class which caused problems on ARM
+            if constexpr (std::is_same_v<ValueType, mpq_class>) {
+                choice_reward[dont_care_translated_choice] = reward_sum / static_cast<unsigned long>(state_num_choices);
+            } else {
+                choice_reward[dont_care_translated_choice] = reward_sum / state_num_choices;
+            }
         }
     }
     components.rewardModels = rewardModels;
