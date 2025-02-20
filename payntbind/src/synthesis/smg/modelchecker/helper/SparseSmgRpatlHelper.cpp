@@ -1,4 +1,4 @@
-/* 
+/*
  * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
  */
 
@@ -12,13 +12,24 @@
 #include <storm/environment/Environment.h>
 #include <storm/environment/solver/MinMaxSolverEnvironment.h>
 #include <storm/utility/vector.h>
+#include <storm/utility/graph.h>
 #include <storm/storage/MaximalEndComponentDecomposition.h>
+#include <storm/settings/SettingsManager.h>
+#include <storm/settings/modules/ModelCheckerSettings.h>
+#include <storm/exceptions/InvalidPropertyException.h>
 
 #include "internal/GameViHelper.h"
 #include "internal/Multiplier.h"
 #include "GameMaximalEndComponentDecomposition.h"
 
+
 namespace synthesis {
+
+    struct QualitativeStateSetsReachabilityRewards {
+        storm::storage::BitVector maybeStates;
+        storm::storage::BitVector infinityStates;
+        storm::storage::BitVector rewardZeroStates;
+    };
 
     void setClippedStatesOfCoalition(storm::storage::BitVector *vector, storm::storage::BitVector relevantStates, storm::storage::BitVector statesOfCoalition) {
         auto clippedStatesCounter = 0;
@@ -193,7 +204,7 @@ namespace synthesis {
                 scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(tempScheduler);
             }
         }
-        
+
         return SMGSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(relevantStates), std::move(scheduler), std::move(constrainedChoiceValues));
     }
 
@@ -356,6 +367,72 @@ namespace synthesis {
             storm::utility::vector::setVectorValues(result, psiStates, storm::utility::one<ValueType>());
         }
         return SMGSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(relevantStates), std::move(scheduler), std::move(constrainedChoiceValues));
+    }
+
+    template<typename ValueType>
+    SMGSparseModelCheckingHelperReturnType<ValueType> SparseSmgRpatlHelper<ValueType>::computeReachabilityRewards(storm::Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::models::sparse::StandardRewardModel<ValueType> const& rewardModel, storm::storage::BitVector const& targetStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler, storm::modelchecker::ModelCheckerHint const& hint) {
+        STORM_LOG_THROW(!rewardModel.empty(), storm::exceptions::InvalidPropertyException, "Reward model for formula is empty. Skipping formula.");
+        return computeReachabilityRewardsHelper(
+            env, std::move(goal), transitionMatrix, backwardTransitions,
+            [&rewardModel](uint_fast64_t rowCount, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::BitVector const& maybeStates) {
+                return rewardModel.getTotalRewardVector(rowCount, transitionMatrix, maybeStates);
+            },
+            targetStates, qualitative, statesOfCoalition, produceScheduler,
+            [&]() { return rewardModel.getStatesWithZeroReward(transitionMatrix); },
+            [&]() { return rewardModel.getChoicesWithZeroReward(transitionMatrix); },
+            hint);
+    }
+
+        template<typename ValueType>
+        QualitativeStateSetsReachabilityRewards computeQualitativeStateSetsReachabilityRewards(
+            storm::solver::SolveGoal<ValueType> const& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix,
+            storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& targetStates,
+            std::function<storm::storage::BitVector()> const& zeroRewardStatesGetter, std::function<storm::storage::BitVector()> const& zeroRewardChoicesGetter) {
+            QualitativeStateSetsReachabilityRewards result;
+            storm::storage::BitVector trueStates(transitionMatrix.getRowGroupCount(), true);
+            if (goal.minimize()) {
+                result.infinityStates =
+                    storm::utility::graph::performProb1E(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions, trueStates, targetStates);
+            } else {
+                result.infinityStates =
+                    storm::utility::graph::performProb1A(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions, trueStates, targetStates);
+            }
+            result.infinityStates.complement();
+
+            if (storm::settings::getModule<storm::settings::modules::ModelCheckerSettings>().isFilterRewZeroSet()) {
+                if (goal.minimize()) {
+                    result.rewardZeroStates = storm::utility::graph::performProb1E(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions,
+                                                                                   trueStates, targetStates, zeroRewardChoicesGetter());
+                } else {
+                    result.rewardZeroStates = storm::utility::graph::performProb1A(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions,
+                                                                                   zeroRewardStatesGetter(), targetStates);
+                }
+            } else {
+                result.rewardZeroStates = targetStates;
+            }
+            result.maybeStates = ~(result.rewardZeroStates | result.infinityStates);
+            return result;
+        }
+
+    template<typename ValueType>
+    SMGSparseModelCheckingHelperReturnType<ValueType> SparseSmgRpatlHelper<ValueType>::computeReachabilityRewardsHelper(
+                storm::Environment const& env, storm::solver::SolveGoal<ValueType>&& goal,
+                storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions,
+                std::function<std::vector<ValueType>(uint_fast64_t, storm::storage::SparseMatrix<ValueType> const&, storm::storage::BitVector const&)> const& totalStateRewardVectorGetter,
+                storm::storage::BitVector const& targetStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler,
+                std::function<storm::storage::BitVector()> const& zeroRewardStatesGetter, std::function<storm::storage::BitVector()> const& zeroRewardChoiceGetter,
+                storm::modelchecker::ModelCheckerHint const& hint) {
+        // todo
+
+        std::vector<ValueType> result(transitionMatrix.getRowGroupCount(), storm::utility::zero<ValueType>());
+
+        // compute infinity, zero and maybe states
+        // ignoring hint for now
+        QualitativeStateSetsReachabilityRewards qualitativeStateSets = computeQualitativeStateSetsReachabilityRewards(
+            goal, transitionMatrix, backwardTransitions, targetStates, zeroRewardStatesGetter, zeroRewardChoiceGetter);
+
+        storm::utility::vector::setVectorValues(result, qualitativeStateSets.infinityStates, storm::utility::infinity<ValueType>());
+
     }
 
     template class SparseSmgRpatlHelper<double>;
