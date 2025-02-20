@@ -31,6 +31,7 @@ namespace synthesis {
 
         rpatl.setGameFormulasAllowed(true);
         rpatl.setRewardOperatorsAllowed(true);
+        rpatl.setReachabilityRewardFormulasAllowed(true);
         rpatl.setLongRunAverageRewardFormulasAllowed(true);
         rpatl.setLongRunAverageOperatorsAllowed(true);
 
@@ -139,6 +140,8 @@ namespace synthesis {
         storm::logic::Formula const& rewardFormula = checkTask.getFormula();
         if (rewardFormula.isLongRunAverageRewardFormula()) {
             return this->computeLongRunAverageRewards(env, checkTask.substituteFormula(rewardFormula.asLongRunAverageRewardFormula()));
+        } else if (rewardFormula.isReachabilityRewardFormula()) {
+            return this->computeReachabilityRewards(env, checkTask.substituteFormula(rewardFormula.asReachabilityRewardFormula()));
         }
         STORM_LOG_THROW(false, storm::exceptions::InvalidArgumentException, "The given formula '" << rewardFormula << "' cannot (yet) be handled.");
     }
@@ -203,6 +206,30 @@ namespace synthesis {
 
         auto ret = synthesis::SparseSmgRpatlHelper<ValueType>::computeBoundedUntilProbabilities(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), leftResult.getTruthValuesVector(), rightResult.getTruthValuesVector(), checkTask.isQualitativeSet(), statesOfCoalition, checkTask.isProduceSchedulersSet(), checkTask.getHint(), pathFormula.getNonStrictLowerBound<uint64_t>(), pathFormula.getNonStrictUpperBound<uint64_t>());
         std::unique_ptr<storm::modelchecker::CheckResult> result(new storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>(std::move(ret.values)));
+        return result;
+    }
+
+    template<typename ModelType>
+    std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::computeReachabilityRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::EventuallyFormula, ValueType> const& checkTask) {
+        storm::logic::EventuallyFormula const& eventuallyFormula = checkTask.getFormula();
+        // storm log throw??
+
+        // find target states
+        std::unique_ptr<storm::modelchecker::CheckResult> subResultPointer = this->check(env, eventuallyFormula.getSubformula()); // subformula is atomic label/expression formula
+        storm::modelchecker::ExplicitQualitativeCheckResult const& subResult = subResultPointer->asExplicitQualitativeCheckResult();
+
+        // what does this do?
+        //  removes certain types of rewards (e.g. state rewards)
+        //  only if hasRewardAccumulation
+        //   what does accumulation mean?
+        auto rewardModel = storm::utility::createFilteredRewardModel(this->getModel(), checkTask);
+
+        auto ret = synthesis::SparseSmgRpatlHelper<ValueType>::computeReachabilityRewards(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), rewardModel.get(), subResult.getTruthValuesVector(), checkTask.isQualitativeSet(), statesOfCoalition, checkTask.isProduceSchedulersSet(), checkTask.getHint());
+
+        std::unique_ptr<storm::modelchecker::CheckResult> result(new storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>(std::move(ret.values)));
+        if (checkTask.isProduceSchedulersSet() && ret.scheduler) {
+            result->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(ret.scheduler));
+        }
         return result;
     }
 
