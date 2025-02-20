@@ -1,14 +1,14 @@
 import stormpy
 import payntbind
 
-from helpers.helper import get_example_path, get_builder_options
+from helpers.helper import get_stormpy_example_path, get_builder_options
 
 
 class TestModelTranslation:
 
     def test_add_dont_care_action(self):
         # setup
-        program = stormpy.parse_prism_program(get_example_path("mdp", "tiny_rewards.nm"), prism_compat=True)
+        program = stormpy.parse_prism_program(get_stormpy_example_path("mdp", "tiny_rewards.nm"), prism_compat=True)
         program = program.label_unlabelled_commands({}) # this is something we always do in PAYNT but without it this will throw segfault!
         mdp = stormpy.build_sparse_model_with_options(program, get_builder_options())
         state_bitvector = stormpy.BitVector(mdp.nr_states, True)
@@ -43,7 +43,7 @@ class TestModelTranslation:
 
     def test_add_dont_care_action_exact(self):
         # setup
-        program = stormpy.parse_prism_program(get_example_path("mdp", "tiny_rewards.nm"), prism_compat=True)
+        program = stormpy.parse_prism_program(get_stormpy_example_path("mdp", "tiny_rewards.nm"), prism_compat=True)
         program = program.label_unlabelled_commands({}) # this is something we always do in PAYNT but without it this will throw segfault!
         mdp = stormpy.build_sparse_exact_model_with_options(program, get_builder_options())
         state_bitvector = stormpy.BitVector(mdp.nr_states, True)
