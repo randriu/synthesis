@@ -55,7 +55,7 @@ class SynthesizerPomdp:
         self.total_iters += iters_mdp
         return assignment
 
-    def unfold_and_synthesize(self, mem_size, unfold_storm):
+    def unfold_and_synthesize(self, mem_size, unfold_storm, unfold_imperfect_only=True):
         paynt.quotient.pomdp.PomdpQuotient.current_family_index = mem_size
 
         # unfold memory according to the best result
@@ -65,37 +65,36 @@ class SynthesizerPomdp:
                 self.quotient.set_imperfect_memory_size(mem_size)
             else:
                 self.quotient.set_global_memory_size(mem_size)
-            return
-
-        if mem_size <= 1:
-            return
-        obs_memory_dict = {}
-        if self.storm_control.is_storm_better:
-            # Storm's result is better and it needs memory
-            if self.storm_control.is_memory_needed():
-                obs_memory_dict = self.storm_control.memory_vector
-                logger.info(f'Added memory nodes for observation based on Storm data')
-            else:
-                if self.storm_control.unfold_cutoff:
-                    # consider the cut-off schedulers actions when updating memory
-                    result_dict = self.storm_control.result_dict
-                else:
-                    # only consider the induced DTMC without cut-off states
-                    result_dict = self.storm_control.result_dict_no_cutoffs
-                for obs in range(self.quotient.observations):
-                    if obs in result_dict:
-                        obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
-                    else:
-                        obs_memory_dict[obs] = self.quotient.observation_memory_size[obs]
-                logger.info(f'Added memory nodes for observation based on Storm data')
         else:
-            for obs in range(self.quotient.observations):
-                if self.quotient.observation_states[obs]>1:
-                    obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
+            if mem_size > 1:
+                obs_memory_dict = {}
+                if self.storm_control.is_storm_better:
+                    # Storm's result is better and it needs memory
+                    if self.storm_control.is_memory_needed():
+                        obs_memory_dict = self.storm_control.memory_vector
+                        logger.info(f'Added memory nodes to match Storm data')
+                    else:
+                        if self.storm_control.unfold_cutoff:
+                            # consider the cut-off schedulers actions when updating memory
+                            result_dict = self.storm_control.result_dict
+                        else:
+                            # only consider the induced DTMC without cut-off states
+                            result_dict = self.storm_control.result_dict_no_cutoffs
+                        for obs in range(self.quotient.observations):
+                            if obs in result_dict:
+                                obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
+                            else:
+                                obs_memory_dict[obs] = self.quotient.observation_memory_size[obs]
+                        logger.info(f'Added memory nodes for observations based on Storm data')
                 else:
-                    obs_memory_dict[obs] = 1
-            logger.info(f'Increase memory in all imperfect observation')
-        self.quotient.set_memory_from_dict(obs_memory_dict)
+                    for obs in range(self.quotient.observations):
+                        if self.quotient.observation_states[obs]>1:
+                            obs_memory_dict[obs] = self.quotient.observation_memory_size[obs] + 1
+                        else:
+                            obs_memory_dict[obs] = 1
+                    logger.info(f'Increased memory in all imperfect observation')
+                self.quotient.set_memory_from_dict(obs_memory_dict)
+
         family = self.quotient.family
 
         # if Storm's result is better, use it to obtain main family that considers only the important actions
