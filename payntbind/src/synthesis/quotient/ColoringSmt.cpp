@@ -134,7 +134,7 @@ ColoringSmt<ValueType>::ColoringSmt(
     // allocate array for path expressions
     uint64_t longest_path = 0;
     for(uint64_t path = 0; path < numPaths(); ++path) {
-        longest_path = std::max(longest_path,getRoot()->paths[path].size());
+        longest_path = std::max(longest_path,(uint64_t)getRoot()->paths[path].size());
     }
     z3::expr_vector state_valuation_int(ctx);
     z3::array<Z3_ast> clause_array(longest_path-1+num_actions);
