@@ -383,33 +383,145 @@ namespace synthesis {
             hint);
     }
 
-        template<typename ValueType>
-        QualitativeStateSetsReachabilityRewards computeQualitativeStateSetsReachabilityRewards(
-            storm::solver::SolveGoal<ValueType> const& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix,
-            storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& targetStates,
-            std::function<storm::storage::BitVector()> const& zeroRewardStatesGetter, std::function<storm::storage::BitVector()> const& zeroRewardChoicesGetter) {
-            QualitativeStateSetsReachabilityRewards result;
-            storm::storage::BitVector trueStates(transitionMatrix.getRowGroupCount(), true);
-            if (goal.minimize()) {
-                result.infinityStates =
-                    storm::utility::graph::performProb1E(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions, trueStates, targetStates);
-            } else {
-                result.infinityStates =
-                    storm::utility::graph::performProb1A(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions, trueStates, targetStates);
-            }
-            result.infinityStates.complement();
+    // For debugging purposes
+    // Prints bit vector to stderr in format "name: bit0 bit1 bit2 ... \n"
+    void printBitVector(storm::storage::BitVector const& bv, std::string const& name)
+    {
+        std::cerr << name << ": ";
+        for (size_t i = 0; i < bv.size(); i++) {
+            std::cerr << bv.get(i) << " ";
+        }
+        std::cerr << "\n";
+    }
 
-            if (storm::settings::getModule<storm::settings::modules::ModelCheckerSettings>().isFilterRewZeroSet()) {
-                if (goal.minimize()) {
-                    result.rewardZeroStates = storm::utility::graph::performProb1E(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions,
-                                                                                   trueStates, targetStates, zeroRewardChoicesGetter());
-                } else {
-                    result.rewardZeroStates = storm::utility::graph::performProb1A(transitionMatrix, transitionMatrix.getRowGroupIndices(), backwardTransitions,
-                                                                                   zeroRewardStatesGetter(), targetStates);
-                }
-            } else {
-                result.rewardZeroStates = targetStates;
+    /**
+     * @brief Return whether the given row contains at least one entry in column specified by columns
+     *
+     * @tparam ValueType
+     * @param row row whose entries are checked
+     * @param columns specifies columns to check against
+     * @return true if at least one entry is in column from columns
+     * @return false otherwise
+     */
+    template<typename ValueType>
+    bool containsOneOf(typename storm::storage::SparseMatrix<ValueType>::const_rows const& row, storm::storage::BitVector const& columns) {
+        for (auto const& entry : row) {
+            if (columns.get(entry.getColumn())) {
+                return true;
             }
+        }
+        return false;
+    }
+
+    /**
+     * @brief Return wheter the given row contains only entries in columns specified by columns
+     *
+     * @tparam ValueType
+     * @param row row whose entries are checked
+     * @param columns specifies columns to check against
+     * @return true if all entries are in columns from columns
+     * @return false otherwise
+     */
+        template<typename ValueType>
+    bool isSubsetOf(typename storm::storage::SparseMatrix<ValueType>::const_rows const& row, storm::storage::BitVector const& columns) {
+        for (auto const& entry : row) {
+            if (!columns.get(entry.getColumn())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // inspired by prism-games SMGSimple.java
+    template<typename ValueType>
+    void prob1step(storm::storage::BitVector const& subset, storm::storage::BitVector const& u, storm::storage::BitVector const& v,
+                    storm::storage::SparseMatrix<ValueType> const& transitionMatrix,
+                    bool forall1, storm::storage::BitVector const& statesOfCoalition,
+                    storm::storage::BitVector& result)
+    {
+        bool b1, b2;
+        bool forall;
+        auto rowGroupIndices = transitionMatrix.getRowGroupIndices();
+
+        for (uint64_t state = 0; state < transitionMatrix.getRowGroupCount(); state++) {
+            if (subset.get(state)) {
+                // statesOfCoalition.get(state) == true means it is player 2 state, else it is player 1 state
+                forall = statesOfCoalition.get(state) ? !forall1 : forall1;
+                b1 = forall;
+                for (uint64_t choice = rowGroupIndices[state]; choice < rowGroupIndices[state + 1]; choice++) {
+                    auto row = transitionMatrix.getRow(choice);
+                    b2 = containsOneOf<ValueType>(row, v) && isSubsetOf<ValueType>(row, u);
+
+                    if (forall)
+                    {
+                        if (!b2) {
+                            b1 = false;
+                            break;
+                        }
+                    }
+                    else {
+                        if (b2) {
+                            b1 = true;
+                            break;
+                        }
+                    }
+                }
+                result.set(state, b1);
+            }
+        }
+    }
+
+    // inspired by prism-games STPGModelChecker.java
+    template<typename ValueType>
+    storm::storage::BitVector prob1(storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::BitVector const& targetStates, bool min1, storm::storage::BitVector const& statesOfCoalition)
+    {
+        uint64_t stateCount = transitionMatrix.getRowGroupCount();
+
+        storm::storage::BitVector u = storm::storage::BitVector(stateCount);
+        storm::storage::BitVector v = storm::storage::BitVector(stateCount);
+        storm::storage::BitVector soln = storm::storage::BitVector(stateCount);
+
+        storm::storage::BitVector unknown = storm::storage::BitVector(stateCount, true);
+        unknown &= ~targetStates;
+
+        bool uDone, vDone;
+
+        u.fill();
+        uDone = false;
+        while (!uDone) {
+            v = targetStates;
+            soln = targetStates;
+            vDone = false;
+            while (!vDone) {
+                prob1step(unknown, u, v, transitionMatrix, min1, statesOfCoalition, soln);
+
+                vDone = v == soln;
+                v = soln;
+            }
+
+            uDone = u == v;
+            u = v;
+        }
+
+        return u;
+    }
+
+    template<typename ValueType>
+    QualitativeStateSetsReachabilityRewards computeQualitativeStateSetsReachabilityRewards(
+        storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::BitVector const& targetStates,
+        storm::solver::SolveGoal<ValueType> const& goal, storm::storage::BitVector const& statesOfCoalition
+    ) {
+        QualitativeStateSetsReachabilityRewards result;
+
+        // if p1 wants to minimize rewards, he wants to maximize the probability to reach target states
+        result.infinityStates = prob1(transitionMatrix, targetStates, !goal.minimize(), statesOfCoalition);
+        // inifinity states are those, where even if maximizing, the probability of reaching target is <1
+        result.infinityStates.complement();
+
+        // TODO: compute all zero reward states
+        // this could reduce the state space for VI
+                result.rewardZeroStates = targetStates;
+
             result.maybeStates = ~(result.rewardZeroStates | result.infinityStates);
             return result;
         }
@@ -426,10 +538,14 @@ namespace synthesis {
 
         std::vector<ValueType> result(transitionMatrix.getRowGroupCount(), storm::utility::zero<ValueType>());
 
-        // compute infinity, zero and maybe states
-        // ignoring hint for now
+        // Compute infinity, zero and maybe states
         QualitativeStateSetsReachabilityRewards qualitativeStateSets = computeQualitativeStateSetsReachabilityRewards(
-            goal, transitionMatrix, backwardTransitions, targetStates, zeroRewardStatesGetter, zeroRewardChoiceGetter);
+            transitionMatrix, targetStates, goal, statesOfCoalition);
+
+        // todo remove debug print
+        printBitVector(qualitativeStateSets.maybeStates, "maybe states");
+        printBitVector(qualitativeStateSets.infinityStates, "infinity states");
+        printBitVector(qualitativeStateSets.rewardZeroStates, "reward zero states");
 
         storm::utility::vector::setVectorValues(result, qualitativeStateSets.infinityStates, storm::utility::infinity<ValueType>());
 
