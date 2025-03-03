@@ -422,7 +422,7 @@ namespace synthesis {
      * @return true if all entries are in columns from columns
      * @return false otherwise
      */
-        template<typename ValueType>
+    template<typename ValueType>
     bool isSubsetOf(typename storm::storage::SparseMatrix<ValueType>::const_rows const& row, storm::storage::BitVector const& columns) {
         for (auto const& entry : row) {
             if (!columns.get(entry.getColumn())) {
@@ -520,11 +520,24 @@ namespace synthesis {
 
         // TODO: compute all zero reward states
         // this could reduce the state space for VI
-                result.rewardZeroStates = targetStates;
+        result.rewardZeroStates = targetStates;
 
-            result.maybeStates = ~(result.rewardZeroStates | result.infinityStates);
-            return result;
+        result.maybeStates = ~(result.rewardZeroStates | result.infinityStates);
+        return result;
+    }
+
+    template<typename ValueType>
+    std::vector<ValueType> replaceZerosWithEpsilon(std::vector<ValueType> v, ValueType epsilon)
+    {
+        std::vector<ValueType> vEps = v;
+        for (auto& value : vEps) {
+            if (value == storm::utility::zero<ValueType>()) {
+                value = epsilon;
+            }
         }
+
+        return vEps;
+    }
 
     template<typename ValueType>
     SMGSparseModelCheckingHelperReturnType<ValueType> SparseSmgRpatlHelper<ValueType>::computeReachabilityRewardsHelper(
@@ -534,9 +547,9 @@ namespace synthesis {
                 storm::storage::BitVector const& targetStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler,
                 std::function<storm::storage::BitVector()> const& zeroRewardStatesGetter, std::function<storm::storage::BitVector()> const& zeroRewardChoiceGetter,
                 storm::modelchecker::ModelCheckerHint const& hint) {
-        // todo
-
         std::vector<ValueType> result(transitionMatrix.getRowGroupCount(), storm::utility::zero<ValueType>());
+        std::unique_ptr<storm::storage::Scheduler<ValueType>> scheduler;
+        std::vector<ValueType> choiceValues = std::vector<ValueType>(transitionMatrix.getRowCount(), storm::utility::zero<ValueType>());
 
         // Compute infinity, zero and maybe states
         QualitativeStateSetsReachabilityRewards qualitativeStateSets = computeQualitativeStateSetsReachabilityRewards(
@@ -549,6 +562,107 @@ namespace synthesis {
 
         storm::utility::vector::setVectorValues(result, qualitativeStateSets.infinityStates, storm::utility::infinity<ValueType>());
 
+        // Check if the values of the maybe states are relevant for the SolveGoal
+        bool maybeStatesNotRelevant = goal.hasRelevantValues() && goal.relevantValues().isDisjointFrom(qualitativeStateSets.maybeStates);
+
+        if (qualitative || maybeStatesNotRelevant)
+        {
+            STORM_LOG_INFO("The rewards for the initial states were determined in a preprocessing step. No exact rewards were computed.");
+            // Set the values for all maybe-states to 1 to indicate that their reward values
+            // are neither 0 nor infinity.
+            storm::utility::vector::setVectorValues(result, qualitativeStateSets.maybeStates, storm::utility::one<ValueType>());
+        }
+        else {
+            storm::storage::BitVector relevantStates = qualitativeStateSets.maybeStates;
+
+            if (!relevantStates.empty()) {
+                // In this case we have to compute the reward values for the remaining states.
+
+                // If the solve goal has relevant values, we need to adjust them.
+                goal.restrictRelevantValues(relevantStates);
+
+                // set up the GameViHelper
+                storm::storage::SparseMatrix<ValueType> submatrix;
+                std::vector<ValueType> b;
+                if (qualitativeStateSets.infinityStates.empty()) {
+                    submatrix = transitionMatrix.getSubmatrix(true, relevantStates, relevantStates, false);
+                    b = totalStateRewardVectorGetter(submatrix.getRowCount(), transitionMatrix, relevantStates);
+                }
+                else {
+                    // Only choices of relevant states that lead to non-infinity states.
+                    storm::storage::BitVector selectedChoices = transitionMatrix.getRowFilter(relevantStates, ~qualitativeStateSets.infinityStates);
+
+                    submatrix = transitionMatrix.getSubmatrix(false, selectedChoices, relevantStates, false);
+                    b = totalStateRewardVectorGetter(transitionMatrix.getRowCount(), transitionMatrix, storm::storage::BitVector(transitionMatrix.getRowGroupCount(), true));
+                    storm::utility::vector::filterVectorInPlace(b, selectedChoices);
+                }
+                storm::storage::BitVector clippedStatesOfCoalition(relevantStates.getNumberOfSetBits());
+                synthesis::setClippedStatesOfCoalition(&clippedStatesOfCoalition, relevantStates, statesOfCoalition);
+                synthesis::GameViHelper<ValueType> viHelper(submatrix, clippedStatesOfCoalition);
+
+                // prepare for value iteration
+                auto solverEnv = env;
+                solverEnv.solver().minMax().setMethod(storm::solver::MinMaxMethod::ValueIteration, false);
+                std::vector<ValueType> x = std::vector<ValueType>(relevantStates.getNumberOfSetBits(), storm::utility::zero<ValueType>());
+                std::vector<ValueType> constrainedChoiceValues = std::vector<ValueType>(b.size(), storm::utility::zero<ValueType>());
+
+                // precomputation for zero reward end components
+                // taken from prism-games (Automatic Verification of Competitive Stochastic Systems)
+
+                // find maximum and minimum reward and check if all rewards are none zero
+                ValueType minimumReward = storm::utility::infinity<ValueType>();
+                ValueType maximumReward = storm::utility::zero<ValueType>();
+                bool allNonZero = true;
+                for (auto reward : b) {
+                    if (reward > storm::utility::zero<ValueType>()) {
+                        if (reward < minimumReward) {
+                            minimumReward = reward;
+                        }
+                        if (reward > maximumReward) {
+                            maximumReward = reward;
+                        }
+                    }
+                    else {
+                        allNonZero = false;
+                    }
+                }
+
+                if (!allNonZero) {
+                    // Compute rewards with epsilon instead of zero. This is used to get the over-approximation
+                    // of the real result, which deals with the problem of staying in zero
+                    // components for free when infinity should be gained.
+                    ValueType epsilon = std::min(minimumReward, maximumReward * 0.01); // todo pochopit
+
+                    // the result of this over aproximation (stored in x) will be used as an initial value for the actual computation
+                    viHelper.performValueIteration(solverEnv, x, replaceZerosWithEpsilon(b, epsilon), goal.direction(), constrainedChoiceValues);
+                }
+
+                if (produceScheduler) {
+                    viHelper.setProduceScheduler(true);
+                }
+                viHelper.performValueIteration(solverEnv, x, b, goal.direction(), constrainedChoiceValues);
+
+                storm::utility::vector::setVectorValues(result, relevantStates, x);
+
+                viHelper.fillChoiceValuesVector(constrainedChoiceValues, relevantStates, transitionMatrix.getRowGroupIndices()); // todo fix bug here
+                choiceValues = constrainedChoiceValues;
+
+                // TODO create scheduler
+
+                // this should probably be under the else branch
+                // in Probabilities it is here and an empty scheduler is returned in case the flow doesnt get here
+                if (produceScheduler)
+                {
+                    scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(viHelper.extractScheduler());
+                }
+            }
+
+        }
+
+        // if produce Scheduler
+            // extend scheduler(...)
+
+        return SMGSparseModelCheckingHelperReturnType<ValueType>(std::move(result), std::move(qualitativeStateSets.maybeStates), std::move(scheduler), std::move(choiceValues));
     }
 
     template class SparseSmgRpatlHelper<double>;
