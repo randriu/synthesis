@@ -539,6 +539,43 @@ namespace synthesis {
         return vEps;
     }
 
+    // fill the choice values vector for every choice in original transition matrix. Result will be stored in choiceValues.
+    // all choices leading from infinityStates of rewardZeroStates will have value 0
+    // all choices leading from maybeStates to infinityStates will have value infinity
+    // all other choices will have values from choiceValues vector
+    template<typename ValueType>
+    void fillChoiceValuesVectorRewards(std::vector<ValueType>& choiceValues, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, QualitativeStateSetsReachabilityRewards const& qualitativeStateSets) {
+        std::vector<ValueType> allChoices = std::vector<ValueType>(transitionMatrix.getRowCount());
+        auto choiceIt = choiceValues.begin();
+        uint64_t choice = 0;
+        for (uint64_t state = 0; state < transitionMatrix.getRowGroupCount(); state ++) {
+            if (qualitativeStateSets.maybeStates.get(state)) {
+                // choice leads from maybe state
+                uint64_t firstChoiceOfNextState = choice + transitionMatrix.getRowGroupSize(state);
+                while (choice < firstChoiceOfNextState) {
+                    auto row = transitionMatrix.getRow(choice);
+                    if (containsOneOf<ValueType>(row, qualitativeStateSets.infinityStates)) {
+                        // choice leads to infinity state
+                        allChoices[choice] = storm::utility::infinity<ValueType>();
+                    }
+                    else {
+                        // choice leads to maybe or reward zero state
+                        allChoices[choice] = *choiceIt;
+                        choiceIt++;
+                    }
+                    choice++;
+                }
+            }
+            else {
+                // choice leads from infinity or reward zero state
+                choice += transitionMatrix.getRowGroupSize(state);
+            }
+        }
+        assert(choiceIt == choiceValues.end());
+
+        choiceValues = allChoices;
+    }
+
     template<typename ValueType>
     SMGSparseModelCheckingHelperReturnType<ValueType> SparseSmgRpatlHelper<ValueType>::computeReachabilityRewardsHelper(
                 storm::Environment const& env, storm::solver::SolveGoal<ValueType>&& goal,
@@ -584,13 +621,14 @@ namespace synthesis {
                 // set up the GameViHelper
                 storm::storage::SparseMatrix<ValueType> submatrix;
                 std::vector<ValueType> b;
+                storm::storage::BitVector selectedChoices = storm::storage::BitVector(transitionMatrix.getRowCount(), true);
                 if (qualitativeStateSets.infinityStates.empty()) {
                     submatrix = transitionMatrix.getSubmatrix(true, relevantStates, relevantStates, false);
                     b = totalStateRewardVectorGetter(submatrix.getRowCount(), transitionMatrix, relevantStates);
                 }
                 else {
                     // Only choices of relevant states that lead to non-infinity states.
-                    storm::storage::BitVector selectedChoices = transitionMatrix.getRowFilter(relevantStates, ~qualitativeStateSets.infinityStates);
+                    selectedChoices = transitionMatrix.getRowFilter(relevantStates, ~qualitativeStateSets.infinityStates);
 
                     submatrix = transitionMatrix.getSubmatrix(false, selectedChoices, relevantStates, false);
                     b = totalStateRewardVectorGetter(transitionMatrix.getRowCount(), transitionMatrix, storm::storage::BitVector(transitionMatrix.getRowGroupCount(), true));
@@ -644,7 +682,7 @@ namespace synthesis {
 
                 storm::utility::vector::setVectorValues(result, relevantStates, x);
 
-                viHelper.fillChoiceValuesVector(constrainedChoiceValues, relevantStates, transitionMatrix.getRowGroupIndices()); // todo fix bug here
+                fillChoiceValuesVectorRewards(constrainedChoiceValues, transitionMatrix, qualitativeStateSets);
                 choiceValues = constrainedChoiceValues;
 
                 // TODO create scheduler
