@@ -103,6 +103,15 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.variables = variables
         self.state_valuations = state_valuations
         self.relevant_state_valuations = state_valuations
+        self.state_is_relevant_bv_backup = self.copy_bitvector(self.state_is_relevant_bv)
+
+    @staticmethod
+    def copy_bitvector(bitvector):
+        """Create a copy of the given BitVector object."""
+        new_bitvector = stormpy.BitVector(bitvector.size())
+        for i in range(bitvector.size()):
+            new_bitvector.set(i, bitvector.get(i))
+        return new_bitvector
 
     def empty_policy(self):
         return self.empty_scheduler()
@@ -242,10 +251,12 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                 for hole, val in zip(hole_names, hole_options):
                     valuation[hole] = val
 
-        state_valuation_to_action = [
-            ({variable:value for variable,value in valuation.items() if variable not in irrelevant_variables},action)
-            for valuation, action in state_valuation_to_action
-        ]
+        # remove irrelevant variables - DTcontrol needs homogeneous states
+        if not family:
+            state_valuation_to_action = [
+                ({variable:value for variable,value in valuation.items() if variable not in irrelevant_variables},action)
+                for valuation, action in state_valuation_to_action
+            ]
         return state_valuation_to_action
 
     def policy_to_json(self, state_valuation_to_action, dt_control=False):
@@ -342,12 +353,20 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         # model = MdpFamilyQuotient.mdp_to_dtmc(model)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
 
-    def mark_irrelevant_states(self, variable: str, default_value):
-        """mark state irrelevant wrt variable if not default_value for given domain"""
-        for index,var in enumerate(self.variables):
-            if var.name == variable:
-                for j in range(len(self.state_valuations)):
-                    if not self.state_is_relevant_bv[j]:
-                        continue  # already marked
-                    if self.state_valuations[j][index] != default_value:
-                        self.state_is_relevant_bv.set(j,False)
+    def mark_irrelevant_states(self, irrelevant_variables: dict):
+        """mark state irrelevant wrt variable if not default for given domain"""
+        for j in range(len(self.state_valuations)):
+            if not self.state_is_relevant_bv[j]:
+                continue
+            relevant = True
+            for variable, default in irrelevant_variables.items():
+                for index,var in enumerate(self.variables):
+                    if var.name == variable:
+                        if self.state_valuations[j][index] != default:
+                            relevant = False
+                            break
+                if not relevant:
+                    break
+            if not relevant:
+                self.state_is_relevant_bv.set(j,False)
+        return True
