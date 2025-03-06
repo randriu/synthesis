@@ -2,6 +2,7 @@ import logging
 
 import paynt.synthesizer.statistic
 import paynt.utils.timer
+from paynt.quotient.mdp_family import MdpFamilyQuotient
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +147,8 @@ class Synthesizer:
         if self.export_synthesis_filename_base is not None:
             self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
 
-        if self.ldokoupi_flag and False: # DTMAP is intractable skip for now
+        callDTMAP = False # DTMAP is intractable skip for now
+        if callDTMAP:
             # call the synthesizer to generate the decision tree for every policy from policy tree
 
             # filter empty policies
@@ -176,13 +178,10 @@ class Synthesizer:
                 # Remove no_label_choices
                 choices = [choice for choice in choices if choice not in no_label_choices]
 
-                # get state_valuations for each state
-                state_valuations = [ self.quotient.state_valuations[i] for i in range(len(self.quotient.state_valuations))]
-
+                self.quotient.state_is_relevant_bv = MdpFamilyQuotient.copy_bitvector(self.quotient.state_is_relevant_bv_backup)
                 irrelevant_variables = self.quotient.irrelevant_variables
                 if irrelevant_variables:
-                    for variable, default in irrelevant_variables.items():
-                        self.quotient.mark_irrelevant_states(variable,default)
+                    self.quotient.mark_irrelevant_states(irrelevant_variables)
 
                 dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
                 # unique export name for each policy

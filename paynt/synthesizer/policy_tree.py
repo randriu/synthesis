@@ -166,6 +166,34 @@ class PolicyTreeNode:
             node1.changed = True
             return policy
         
+        # try policy1 for family2
+        mdp1 = quotient.apply_policy_to_family(node2.family, policy1[0])
+        policy_result1 = mdp1.model_check_property(prop, alt=True)
+        PolicyTreeNode.mdps_model_checked += 1
+
+        # try policy2 for family1
+        mdp2 = quotient.apply_policy_to_family(node1.family, policy2[0])
+        policy_result2 = mdp2.model_check_property(prop, alt=True)
+        PolicyTreeNode.mdps_model_checked += 2
+
+        if policy_result1.sat and policy_result2.sat:
+            mask1 = [state for state, action in enumerate(policy1[0]) if action is not None]
+            mask2 = [state for state, action in enumerate(policy2[0]) if action is not None]
+            if len(mask1) <= len(mask2):
+                node1.changed = True
+                return (policy1[0], mask1)
+            else:
+                node1.changed = True
+                return (policy2[0], mask2)
+        elif policy_result1.sat:
+            mask1 = [state for state, action in enumerate(policy1[0]) if action is not None]
+            node1.changed = True
+            return (policy1[0], mask1)
+        elif policy_result2.sat:
+            mask2 = [state for state, action in enumerate(policy2[0]) if action is not None]
+            node1.changed = True
+            return (policy2[0], mask2)
+
         policy12,policy21 = merge_policies_exclusively(policy1,policy2)
 
         # try policy1 for family2
@@ -190,30 +218,34 @@ class PolicyTreeNode:
     def merge_children_having_compatible_policies(self, quotient, prop, policies):
         if self.is_leaf:
             return
-        i = 0
-        while i < len(self.child_nodes):
+        i = len(self.child_nodes) - 1
+        # LDOK TODO: is reverse order ok ask roman
+        # imo should be fine, this way i'm applying one policy to as many families as possible,
+        # then repeating with next policy
+        while i >= 0 and self.child_nodes:
             child1 = self.child_nodes[i]
-            child1.changed = False  # policy can change only once, son moves to future for further merging
+            child1.changed = False  # policy can change only once, son is in future for further merging
             if child1.sat is not True:
-                i += 1
+                i -= 1
                 continue
 
             join_to_i = [i]
             # collect other children to merge to i
-            for j in range(i+1,len(self.child_nodes)):
+            for j in range(i):
                 child2 = self.child_nodes[j]
                 if child2.sat is not True:
                     continue
-                policy = PolicyTreeNode.make_policies_compatible(quotient,prop,child1,child2,policies)
+                policy = PolicyTreeNode.make_policies_compatible(quotient, prop, child1, child2, policies)
                 if policy is None:
                     continue
                 # nodes can be merged
                 policies[child1.policy_index] = policy
                 policies[child2.policy_index] = None
                 join_to_i.append(j)
-            
+
+            # assert len(join_to_i) <= 2
             self.merge_children_indices(join_to_i)
-            i += 1
+            i -= 1
 
     def skip_redundant_children(self):
         ''' Adopt grandchildren of each child that uses the same splitter as self. '''
@@ -501,6 +533,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     double_check_policy_tree_leaves = False
     # if True, unreachable choices will be discarded from the splitting scheduler
     discard_unreachable_choices = False
+    ldok_postprocessing_times = paynt.utils.timer.Timer()
     
     @property
     def method_name(self):
@@ -509,16 +542,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     @staticmethod
     def double_check_policy(quotient, family, prop, policy):
         _,mdp = quotient.fix_and_apply_policy_to_family(family, policy)
-        if family.size == 1:
-            quotient.assert_mdp_is_deterministic(mdp, family)
+        #if family.size == 1:
+        #    # due to experimental state removal this may not hold in irrelevant states
+        #    quotient.assert_mdp_is_deterministic(mdp, family)
         DOUBLE_CHECK_PRECISION = 1e-6
         default_precision = Property.model_checking_precision
         Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)
         policy_result = mdp.model_check_property(prop, alt=True)
         Property.set_model_checking_precision(default_precision)
         if not policy_result.sat:
-            logger.warning("policy should be SAT but (most likely due to model checking precision) has value {}".format(policy_result.value))
-        return
+            # logger.warning("policy should be SAT but (most likely due to model checking precision) has value {}".format(policy_result.value))
+            return False
+        return True
     
     
     def verify_policy(self, family, prop, policy):
@@ -558,7 +593,124 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if action < self.quotient.num_actions:
                 game_policy_fixed[state] = action
         game_policy = game_policy_fixed
+
+        if game_sat:
+            # logger.debug("debug: state to destination")
+            # for n, (state,choice,prob) in enumerate(zip(self.quotient.state_valuations,game_solver.solution_state_to_quotient_choice,game_solver.solution_state_values)):
+            #     if choice == len(self.quotient.choice_to_action):
+            #         continue # usually sink state
+            #     # print in format n: state [prob]  -> possible destinations
+            #     logger.debug("{}:{} [{:.2f}] -> {}".format(n,state,prob,self.quotient.choice_destinations[game_solver.solution_state_to_quotient_choice[n]]))
+            # logger.debug("debug: state to destination end")
+
+            if self.ldokoupi_flag:
+                self.ldok_postprocessing_times.start()
+                game_policy = self.post_process_game_policy(game_policy,game_solver,family, prop) # removes unreach and ε-non rising states
+                game_policy = self.post_process_game_policy_max_reach(game_policy, game_solver, family, prop)  # try max probability
+                self.ldok_postprocessing_times.stop()
+
         return game_policy,game_sat
+
+    def post_process_game_policy(self, game_policy_fixed, game_solver,family, prop):
+        for epsilon in [1e-9, 1e-5, 1e-3, 1e-1]:
+            game_policy_post = self.quotient.empty_policy()
+            ## post process - remove choices leading to lower value, given current policy
+            # assuming single good path
+            discovered_states = set()
+            initial_states = self.quotient.quotient_mdp.initial_states
+            while initial_states:
+                cur_state = initial_states.pop()
+                cur_value = game_solver.solution_state_values[cur_state]
+                game_policy_post[cur_state] = game_policy_fixed[cur_state]
+                if cur_state in discovered_states:
+                    continue
+                discovered_states.add(cur_state)
+                cur_choice = game_solver.solution_state_to_quotient_choice[cur_state]
+                target_states = self.quotient.choice_destinations[cur_choice]
+                for target_state in target_states:
+                    if target_state in discovered_states:
+                        continue
+                    if game_solver.solution_state_values[target_state] <= cur_value - epsilon:
+                        continue
+                    initial_states.append(target_state)
+            sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+            if sat:
+                return game_policy_post
+
+        logger.debug("policy couldn't be ε-rise simplified")
+        return game_policy_fixed
+
+    def post_process_game_policy_max_reach(self, game_policy, game_solver, family, prop, check_granularity=1):
+        """ DFS only on max probability path until reaching the target
+        then verify if the policy satisfies the property based on check_granularity
+        if set to -1 then check every multiple of shortest path from init to end state
+        This post is applicable iff self loop ( _stay_ ) is first action in MDP
+        """
+
+        def getProbForChoice(choice, target):
+            choices_transition_matrix = self.quotient.quotient_mdp.transition_matrix
+            for entry in choices_transition_matrix.get_row(choice):
+                dst, prob = entry.column, entry.value()  # entry.getColumn(), entry.getValue()
+                if dst == target:
+                    return prob
+            return 0.0
+
+        # self loop has to be first aplicable action
+        if self.quotient.action_labels[0] == "__no_label__":
+            if not self.quotient.action_labels[1].startswith("_stay"):
+                return game_policy
+        else:
+            if not self.quotient.action_labels[0].startswith("_stay"):
+                return game_policy
+        # self loops serves as verification against worst case scenario -> any other action is better
+
+        depth = -1
+        end_state = next((i for i, state in enumerate(game_solver.state_is_target) if state), -1)
+        assert end_state != -1
+
+        assert len(self.quotient.quotient_mdp.initial_states) == 1
+        current_state = self.quotient.quotient_mdp.initial_states[0]
+        game_policy_post = self.quotient.empty_policy()
+        game_policy_post[current_state] = game_policy[current_state]
+
+        explored_states = set() # avoid cycles
+        state_stack = [current_state]
+
+        while state_stack:
+            current_state = state_stack.pop()
+            if current_state in explored_states:
+                continue
+            game_policy_post[current_state] = game_policy[current_state]
+            explored_states.add(current_state)
+
+            cur_choice = game_solver.solution_state_to_quotient_choice[current_state]
+            target_states = self.quotient.choice_destinations[cur_choice]
+
+            depth += 1
+            if current_state == end_state and check_granularity < 0:
+                check_granularity = depth # shortest path length
+
+            target_probabilities = []
+
+            # Collect probabilities and corresponding target states
+            for target_state in target_states:
+                prob = getProbForChoice(cur_choice, target_state)
+                target_probabilities.append((prob, target_state))
+
+            # Sort the collected probabilities and target states in ascending order
+            target_probabilities.sort()
+
+            # Push the sorted target states onto the stack - max prob goes out first
+            for prob, target_state in target_probabilities:
+                state_stack.append(target_state)
+
+            if check_granularity > 0 and depth % check_granularity == 0:
+                sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+                if sat:
+                    return game_policy_post
+
+        logger.debug("policy couldn't be simplified by max reach")
+        return game_policy
 
     def state_to_choice_to_hole_selection(self, state_to_choice):
         if SynthesizerPolicyTree.discard_unreachable_choices:
@@ -578,11 +730,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
 
-        if family.size == 1:
-            mdp_family_result.policy = self.solve_singleton(family,prop)
-            return mdp_family_result
-        
-        if family.candidate_policy is None:
+        if family.candidate_policy is None or self.ldokoupi_flag:
             game_policy,game_sat = self.solve_game_abstraction(family,prop,game_solver)
         else:
             game_policy = family.candidate_policy
@@ -591,6 +739,11 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         mdp_family_result.game_policy = game_policy
         if game_sat:
             mdp_family_result.policy = game_policy
+            return mdp_family_result
+
+        if family.size == 1:
+            # fallback method (usually UNSAT families or w/o candidate policy)
+            mdp_family_result.policy = self.solve_singleton(family, prop)
             return mdp_family_result
 
         # solve primary direction for the MDP abstraction
@@ -721,6 +874,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node.split(result.splitter,suboptions,subfamilies)
             undecided_leaves += policy_tree_node.child_nodes
 
+        logger.debug(f"LDOKOUPI: postprocessing took {int(self.ldok_postprocessing_times.read())} s")
         if SynthesizerPolicyTree.double_check_policy_tree_leaves:
             policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
@@ -753,25 +907,32 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     def export_evaluation_result(self, evaluations, export_filename_base):
         import json
-        policies = self.policy_tree.extract_policies(self.quotient, keep_family=self.ldokoupi_flag)
-        policies_json = [] if self.ldokoupi_flag else {}
-        for index,key_value in enumerate(policies.items()):
-            policy_id,policy = key_value
-            policy_json = self.quotient.policy_to_json(policy, dt_control=self.ldokoupi_flag)
+        flag_bp = self.ldokoupi_flag
+        # second export is in DTControl format
+        for flag in [False, True]:
+            if not self.ldokoupi_flag and flag is True:
+                continue
+            self.ldokoupi_flag = flag
 
-            if not self.ldokoupi_flag:
-                policies_json[policy_id] = policy_json
-            else:
-                # for merging policy tree & DTs create long list as classification problem for DTCONTROL
-                policies_json.extend(policy_json)
+            policies = self.policy_tree.extract_policies(self.quotient, keep_family=self.ldokoupi_flag)
+            policies_json = [] if self.ldokoupi_flag else {}
+            for index,key_value in enumerate(policies.items()):
+                policy_id,policy = key_value
+                policy_json = self.quotient.policy_to_json(policy, dt_control=self.ldokoupi_flag)
 
-        policies_string = json.dumps(policies_json, indent=4)
+                if not self.ldokoupi_flag:
+                    policies_json[policy_id] = policy_json
+                else:
+                    # for merging policy tree & DTs create long list as classification problem for DTCONTROL
+                    policies_json.extend(policy_json)
 
-        policies_filename = export_filename_base + ".json"
-        with open(policies_filename, 'w') as file:
-            file.write(policies_string)
+            policies_string = json.dumps(policies_json, indent=4)
 
-        logger.info(f"exported policies to {policies_filename}")
+            policies_filename = export_filename_base + ".json" if not flag else export_filename_base + ".storm.json"
+            with open(policies_filename, 'w') as file:
+                file.write(policies_string)
+            self.ldokoupi_flag = flag_bp
+            logger.info(f"exported policies to {policies_filename}")
 
         tree = self.policy_tree.extract_policy_tree(self.quotient)
         tree_filename = export_filename_base + ".dot"
