@@ -21,6 +21,7 @@ formula ydown   = max(y-1,yMIN);
 
 module clock
     clk : [0..1] init 0;
+    [_stay_]  !done & clk=0 -> (clk'=0);
     [left]  !done & clk=0 -> (clk'=1);
     [right] !done & clk=0 -> (clk'=1);
     [down]  !done & clk=0 -> (clk'=1);
