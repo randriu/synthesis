@@ -254,9 +254,9 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    storm::storage::SparseMatrix<double> PosmgManager<ValueType>::constructTransitionMatrix()
+    storm::storage::SparseMatrix<ValueType> PosmgManager<ValueType>::constructTransitionMatrix()
     {
-        storm::storage::SparseMatrixBuilder<double> builder(
+        storm::storage::SparseMatrixBuilder<ValueType> builder(
             this->rowCount, this->stateCount, 0, true, true, this->stateCount
         );
         for (uint64_t state = 0; state < this->stateCount; state++)
@@ -418,7 +418,7 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    std::shared_ptr<storm::models::sparse::Mdp<double>> PosmgManager<ValueType>::constructMdp()
+    std::shared_ptr<storm::models::sparse::Mdp<ValueType>> PosmgManager<ValueType>::constructMdp()
     {
         this->buildStateSpace();
         this->buildTransitionMatrixSpurious();
@@ -452,5 +452,6 @@ namespace synthesis {
     }
 
     template class PosmgManager<double>;
+    template class PosmgManager<storm::RationalNumber>;
 
 } // namespace synthesis

@@ -1,6 +1,7 @@
 #include "choiceTransformation.h"
 
 #include "src/synthesis/translation/componentTranslations.h"
+#include "src/synthesis/posmg/Posmg.h"
 
 #include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/exceptions/InvalidArgumentException.h>
@@ -48,19 +49,19 @@ template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Model<ValueType>> addMissingChoiceLabelsModel(
     storm::models::sparse::Model<ValueType> const& model
 ) {
-    try
-    {
-        storm::storage::sparse::ModelComponents<ValueType> components = componentsFromModel(model);
-        addMissingChoiceLabelsLabeling(model,components.choiceLabeling.value());
-        if(not components.choiceLabeling.value().containsLabel(NO_ACTION_LABEL)) {
-            return NULL;
-        }
-        return storm::utility::builder::buildModelFromComponents<ValueType>(model.getType(),std::move(components));
-    }
-    catch(const std::exception& e)
-    {
-        // e.g if model is POSMG. Todo add support for POSMG
+    storm::storage::sparse::ModelComponents<ValueType> components = componentsFromModel(model);
+    addMissingChoiceLabelsLabeling(model,components.choiceLabeling.value());
+    if(not components.choiceLabeling.value().containsLabel(NO_ACTION_LABEL)) {
         return NULL;
+    }
+
+    if (dynamic_cast<Posmg<ValueType> const*>(&model))
+    {
+        return std::make_shared<Posmg<ValueType>>(std::move(components));
+    }
+    else
+    {
+        return storm::utility::builder::buildModelFromComponents<ValueType>(model.getType(),std::move(components));
     }
 }
 

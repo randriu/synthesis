@@ -1,4 +1,5 @@
 #include "componentTranslations.h"
+#include "src/synthesis/posmg/Posmg.h"
 
 #include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/models/sparse/Pomdp.h>
@@ -29,6 +30,10 @@ storm::storage::sparse::ModelComponents<ValueType> componentsFromModel(
         auto smg = static_cast<storm::models::sparse::Smg<ValueType> const&>(model);
         components.statePlayerIndications = smg.getStatePlayerIndications();
         // skipping playerNameToIndexMap since Smg does not directly exposes those
+    }
+    if (auto posmg = dynamic_cast<Posmg<ValueType> const*>(&model)) {
+        components.observabilityClasses = posmg->getObservations();
+        // state player indications are already filled in the ModelType == Smg branch
     }
     return components;
 }
@@ -112,7 +117,7 @@ storm::models::sparse::StandardRewardModel<ValueType> translateRewardModel(
     std::optional<std::vector<ValueType>> state_rewards;
     STORM_LOG_THROW(!reward_model.hasStateRewards() and !reward_model.hasTransitionRewards() and reward_model.hasStateActionRewards(),
         storm::exceptions::NotSupportedException, "expected state-action rewards");
-    
+
     uint64_t num_choices = reward_model.getStateActionRewardVector().size();
     std::vector<ValueType> action_rewards(translated_to_original_choice.size());
     for(uint64_t translated_choice: translated_choice_mask) {

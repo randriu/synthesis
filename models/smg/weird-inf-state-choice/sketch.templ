@@ -1,0 +1,32 @@
+// weird choice in state s=2
+
+smg
+
+player square
+    [s1], [s2], [s3], state_space
+endplayer
+
+player circle
+    [c1]
+endplayer
+
+module state_space
+    s : [0..3];
+
+    [s1] s=0 -> (s'=1);
+
+    [c1] s=1 -> 0.5 : (s'=2) + 0.5 : (s'=3);
+
+    [s2] s=2 -> (s'=1);
+    [s3] s=2 -> (s'=2);
+
+    [] s=3 -> true;
+endmodule
+
+label "goal" = s=3;
+
+rewards "rew"
+    [s1] true : 1;
+    [s2] true : 1;
+    [s3] true : 1;
+endrewards

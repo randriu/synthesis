@@ -254,3 +254,10 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
 
         return paynt.models.models.Smg(stormpy.storage.SparseSmg(components))
 
+    def scheduler_selection(self, mdp, scheduler):
+        ''' Get hole options involved in the scheduler selection. '''
+        assert scheduler.memoryless and scheduler.deterministic
+        state_to_choice = self.scheduler_to_state_to_choice(mdp, scheduler, discard_unreachable_choices=False)
+        choices = self.state_to_choice_to_choices(state_to_choice)
+        hole_selection = self.coloring.collectHoleOptions(choices)
+        return hole_selection

@@ -68,7 +68,7 @@ class SubMdp(Mdp):
 
 
 class Smg(Mdp):
-    
+
     def __init__(self, model):
         super().__init__(model)
 
