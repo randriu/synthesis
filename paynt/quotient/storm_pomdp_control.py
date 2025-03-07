@@ -1,3 +1,5 @@
+import paynt.quotient
+import paynt.quotient.fsc
 import stormpy
 import stormpy.pomdp
 import payntbind
@@ -155,8 +157,8 @@ class StormPOMDPControl:
                 #print(result.upper_bound)
                 #print(result.lower_bound)
                 pass
-            else:
-                print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+            # else:
+                # print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
             exit()
 
         # print(f'\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
@@ -630,6 +632,159 @@ class StormPOMDPControl:
                     self.memory_vector[obs] = len(self.result_dict[obs])
                 else:
                     self.memory_vector[obs] = 1
+
+    def belief_controller_to_fsc(self, storm_result, paynt_fsc=None):
+
+        belief_mc = storm_result.induced_mc_from_scheduler
+
+        uses_fsc = False
+        used_randomized_schedulers = []
+        paynt_cutoff_states = 0
+        belief_states_map = []
+
+        for state in belief_mc.states:
+            if 'finite_mem' in state.labels:
+                uses_fsc = True
+                paynt_cutoff_states += 1
+            else:
+                belief_states_map.append(state.id)
+                for label in state.labels:
+                    if 'sched_' in label:
+                        _, scheduler_index = label.split('_')
+                        if int(scheduler_index) in used_randomized_schedulers:
+                            continue
+                        used_randomized_schedulers.append(int(scheduler_index))
+
+        fsc_nodes = belief_mc.nr_states + len(used_randomized_schedulers)
+
+        if uses_fsc:
+            fsc_nodes += paynt_fsc.num_nodes
+            first_fsc_node = belief_mc.nr_states + len(used_randomized_schedulers)
+
+        result_fsc = paynt.quotient.fsc.FSC(fsc_nodes, self.quotient.observations, is_deterministic=False)
+
+        action_labels = set()
+        for labels in self.quotient.action_labels_at_observation:
+            action_labels.update(labels)
+        action_labels = list(action_labels)
+        result_fsc.action_labels = action_labels
+
+        result_fsc.observation_labels = self.quotient.observation_labels
+
+        print(dir(belief_mc.labeling))
+        print(result_fsc.action_labels)
+
+        if paynt_fsc is not None:
+            paynt_fsc.make_stochastic()
+            paynt_fsc_num_nodes = paynt_fsc.num_nodes
+            paynt_fsc_action_function = paynt_fsc.action_function
+            paynt_fsc_update_function = paynt_fsc.update_function
+            new_fsc_update_function = []
+            
+            for node in range(paynt_fsc_num_nodes):
+                new_fsc_update_function.append([])
+                for obs in range(self.quotient.observations):
+                    new_fsc_update_function[node].append({list(paynt_fsc_update_function[node][obs].keys())[0]+first_fsc_node:1.0})
+
+            for node in range(paynt_fsc_num_nodes):
+                result_fsc.action_function[node+first_fsc_node] = paynt_fsc_action_function[node]
+                result_fsc.update_function[node+first_fsc_node] = new_fsc_update_function[node]
+                    
+        init_state = 0
+        for state in belief_mc.states:
+            if "init" in state.labels:
+                init_state = state.id
+                actions = list(belief_mc.choice_labeling.get_labels_of_choice(state.id))
+                assert len(actions) == 1, "Belief MC has multiple labels for one action"
+                action = actions[0]
+                for obs in range(self.quotient.observations):
+                    result_fsc.action_function[0][obs] = {result_fsc.action_labels.index(action):1.0}
+                successors = []
+                for transition in belief_mc.transition_matrix.row_iter(state.id, state.id):
+                    successors.append(transition.column)
+
+                for succ in successors:
+                    for label in belief_mc.labeling.get_labels_of_state(succ):
+                        succ_observation = None
+                        if '[' in label:
+                            # observation based on prism observables
+                            succ_observation = self.quotient.observation_labels.index(label)
+                        elif 'obs_' in label:
+                            # explicit observation index
+                            _,succ_observation = label.split('_')
+                        if succ_observation is not None:
+                            succ_observation = int(succ_observation)
+                            if succ != init_state:
+                                succ_node_id = succ if succ > init_state else succ + 1
+                            else:
+                                succ_node_id = 0
+                            result_fsc.update_function[0][succ_observation] = {succ_node_id:1.0}
+                break
+
+        for state in belief_mc.states:
+            if 'init' in state.labels:
+                continue
+            node_id = state.id if state.id > init_state else state.id + 1
+            if 'finite_mem' in state.labels: # transition to PAYNT FSC
+                # TODO we should know which memory node was chosen here???
+                for obs in range(self.quotient.observations):
+                    result_fsc.action_function[node_id] = result_fsc.action_function[first_fsc_node]
+                    result_fsc.update_function[node_id] = result_fsc.update_function[first_fsc_node]
+            elif 'cutoff' in state.labels: # Storm cutoff schedulers
+                for label in state.labels:
+                    if 'sched_' in label:
+                        _, scheduler_index = label.split('_')
+                scheduler = storm_result.cutoff_schedulers[int(scheduler_index)]
+                for obs in range(self.quotient.observations):
+                    result_fsc.update_function[node_id][obs] = {node_id: 1.0}
+                processed_obs = []
+                for pomdp_state in range(self.quotient.pomdp.nr_states):
+                    obs_index = self.quotient.pomdp.get_observation(pomdp_state)
+                    if obs_index in processed_obs:
+                        continue
+                    processed_obs.append(obs_index)
+                    choice = scheduler.get_choice(pomdp_state).get_choice().__str__()
+                    choice = choice.replace('{','').replace('}','').replace('[','').replace(']','').replace(' ','').split(',')
+                    for c in choice[:-1]:
+                        prob, action = c.split(':')
+                        action = int(action)
+                        action_label = self.quotient.action_labels_at_observation[obs_index][action]
+                        action_index = result_fsc.action_labels.index(action_label)
+                        result_fsc.action_function[node_id][obs_index] = {action_index:float(prob)}
+            elif '__extra' in state.labels or 'target' in state.labels: # basically target states so just loop with everything
+                for obs in range(self.quotient.observations):
+                    result_fsc.action_function[node_id][obs] = {0:1.0}
+                    result_fsc.update_function[node_id][obs] = {node_id: 1.0}
+            else: # normal belief mc states
+                actions = list(belief_mc.choice_labeling.get_labels_of_choice(state.id))
+                assert len(actions) == 1, "Belief MC has multiple labels for one action"
+                action = actions[0]
+                for obs in range(self.quotient.observations):
+                    result_fsc.action_function[node_id][obs] = {result_fsc.action_labels.index(action):1.0}
+                successors = []
+                for transition in belief_mc.transition_matrix.row_iter(state.id, state.id):
+                    successors.append(transition.column)
+                for succ in successors:
+                    for label in belief_mc.labeling.get_labels_of_state(succ):
+                        succ_observation = None
+                        if '[' in label:
+                            # observation based on prism observables
+                            succ_observation = self.quotient.observation_labels.index(label)
+                        elif 'obs_' in label:
+                            # explicit observation index
+                            _,succ_observation = label.split('_')
+                        if succ_observation is not None:
+                            succ_observation = int(succ_observation)
+                            if succ != init_state:
+                                succ_node_id = succ if succ > init_state else succ + 1
+                            else:
+                                succ_node_id = 0
+                            result_fsc.update_function[node_id][succ_observation] = {succ_node_id: 1.0}
+
+        return result_fsc
+
+
+
     
     # Computes the size of the controller for belief MC
     # if it uses FSC cutoffs assignment should be provided
