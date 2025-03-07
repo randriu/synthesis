@@ -780,8 +780,6 @@ class StormPOMDPControl:
                             else:
                                 succ_node_id = 0
                             result_fsc.update_function[node_id][succ_observation] = {succ_node_id: 1.0}
-        
-        self.quotient.get_induced_dtmc_from_fsc(result_fsc)
 
         return result_fsc
 
