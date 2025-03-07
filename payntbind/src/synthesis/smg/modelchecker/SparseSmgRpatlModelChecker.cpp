@@ -219,10 +219,7 @@ namespace synthesis {
         std::unique_ptr<storm::modelchecker::CheckResult> subResultPointer = this->check(env, eventuallyFormula.getSubformula()); // subformula is atomic label/expression formula
         storm::modelchecker::ExplicitQualitativeCheckResult const& subResult = subResultPointer->asExplicitQualitativeCheckResult();
 
-        // what does this do?
-        //  removes certain types of rewards (e.g. state rewards)
-        //  only if hasRewardAccumulation
-        //   what does accumulation mean?
+        // if hasRewardAccumulation removes certain types of rewards (e.g. state rewards)
         auto rewardModel = storm::utility::createFilteredRewardModel(this->getModel(), checkTask);
 
         auto ret = synthesis::SparseSmgRpatlHelper<ValueType>::computeReachabilityRewards(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), rewardModel.get(), subResult.getTruthValuesVector(), checkTask.isQualitativeSet(), statesOfCoalition, checkTask.isProduceSchedulersSet(), checkTask.getHint());

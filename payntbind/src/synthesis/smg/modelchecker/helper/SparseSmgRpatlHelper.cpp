@@ -386,10 +386,7 @@ namespace synthesis {
             [&rewardModel](uint_fast64_t rowCount, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::BitVector const& maybeStates) {
                 return rewardModel.getTotalRewardVector(rowCount, transitionMatrix, maybeStates);
             },
-            targetStates, qualitative, statesOfCoalition, produceScheduler,
-            [&]() { return rewardModel.getStatesWithZeroReward(transitionMatrix); },
-            [&]() { return rewardModel.getChoicesWithZeroReward(transitionMatrix); },
-            hint);
+            targetStates, qualitative, statesOfCoalition, produceScheduler, hint);
     }
 
     // For debugging purposes
@@ -527,7 +524,7 @@ namespace synthesis {
         // inifinity states are those, where even if maximizing, the probability of reaching target is <1
         result.infinityStates.complement();
 
-        // TODO: compute all zero reward states
+        // TODO: compute all zero reward states (will be necessary to add zero reward getters parameters?)
         // this could reduce the state space for VI
         result.rewardZeroStates = targetStates;
 
@@ -604,7 +601,6 @@ namespace synthesis {
                 storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions,
                 std::function<std::vector<ValueType>(uint_fast64_t, storm::storage::SparseMatrix<ValueType> const&, storm::storage::BitVector const&)> const& totalStateRewardVectorGetter,
                 storm::storage::BitVector const& targetStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler,
-                std::function<storm::storage::BitVector()> const& zeroRewardStatesGetter, std::function<storm::storage::BitVector()> const& zeroRewardChoiceGetter,
                 storm::modelchecker::ModelCheckerHint const& hint) {
         std::vector<ValueType> result(transitionMatrix.getRowGroupCount(), storm::utility::zero<ValueType>());
         std::unique_ptr<storm::storage::Scheduler<ValueType>> scheduler = std::make_unique<storm::storage::Scheduler<ValueType>>(transitionMatrix.getRowGroupCount());
@@ -613,11 +609,6 @@ namespace synthesis {
         // Compute infinity, zero and maybe states
         QualitativeStateSetsReachabilityRewards qualitativeStateSets = computeQualitativeStateSetsReachabilityRewards(
             transitionMatrix, targetStates, goal, statesOfCoalition);
-
-        // todo remove debug print
-        printBitVector(qualitativeStateSets.maybeStates, "maybe states");
-        printBitVector(qualitativeStateSets.infinityStates, "infinity states");
-        printBitVector(qualitativeStateSets.rewardZeroStates, "reward zero states");
 
         storm::utility::vector::setVectorValues(result, qualitativeStateSets.infinityStates, storm::utility::infinity<ValueType>());
 
@@ -694,7 +685,7 @@ namespace synthesis {
                     // Compute rewards with epsilon instead of zero. This is used to get the over-approximation
                     // of the real result, which deals with the problem of staying in zero
                     // components for free when infinity should be gained.
-                    ValueType epsilon = std::min(minimumReward, maximumReward * 0.01); // todo pochopit
+                    ValueType epsilon = std::min(minimumReward, maximumReward * 0.01);
 
                     // the result of this over aproximation (stored in x) will be used as an initial value for the actual computation
                     viHelper.performValueIteration(solverEnv, x, replaceZerosWithEpsilon(b, epsilon), goal.direction(), constrainedChoiceValues);

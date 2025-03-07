@@ -29,8 +29,6 @@ namespace synthesis {
 
         static SMGSparseModelCheckingHelperReturnType<ValueType> computeBoundedUntilProbabilities(storm::Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::storage::BitVector const& phiStates, storm::storage::BitVector const& psiStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler, storm::modelchecker::ModelCheckerHint const& hint, uint64_t lowerBound, uint64_t upperBound, bool computeBoundedGlobally = false);
 
-        // todo reward model type??
-        // do I need statesOfCoalition?
         static SMGSparseModelCheckingHelperReturnType<ValueType> computeReachabilityRewards(storm::Environment const& env, storm::solver::SolveGoal<ValueType>&& goal, storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions, storm::models::sparse::StandardRewardModel<ValueType> const& rewardModel, storm::storage::BitVector const& targetStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler, storm::modelchecker::ModelCheckerHint const& hint = storm::modelchecker::ModelCheckerHint());
 
     private:
@@ -39,7 +37,6 @@ namespace synthesis {
                                                                                                 storm::storage::SparseMatrix<ValueType> const& transitionMatrix, storm::storage::SparseMatrix<ValueType> const& backwardTransitions,
                                                                                                 std::function<std::vector<ValueType>(uint_fast64_t, storm::storage::SparseMatrix<ValueType> const&, storm::storage::BitVector const&)> const& totalStateRewardVectorGetter,
                                                                                                 storm::storage::BitVector const& targetStates, bool qualitative, storm::storage::BitVector statesOfCoalition, bool produceScheduler,
-                                                                                                std::function<storm::storage::BitVector()> const& zeroRewardStatesGetter, std::function<storm::storage::BitVector()> const& zeroRewardChoiceGetter,
                                                                                                 storm::modelchecker::ModelCheckerHint const& hint = storm::modelchecker::ModelCheckerHint());
 
         static storm::storage::Scheduler<ValueType> expandScheduler(storm::storage::Scheduler<ValueType> scheduler, storm::storage::BitVector psiStates, storm::storage::BitVector notPhiStates);
