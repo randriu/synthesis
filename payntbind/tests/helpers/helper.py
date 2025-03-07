@@ -24,3 +24,8 @@ def get_builder_options():
 
 def get_sketch_paths(project_path, sketch_name="sketch.templ", props_name="sketch.props"):
     return os.path.join(paynt_models_dir, project_path, sketch_name), os.path.join(paynt_models_dir, project_path, props_name)
+
+def read_first_line(filepath):
+    with open(filepath, 'r') as file:
+        first_line = file.readline().strip()
+    return first_line
