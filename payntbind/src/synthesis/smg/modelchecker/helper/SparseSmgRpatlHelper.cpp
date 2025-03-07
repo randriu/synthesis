@@ -669,10 +669,10 @@ namespace synthesis {
                 // precomputation for zero reward end components
                 // taken from prism-games (Automatic Verification of Competitive Stochastic Systems)
 
-                // find maximum and minimum reward and check if all rewards are none zero
+                // find maximum and minimum reward and check if all rewards are positive
                 ValueType minimumReward = storm::utility::infinity<ValueType>();
                 ValueType maximumReward = storm::utility::zero<ValueType>();
-                bool allNonZero = true;
+                bool allPositive = true;
                 for (auto reward : b) {
                     if (reward > storm::utility::zero<ValueType>()) {
                         if (reward < minimumReward) {
@@ -683,11 +683,14 @@ namespace synthesis {
                         }
                     }
                     else {
-                        allNonZero = false;
+                        allPositive = false;
+                        if (reward < storm::utility::zero<ValueType>()) {
+                            STORM_LOG_WARN("Some reward is negative. The computaion of negative rewards was not tested and might return wrong results or fail.");
+                        }
                     }
                 }
 
-                if (!allNonZero) {
+                if (!allPositive) {
                     // Compute rewards with epsilon instead of zero. This is used to get the over-approximation
                     // of the real result, which deals with the problem of staying in zero
                     // components for free when infinity should be gained.

@@ -212,7 +212,8 @@ namespace synthesis {
     template<typename ModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::computeReachabilityRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::EventuallyFormula, ValueType> const& checkTask) {
         storm::logic::EventuallyFormula const& eventuallyFormula = checkTask.getFormula();
-        // storm log throw??
+        STORM_LOG_THROW(checkTask.isOptimizationDirectionSet(), storm::exceptions::InvalidPropertyException,
+                    "Formula needs to specify whether minimal or maximal values are to be computed on nondeterministic model.");
 
         // find target states
         std::unique_ptr<storm::modelchecker::CheckResult> subResultPointer = this->check(env, eventuallyFormula.getSubformula()); // subformula is atomic label/expression formula
