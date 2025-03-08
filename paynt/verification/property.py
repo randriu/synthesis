@@ -433,3 +433,4 @@ class Specification:
     def negate(self):
         properties_negated = [p.negate() for p in self.all_properties()]
         return Specification(properties_negated)
+

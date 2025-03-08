@@ -191,8 +191,8 @@ class Sketch:
             # assert explicit_quotient.is_nondeterministic_model, "expected nondeterministic model"
             if decpomdp_manager is not None and decpomdp_manager.num_agents > 1:
                 quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
-            # elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
-            #     quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
+            elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
+                quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
             elif not explicit_quotient.is_partially_observable:
                 quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification, tree_helper)
             else:

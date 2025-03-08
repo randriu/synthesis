@@ -12,6 +12,7 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
+
 class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
 
     # label for action executing a random action selection
@@ -42,8 +43,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                     available_actions.append(action)
             state_to_actions.append(available_actions)
         return state_to_actions
-
-
 
     
     def __init__(self, quotient_mdp, family, coloring, specification):
@@ -350,7 +349,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         assert family.size == 1, "expecting family of size 1"
         choices = self.coloring.selectCompatibleChoices(family.family)
         model,state_map,choice_map = self.restrict_quotient(choices)
-        # model = MdpFamilyQuotient.mdp_to_dtmc(model)
+        model = MdpFamilyQuotient.mdp_to_dtmc(model)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
 
     def mark_irrelevant_states(self, irrelevant_variables: dict):

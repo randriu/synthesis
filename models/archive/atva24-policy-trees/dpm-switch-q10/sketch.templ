@@ -44,7 +44,6 @@ module CLOCK
     [tick01] c=0 -> (c'=1);
     [tick02] c=0 -> (c'=1);
     [tick1] c=1 -> (c'=0);
-    [_stay_] c=0 -> true;
 endmodule
 
 
@@ -74,6 +73,7 @@ module SP
     // waiting states
     [tick1] sp = 3 -> WP1*0.1 : (sp'=sp-2) + 1-WP1*0.1 : true;
     [tick1] sp = 4 -> WP2*0.1 : (sp'=sp-2) + 1-WP2*0.1 : true;
+
 endmodule
 
 
@@ -101,6 +101,7 @@ module SR
     [tick1] q > T3*0.1*QMAX & P4 = 0 -> 0.5: true + 0.5: (sr'=1);
     [tick1] q > T3*0.1*QMAX & P4 = 1 -> 0.3: true + 0.7: (sr'=1);
     [tick1] q > T3*0.1*QMAX & P4 = 2 -> 0.1: true + 0.9: (sr'=1);
+
 endmodule
 
 
@@ -124,6 +125,7 @@ module SRQ
 
     [tick1] sp=2 -> 1: (q'=max(q-1,0)); // serve
     [tick1] sp!=2 -> true;
+
 endmodule
 
 
