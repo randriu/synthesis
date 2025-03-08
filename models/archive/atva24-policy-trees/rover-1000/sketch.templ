@@ -64,7 +64,6 @@ module rover
 	[task4_start] task=0 -> task4_success_pr*0.1 : (task'=4) & (success'=true) + (1-task4_success_pr*0.1) : (task'=4) & (success'=false);
 
 	[task_done] task>0 -> (task'= 0) & (success'=false);
-    [_stay_] task=0 -> true;
 endmodule
 
 
@@ -92,6 +91,22 @@ module value_counting_module
 	[task_done] medium_value_task -> (val'=min(1000,val + (success ? value_medium : 0)));
 	[task_done] high_value_task -> (val'=min(1000,val + (success ? value_high : 0)));
 endmodule
+
+//rewards "time"
+//	[task_done] low_time_task : time_low;
+//	[task_done] medium_time_task : time_medium;
+//	[task_done] high_time_task : time_high;
+//endrewards
+//
+//rewards "energy"
+//	[task_done] low_energy_task & !increased_energy : energy_low;
+//	[task_done] low_energy_task &  increased_energy : energy_medium;
+//	[task_done] medium_energy_task & !increased_energy : energy_medium;
+//	[task_done] medium_energy_task &  increased_energy : energy_high;
+//	[task_done] high_energy_task & !increased_energy : energy_high;
+//	[task_done] high_energy_task &  increased_energy : energy_high;
+//endrewards
+
 
 label "goal" = val = 1000;
 

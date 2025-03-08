@@ -612,10 +612,14 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return game_policy,game_sat
 
     def post_process_game_policy(self, game_policy_fixed, game_solver,family, prop):
+        """
+        try to keep only states with increasing probability of reaching the target.
+        This is done by removing states that have lower value than their parent state
+        Epsilon is used as a threshold to remove states with value lower by epsilon than the parent state
+        """
         for epsilon in [1e-9, 1e-5, 1e-3, 1e-1]:
             game_policy_post = self.quotient.empty_policy()
             ## post process - remove choices leading to lower value, given current policy
-            # assuming single good path
             discovered_states = set()
             initial_states = self.quotient.quotient_mdp.initial_states
             while initial_states:

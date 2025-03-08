@@ -64,7 +64,6 @@ module rover
 	[task4_start] task=0 -> task4_success_pr*0.01 : (task'=4) & (success'=true) + (1-task4_success_pr*0.01) : (task'=4) & (success'=false);
 
 	[task_done] task>0 -> (task'= 0) & (success'=false);
-    [_stay_] task=0 -> true;
 endmodule
 
 
