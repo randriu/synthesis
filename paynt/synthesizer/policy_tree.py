@@ -1,3 +1,5 @@
+import heapq
+
 import stormpy
 import payntbind
 
@@ -605,8 +607,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
             if self.ldokoupi_flag:
                 self.ldok_postprocessing_times.start()
-                game_policy = self.post_process_game_policy(game_policy,game_solver,family, prop) # removes unreach and ε-non rising states
-                game_policy = self.post_process_game_policy_max_reach(game_policy, game_solver, family, prop)  # try max probability
+                #game_policy = self.post_process_game_policy_max_reach(game_policy, game_solver, family, prop)  # try max probability
+                game_policy = self.post_process_game_policy_max_reach2(game_policy, game_solver, family, prop)  # try max probability
+                #game_policy = self.post_process_game_policy(game_policy,game_solver,family, prop) # removes unreach and ε-non rising states
+                # game_policy = self.post_process_bruteforce(game_policy, game_solver, family, prop)  # try brute force to find truly optimal policy
                 self.ldok_postprocessing_times.stop()
 
         return game_policy,game_sat
@@ -643,6 +647,91 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         logger.debug("policy couldn't be ε-rise simplified")
         return game_policy_fixed
+    
+    def post_process_game_policy_max_reach2(self, game_policy, game_solver, family, prop, check_granularity=1):
+        """ DFS only on max probability path until reaching the target
+        then verify if the policy satisfies the property based on check_granularity
+        if set to -1 then check every multiple of shortest path from init to end state
+        This post is applicable iff self loop ( _stay_ ) is first action in MDP
+        """
+
+        def getProbForChoice(choice, target):
+            choices_transition_matrix = self.quotient.quotient_mdp.transition_matrix
+            for entry in choices_transition_matrix.get_row(choice):
+                dst, prob = entry.column, entry.value()  # entry.getColumn(), entry.getValue()
+                if dst == target:
+                    return prob
+            return 0.0
+
+        # self loop has to be first aplicable action
+        if self.quotient.action_labels[0] == "__no_label__":
+            if not self.quotient.action_labels[1].startswith("_stay"):
+                return game_policy
+        else:
+            if not self.quotient.action_labels[0].startswith("_stay"):
+                return game_policy
+        # self loops serves as verification against worst case scenario -> any other action is better
+
+        depth = -1
+        end_state = next((state for state in game_solver.state_is_target if state), -1)
+        assert end_state != -1
+
+        assert len(self.quotient.quotient_mdp.initial_states) == 1
+        current_state = self.quotient.quotient_mdp.initial_states[0]
+        game_policy_post = self.quotient.empty_policy()
+        game_policy_post[current_state] = game_policy[current_state]
+
+        explored_states = set()  # avoid cycles
+        state_stack = [(game_solver.solution_state_values[current_state], current_state)]
+        bfs_flag = False
+        que = []
+
+        while state_stack or que:
+            if state_stack:
+                _, current_state = heapq.heappop(state_stack)
+            else:
+                current_state = que.pop(0)
+
+            if current_state in explored_states:
+                continue
+            game_policy_post[current_state] = game_policy[current_state]
+            explored_states.add(current_state)
+
+            cur_choice = game_solver.solution_state_to_quotient_choice[current_state]
+            target_states = self.quotient.choice_destinations[cur_choice]
+
+            if len(target_states) != 1:
+                depth += 1
+
+            if current_state == end_state:
+                bfs_flag = True
+            if current_state == end_state and check_granularity < 0:
+                check_granularity = depth  # shortest path length
+
+            target_probabilities = []
+
+            # Collect probabilities and corresponding target states
+            for target_state in target_states:
+                prob = getProbForChoice(cur_choice, target_state)
+                target_probabilities.append((prob, target_state))
+
+
+            # Push the sorted target states onto the stack - max prob goes out first
+            if not bfs_flag:
+                for prob, target_state in target_probabilities:
+                    heapq.heappush(state_stack, (-game_solver.solution_state_values[target_state], target_state))
+            else:
+                for prob, target_state in target_probabilities:
+                    que.append(target_state)
+
+            if check_granularity > 0 and depth % check_granularity == 0:
+                sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+                if sat:
+                    return game_policy_post
+
+        logger.debug("policy couldn't be simplified by max reach")
+        return game_policy
+
 
     def post_process_game_policy_max_reach(self, game_policy, game_solver, family, prop, check_granularity=1):
         """ DFS only on max probability path until reaching the target
@@ -669,7 +758,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # self loops serves as verification against worst case scenario -> any other action is better
 
         depth = -1
-        end_state = next((i for i, state in enumerate(game_solver.state_is_target) if state), -1)
+        end_state = next((state for state in game_solver.state_is_target if state), -1)
         assert end_state != -1
 
         assert len(self.quotient.quotient_mdp.initial_states) == 1
@@ -689,6 +778,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
             cur_choice = game_solver.solution_state_to_quotient_choice[current_state]
             target_states = self.quotient.choice_destinations[cur_choice]
+
+            # finish DFS queue,  unless deterministic state
+            if end_state in explored_states and len(target_states) != 1:
+                continue
 
             depth += 1
             if current_state == end_state and check_granularity < 0:
@@ -715,6 +808,32 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         logger.debug("policy couldn't be simplified by max reach")
         return game_policy
+
+
+    def post_process_bruteforce(self, game_policy, game_solver, family, prop):
+        """ Brute force approach to find the pseudo smallest policy
+        for totally correct results all permutations would be needed to check
+        """
+
+        game_policy_post = self.quotient.empty_policy()
+        for state in range(len(game_policy)):
+            game_policy_post[state] = game_policy[state]
+
+        changed = True
+        while changed:
+            changed = False
+            for state in range(len(game_policy)):
+                if game_policy_post[state] is None:
+                    continue
+                # try set none and verify if fail, revert
+                old_action = game_policy_post[state]
+                game_policy_post[state] = None
+                sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+                if not sat:
+                    game_policy_post[state] = old_action
+                else:
+                    changed = True
+        return game_policy_post
 
     def state_to_choice_to_hole_selection(self, state_to_choice):
         if SynthesizerPolicyTree.discard_unreachable_choices:
