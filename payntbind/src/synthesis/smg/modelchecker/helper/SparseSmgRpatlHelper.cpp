@@ -400,44 +400,6 @@ namespace synthesis {
         std::cerr << "\n";
     }
 
-    /**
-     * @brief Return whether the given row contains at least one entry in column specified by columns
-     *
-     * @tparam ValueType
-     * @param row row whose entries are checked
-     * @param columns specifies columns to check against
-     * @return true if at least one entry is in column from columns
-     * @return false otherwise
-     */
-    template<typename ValueType>
-    bool containsOneOf(typename storm::storage::SparseMatrix<ValueType>::const_rows const& row, storm::storage::BitVector const& columns) {
-        for (auto const& entry : row) {
-            if (columns.get(entry.getColumn())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @brief Return wheter the given row contains only entries in columns specified by columns
-     *
-     * @tparam ValueType
-     * @param row row whose entries are checked
-     * @param columns specifies columns to check against
-     * @return true if all entries are in columns from columns
-     * @return false otherwise
-     */
-    template<typename ValueType>
-    bool isSubsetOf(typename storm::storage::SparseMatrix<ValueType>::const_rows const& row, storm::storage::BitVector const& columns) {
-        for (auto const& entry : row) {
-            if (!columns.get(entry.getColumn())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     // inspired by prism-games SMGSimple.java
     template<typename ValueType>
     void prob1step(storm::storage::BitVector const& subset, storm::storage::BitVector const& u, storm::storage::BitVector const& v,
@@ -456,7 +418,8 @@ namespace synthesis {
                 b1 = forall;
                 for (uint64_t choice = rowGroupIndices[state]; choice < rowGroupIndices[state + 1]; choice++) {
                     auto row = transitionMatrix.getRow(choice);
-                    b2 = containsOneOf<ValueType>(row, v) && isSubsetOf<ValueType>(row, u);
+                    b2 = std::any_of(row.begin(), row.end(), [&v](auto const& entry) { return v.get(entry.getColumn()); }) &&
+                         std::all_of(row.begin(), row.end(), [&u](auto const& entry) { return u.get(entry.getColumn()); });
 
                     if (forall)
                     {
@@ -560,7 +523,7 @@ namespace synthesis {
                 uint64_t firstChoiceOfNextState = choice + transitionMatrix.getRowGroupSize(state);
                 while (choice < firstChoiceOfNextState) {
                     auto row = transitionMatrix.getRow(choice);
-                    if (containsOneOf<ValueType>(row, qualitativeStateSets.infinityStates)) {
+                    if (std::any_of(row.begin(), row.end(), [&qualitativeStateSets](auto const& entry) { return qualitativeStateSets.infinityStates.get(entry.getColumn()); })) {
                         // choice leads to infinity state
                         allChoices[choice] = storm::utility::infinity<ValueType>();
                     }
