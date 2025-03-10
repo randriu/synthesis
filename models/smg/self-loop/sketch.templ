@@ -1,0 +1,32 @@
+// self loop
+
+smg
+
+player square
+  [action2], [action3]
+endplayer
+
+player circle
+  [action1], state_space
+endplayer
+
+module state_space
+  s : [0..2];
+
+  [action1] s=0 -> (s'=1);
+
+  [action2] s=1 -> (s'=1);
+  [action3] s=1 -> (s'=2);
+
+  [] s=2 -> true;
+endmodule
+
+label "goal" = s=2;
+
+rewards "rew"
+
+  [action1] true : 1;
+  [action2] true : 1;
+  [action3] true : 1;
+
+endrewards

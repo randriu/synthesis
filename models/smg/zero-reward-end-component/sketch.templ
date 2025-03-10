@@ -1,0 +1,42 @@
+// zero reward end component
+
+smg
+
+player square
+
+  [s_action1], [s_action2], state_space
+
+endplayer
+
+player circle
+
+  [c_action1], [c_action2]
+
+endplayer
+
+
+module state_space
+  s : [0..3];
+
+  [s_action1] s=0 -> (s'=1);
+
+  [c_action1] s=1 -> (s'=2);
+  [c_action2] s=1 -> (s'=3);
+
+  [s_action2] s=2 -> (s'=1);
+
+  [] s=3 -> true;
+endmodule
+
+label "goal" = s=3;
+
+rewards "rew"
+
+  [s_action1] true : 1;
+
+  [c_action1] true : 0;
+  [c_action2] true : 1;
+
+  [s_action2] true : 0;
+
+endrewards

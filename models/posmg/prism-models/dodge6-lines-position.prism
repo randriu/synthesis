@@ -1,0 +1,86 @@
+// NxN grid, player1 starts at (1,1) and his goal is to get to (N,N) without crashing into player2
+// player2 starts at (4,4) and wants crash into player1
+// both players have slippery movement
+
+smg
+
+const int N=6;
+const int xMIN = 1;
+const int yMIN = 1;
+const int xMAX = N;
+const int yMAX = N;
+
+player p1
+    player1, [l1], [r1], [d1], [u1]
+endplayer
+
+player p2
+    player2, [l2], [r2], [d2], [u2]
+endplayer
+
+// DEFINING THE OBSERVATIONS
+// player1 only observes its own x coordinate
+observable "x1" = x1;
+observable "x2" = x2;
+observable "clk" = clk;
+observable "done" = done;
+
+formula crash = (x1=x2 & y1=y2);
+formula goal = (x1=xMAX & y1=yMAX);
+formula done = goal | crash;
+
+// clock to make the game alternating
+formula clk_next = mod(clk+1,2);
+module clk
+    clk : [0..1] init 0;
+
+    [l1] !done & clk=0 -> (clk'=clk_next);
+    [r1] !done & clk=0 -> (clk'=clk_next);
+    [d1] !done & clk=0 -> (clk'=clk_next);
+    [u1] !done & clk=0 -> (clk'=clk_next);
+
+    [l2] !done & clk=1 -> (clk'=clk_next);
+    [r2] !done & clk=1 -> (clk'=clk_next);
+    [d2] !done & clk=1 -> (clk'=clk_next);
+    [u2] !done & clk=1 -> (clk'=clk_next);
+endmodule
+
+
+label "goal" = goal;
+
+const double slip = 0.2;
+
+const int x1_init = 1;
+const int y1_init = 1;
+
+formula x1right  = min(x1+1,xMAX);
+formula x1left   = max(x1-1,xMIN);
+formula y1up     = min(y1+1,yMAX);
+formula y1down   = max(y1-1,yMIN);
+
+module player1
+    x1 : [xMIN..xMAX] init x1_init;
+    y1 : [yMIN..yMAX] init y1_init;
+    [l1] true -> 1 : (x1'=x1left);
+    [r1] true -> 1 : (x1'=x1right);
+    [d1] true -> 1 : (y1'=y1down);
+    [u1] true -> 1 : (y1'=y1up);
+endmodule
+
+const int x2_init = 4;
+const int y2_init = 4;
+
+formula x2right  = y2=4 ? min(x2+1,4) : x2;
+formula x2left   = y2=4 ? max(x2-1,0) : x2;
+formula y2up     = x2=4 ? min(y2+1,4) : y2;
+formula y2down   = x2=4 ? max(y2-1,0) : y2;
+
+module player2
+    x2 : [xMIN..xMAX] init x2_init;
+    y2 : [yMIN..yMAX] init y2_init;
+    [l2] true -> 1-slip : (x2'=x2left)  + slip : true;
+    [r2] true -> 1-slip : (x2'=x2right) + slip : true;
+    [d2] true -> 1-slip : (y2'=y2down)  + slip : true;
+    [u2] true -> 1-slip : (y2'=y2up)    + slip : true;
+endmodule
+

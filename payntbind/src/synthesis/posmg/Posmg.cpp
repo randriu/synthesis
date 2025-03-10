@@ -75,6 +75,7 @@ void Posmg<ValueType,RewardModelType>::calculateP0ObservationCount()
 }
 
 template class Posmg<double>;
+template class Posmg<storm::RationalNumber>;
 
 
 template<typename ValueType, typename RewardModelType>
@@ -100,6 +101,13 @@ template Posmg<double> posmgFromPomdp<double>(
     std::vector<storm::storage::PlayerIndex> statePlayerIndications);
 template Posmg<double> posmgFromSmg<double>(
     storm::models::sparse::Smg<double>,
+    std::optional<std::vector<uint32_t>> observabilityClasses);
+
+template Posmg<storm::RationalNumber> posmgFromPomdp<storm::RationalNumber>(
+    storm::models::sparse::Pomdp<storm::RationalNumber> pomdp,
+    std::vector<storm::storage::PlayerIndex> statePlayerIndications);
+template Posmg<storm::RationalNumber> posmgFromSmg<storm::RationalNumber>(
+    storm::models::sparse::Smg<storm::RationalNumber>,
     std::optional<std::vector<uint32_t>> observabilityClasses);
 
 } // namespace synthesis

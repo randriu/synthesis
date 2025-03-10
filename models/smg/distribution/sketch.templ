@@ -1,0 +1,35 @@
+// distribution
+
+smg
+
+player square
+  [action1]
+endplayer
+
+player circle
+  [action2]
+endplayer
+
+player sink
+  state_space
+endplayer
+
+
+module state_space
+  s : [0..2];
+
+  [action1] s=0 -> (s'=1);
+
+  [action2] s=1 -> 0.5 : (s'=1) + 0.5 : (s'=2);
+
+  [] s=2 -> true;
+endmodule
+
+label "goal" = s=2;
+
+rewards "rew"
+
+  [action1] true : 1;
+  [action2] true : 1;
+
+endrewards
