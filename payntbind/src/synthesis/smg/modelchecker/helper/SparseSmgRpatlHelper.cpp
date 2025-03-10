@@ -509,7 +509,7 @@ namespace synthesis {
     }
 
     // fill the choice values vector for every choice in original transition matrix. Result will be stored in choiceValues.
-    // all choices leading from infinityStates of rewardZeroStates will have value 0
+    // all choices leading from infinityStates or rewardZeroStates will have value 0
     // all choices leading from maybeStates to infinityStates will have value infinity
     // all other choices will have values from choiceValues vector
     template<typename ValueType>
