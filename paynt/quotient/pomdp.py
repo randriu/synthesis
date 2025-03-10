@@ -741,6 +741,118 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         fsc.fill_implicit_actions_and_updates()
         fsc.check(observation_to_actions)
         return fsc
+    
+
+
+    def get_induced_dtmc_from_fsc(self, fsc):
+        # TODO maybe make this into payntbind function if it's slow
+        if fsc.is_deterministic:
+            fsc_copy = fsc.copy()
+            fsc_copy.make_stochastic()
+        else:
+            fsc_copy = fsc
+        action_function = fsc_copy.action_function
+        update_function = fsc_copy.update_function
+        action_labels = fsc_copy.action_labels
+
+        # compute the state space for the induced dtmc
+        dtmc_states_map = {}
+        state_queue = [(self.pomdp.initial_states[0],0)]
+        dtmc_states_map[len(dtmc_states_map)] = (self.pomdp.initial_states[0],0)
+
+        while state_queue:
+            current_state_memory_pair = state_queue.pop()
+
+            # compute the successor states
+            current_obs = self.pomdp.observations[current_state_memory_pair[0]]
+            selected_actions = action_function[current_state_memory_pair[1]][current_obs]
+            if selected_actions is None:
+                continue
+            selected_updates = update_function[current_state_memory_pair[1]][current_obs]
+            if selected_updates is None:
+                continue
+
+            for selected_action in selected_actions.keys():
+                for selected_update in selected_updates.keys():
+                    selected_action_label = action_labels[selected_action]
+
+                    choice_offset_for_selected_label = self.action_labels_at_observation[current_obs].index(selected_action_label)
+                    choice_index = self.pomdp.get_choice_index(current_state_memory_pair[0], choice_offset_for_selected_label)
+
+                    for entry in self.pomdp.transition_matrix.get_row(choice_index):
+                        next_state = entry.column
+                        next_state_memory_pair = (next_state,selected_update)
+                        if next_state_memory_pair not in dtmc_states_map.values():
+                            state_queue.append(next_state_memory_pair)
+                            dtmc_states_map[len(dtmc_states_map)] = next_state_memory_pair
+
+
+        # construct the transition matrix
+        num_dtmc_states = len(dtmc_states_map)
+        dtmc_tm_builder = stormpy.SparseMatrixBuilder(num_dtmc_states, num_dtmc_states, force_dimensions=True)
+        state_action_rewards = {name:[] for name in self.pomdp.reward_models.keys()}
+        for dtmc_state, current_state_memory_pair in dtmc_states_map.items():
+            current_obs = self.pomdp.observations[current_state_memory_pair[0]]
+            selected_actions = action_function[current_state_memory_pair[1]][current_obs]
+            if selected_actions is None:
+                continue
+            selected_updates = update_function[current_state_memory_pair[1]][current_obs]
+            if selected_updates is None:
+                continue
+
+            next_state_prob_map = {state:0 for state in dtmc_states_map.keys()}
+
+            current_reward = {name:[] for name in self.pomdp.reward_models.keys()}
+
+            for selected_action, action_prob in selected_actions.items():
+                selected_action_label = action_labels[selected_action]
+                choice_offset_for_selected_label = self.action_labels_at_observation[current_obs].index(selected_action_label)
+                choice_index = self.pomdp.get_choice_index(current_state_memory_pair[0], choice_offset_for_selected_label)
+
+                for reward_name, reward_model in self.pomdp.reward_models.items():
+                    current_reward[reward_name] = reward_model.state_action_rewards[choice_index]*action_prob
+
+                for selected_update, update_prob in selected_updates.items():
+                    
+
+                    for entry in self.pomdp.transition_matrix.get_row(choice_index):
+                        next_state = entry.column
+                        next_state_memory_pair = (next_state,selected_update)
+                        next_state_index = [index for index,state in dtmc_states_map.items() if state == next_state_memory_pair]
+                        assert len(next_state_index) == 1, "expected unique state for given state memory pair"
+                        next_state_index = next_state_index[0]
+                        next_state_prob_map[next_state_index] += entry.value()*action_prob*update_prob
+
+            for reward_name in self.pomdp.reward_models.keys():
+                state_action_rewards[reward_name].append(current_reward[reward_name])
+
+                
+
+            for next_state_index, next_state_prob in next_state_prob_map.items():
+                dtmc_tm_builder.add_next_value(dtmc_state, next_state_index, next_state_prob)
+
+        dtmc_tm = dtmc_tm_builder.build()
+
+        # construct the labeling
+        dtmc_labeling = stormpy.storage.StateLabeling(num_dtmc_states)
+        for label in self.pomdp.labeling.get_labels():
+            dtmc_labeling.add_label(label)
+        for dtmc_state, current_state_memory_pair in dtmc_states_map.items():
+            for label in self.pomdp.labeling.get_labels_of_state(current_state_memory_pair[0]):
+                if label == "init" and current_state_memory_pair != (self.pomdp.initial_states[0],0): # only (0,0) state is initital
+                    continue
+                dtmc_labeling.add_label_to_state(label, dtmc_state)
+
+        # construct the reward structure
+        dtmc_reward_models = {}
+        for reward_name in self.pomdp.reward_models.keys():
+            assert reward_model.has_state_action_rewards == True, "currently this implementation expects state action rewards"
+            dtmc_reward_models[reward_name] = stormpy.SparseRewardModel(optional_state_action_reward_vector=state_action_rewards[reward_name])
+
+        components = stormpy.SparseModelComponents(transition_matrix=dtmc_tm, state_labeling=dtmc_labeling, reward_models=dtmc_reward_models)
+        induced_dtmc = stormpy.storage.SparseDtmc(components)
+
+        return induced_dtmc
 
 
     def compute_qvalues(self, assignment):
