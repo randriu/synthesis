@@ -157,7 +157,6 @@ class StormPOMDPControl:
                 pass
             # else:
                 # print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
-            self.belief_controller_to_fsc(result, self.latest_paynt_result_fsc)
             exit()
 
         # print(f'\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
@@ -844,12 +843,6 @@ class StormPOMDPControl:
                         result_fsc.update_function[node_id][succ_observation] = {belief_mc_nodes_map[succ]: 1.0}
 
         logger.info(f"constructed FSC with {result_fsc.num_nodes} nodes")
-
-        dtmc = self.quotient.get_induced_dtmc_from_fsc(result_fsc)
-        print(dtmc)
-        result = stormpy.model_checking(dtmc, self.quotient.specification.optimality.formula)
-        print(result.at(0))
-        exit()
 
         return result_fsc
 
