@@ -18,50 +18,48 @@ logger = logging.getLogger(__name__)
 # class implementing the main components of the Storm integration for FSC synthesis for POMDPs
 class StormPOMDPControl:
 
-    latest_storm_result = None      # holds object representing the latest Storm result
-    storm_bounds = None             # under-approximation value from Storm
-
-    # PAYNT data and FSC export
-    latest_paynt_result = None      # holds the synthesised assignment
-    latest_paynt_result_fsc = None  # holds the FSC built from assignment
-    paynt_bounds = None
-    paynt_export = []
-
-    # parsed best result data dictionary (Starting with data from Storm)
-    result_dict = {}
-    result_dict_no_cutoffs = {}
-    result_dict_paynt = {}
-    memory_vector = {}
-
-    # controller sizes
-    belief_controller_size = None
-    paynt_fsc_size = None
-
-    is_storm_better = False
-
-    pomdp = None                    # The original POMDP model
-    quotient = None
-    spec_formulas = None            # The specification to be checked
-    storm_options = None
-    get_result = None
-    use_cutoffs = False
-    unfold_strategy_storm = None
-
-    # PAYNT/Storm iteration settings
-    iteration_timeout = None
-    paynt_timeout = None
-    storm_timeout = None
-
-    storm_terminated = False
-
-    s_queue = None
-
-    saynt_timer = None
-    export_fsc_storm = None
-    export_fsc_paynt = None
-
     def __init__(self):
-        pass
+        self.latest_storm_result = None      # holds object representing the latest Storm result
+        self.storm_bounds = None             # under-approximation value from Storm
+
+        # PAYNT data and FSC export
+        self.latest_paynt_result = None      # holds the synthesised assignment
+        self.latest_paynt_result_fsc = None  # holds the FSC built from assignment
+        self.paynt_bounds = None
+        self.paynt_export = []
+
+        # parsed best result data dictionary (Starting with data from Storm)
+        self.result_dict = {}
+        self.result_dict_no_cutoffs = {}
+        self.result_dict_paynt = {}
+        self.memory_vector = {}
+
+        # controller sizes
+        self.belief_controller_size = None
+        self.paynt_fsc_size = None
+
+        self.is_storm_better = False
+
+        self.pomdp = None                    # The original POMDP model
+        self.quotient = None
+        self.spec_formulas = None            # The specification to be checked
+        self.storm_options = None
+        self.get_result = None
+        self.use_cutoffs = False
+        self.unfold_strategy_storm = None
+
+        # PAYNT/Storm iteration settings
+        self.iteration_timeout = None
+        self.paynt_timeout = None
+        self.storm_timeout = None
+
+        self.storm_terminated = False
+
+        self.s_queue = None
+
+        self.saynt_timer = None
+        self.export_fsc_storm = None
+        self.export_fsc_paynt = None
 
     def set_options(self,
         storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
@@ -89,9 +87,9 @@ class StormPOMDPControl:
             self.unfold_cutoff = True
 
     def get_storm_result(self):
-        self.run_storm_analysis()
+        self.run_storm_analysis(self)
         self.parse_results(self.quotient)
-        self.update_data()
+        self.update_data(self)
 
         if self.s_queue is not None:
             self.s_queue.put((self.result_dict, self.storm_bounds))
@@ -159,6 +157,7 @@ class StormPOMDPControl:
                 pass
             # else:
                 # print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+            self.belief_controller_to_fsc(result, self.latest_paynt_result_fsc)
             exit()
 
         # print(f'\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
@@ -682,7 +681,7 @@ class StormPOMDPControl:
 
         result_fsc.observation_labels = self.quotient.observation_labels
 
-        if paynt_fsc is not None:
+        if paynt_fsc is not None and uses_fsc:
             paynt_fsc.make_stochastic()
             paynt_fsc_num_nodes = paynt_fsc.num_nodes
             paynt_fsc_action_function = paynt_fsc.action_function
@@ -736,10 +735,13 @@ class StormPOMDPControl:
                     choice = choice.replace('{','').replace('}','').replace('[','').replace(']','').replace(' ','').split(',')
                     for c in choice[:-1]:
                         prob, cutoff_action = c.split(':')
-                        if action == cutoff_action:
-                            action_label = self.quotient.action_labels_at_observation[succ_observation][action]
-                            action_index = result_fsc.action_labels.index(action_label)
-                            result_fsc.action_function[0][succ_observation] = {action_index:float(prob)}
+                        action_label = self.quotient.action_labels_at_observation[succ_observation][int(cutoff_action)]
+                        action_index = result_fsc.action_labels.index(action_label)
+                        if result_fsc.action_function[node_id][succ_observation] is None:
+                            result_fsc.action_function[node_id][succ_observation] = {action_index:float(prob)}
+                        else:
+                            result_fsc.action_function[node_id][succ_observation][action_index] = float(prob)
+                    break
                 result_fsc.update_function[0][succ_observation] = {cutoff_node_id: 1.0}
             else:
                 if action == "loop":
@@ -756,6 +758,9 @@ class StormPOMDPControl:
                 for label in state.labels:
                     if 'sched_' in label:
                         _, scheduler_index = label.split('_')
+                        break
+                else:
+                    continue
                 scheduler = storm_result.cutoff_schedulers[int(scheduler_index)]
                 for obs in range(self.quotient.observations):
                     result_fsc.update_function[node_id][obs] = {node_id: 1.0}
@@ -772,7 +777,10 @@ class StormPOMDPControl:
                         action = int(action)
                         action_label = self.quotient.action_labels_at_observation[obs_index][action]
                         action_index = result_fsc.action_labels.index(action_label)
-                        result_fsc.action_function[node_id][obs_index] = {action_index:float(prob)}
+                        if result_fsc.action_function[node_id][obs_index] is None:
+                            result_fsc.action_function[node_id][obs_index] = {action_index:float(prob)}
+                        else:
+                            result_fsc.action_function[node_id][obs_index][action_index] = float(prob)
             elif '__extra' in state.labels or 'target' in state.labels: # basically target states so just loop with everything
                 for obs in range(self.quotient.observations):
                     first_action_in_obs = self.quotient.action_labels_at_observation[obs][0] # this ensures the looping action is available
@@ -819,10 +827,13 @@ class StormPOMDPControl:
                             choice = choice.replace('{','').replace('}','').replace('[','').replace(']','').replace(' ','').split(',')
                             for c in choice[:-1]:
                                 prob, cutoff_action = c.split(':')
-                                if action == cutoff_action:
-                                    action_label = self.quotient.action_labels_at_observation[succ_observation][action]
-                                    action_index = result_fsc.action_labels.index(action_label)
+                                action_label = self.quotient.action_labels_at_observation[succ_observation][int(cutoff_action)]
+                                action_index = result_fsc.action_labels.index(action_label)
+                                if result_fsc.action_function[node_id][succ_observation] is None:
                                     result_fsc.action_function[node_id][succ_observation] = {action_index:float(prob)}
+                                else:
+                                    result_fsc.action_function[node_id][succ_observation][action_index] = float(prob)
+                            break
                         result_fsc.update_function[node_id][succ_observation] = {cutoff_node_id: 1.0}
                     else:
                         if action == "loop":
@@ -831,6 +842,14 @@ class StormPOMDPControl:
                         else:
                             result_fsc.action_function[node_id][succ_observation] = {result_fsc.action_labels.index(action): 1.0}
                         result_fsc.update_function[node_id][succ_observation] = {belief_mc_nodes_map[succ]: 1.0}
+
+        logger.info(f"constructed FSC with {result_fsc.num_nodes} nodes")
+
+        dtmc = self.quotient.get_induced_dtmc_from_fsc(result_fsc)
+        print(dtmc)
+        result = stormpy.model_checking(dtmc, self.quotient.specification.optimality.formula)
+        print(result.at(0))
+        exit()
 
         return result_fsc
 

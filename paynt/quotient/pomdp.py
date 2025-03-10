@@ -795,14 +795,18 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             current_obs = self.pomdp.observations[current_state_memory_pair[0]]
             selected_actions = action_function[current_state_memory_pair[1]][current_obs]
             if selected_actions is None:
+                for reward_name in self.pomdp.reward_models.keys():
+                    state_action_rewards[reward_name].append(0)
                 continue
             selected_updates = update_function[current_state_memory_pair[1]][current_obs]
             if selected_updates is None:
+                for reward_name in self.pomdp.reward_models.keys():
+                    state_action_rewards[reward_name].append(0)
                 continue
 
             next_state_prob_map = {state:0 for state in dtmc_states_map.keys()}
 
-            current_reward = {name:[] for name in self.pomdp.reward_models.keys()}
+            current_reward = {name:0 for name in self.pomdp.reward_models.keys()}
 
             for selected_action, action_prob in selected_actions.items():
                 selected_action_label = action_labels[selected_action]
@@ -810,7 +814,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 choice_index = self.pomdp.get_choice_index(current_state_memory_pair[0], choice_offset_for_selected_label)
 
                 for reward_name, reward_model in self.pomdp.reward_models.items():
-                    current_reward[reward_name] = reward_model.state_action_rewards[choice_index]*action_prob
+                    current_reward[reward_name] += reward_model.state_action_rewards[choice_index]*action_prob
 
                 for selected_update, update_prob in selected_updates.items():
                     
