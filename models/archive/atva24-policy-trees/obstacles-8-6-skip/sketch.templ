@@ -48,6 +48,7 @@ formula clk_next = mod(clk+1,NUM_OBS+1);
 module clk
     clk : [0..NUM_OBS] init 0;
 
+    [_stay_] !done & clk=0 -> (clk'=0);
     [left]  !done & clk=0 -> (clk'=clk_next);
     [right] !done & clk=0 -> (clk'=clk_next);
     [down]  !done & clk=0 -> (clk'=clk_next);
