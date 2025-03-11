@@ -94,7 +94,14 @@ namespace synthesis {
     template<typename ModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::checkProbabilityOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::ProbabilityOperatorFormula, ValueType> const& checkTask) {
         storm::logic::ProbabilityOperatorFormula const& stateFormula = checkTask.getFormula();
-        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeProbabilities(env, checkTask.substituteFormula(stateFormula.getSubformula()));
+
+        // when checking a qualitative property (i.e. bound is set), the optimization direction for SGs must opposite to the optimization direction for MDPs
+        auto newCheckTask = checkTask.substituteFormula(stateFormula.getSubformula());
+        if (newCheckTask.isBoundSet()) {
+            newCheckTask.setOptimizationDirection(storm::solver::invert(checkTask.getOptimizationDirection()));
+        }
+
+        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeProbabilities(env, newCheckTask);
 
         if (checkTask.isBoundSet()) {
             STORM_LOG_THROW(result->isQuantitative(), storm::exceptions::InvalidOperationException, "Unable to perform comparison operation on non-quantitative result.");
@@ -107,8 +114,21 @@ namespace synthesis {
     template<typename ModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::checkRewardOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::RewardOperatorFormula, ValueType> const& checkTask) {
         storm::logic::RewardOperatorFormula const& formula = checkTask.getFormula();
-        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeRewards(env, checkTask.substituteFormula(formula.getSubformula()));
-        return result;
+
+        // when checking a qualitative property (i.e. bound is set), the optimization direction for SGs must opposite to the optimization direction for MDPs
+        auto newCheckTask = checkTask.substituteFormula(formula.getSubformula());
+        if (newCheckTask.isBoundSet()) {
+            newCheckTask.setOptimizationDirection(storm::solver::invert(checkTask.getOptimizationDirection()));
+        }
+
+        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeRewards(env, newCheckTask);
+
+        if (checkTask.isBoundSet()) {
+            STORM_LOG_THROW(result->isQuantitative(), storm::exceptions::InvalidOperationException, "Unable to perform comparison operation on non-quantitative result.");
+            return result->asQuantitativeCheckResult<ValueType>().compareAgainstBound(checkTask.getBoundComparisonType(), checkTask.getBoundThreshold());
+        } else {
+            return result;
+        }
     }
 
     template<typename ModelType>

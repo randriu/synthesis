@@ -68,6 +68,94 @@ class TestSmgModelchecker:
         assert result.scheduler.get_choice(1).get_deterministic_choice() == 0
         assert result.scheduler.get_choice(2).get_deterministic_choice() == 0
 
+    def test_simple_game_circle_ge(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-ge.prop')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        # assert result.get_values() == pytest.approx([12, 10, 0])
+        assert not result.at(0)
+        assert not result.at(1)
+        assert not result.at(2)
+
+    def test_simple_game_circle_le(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-le.prop')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        # assert result.get_values() == pytest.approx([21, 20, 0])
+        assert not result.at(0)
+        assert not result.at(1)
+        assert result.at(2)
+
+    def test_simple_game_square_ge(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='square-ge.prop')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        # assert result.get_values() == pytest.approx([21, 20, 0])
+        assert result.at(0)
+        assert result.at(1)
+        assert not result.at(2)
+
+    def test_simple_game_square_le(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='square-le.prop')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        # assert result.get_values() == pytest.approx([12, 10, 0])
+        assert result.at(0)
+        assert result.at(1)
+        assert result.at(2)
+
     def test_distribution_min(self):
         # setup
         smg_file, props_file = get_sketch_paths('smg/distribution', props_name='circle-min.prop')
@@ -450,3 +538,88 @@ class TestSmgModelchecker:
         assert result.scheduler.get_choice(3).get_deterministic_choice() == 0
         assert result.scheduler.get_choice(4).get_deterministic_choice() == 1
         assert result.scheduler.get_choice(5).get_deterministic_choice() == 0
+
+
+    def test_probability_circle_ge(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/probability-qualitative', props_name='circle-ge.props')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        assert not result.at(0)
+        assert not result.at(1)
+        assert result.at(2)
+
+    def test_probability_circle_le(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/probability-qualitative', props_name='circle-le.props')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        assert not result.at(0)
+        assert not result.at(1)
+        assert not result.at(2)
+
+    def test_probability_square_ge(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/probability-qualitative', props_name='square-ge.props')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        assert result.at(0)
+        assert result.at(1)
+        assert result.at(2)
+
+    def test_probability_square_le(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/probability-qualitative', props_name='square-le.props')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._qualitative
+        assert result.result_for_all_states
+        assert result.at(0)
+        assert result.at(1)
+        assert not result.at(2)
