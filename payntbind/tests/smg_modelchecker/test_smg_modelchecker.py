@@ -394,3 +394,59 @@ class TestSmgModelchecker:
         assert result.has_scheduler
         assert result.scheduler.deterministic
         assert result.scheduler.memoryless
+
+    def test_probability(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/probabilities')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._quantitative
+        assert result.result_for_all_states
+        assert result.get_values() == pytest.approx([0.5, 0.5, 1, 0])
+
+        assert result.has_scheduler
+        assert result.scheduler.deterministic
+        assert result.scheduler.memoryless
+        assert result.scheduler.get_choice(0).get_deterministic_choice() == 0
+        assert result.scheduler.get_choice(1).get_deterministic_choice() == 1
+        assert result.scheduler.get_choice(2).get_deterministic_choice() == 0
+        assert result.scheduler.get_choice(3).get_deterministic_choice() == 0
+
+    def test_probability_mec_exit(self):
+        # setup
+        smg_file, props_file = get_sketch_paths('smg/mec-exit')
+        prop = read_first_line(props_file)
+        program = stormpy.parse_prism_program(smg_file)
+        properties = stormpy.parse_properties_for_prism_program(prop, program, None)
+        model = stormpy.build_model(program, properties)
+        paynt.verification.property.Property.initialize()
+
+        # test
+        result = payntbind.synthesis.model_check_smg(model, properties[0].raw_formula,
+                                                    only_initial_states=False,
+                                                    set_produce_schedulers=True,
+                                                    env=paynt.verification.property.Property.environment)
+        # assert
+        assert result._quantitative
+        assert result.result_for_all_states
+        assert result.get_values() == pytest.approx([0.5, 0.5, 0, 1, 0.5, 0.5])
+
+        assert result.has_scheduler
+        assert result.scheduler.deterministic
+        assert result.scheduler.memoryless
+        assert result.scheduler.get_choice(0).get_deterministic_choice() == 2
+        assert result.scheduler.get_choice(1).get_deterministic_choice() == 0
+        assert result.scheduler.get_choice(2).get_deterministic_choice() == 0
+        assert result.scheduler.get_choice(3).get_deterministic_choice() == 0
+        assert result.scheduler.get_choice(4).get_deterministic_choice() == 1
+        assert result.scheduler.get_choice(5).get_deterministic_choice() == 0
