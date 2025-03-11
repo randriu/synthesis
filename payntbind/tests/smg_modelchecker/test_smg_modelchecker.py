@@ -18,7 +18,7 @@ class TestSmgModelchecker:
 
     def test_simple_game_min(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -44,7 +44,7 @@ class TestSmgModelchecker:
 
     def test_simple_game_max(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-max.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-max.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -70,7 +70,7 @@ class TestSmgModelchecker:
 
     def test_simple_game_circle_ge(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-ge.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-ge.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -92,7 +92,7 @@ class TestSmgModelchecker:
 
     def test_simple_game_circle_le(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-le.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-le.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -114,7 +114,7 @@ class TestSmgModelchecker:
 
     def test_simple_game_square_ge(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='square-ge.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='square-ge.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -136,7 +136,7 @@ class TestSmgModelchecker:
 
     def test_simple_game_square_le(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='square-le.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='square-le.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -158,7 +158,7 @@ class TestSmgModelchecker:
 
     def test_distribution_min(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/distribution', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/distribution', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -183,7 +183,7 @@ class TestSmgModelchecker:
 
     def test_distribution_max(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/distribution', props_name='circle-max.prop')
+        smg_file, props_file = get_sketch_paths('smg/distribution', props_name='circle-max.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -208,7 +208,7 @@ class TestSmgModelchecker:
 
     def test_medium_game_min(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/medium-game', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/medium-game', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -236,7 +236,7 @@ class TestSmgModelchecker:
 
     def test_medium_game_max(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/medium-game', props_name='circle-max.prop')
+        smg_file, props_file = get_sketch_paths('smg/medium-game', props_name='circle-max.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -264,7 +264,7 @@ class TestSmgModelchecker:
 
     def test_zero_reward_end_component_min(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/zero-reward-end-component', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/zero-reward-end-component', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -287,7 +287,7 @@ class TestSmgModelchecker:
 
     def test_zero_reward_end_component_max(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/zero-reward-end-component', props_name='circle-max.prop')
+        smg_file, props_file = get_sketch_paths('smg/zero-reward-end-component', props_name='circle-max.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -310,7 +310,7 @@ class TestSmgModelchecker:
 
     def test_self_loop_min(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/self-loop', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/self-loop', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -332,7 +332,7 @@ class TestSmgModelchecker:
 
     def test_self_loop_max(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/self-loop', props_name='circle-max.prop')
+        smg_file, props_file = get_sketch_paths('smg/self-loop', props_name='circle-max.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -354,7 +354,7 @@ class TestSmgModelchecker:
 
     def test_no_scheduler(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -375,7 +375,7 @@ class TestSmgModelchecker:
 
     def test_only_initial_states(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -401,7 +401,7 @@ class TestSmgModelchecker:
 
     def test_only_initial_states(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/medium-game', props_name='circle-max.prop')
+        smg_file, props_file = get_sketch_paths('smg/medium-game', props_name='circle-max.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -432,7 +432,7 @@ class TestSmgModelchecker:
     # is is probably a bug in computing optimal choices in infinity states
     def test_weird_inf_state_choice(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/weird-inf-state-choice', props_name='circle-min.prop')
+        smg_file, props_file = get_sketch_paths('smg/weird-inf-state-choice', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
