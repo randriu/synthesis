@@ -9,13 +9,6 @@ from math import inf
 
 class TestSmgModelchecker:
 
-    props = [
-        '<<square>> R{"rew"}max=? [F "goal"]',
-        '<<square>> R{"rew"}min=? [F "goal"]',
-        '<<circle>> R{"rew"}max=? [F "goal"]',
-        '<<circle>> R{"rew"}min=? [F "goal"]'
-    ]
-
     def test_simple_game_min(self):
         # setup
         smg_file, props_file = get_sketch_paths('smg/simple-game', props_name='circle-min.props')
@@ -85,7 +78,6 @@ class TestSmgModelchecker:
         # assert
         assert result._qualitative
         assert result.result_for_all_states
-        # assert result.get_values() == pytest.approx([12, 10, 0])
         assert not result.at(0)
         assert not result.at(1)
         assert not result.at(2)
@@ -107,7 +99,6 @@ class TestSmgModelchecker:
         # assert
         assert result._qualitative
         assert result.result_for_all_states
-        # assert result.get_values() == pytest.approx([21, 20, 0])
         assert not result.at(0)
         assert not result.at(1)
         assert result.at(2)
@@ -129,7 +120,6 @@ class TestSmgModelchecker:
         # assert
         assert result._qualitative
         assert result.result_for_all_states
-        # assert result.get_values() == pytest.approx([21, 20, 0])
         assert result.at(0)
         assert result.at(1)
         assert not result.at(2)
@@ -151,7 +141,6 @@ class TestSmgModelchecker:
         # assert
         assert result._qualitative
         assert result.result_for_all_states
-        # assert result.get_values() == pytest.approx([12, 10, 0])
         assert result.at(0)
         assert result.at(1)
         assert result.at(2)

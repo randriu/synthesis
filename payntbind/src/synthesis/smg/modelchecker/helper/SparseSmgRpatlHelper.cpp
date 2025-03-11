@@ -389,17 +389,6 @@ namespace synthesis {
             targetStates, qualitative, statesOfCoalition, produceScheduler, hint);
     }
 
-    // For debugging purposes
-    // Prints bit vector to stderr in format "name: bit0 bit1 bit2 ... \n"
-    void printBitVector(storm::storage::BitVector const& bv, std::string const& name)
-    {
-        std::cerr << name << ": ";
-        for (size_t i = 0; i < bv.size(); i++) {
-            std::cerr << bv.get(i) << " ";
-        }
-        std::cerr << "\n";
-    }
-
     // inspired by prism-games SMGSimple.java
     template<typename ValueType>
     void prob1step(storm::storage::BitVector const& subset, storm::storage::BitVector const& u, storm::storage::BitVector const& v,
