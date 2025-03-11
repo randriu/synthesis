@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
+ * methods to compute***Probabilites were taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
  */
 
 #include <vector>

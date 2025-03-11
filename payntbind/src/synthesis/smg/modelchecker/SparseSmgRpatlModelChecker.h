@@ -3,6 +3,8 @@
 /**
  * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
  * Storm version.
+ *
+ * Methods to support reward computation were added.
  */
 
 #include <gmpxx.h>

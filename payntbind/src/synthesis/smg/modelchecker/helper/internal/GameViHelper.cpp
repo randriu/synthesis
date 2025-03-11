@@ -1,6 +1,7 @@
 /*
  * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
- * the checkConvergence method was modified
+
+ * The checkConvergence method was modified
  */
 
 #include "GameViHelper.h"
