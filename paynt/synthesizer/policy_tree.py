@@ -724,7 +724,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 for prob, target_state in target_probabilities:
                     que.append(target_state)
 
-            if check_granularity > 0 and depth % check_granularity == 0:
+            if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
                 sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
                 if sat:
                     return game_policy_post
@@ -733,7 +733,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return game_policy
 
 
-    def post_process_game_policy_max_reach(self, game_policy, game_solver, family, prop, check_granularity=1):
+    def post_process_game_policy_max_reach(self, game_policy, game_solver, family, prop, check_granularity=4):
         """ DFS only on max probability path until reaching the target
         then verify if the policy satisfies the property based on check_granularity
         if set to -1 then check every multiple of shortest path from init to end state
@@ -801,7 +801,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             for prob, target_state in target_probabilities:
                 state_stack.append(target_state)
 
-            if check_granularity > 0 and depth % check_granularity == 0:
+            if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
                 sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
                 if sat:
                     return game_policy_post
