@@ -1,0 +1,30 @@
+smg
+
+player square
+  [s1], [s2], [s3], [s4], [s5]
+endplayer
+
+player circle
+  [c1], [c2], [c3], [c4]
+endplayer
+
+module state_space
+  s : [0..5];
+
+  [s1] s=0 -> (s'=0);
+  [s2] s=0 -> (s'=1);
+  [s3] s=0 -> 0.5 : (s'=2) + 0.5 : (s'=3);
+
+  [c1] s=1 -> (s'=4);
+
+  [s4] s=4 -> (s'=1);
+  [s5] s=4 -> (s'=5);
+
+  [c2] s=5 -> (s'=0);
+
+
+  [c3] s=2 -> (s'=2);
+  [c4] s=3 -> (s'=3);
+endmodule
+
+label "goal" = s=3;
