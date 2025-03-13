@@ -154,3 +154,11 @@ class FSC:
                 if self.action_function[node][obs] is None:
                     self.action_function[node][obs] = self.action_function[0][obs]
                     self.update_function[node][obs] = self.update_function[0][obs]
+
+    def copy(self):
+        fsc = FSC(self.num_nodes, self.num_observations, self.is_deterministic)
+        fsc.action_function = [ [action for action in node] for node in self.action_function ]
+        fsc.update_function = [ [update for update in node] for node in self.update_function ]
+        fsc.observation_labels = self.observation_labels
+        fsc.action_labels = self.action_labels
+        return fsc
