@@ -98,17 +98,19 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> removeAction(
  * these unlabeled actions.
  * @return an updated model or NULL if no change took place
  */
+
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Model<ValueType>> restoreActionsInAbsorbingStates(
     storm::models::sparse::Model<ValueType> const& model
 );
 
 /**
- * To every state of an MDP add an explicit action that executes a random choice between available actions.
+ * To every state in \p state_mask, add an explicit action that executes a random choice between available actions.
  */
 template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
-    storm::models::sparse::Model<ValueType> const& model
+    storm::models::sparse::Model<ValueType> const& model,
+    storm::storage::BitVector const& state_mask
 );
 
 /**

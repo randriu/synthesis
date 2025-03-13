@@ -1,3 +1,5 @@
+import paynt.quotient
+import paynt.quotient.fsc
 import stormpy
 import stormpy.pomdp
 import payntbind
@@ -16,50 +18,48 @@ logger = logging.getLogger(__name__)
 # class implementing the main components of the Storm integration for FSC synthesis for POMDPs
 class StormPOMDPControl:
 
-    latest_storm_result = None      # holds object representing the latest Storm result
-    storm_bounds = None             # under-approximation value from Storm
-
-    # PAYNT data and FSC export
-    latest_paynt_result = None      # holds the synthesised assignment
-    latest_paynt_result_fsc = None  # holds the FSC built from assignment
-    paynt_bounds = None
-    paynt_export = []
-
-    # parsed best result data dictionary (Starting with data from Storm)
-    result_dict = {}
-    result_dict_no_cutoffs = {}
-    result_dict_paynt = {}
-    memory_vector = {}
-
-    # controller sizes
-    belief_controller_size = None
-    paynt_fsc_size = None
-
-    is_storm_better = False
-
-    pomdp = None                    # The original POMDP model
-    quotient = None
-    spec_formulas = None            # The specification to be checked
-    storm_options = None
-    get_result = None
-    use_cutoffs = False
-    unfold_strategy_storm = None
-
-    # PAYNT/Storm iteration settings
-    iteration_timeout = None
-    paynt_timeout = None
-    storm_timeout = None
-
-    storm_terminated = False
-
-    s_queue = None
-
-    saynt_timer = None
-    export_fsc_storm = None
-    export_fsc_paynt = None
-
     def __init__(self):
-        pass
+        self.latest_storm_result = None      # holds object representing the latest Storm result
+        self.storm_bounds = None             # under-approximation value from Storm
+
+        # PAYNT data and FSC export
+        self.latest_paynt_result = None      # holds the synthesised assignment
+        self.latest_paynt_result_fsc = None  # holds the FSC built from assignment
+        self.paynt_bounds = None
+        self.paynt_export = []
+
+        # parsed best result data dictionary (Starting with data from Storm)
+        self.result_dict = {}
+        self.result_dict_no_cutoffs = {}
+        self.result_dict_paynt = {}
+        self.memory_vector = {}
+
+        # controller sizes
+        self.belief_controller_size = None
+        self.paynt_fsc_size = None
+
+        self.is_storm_better = False
+
+        self.pomdp = None                    # The original POMDP model
+        self.quotient = None
+        self.spec_formulas = None            # The specification to be checked
+        self.storm_options = None
+        self.get_result = None
+        self.use_cutoffs = False
+        self.unfold_strategy_storm = None
+
+        # PAYNT/Storm iteration settings
+        self.iteration_timeout = None
+        self.paynt_timeout = None
+        self.storm_timeout = None
+
+        self.storm_terminated = False
+
+        self.s_queue = None
+
+        self.saynt_timer = None
+        self.export_fsc_storm = None
+        self.export_fsc_paynt = None
 
     def set_options(self,
         storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
@@ -87,12 +87,19 @@ class StormPOMDPControl:
             self.unfold_cutoff = True
 
     def get_storm_result(self):
-        self.run_storm_analysis()
+        self.run_storm_analysis(self)
         self.parse_results(self.quotient)
-        self.update_data()
+        self.update_data(self)
 
         if self.s_queue is not None:
             self.s_queue.put((self.result_dict, self.storm_bounds))
+
+    def store_storm_result(self, result):
+        self.latest_storm_result = result
+        if self.quotient.specification.optimality.minimizing:
+            self.storm_bounds = self.latest_storm_result.upper_bound
+        else:
+            self.storm_bounds = self.latest_storm_result.lower_bound
 
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
@@ -138,28 +145,23 @@ class StormPOMDPControl:
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
         size = self.get_belief_controller_size(result, self.paynt_fsc_size)
 
+
+        print(f'-----------Storm-----------')
+        print(f'Value = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}', flush=True)
         if self.get_result is not None:
             # TODO not important for the paper but it would be nice to have correct FSC here as well
-            
             if self.storm_options == "overapp":
-                print(f'-----------Storm----------- \
-                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\n', flush=True)
                 #print(".....")
                 #print(result.upper_bound)
                 #print(result.lower_bound)
-            else:
-                print(f'-----------Storm----------- \
-                \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+                pass
+            # else:
+                # print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
             exit()
 
-        print(f'-----------Storm----------- \
-              \nValue = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
+        # print(f'\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
 
-        self.latest_storm_result = result
-        if self.quotient.specification.optimality.minimizing:
-            self.storm_bounds = self.latest_storm_result.upper_bound
-        else:
-            self.storm_bounds = self.latest_storm_result.lower_bound
+        self.store_storm_result(result)
 
     # setup interactive Storm belief model checker
     def interactive_storm_setup(self):
@@ -217,11 +219,7 @@ class StormPOMDPControl:
                     print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
                     text_file.close()
 
-            self.latest_storm_result = result
-            if self.quotient.specification.optimality.minimizing:
-                self.storm_bounds = self.latest_storm_result.upper_bound
-            else:
-                self.storm_bounds = self.latest_storm_result.lower_bound
+            self.store_storm_result(result)
             self.parse_results(self.quotient)
             self.update_data()
 
@@ -270,11 +268,7 @@ class StormPOMDPControl:
                 print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
                 text_file.close()
 
-        self.latest_storm_result = result
-        if self.quotient.specification.optimality.minimizing:
-            self.storm_bounds = self.latest_storm_result.upper_bound
-        else:
-            self.storm_bounds = self.latest_storm_result.lower_bound
+        self.store_storm_result(result)
         self.parse_results(self.quotient)
         self.update_data()
 
@@ -380,7 +374,7 @@ class StormPOMDPControl:
         # to make the code cleaner
         get_choice_label = self.latest_storm_result.induced_mc_from_scheduler.choice_labeling.get_labels_of_choice
 
-        cutoff_epxloration = [x for x in range(len(self.latest_storm_result.cutoff_schedulers))]
+        cutoff_epxloration = list(range(len(self.latest_storm_result.cutoff_schedulers)))
         finite_mem = False
 
         result = {x:[] for x in range(quotient.observations)}
@@ -394,46 +388,31 @@ class StormPOMDPControl:
             # parse non cut-off states
             if 'cutoff' not in state.labels and 'clipping' not in state.labels:
                 for label in state.labels:
-                    # observation based on prism observables
+                    observation = None
                     if '[' in label:
+                        # observation based on prism observables
                         observation = self.quotient.observation_labels.index(label)
-
-                        index = -1
-
-                        choice_label = list(get_choice_label(state.id))[0]
-                        for i in range(len(quotient.action_labels_at_observation[int(observation)])):
-                            if choice_label == quotient.action_labels_at_observation[int(observation)][i]:
-                                index = i
-                                break
-
-                        if index >= 0 and index not in result[int(observation)]:
-                            result[int(observation)].append(index)
-
-                        if index >= 0 and index not in result_no_cutoffs[int(observation)]:
-                            result_no_cutoffs[int(observation)].append(index)
-                    # explicit observation index
                     elif 'obs_' in label:
-                        _, observation = label.split('_')
-
-                        index = -1
+                        # explicit observation index
+                        _,observation = label.split('_')
+                    if observation is not None:
+                        observation = int(observation)
                         choice_label = list(get_choice_label(state.id))[0]
-                        for i in range(len(quotient.action_labels_at_observation[int(observation)])):
-                            if choice_label == quotient.action_labels_at_observation[int(observation)][i]:
-                                index = i
+                        for index,action_label in enumerate(quotient.action_labels_at_observation[observation]):
+                            if choice_label == action_label:
+                                if index not in result[observation]:
+                                    result[observation].append(index)
+                                if index not in result_no_cutoffs[observation]:
+                                    result_no_cutoffs[observation].append(index)
                                 break
-
-                        if index >= 0 and index not in result[int(observation)]:
-                            result[int(observation)].append(index)
-
-                        if index >= 0 and index not in result_no_cutoffs[int(observation)]:
-                            result_no_cutoffs[int(observation)].append(index)
                         
+
             # parse cut-off states
             else:
                 if 'finite_mem' in state.labels and not finite_mem:
                     finite_mem = True
                     self.parse_paynt_result(self.quotient)
-                    for obs, actions in self.result_dict_paynt.items():
+                    for obs,actions in self.result_dict_paynt.items():
                         for action in actions:
                             if action not in result_no_cutoffs[obs]:
                                 result_no_cutoffs[obs].append(action)
@@ -462,7 +441,6 @@ class StormPOMDPControl:
                             for action in actions:
                                 if action not in result[observation]:
                                     result[observation].append(action)
-    
                         cutoff_epxloration.remove(int(scheduler_index))
 
         # removing unrestricted observations
@@ -484,19 +462,14 @@ class StormPOMDPControl:
         chars = '}{]['
         for c in chars:
             choice_string = choice_string.replace(c, '')
-        
         choice_string = choice_string.strip(', ')
-
         choices = choice_string.split(',')
 
         result = []
-
         for choice in choices:
             probability, action = choice.split(':')
             # probability bound
-
             action = int(action.strip())
-            
             result.append(action)
 
         return result
@@ -593,14 +566,14 @@ class StormPOMDPControl:
 
         subfamilies = []
 
-        for i in range(len(restrictions)):
+        for i,restriction in enumerate(restrictions):
             restricted_family = family.copy()
 
-            actions = [action for action in family.hole_options(restrictions[i]["hole"]) if action not in restrictions[i]["restriction"]]
+            actions = [action for action in family.hole_options(restriction["hole"]) if action not in restriction["restriction"]]
             if len(actions) == 0:
-                actions = [family.hole_options(restrictions[i]["hole"])[0]]
+                actions = [family.hole_options(restriction["hole"])[0]]
 
-            restricted_family.hole_set_options(restrictions[i]['hole'],actions)
+            restricted_family.hole_set_options(restriction['hole'],actions)
 
             for j in range(i):
                 restricted_family.hole_set_options(restrictions[j]['hole'],restrictions[j]["restriction"])
@@ -657,6 +630,223 @@ class StormPOMDPControl:
                     self.memory_vector[obs] = len(self.result_dict[obs])
                 else:
                     self.memory_vector[obs] = 1
+
+    def belief_controller_to_fsc(self, storm_result, paynt_fsc=None):
+
+        belief_mc = storm_result.induced_mc_from_scheduler
+
+        uses_fsc = False
+        used_randomized_schedulers = {}
+        paynt_cutoff_states = 0
+
+        for state in belief_mc.states:
+            if 'finite_mem' in state.labels:
+                uses_fsc = True
+                paynt_cutoff_states += 1
+            else:
+                for label in state.labels:
+                    if 'sched_' in label:
+                        _, scheduler_index = label.split('_')
+                        if int(scheduler_index) in used_randomized_schedulers.keys():
+                            continue
+                        used_randomized_schedulers[int(scheduler_index)] = state.id
+
+        fsc_nodes = belief_mc.nr_states - paynt_cutoff_states + 1 # +1 for new initial node
+
+        fsc_node = 1
+        belief_mc_nodes_map = []
+        for state in belief_mc.states:
+            for label in state.labels:
+                if 'finite_mem' in label:
+                    belief_mc_nodes_map.append(None)
+                    break
+            else:
+                belief_mc_nodes_map.append(fsc_node)
+                fsc_node += 1
+
+        assert fsc_nodes-1 == len([x for x in belief_mc_nodes_map if x is not None]), f"{fsc_nodes-1} != {len([x for x in belief_mc_nodes_map if x is not None])}"
+
+        if uses_fsc:
+            fsc_nodes += paynt_fsc.num_nodes
+            first_fsc_node = belief_mc.nr_states - paynt_cutoff_states + 1
+
+        result_fsc = paynt.quotient.fsc.FSC(fsc_nodes, self.quotient.observations, is_deterministic=False)
+
+        action_labels = set()
+        for labels in self.quotient.action_labels_at_observation:
+            action_labels.update(labels)
+        action_labels = list(action_labels)
+        result_fsc.action_labels = action_labels
+
+        result_fsc.observation_labels = self.quotient.observation_labels
+
+        if paynt_fsc is not None and uses_fsc:
+            paynt_fsc.make_stochastic()
+            paynt_fsc_num_nodes = paynt_fsc.num_nodes
+            paynt_fsc_action_function = paynt_fsc.action_function
+            paynt_fsc_update_function = paynt_fsc.update_function
+            new_fsc_update_function = []
+            
+            for node in range(paynt_fsc_num_nodes):
+                new_fsc_update_function.append([])
+                for obs in range(self.quotient.observations):
+                    new_fsc_update_function[node].append({list(paynt_fsc_update_function[node][obs].keys())[0]+first_fsc_node:1.0})
+
+            for node in range(paynt_fsc_num_nodes):
+                result_fsc.action_function[node+first_fsc_node] = paynt_fsc_action_function[node]
+                result_fsc.update_function[node+first_fsc_node] = new_fsc_update_function[node]
+        
+        # create the initial node
+        init_belief_state = belief_mc.initial_states[0]
+        actions = list(belief_mc.choice_labeling.get_labels_of_choice(init_belief_state))
+        assert len(actions) == 1, "Belief MC has multiple labels for one action"
+        action = actions[0]
+        for label in belief_mc.labeling.get_labels_of_state(init_belief_state):
+            succ_observation = None
+            fsc_switch = False
+            cutoff_switch = None
+            for label in belief_mc.labeling.get_labels_of_state(init_belief_state):
+                if '[' in label:
+                    # observation based on prism observables
+                    succ_observation = self.quotient.observation_labels.index(label)
+                elif 'obs_' in label:
+                    # explicit observation index
+                    _,succ_observation = label.split('_')
+                elif 'finite_mem' in label:
+                    fsc_switch = True
+                if 'sched_' in label:
+                    _, cutoff_switch = label.split('_')
+                if succ_observation is not None:
+                    succ_observation = int(succ_observation)
+            assert not(fsc_switch and (cutoff_switch is not None)), "Belief MC state has both FSC and Storm cutoff scheduler"
+            assert succ_observation is not None, "Belief MC state has no observation"
+            if fsc_switch:
+                result_fsc.action_function[0][succ_observation] = result_fsc.action_function[first_fsc_node][succ_observation]
+                result_fsc.update_function[0][succ_observation] = result_fsc.update_function[first_fsc_node][succ_observation]
+            elif cutoff_switch is not None:
+                scheduler = storm_result.cutoff_schedulers[int(cutoff_switch)]
+                cutoff_node_id = belief_mc_nodes_map[used_randomized_schedulers[int(cutoff_switch)]]
+                for pomdp_state in range(self.quotient.pomdp.nr_states):
+                    obs_index = self.quotient.pomdp.get_observation(pomdp_state)
+                    if obs_index != succ_observation:
+                        continue
+                    choice = scheduler.get_choice(pomdp_state).get_choice().__str__()
+                    choice = choice.replace('{','').replace('}','').replace('[','').replace(']','').replace(' ','').split(',')
+                    for c in choice[:-1]:
+                        prob, cutoff_action = c.split(':')
+                        action_label = self.quotient.action_labels_at_observation[succ_observation][int(cutoff_action)]
+                        action_index = result_fsc.action_labels.index(action_label)
+                        if result_fsc.action_function[node_id][succ_observation] is None:
+                            result_fsc.action_function[node_id][succ_observation] = {action_index:float(prob)}
+                        else:
+                            result_fsc.action_function[node_id][succ_observation][action_index] = float(prob)
+                    break
+                result_fsc.update_function[0][succ_observation] = {cutoff_node_id: 1.0}
+            else:
+                if action == "loop":
+                    result_fsc.action_function[0][succ_observation] = {0: 1.0}
+                else:
+                    result_fsc.action_function[0][succ_observation] = {result_fsc.action_labels.index(action): 1.0}
+                result_fsc.update_function[0][succ_observation] = {belief_mc_nodes_map[init_belief_state]: 1.0}
+
+        for state in belief_mc.states:
+            node_id = belief_mc_nodes_map[state.id]
+            if node_id is None:
+                continue
+            elif 'cutoff' in state.labels: # Storm cutoff schedulers
+                for label in state.labels:
+                    if 'sched_' in label:
+                        _, scheduler_index = label.split('_')
+                        break
+                else:
+                    continue
+                scheduler = storm_result.cutoff_schedulers[int(scheduler_index)]
+                for obs in range(self.quotient.observations):
+                    result_fsc.update_function[node_id][obs] = {node_id: 1.0}
+                processed_obs = []
+                for pomdp_state in range(self.quotient.pomdp.nr_states):
+                    obs_index = self.quotient.pomdp.get_observation(pomdp_state)
+                    if obs_index in processed_obs:
+                        continue
+                    processed_obs.append(obs_index)
+                    choice = scheduler.get_choice(pomdp_state).get_choice().__str__()
+                    choice = choice.replace('{','').replace('}','').replace('[','').replace(']','').replace(' ','').split(',')
+                    for c in choice[:-1]:
+                        prob, action = c.split(':')
+                        action = int(action)
+                        action_label = self.quotient.action_labels_at_observation[obs_index][action]
+                        action_index = result_fsc.action_labels.index(action_label)
+                        if result_fsc.action_function[node_id][obs_index] is None:
+                            result_fsc.action_function[node_id][obs_index] = {action_index:float(prob)}
+                        else:
+                            result_fsc.action_function[node_id][obs_index][action_index] = float(prob)
+            elif '__extra' in state.labels or 'target' in state.labels: # basically target states so just loop with everything
+                for obs in range(self.quotient.observations):
+                    first_action_in_obs = self.quotient.action_labels_at_observation[obs][0] # this ensures the looping action is available
+                    result_fsc.action_function[node_id][obs] = {action_labels.index(first_action_in_obs):1.0}
+                    result_fsc.update_function[node_id][obs] = {node_id: 1.0}
+            else: # normal belief mc states
+                successors = []
+                for transition in belief_mc.transition_matrix.row_iter(state.id, state.id):
+                    successors.append(transition.column)
+                for succ in successors:
+                    actions = list(belief_mc.choice_labeling.get_labels_of_choice(succ))
+                    assert len(actions) == 1, "Belief MC has multiple labels for one action"
+                    action = actions[0]
+
+                    succ_observation = None
+                    fsc_switch = False
+                    cutoff_switch = None
+                    for label in belief_mc.labeling.get_labels_of_state(succ):
+                        if '[' in label:
+                            # observation based on prism observables
+                            succ_observation = self.quotient.observation_labels.index(label)
+                        elif 'obs_' in label:
+                            # explicit observation index
+                            _,succ_observation = label.split('_')
+                        elif 'finite_mem' in label:
+                            fsc_switch = True
+                        if 'sched_' in label:
+                            _, cutoff_switch = label.split('_')
+                        if succ_observation is not None:
+                            succ_observation = int(succ_observation)
+                    assert not(fsc_switch and (cutoff_switch is not None)), "Belief MC state has both FSC and Storm cutoff scheduler"
+                    assert succ_observation is not None, "Belief MC state has no observation"
+                    if fsc_switch:
+                        result_fsc.action_function[node_id][succ_observation] = result_fsc.action_function[first_fsc_node][succ_observation]
+                        result_fsc.update_function[node_id][succ_observation] = result_fsc.update_function[first_fsc_node][succ_observation]
+                    elif cutoff_switch is not None:
+                        scheduler = storm_result.cutoff_schedulers[int(cutoff_switch)]
+                        cutoff_node_id = belief_mc_nodes_map[used_randomized_schedulers[int(cutoff_switch)]]
+                        for pomdp_state in range(self.quotient.pomdp.nr_states):
+                            obs_index = self.quotient.pomdp.get_observation(pomdp_state)
+                            if obs_index != succ_observation:
+                                continue
+                            choice = scheduler.get_choice(pomdp_state).get_choice().__str__()
+                            choice = choice.replace('{','').replace('}','').replace('[','').replace(']','').replace(' ','').split(',')
+                            for c in choice[:-1]:
+                                prob, cutoff_action = c.split(':')
+                                action_label = self.quotient.action_labels_at_observation[succ_observation][int(cutoff_action)]
+                                action_index = result_fsc.action_labels.index(action_label)
+                                if result_fsc.action_function[node_id][succ_observation] is None:
+                                    result_fsc.action_function[node_id][succ_observation] = {action_index:float(prob)}
+                                else:
+                                    result_fsc.action_function[node_id][succ_observation][action_index] = float(prob)
+                            break
+                        result_fsc.update_function[node_id][succ_observation] = {cutoff_node_id: 1.0}
+                    else:
+                        if action == "loop":
+                            first_action_in_obs = self.quotient.action_labels_at_observation[succ_observation][0] # this ensures the looping action is available
+                            result_fsc.action_function[node_id][succ_observation] = {action_labels.index(first_action_in_obs): 1.0}
+                        else:
+                            result_fsc.action_function[node_id][succ_observation] = {result_fsc.action_labels.index(action): 1.0}
+                        result_fsc.update_function[node_id][succ_observation] = {belief_mc_nodes_map[succ]: 1.0}
+
+        logger.info(f"constructed FSC with {result_fsc.num_nodes} nodes")
+
+        return result_fsc
+
+
     
     # Computes the size of the controller for belief MC
     # if it uses FSC cutoffs assignment should be provided

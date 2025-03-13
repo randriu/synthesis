@@ -132,7 +132,7 @@ class MdpSpecificationResult(SpecificationResult):
             else:
                 self.improving_assignment = opt.improving_assignment
                 self.improving_value = opt.improving_value
-                self.can_improve = opt.can_improve        
+                self.can_improve = opt.can_improve
             return
 
         # constraints undecided

@@ -1,5 +1,6 @@
 #include "synthesis.h"
 
+#include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/logic/Formula.h>
 #include <storm/logic/UntilFormula.h>
 #include <storm/logic/OperatorFormula.h>
@@ -70,9 +71,16 @@ void define_helpers(py::module& m) {
 
     m.def("transform_until_to_eventually", &synthesis::transformUntilToEventually<double>, py::arg("formula"));
     m.def("remove_reward_model", &synthesis::removeRewardModel<double>, py::arg("model"), py::arg("reward_name"));
+    m.def("remove_reward_model_exact", &synthesis::removeRewardModel<storm::RationalNumber>, py::arg("model"), py::arg("reward_name"));
 
     m.def("multiply_with_vector", [] (storm::storage::SparseMatrix<double> matrix,std::vector<double> vector) {
         std::vector<double> result(matrix.getRowCount());
+        matrix.multiplyWithVector(vector, result);
+        return result;
+    }, py::arg("matrix"), py::arg("vector"));
+
+    m.def("multiply_with_vector_exact", [] (storm::storage::SparseMatrix<storm::RationalNumber> matrix,std::vector<storm::RationalNumber> vector) {
+        std::vector<storm::RationalNumber> result(matrix.getRowCount());
         matrix.multiplyWithVector(vector, result);
         return result;
     }, py::arg("matrix"), py::arg("vector"));
