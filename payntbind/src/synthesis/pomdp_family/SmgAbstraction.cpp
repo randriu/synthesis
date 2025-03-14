@@ -114,7 +114,7 @@ namespace synthesis {
         storm::storage::BitVector game_choice_mask(game_num_choices,true);
         storm::storage::BitVector player1_choice_mask(game_num_choices);
         for(uint64_t game_choice = 0; game_choice < game_num_choices; ++game_choice) {
-            player1_choice_mask.set(game_choice_is_player1[game_choice]);
+            player1_choice_mask.set(game_choice, game_choice_is_player1[game_choice]);
         }
         components.choiceLabeling = synthesis::translateChoiceLabeling(quotient,game_choice_to_quotient_choice,game_choice_mask);
         components.rewardModels = synthesis::translateRewardModels(quotient,game_choice_to_quotient_choice,player1_choice_mask);
