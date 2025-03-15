@@ -219,7 +219,7 @@ class Statistic:
         members_sat = sum( [evaluation.family.size for evaluation in self.evaluations if evaluation.sat ])
         members_total = self.quotient.family.size
         members_sat_percentage = int(round(members_sat/members_total*100,0))
-        return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)"
+        return f"satisfied {members_sat}/{members_total} members ({members_sat_percentage}%)\nunsat members: {members_total-members_sat}"
 
     
     def get_summary(self):
