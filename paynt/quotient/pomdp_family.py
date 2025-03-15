@@ -123,6 +123,8 @@ class GameAbstractionSolver():
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         assignment = synthesizer.synthesize(print_stats=False)
 
+        # TODO modify for rewards
+        #   assignment can be None even for optimality property if the value is infinity
         assert assignment is not None
 
         # extract results
@@ -203,9 +205,11 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def pomdp_from_mdp(self, mdp, observability_classes):
         transition_matrix = mdp.transition_matrix
         state_labeling = mdp.labeling
+        reward_models = mdp.reward_models
         components = stormpy.SparseModelComponents(
             transition_matrix=transition_matrix,
-            state_labeling=state_labeling)
+            state_labeling=state_labeling,
+            reward_models=reward_models)
 
         components.observability_classes=observability_classes
 
