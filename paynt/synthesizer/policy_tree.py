@@ -607,8 +607,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
             if self.ldokoupi_flag:
                 self.ldok_postprocessing_times.start()
-                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
+                # order is important - cut most diverging paths first
                 game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
+                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
                 # game_policy = self.post_process_bruteforce(game_policy, game_solver, family, prop)
                 self.ldok_postprocessing_times.stop()
 
@@ -621,6 +622,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         if negative check every shortest path from init to end state / check_granularity
         This post is applicable iff self loop ( _stay_ ) is first action in MDP
         """
+        # LDOK TODO: need to account for minimizing properties -> non-increasing gradient
 
         # self loop has to be first applicable action
         if self.quotient.action_labels[0] == "__no_label__":
@@ -636,11 +638,10 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert end_state != -1
 
         assert len(self.quotient.quotient_mdp.initial_states) == 1
-        current_state = self.quotient.quotient_mdp.initial_states[0]
         game_policy_post = self.quotient.empty_policy()
-        game_policy_post[current_state] = game_policy[current_state]
 
         explored_states = set()  # avoid cycles
+        current_state = self.quotient.quotient_mdp.initial_states[0]
         state_stack = [(game_solver.solution_state_values[current_state], current_state)]
         bfs_flag = False
         que = []
@@ -680,7 +681,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 if sat:
                     return game_policy_post
 
-        # logger.debug("policy couldn't be simplified by max reach")
+        # logger.debug("policy couldn't be simplified by gradient")
         return game_policy
 
 
@@ -713,51 +714,38 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert end_state != -1
 
         assert len(self.quotient.quotient_mdp.initial_states) == 1
-        current_state = self.quotient.quotient_mdp.initial_states[0]
         game_policy_post = self.quotient.empty_policy()
-        game_policy_post[current_state] = game_policy[current_state]
 
         explored_states = set() # avoid cycles
-        state_stack = [current_state]
+        current_state = self.quotient.quotient_mdp.initial_states[0]
+        state_stack = [(-1.0, current_state)]
 
         while state_stack:
-            current_state = state_stack.pop()
+            _, current_state = heapq.heappop(state_stack)
             if current_state in explored_states:
                 continue
+
             game_policy_post[current_state] = game_policy[current_state]
             explored_states.add(current_state)
 
             cur_choice = game_solver.solution_state_to_quotient_choice[current_state]
             target_states = self.quotient.choice_destinations[cur_choice]
 
-            # finish DFS queue,  unless deterministic state
-            if end_state in explored_states and len(target_states) != 1:
-                continue
-
             depth += 1
             if current_state == end_state and check_granularity < 0:
                 check_granularity = depth # shortest path length
 
-            target_probabilities = []
-
             # Collect probabilities and corresponding target states
             for target_state in target_states:
                 prob = getProbForChoice(cur_choice, target_state)
-                target_probabilities.append((prob, target_state))
-
-            # Sort the collected probabilities and target states in ascending order
-            target_probabilities.sort()
-
-            # Push the sorted target states onto the stack - max prob goes out first
-            for prob, target_state in target_probabilities:
-                state_stack.append(target_state)
+                heapq.heappush(state_stack, (-prob, target_state))
 
             if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
                 sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
                 if sat:
                     return game_policy_post
 
-        # logger.debug("policy couldn't be simplified by max reach")
+        # logger.debug("policy couldn't be simplified by probability reach")
         return game_policy
 
 
