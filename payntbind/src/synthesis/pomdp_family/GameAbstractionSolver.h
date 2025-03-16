@@ -69,6 +69,8 @@ namespace synthesis {
         void enableProfiling(bool enable);
         void printProfiling();
 
+        /** Identification of target states. */
+        storm::storage::BitVector state_is_target;
     private:
 
         storm::models::sparse::Model<ValueType> const& quotient;
@@ -76,9 +78,6 @@ namespace synthesis {
         std::vector<uint64_t> choice_to_action;
         std::shared_ptr<storm::logic::GameFormula const> game_formula;
         bool player1_maximizing;
-        
-        /** Identification of target states. */
-        storm::storage::BitVector state_is_target;
         
         /** For each state of the quotient, a list of actions associated with its rows. */
         // std::vector<std::vector<uint64_t>> state_to_actions;
