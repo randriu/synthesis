@@ -22,6 +22,9 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     # if true, irrelevant states will not be considered for tree mapping
     filter_deterministic_states = True # TODO: change to false
 
+    # default value for DTNest (UAI25) - origin in mdp.py
+    tree_helper = None
+
     @staticmethod
     def map_state_action_to_choices(mdp, num_actions, choice_to_action):
         state_action_choices = []

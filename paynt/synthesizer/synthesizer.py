@@ -147,7 +147,7 @@ class Synthesizer:
         if self.export_synthesis_filename_base is not None:
             self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
 
-        callDTMAP = False # DTMAP is intractable skip for now
+        callDTMAP = True  # DTMAP is intractable skip for now
         if callDTMAP:
             # call the synthesizer to generate the decision tree for every policy from policy tree
 

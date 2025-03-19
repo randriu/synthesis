@@ -13,8 +13,7 @@ logger = logging.getLogger(__name__)
 class MdpQuotient(paynt.quotient.quotient.Quotient):
     # label for action executing a random action selection
     DONT_CARE_ACTION_LABEL = "__random__"
-    # if true, an explicit action executing a random choice of an available action will be added to each state
-    add_dont_care_action = False
+
     # if true, irrelevant states will not be considered for tree mapping
     filter_deterministic_states = True
 

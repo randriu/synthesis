@@ -187,7 +187,7 @@ def paynt_run(
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_depth = tree_depth
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.scheduler_path = tree_map_scheduler
-    paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
+    paynt.quotient.quotient.Quotient.add_dont_care_action = add_dont_care_action
 
     storm_control = None
     if storm_pomdp:

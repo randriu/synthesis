@@ -19,6 +19,9 @@ class Quotient:
     # label associated with un-labelled choices
     EMPTY_LABEL = "__no_label__"
 
+    # if true, an explicit action executing a random choice of an available action will be added to each states
+    add_dont_care_action = False
+
     @staticmethod
     def make_vector_defined(vector):
         vector_noinf = [ value if value != math.inf else 0 for value in vector]
