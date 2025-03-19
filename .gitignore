@@ -10,3 +10,4 @@ prerequisites/
 .DS_Store
 
 build/
+subtree_test*

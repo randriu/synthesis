@@ -1,12 +1,17 @@
 class Variable:
 
-    def __init__(self, variable, name, state_valuations):
+    def __init__(self, name, domain):
         self.name = name
-        domain = set()
-        for state,valuation in enumerate(state_valuations):
-            value = valuation[variable]
-            domain.add(value)
-        domain = list(domain)
+        self.domain = domain
+
+    @classmethod
+    def create_variable(cls, variable, name, domain):
+        # LADA TODO: delete or explain why
+        # domain = set()
+        #for state,valuation in enumerate(state_valuations):
+        #    value = valuation[variable]
+        #    domain.add(value)
+        #domain = list(domain)
         # conversion of boolean variables to integers
         domain_new = []
         for value in domain:
@@ -17,7 +22,7 @@ class Variable:
             domain_new.append(value)
         domain = domain_new
         domain = sorted(domain)
-        self.domain = domain
+        return cls(name,domain)
 
     @property
     def domain_min(self):
