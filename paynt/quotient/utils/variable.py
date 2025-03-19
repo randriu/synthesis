@@ -6,12 +6,6 @@ class Variable:
 
     @classmethod
     def create_variable(cls, variable, name, domain):
-        # LADA TODO: delete or explain why
-        # domain = set()
-        #for state,valuation in enumerate(state_valuations):
-        #    value = valuation[variable]
-        #    domain.add(value)
-        #domain = list(domain)
         # conversion of boolean variables to integers
         domain_new = []
         for value in domain:

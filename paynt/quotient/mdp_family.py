@@ -94,7 +94,16 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             valuation = json.loads(str(sv.get_json(state)))
             valuation = [valuation[var_name] for var_name in variable_name]
             state_valuations.append(valuation)
-        variables = [paynt.quotient.utils.variable.Variable(var, var_name, state_valuations) for var, var_name in enumerate(variable_name)]
+
+        vars_domains = []
+        for variable_index in range(len(state_valuations[0])):
+            single_var_domain = set()
+            for state,valuation in enumerate(state_valuations):
+                value = valuation[variable_index]
+                single_var_domain.add(value)
+            vars_domains.append(list(single_var_domain))
+
+        variables = [paynt.quotient.utils.variable.Variable.create_variable(variable, name, vars_domains[variable]) for variable, name in enumerate(variable_name)]
         variable_mask = [len(v.domain) > 1 for v in variables]
         variables = [v for index, v in enumerate(variables) if variable_mask[index]]
         for state, valuation in enumerate(state_valuations):

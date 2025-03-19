@@ -149,7 +149,8 @@ class Sketch:
         logger.info("sketch parsing OK")
 
         tree_helper = None
-        if tree_helper_path is not None:
+        if tree_helper_path and os.path.exists(tree_helper_path):
+            # LADA TODO: use this later
             tree_helper = paynt.utils.tree_helper.parse_tree_helper(tree_helper_path)
             logger.info("tree helper loaded")
 
