@@ -354,9 +354,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                             self.dtcontrol_calls += 1
 
                             if setting == "default":
-                                command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+                                command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
                             else:
-                                command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
+                                command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
                             subprocess.run(command, cwd=f"{temp_file_name}")
 
                             logger.info(f"parsing new dtcontrol tree for setting {setting}")
@@ -378,9 +378,9 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                                 self.dtcontrol_recomputed_calls += 1
 
                                 if setting == "default":
-                                    command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
+                                    command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
                                 else:
-                                    command = ["dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
+                                    command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
                                 subprocess.run(command, cwd=f"{temp_file_name}")
 
                                 logger.info(f"parsing new dtcontrol tree for recomputed scheduler for setting {setting}")
