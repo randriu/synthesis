@@ -1,14 +1,14 @@
 {
-  "scheduler": {
+  "scheduler-relevant": {
     "classifiers": {
       "default": {
         "stats": {
-          "nodes": 1291,
-          "inner nodes": 645,
-          "paths": 646,
-          "bandwidth": 10
+          "nodes": 719,
+          "inner nodes": 359,
+          "paths": 360,
+          "bandwidth": 9
         },
-        "time": "00:00:00.249"
+        "time": "00:00:00.132"
       }
     },
     "metadata": {
@@ -101,14 +101,14 @@
           "0": [
             "process1_cmd_0",
             "process8_cmd_7",
-            "process2_cmd_1",
             "process3_cmd_2",
-            "process4_cmd_3",
+            "process2_cmd_1",
+            "process10_cmd_9",
             "process5_cmd_4",
             "process6_cmd_5",
             "process7_cmd_6",
-            "process10_cmd_9",
-            "process9_cmd_8"
+            "process9_cmd_8",
+            "process4_cmd_3"
           ]
         },
         "min": [
@@ -120,8 +120,8 @@
         "step_size": [
           1
         ],
-        "num_rows": 1013,
-        "num_flattened": 1013,
+        "num_rows": 564,
+        "num_flattened": 564,
         "num_unique_labels": 10
       }
     }

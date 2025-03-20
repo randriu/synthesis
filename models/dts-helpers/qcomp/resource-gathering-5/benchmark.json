@@ -1,14 +1,14 @@
 {
-  "scheduler": {
+  "scheduler-relevant": {
     "classifiers": {
       "default": {
         "stats": {
-          "nodes": 327,
-          "inner nodes": 163,
-          "paths": 164,
-          "bandwidth": 8
+          "nodes": 13,
+          "inner nodes": 6,
+          "paths": 7,
+          "bandwidth": 3
         },
-        "time": "00:00:00.116"
+        "time": "00:00:00.005"
       }
     },
     "metadata": {
@@ -27,18 +27,18 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
           1.0,
+          1.0,
+          3.0,
           1.0
         ],
         "min_outer": [
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
           1.0,
+          1.0,
+          3.0,
           1.0
         ],
         "max_inner": [
@@ -77,8 +77,8 @@
           "0": [
             "top",
             "right",
-            "left",
-            "down"
+            "down",
+            "left"
           ]
         },
         "min": [
@@ -90,8 +90,8 @@
         "step_size": [
           1
         ],
-        "num_rows": 3290,
-        "num_flattened": 3290,
+        "num_rows": 65,
+        "num_flattened": 65,
         "num_unique_labels": 4
       }
     }

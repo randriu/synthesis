@@ -1,0 +1,14 @@
+// Maximum probability of COL collisions
+"collisions": Pmax=? [ F "goal" ];
+// Maximum expected cost for both stations to send correctly
+//"cost_max": R{"cost"}max=? [ F s1=12 & s2=12 ];
+// Minimum expected cost for both stations to send correctly
+//"cost_min": R{"cost"}min=? [ F s1=12 & s2=12 ];
+// Maximum expected collisions before both stations to send correctly
+//"num_collisions": R{"collisions"}max=? [ F s1=12 & s2=12 ];
+// With probability 1, eventually both stations have sent their packet correctly
+//"sent": P>=1 [ F s1=12 & s2=12 ];
+// Maximum expected time for both stations to send correctly
+//"time_max": R{"time"}max=? [ F s1=12 & s2=12 ];
+// Minimum expected time for both stations to send correctly
+//"time_min": R{"time"}min=? [ F s1=12 & s2=12 ];

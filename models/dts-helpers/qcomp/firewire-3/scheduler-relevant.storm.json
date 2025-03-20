@@ -1,0 +1,2466 @@
+[
+    {
+        "c": [
+            {
+                "index": 0,
+                "labels": [
+                    "snd_idle12"
+                ],
+                "origin": {
+                    "action-label": "snd_idle12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 5) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 0)",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(x1' = 0) & (s1' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(x1' = 0) & (s1' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 0,
+            "s2": 0,
+            "w12": 0,
+            "w21": 0,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2,
+                "labels": [
+                    "rec_idle12"
+                ],
+                "origin": {
+                    "action-label": "rec_idle12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 5)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 0)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 0,
+            "w12": 5,
+            "w21": 0,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4,
+                "labels": [
+                    "rec_idle12"
+                ],
+                "origin": {
+                    "action-label": "rec_idle12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 5)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 0)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 0,
+            "w12": 5,
+            "w21": 0,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 26,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 2) & (x1 < 85))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 4,
+            "w12": 0,
+            "w21": 5,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 28,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 2) & (x1 < 85))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 5,
+            "w12": 0,
+            "w21": 5,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 40,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 4,
+            "w12": 0,
+            "w21": 5,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 42,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 5,
+            "w12": 0,
+            "w21": 5,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 54,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 2) & (x1 < 85))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 4,
+            "w12": 0,
+            "w21": 5,
+            "x1": 1,
+            "x2": 1,
+            "y1": 0,
+            "y2": 0,
+            "z1": 1,
+            "z2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 57,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 2) & (x1 < 85))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 5,
+            "w12": 0,
+            "w21": 5,
+            "x1": 1,
+            "x2": 1,
+            "y1": 0,
+            "y2": 0,
+            "z1": 1,
+            "z2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 70,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 4,
+            "w12": 0,
+            "w21": 5,
+            "x1": 1,
+            "x2": 1,
+            "y1": 0,
+            "y2": 0,
+            "z1": 1,
+            "z2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 73,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 5,
+            "w12": 0,
+            "w21": 5,
+            "x1": 1,
+            "x2": 1,
+            "y1": 0,
+            "y2": 0,
+            "z1": 1,
+            "z2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 86,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 2) & (x1 < 85))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 4,
+            "w12": 0,
+            "w21": 5,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0,
+            "z1": 2,
+            "z2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 89,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 2) & (x1 < 85))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 2,
+            "s2": 5,
+            "w12": 0,
+            "w21": 5,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0,
+            "z1": 2,
+            "z2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 100,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 4,
+            "w12": 0,
+            "w21": 5,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0,
+            "z1": 2,
+            "z2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 103,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 5) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 5,
+            "w12": 0,
+            "w21": 5,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0,
+            "z1": 2,
+            "z2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 418,
+                "labels": [
+                    "snd_req12"
+                ],
+                "origin": {
+                    "action-label": "snd_req12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 1) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 4) & (x1 >= 76))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = 0) & (s1' = 6)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 4,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 76,
+            "x2": 76,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 421,
+                "labels": [
+                    "snd_req12"
+                ],
+                "origin": {
+                    "action-label": "snd_req12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 1) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 4) & (x1 >= 76))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = 0) & (s1' = 6)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 4,
+            "s2": 5,
+            "w12": 0,
+            "w21": 0,
+            "x1": 76,
+            "x2": 76,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 423,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 76,
+            "x2": 76,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 427,
+                "labels": [
+                    "rec_req12"
+                ],
+                "origin": {
+                    "action-label": "rec_req12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 1)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 4)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 2)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 4,
+            "w12": 1,
+            "w21": 0,
+            "x1": 0,
+            "x2": 76,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 435,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "((w12 = 1) & (y2 < 3))",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(y1' = (min((y1 + 1), 4))) & (y2' = (min((y2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 6)",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 5,
+            "w12": 1,
+            "w21": 0,
+            "x1": 0,
+            "x2": 76,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 439,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 77,
+            "x2": 77,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 448,
+                "labels": [
+                    "snd_ack21"
+                ],
+                "origin": {
+                    "action-label": "snd_ack21",
+                    "transitions": [
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w21' = 3) & (z1' = 0) & (z2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 2) & (x2 >= 76))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = 0) & (s2' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 2,
+            "w12": 0,
+            "w21": 0,
+            "x1": 0,
+            "x2": 76,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 466,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "((w12 = 1) & (y2 < 3))",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(y1' = (min((y1 + 1), 4))) & (y2' = (min((y2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 6)",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 5,
+            "w12": 1,
+            "w21": 0,
+            "x1": 0,
+            "x2": 77,
+            "y1": 1,
+            "y2": 1,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 473,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 78,
+            "x2": 78,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 490,
+                "labels": [
+                    "rec_ack21"
+                ],
+                "origin": {
+                    "action-label": "rec_ack21",
+                    "transitions": [
+                        {
+                            "guard": "(s1 = 6)",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 8)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 3)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w21' = 0) & (z1' = 0) & (z2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 7,
+            "w12": 0,
+            "w21": 3,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 522,
+                "labels": [
+                    "rec_ack12"
+                ],
+                "origin": {
+                    "action-label": "rec_ack12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 3)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 6)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 7,
+            "s2": 6,
+            "w12": 3,
+            "w21": 0,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 523,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "((w12 = 1) & (y2 < 3))",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(y1' = (min((y1 + 1), 4))) & (y2' = (min((y2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 6)",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 5) & (x2 < 167))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 5,
+            "w12": 1,
+            "w21": 0,
+            "x1": 0,
+            "x2": 78,
+            "y1": 2,
+            "y2": 2,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 532,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 79,
+            "x2": 79,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 614,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 80,
+            "x2": 80,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 702,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 81,
+            "x2": 81,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 798,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 82,
+            "x2": 82,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 940,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 83,
+            "x2": 83,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1194,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 4) & (x2 < 85))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = (min((x2 + 1), 168)))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 4,
+            "w12": 0,
+            "w21": 0,
+            "x1": 84,
+            "x2": 84,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1900,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 1) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 6)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 6,
+            "w12": 0,
+            "w21": 1,
+            "x1": 85,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2053,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 1) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 6)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 6,
+            "w12": 0,
+            "w21": 1,
+            "x1": 86,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 1,
+            "z2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2112,
+                "labels": [
+                    "time"
+                ],
+                "origin": {
+                    "action-label": "time",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 < 167))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = (min((x1 + 1), 168)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((w21 = 1) & (z2 < 3))",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(z1' = (min((z1 + 1), 4))) & (z2' = (min((z2 + 1), 4)))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 6)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": ""
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 6,
+            "w12": 0,
+            "w21": 1,
+            "x1": 87,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 2,
+            "z2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4043,
+                "labels": [
+                    "snd_req12"
+                ],
+                "origin": {
+                    "action-label": "snd_req12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 1) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 5) & (x1 >= 159))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = 0) & (s1' = 6)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 5,
+            "s2": 5,
+            "w12": 0,
+            "w21": 0,
+            "x1": 159,
+            "x2": 159,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4085,
+                "labels": [
+                    "rec_req12"
+                ],
+                "origin": {
+                    "action-label": "rec_req12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 1)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 5)",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 5,
+            "w12": 1,
+            "w21": 0,
+            "x1": 0,
+            "x2": 159,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4158,
+                "labels": [
+                    "snd_ack21"
+                ],
+                "origin": {
+                    "action-label": "snd_ack21",
+                    "transitions": [
+                        {
+                            "guard": "(w21 = 0)",
+                            "module": "wire21",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w21' = 3) & (z1' = 0) & (z2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 3) & (x2 >= 159))",
+                            "module": "node2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x2' = 0) & (s2' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 6,
+            "s2": 3,
+            "w12": 0,
+            "w21": 0,
+            "x1": 0,
+            "x2": 159,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4159,
+                "labels": [
+                    "snd_ack12"
+                ],
+                "origin": {
+                    "action-label": "snd_ack12",
+                    "transitions": [
+                        {
+                            "guard": "(w12 = 0)",
+                            "module": "wire12",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(w12' = 3) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 3) & (x1 >= 159))",
+                            "module": "node1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(x1' = 0) & (s1' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "s1": 3,
+            "s2": 6,
+            "w12": 0,
+            "w21": 0,
+            "x1": 159,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0,
+            "z1": 0,
+            "z2": 0
+        }
+    }
+]

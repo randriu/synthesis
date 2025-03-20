@@ -1,0 +1,85 @@
+mdp
+const int GMAX = 5;
+const int XINIT = 3;
+const int YINIT = 1;
+const int TO_COLLECT = 5;
+const int GOLD_TO_COLLECT = 5;
+const int GEM_TO_COLLECT = 5;
+const double pAttack = (1 / 10);
+
+
+formula x_gold = 3;
+formula y_gold = 5;
+formula left_of_gold = (((x + 1) = x_gold) & (y = y_gold));
+formula right_of_gold = (((x - 1) = x_gold) & (y = y_gold));
+formula below_of_gold = ((x = x_gold) & ((y + 1) = y_gold));
+formula above_of_gold = ((x = x_gold) & ((y - 1) = y_gold));
+formula x_gem = 5;
+formula y_gem = 4;
+formula left_of_gem = (((x + 1) = x_gem) & (y = y_gem));
+formula right_of_gem = (((x - 1) = x_gem) & (y = y_gem));
+formula below_of_gem = ((x = x_gem) & ((y + 1) = y_gem));
+formula above_of_gem = ((x = x_gem) & ((y - 1) = y_gem));
+formula x_home = 3;
+formula y_home = 1;
+formula left_of_home = (((x + 1) = x_home) & (y = y_home));
+formula right_of_home = (((x - 1) = x_home) & (y = y_home));
+formula below_of_home = ((x = x_home) & ((y + 1) = y_home));
+formula above_of_home = ((x = x_home) & ((y - 1) = y_home));
+formula x_enemy_1 = 4;
+formula y_enemy_1 = 5;
+formula left_of_enemy_1 = (((x + 1) = x_enemy_1) & (y = y_enemy_1));
+formula right_of_enemy_1 = (((x - 1) = x_enemy_1) & (y = y_enemy_1));
+formula below_of_enemy_1 = ((x = x_enemy_1) & ((y + 1) = y_enemy_1));
+formula above_of_enemy_1 = ((x = x_enemy_1) & ((y - 1) = y_enemy_1));
+formula x_enemy_2 = 3;
+formula y_enemy_2 = 4;
+formula left_of_enemy_2 = (((x + 1) = x_enemy_2) & (y = y_enemy_2));
+formula right_of_enemy_2 = (((x - 1) = x_enemy_2) & (y = y_enemy_2));
+formula below_of_enemy_2 = ((x = x_enemy_2) & ((y + 1) = y_enemy_2));
+formula above_of_enemy_2 = ((x = x_enemy_2) & ((y - 1) = y_enemy_2));
+formula left_of_enemy = (left_of_enemy_1 | left_of_enemy_2);
+formula right_of_enemy = (right_of_enemy_1 | right_of_enemy_2);
+formula above_of_enemy = (above_of_enemy_1 | above_of_enemy_2);
+formula below_of_enemy = (below_of_enemy_1 | below_of_enemy_2);
+
+module robot
+	gold: bool init false;
+	gem: bool init false;
+	attacked: bool init false;
+	x: [1..5] init 3;
+	y: [1..5] init 1;
+	[right] (!(((((x + 1) = 4) & (y = 5)) | (((x + 1) = 3) & (y = 4)))) & (x < 5)) -> 1 : (gold' = ((gold & !((((x + 1) = 3) & (y = 1)))) | (((x + 1) = 3) & (y = 5)))) & (gem' = ((gem & !((((x + 1) = 3) & (y = 1)))) | (((x + 1) = 5) & (y = 4)))) & (attacked' = false) & (x' = (x + 1));
+	[left] (!(((((x - 1) = 4) & (y = 5)) | (((x - 1) = 3) & (y = 4)))) & (x > 1)) -> 1 : (gold' = ((gold & !((((x - 1) = 3) & (y = 1)))) | (((x - 1) = 3) & (y = 5)))) & (gem' = ((gem & !((((x - 1) = 3) & (y = 1)))) | (((x - 1) = 5) & (y = 4)))) & (attacked' = false) & (x' = (x - 1));
+	[top] (!((((x = 4) & ((y + 1) = 5)) | ((x = 3) & ((y + 1) = 4)))) & (y < 5)) -> 1 : (gold' = ((gold & !(((x = 3) & ((y + 1) = 1)))) | ((x = 3) & ((y + 1) = 5)))) & (gem' = ((gem & !(((x = 3) & ((y + 1) = 1)))) | ((x = 5) & ((y + 1) = 4)))) & (attacked' = false) & (y' = (y + 1));
+	[down] (!((((x = 4) & ((y - 1) = 5)) | ((x = 3) & ((y - 1) = 4)))) & (y > 1)) -> 1 : (gold' = ((gold & !(((x = 3) & ((y - 1) = 1)))) | ((x = 3) & ((y - 1) = 5)))) & (gem' = ((gem & !(((x = 3) & ((y - 1) = 1)))) | ((x = 5) & ((y - 1) = 4)))) & (attacked' = false) & (y' = (y - 1));
+	[right] (((((x + 1) = 4) & (y = 5)) | (((x + 1) = 3) & (y = 4))) & (x < 5)) -> (1 / 10) : (gold' = false) & (gem' = false) & (attacked' = true) & (x' = 3) & (y' = 1) + (1 - (1 / 10)) : (gold' = ((gold & !((((x + 1) = 3) & (y = 1)))) | (((x + 1) = 3) & (y = 5)))) & (gem' = ((gem & !((((x + 1) = 3) & (y = 1)))) | (((x + 1) = 5) & (y = 4)))) & (attacked' = false) & (x' = (x + 1));
+	[left] (((((x - 1) = 4) & (y = 5)) | (((x - 1) = 3) & (y = 4))) & (x > 1)) -> (1 / 10) : (gold' = false) & (gem' = false) & (attacked' = true) & (x' = 3) & (y' = 1) + (1 - (1 / 10)) : (gold' = ((gold & !((((x - 1) = 3) & (y = 1)))) | (((x - 1) = 3) & (y = 5)))) & (gem' = ((gem & !((((x - 1) = 3) & (y = 1)))) | (((x - 1) = 5) & (y = 4)))) & (attacked' = false) & (x' = (x - 1));
+	[top] ((((x = 4) & ((y + 1) = 5)) | ((x = 3) & ((y + 1) = 4))) & (y < 5)) -> (1 / 10) : (gold' = false) & (gem' = false) & (attacked' = true) & (x' = 3) & (y' = 1) + (1 - (1 / 10)) : (gold' = ((gold & !(((x = 3) & ((y + 1) = 1)))) | ((x = 3) & ((y + 1) = 5)))) & (gem' = ((gem & !(((x = 3) & ((y + 1) = 1)))) | ((x = 5) & ((y + 1) = 4)))) & (attacked' = false) & (y' = (y + 1));
+	[down] ((((x = 4) & ((y - 1) = 5)) | ((x = 3) & ((y - 1) = 4))) & (y > 1)) -> (1 / 10) : (gold' = false) & (gem' = false) & (attacked' = true) & (x' = 3) & (y' = 1) + (1 - (1 / 10)) : (gold' = ((gold & !(((x = 3) & ((y - 1) = 1)))) | ((x = 3) & ((y - 1) = 5)))) & (gem' = ((gem & !(((x = 3) & ((y - 1) = 1)))) | ((x = 5) & ((y - 1) = 4)))) & (attacked' = false) & (y' = (y - 1));
+endmodule
+
+module goldcounter
+	required_gold: [0..5] init 5;
+	[right] true -> 1 : (required_gold' = (max(0, (required_gold - (((((x + 1) = 3) & (y = 1)) & gold) ? 1 : 0)))));
+	[left] true -> 1 : (required_gold' = (max(0, (required_gold - (((((x - 1) = 3) & (y = 1)) & gold) ? 1 : 0)))));
+	[top] true -> 1 : (required_gold' = (max(0, (required_gold - ((((x = 3) & ((y + 1) = 1)) & gold) ? 1 : 0)))));
+	[down] true -> 1 : (required_gold' = (max(0, (required_gold - ((((x = 3) & ((y - 1) = 1)) & gold) ? 1 : 0)))));
+endmodule
+
+module gemcounter
+	required_gem: [0..5] init 5;
+	[right] true -> 1 : (required_gem' = (max(0, (required_gem - (((((x + 1) = 3) & (y = 1)) & gem) ? 1 : 0)))));
+	[left] true -> 1 : (required_gem' = (max(0, (required_gem - (((((x - 1) = 3) & (y = 1)) & gem) ? 1 : 0)))));
+	[top] true -> 1 : (required_gem' = (max(0, (required_gem - ((((x = 3) & ((y + 1) = 1)) & gem) ? 1 : 0)))));
+	[down] true -> 1 : (required_gem' = (max(0, (required_gem - ((((x = 3) & ((y - 1) = 1)) & gem) ? 1 : 0)))));
+endmodule
+
+rewards "steps"
+	[right] true: 1;
+	[left] true: 1;
+	[top] true: 1;
+	[down] true: 1;
+endrewards
+
+label "goal" = ((required_gold = 0) & (required_gem = 0));

@@ -1,14 +1,14 @@
 {
-  "scheduler": {
+  "scheduler-relevant": {
     "classifiers": {
       "default": {
         "stats": {
-          "nodes": 309,
-          "inner nodes": 154,
-          "paths": 155,
-          "bandwidth": 8
+          "nodes": 65,
+          "inner nodes": 32,
+          "paths": 33,
+          "bandwidth": 6
         },
-        "time": "00:00:00.236"
+        "time": "00:00:00.038"
       }
     },
     "metadata": {
@@ -84,10 +84,10 @@
           6.0,
           6.0,
           0.0,
-          1.0,
-          1.0,
-          1.0,
-          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
           1.0,
           1.0,
@@ -105,10 +105,10 @@
           6.0,
           6.0,
           0.0,
-          1.0,
-          1.0,
-          1.0,
-          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
           1.0,
           1.0,
           1.0,
@@ -149,34 +149,29 @@
           "0": [
             "process4_cmd_15",
             "process4_cmd_16",
-            "process1_cmd_2",
-            "process2_cmd_7",
-            "process3_cmd_12",
-            "process4_cmd_17",
-            "process1_cmd_3",
-            "process2_cmd_8",
-            "process3_cmd_13",
             "process3_cmd_10",
             "process3_cmd_11",
             "process2_cmd_5",
             "process2_cmd_6",
             "process1_cmd_0",
             "process1_cmd_1",
-            "process4_cmd_18"
+            "process1_cmd_3",
+            "process3_cmd_13",
+            "process2_cmd_8"
           ]
         },
         "min": [
           0
         ],
         "max": [
-          15
+          10
         ],
         "step_size": [
           1
         ],
-        "num_rows": 6144,
-        "num_flattened": 6144,
-        "num_unique_labels": 16
+        "num_rows": 914,
+        "num_flattened": 914,
+        "num_unique_labels": 11
       }
     }
   }

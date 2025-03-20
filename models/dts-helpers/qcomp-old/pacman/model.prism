@@ -1,0 +1,1106 @@
+// %%%%%%%%%%%%
+// %..........%
+// %.%.%%.%.%.%
+// %.%.%%.%.%.%
+// %..........%
+// %%%.%.%%%%.%
+// %...%......%
+// %%%%%%%%%%%%
+
+mdp
+
+//CONSTANTS
+const xSize = 11;
+const ySize = 7;
+
+const MAXSTEPS = 10;
+
+formula deactive0 = (xG0 = 0);
+formula deactive1 = (xG1 = 0);
+
+module arbiter
+  pMove : [0 .. 2] init 0; //token to determine who is allowed to move
+  steps : [0 .. MAXSTEPS] init 0; //number of steps we plan ahead
+
+  [g0]  (pMove = 0) & !deactive0 & ((xG0 < xP ? xP - xG0 : xG0 - xP) + (yG0 < yP ? yP - yG0 : yG0 - yP) <= 2*(MAXSTEPS - steps)) -> 1:(pMove' = 1);
+  [stop0]    (pMove = 0) & (deactive0 | ((xG0 < xP ? xP - xG0 : xG0 - xP) + (yG0 < yP ? yP - yG0 : yG0 - yP) > 2*(MAXSTEPS - steps))) -> 1:(pMove' = 1);
+  [g1]  (pMove = 1) & !deactive1 & ((xG1 < xP ? xP - xG1 : xG1 - xP) + (yG1 < yP ? yP - yG1 : yG1 - yP) <= 2*(MAXSTEPS - steps)) -> 1:(pMove' = 2);
+  [stop1]    (pMove = 1) & (deactive1 | ((xG1 < xP ? xP - xG1 : xG1 - xP) + (yG1 < yP ? yP - yG1 : yG1 - yP) > 2*(MAXSTEPS - steps))) -> 1:(pMove' = 2);
+  
+
+  [p]     (pMove = 2 & steps < MAXSTEPS ) -> 1:(pMove' = 0) & (steps' = steps + 1);
+  [left]  (pMove = 2 & steps < MAXSTEPS ) -> 1:(pMove' = 0) & (steps' = steps + 1);
+  [right] (pMove = 2 & steps < MAXSTEPS ) -> 1:(pMove' = 0) & (steps' = steps + 1);
+  [up]    (pMove = 2 & steps < MAXSTEPS ) -> 1:(pMove' = 0) & (steps' = steps + 1);
+  [down]  (pMove = 2 & steps < MAXSTEPS ) -> 1:(pMove' = 0) & (steps' = steps + 1);
+  
+  [] (pMove = 2 & (steps = MAXSTEPS | (deactive0 & deactive1))) -> 1:(pMove'=2);
+endmodule
+
+
+//GHOST#0
+module ghost0
+  xG0 : [0..xSize] init 3; // x position of Ghost
+  yG0 : [0..ySize] init 4; // y position of Ghost
+  dG0 : [0..3] init 0; //direction of ghost (0=right, 1=up, 2=left, 3=down)
+  
+  [p] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG0'=xG1) & (yG0'=yG1) & (dG0'=dG1);
+  [p] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG0'=xG0);
+  [right] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG0'=xG1) & (yG0'=yG1) & (dG0'=dG1);
+  [right] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG0'=xG0);
+  [left] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG0'=xG1) & (yG0'=yG1) & (dG0'=dG1);
+  [left] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG0'=xG0);
+  [down] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG0'=xG1) & (yG0'=yG1) & (dG0'=dG1);
+  [down] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG0'=xG0);
+  [up] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG0'=xG1) & (yG0'=yG1) & (dG0'=dG1);
+  [up] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG0'=xG0);
+
+
+  [stop0] true -> 1:(xG0'=0) & (yG0'=0);
+    //horizontal corridor
+  [g0] (yG0=1 & xG0 >=2 & xG0 <=2 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=1 & xG0 >=2 & xG0 <=2 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=1 & xG0 >=4 & xG0 <=5 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=1 & xG0 >=4 & xG0 <=5 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=1 & xG0 >=7 & xG0 <=7 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=1 & xG0 >=7 & xG0 <=7 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=1 & xG0 >=9 & xG0 <=9 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=1 & xG0 >=9 & xG0 <=9 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=4 & xG0 >=2 & xG0 <=2 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=4 & xG0 >=2 & xG0 <=2 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=4 & xG0 >=4 & xG0 <=4 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=4 & xG0 >=4 & xG0 <=4 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=4 & xG0 >=7 & xG0 <=7 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=4 & xG0 >=7 & xG0 <=7 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=4 & xG0 >=9 & xG0 <=9 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=4 & xG0 >=9 & xG0 <=9 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=6 & xG0 >=2 & xG0 <=2 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=6 & xG0 >=2 & xG0 <=2 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+  //horizontal corridor
+  [g0] (yG0=6 & xG0 >=6 & xG0 <=9 & dG0 =0) -> 1:(xG0'=xG0+1) & (dG0'=0); 
+  [g0] (yG0=6 & xG0 >=6 & xG0 <=9 & dG0 =2) -> 1:(xG0'=xG0-1) & (dG0'=2); 
+
+  //vertical corridor
+  [g0] (xG0=1 & yG0 >=2 & yG0 <=3 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=1 & yG0 >=2 & yG0 <=3 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=3 & yG0 >=2 & yG0 <=3 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=3 & yG0 >=2 & yG0 <=3 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=3 & yG0 >=5 & yG0 <=5 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=3 & yG0 >=5 & yG0 <=5 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=5 & yG0 >=5 & yG0 <=5 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=5 & yG0 >=5 & yG0 <=5 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=6 & yG0 >=2 & yG0 <=3 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=6 & yG0 >=2 & yG0 <=3 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=8 & yG0 >=2 & yG0 <=3 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=8 & yG0 >=2 & yG0 <=3 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=10 & yG0 >=2 & yG0 <=3 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=10 & yG0 >=2 & yG0 <=3 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+  //vertical corridor
+  [g0] (xG0=10 & yG0 >=5 & yG0 <=5 & dG0=1) -> 1:(yG0'=yG0+1) & (dG0'=1); 
+  [g0] (xG0=10 & yG0 >=5 & yG0 <=5 & dG0 =3) -> 1:(yG0'=yG0-1) & (dG0'=3); 
+
+  //deadends
+  [g0] (xG0=1 & yG0=6) -> 1: (xG0'=xG0+1) & (dG0'=0);
+
+  //corners
+  [g0] (xG0=1 & yG0=1 & (dG0=2 | dG0=1))-> 1: (yG0'=yG0+1) & (dG0'=1);
+  [g0] (xG0=1 & yG0=1 & (dG0=3 | dG0=0)) -> 1: (xG0'=xG0+1) & (dG0'=0);
+  [g0] (xG0=1 & yG0=4 & (dG0=2 | dG0=3)) -> 1: (yG0'=yG0-1) & (dG0'=3);
+  [g0] (xG0=1 & yG0=4 & (dG0=1 | dG0=0)) -> 1: (xG0'=xG0+1) & (dG0'=0);
+  [g0] (xG0=3 & yG0=6 & (dG0=0 | dG0=3)) -> 1: (yG0'=yG0-1) & (dG0'=3);
+  [g0] (xG0=3 & yG0=6 & (dG0=1 | dG0=2)) -> 1: (xG0'=xG0-1) & (dG0'=2);
+  [g0] (xG0=5 & yG0=6 & (dG0=2 | dG0=3)) -> 1: (yG0'=yG0-1) & (dG0'=3);
+  [g0] (xG0=5 & yG0=6 & (dG0=1 | dG0=0)) -> 1: (xG0'=xG0+1) & (dG0'=0);
+  [g0] (xG0=10 & yG0=1 & (dG0=0 | dG0=1))-> 1: (yG0'=yG0+1) & (dG0'=1);
+  [g0] (xG0=10 & yG0=1 & (dG0=3 | dG0=2)) -> 1: (xG0'=xG0-1) & (dG0'=2);
+  [g0] (xG0=10 & yG0=6 & (dG0=0 | dG0=3)) -> 1: (yG0'=yG0-1) & (dG0'=3);
+  [g0] (xG0=10 & yG0=6 & (dG0=1 | dG0=2)) -> 1: (xG0'=xG0-1) & (dG0'=2);
+
+
+  //crossing at position (3, 1)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g0] (xG0=3 & yG0=1 & dG0=0 & xG0<xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=3 & yG0=1 & dG0=3 & xG0<xP & yG0=yP ) -> 0.92: (xG0'=xG0+1) & (dG0'=0) + 0.08: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=3 & yG0=1 & dG0=2 & xG0<xP & yG0=yP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g0] (xG0=3 & yG0=1 & dG0=0 & yG0<yP & xG0=xP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=3 & yG0=1 & dG0=3 & yG0<yP & xG0=xP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=3 & yG0=1 & dG0=2 & yG0<yP & xG0=xP ) -> 0.8: (yG0'=yG0+1) & (dG0'=1) + 0.2: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g0] (xG0=3 & yG0=1 & dG0=0 & xG0>xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=3 & yG0=1 & dG0=3 & xG0>xP & yG0=yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=3 & yG0=1 & dG0=2 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=3 & yG0=1 & dG0=0 & xG0<xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=3 & yG0=1 & dG0=3 & xG0<xP & yG0<yP ) -> 0.78: (xG0'=xG0+1) & (dG0'=0) + 0.22: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=3 & yG0=1 & dG0=2 & xG0<xP & yG0<yP ) -> 0.86: (yG0'=yG0+1) & (dG0'=1) + 0.14: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=3 & yG0=1 & dG0=0 & xG0>xP & yG0<yP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=3 & yG0=1 & dG0=3 & xG0>xP & yG0<yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=3 & yG0=1 & dG0=2 & xG0>xP & yG0<yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=3 & yG0=1 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (6, 1)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g0] (xG0=6 & yG0=1 & dG0=0 & xG0<xP & yG0=yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=6 & yG0=1 & dG0=3 & xG0<xP & yG0=yP ) -> 0.64: (xG0'=xG0+1) & (dG0'=0) + 0.36: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=6 & yG0=1 & dG0=2 & xG0<xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g0] (xG0=6 & yG0=1 & dG0=0 & yG0<yP & xG0=xP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=6 & yG0=1 & dG0=3 & yG0<yP & xG0=xP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=6 & yG0=1 & dG0=2 & yG0<yP & xG0=xP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g0] (xG0=6 & yG0=1 & dG0=0 & xG0>xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=6 & yG0=1 & dG0=3 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=6 & yG0=1 & dG0=2 & xG0>xP & yG0=yP ) -> 0.22: (yG0'=yG0+1) & (dG0'=1) + 0.78: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=6 & yG0=1 & dG0=0 & xG0<xP & yG0<yP ) -> 0.46: (xG0'=xG0+1) & (dG0'=0) + 0.54: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=6 & yG0=1 & dG0=3 & xG0<xP & yG0<yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=6 & yG0=1 & dG0=2 & xG0<xP & yG0<yP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=6 & yG0=1 & dG0=0 & xG0>xP & yG0<yP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=6 & yG0=1 & dG0=3 & xG0>xP & yG0<yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=6 & yG0=1 & dG0=2 & xG0>xP & yG0<yP ) -> 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.67: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=6 & yG0=1 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (8, 1)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g0] (xG0=8 & yG0=1 & dG0=0 & xG0<xP & yG0=yP ) -> 0.4: (xG0'=xG0+1) & (dG0'=0) + 0.6: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=8 & yG0=1 & dG0=3 & xG0<xP & yG0=yP ) -> 0.92: (xG0'=xG0+1) & (dG0'=0) + 0.08: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=8 & yG0=1 & dG0=2 & xG0<xP & yG0=yP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g0] (xG0=8 & yG0=1 & dG0=0 & yG0<yP & xG0=xP ) -> 0.4: (xG0'=xG0+1) & (dG0'=0) + 0.6: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=8 & yG0=1 & dG0=3 & yG0<yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=8 & yG0=1 & dG0=2 & yG0<yP & xG0=xP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g0] (xG0=8 & yG0=1 & dG0=0 & xG0>xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=8 & yG0=1 & dG0=3 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=8 & yG0=1 & dG0=2 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=8 & yG0=1 & dG0=0 & xG0<xP & yG0<yP ) -> 0.36: (xG0'=xG0+1) & (dG0'=0) + 0.64: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=8 & yG0=1 & dG0=3 & xG0<xP & yG0<yP ) -> 0.75: (xG0'=xG0+1) & (dG0'=0) + 0.25: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=8 & yG0=1 & dG0=2 & xG0<xP & yG0<yP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=8 & yG0=1 & dG0=0 & xG0>xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=8 & yG0=1 & dG0=3 & xG0>xP & yG0<yP ) -> 0.2: (xG0'=xG0+1) & (dG0'=0) + 0.8: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=8 & yG0=1 & dG0=2 & xG0>xP & yG0<yP ) -> 0.67: (yG0'=yG0+1) & (dG0'=1) + 0.33: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=8 & yG0=1 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (3, 4)  [center crossing]
+
+  //- positioning pacman = r
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & xG0<xP & yG0=yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & xG0<xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & xG0<xP & yG0=yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & xG0<xP & yG0=yP ) -> 0.61: (xG0'=xG0+1) & (dG0'=0) + 0.26: (xG0'=xG0-1) & (dG0'=2) + 0.13: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = u
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & yG0<yP & xG0=xP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & yG0<yP & xG0=xP ) -> 0.16: (xG0'=xG0+1) & (dG0'=0) + 0.67: (yG0'=yG0+1) & (dG0'=1) + 0.17: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & yG0<yP & xG0=xP ) -> 0.28: (yG0'=yG0+1) & (dG0'=1) + 0.43: (xG0'=xG0-1) & (dG0'=2) + 0.29: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & yG0<yP & xG0=xP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (xG0'=xG0-1) & (dG0'=2) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = l
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & xG0>xP & yG0=yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & xG0>xP & yG0=yP ) -> 0.34: (yG0'=yG0+1) & (dG0'=1) + 0.33: (xG0'=xG0-1) & (dG0'=2) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & xG0>xP & yG0=yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (xG0'=xG0-1) & (dG0'=2) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = d
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & yG0>yP & xG0=xP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & yG0>yP & xG0=xP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & yG0>yP & xG0=xP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & yG0>yP & xG0=xP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & xG0<xP & yG0<yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & xG0<xP & yG0<yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & xG0<xP & yG0<yP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.25: (xG0'=xG0-1) & (dG0'=2) + 0.25: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & xG0<xP & yG0<yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & xG0>xP & yG0<yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & xG0>xP & yG0<yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & xG0>xP & yG0<yP ) -> 0.34: (yG0'=yG0+1) & (dG0'=1) + 0.33: (xG0'=xG0-1) & (dG0'=2) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & xG0>xP & yG0<yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (xG0'=xG0-1) & (dG0'=2) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = d-r
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & xG0<xP & yG0>yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & xG0<xP & yG0>yP ) -> 0.67: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & xG0<xP & yG0>yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & xG0<xP & yG0>yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = d-l
+
+  [g0] (xG0=3 & yG0=4 & dG0=0 & xG0>xP & yG0>yP ) -> 0.34: (xG0'=xG0+1) & (dG0'=0) + 0.33: (yG0'=yG0+1) & (dG0'=1) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g0] (xG0=3 & yG0=4 & dG0=1 & xG0>xP & yG0>yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right, up or left
+  [g0] (xG0=3 & yG0=4 & dG0=2 & xG0>xP & yG0>yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go up, left or down
+  [g0] (xG0=3 & yG0=4 & dG0=3 & xG0>xP & yG0>yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=3 & yG0=4 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (5, 4)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & xG0<xP & yG0=yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & xG0<xP & yG0=yP ) -> 0.89: (xG0'=xG0+1) & (dG0'=0) + 0.11: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & xG0<xP & yG0=yP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & yG0<yP & xG0=xP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & yG0<yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & yG0<yP & xG0=xP ) -> 0.83: (yG0'=yG0+1) & (dG0'=1) + 0.17: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & xG0>xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & xG0>xP & yG0=yP ) -> 0.17: (xG0'=xG0+1) & (dG0'=0) + 0.83: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & xG0>xP & yG0=yP ) -> 0.17: (yG0'=yG0+1) & (dG0'=1) + 0.83: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = d
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & yG0>yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & yG0>yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & yG0>yP & xG0=xP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & xG0<xP & yG0<yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & xG0<xP & yG0<yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & xG0<xP & yG0<yP ) -> 0.75: (yG0'=yG0+1) & (dG0'=1) + 0.25: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & xG0>xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & xG0>xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & xG0>xP & yG0<yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = d-r
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & xG0<xP & yG0>yP ) -> 0.95: (xG0'=xG0+1) & (dG0'=0) + 0.05: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & xG0<xP & yG0>yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & xG0<xP & yG0>yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = d-l
+
+  [g0] (xG0=5 & yG0=4 & dG0=0 & xG0>xP & yG0>yP ) -> 1.0: (yG0'=yG0+1) & (dG0'=1);  // ghost is moving to the right -> continues to go right or up
+  [g0] (xG0=5 & yG0=4 & dG0=3 & xG0>xP & yG0>yP ) -> 0.11: (xG0'=xG0+1) & (dG0'=0) + 0.89: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go right or left
+  [g0] (xG0=5 & yG0=4 & dG0=2 & xG0>xP & yG0>yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=5 & yG0=4 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (6, 4)  [t-down crossing]
+ 
+  //- positioning pacman = r
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & xG0<xP & yG0=yP ) -> 0.57: (xG0'=xG0+1) & (dG0'=0) + 0.43: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & xG0<xP & yG0=yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & xG0<xP & yG0=yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & yG0<yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & yG0<yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & yG0<yP & xG0=xP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = l
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & xG0>xP & yG0=yP ) -> 0.75: (xG0'=xG0-1) & (dG0'=2) + 0.25: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & yG0>yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & yG0>yP & xG0=xP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & yG0>yP & xG0=xP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & xG0<xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & xG0<xP & yG0<yP ) -> 0.89: (xG0'=xG0+1) & (dG0'=0) + 0.11: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & xG0<xP & yG0<yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & xG0>xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & xG0>xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & xG0>xP & yG0<yP ) -> 0.67: (xG0'=xG0-1) & (dG0'=2) + 0.33: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-r
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & xG0<xP & yG0>yP ) -> 0.69: (xG0'=xG0+1) & (dG0'=0) + 0.31: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & xG0<xP & yG0>yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & xG0<xP & yG0>yP ) -> 0.33: (xG0'=xG0-1) & (dG0'=2) + 0.67: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-l
+
+  [g0] (xG0=6 & yG0=4 & dG0=0 & xG0>xP & yG0>yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=6 & yG0=4 & dG0=1 & xG0>xP & yG0>yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=6 & yG0=4 & dG0=2 & xG0>xP & yG0>yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving left -> continues to go left or down
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=6 & yG0=4 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (8, 4)  [t-down crossing]
+ 
+  //- positioning pacman = r
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & xG0<xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & xG0<xP & yG0=yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & xG0<xP & yG0=yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & yG0<yP & xG0=xP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & yG0<yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & yG0<yP & xG0=xP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = l
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & xG0>xP & yG0=yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & xG0>xP & yG0=yP ) -> 0.44: (xG0'=xG0+1) & (dG0'=0) + 0.56: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & xG0>xP & yG0=yP ) -> 0.83: (xG0'=xG0-1) & (dG0'=2) + 0.17: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & yG0>yP & xG0=xP ) -> 0.43: (xG0'=xG0+1) & (dG0'=0) + 0.57: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & yG0>yP & xG0=xP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & yG0>yP & xG0=xP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-r
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & xG0<xP & yG0<yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & xG0<xP & yG0<yP ) -> 1.0: (xG0'=xG0+1) & (dG0'=0);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & xG0<xP & yG0<yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & xG0>xP & yG0<yP ) -> 0.33: (xG0'=xG0+1) & (dG0'=0) + 0.67: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & xG0>xP & yG0<yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & xG0>xP & yG0<yP ) -> 0.83: (xG0'=xG0-1) & (dG0'=2) + 0.17: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-r
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & xG0<xP & yG0>yP ) -> 0.56: (xG0'=xG0+1) & (dG0'=0) + 0.44: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & xG0<xP & yG0>yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & xG0<xP & yG0>yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-l
+
+  [g0] (xG0=8 & yG0=4 & dG0=0 & xG0>xP & yG0>yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go right or down
+  [g0] (xG0=8 & yG0=4 & dG0=1 & xG0>xP & yG0>yP ) -> 0.5: (xG0'=xG0+1) & (dG0'=0) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go right or left
+  [g0] (xG0=8 & yG0=4 & dG0=2 & xG0>xP & yG0>yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving left -> continues to go left or down
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=8 & yG0=4 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+
+  //crossing at position (10, 4)  [t-left crossing]
+
+  //- positioning pacman = u
+
+  [g0] (xG0=10 & yG0=4 & dG0=0 & yG0<yP & xG0=xP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go up or down
+  [g0] (xG0=10 & yG0=4 & dG0=1 & yG0<yP & xG0=xP ) -> 0.45: (yG0'=yG0+1) & (dG0'=1) + 0.55: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go up or left
+  [g0] (xG0=10 & yG0=4 & dG0=3 & yG0<yP & xG0=xP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = l
+
+  [g0] (xG0=10 & yG0=4 & dG0=0 & xG0>xP & yG0=yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go up or down
+  [g0] (xG0=10 & yG0=4 & dG0=1 & xG0>xP & yG0=yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go up or left
+  [g0] (xG0=10 & yG0=4 & dG0=3 & xG0>xP & yG0=yP ) -> 0.79: (xG0'=xG0-1) & (dG0'=2) + 0.21: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = d
+
+  [g0] (xG0=10 & yG0=4 & dG0=0 & yG0>yP & xG0=xP ) -> 0.2: (yG0'=yG0+1) & (dG0'=1) + 0.8: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go up or down
+  [g0] (xG0=10 & yG0=4 & dG0=1 & yG0>yP & xG0=xP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go up or left
+  [g0] (xG0=10 & yG0=4 & dG0=3 & yG0>yP & xG0=xP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = u-l
+
+  [g0] (xG0=10 & yG0=4 & dG0=0 & xG0>xP & yG0<yP ) -> 0.75: (yG0'=yG0+1) & (dG0'=1) + 0.25: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go up or down
+  [g0] (xG0=10 & yG0=4 & dG0=1 & xG0>xP & yG0<yP ) -> 0.44: (yG0'=yG0+1) & (dG0'=1) + 0.56: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go up or left
+  [g0] (xG0=10 & yG0=4 & dG0=3 & xG0>xP & yG0<yP ) -> 1.0: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = d-l
+
+  [g0] (xG0=10 & yG0=4 & dG0=0 & xG0>xP & yG0>yP ) -> 1.0: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving to the right -> continues to go up or down
+  [g0] (xG0=10 & yG0=4 & dG0=1 & xG0>xP & yG0>yP ) -> 0.5: (yG0'=yG0+1) & (dG0'=1) + 0.5: (xG0'=xG0-1) & (dG0'=2);  // ghost is moving up -> continues to go up or left
+  [g0] (xG0=10 & yG0=4 & dG0=3 & xG0>xP & yG0>yP ) -> 0.5: (xG0'=xG0-1) & (dG0'=2) + 0.5: (yG0'=yG0-1) & (dG0'=3);  // ghost is moving down -> continues to go left or down
+
+  //- position pacman == position ghost
+
+  [g0] (xG0=10 & yG0=4 &  xG0=xP & yG0=yP) -> 1: (xG0'=xG0);
+endmodule
+
+//GHOST#1
+module ghost1
+  xG1 : [0..xSize] init 3; // x position of Ghost
+  yG1 : [0..ySize] init 4; // y position of Ghost
+  dG1 : [0..3] init 0; //direction of ghost (0=right, 1=up, 2=left, 3=down)
+  
+  [p] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG1'=xG0) & (yG1'=yG0) & (dG1'=dG0);
+  [p] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG1'=xG1);
+  [right] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG1'=xG0) & (yG1'=yG0) & (dG1'=dG0);
+  [right] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG1'=xG1);
+  [left] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG1'=xG0) & (yG1'=yG0) & (dG1'=dG0);
+  [left] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG1'=xG1);
+  [down] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG1'=xG0) & (yG1'=yG0) & (dG1'=dG0);
+  [down] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG1'=xG1);
+  [up] (xG0 > xG1 | (xG0 = xG1 & yG0 > yG1)) -> 1:(xG1'=xG0) & (yG1'=yG0) & (dG1'=dG0);
+  [up] (xG0 <= xG1 & (xG0 != xG1 | yG0 <= yG1)) -> 1:(xG1'=xG1);
+
+  [stop1] true -> 1:(xG1'=0) & (yG1'=0);
+  
+
+    //horizontal corridor
+  [g1] (yG1=1 & xG1 >=2 & xG1 <=2 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=1 & xG1 >=2 & xG1 <=2 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=1 & xG1 >=4 & xG1 <=5 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=1 & xG1 >=4 & xG1 <=5 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=1 & xG1 >=7 & xG1 <=7 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=1 & xG1 >=7 & xG1 <=7 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=1 & xG1 >=9 & xG1 <=9 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=1 & xG1 >=9 & xG1 <=9 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=4 & xG1 >=2 & xG1 <=2 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=4 & xG1 >=2 & xG1 <=2 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=4 & xG1 >=4 & xG1 <=4 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=4 & xG1 >=4 & xG1 <=4 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=4 & xG1 >=7 & xG1 <=7 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=4 & xG1 >=7 & xG1 <=7 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=4 & xG1 >=9 & xG1 <=9 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=4 & xG1 >=9 & xG1 <=9 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=6 & xG1 >=2 & xG1 <=2 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=6 & xG1 >=2 & xG1 <=2 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+  //horizontal corridor
+  [g1] (yG1=6 & xG1 >=6 & xG1 <=9 & dG1 =0) -> 1:(xG1'=xG1+1) & (dG1'=0); 
+  [g1] (yG1=6 & xG1 >=6 & xG1 <=9 & dG1 =2) -> 1:(xG1'=xG1-1) & (dG1'=2); 
+
+  //vertical corridor
+  [g1] (xG1=1 & yG1 >=2 & yG1 <=3 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=1 & yG1 >=2 & yG1 <=3 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=3 & yG1 >=2 & yG1 <=3 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=3 & yG1 >=2 & yG1 <=3 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=3 & yG1 >=5 & yG1 <=5 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=3 & yG1 >=5 & yG1 <=5 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=5 & yG1 >=5 & yG1 <=5 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=5 & yG1 >=5 & yG1 <=5 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=6 & yG1 >=2 & yG1 <=3 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=6 & yG1 >=2 & yG1 <=3 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=8 & yG1 >=2 & yG1 <=3 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=8 & yG1 >=2 & yG1 <=3 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=10 & yG1 >=2 & yG1 <=3 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=10 & yG1 >=2 & yG1 <=3 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+  //vertical corridor
+  [g1] (xG1=10 & yG1 >=5 & yG1 <=5 & dG1=1) -> 1:(yG1'=yG1+1) & (dG1'=1); 
+  [g1] (xG1=10 & yG1 >=5 & yG1 <=5 & dG1 =3) -> 1:(yG1'=yG1-1) & (dG1'=3); 
+
+  //deadends
+  [g1] (xG1=1 & yG1=6) -> 1: (xG1'=xG1+1) & (dG1'=0);
+
+  //corners
+  [g1] (xG1=1 & yG1=1 & (dG1=2 | dG1=1))-> 1: (yG1'=yG1+1) & (dG1'=1);
+  [g1] (xG1=1 & yG1=1 & (dG1=3 | dG1=0)) -> 1: (xG1'=xG1+1) & (dG1'=0);
+  [g1] (xG1=1 & yG1=4 & (dG1=2 | dG1=3)) -> 1: (yG1'=yG1-1) & (dG1'=3);
+  [g1] (xG1=1 & yG1=4 & (dG1=1 | dG1=0)) -> 1: (xG1'=xG1+1) & (dG1'=0);
+  [g1] (xG1=3 & yG1=6 & (dG1=0 | dG1=3)) -> 1: (yG1'=yG1-1) & (dG1'=3);
+  [g1] (xG1=3 & yG1=6 & (dG1=1 | dG1=2)) -> 1: (xG1'=xG1-1) & (dG1'=2);
+  [g1] (xG1=5 & yG1=6 & (dG1=2 | dG1=3)) -> 1: (yG1'=yG1-1) & (dG1'=3);
+  [g1] (xG1=5 & yG1=6 & (dG1=1 | dG1=0)) -> 1: (xG1'=xG1+1) & (dG1'=0);
+  [g1] (xG1=10 & yG1=1 & (dG1=0 | dG1=1))-> 1: (yG1'=yG1+1) & (dG1'=1);
+  [g1] (xG1=10 & yG1=1 & (dG1=3 | dG1=2)) -> 1: (xG1'=xG1-1) & (dG1'=2);
+  [g1] (xG1=10 & yG1=6 & (dG1=0 | dG1=3)) -> 1: (yG1'=yG1-1) & (dG1'=3);
+  [g1] (xG1=10 & yG1=6 & (dG1=1 | dG1=2)) -> 1: (xG1'=xG1-1) & (dG1'=2);
+
+
+  //crossing at position (3, 1)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g1] (xG1=3 & yG1=1 & dG1=0 & xG1<xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=3 & yG1=1 & dG1=3 & xG1<xP & yG1=yP ) -> 0.92: (xG1'=xG1+1) & (dG1'=0) + 0.08: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=3 & yG1=1 & dG1=2 & xG1<xP & yG1=yP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g1] (xG1=3 & yG1=1 & dG1=0 & yG1<yP & xG1=xP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=3 & yG1=1 & dG1=3 & yG1<yP & xG1=xP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=3 & yG1=1 & dG1=2 & yG1<yP & xG1=xP ) -> 0.8: (yG1'=yG1+1) & (dG1'=1) + 0.2: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g1] (xG1=3 & yG1=1 & dG1=0 & xG1>xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=3 & yG1=1 & dG1=3 & xG1>xP & yG1=yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=3 & yG1=1 & dG1=2 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=3 & yG1=1 & dG1=0 & xG1<xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=3 & yG1=1 & dG1=3 & xG1<xP & yG1<yP ) -> 0.78: (xG1'=xG1+1) & (dG1'=0) + 0.22: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=3 & yG1=1 & dG1=2 & xG1<xP & yG1<yP ) -> 0.86: (yG1'=yG1+1) & (dG1'=1) + 0.14: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=3 & yG1=1 & dG1=0 & xG1>xP & yG1<yP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=3 & yG1=1 & dG1=3 & xG1>xP & yG1<yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=3 & yG1=1 & dG1=2 & xG1>xP & yG1<yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=3 & yG1=1 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (6, 1)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g1] (xG1=6 & yG1=1 & dG1=0 & xG1<xP & yG1=yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=6 & yG1=1 & dG1=3 & xG1<xP & yG1=yP ) -> 0.64: (xG1'=xG1+1) & (dG1'=0) + 0.36: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=6 & yG1=1 & dG1=2 & xG1<xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g1] (xG1=6 & yG1=1 & dG1=0 & yG1<yP & xG1=xP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=6 & yG1=1 & dG1=3 & yG1<yP & xG1=xP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=6 & yG1=1 & dG1=2 & yG1<yP & xG1=xP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g1] (xG1=6 & yG1=1 & dG1=0 & xG1>xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=6 & yG1=1 & dG1=3 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=6 & yG1=1 & dG1=2 & xG1>xP & yG1=yP ) -> 0.22: (yG1'=yG1+1) & (dG1'=1) + 0.78: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=6 & yG1=1 & dG1=0 & xG1<xP & yG1<yP ) -> 0.46: (xG1'=xG1+1) & (dG1'=0) + 0.54: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=6 & yG1=1 & dG1=3 & xG1<xP & yG1<yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=6 & yG1=1 & dG1=2 & xG1<xP & yG1<yP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=6 & yG1=1 & dG1=0 & xG1>xP & yG1<yP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=6 & yG1=1 & dG1=3 & xG1>xP & yG1<yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=6 & yG1=1 & dG1=2 & xG1>xP & yG1<yP ) -> 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.67: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=6 & yG1=1 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (8, 1)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g1] (xG1=8 & yG1=1 & dG1=0 & xG1<xP & yG1=yP ) -> 0.4: (xG1'=xG1+1) & (dG1'=0) + 0.6: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=8 & yG1=1 & dG1=3 & xG1<xP & yG1=yP ) -> 0.92: (xG1'=xG1+1) & (dG1'=0) + 0.08: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=8 & yG1=1 & dG1=2 & xG1<xP & yG1=yP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g1] (xG1=8 & yG1=1 & dG1=0 & yG1<yP & xG1=xP ) -> 0.4: (xG1'=xG1+1) & (dG1'=0) + 0.6: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=8 & yG1=1 & dG1=3 & yG1<yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=8 & yG1=1 & dG1=2 & yG1<yP & xG1=xP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g1] (xG1=8 & yG1=1 & dG1=0 & xG1>xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=8 & yG1=1 & dG1=3 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=8 & yG1=1 & dG1=2 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=8 & yG1=1 & dG1=0 & xG1<xP & yG1<yP ) -> 0.36: (xG1'=xG1+1) & (dG1'=0) + 0.64: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=8 & yG1=1 & dG1=3 & xG1<xP & yG1<yP ) -> 0.75: (xG1'=xG1+1) & (dG1'=0) + 0.25: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=8 & yG1=1 & dG1=2 & xG1<xP & yG1<yP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=8 & yG1=1 & dG1=0 & xG1>xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=8 & yG1=1 & dG1=3 & xG1>xP & yG1<yP ) -> 0.2: (xG1'=xG1+1) & (dG1'=0) + 0.8: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=8 & yG1=1 & dG1=2 & xG1>xP & yG1<yP ) -> 0.67: (yG1'=yG1+1) & (dG1'=1) + 0.33: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=8 & yG1=1 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (3, 4)  [center crossing]
+
+  //- positioning pacman = r
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & xG1<xP & yG1=yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & xG1<xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & xG1<xP & yG1=yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & xG1<xP & yG1=yP ) -> 0.61: (xG1'=xG1+1) & (dG1'=0) + 0.26: (xG1'=xG1-1) & (dG1'=2) + 0.13: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = u
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & yG1<yP & xG1=xP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & yG1<yP & xG1=xP ) -> 0.16: (xG1'=xG1+1) & (dG1'=0) + 0.67: (yG1'=yG1+1) & (dG1'=1) + 0.17: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & yG1<yP & xG1=xP ) -> 0.28: (yG1'=yG1+1) & (dG1'=1) + 0.43: (xG1'=xG1-1) & (dG1'=2) + 0.29: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & yG1<yP & xG1=xP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (xG1'=xG1-1) & (dG1'=2) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = l
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & xG1>xP & yG1=yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & xG1>xP & yG1=yP ) -> 0.34: (yG1'=yG1+1) & (dG1'=1) + 0.33: (xG1'=xG1-1) & (dG1'=2) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & xG1>xP & yG1=yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (xG1'=xG1-1) & (dG1'=2) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = d
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & yG1>yP & xG1=xP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & yG1>yP & xG1=xP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & yG1>yP & xG1=xP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & yG1>yP & xG1=xP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & xG1<xP & yG1<yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & xG1<xP & yG1<yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & xG1<xP & yG1<yP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.25: (xG1'=xG1-1) & (dG1'=2) + 0.25: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & xG1<xP & yG1<yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & xG1>xP & yG1<yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & xG1>xP & yG1<yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & xG1>xP & yG1<yP ) -> 0.34: (yG1'=yG1+1) & (dG1'=1) + 0.33: (xG1'=xG1-1) & (dG1'=2) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & xG1>xP & yG1<yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (xG1'=xG1-1) & (dG1'=2) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = d-r
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & xG1<xP & yG1>yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & xG1<xP & yG1>yP ) -> 0.67: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & xG1<xP & yG1>yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & xG1<xP & yG1>yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- positioning pacman = d-l
+
+  [g1] (xG1=3 & yG1=4 & dG1=0 & xG1>xP & yG1>yP ) -> 0.34: (xG1'=xG1+1) & (dG1'=0) + 0.33: (yG1'=yG1+1) & (dG1'=1) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right, up or down
+  [g1] (xG1=3 & yG1=4 & dG1=1 & xG1>xP & yG1>yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right, up or left
+  [g1] (xG1=3 & yG1=4 & dG1=2 & xG1>xP & yG1>yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go up, left or down
+  [g1] (xG1=3 & yG1=4 & dG1=3 & xG1>xP & yG1>yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go right, left or down
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=3 & yG1=4 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (5, 4)  [t-up crossing]
+ 
+  //- positioning pacman = r
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & xG1<xP & yG1=yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & xG1<xP & yG1=yP ) -> 0.89: (xG1'=xG1+1) & (dG1'=0) + 0.11: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & xG1<xP & yG1=yP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & yG1<yP & xG1=xP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & yG1<yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & yG1<yP & xG1=xP ) -> 0.83: (yG1'=yG1+1) & (dG1'=1) + 0.17: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = l
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & xG1>xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & xG1>xP & yG1=yP ) -> 0.17: (xG1'=xG1+1) & (dG1'=0) + 0.83: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & xG1>xP & yG1=yP ) -> 0.17: (yG1'=yG1+1) & (dG1'=1) + 0.83: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = d
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & yG1>yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & yG1>yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & yG1>yP & xG1=xP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & xG1<xP & yG1<yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & xG1<xP & yG1<yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & xG1<xP & yG1<yP ) -> 0.75: (yG1'=yG1+1) & (dG1'=1) + 0.25: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & xG1>xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & xG1>xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & xG1>xP & yG1<yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = d-r
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & xG1<xP & yG1>yP ) -> 0.95: (xG1'=xG1+1) & (dG1'=0) + 0.05: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & xG1<xP & yG1>yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & xG1<xP & yG1>yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- positioning pacman = d-l
+
+  [g1] (xG1=5 & yG1=4 & dG1=0 & xG1>xP & yG1>yP ) -> 1.0: (yG1'=yG1+1) & (dG1'=1);  // ghost is moving to the right -> continues to go right or up
+  [g1] (xG1=5 & yG1=4 & dG1=3 & xG1>xP & yG1>yP ) -> 0.11: (xG1'=xG1+1) & (dG1'=0) + 0.89: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go right or left
+  [g1] (xG1=5 & yG1=4 & dG1=2 & xG1>xP & yG1>yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving to the left -> continues to go up or left
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=5 & yG1=4 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (6, 4)  [t-down crossing]
+ 
+  //- positioning pacman = r
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & xG1<xP & yG1=yP ) -> 0.57: (xG1'=xG1+1) & (dG1'=0) + 0.43: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & xG1<xP & yG1=yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & xG1<xP & yG1=yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & yG1<yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & yG1<yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & yG1<yP & xG1=xP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = l
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & xG1>xP & yG1=yP ) -> 0.75: (xG1'=xG1-1) & (dG1'=2) + 0.25: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & yG1>yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & yG1>yP & xG1=xP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & yG1>yP & xG1=xP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & xG1<xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & xG1<xP & yG1<yP ) -> 0.89: (xG1'=xG1+1) & (dG1'=0) + 0.11: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & xG1<xP & yG1<yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & xG1>xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & xG1>xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & xG1>xP & yG1<yP ) -> 0.67: (xG1'=xG1-1) & (dG1'=2) + 0.33: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-r
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & xG1<xP & yG1>yP ) -> 0.69: (xG1'=xG1+1) & (dG1'=0) + 0.31: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & xG1<xP & yG1>yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & xG1<xP & yG1>yP ) -> 0.33: (xG1'=xG1-1) & (dG1'=2) + 0.67: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-l
+
+  [g1] (xG1=6 & yG1=4 & dG1=0 & xG1>xP & yG1>yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=6 & yG1=4 & dG1=1 & xG1>xP & yG1>yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=6 & yG1=4 & dG1=2 & xG1>xP & yG1>yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving left -> continues to go left or down
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=6 & yG1=4 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (8, 4)  [t-down crossing]
+ 
+  //- positioning pacman = r
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & xG1<xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & xG1<xP & yG1=yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & xG1<xP & yG1=yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & yG1<yP & xG1=xP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & yG1<yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & yG1<yP & xG1=xP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = l
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & xG1>xP & yG1=yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & xG1>xP & yG1=yP ) -> 0.44: (xG1'=xG1+1) & (dG1'=0) + 0.56: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & xG1>xP & yG1=yP ) -> 0.83: (xG1'=xG1-1) & (dG1'=2) + 0.17: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & yG1>yP & xG1=xP ) -> 0.43: (xG1'=xG1+1) & (dG1'=0) + 0.57: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & yG1>yP & xG1=xP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & yG1>yP & xG1=xP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-r
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & xG1<xP & yG1<yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & xG1<xP & yG1<yP ) -> 1.0: (xG1'=xG1+1) & (dG1'=0);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & xG1<xP & yG1<yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & xG1>xP & yG1<yP ) -> 0.33: (xG1'=xG1+1) & (dG1'=0) + 0.67: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & xG1>xP & yG1<yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & xG1>xP & yG1<yP ) -> 0.83: (xG1'=xG1-1) & (dG1'=2) + 0.17: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-r
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & xG1<xP & yG1>yP ) -> 0.56: (xG1'=xG1+1) & (dG1'=0) + 0.44: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & xG1<xP & yG1>yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & xG1<xP & yG1>yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- positioning pacman = d-l
+
+  [g1] (xG1=8 & yG1=4 & dG1=0 & xG1>xP & yG1>yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go right or down
+  [g1] (xG1=8 & yG1=4 & dG1=1 & xG1>xP & yG1>yP ) -> 0.5: (xG1'=xG1+1) & (dG1'=0) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go right or left
+  [g1] (xG1=8 & yG1=4 & dG1=2 & xG1>xP & yG1>yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving left -> continues to go left or down
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=8 & yG1=4 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+
+  //crossing at position (10, 4)  [t-left crossing]
+
+  //- positioning pacman = u
+
+  [g1] (xG1=10 & yG1=4 & dG1=0 & yG1<yP & xG1=xP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go up or down
+  [g1] (xG1=10 & yG1=4 & dG1=1 & yG1<yP & xG1=xP ) -> 0.45: (yG1'=yG1+1) & (dG1'=1) + 0.55: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go up or left
+  [g1] (xG1=10 & yG1=4 & dG1=3 & yG1<yP & xG1=xP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = l
+
+  [g1] (xG1=10 & yG1=4 & dG1=0 & xG1>xP & yG1=yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go up or down
+  [g1] (xG1=10 & yG1=4 & dG1=1 & xG1>xP & yG1=yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go up or left
+  [g1] (xG1=10 & yG1=4 & dG1=3 & xG1>xP & yG1=yP ) -> 0.79: (xG1'=xG1-1) & (dG1'=2) + 0.21: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = d
+
+  [g1] (xG1=10 & yG1=4 & dG1=0 & yG1>yP & xG1=xP ) -> 0.2: (yG1'=yG1+1) & (dG1'=1) + 0.8: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go up or down
+  [g1] (xG1=10 & yG1=4 & dG1=1 & yG1>yP & xG1=xP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go up or left
+  [g1] (xG1=10 & yG1=4 & dG1=3 & yG1>yP & xG1=xP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = u-l
+
+  [g1] (xG1=10 & yG1=4 & dG1=0 & xG1>xP & yG1<yP ) -> 0.75: (yG1'=yG1+1) & (dG1'=1) + 0.25: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go up or down
+  [g1] (xG1=10 & yG1=4 & dG1=1 & xG1>xP & yG1<yP ) -> 0.44: (yG1'=yG1+1) & (dG1'=1) + 0.56: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go up or left
+  [g1] (xG1=10 & yG1=4 & dG1=3 & xG1>xP & yG1<yP ) -> 1.0: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving down -> continues to go left or down
+
+  //- positioning pacman = d-l
+
+  [g1] (xG1=10 & yG1=4 & dG1=0 & xG1>xP & yG1>yP ) -> 1.0: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving to the right -> continues to go up or down
+  [g1] (xG1=10 & yG1=4 & dG1=1 & xG1>xP & yG1>yP ) -> 0.5: (yG1'=yG1+1) & (dG1'=1) + 0.5: (xG1'=xG1-1) & (dG1'=2);  // ghost is moving up -> continues to go up or left
+  [g1] (xG1=10 & yG1=4 & dG1=3 & xG1>xP & yG1>yP ) -> 0.5: (xG1'=xG1-1) & (dG1'=2) + 0.5: (yG1'=yG1-1) & (dG1'=3);  // ghost is moving down -> continues to go left or down
+
+  //- position pacman == position ghost
+
+  [g1] (xG1=10 & yG1=4 &  xG1=xP & yG1=yP) -> 1: (xG1'=xG1);
+endmodule
+
+//PACMAN
+module pacman
+  xP : [1..xSize] init 1;// x position of Pacman
+  yP : [1..ySize] init 1;// y position of Pacman
+  dP : [0 .. 3] init 0; //direction of pacman (0=right, 1=up, 2=left, 3=down)
+
+  //horizontal corridor
+  [p] (yP=1 & xP >=2 & xP <=2 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=1 & xP >=2 & xP <=2 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=1 & xP >=4 & xP <=5 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=1 & xP >=4 & xP <=5 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=1 & xP >=7 & xP <=7 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=1 & xP >=7 & xP <=7 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=1 & xP >=9 & xP <=9 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=1 & xP >=9 & xP <=9 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=4 & xP >=2 & xP <=2 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=4 & xP >=2 & xP <=2 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=4 & xP >=4 & xP <=4 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=4 & xP >=4 & xP <=4 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=4 & xP >=7 & xP <=7 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=4 & xP >=7 & xP <=7 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=4 & xP >=9 & xP <=9 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=4 & xP >=9 & xP <=9 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=6 & xP >=2 & xP <=2 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=6 & xP >=2 & xP <=2 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+  //horizontal corridor
+  [p] (yP=6 & xP >=6 & xP <=9 & dP =0) -> 1:(xP'=xP+1) & (dP'=0); 
+  [p] (yP=6 & xP >=6 & xP <=9 & dP =2) -> 1:(xP'=xP-1) & (dP'=2); 
+
+  //vertical corridor
+  [p] (xP=1 & yP >=2 & yP <=3 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=1 & yP >=2 & yP <=3 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=3 & yP >=2 & yP <=3 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=3 & yP >=2 & yP <=3 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=3 & yP >=5 & yP <=5 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=3 & yP >=5 & yP <=5 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=5 & yP >=5 & yP <=5 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=5 & yP >=5 & yP <=5 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=6 & yP >=2 & yP <=3 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=6 & yP >=2 & yP <=3 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=8 & yP >=2 & yP <=3 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=8 & yP >=2 & yP <=3 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=10 & yP >=2 & yP <=3 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=10 & yP >=2 & yP <=3 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+  //vertical corridor
+  [p] (xP=10 & yP >=5 & yP <=5 & dP=1) -> 1:(yP'=yP+1) & (dP'=1); 
+  [p] (xP=10 & yP >=5 & yP <=5 & dP =3) -> 1:(yP'=yP-1) & (dP'=3); 
+
+  //deadends
+  [p] (xP=1 & yP=6) -> 1: (xP'=xP+1) & (dP'=0);
+
+  //corners
+  [p] (xP=1 & yP=1 & (dP=2 | dP=1))-> 1: (yP'=yP+1) & (dP'=1);
+  [p] (xP=1 & yP=1 & (dP=3 | dP=0)) -> 1: (xP'=xP+1) & (dP'=0);
+  [p] (xP=1 & yP=4 & (dP=2 | dP=3)) -> 1: (yP'=yP-1) & (dP'=3);
+  [p] (xP=1 & yP=4 & (dP=1 | dP=0)) -> 1: (xP'=xP+1) & (dP'=0);
+  [p] (xP=3 & yP=6 & (dP=0 | dP=3)) -> 1: (yP'=yP-1) & (dP'=3);
+  [p] (xP=3 & yP=6 & (dP=1 | dP=2)) -> 1: (xP'=xP-1) & (dP'=2);
+  [p] (xP=5 & yP=6 & (dP=2 | dP=3)) -> 1: (yP'=yP-1) & (dP'=3);
+  [p] (xP=5 & yP=6 & (dP=1 | dP=0)) -> 1: (xP'=xP+1) & (dP'=0);
+  [p] (xP=10 & yP=1 & (dP=0 | dP=1))-> 1: (yP'=yP+1) & (dP'=1);
+  [p] (xP=10 & yP=1 & (dP=3 | dP=2)) -> 1: (xP'=xP-1) & (dP'=2);
+  [p] (xP=10 & yP=6 & (dP=0 | dP=3)) -> 1: (yP'=yP-1) & (dP'=3);
+  [p] (xP=10 & yP=6 & (dP=1 | dP=2)) -> 1: (xP'=xP-1) & (dP'=2);
+
+  // crossing at position(3, 1)
+
+  [right] (xP=3 & yP=1) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=3 & yP=1) -> 1: (yP'=yP+1) & (dP'=1);
+  [left] (xP=3 & yP=1) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=3 & yP=1 & pMove=2) -> 1: (xP'=xP);
+
+  // crossing at position(6, 1)
+
+  [right] (xP=6 & yP=1) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=6 & yP=1) -> 1: (yP'=yP+1) & (dP'=1);
+  [left] (xP=6 & yP=1) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=6 & yP=1 & pMove=2) -> 1: (xP'=xP);
+
+  // crossing at position(8, 1)
+
+  [right] (xP=8 & yP=1) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=8 & yP=1) -> 1: (yP'=yP+1) & (dP'=1);
+  [left] (xP=8 & yP=1) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=8 & yP=1 & pMove=2) -> 1: (xP'=xP);
+
+  // crossing at position(3, 4)
+
+  [right] (xP=3 & yP=4) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=3 & yP=4) -> 1: (yP'=yP+1) & (dP'=1);
+  [left] (xP=3 & yP=4) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=3 & yP=4) -> 1: (yP'=yP-1) & (dP'=3);
+
+  // crossing at position(5, 4)
+
+  [right] (xP=5 & yP=4) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=5 & yP=4) -> 1: (yP'=yP+1) & (dP'=1);
+  [left] (xP=5 & yP=4) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=5 & yP=4 & pMove=2) -> 1: (xP'=xP);
+
+  // crossing at position(6, 4)
+
+  [right] (xP=6 & yP=4) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=6 & yP=4 & pMove=2) -> 1: (xP'=xP);
+  [left] (xP=6 & yP=4) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=6 & yP=4) -> 1: (yP'=yP-1) & (dP'=3);
+
+  // crossing at position(8, 4)
+
+  [right] (xP=8 & yP=4) -> 1: (xP'=xP+1) & (dP'=0);
+  [up] (xP=8 & yP=4 & pMove=2) -> 1: (xP'=xP);
+  [left] (xP=8 & yP=4) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=8 & yP=4) -> 1: (yP'=yP-1) & (dP'=3);
+
+  // crossing at position(10, 4)
+
+  [right] (xP=10 & yP=4 & pMove=2) -> 1: (xP'=xP);
+  [up] (xP=10 & yP=4) -> 1: (yP'=yP+1) & (dP'=1);
+  [left] (xP=10 & yP=4) -> 1: (xP'=xP-1) & (dP'=2);
+  [down] (xP=10 & yP=4) -> 1: (yP'=yP-1) & (dP'=3);
+
+endmodule
+
+//CRASH
+label "Crash" = (xP = xG0 & yP = yG0) | (xP = xG1 & yP = yG1);
+//label "Safe" = deactive0 & deactive1;
+

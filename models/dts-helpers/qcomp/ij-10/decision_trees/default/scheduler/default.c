@@ -20,7 +20,7 @@ float classify(const float x[]) {
 									return 0.0f;
 								}
 								else {
-									return 9.0f;
+									return 8.0f;
 								}
 
 							}
@@ -34,7 +34,7 @@ float classify(const float x[]) {
 									}
 									else {
 										if (x[2] <= 0.5) {
-											return 9.0f;
+											return 8.0f;
 										}
 										else {
 											return 0.0f;
@@ -68,14 +68,8 @@ float classify(const float x[]) {
 
 								}
 								else {
-									if (x[2] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
+									if (x[10] <= 0.5) {
+										return 1.0f;
 									}
 									else {
 										return 0.0f;
@@ -89,35 +83,8 @@ float classify(const float x[]) {
 
 					}
 					else {
-						if (x[1] <= 0.5) {
-							if (x[2] <= 0.5) {
-								return 6.0f;
-							}
-							else {
-								if (x[8] <= 0.5) {
-									if (x[9] <= 0.5) {
-										return 6.0f;
-									}
-									else {
-										return 1.0f;
-									}
-
-								}
-								else {
-									if (x[10] <= 0.5) {
-										return 6.0f;
-									}
-									else {
-										return 8.0f;
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[8] <= 0.5) {
+						if (x[8] <= 0.5) {
+							if (x[1] <= 0.5) {
 								if (x[2] <= 0.5) {
 									return 6.0f;
 								}
@@ -126,13 +93,28 @@ float classify(const float x[]) {
 										return 6.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 6.0f;
-										}
+										return 1.0f;
+									}
 
+								}
+
+							}
+							else {
+								return 6.0f;
+							}
+
+						}
+						else {
+							if (x[1] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 6.0f;
+								}
+								else {
+									if (x[10] <= 0.5) {
+										return 6.0f;
+									}
+									else {
+										return 4.0f;
 									}
 
 								}
@@ -173,55 +155,55 @@ float classify(const float x[]) {
 				}
 				else {
 					if (x[1] <= 0.5) {
-						if (x[2] <= 0.5) {
-							return 5.0f;
-						}
-						else {
-							if (x[7] <= 0.5) {
-								if (x[8] <= 0.5) {
-									return 5.0f;
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 8.0f;
-										}
-										else {
+						if (x[7] <= 0.5) {
+							if (x[9] <= 0.5) {
+								if (x[10] <= 0.5) {
+									if (x[2] <= 0.5) {
+										return 5.0f;
+									}
+									else {
+										if (x[8] <= 0.5) {
 											return 5.0f;
 										}
+										else {
+											return 4.0f;
+										}
 
+									}
+
+								}
+								else {
+									return 5.0f;
+								}
+
+							}
+							else {
+								return 5.0f;
+							}
+
+						}
+						else {
+							if (x[2] <= 0.5) {
+								return 5.0f;
+							}
+							else {
+								if (x[9] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 5.0f;
+									}
+									else {
+										return 8.0f;
+									}
+
+								}
+								else {
+									if (x[10] <= 0.5) {
+										return 6.0f;
 									}
 									else {
 										return 5.0f;
 									}
 
-								}
-
-							}
-							else {
-								if (x[8] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-
-								}
-								else {
-									return 5.0f;
 								}
 
 							}
@@ -231,41 +213,8 @@ float classify(const float x[]) {
 					}
 					else {
 						if (x[7] <= 0.5) {
-							if (x[2] <= 0.5) {
-								if (x[10] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										return 5.0f;
-									}
-
-								}
-
-							}
-							else {
-								if (x[8] <= 0.5) {
+							if (x[8] <= 0.5) {
+								if (x[2] <= 0.5) {
 									if (x[9] <= 0.5) {
 										if (x[10] <= 0.5) {
 											return 5.0f;
@@ -283,6 +232,33 @@ float classify(const float x[]) {
 											return 5.0f;
 										}
 
+									}
+
+								}
+								else {
+									if (x[9] <= 0.5) {
+										if (x[10] <= 0.5) {
+											return 5.0f;
+										}
+										else {
+											return 0.0f;
+										}
+
+									}
+									else {
+										return 5.0f;
+									}
+
+								}
+
+							}
+							else {
+								if (x[2] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 0.0f;
+									}
+									else {
+										return 5.0f;
 									}
 
 								}
@@ -309,13 +285,7 @@ float classify(const float x[]) {
 							if (x[2] <= 0.5) {
 								if (x[9] <= 0.5) {
 									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
+										return 5.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
@@ -334,30 +304,24 @@ float classify(const float x[]) {
 
 							}
 							else {
-								if (x[10] <= 0.5) {
+								if (x[9] <= 0.5) {
 									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
 										return 5.0f;
 									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[8] <= 0.5) {
+									else {
+										if (x[10] <= 0.5) {
 											return 5.0f;
 										}
 										else {
 											return 7.0f;
 										}
 
+									}
+
+								}
+								else {
+									if (x[10] <= 0.5) {
+										return 5.0f;
 									}
 									else {
 										return 0.0f;
@@ -380,15 +344,15 @@ float classify(const float x[]) {
 						if (x[7] <= 0.5) {
 							if (x[2] <= 0.5) {
 								if (x[8] <= 0.5) {
-									return 4.0f;
+									return 9.0f;
 								}
 								else {
 									if (x[9] <= 0.5) {
-										return 4.0f;
+										return 9.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
-											return 4.0f;
+											return 9.0f;
 										}
 										else {
 											return 7.0f;
@@ -402,21 +366,21 @@ float classify(const float x[]) {
 							else {
 								if (x[8] <= 0.5) {
 									if (x[9] <= 0.5) {
-										return 4.0f;
+										return 9.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
-											return 4.0f;
+											return 9.0f;
 										}
 										else {
-											return 8.0f;
+											return 4.0f;
 										}
 
 									}
 
 								}
 								else {
-									return 4.0f;
+									return 9.0f;
 								}
 
 							}
@@ -425,11 +389,11 @@ float classify(const float x[]) {
 						else {
 							if (x[10] <= 0.5) {
 								if (x[2] <= 0.5) {
-									return 4.0f;
+									return 9.0f;
 								}
 								else {
 									if (x[8] <= 0.5) {
-										return 4.0f;
+										return 9.0f;
 									}
 									else {
 										return 6.0f;
@@ -445,10 +409,10 @@ float classify(const float x[]) {
 								else {
 									if (x[8] <= 0.5) {
 										if (x[9] <= 0.5) {
-											return 4.0f;
+											return 9.0f;
 										}
 										else {
-											return 8.0f;
+											return 4.0f;
 										}
 
 									}
@@ -474,16 +438,10 @@ float classify(const float x[]) {
 							if (x[8] <= 0.5) {
 								if (x[9] <= 0.5) {
 									if (x[2] <= 0.5) {
-										return 4.0f;
+										return 9.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 8.0f;
-										}
-
+										return 4.0f;
 									}
 
 								}
@@ -502,7 +460,7 @@ float classify(const float x[]) {
 											return 1.0f;
 										}
 										else {
-											return 4.0f;
+											return 9.0f;
 										}
 
 									}
@@ -511,8 +469,8 @@ float classify(const float x[]) {
 
 							}
 							else {
-								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
+								if (x[9] <= 0.5) {
+									if (x[2] <= 0.5) {
 										if (x[10] <= 0.5) {
 											return 5.0f;
 										}
@@ -522,32 +480,26 @@ float classify(const float x[]) {
 
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
+										return 7.0f;
 									}
 
 								}
 								else {
-									if (x[9] <= 0.5) {
+									if (x[2] <= 0.5) {
 										if (x[10] <= 0.5) {
 											return 7.0f;
 										}
 										else {
-											return 4.0f;
+											return 9.0f;
 										}
 
 									}
 									else {
 										if (x[10] <= 0.5) {
-											return 4.0f;
+											return 9.0f;
 										}
 										else {
-											return 8.0f;
+											return 4.0f;
 										}
 
 									}
@@ -558,31 +510,37 @@ float classify(const float x[]) {
 
 						}
 						else {
-							if (x[2] <= 0.5) {
-								return 4.0f;
-							}
-							else {
-								if (x[8] <= 0.5) {
-									return 4.0f;
+							if (x[9] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 9.0f;
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 8.0f;
-										}
-
+									if (x[8] <= 0.5) {
+										return 9.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
-											return 1.0f;
+											return 9.0f;
 										}
 										else {
 											return 4.0f;
 										}
 
+									}
+
+								}
+
+							}
+							else {
+								if (x[8] <= 0.5) {
+									return 9.0f;
+								}
+								else {
+									if (x[10] <= 0.5) {
+										return 1.0f;
+									}
+									else {
+										return 9.0f;
 									}
 
 								}
@@ -597,103 +555,67 @@ float classify(const float x[]) {
 				else {
 					if (x[7] <= 0.5) {
 						if (x[8] <= 0.5) {
-							if (x[6] <= 0.5) {
+							if (x[10] <= 0.5) {
 								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 4.0f;
-									}
-
+									return 9.0f;
 								}
 								else {
-									return 4.0f;
+									if (x[6] <= 0.5) {
+										return 9.0f;
+									}
+									else {
+										return 1.0f;
+									}
+
 								}
 
 							}
 							else {
-								if (x[9] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
+								if (x[6] <= 0.5) {
+									if (x[9] <= 0.5) {
+										return 0.0f;
 									}
 									else {
-										return 0.0f;
+										return 9.0f;
 									}
 
 								}
 								else {
-									if (x[2] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 1.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
+									return 0.0f;
 								}
 
 							}
 
 						}
 						else {
-							if (x[9] <= 0.5) {
-								if (x[6] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
+							if (x[6] <= 0.5) {
+								if (x[2] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 0.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
+										if (x[9] <= 0.5) {
+											return 9.0f;
 										}
 										else {
-											return 0.0f;
+											return 7.0f;
 										}
 
 									}
 
 								}
 								else {
-									if (x[2] <= 0.5) {
-										return 4.0f;
-									}
-									else {
+									if (x[9] <= 0.5) {
 										if (x[10] <= 0.5) {
-											return 7.0f;
+											return 9.0f;
 										}
 										else {
-											return 4.0f;
+											return 0.0f;
 										}
 
+									}
+									else {
+										return 9.0f;
 									}
 
 								}
@@ -701,29 +623,23 @@ float classify(const float x[]) {
 							}
 							else {
 								if (x[2] <= 0.5) {
-									if (x[6] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 7.0f;
-										}
-
+									if (x[9] <= 0.5) {
+										return 9.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
 											return 7.0f;
 										}
 										else {
-											return 4.0f;
+											return 9.0f;
 										}
 
 									}
 
 								}
 								else {
-									if (x[6] <= 0.5) {
-										return 4.0f;
+									if (x[9] <= 0.5) {
+										return 7.0f;
 									}
 									else {
 										return 0.0f;
@@ -737,107 +653,35 @@ float classify(const float x[]) {
 
 					}
 					else {
-						if (x[2] <= 0.5) {
-							if (x[6] <= 0.5) {
+						if (x[6] <= 0.5) {
+							if (x[2] <= 0.5) {
 								if (x[8] <= 0.5) {
 									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
+										return 6.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
 											return 6.0f;
 										}
 										else {
-											return 4.0f;
+											return 9.0f;
 										}
 
 									}
 
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 6.0f;
-									}
-
+									return 6.0f;
 								}
 
 							}
 							else {
-								if (x[8] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[8] <= 0.5) {
-								if (x[6] <= 0.5) {
-									if (x[9] <= 0.5) {
+								if (x[9] <= 0.5) {
+									if (x[8] <= 0.5) {
 										return 0.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
+										return 6.0f;
 									}
 
 								}
@@ -846,11 +690,23 @@ float classify(const float x[]) {
 								}
 
 							}
+
+						}
+						else {
+							if (x[8] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 6.0f;
+								}
+								else {
+									return 0.0f;
+								}
+
+							}
 							else {
-								if (x[6] <= 0.5) {
+								if (x[2] <= 0.5) {
 									if (x[9] <= 0.5) {
 										if (x[10] <= 0.5) {
-											return 6.0f;
+											return 9.0f;
 										}
 										else {
 											return 0.0f;
@@ -858,14 +714,20 @@ float classify(const float x[]) {
 
 									}
 									else {
-										return 0.0f;
+										if (x[10] <= 0.5) {
+											return 0.0f;
+										}
+										else {
+											return 9.0f;
+										}
+
 									}
 
 								}
 								else {
 									if (x[9] <= 0.5) {
 										if (x[10] <= 0.5) {
-											return 4.0f;
+											return 9.0f;
 										}
 										else {
 											return 0.0f;
@@ -873,7 +735,7 @@ float classify(const float x[]) {
 
 									}
 									else {
-										return 4.0f;
+										return 9.0f;
 									}
 
 								}
@@ -893,15 +755,15 @@ float classify(const float x[]) {
 			if (x[1] <= 0.5) {
 				if (x[6] <= 0.5) {
 					if (x[5] <= 0.5) {
-						if (x[10] <= 0.5) {
-							if (x[7] <= 0.5) {
-								if (x[2] <= 0.5) {
+						if (x[7] <= 0.5) {
+							if (x[2] <= 0.5) {
+								if (x[10] <= 0.5) {
 									if (x[8] <= 0.5) {
-										return 3.0f;
+										return 2.0f;
 									}
 									else {
 										if (x[9] <= 0.5) {
-											return 3.0f;
+											return 2.0f;
 										}
 										else {
 											return 7.0f;
@@ -911,14 +773,20 @@ float classify(const float x[]) {
 
 								}
 								else {
-									return 3.0f;
+									return 2.0f;
 								}
 
 							}
 							else {
+								return 2.0f;
+							}
+
+						}
+						else {
+							if (x[10] <= 0.5) {
 								if (x[2] <= 0.5) {
 									if (x[8] <= 0.5) {
-										return 3.0f;
+										return 2.0f;
 									}
 									else {
 										return 6.0f;
@@ -936,34 +804,28 @@ float classify(const float x[]) {
 
 									}
 									else {
-										return 3.0f;
+										return 2.0f;
 									}
 
 								}
 
 							}
-
-						}
-						else {
-							if (x[2] <= 0.5) {
-								return 3.0f;
-							}
 							else {
-								if (x[7] <= 0.5) {
-									return 3.0f;
+								if (x[2] <= 0.5) {
+									return 2.0f;
 								}
 								else {
 									if (x[8] <= 0.5) {
 										if (x[9] <= 0.5) {
-											return 9.0f;
+											return 8.0f;
 										}
 										else {
-											return 3.0f;
+											return 2.0f;
 										}
 
 									}
 									else {
-										return 3.0f;
+										return 2.0f;
 									}
 
 								}
@@ -975,104 +837,62 @@ float classify(const float x[]) {
 					}
 					else {
 						if (x[8] <= 0.5) {
-							if (x[9] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
+							if (x[2] <= 0.5) {
+								if (x[7] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 2.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 9.0f;
 									}
 
 								}
 								else {
-									if (x[7] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
+									return 2.0f;
 								}
 
 							}
 							else {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
+								if (x[7] <= 0.5) {
+									if (x[9] <= 0.5) {
 										if (x[10] <= 0.5) {
-											return 4.0f;
+											return 2.0f;
 										}
 										else {
-											return 3.0f;
+											return 9.0f;
 										}
 
 									}
 									else {
-										return 3.0f;
+										return 2.0f;
 									}
 
 								}
 								else {
-									if (x[7] <= 0.5) {
-										return 3.0f;
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
+									return 9.0f;
 								}
 
 							}
 
 						}
 						else {
-							if (x[7] <= 0.5) {
-								if (x[9] <= 0.5) {
-									if (x[10] <= 0.5) {
-										return 4.0f;
+							if (x[9] <= 0.5) {
+								if (x[2] <= 0.5) {
+									if (x[7] <= 0.5) {
+										return 9.0f;
 									}
 									else {
-										return 3.0f;
+										return 2.0f;
 									}
 
 								}
 								else {
-									return 3.0f;
+									return 2.0f;
 								}
 
 							}
 							else {
-								return 3.0f;
+								return 2.0f;
 							}
 
 						}
@@ -1081,49 +901,97 @@ float classify(const float x[]) {
 
 				}
 				else {
-					if (x[9] <= 0.5) {
-						if (x[5] <= 0.5) {
-							if (x[2] <= 0.5) {
-								if (x[7] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
+					if (x[5] <= 0.5) {
+						if (x[10] <= 0.5) {
+							if (x[8] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 2.0f;
 								}
 								else {
-									if (x[10] <= 0.5) {
+									if (x[7] <= 0.5) {
 										return 5.0f;
 									}
 									else {
-										return 3.0f;
+										return 2.0f;
 									}
 
 								}
 
 							}
 							else {
+								if (x[2] <= 0.5) {
+									if (x[7] <= 0.5) {
+										return 2.0f;
+									}
+									else {
+										return 5.0f;
+									}
+
+								}
+								else {
+									if (x[7] <= 0.5) {
+										return 5.0f;
+									}
+									else {
+										return 2.0f;
+									}
+
+								}
+
+							}
+
+						}
+						else {
+							if (x[2] <= 0.5) {
+								if (x[8] <= 0.5) {
+									if (x[7] <= 0.5) {
+										return 5.0f;
+									}
+									else {
+										return 2.0f;
+									}
+
+								}
+								else {
+									return 2.0f;
+								}
+
+							}
+							else {
 								if (x[7] <= 0.5) {
 									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 5.0f;
+										return 2.0f;
+									}
+									else {
+										if (x[9] <= 0.5) {
+											return 4.0f;
 										}
 										else {
-											return 3.0f;
+											return 2.0f;
 										}
 
 									}
+
+								}
+								else {
+									return 2.0f;
+								}
+
+							}
+
+						}
+
+					}
+					else {
+						if (x[8] <= 0.5) {
+							if (x[7] <= 0.5) {
+								if (x[9] <= 0.5) {
+									if (x[2] <= 0.5) {
+										return 5.0f;
+									}
 									else {
 										if (x[10] <= 0.5) {
-											return 3.0f;
+											return 5.0f;
 										}
 										else {
 											return 8.0f;
@@ -1133,7 +1001,22 @@ float classify(const float x[]) {
 
 								}
 								else {
-									return 3.0f;
+									if (x[10] <= 0.5) {
+										return 2.0f;
+									}
+									else {
+										return 5.0f;
+									}
+
+								}
+
+							}
+							else {
+								if (x[9] <= 0.5) {
+									return 9.0f;
+								}
+								else {
+									return 6.0f;
 								}
 
 							}
@@ -1141,185 +1024,26 @@ float classify(const float x[]) {
 						}
 						else {
 							if (x[10] <= 0.5) {
-								if (x[8] <= 0.5) {
-									if (x[2] <= 0.5) {
-										return 4.0f;
-									}
-									else {
-										if (x[7] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-								else {
-									return 3.0f;
-								}
-
-							}
-							else {
 								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										return 5.0f;
+									if (x[9] <= 0.5) {
+										return 2.0f;
 									}
 									else {
-										if (x[8] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
+										return 1.0f;
 									}
 
 								}
 								else {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 9.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-
-					}
-					else {
-						if (x[7] <= 0.5) {
-							if (x[2] <= 0.5) {
-								if (x[5] <= 0.5) {
-									return 3.0f;
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
+									return 2.0f;
 								}
 
 							}
 							else {
-								if (x[5] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 3.0f;
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
+								if (x[9] <= 0.5) {
+									return 8.0f;
 								}
 								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[2] <= 0.5) {
-								if (x[5] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 3.0f;
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 1.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[5] <= 0.5) {
-									return 3.0f;
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
+									return 2.0f;
 								}
 
 							}
@@ -1333,25 +1057,19 @@ float classify(const float x[]) {
 			}
 			else {
 				if (x[5] <= 0.5) {
-					if (x[6] <= 0.5) {
-						if (x[8] <= 0.5) {
-							if (x[7] <= 0.5) {
+					if (x[8] <= 0.5) {
+						if (x[7] <= 0.5) {
+							if (x[6] <= 0.5) {
 								if (x[2] <= 0.5) {
 									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
+										return 2.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
 											return 0.0f;
 										}
 										else {
-											return 3.0f;
+											return 2.0f;
 										}
 
 									}
@@ -1360,7 +1078,7 @@ float classify(const float x[]) {
 								else {
 									if (x[9] <= 0.5) {
 										if (x[10] <= 0.5) {
-											return 3.0f;
+											return 2.0f;
 										}
 										else {
 											return 0.0f;
@@ -1372,7 +1090,7 @@ float classify(const float x[]) {
 											return 0.0f;
 										}
 										else {
-											return 3.0f;
+											return 2.0f;
 										}
 
 									}
@@ -1383,108 +1101,48 @@ float classify(const float x[]) {
 							else {
 								if (x[2] <= 0.5) {
 									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 0.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
+										return 2.0f;
 									}
 
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
+									return 0.0f;
 								}
 
 							}
 
 						}
 						else {
-							if (x[7] <= 0.5) {
+							if (x[2] <= 0.5) {
 								if (x[9] <= 0.5) {
-									if (x[10] <= 0.5) {
-										return 0.0f;
-									}
-									else {
-										return 7.0f;
-									}
-
+									return 2.0f;
 								}
 								else {
 									if (x[10] <= 0.5) {
-										return 7.0f;
+										return 2.0f;
 									}
 									else {
-										return 3.0f;
+										return 8.0f;
 									}
 
 								}
 
 							}
 							else {
-								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 7.0f;
-										}
-
+								if (x[9] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 0.0f;
 									}
 									else {
-										return 3.0f;
+										return 8.0f;
 									}
 
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
+									return 1.0f;
 								}
 
 							}
@@ -1493,39 +1151,27 @@ float classify(const float x[]) {
 
 					}
 					else {
-						if (x[2] <= 0.5) {
-							if (x[7] <= 0.5) {
-								if (x[9] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+						if (x[6] <= 0.5) {
+							if (x[10] <= 0.5) {
+								if (x[7] <= 0.5) {
+									if (x[9] <= 0.5) {
+										return 0.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
+										return 7.0f;
 									}
 
 								}
 								else {
-									if (x[8] <= 0.5) {
-										return 3.0f;
+									if (x[2] <= 0.5) {
+										return 2.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
+										if (x[9] <= 0.5) {
+											return 2.0f;
 										}
 										else {
-											return 1.0f;
+											return 0.0f;
 										}
 
 									}
@@ -1534,84 +1180,54 @@ float classify(const float x[]) {
 
 							}
 							else {
-								if (x[8] <= 0.5) {
-									return 3.0f;
+								if (x[9] <= 0.5) {
+									return 7.0f;
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
+									return 2.0f;
 								}
 
 							}
 
 						}
 						else {
-							if (x[7] <= 0.5) {
-								if (x[8] <= 0.5) {
-									return 0.0f;
-								}
-								else {
-									if (x[9] <= 0.5) {
-										return 0.0f;
+							if (x[9] <= 0.5) {
+								if (x[2] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 2.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 0.0f;
 									}
 
+								}
+								else {
+									return 0.0f;
 								}
 
 							}
 							else {
-								if (x[9] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
+								if (x[10] <= 0.5) {
+									if (x[7] <= 0.5) {
+										return 0.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 5.0f;
 									}
 
 								}
 								else {
-									if (x[10] <= 0.5) {
-										return 5.0f;
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 0.0f;
+									if (x[2] <= 0.5) {
+										if (x[7] <= 0.5) {
+											return 1.0f;
 										}
 										else {
-											return 3.0f;
+											return 2.0f;
 										}
 
+									}
+									else {
+										return 2.0f;
 									}
 
 								}
@@ -1624,137 +1240,47 @@ float classify(const float x[]) {
 
 				}
 				else {
-					if (x[9] <= 0.5) {
-						if (x[6] <= 0.5) {
-							if (x[10] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
+					if (x[7] <= 0.5) {
+						if (x[2] <= 0.5) {
+							if (x[6] <= 0.5) {
+								if (x[10] <= 0.5) {
+									return 9.0f;
 								}
 								else {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
+									return 0.0f;
 								}
 
 							}
 							else {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										return 0.0f;
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
-								}
-
+								return 2.0f;
 							}
 
 						}
 						else {
-							if (x[10] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										return 3.0f;
-									}
-
+							if (x[8] <= 0.5) {
+								if (x[10] <= 0.5) {
+									return 0.0f;
 								}
 								else {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
+									return 2.0f;
 								}
 
 							}
 							else {
-								if (x[7] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 0.0f;
-									}
-									else {
-										if (x[2] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 3.0f;
-										}
+								return 2.0f;
+							}
 
-									}
+						}
 
+					}
+					else {
+						if (x[2] <= 0.5) {
+							if (x[6] <= 0.5) {
+								return 6.0f;
+							}
+							else {
+								if (x[10] <= 0.5) {
+									return 2.0f;
 								}
 								else {
 									return 0.0f;
@@ -1763,130 +1289,16 @@ float classify(const float x[]) {
 							}
 
 						}
-
-					}
-					else {
-						if (x[7] <= 0.5) {
-							if (x[6] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-								else {
-									if (x[10] <= 0.5) {
-										return 3.0f;
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-
-							}
-							else {
-								if (x[2] <= 0.5) {
-									return 3.0f;
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
 						else {
-							if (x[2] <= 0.5) {
-								if (x[10] <= 0.5) {
-									return 3.0f;
-								}
-								else {
-									if (x[6] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-
+							if (x[9] <= 0.5) {
+								return 0.0f;
 							}
 							else {
 								if (x[10] <= 0.5) {
-									if (x[6] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
+									return 6.0f;
 								}
 								else {
-									if (x[6] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
+									return 0.0f;
 								}
 
 							}
@@ -1903,45 +1315,99 @@ float classify(const float x[]) {
 
 	}
 	else {
-		if (x[1] <= 0.5) {
-			if (x[2] <= 0.5) {
-				if (x[6] <= 0.5) {
-					if (x[8] <= 0.5) {
-						if (x[4] <= 0.5) {
-							return 2.0f;
-						}
-						else {
-							if (x[10] <= 0.5) {
-								return 2.0f;
-							}
-							else {
-								if (x[5] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[9] <= 0.5) {
+		if (x[5] <= 0.5) {
+			if (x[6] <= 0.5) {
+				if (x[7] <= 0.5) {
+					if (x[1] <= 0.5) {
+						if (x[9] <= 0.5) {
+							if (x[4] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 3.0f;
+								}
+								else {
+									if (x[8] <= 0.5) {
+										return 3.0f;
+									}
+									else {
+										if (x[10] <= 0.5) {
 											return 3.0f;
 										}
 										else {
-											return 2.0f;
+											return 4.0f;
 										}
 
 									}
-									else {
+
+								}
+
+							}
+							else {
+								if (x[8] <= 0.5) {
+									if (x[2] <= 0.5) {
 										return 2.0f;
+									}
+									else {
+										return 3.0f;
 									}
 
 								}
 								else {
-									if (x[7] <= 0.5) {
-										return 2.0f;
+									if (x[2] <= 0.5) {
+										return 3.0f;
 									}
 									else {
-										if (x[9] <= 0.5) {
-											return 2.0f;
+										if (x[10] <= 0.5) {
+											return 7.0f;
 										}
 										else {
-											return 1.0f;
+											return 3.0f;
 										}
 
+									}
+
+								}
+
+							}
+
+						}
+						else {
+							if (x[2] <= 0.5) {
+								if (x[4] <= 0.5) {
+									if (x[8] <= 0.5) {
+										return 3.0f;
+									}
+									else {
+										return 7.0f;
+									}
+
+								}
+								else {
+									return 3.0f;
+								}
+
+							}
+							else {
+								if (x[8] <= 0.5) {
+									if (x[4] <= 0.5) {
+										return 3.0f;
+									}
+									else {
+										if (x[10] <= 0.5) {
+											return 1.0f;
+										}
+										else {
+											return 3.0f;
+										}
+
+									}
+
+								}
+								else {
+									if (x[4] <= 0.5) {
+										return 1.0f;
+									}
+									else {
+										return 3.0f;
 									}
 
 								}
@@ -1952,98 +1418,80 @@ float classify(const float x[]) {
 
 					}
 					else {
-						if (x[5] <= 0.5) {
-							if (x[4] <= 0.5) {
-								if (x[9] <= 0.5) {
-									return 2.0f;
-								}
-								else {
-									if (x[10] <= 0.5) {
-										return 2.0f;
+						if (x[9] <= 0.5) {
+							if (x[2] <= 0.5) {
+								if (x[4] <= 0.5) {
+									if (x[8] <= 0.5) {
+										return 0.0f;
 									}
 									else {
-										if (x[7] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
+										return 3.0f;
 									}
 
+								}
+								else {
+									return 0.0f;
 								}
 
 							}
 							else {
-								return 2.0f;
+								if (x[8] <= 0.5) {
+									if (x[10] <= 0.5) {
+										return 3.0f;
+									}
+									else {
+										return 8.0f;
+									}
+
+								}
+								else {
+									if (x[10] <= 0.5) {
+										return 7.0f;
+									}
+									else {
+										return 0.0f;
+									}
+
+								}
+
 							}
 
 						}
 						else {
-							if (x[4] <= 0.5) {
-								if (x[7] <= 0.5) {
-									if (x[9] <= 0.5) {
-										return 2.0f;
+							if (x[10] <= 0.5) {
+								if (x[2] <= 0.5) {
+									if (x[4] <= 0.5) {
+										return 3.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
+										return 0.0f;
 									}
 
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
+									return 1.0f;
 								}
 
 							}
 							else {
-								if (x[7] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
+								if (x[4] <= 0.5) {
+									if (x[2] <= 0.5) {
+										if (x[8] <= 0.5) {
+											return 0.0f;
 										}
 										else {
-											return 4.0f;
+											return 1.0f;
 										}
 
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 0.0f;
 									}
 
 								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+									if (x[2] <= 0.5) {
+										return 0.0f;
 									}
 									else {
 										return 2.0f;
@@ -2059,85 +1507,79 @@ float classify(const float x[]) {
 
 				}
 				else {
-					if (x[5] <= 0.5) {
-						if (x[7] <= 0.5) {
-							if (x[8] <= 0.5) {
-								return 2.0f;
-							}
-							else {
-								if (x[4] <= 0.5) {
+					if (x[4] <= 0.5) {
+						if (x[2] <= 0.5) {
+							if (x[1] <= 0.5) {
+								if (x[8] <= 0.5) {
+									return 3.0f;
+								}
+								else {
 									if (x[9] <= 0.5) {
-										return 2.0f;
+										return 3.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
-											return 5.0f;
+											return 3.0f;
 										}
 										else {
-											return 2.0f;
+											return 6.0f;
 										}
 
 									}
 
 								}
+
+							}
+							else {
+								if (x[8] <= 0.5) {
+									return 6.0f;
+								}
 								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
+									return 3.0f;
 								}
 
 							}
 
 						}
 						else {
-							return 2.0f;
+							if (x[10] <= 0.5) {
+								if (x[9] <= 0.5) {
+									return 3.0f;
+								}
+								else {
+									return 6.0f;
+								}
+
+							}
+							else {
+								return 3.0f;
+							}
+
 						}
 
 					}
 					else {
-						if (x[4] <= 0.5) {
-							return 2.0f;
-						}
-						else {
-							if (x[7] <= 0.5) {
-								return 2.0f;
+						if (x[2] <= 0.5) {
+							if (x[1] <= 0.5) {
+								return 3.0f;
 							}
 							else {
 								if (x[10] <= 0.5) {
-									return 2.0f;
+									return 0.0f;
 								}
 								else {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 9.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
-									}
-
+									return 6.0f;
 								}
 
+							}
+
+						}
+						else {
+							if (x[8] <= 0.5) {
+								return 6.0f;
+							}
+							else {
+								return 2.0f;
 							}
 
 						}
@@ -2148,211 +1590,52 @@ float classify(const float x[]) {
 
 			}
 			else {
-				if (x[5] <= 0.5) {
-					if (x[7] <= 0.5) {
-						if (x[6] <= 0.5) {
-							if (x[9] <= 0.5) {
-								if (x[8] <= 0.5) {
-									return 2.0f;
-								}
-								else {
-									if (x[4] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 8.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[4] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										return 1.0f;
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[4] <= 0.5) {
-								if (x[8] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 8.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[8] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-
-					}
-					else {
-						if (x[4] <= 0.5) {
+				if (x[4] <= 0.5) {
+					if (x[1] <= 0.5) {
+						if (x[9] <= 0.5) {
 							if (x[10] <= 0.5) {
-								if (x[6] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-							else {
-								if (x[6] <= 0.5) {
-									return 2.0f;
-								}
-								else {
-									if (x[9] <= 0.5) {
-										return 2.0f;
+								if (x[7] <= 0.5) {
+									if (x[2] <= 0.5) {
+										return 3.0f;
 									}
 									else {
 										if (x[8] <= 0.5) {
-											return 1.0f;
+											return 3.0f;
 										}
 										else {
-											return 5.0f;
+											return 7.0f;
 										}
 
+									}
+
+								}
+								else {
+									if (x[8] <= 0.5) {
+										return 6.0f;
+									}
+									else {
+										return 3.0f;
+									}
+
+								}
+
+							}
+							else {
+								if (x[2] <= 0.5) {
+									return 3.0f;
+								}
+								else {
+									if (x[7] <= 0.5) {
+										if (x[8] <= 0.5) {
+											return 4.0f;
+										}
+										else {
+											return 3.0f;
+										}
+
+									}
+									else {
+										return 3.0f;
 									}
 
 								}
@@ -2362,192 +1645,48 @@ float classify(const float x[]) {
 						}
 						else {
 							if (x[8] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 3.0f;
+								}
+								else {
+									if (x[7] <= 0.5) {
+										if (x[10] <= 0.5) {
+											return 1.0f;
+										}
+										else {
+											return 3.0f;
+										}
+
+									}
+									else {
+										return 1.0f;
+									}
+
+								}
+
+							}
+							else {
 								if (x[10] <= 0.5) {
-									if (x[6] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 6.0f;
+									if (x[2] <= 0.5) {
+										if (x[7] <= 0.5) {
+											return 5.0f;
 										}
 										else {
-											return 2.0f;
+											return 3.0f;
 										}
 
 									}
 									else {
-										return 2.0f;
+										return 3.0f;
 									}
 
 								}
 								else {
-									if (x[6] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[6] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-
-						}
-
-					}
-
-				}
-				else {
-					if (x[10] <= 0.5) {
-						if (x[4] <= 0.5) {
-							if (x[9] <= 0.5) {
-								return 2.0f;
-							}
-							else {
-								if (x[6] <= 0.5) {
-									if (x[7] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										return 4.0f;
-									}
-
-								}
-								else {
-									if (x[7] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[7] <= 0.5) {
-								if (x[6] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 8.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[8] <= 0.5) {
-									if (x[6] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
+									if (x[2] <= 0.5) {
 										return 3.0f;
 									}
 									else {
-										if (x[6] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 1.0f;
-										}
-
+										return 5.0f;
 									}
 
 								}
@@ -2558,93 +1697,84 @@ float classify(const float x[]) {
 
 					}
 					else {
-						if (x[6] <= 0.5) {
-							if (x[7] <= 0.5) {
-								if (x[4] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
+						if (x[7] <= 0.5) {
+							if (x[2] <= 0.5) {
+								if (x[8] <= 0.5) {
+									return 5.0f;
 								}
 								else {
-									if (x[8] <= 0.5) {
-										return 4.0f;
+									if (x[9] <= 0.5) {
+										return 5.0f;
 									}
 									else {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
+										return 3.0f;
 									}
 
 								}
 
 							}
 							else {
-								if (x[4] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
+								if (x[8] <= 0.5) {
+									if (x[9] <= 0.5) {
+										return 5.0f;
 									}
 									else {
-										if (x[9] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
+										return 3.0f;
 									}
 
 								}
 								else {
-									if (x[8] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 8.0f;
-										}
-
-									}
-
+									return 3.0f;
 								}
 
 							}
 
 						}
 						else {
-							if (x[7] <= 0.5) {
-								if (x[8] <= 0.5) {
-									return 2.0f;
+							if (x[10] <= 0.5) {
+								if (x[9] <= 0.5) {
+									return 6.0f;
 								}
 								else {
+									return 0.0f;
+								}
+
+							}
+							else {
+								return 5.0f;
+							}
+
+						}
+
+					}
+
+				}
+				else {
+					if (x[7] <= 0.5) {
+						if (x[8] <= 0.5) {
+							if (x[2] <= 0.5) {
+								if (x[1] <= 0.5) {
+									return 3.0f;
+								}
+								else {
+									return 2.0f;
+								}
+
+							}
+							else {
+								if (x[1] <= 0.5) {
 									if (x[9] <= 0.5) {
-										return 2.0f;
+										if (x[10] <= 0.5) {
+											return 5.0f;
+										}
+										else {
+											return 2.0f;
+										}
+
 									}
 									else {
-										if (x[4] <= 0.5) {
-											return 7.0f;
+										if (x[10] <= 0.5) {
+											return 2.0f;
 										}
 										else {
 											return 5.0f;
@@ -2653,44 +1783,56 @@ float classify(const float x[]) {
 									}
 
 								}
+								else {
+									return 5.0f;
+								}
 
 							}
-							else {
-								if (x[4] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 1.0f;
-										}
 
+						}
+						else {
+							if (x[1] <= 0.5) {
+								if (x[9] <= 0.5) {
+									return 5.0f;
+								}
+								else {
+									if (x[10] <= 0.5) {
+										return 5.0f;
 									}
 									else {
-										return 2.0f;
+										return 3.0f;
 									}
 
 								}
+
+							}
+							else {
+								if (x[2] <= 0.5) {
+									return 3.0f;
+								}
 								else {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 9.0f;
-										}
-										else {
-											return 6.0f;
-										}
+									return 0.0f;
+								}
 
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 1.0f;
-										}
+							}
 
-									}
+						}
 
+					}
+					else {
+						if (x[8] <= 0.5) {
+							return 6.0f;
+						}
+						else {
+							if (x[1] <= 0.5) {
+								return 2.0f;
+							}
+							else {
+								if (x[10] <= 0.5) {
+									return 5.0f;
+								}
+								else {
+									return 2.0f;
 								}
 
 							}
@@ -2705,951 +1847,60 @@ float classify(const float x[]) {
 
 		}
 		else {
-			if (x[4] <= 0.5) {
-				if (x[5] <= 0.5) {
-					if (x[7] <= 0.5) {
-						if (x[6] <= 0.5) {
-							if (x[10] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-								else {
-									return 2.0f;
-								}
-
-							}
-							else {
-								if (x[9] <= 0.5) {
-									if (x[2] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[2] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 1.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[8] <= 0.5) {
-								if (x[9] <= 0.5) {
-									if (x[10] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										return 5.0f;
-									}
-
-								}
-								else {
-									if (x[2] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 1.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[10] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 7.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									return 2.0f;
-								}
-
-							}
-
-						}
-
-					}
-					else {
+			if (x[1] <= 0.5) {
+				if (x[4] <= 0.5) {
+					if (x[2] <= 0.5) {
 						if (x[9] <= 0.5) {
-							if (x[6] <= 0.5) {
-								if (x[10] <= 0.5) {
-									return 2.0f;
-								}
-								else {
-									if (x[2] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[8] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[10] <= 0.5) {
-										if (x[2] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-
-							}
-
+							return 3.0f;
 						}
 						else {
-							if (x[10] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[8] <= 0.5) {
-										return 6.0f;
-									}
-									else {
-										if (x[6] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-								else {
-									return 0.0f;
-								}
-
-							}
-							else {
-								if (x[6] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										return 5.0f;
-									}
-
-								}
-
-							}
-
-						}
-
-					}
-
-				}
-				else {
-					if (x[7] <= 0.5) {
-						if (x[8] <= 0.5) {
-							if (x[6] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-							else {
-								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[2] <= 0.5) {
-								if (x[6] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
+							if (x[7] <= 0.5) {
 								if (x[10] <= 0.5) {
-									if (x[6] <= 0.5) {
-										return 2.0f;
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
+									return 9.0f;
 								}
 								else {
-									if (x[6] <= 0.5) {
-										return 4.0f;
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
+									return 3.0f;
 								}
 
+							}
+							else {
+								return 3.0f;
 							}
 
 						}
 
 					}
 					else {
-						if (x[10] <= 0.5) {
-							if (x[2] <= 0.5) {
-								if (x[6] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[6] <= 0.5) {
-									return 0.0f;
-								}
-								else {
-									if (x[9] <= 0.5) {
-										return 0.0f;
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[6] <= 0.5) {
-								if (x[8] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										return 0.0f;
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-
-							}
-							else {
-								return 2.0f;
-							}
-
-						}
-
-					}
-
-				}
-
-			}
-			else {
-				if (x[6] <= 0.5) {
-					if (x[5] <= 0.5) {
-						if (x[7] <= 0.5) {
-							if (x[9] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 9.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[10] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 1.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[2] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 9.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										if (x[8] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[8] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[2] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 6.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										return 0.0f;
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-
-					}
-					else {
-						if (x[8] <= 0.5) {
-							if (x[2] <= 0.5) {
-								if (x[7] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[10] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 8.0f;
-										}
-										else {
-											return 2.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[9] <= 0.5) {
-										return 3.0f;
-									}
-									else {
-										if (x[7] <= 0.5) {
-											return 1.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-
-							}
-
-						}
-						else {
-							if (x[10] <= 0.5) {
-								if (x[9] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[7] <= 0.5) {
-											return 4.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 0.0f;
-									}
-
-								}
-								else {
-									if (x[2] <= 0.5) {
-										if (x[7] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[7] <= 0.5) {
-											return 7.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-
-							}
-							else {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[9] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-
-								}
-								else {
-									if (x[7] <= 0.5) {
-										if (x[9] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 4.0f;
-										}
-
-									}
-									else {
-										return 4.0f;
-									}
-
-								}
-
-							}
-
-						}
-
-					}
-
-				}
-				else {
-					if (x[5] <= 0.5) {
-						if (x[2] <= 0.5) {
+						if (x[6] <= 0.5) {
 							if (x[7] <= 0.5) {
 								if (x[9] <= 0.5) {
 									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 3.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
+										return 9.0f;
 									}
 
 								}
 								else {
-									if (x[10] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 3.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
+									return 3.0f;
 								}
 
 							}
 							else {
-								if (x[9] <= 0.5) {
-									if (x[10] <= 0.5) {
-										if (x[8] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-									else {
-										return 2.0f;
-									}
-
+								if (x[8] <= 0.5) {
+									return 6.0f;
 								}
 								else {
-									if (x[8] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
+									if (x[9] <= 0.5) {
+										return 9.0f;
 									}
 									else {
 										if (x[10] <= 0.5) {
-											return 5.0f;
+											return 9.0f;
 										}
 										else {
-											return 3.0f;
+											return 6.0f;
 										}
 
 									}
@@ -3662,50 +1913,32 @@ float classify(const float x[]) {
 						else {
 							if (x[7] <= 0.5) {
 								if (x[8] <= 0.5) {
-									if (x[9] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-
+									return 3.0f;
 								}
 								else {
-									if (x[9] <= 0.5) {
-										return 0.0f;
+									if (x[10] <= 0.5) {
+										return 9.0f;
 									}
 									else {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 3.0f;
-										}
-
+										return 7.0f;
 									}
 
 								}
 
 							}
 							else {
-								if (x[9] <= 0.5) {
-									if (x[10] <= 0.5) {
-										return 0.0f;
+								if (x[8] <= 0.5) {
+									if (x[9] <= 0.5) {
+										if (x[10] <= 0.5) {
+											return 3.0f;
+										}
+										else {
+											return 9.0f;
+										}
+
 									}
 									else {
-										return 3.0f;
+										return 1.0f;
 									}
 
 								}
@@ -3718,58 +1951,49 @@ float classify(const float x[]) {
 						}
 
 					}
-					else {
-						if (x[8] <= 0.5) {
-							if (x[9] <= 0.5) {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 2.0f;
-										}
 
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 2.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
+				}
+				else {
+					if (x[7] <= 0.5) {
+						if (x[9] <= 0.5) {
+							if (x[2] <= 0.5) {
+								if (x[8] <= 0.5) {
+									return 3.0f;
 								}
 								else {
-									if (x[7] <= 0.5) {
-										if (x[10] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 5.0f;
-										}
-
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 6.0f;
-										}
-										else {
-											return 0.0f;
-										}
-
-									}
-
+									return 9.0f;
 								}
 
 							}
 							else {
-								if (x[2] <= 0.5) {
+								if (x[8] <= 0.5) {
+									return 4.0f;
+								}
+								else {
+									return 3.0f;
+								}
+
+							}
+
+						}
+						else {
+							if (x[2] <= 0.5) {
+								return 2.0f;
+							}
+							else {
+								if (x[6] <= 0.5) {
 									if (x[10] <= 0.5) {
-										if (x[7] <= 0.5) {
-											return 2.0f;
+										return 3.0f;
+									}
+									else {
+										return 9.0f;
+									}
+
+								}
+								else {
+									if (x[8] <= 0.5) {
+										if (x[10] <= 0.5) {
+											return 9.0f;
 										}
 										else {
 											return 3.0f;
@@ -3781,16 +2005,64 @@ float classify(const float x[]) {
 									}
 
 								}
+
+							}
+
+						}
+
+					}
+					else {
+						if (x[10] <= 0.5) {
+							if (x[8] <= 0.5) {
+								return 3.0f;
+							}
+							else {
+								if (x[2] <= 0.5) {
+									return 3.0f;
+								}
 								else {
-									if (x[10] <= 0.5) {
-										return 5.0f;
+									if (x[9] <= 0.5) {
+										return 2.0f;
 									}
 									else {
-										if (x[7] <= 0.5) {
-											return 1.0f;
+										return 1.0f;
+									}
+
+								}
+
+							}
+
+						}
+						else {
+							if (x[6] <= 0.5) {
+								if (x[2] <= 0.5) {
+									return 3.0f;
+								}
+								else {
+									return 4.0f;
+								}
+
+							}
+							else {
+								if (x[8] <= 0.5) {
+									if (x[9] <= 0.5) {
+										return 8.0f;
+									}
+									else {
+										return 6.0f;
+									}
+
+								}
+								else {
+									if (x[2] <= 0.5) {
+										return 8.0f;
+									}
+									else {
+										if (x[9] <= 0.5) {
+											return 7.0f;
 										}
 										else {
-											return 6.0f;
+											return 1.0f;
 										}
 
 									}
@@ -3800,72 +2072,84 @@ float classify(const float x[]) {
 							}
 
 						}
-						else {
-							if (x[9] <= 0.5) {
-								if (x[10] <= 0.5) {
-									if (x[2] <= 0.5) {
-										if (x[7] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 5.0f;
-										}
 
-									}
-									else {
-										return 0.0f;
-									}
+					}
 
+				}
+
+			}
+			else {
+				if (x[4] <= 0.5) {
+					if (x[7] <= 0.5) {
+						if (x[10] <= 0.5) {
+							if (x[2] <= 0.5) {
+								return 9.0f;
+							}
+							else {
+								if (x[6] <= 0.5) {
+									return 3.0f;
 								}
 								else {
-									if (x[2] <= 0.5) {
-										if (x[7] <= 0.5) {
-											return 0.0f;
-										}
-										else {
-											return 7.0f;
-										}
-
-									}
-									else {
-										return 7.0f;
-									}
-
+									return 9.0f;
 								}
 
 							}
+
+						}
+						else {
+							return 9.0f;
+						}
+
+					}
+					else {
+						if (x[10] <= 0.5) {
+							if (x[6] <= 0.5) {
+								return 0.0f;
+							}
 							else {
-								if (x[2] <= 0.5) {
-									if (x[7] <= 0.5) {
-										return 5.0f;
-									}
-									else {
-										if (x[10] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 7.0f;
-										}
+								return 9.0f;
+							}
 
-									}
+						}
+						else {
+							return 3.0f;
+						}
 
-								}
-								else {
-									if (x[10] <= 0.5) {
-										return 7.0f;
-									}
-									else {
-										if (x[7] <= 0.5) {
-											return 5.0f;
-										}
-										else {
-											return 0.0f;
-										}
+					}
 
-									}
+				}
+				else {
+					if (x[2] <= 0.5) {
+						if (x[10] <= 0.5) {
+							if (x[7] <= 0.5) {
+								return 0.0f;
+							}
+							else {
+								return 2.0f;
+							}
 
-								}
+						}
+						else {
+							return 9.0f;
+						}
 
+					}
+					else {
+						if (x[9] <= 0.5) {
+							if (x[10] <= 0.5) {
+								return 4.0f;
+							}
+							else {
+								return 2.0f;
+							}
+
+						}
+						else {
+							if (x[6] <= 0.5) {
+								return 1.0f;
+							}
+							else {
+								return 0.0f;
 							}
 
 						}

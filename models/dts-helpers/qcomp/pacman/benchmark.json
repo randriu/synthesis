@@ -1,14 +1,14 @@
 {
-  "scheduler": {
+  "scheduler-relevant": {
     "classifiers": {
       "default": {
         "stats": {
-          "nodes": 197,
-          "inner nodes": 98,
-          "paths": 99,
-          "bandwidth": 7
+          "nodes": 7,
+          "inner nodes": 3,
+          "paths": 4,
+          "bandwidth": 2
         },
-        "time": "00:00:00.196"
+        "time": "00:00:00.004"
       }
     },
     "metadata": {
@@ -31,8 +31,8 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
+          2.0,
+          2.0,
           0.0,
           0.0,
           1.0,
@@ -44,8 +44,8 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          0.0,
+          2.0,
+          2.0,
           0.0,
           0.0,
           1.0,
@@ -56,28 +56,28 @@
         "max_inner": [
           3.0,
           3.0,
-          3.0,
           2.0,
-          10.0,
+          2.0,
           9.0,
-          9.0,
-          10.0,
+          5.0,
+          7.0,
           6.0,
           6.0,
-          6.0
+          6.0,
+          3.0
         ],
         "max_outer": [
           3.0,
           3.0,
-          3.0,
           2.0,
-          10.0,
+          2.0,
           9.0,
-          9.0,
-          10.0,
+          5.0,
+          7.0,
           6.0,
           6.0,
-          6.0
+          6.0,
+          3.0
         ],
         "step_size": [
           1,
@@ -99,13 +99,8 @@
         ],
         "category_names": {
           "0": [
-            "g0",
-            "g1",
-            "p",
             "left",
             "right",
-            "stop0",
-            "stop1",
             "arbiter_cmd_9"
           ]
         },
@@ -113,14 +108,14 @@
           0
         ],
         "max": [
-          7
+          2
         ],
         "step_size": [
           1
         ],
-        "num_rows": 2223,
-        "num_flattened": 2223,
-        "num_unique_labels": 8
+        "num_rows": 10,
+        "num_flattened": 10,
+        "num_unique_labels": 3
       }
     }
   }

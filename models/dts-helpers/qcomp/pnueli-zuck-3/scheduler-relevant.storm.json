@@ -1,0 +1,2223 @@
+[
+    {
+        "c": [
+            {
+                "index": 2,
+                "labels": [
+                    "process2_cmd_50"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_50",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 1)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 2)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 1,
+            "p1": 1,
+            "p2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 9,
+                "labels": [
+                    "process0_cmd_2"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_2",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 1)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 2)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 1,
+            "p1": 1,
+            "p2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 19,
+                "labels": [
+                    "process0_cmd_3"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_3",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 2) & ((((p1 < 4) | (p1 > 13)) & ((p2 < 4) | (p2 > 13))) | (((p1 >= 14) & (p1 <= 15)) | ((p2 >= 14) & (p2 <= 15)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 46,
+                "labels": [
+                    "process2_cmd_51"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_51",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 2) & ((((p1 < 4) | (p1 > 13)) & ((p0 < 4) | (p0 > 13))) | (((p1 >= 14) & (p1 <= 15)) | ((p0 >= 14) & (p0 <= 15)))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 3,
+            "p1": 1,
+            "p2": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 75,
+                "labels": [
+                    "process0_cmd_2"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_2",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 1)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 2)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 1,
+            "p1": 1,
+            "p2": 7
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 105,
+                "labels": [
+                    "process0_cmd_5"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_5",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 3)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 4)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 3,
+            "p1": 1,
+            "p2": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 126,
+                "labels": [
+                    "process2_cmd_56"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_56",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 4) & !(((((p0 >= 10) & (p0 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p0 >= 4) & (p0 <= 5)) | ((p1 >= 4) & (p1 <= 5))))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 10)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 129,
+                "labels": [
+                    "process2_cmd_60"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_60",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 7) & ((((p0 >= 7) & (p0 <= 8)) | ((p1 >= 7) & (p1 <= 8))) | (((p0 >= 0) & (p0 <= 3)) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 7
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 207,
+                "labels": [
+                    "process0_cmd_8"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_8",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 4) & !(((((p2 >= 10) & (p2 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p2 >= 4) & (p2 <= 5)) | ((p1 >= 4) & (p1 <= 5))))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 10)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 4,
+            "p1": 1,
+            "p2": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 246,
+                "labels": [
+                    "process2_cmd_64"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_64",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 10)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 11)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 10
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 249,
+                "labels": [
+                    "process2_cmd_62"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_62",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 8)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 8
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 369,
+                "labels": [
+                    "process0_cmd_16"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_16",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 10)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 11)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 10,
+            "p1": 1,
+            "p2": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 428,
+                "labels": [
+                    "process2_cmd_65"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_65",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 11) & (((p1 < 4) | (p1 > 13)) & ((p0 < 4) | (p0 > 13))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 13)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 11
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 431,
+                "labels": [
+                    "process2_cmd_63"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_63",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 9)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 9
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 604,
+                "labels": [
+                    "process0_cmd_17"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_17",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 11) & (((p1 < 4) | (p1 > 13)) & ((p2 < 4) | (p2 > 13))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 13)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 11,
+            "p1": 1,
+            "p2": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 686,
+                "labels": [
+                    "process2_cmd_68"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_68",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 13)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 14)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 13
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 730,
+                "labels": [
+                    "process0_cmd_23"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_23",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 15)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 15,
+            "p1": 1,
+            "p2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 943,
+                "labels": [
+                    "process2_cmd_54"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_54",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 3)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 1,
+            "p2": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1036,
+                "labels": [
+                    "process0_cmd_3"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_3",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 2) & ((((p1 < 4) | (p1 > 13)) & ((p2 < 4) | (p2 > 13))) | (((p1 >= 14) & (p1 <= 15)) | ((p2 >= 14) & (p2 <= 15)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 1,
+            "p2": 14
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1087,
+                "labels": [
+                    "process0_cmd_1"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_1",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 0)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1402,
+                "labels": [
+                    "process2_cmd_60"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_60",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 7) & ((((p0 >= 7) & (p0 <= 8)) | ((p1 >= 7) & (p1 <= 8))) | (((p0 >= 0) & (p0 <= 3)) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 1,
+            "p2": 7
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1457,
+                "labels": [
+                    "process0_cmd_5"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_5",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 3)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 4)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 3,
+            "p1": 1,
+            "p2": 14
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1550,
+                "labels": [
+                    "process0_cmd_2"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_2",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 1)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 2)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 1,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1993,
+                "labels": [
+                    "process0_cmd_20"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_20",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 13)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 14)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 1,
+            "p2": 8
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1999,
+                "labels": [
+                    "process2_cmd_56"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_56",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 4) & !(((((p0 >= 10) & (p0 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p0 >= 4) & (p0 <= 5)) | ((p1 >= 4) & (p1 <= 5))))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 10)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2007,
+                "labels": [
+                    "process0_cmd_1"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_1",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 0)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 7
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2031,
+                "labels": [
+                    "process0_cmd_12"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_12",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 7) & ((((p2 >= 7) & (p2 <= 8)) | ((p1 >= 7) & (p1 <= 8))) | (((p2 >= 0) & (p2 <= 3)) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 7,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2038,
+                "labels": [
+                    "process0_cmd_8"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_8",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 4) & !(((((p2 >= 10) & (p2 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p2 >= 4) & (p2 <= 5)) | ((p1 >= 4) & (p1 <= 5))))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 10)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 4,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2045,
+                "labels": [
+                    "process0_cmd_7"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_7",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 4) & ((((p2 >= 10) & (p2 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p2 >= 4) & (p2 <= 5)) | ((p1 >= 4) & (p1 <= 5)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 5)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 4,
+            "p1": 1,
+            "p2": 14
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2138,
+                "labels": [
+                    "process0_cmd_3"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_3",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 2) & ((((p1 < 4) | (p1 > 13)) & ((p2 < 4) | (p2 > 13))) | (((p1 >= 14) & (p1 <= 15)) | ((p2 >= 14) & (p2 <= 15)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 2,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2213,
+                "labels": [
+                    "process0_cmd_21"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_21",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 14) & (((p1 < 2) | (p1 > 3)) & ((p2 < 2) | (p2 > 3))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 15)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 14,
+            "p1": 1,
+            "p2": 8
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2724,
+                "labels": [
+                    "process2_cmd_64"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_64",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 10)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 11)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 10
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2735,
+                "labels": [
+                    "process2_cmd_62"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_62",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 8)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 8
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2751,
+                "labels": [
+                    "process0_cmd_14"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_14",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 8)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 8,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2755,
+                "labels": [
+                    "process0_cmd_9"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_9",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 5)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 6)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 5,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2759,
+                "labels": [
+                    "process0_cmd_16"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_16",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 10)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 11)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 10,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2768,
+                "labels": [
+                    "process2_cmd_69"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_69",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 14) & (((p1 < 2) | (p1 > 3)) & ((p0 < 2) | (p0 > 3))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 15)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 5,
+            "p1": 1,
+            "p2": 14
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2859,
+                "labels": [
+                    "process0_cmd_6"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_6",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 3)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 3,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2916,
+                "labels": [
+                    "process0_cmd_23"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_23",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 15)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 15,
+            "p1": 1,
+            "p2": 8
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3417,
+                "labels": [
+                    "process0_cmd_8"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_8",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 4) & !(((((p2 >= 10) & (p2 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p2 >= 4) & (p2 <= 5)) | ((p1 >= 4) & (p1 <= 5))))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 10)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 4,
+            "p1": 3,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3538,
+                "labels": [
+                    "process2_cmd_65"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_65",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 11) & (((p1 < 4) | (p1 > 13)) & ((p0 < 4) | (p0 > 13))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 13)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 11
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3549,
+                "labels": [
+                    "process2_cmd_63"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_63",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 9)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 9
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3550,
+                "labels": [
+                    "process0_cmd_11"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_11",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 6) & !(((((p2 >= 10) & (p2 <= 15)) | ((p1 >= 10) & (p1 <= 15))) | (((p2 >= 4) & (p2 <= 5)) | ((p1 >= 4) & (p1 <= 5))))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 6,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3560,
+                "labels": [
+                    "process0_cmd_15"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_15",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 9)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p0' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p0' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 9,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3567,
+                "labels": [
+                    "process0_cmd_17"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_17",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 11) & (((p1 < 4) | (p1 > 13)) & ((p2 < 4) | (p2 > 13))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 13)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 11,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3576,
+                "labels": [
+                    "process2_cmd_71"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_71",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 15)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 5,
+            "p1": 1,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3586,
+                "labels": [
+                    "process0_cmd_12"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_12",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 7) & ((((p2 >= 7) & (p2 <= 8)) | ((p1 >= 7) & (p1 <= 8))) | (((p2 >= 0) & (p2 <= 3)) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 7,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4224,
+                "labels": [
+                    "process0_cmd_16"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_16",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 10)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 11)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 10,
+            "p1": 3,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4348,
+                "labels": [
+                    "process2_cmd_68"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_68",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 13)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 14)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 13
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4367,
+                "labels": [
+                    "process0_cmd_20"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_20",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 13)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 14)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4380,
+                "labels": [
+                    "process2_cmd_71"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_71",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 15)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 4,
+            "p1": 3,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4384,
+                "labels": [
+                    "process0_cmd_14"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_14",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 8)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 8,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4387,
+                "labels": [
+                    "process0_cmd_12"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_12",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 7) & ((((p2 >= 7) & (p2 <= 8)) | ((p1 >= 7) & (p1 <= 8))) | (((p2 >= 0) & (p2 <= 3)) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 7,
+            "p1": 3,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4944,
+                "labels": [
+                    "process0_cmd_17"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_17",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 11) & (((p1 < 4) | (p1 > 13)) & ((p2 < 4) | (p2 > 13))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 13)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 11,
+            "p1": 3,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5074,
+                "labels": [
+                    "process2_cmd_69"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_69",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 14) & (((p1 < 2) | (p1 > 3)) & ((p0 < 2) | (p0 > 3))))",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 15)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 14
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5081,
+                "labels": [
+                    "process0_cmd_21"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_21",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 14) & (((p1 < 2) | (p1 > 3)) & ((p2 < 2) | (p2 > 3))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 15)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 14,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5093,
+                "labels": [
+                    "process1_cmd_27"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_27",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 2) & ((((p0 < 4) | (p0 > 13)) & ((p2 < 4) | (p2 > 13))) | (((p0 >= 14) & (p0 <= 15)) | ((p2 >= 14) & (p2 <= 15)))))",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 9,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5095,
+                "labels": [
+                    "process0_cmd_14"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_14",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 8)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 8,
+            "p1": 3,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5529,
+                "labels": [
+                    "process1_cmd_30"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_30",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 3)",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 3,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5644,
+                "labels": [
+                    "process1_cmd_26"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_26",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 1)",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 2)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 1,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5649,
+                "labels": [
+                    "process2_cmd_49"
+                ],
+                "origin": {
+                    "action-label": "process2_cmd_49",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 0)",
+                            "module": "process2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 15,
+            "p1": 1,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5654,
+                "labels": [
+                    "process0_cmd_15"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_15",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 9)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p0' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p0' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 9,
+            "p1": 3,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5960,
+                "labels": [
+                    "process1_cmd_36"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_36",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 7) & ((((p2 >= 7) & (p2 <= 8)) | ((p0 >= 7) & (p0 <= 8))) | (((p2 >= 0) & (p2 <= 3)) | ((p0 >= 0) & (p0 <= 3)))))",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 7,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6044,
+                "labels": [
+                    "process0_cmd_1"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_1",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 0)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 2,
+            "p2": 15
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6124,
+                "labels": [
+                    "process1_cmd_36"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_36",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 7) & ((((p2 >= 7) & (p2 <= 8)) | ((p0 >= 7) & (p0 <= 8))) | (((p2 >= 0) & (p2 <= 3)) | ((p0 >= 0) & (p0 <= 3)))))",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 7,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6143,
+                "labels": [
+                    "process1_cmd_32"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_32",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 4) & !(((((p2 >= 10) & (p2 <= 15)) | ((p0 >= 10) & (p0 <= 15))) | (((p2 >= 4) & (p2 <= 5)) | ((p0 >= 4) & (p0 <= 5))))))",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 10)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 4,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6223,
+                "labels": [
+                    "process0_cmd_20"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_20",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 13)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 14)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 13,
+            "p1": 8,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6307,
+                "labels": [
+                    "process1_cmd_38"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_38",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 8)",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 9)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 8,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6369,
+                "labels": [
+                    "process0_cmd_21"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_21",
+                    "transitions": [
+                        {
+                            "guard": "((p0 = 14) & (((p1 < 2) | (p1 > 3)) & ((p2 < 2) | (p2 > 3))))",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 15)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 14,
+            "p1": 8,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6406,
+                "labels": [
+                    "process1_cmd_39"
+                ],
+                "origin": {
+                    "action-label": "process1_cmd_39",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 9)",
+                            "module": "process1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p1' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p1' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 0,
+            "p1": 9,
+            "p2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6433,
+                "labels": [
+                    "process0_cmd_23"
+                ],
+                "origin": {
+                    "action-label": "process0_cmd_23",
+                    "transitions": [
+                        {
+                            "guard": "(p0 = 15)",
+                            "module": "process0",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p0' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p0": 15,
+            "p1": 8,
+            "p2": 0
+        }
+    }
+]

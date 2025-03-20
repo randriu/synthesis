@@ -1,14 +1,14 @@
 {
-  "scheduler": {
+  "scheduler-relevant": {
     "classifiers": {
       "default": {
         "stats": {
-          "nodes": 93,
-          "inner nodes": 46,
-          "paths": 47,
-          "bandwidth": 6
+          "nodes": 17,
+          "inner nodes": 8,
+          "paths": 9,
+          "bandwidth": 4
         },
-        "time": "00:00:00.189"
+        "time": "00:00:00.007"
       }
     },
     "metadata": {
@@ -55,29 +55,29 @@
         ],
         "max_inner": [
           2.0,
-          15.0,
-          15.0,
+          0.0,
+          0.0,
           4.0,
           4.0,
-          4.0,
-          4.0,
+          3.0,
+          3.0,
           30.0,
           30.0,
           2.0,
-          1.0
+          0.0
         ],
         "max_outer": [
           2.0,
-          15.0,
-          15.0,
+          0.0,
+          0.0,
           4.0,
           4.0,
-          4.0,
-          4.0,
+          3.0,
+          3.0,
           30.0,
           30.0,
           2.0,
-          1.0
+          0.0
         ],
         "step_size": [
           1,
@@ -100,18 +100,10 @@
         "category_names": {
           "0": [
             "send1",
-            "send2",
             "cd",
             "station1_cmd_18",
-            "station2_cmd_33",
-            "time",
             "station1_cmd_19",
-            "busy2",
-            "busy1",
-            "station2_cmd_34",
-            "station2_cmd_35",
             "station1_cmd_20",
-            "station2_cmd_36",
             "station1_cmd_21",
             "end1",
             "end2"
@@ -121,14 +113,14 @@
           0
         ],
         "max": [
-          15
+          7
         ],
         "step_size": [
           1
         ],
-        "num_rows": 7951,
-        "num_flattened": 7951,
-        "num_unique_labels": 16
+        "num_rows": 22,
+        "num_flattened": 22,
+        "num_unique_labels": 8
       }
     }
   }

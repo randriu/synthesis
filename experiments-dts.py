@@ -10,8 +10,8 @@ import click
 import math
 import concurrent.futures
 
-date="02-04"
-experiment_group_name = f"{date}-integration-1h"
+date="02-06"
+experiment_group_name = f"{date}-dtpaynt-error-01-1h"
 paynt_one = "one" in experiment_group_name
 
 new_models = True
@@ -170,7 +170,7 @@ def collect_tasks(models_dir, experiment_name, output_dir, restart:bool):
 
 
 def evaluate_benchmarks(experiment_name, num_workers, paynt_dir, timeout_seconds, maxmem_mb, options, restart, output_dir):
-    models_dir = "/home/fpmk/synthesis-playground/models/dts-uai"
+    models_dir = "/home/fpmk/synthesis-playground/models/dts-uai-subset"
     tasks = collect_tasks(models_dir, experiment_name, output_dir, restart)
     print(tasks)
     # exit()
@@ -495,7 +495,7 @@ def main(paynt_dir, workers, timeout, maxmem, output, restart):
     #     (f"{experiment_group_name}/{depth}", f"{profiling} --tree-depth={depth} {tree_enumeration}", timeout) for depth in range(depth_min,depth_max+1)
     # ]
     experiments = [
-        (f"{experiment_group_name}/integration", f"--add-dont-care-action", timeout)
+        (f"{experiment_group_name}/integration", f"--add-dont-care-action --tree-enumeration --tree-depth 10", timeout)
     ]
 
     if paynt_one:

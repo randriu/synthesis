@@ -1,14 +1,14 @@
 {
-  "scheduler": {
+  "scheduler-relevant": {
     "classifiers": {
       "default": {
         "stats": {
-          "nodes": 1893,
-          "inner nodes": 946,
-          "paths": 947,
-          "bandwidth": 10
+          "nodes": 51,
+          "inner nodes": 25,
+          "paths": 26,
+          "bandwidth": 5
         },
-        "time": "00:00:00.555"
+        "time": "00:00:00.012"
       }
     },
     "metadata": {
@@ -33,16 +33,16 @@
           0.0
         ],
         "max_inner": [
-          7.0,
-          7.0,
-          7.0,
-          7.0
+          5.0,
+          5.0,
+          5.0,
+          3.0
         ],
         "max_outer": [
-          7.0,
-          7.0,
-          7.0,
-          7.0
+          5.0,
+          5.0,
+          5.0,
+          3.0
         ],
         "step_size": [
           1,
@@ -59,58 +59,38 @@
           "0": [
             "phil4_cmd_55",
             "phil4_cmd_56",
-            "phil3_cmd_38",
             "phil3_cmd_37",
             "phil1_cmd_1",
-            "phil1_cmd_7",
-            "phil1_cmd_9",
             "phil1_cmd_2",
-            "phil2_cmd_25",
-            "phil2_cmd_21",
-            "phil2_cmd_27",
-            "phil2_cmd_20",
-            "phil3_cmd_43",
-            "phil3_cmd_45",
-            "phil1_cmd_3",
+            "phil3_cmd_38",
             "phil1_cmd_5",
-            "phil3_cmd_41",
             "phil3_cmd_39",
             "phil2_cmd_19",
+            "phil1_cmd_9",
+            "phil2_cmd_20",
+            "phil3_cmd_43",
+            "phil3_cmd_41",
             "phil2_cmd_23",
-            "phil1_cmd_8",
-            "phil1_cmd_10",
-            "phil2_cmd_28",
-            "phil1_cmd_11",
-            "phil1_cmd_12",
-            "phil2_cmd_30",
-            "phil2_cmd_26",
-            "phil3_cmd_46",
-            "phil3_cmd_48",
-            "phil2_cmd_29",
-            "phil3_cmd_44",
-            "phil4_cmd_61",
-            "phil3_cmd_47",
-            "phil4_cmd_63",
-            "phil4_cmd_62",
-            "phil4_cmd_64",
-            "phil4_cmd_65",
-            "phil4_cmd_66",
-            "phil4_cmd_57",
-            "phil4_cmd_59"
+            "phil3_cmd_45",
+            "phil2_cmd_27",
+            "phil2_cmd_21",
+            "phil1_cmd_3",
+            "phil1_cmd_7",
+            "phil2_cmd_25"
           ]
         },
         "min": [
           0
         ],
         "max": [
-          39
+          19
         ],
         "step_size": [
           1
         ],
-        "num_rows": 2268,
-        "num_flattened": 2268,
-        "num_unique_labels": 40
+        "num_rows": 30,
+        "num_flattened": 30,
+        "num_unique_labels": 20
       }
     }
   }

@@ -1,0 +1,990 @@
+[
+    {
+        "c": [
+            {
+                "index": 7,
+                "labels": [
+                    "phil4_cmd_55"
+                ],
+                "origin": {
+                    "action-label": "phil4_cmd_55",
+                    "transitions": [
+                        {
+                            "guard": "(p4 = 0)",
+                            "module": "phil4",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p4' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 0,
+            "p4": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 35,
+                "labels": [
+                    "phil4_cmd_56"
+                ],
+                "origin": {
+                    "action-label": "phil4_cmd_56",
+                    "transitions": [
+                        {
+                            "guard": "(p4 = 1)",
+                            "module": "phil4",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p4' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p4' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 0,
+            "p4": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 119,
+                "labels": [
+                    "phil3_cmd_37"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_37",
+                    "transitions": [
+                        {
+                            "guard": "(p3 = 0)",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 0,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 122,
+                "labels": [
+                    "phil1_cmd_1"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_1",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 0)",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 0,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 223,
+                "labels": [
+                    "phil1_cmd_2"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_2",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 1)",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p1' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p1' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 1,
+            "p2": 0,
+            "p3": 0,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 326,
+                "labels": [
+                    "phil3_cmd_38"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_38",
+                    "transitions": [
+                        {
+                            "guard": "(p3 = 1)",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p3' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p3' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 1,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 416,
+                "labels": [
+                    "phil3_cmd_37"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_37",
+                    "transitions": [
+                        {
+                            "guard": "(p3 = 0)",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 0,
+            "p3": 0,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 481,
+                "labels": [
+                    "phil1_cmd_5"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_5",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 3) & (((p4 = 11) | (p4 = 5)) | ((p4 = 7) | ((p4 >= 0) & (p4 <= 3)))))",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 5)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 3,
+            "p2": 0,
+            "p3": 0,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 725,
+                "labels": [
+                    "phil3_cmd_39"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_39",
+                    "transitions": [
+                        {
+                            "guard": "((p3 = 2) & ((((p4 >= 0) & (p4 <= 4)) | (p4 = 6)) | (p4 = 10)))",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 4)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 2,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 742,
+                "labels": [
+                    "phil2_cmd_19"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_19",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 0)",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 904,
+                "labels": [
+                    "phil3_cmd_38"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_38",
+                    "transitions": [
+                        {
+                            "guard": "(p3 = 1)",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p3' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p3' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 0,
+            "p3": 1,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 963,
+                "labels": [
+                    "phil1_cmd_9"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_9",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 5) & ((((p2 >= 0) & (p2 <= 4)) | (p2 = 6)) | (p2 = 10)))",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 5,
+            "p2": 0,
+            "p3": 0,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1387,
+                "labels": [
+                    "phil2_cmd_20"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_20",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 1)",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 1,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1411,
+                "labels": [
+                    "phil3_cmd_43"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_43",
+                    "transitions": [
+                        {
+                            "guard": "((p3 = 4) & (((p2 = 11) | (p2 = 5)) | ((p2 = 7) | ((p2 >= 0) & (p2 <= 3)))))",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 0,
+            "p3": 4,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1677,
+                "labels": [
+                    "phil2_cmd_19"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_19",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 0)",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 0,
+            "p3": 2,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 1693,
+                "labels": [
+                    "phil3_cmd_41"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_41",
+                    "transitions": [
+                        {
+                            "guard": "((p3 = 3) & (((p2 = 11) | (p2 = 5)) | ((p2 = 7) | ((p2 >= 0) & (p2 <= 3)))))",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 5)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 0,
+            "p3": 3,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2210,
+                "labels": [
+                    "phil1_cmd_1"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_1",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 0)",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 2,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2297,
+                "labels": [
+                    "phil2_cmd_23"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_23",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 3) & (((p1 = 11) | (p1 = 5)) | ((p1 = 7) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 5)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 3,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2677,
+                "labels": [
+                    "phil2_cmd_20"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_20",
+                    "transitions": [
+                        {
+                            "guard": "(p2 = 1)",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p2' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 1,
+            "p3": 2,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2730,
+                "labels": [
+                    "phil3_cmd_45"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_45",
+                    "transitions": [
+                        {
+                            "guard": "((p3 = 5) & ((((p4 >= 0) & (p4 <= 4)) | (p4 = 6)) | (p4 = 10)))",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 0,
+            "p3": 5,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3142,
+                "labels": [
+                    "phil1_cmd_2"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_2",
+                    "transitions": [
+                        {
+                            "guard": "(p1 = 1)",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p1' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(p1' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 1,
+            "p2": 2,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3402,
+                "labels": [
+                    "phil2_cmd_27"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_27",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 5) & ((((p3 >= 0) & (p3 <= 4)) | (p3 = 6)) | (p3 = 10)))",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 0,
+            "p2": 5,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3762,
+                "labels": [
+                    "phil2_cmd_21"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_21",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 2) & ((((p3 >= 0) & (p3 <= 4)) | (p3 = 6)) | (p3 = 10)))",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 4)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 2,
+            "p3": 2,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3769,
+                "labels": [
+                    "phil1_cmd_3"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_3",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 2) & ((((p2 >= 0) & (p2 <= 4)) | (p2 = 6)) | (p2 = 10)))",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 4)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 2,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 3832,
+                "labels": [
+                    "phil2_cmd_23"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_23",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 3) & (((p1 = 11) | (p1 = 5)) | ((p1 = 7) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 5)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 3,
+            "p3": 2,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4158,
+                "labels": [
+                    "phil3_cmd_41"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_41",
+                    "transitions": [
+                        {
+                            "guard": "((p3 = 3) & (((p2 = 11) | (p2 = 5)) | ((p2 = 7) | ((p2 >= 0) & (p2 <= 3)))))",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 5)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 3,
+            "p2": 2,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4699,
+                "labels": [
+                    "phil1_cmd_7"
+                ],
+                "origin": {
+                    "action-label": "phil1_cmd_7",
+                    "transitions": [
+                        {
+                            "guard": "((p1 = 4) & (((p4 = 11) | (p4 = 5)) | ((p4 = 7) | ((p4 >= 0) & (p4 <= 3)))))",
+                            "module": "phil1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p1' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 4,
+            "p2": 2,
+            "p3": 3,
+            "p4": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4868,
+                "labels": [
+                    "phil2_cmd_25"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_25",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 4) & (((p1 = 11) | (p1 = 5)) | ((p1 = 7) | ((p1 >= 0) & (p1 <= 3)))))",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 4,
+            "p3": 2,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4937,
+                "labels": [
+                    "phil2_cmd_27"
+                ],
+                "origin": {
+                    "action-label": "phil2_cmd_27",
+                    "transitions": [
+                        {
+                            "guard": "((p2 = 5) & ((((p3 >= 0) & (p3 <= 4)) | (p3 = 6)) | (p3 = 10)))",
+                            "module": "phil2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p2' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 2,
+            "p2": 5,
+            "p3": 2,
+            "p4": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5292,
+                "labels": [
+                    "phil3_cmd_45"
+                ],
+                "origin": {
+                    "action-label": "phil3_cmd_45",
+                    "transitions": [
+                        {
+                            "guard": "((p3 = 5) & ((((p4 >= 0) & (p4 <= 4)) | (p4 = 6)) | (p4 = 10)))",
+                            "module": "phil3",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(p3' = 8)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "p1": 3,
+            "p2": 2,
+            "p3": 5,
+            "p4": 2
+        }
+    }
+]

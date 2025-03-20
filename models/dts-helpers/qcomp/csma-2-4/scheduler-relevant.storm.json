@@ -1,0 +1,1194 @@
+[
+    {
+        "c": [
+            {
+                "index": 0,
+                "labels": [
+                    "send1"
+                ],
+                "origin": {
+                    "action-label": "send1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 0)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 1)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 0)",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 1) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 0,
+            "cd2": 0,
+            "s1": 0,
+            "s2": 0,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 4,
+                "labels": [
+                    "cd"
+                ],
+                "origin": {
+                    "action-label": "cd",
+                    "transitions": [
+                        {
+                            "guard": "((b = 2) & (y2 <= 1))",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 1)",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 2) & (x1' = 0) & (cd1' = (min(4, (cd1 + 1))))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 1)",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 2) & (x2' = 0) & (cd2' = (min(4, (cd2 + 1))))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 2,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 0,
+            "cd2": 0,
+            "s1": 1,
+            "s2": 1,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6,
+                "labels": [
+                    "station1_cmd_18"
+                ],
+                "origin": {
+                    "action-label": "station1_cmd_18",
+                    "transitions": [
+                        {
+                            "guard": "((s1 = 2) & (cd1 = 1))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(s1' = 3) & (bc1' = 0)"
+                                },
+                                {
+                                    "prob": "(1 / 2)",
+                                    "result": "(s1' = 3) & (bc1' = 1)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 1,
+            "cd2": 1,
+            "s1": 2,
+            "s2": 2,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 21,
+                "labels": [
+                    "send1"
+                ],
+                "origin": {
+                    "action-label": "send1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 0)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 1)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(((s1 = 3) & (x1 = 2)) & (bc1 = 0))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 1) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 1,
+            "cd2": 1,
+            "s1": 3,
+            "s2": 3,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 30,
+                "labels": [
+                    "cd"
+                ],
+                "origin": {
+                    "action-label": "cd",
+                    "transitions": [
+                        {
+                            "guard": "((b = 2) & (y2 <= 1))",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 1)",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 2) & (x1' = 0) & (cd1' = (min(4, (cd1 + 1))))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 1)",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 2) & (x2' = 0) & (cd2' = (min(4, (cd2 + 1))))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 2,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 1,
+            "cd2": 1,
+            "s1": 1,
+            "s2": 1,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 34,
+                "labels": [
+                    "station1_cmd_19"
+                ],
+                "origin": {
+                    "action-label": "station1_cmd_19",
+                    "transitions": [
+                        {
+                            "guard": "((s1 = 2) & (cd1 = 2))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 4)",
+                                    "result": "(s1' = 3) & (bc1' = 0)"
+                                },
+                                {
+                                    "prob": "(1 / 4)",
+                                    "result": "(s1' = 3) & (bc1' = 1)"
+                                },
+                                {
+                                    "prob": "(1 / 4)",
+                                    "result": "(s1' = 3) & (bc1' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 4)",
+                                    "result": "(s1' = 3) & (bc1' = 3)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 2,
+            "cd2": 2,
+            "s1": 2,
+            "s2": 2,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 97,
+                "labels": [
+                    "send1"
+                ],
+                "origin": {
+                    "action-label": "send1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 0)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 1)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(((s1 = 3) & (x1 = 2)) & (bc1 = 0))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 1) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 2,
+            "cd2": 2,
+            "s1": 3,
+            "s2": 3,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 138,
+                "labels": [
+                    "cd"
+                ],
+                "origin": {
+                    "action-label": "cd",
+                    "transitions": [
+                        {
+                            "guard": "((b = 2) & (y2 <= 1))",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 1)",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 2) & (x1' = 0) & (cd1' = (min(4, (cd1 + 1))))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 1)",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 2) & (x2' = 0) & (cd2' = (min(4, (cd2 + 1))))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 2,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 2,
+            "cd2": 2,
+            "s1": 1,
+            "s2": 1,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 168,
+                "labels": [
+                    "station1_cmd_20"
+                ],
+                "origin": {
+                    "action-label": "station1_cmd_20",
+                    "transitions": [
+                        {
+                            "guard": "((s1 = 2) & (cd1 = 3))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 0)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 1)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 3)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 5)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 6)"
+                                },
+                                {
+                                    "prob": "(1 / 8)",
+                                    "result": "(s1' = 3) & (bc1' = 7)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 3,
+            "cd2": 3,
+            "s1": 2,
+            "s2": 2,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 513,
+                "labels": [
+                    "send1"
+                ],
+                "origin": {
+                    "action-label": "send1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 0)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 1)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(((s1 = 3) & (x1 = 2)) & (bc1 = 0))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 1) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 3,
+            "cd2": 3,
+            "s1": 3,
+            "s2": 3,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 796,
+                "labels": [
+                    "cd"
+                ],
+                "origin": {
+                    "action-label": "cd",
+                    "transitions": [
+                        {
+                            "guard": "((b = 2) & (y2 <= 1))",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 1)",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 2) & (x1' = 0) & (cd1' = (min(4, (cd1 + 1))))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 1)",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 2) & (x2' = 0) & (cd2' = (min(4, (cd2 + 1))))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 2,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 3,
+            "cd2": 3,
+            "s1": 1,
+            "s2": 1,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 926,
+                "labels": [
+                    "station1_cmd_21"
+                ],
+                "origin": {
+                    "action-label": "station1_cmd_21",
+                    "transitions": [
+                        {
+                            "guard": "((s1 = 2) & (cd1 = 4))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 0)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 1)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 2)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 3)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 4)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 5)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 6)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 7)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 8)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 9)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 10)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 11)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 12)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 13)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 14)"
+                                },
+                                {
+                                    "prob": "(1 / 16)",
+                                    "result": "(s1' = 3) & (bc1' = 15)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 4,
+            "s1": 2,
+            "s2": 2,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2097,
+                "labels": [
+                    "send1"
+                ],
+                "origin": {
+                    "action-label": "send1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 0)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 1)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(((s1 = 3) & (x1 = 2)) & (bc1 = 0))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 1) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 0,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 4,
+            "s1": 3,
+            "s2": 3,
+            "x1": 2,
+            "x2": 2,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 2744,
+                "labels": [
+                    "cd"
+                ],
+                "origin": {
+                    "action-label": "cd",
+                    "transitions": [
+                        {
+                            "guard": "((b = 2) & (y2 <= 1))",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0) & (y2' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s1 = 1)",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 2) & (x1' = 0) & (cd1' = (min(4, (cd1 + 1))))"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "(s2 = 1)",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 2) & (x2' = 0) & (cd2' = (min(4, (cd2 + 1))))"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 2,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 4,
+            "s1": 1,
+            "s2": 1,
+            "x1": 0,
+            "x2": 0,
+            "y1": 0,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5599,
+                "labels": [
+                    "end1"
+                ],
+                "origin": {
+                    "action-label": "end1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 1) & (x1 = 30))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 4) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 1,
+            "cd2": 4,
+            "s1": 1,
+            "s2": 3,
+            "x1": 30,
+            "x2": 2,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 5631,
+                "labels": [
+                    "end2"
+                ],
+                "origin": {
+                    "action-label": "end2",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 1) & (x2 = 30))",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 4) & (x2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 1,
+            "s1": 3,
+            "s2": 1,
+            "x1": 2,
+            "x2": 30,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6467,
+                "labels": [
+                    "end1"
+                ],
+                "origin": {
+                    "action-label": "end1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 1) & (x1 = 30))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 4) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 2,
+            "cd2": 4,
+            "s1": 1,
+            "s2": 3,
+            "x1": 30,
+            "x2": 2,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 6499,
+                "labels": [
+                    "end2"
+                ],
+                "origin": {
+                    "action-label": "end2",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 1) & (x2 = 30))",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 4) & (x2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 2,
+            "s1": 3,
+            "s2": 1,
+            "x1": 2,
+            "x2": 30,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 7105,
+                "labels": [
+                    "end1"
+                ],
+                "origin": {
+                    "action-label": "end1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 1) & (x1 = 30))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 4) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 3,
+            "cd2": 4,
+            "s1": 1,
+            "s2": 3,
+            "x1": 30,
+            "x2": 2,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 7137,
+                "labels": [
+                    "end2"
+                ],
+                "origin": {
+                    "action-label": "end2",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 1) & (x2 = 30))",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 4) & (x2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 3,
+            "s1": 3,
+            "s2": 1,
+            "x1": 2,
+            "x2": 30,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 7553,
+                "labels": [
+                    "end1"
+                ],
+                "origin": {
+                    "action-label": "end1",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s1 = 1) & (x1 = 30))",
+                            "module": "station1",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s1' = 4) & (x1' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 4,
+            "s1": 1,
+            "s2": 3,
+            "x1": 30,
+            "x2": 2,
+            "y1": 2,
+            "y2": 0
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 7585,
+                "labels": [
+                    "end2"
+                ],
+                "origin": {
+                    "action-label": "end2",
+                    "transitions": [
+                        {
+                            "guard": "(b = 1)",
+                            "module": "bus",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(b' = 0) & (y1' = 0)"
+                                }
+                            ]
+                        },
+                        {
+                            "guard": "((s2 = 1) & (x2 = 30))",
+                            "module": "station2",
+                            "updates": [
+                                {
+                                    "prob": "1",
+                                    "result": "(s2' = 4) & (x2' = 0)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "b": 1,
+            "bc1": 0,
+            "bc2": 0,
+            "cd1": 4,
+            "cd2": 4,
+            "s1": 3,
+            "s2": 1,
+            "x1": 2,
+            "x2": 30,
+            "y1": 2,
+            "y2": 0
+        }
+    }
+]

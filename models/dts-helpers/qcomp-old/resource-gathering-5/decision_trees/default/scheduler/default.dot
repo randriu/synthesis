@@ -1,0 +1,2166 @@
+digraph {
+0 [label="x <= 3.5
+--------------
+
+attacked <= 0.5 : 1.898
+gem <= 0.5 : 1.743
+gold <= 0.5 : 1.739
+required_gem <= 0.5 : 1.896
+required_gem <= 1.5 : 1.898
+required_gem <= 2.5 : 1.901
+required_gem <= 3.5 : 1.904
+required_gem <= 4.5 : 1.907
+required_gold <= 0.5 : 1.882
+required_gold <= 1.5 : 1.894
+required_gold <= 2.5 : 1.898
+required_gold <= 3.5 : 1.902
+required_gold <= 4.5 : 1.906
+x <= 1.5 : 1.717
+x <= 2.5 : 1.621
+x <= 3.5 : 1.565
+x <= 4.5 : 1.702
+y <= 1.5 : 1.851
+y <= 2.5 : 1.847
+y <= 3.5 : 1.807
+y <= 4.5 : 1.799"];
+1 [label="gold <= 0.5
+--------------
+
+attacked <= 0.5 : 1.41
+gem <= 0.5 : 1.345
+gold <= 0.5 : 1.076
+required_gem <= 0.5 : 1.413
+required_gem <= 1.5 : 1.412
+required_gem <= 2.5 : 1.412
+required_gem <= 3.5 : 1.415
+required_gem <= 4.5 : 1.419
+required_gold <= 0.5 : 1.353
+required_gold <= 1.5 : 1.393
+required_gold <= 2.5 : 1.401
+required_gold <= 3.5 : 1.408
+required_gold <= 4.5 : 1.416
+x <= 1.5 : 1.261
+x <= 2.5 : 1.278
+y <= 1.5 : 1.366
+y <= 2.5 : 1.391
+y <= 3.5 : 1.383
+y <= 4.5 : 1.334"];
+2 [label="y <= 4.5
+--------------
+
+attacked <= 0.5 : 1.269
+gem <= 0.5 : 1.123
+required_gem <= 0.5 : 1.242
+required_gem <= 1.5 : 1.24
+required_gem <= 2.5 : 1.24
+required_gem <= 3.5 : 1.247
+required_gem <= 4.5 : 1.26
+required_gold <= 0.5 : 1.1
+required_gold <= 1.5 : 1.185
+required_gold <= 2.5 : 1.202
+required_gold <= 3.5 : 1.218
+required_gold <= 4.5 : 1.241
+x <= 1.5 : 1.186
+x <= 2.5 : 1.177
+y <= 1.5 : 1.251
+y <= 2.5 : 1.264
+y <= 3.5 : 1.257
+y <= 4.5 : 1.086"];
+3 [label="required_gold <= 0.5
+--------------
+
+attacked <= 0.5 : 1.225
+gem <= 0.5 : 1.046
+required_gem <= 0.5 : 1.184
+required_gem <= 1.5 : 1.184
+required_gem <= 2.5 : 1.184
+required_gem <= 3.5 : 1.193
+required_gem <= 4.5 : 1.21
+required_gold <= 0.5 : 1.005
+required_gold <= 1.5 : 1.111
+required_gold <= 2.5 : 1.133
+required_gold <= 3.5 : 1.155
+required_gold <= 4.5 : 1.185
+x <= 1.5 : 1.144
+x <= 2.5 : 1.159
+y <= 1.5 : 1.185
+y <= 2.5 : 1.2
+y <= 3.5 : 1.184"];
+4 [label="gem <= 0.5
+--------------
+
+attacked <= 0.5 : 0.639
+gem <= 0.5 : 0.433
+required_gem <= 1.5 : 0.65
+required_gem <= 2.5 : 0.65
+required_gem <= 3.5 : 0.65
+required_gem <= 4.5 : 0.65
+x <= 1.5 : 0.541
+x <= 2.5 : 0.543
+y <= 1.5 : 0.573
+y <= 2.5 : 0.613
+y <= 3.5 : 0.607"];
+5 [label="right"];
+4 -> 5 [label="True"];
+6 [label="x <= 2.5
+--------------
+
+required_gem <= 1.5 : 0.946
+required_gem <= 2.5 : 0.946
+required_gem <= 3.5 : 0.946
+required_gem <= 4.5 : 0.946
+x <= 1.5 : 0.627
+x <= 2.5 : 0.395
+y <= 1.5 : 0.811
+y <= 2.5 : 0.874
+y <= 3.5 : 0.84"];
+7 [label="y <= 3.5
+--------------
+
+required_gem <= 1.5 : 0.544
+required_gem <= 2.5 : 0.544
+required_gem <= 3.5 : 0.544
+required_gem <= 4.5 : 0.544
+x <= 1.5 : 0.406
+y <= 1.5 : 0.488
+y <= 2.5 : 0.406
+y <= 3.5 : 0.25"];
+8 [label="right"];
+7 -> 8 [label="True"];
+9 [label="x <= 1.5
+--------------
+
+required_gem <= 1.5 : 1.0
+required_gem <= 2.5 : 1.0
+required_gem <= 3.5 : 1.0
+required_gem <= 4.5 : 1.0
+x <= 1.5 : 0.0"];
+10 [label="right"];
+9 -> 10 [label="True"];
+11 [label="down"];
+9 -> 11 [style="dashed", label="False"];
+7 -> 9 [style="dashed", label="False"];
+6 -> 7 [label="True"];
+12 [label="down"];
+6 -> 12 [style="dashed", label="False"];
+4 -> 6 [style="dashed", label="False"];
+3 -> 4 [label="True"];
+13 [label="gem <= 0.5
+--------------
+
+attacked <= 0.5 : 1.06
+gem <= 0.5 : 0.805
+required_gem <= 0.5 : 1.037
+required_gem <= 1.5 : 1.011
+required_gem <= 2.5 : 1.007
+required_gem <= 3.5 : 1.017
+required_gem <= 4.5 : 1.039
+required_gold <= 1.5 : 1.048
+required_gold <= 2.5 : 1.036
+required_gold <= 3.5 : 1.032
+required_gold <= 4.5 : 1.039
+x <= 1.5 : 0.972
+x <= 2.5 : 0.993
+y <= 1.5 : 1.023
+y <= 2.5 : 1.033
+y <= 3.5 : 1.007"];
+14 [label="x <= 2.5
+--------------
+
+attacked <= 0.5 : 0.281
+required_gem <= 0.5 : 0.278
+required_gem <= 1.5 : 0.261
+required_gem <= 2.5 : 0.239
+required_gem <= 3.5 : 0.256
+required_gem <= 4.5 : 0.28
+required_gold <= 1.5 : 0.284
+required_gold <= 2.5 : 0.266
+required_gold <= 3.5 : 0.253
+required_gold <= 4.5 : 0.275
+x <= 1.5 : 0.264
+x <= 2.5 : 0.218
+y <= 1.5 : 0.286
+y <= 2.5 : 0.284
+y <= 3.5 : 0.272"];
+15 [label="top"];
+14 -> 15 [label="True"];
+16 [label="required_gem <= 2.5
+--------------
+
+attacked <= 0.5 : 0.565
+required_gem <= 0.5 : 0.529
+required_gem <= 1.5 : 0.481
+required_gem <= 2.5 : 0.418
+required_gem <= 3.5 : 0.463
+required_gem <= 4.5 : 0.531
+required_gold <= 1.5 : 0.543
+required_gold <= 2.5 : 0.492
+required_gold <= 3.5 : 0.459
+required_gold <= 4.5 : 0.52
+y <= 1.5 : 0.562
+y <= 2.5 : 0.556
+y <= 3.5 : 0.52"];
+17 [label="top"];
+16 -> 17 [label="True"];
+18 [label="required_gold <= 3.5
+--------------
+
+attacked <= 0.5 : 0.833
+required_gem <= 3.5 : 0.814
+required_gem <= 4.5 : 0.831
+required_gold <= 1.5 : 0.777
+required_gold <= 2.5 : 0.658
+required_gold <= 3.5 : 0.595
+required_gold <= 4.5 : 0.735
+y <= 1.5 : 0.826
+y <= 2.5 : 0.811
+y <= 3.5 : 0.735"];
+19 [label="y <= 3.5
+--------------
+
+attacked <= 0.5 : 0.982
+required_gem <= 3.5 : 0.943
+required_gem <= 4.5 : 0.98
+required_gold <= 1.5 : 0.98
+required_gold <= 2.5 : 0.943
+y <= 1.5 : 0.967
+y <= 2.5 : 0.936
+y <= 3.5 : 0.793"];
+20 [label="required_gem <= 3.5
+--------------
+
+attacked <= 0.5 : 0.991
+required_gem <= 3.5 : 0.918
+required_gem <= 4.5 : 0.973
+required_gold <= 1.5 : 0.973
+required_gold <= 2.5 : 0.918
+y <= 1.5 : 0.991
+y <= 2.5 : 0.991"];
+21 [label="required_gold <= 1.5
+--------------
+
+attacked <= 0.5 : 0.918
+required_gold <= 1.5 : 0.0
+required_gold <= 2.5 : 0.667
+y <= 1.5 : 0.918
+y <= 2.5 : 0.918"];
+22 [label="right"];
+21 -> 22 [label="True"];
+23 [label="top"];
+21 -> 23 [style="dashed", label="False"];
+20 -> 21 [label="True"];
+24 [label="required_gold <= 1.5
+--------------
+
+attacked <= 0.5 : 0.918
+required_gem <= 4.5 : 0.918
+required_gold <= 1.5 : 0.874
+required_gold <= 2.5 : 0.874
+y <= 1.5 : 0.918
+y <= 2.5 : 0.918"];
+25 [label="required_gem <= 4.5
+--------------
+
+attacked <= 0.5 : 1.0
+required_gem <= 4.5 : 0.0
+y <= 1.5 : 1.0
+y <= 2.5 : 1.0"];
+26 [label="right"];
+25 -> 26 [label="True"];
+27 [label="top"];
+25 -> 27 [style="dashed", label="False"];
+24 -> 25 [label="True"];
+28 [label="required_gem <= 4.5
+--------------
+
+attacked <= 0.5 : 0.811
+required_gem <= 4.5 : 0.5
+required_gold <= 2.5 : 0.5
+y <= 1.5 : 0.811
+y <= 2.5 : 0.811"];
+29 [label="required_gold <= 2.5
+--------------
+
+attacked <= 0.5 : 1.0
+required_gold <= 2.5 : 0.0
+y <= 1.5 : 1.0
+y <= 2.5 : 1.0"];
+30 [label="right"];
+29 -> 30 [label="True"];
+31 [label="top"];
+29 -> 31 [style="dashed", label="False"];
+28 -> 29 [label="True"];
+32 [label="right"];
+28 -> 32 [style="dashed", label="False"];
+24 -> 28 [style="dashed", label="False"];
+20 -> 24 [style="dashed", label="False"];
+19 -> 20 [label="True"];
+33 [label="top"];
+19 -> 33 [style="dashed", label="False"];
+18 -> 19 [label="True"];
+34 [label="top"];
+18 -> 34 [style="dashed", label="False"];
+16 -> 18 [style="dashed", label="False"];
+14 -> 16 [style="dashed", label="False"];
+13 -> 14 [label="True"];
+35 [label="x <= 2.5
+--------------
+
+required_gem <= 0.5 : 1.346
+required_gem <= 1.5 : 1.283
+required_gem <= 2.5 : 1.277
+required_gem <= 3.5 : 1.294
+required_gem <= 4.5 : 1.336
+required_gold <= 1.5 : 1.369
+required_gold <= 2.5 : 1.345
+required_gold <= 3.5 : 1.34
+required_gold <= 4.5 : 1.352
+x <= 1.5 : 1.113
+x <= 2.5 : 1.095
+y <= 1.5 : 1.243
+y <= 2.5 : 1.317
+y <= 3.5 : 1.276"];
+36 [label="y <= 3.5
+--------------
+
+required_gem <= 0.5 : 1.11
+required_gem <= 1.5 : 1.077
+required_gem <= 2.5 : 1.071
+required_gem <= 3.5 : 1.08
+required_gem <= 4.5 : 1.108
+required_gold <= 1.5 : 1.133
+required_gold <= 2.5 : 1.12
+required_gold <= 3.5 : 1.119
+required_gold <= 4.5 : 1.129
+x <= 1.5 : 0.979
+y <= 1.5 : 1.042
+y <= 2.5 : 1.032
+y <= 3.5 : 0.921"];
+37 [label="x <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.768
+required_gem <= 1.5 : 0.76
+required_gem <= 2.5 : 0.757
+required_gem <= 3.5 : 0.763
+required_gem <= 4.5 : 0.779
+required_gold <= 1.5 : 0.798
+required_gold <= 2.5 : 0.793
+required_gold <= 3.5 : 0.794
+required_gold <= 4.5 : 0.8
+x <= 1.5 : 0.5
+y <= 1.5 : 0.75
+y <= 2.5 : 0.798"];
+38 [label="right"];
+37 -> 38 [label="True"];
+39 [label="required_gem <= 0.5
+--------------
+
+required_gem <= 0.5 : 0.809
+required_gem <= 1.5 : 0.829
+required_gem <= 2.5 : 0.837
+required_gem <= 3.5 : 0.863
+required_gem <= 4.5 : 0.915
+required_gold <= 1.5 : 0.963
+required_gold <= 2.5 : 0.946
+required_gold <= 3.5 : 0.946
+required_gold <= 4.5 : 0.963
+y <= 1.5 : 0.829
+y <= 2.5 : 0.959"];
+40 [label="top"];
+39 -> 40 [label="True"];
+41 [label="y <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.918
+required_gem <= 2.5 : 0.89
+required_gem <= 3.5 : 0.887
+required_gem <= 4.5 : 0.911
+required_gold <= 1.5 : 0.911
+required_gold <= 2.5 : 0.887
+required_gold <= 3.5 : 0.89
+required_gold <= 4.5 : 0.918
+y <= 1.5 : 0.647
+y <= 2.5 : 0.911"];
+42 [label="right"];
+41 -> 42 [label="True"];
+43 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 1.5 : 0.8
+required_gem <= 2.5 : 0.77
+required_gem <= 3.5 : 0.786
+required_gem <= 4.5 : 0.849
+required_gold <= 1.5 : 0.849
+required_gold <= 2.5 : 0.786
+required_gold <= 3.5 : 0.77
+required_gold <= 4.5 : 0.8
+y <= 2.5 : 0.971"];
+44 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.361
+required_gold <= 1.5 : 0.2
+required_gold <= 2.5 : 0.325
+required_gold <= 3.5 : 0.39
+required_gold <= 4.5 : 0.435
+y <= 2.5 : 0.469"];
+45 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.0
+y <= 2.5 : 1.0"];
+46 [label="top"];
+45 -> 46 [label="True"];
+47 [label="right"];
+45 -> 47 [style="dashed", label="False"];
+44 -> 45 [label="True"];
+48 [label="top"];
+44 -> 48 [style="dashed", label="False"];
+43 -> 44 [label="True"];
+49 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 3.5 : 0.911
+required_gem <= 4.5 : 0.907
+required_gold <= 1.5 : 0.8
+required_gold <= 2.5 : 0.551
+required_gold <= 3.5 : 0.562
+required_gold <= 4.5 : 0.649
+y <= 2.5 : 0.971"];
+50 [label="right"];
+49 -> 50 [label="True"];
+51 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.667
+required_gem <= 4.5 : 0.739
+required_gold <= 3.5 : 0.739
+required_gold <= 4.5 : 0.667
+y <= 2.5 : 0.918"];
+52 [label="top"];
+51 -> 52 [label="True"];
+53 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 4.5 : 0.918
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.541
+y <= 2.5 : 1.0"];
+54 [label="right"];
+53 -> 54 [label="True"];
+55 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 4.5 : 0.5
+required_gold <= 4.5 : 0.5
+y <= 2.5 : 0.811"];
+56 [label="top"];
+55 -> 56 [label="True"];
+57 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0
+y <= 2.5 : 1.0"];
+58 [label="right"];
+57 -> 58 [label="True"];
+59 [label="top"];
+57 -> 59 [style="dashed", label="False"];
+55 -> 57 [style="dashed", label="False"];
+53 -> 55 [style="dashed", label="False"];
+51 -> 53 [style="dashed", label="False"];
+49 -> 51 [style="dashed", label="False"];
+43 -> 49 [style="dashed", label="False"];
+41 -> 43 [style="dashed", label="False"];
+39 -> 41 [style="dashed", label="False"];
+37 -> 39 [style="dashed", label="False"];
+36 -> 37 [label="True"];
+60 [label="x <= 1.5
+--------------
+
+required_gem <= 0.5 : 1.142
+required_gem <= 1.5 : 1.0
+required_gem <= 2.5 : 0.995
+required_gem <= 3.5 : 1.034
+required_gem <= 4.5 : 1.116
+required_gold <= 1.5 : 1.166
+required_gold <= 2.5 : 1.115
+required_gold <= 3.5 : 1.099
+required_gold <= 4.5 : 1.117
+x <= 1.5 : 0.918"];
+61 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 0.5 : 0.809
+required_gem <= 1.5 : 0.667
+required_gem <= 2.5 : 0.662
+required_gem <= 3.5 : 0.7
+required_gem <= 4.5 : 0.783
+required_gold <= 1.5 : 0.833
+required_gold <= 2.5 : 0.782
+required_gold <= 3.5 : 0.766
+required_gold <= 4.5 : 0.784"];
+62 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.313
+required_gem <= 1.5 : 0.241
+required_gold <= 1.5 : 0.184
+required_gold <= 2.5 : 0.26
+required_gold <= 3.5 : 0.302
+required_gold <= 4.5 : 0.331"];
+63 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.667
+required_gem <= 1.5 : 0.0"];
+64 [label="top"];
+63 -> 64 [label="True"];
+65 [label="right"];
+63 -> 65 [style="dashed", label="False"];
+62 -> 63 [label="True"];
+66 [label="top"];
+62 -> 66 [style="dashed", label="False"];
+61 -> 62 [label="True"];
+67 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 3.5 : 0.911
+required_gem <= 4.5 : 0.907
+required_gold <= 1.5 : 0.8
+required_gold <= 2.5 : 0.551
+required_gold <= 3.5 : 0.562
+required_gold <= 4.5 : 0.649"];
+68 [label="right"];
+67 -> 68 [label="True"];
+69 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.667
+required_gem <= 4.5 : 0.739
+required_gold <= 3.5 : 0.739
+required_gold <= 4.5 : 0.667"];
+70 [label="top"];
+69 -> 70 [label="True"];
+71 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 4.5 : 0.918
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.541"];
+72 [label="right"];
+71 -> 72 [label="True"];
+73 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 4.5 : 0.5
+required_gold <= 4.5 : 0.5"];
+74 [label="top"];
+73 -> 74 [label="True"];
+75 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0"];
+76 [label="right"];
+75 -> 76 [label="True"];
+77 [label="top"];
+75 -> 77 [style="dashed", label="False"];
+73 -> 75 [style="dashed", label="False"];
+71 -> 73 [style="dashed", label="False"];
+69 -> 71 [style="dashed", label="False"];
+67 -> 69 [style="dashed", label="False"];
+61 -> 67 [style="dashed", label="False"];
+60 -> 61 [label="True"];
+78 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 0.5 : 0.809
+required_gem <= 1.5 : 0.667
+required_gem <= 2.5 : 0.662
+required_gem <= 3.5 : 0.7
+required_gem <= 4.5 : 0.783
+required_gold <= 1.5 : 0.833
+required_gold <= 2.5 : 0.782
+required_gold <= 3.5 : 0.766
+required_gold <= 4.5 : 0.784"];
+79 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.313
+required_gem <= 1.5 : 0.241
+required_gold <= 1.5 : 0.184
+required_gold <= 2.5 : 0.26
+required_gold <= 3.5 : 0.302
+required_gold <= 4.5 : 0.331"];
+80 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.667
+required_gem <= 1.5 : 0.0"];
+81 [label="top"];
+80 -> 81 [label="True"];
+82 [label="down"];
+80 -> 82 [style="dashed", label="False"];
+79 -> 80 [label="True"];
+83 [label="top"];
+79 -> 83 [style="dashed", label="False"];
+78 -> 79 [label="True"];
+84 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 3.5 : 0.911
+required_gem <= 4.5 : 0.907
+required_gold <= 1.5 : 0.8
+required_gold <= 2.5 : 0.551
+required_gold <= 3.5 : 0.562
+required_gold <= 4.5 : 0.649"];
+85 [label="down"];
+84 -> 85 [label="True"];
+86 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.667
+required_gem <= 4.5 : 0.739
+required_gold <= 3.5 : 0.739
+required_gold <= 4.5 : 0.667"];
+87 [label="top"];
+86 -> 87 [label="True"];
+88 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 4.5 : 0.918
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.541"];
+89 [label="down"];
+88 -> 89 [label="True"];
+90 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 4.5 : 0.5
+required_gold <= 4.5 : 0.5"];
+91 [label="top"];
+90 -> 91 [label="True"];
+92 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0"];
+93 [label="down"];
+92 -> 93 [label="True"];
+94 [label="top"];
+92 -> 94 [style="dashed", label="False"];
+90 -> 92 [style="dashed", label="False"];
+88 -> 90 [style="dashed", label="False"];
+86 -> 88 [style="dashed", label="False"];
+84 -> 86 [style="dashed", label="False"];
+78 -> 84 [style="dashed", label="False"];
+60 -> 78 [style="dashed", label="False"];
+36 -> 60 [style="dashed", label="False"];
+35 -> 36 [label="True"];
+95 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 0.5 : 0.809
+required_gem <= 1.5 : 0.667
+required_gem <= 2.5 : 0.662
+required_gem <= 3.5 : 0.7
+required_gem <= 4.5 : 0.783
+required_gold <= 1.5 : 0.833
+required_gold <= 2.5 : 0.782
+required_gold <= 3.5 : 0.766
+required_gold <= 4.5 : 0.784
+y <= 2.5 : 0.918
+y <= 3.5 : 0.918"];
+96 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.313
+required_gem <= 1.5 : 0.241
+required_gold <= 1.5 : 0.184
+required_gold <= 2.5 : 0.26
+required_gold <= 3.5 : 0.302
+required_gold <= 4.5 : 0.331
+y <= 2.5 : 0.353
+y <= 3.5 : 0.353"];
+97 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.667
+required_gem <= 1.5 : 0.0
+y <= 2.5 : 0.918
+y <= 3.5 : 0.918"];
+98 [label="top"];
+97 -> 98 [label="True"];
+99 [label="down"];
+97 -> 99 [style="dashed", label="False"];
+96 -> 97 [label="True"];
+100 [label="top"];
+96 -> 100 [style="dashed", label="False"];
+95 -> 96 [label="True"];
+101 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 3.5 : 0.911
+required_gem <= 4.5 : 0.907
+required_gold <= 1.5 : 0.8
+required_gold <= 2.5 : 0.551
+required_gold <= 3.5 : 0.562
+required_gold <= 4.5 : 0.649
+y <= 2.5 : 0.971
+y <= 3.5 : 0.971"];
+102 [label="down"];
+101 -> 102 [label="True"];
+103 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.667
+required_gem <= 4.5 : 0.739
+required_gold <= 3.5 : 0.739
+required_gold <= 4.5 : 0.667
+y <= 2.5 : 0.918
+y <= 3.5 : 0.918"];
+104 [label="top"];
+103 -> 104 [label="True"];
+105 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 4.5 : 0.918
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.541
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0"];
+106 [label="down"];
+105 -> 106 [label="True"];
+107 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 4.5 : 0.5
+required_gold <= 4.5 : 0.5
+y <= 2.5 : 0.811
+y <= 3.5 : 0.811"];
+108 [label="top"];
+107 -> 108 [label="True"];
+109 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0"];
+110 [label="down"];
+109 -> 110 [label="True"];
+111 [label="top"];
+109 -> 111 [style="dashed", label="False"];
+107 -> 109 [style="dashed", label="False"];
+105 -> 107 [style="dashed", label="False"];
+103 -> 105 [style="dashed", label="False"];
+101 -> 103 [style="dashed", label="False"];
+95 -> 101 [style="dashed", label="False"];
+35 -> 95 [style="dashed", label="False"];
+13 -> 35 [style="dashed", label="False"];
+3 -> 13 [style="dashed", label="False"];
+2 -> 3 [label="True"];
+112 [label="required_gold <= 0.5
+--------------
+
+gem <= 0.5 : 0.186
+required_gem <= 0.5 : 0.214
+required_gem <= 1.5 : 0.221
+required_gem <= 2.5 : 0.221
+required_gem <= 3.5 : 0.222
+required_gem <= 4.5 : 0.222
+required_gold <= 0.5 : 0.116
+required_gold <= 1.5 : 0.161
+required_gold <= 2.5 : 0.184
+required_gold <= 3.5 : 0.2
+required_gold <= 4.5 : 0.212
+x <= 1.5 : 0.186"];
+113 [label="gem <= 0.5
+--------------
+
+gem <= 0.5 : 0.5
+required_gem <= 1.5 : 0.811
+required_gem <= 2.5 : 0.811
+required_gem <= 3.5 : 0.811
+required_gem <= 4.5 : 0.811
+x <= 1.5 : 0.5"];
+114 [label="right"];
+113 -> 114 [label="True"];
+115 [label="x <= 1.5
+--------------
+
+required_gem <= 1.5 : 1.0
+required_gem <= 2.5 : 1.0
+required_gem <= 3.5 : 1.0
+required_gem <= 4.5 : 1.0
+x <= 1.5 : 0.0"];
+116 [label="right"];
+115 -> 116 [label="True"];
+117 [label="down"];
+115 -> 117 [style="dashed", label="False"];
+113 -> 115 [style="dashed", label="False"];
+112 -> 113 [label="True"];
+118 [label="right"];
+112 -> 118 [style="dashed", label="False"];
+2 -> 112 [style="dashed", label="False"];
+1 -> 2 [label="True"];
+119 [label="x <= 1.5
+--------------
+
+gem <= 0.5 : 0.814
+required_gem <= 0.5 : 0.867
+required_gem <= 1.5 : 0.863
+required_gem <= 2.5 : 0.866
+required_gem <= 3.5 : 0.869
+required_gem <= 4.5 : 0.871
+required_gold <= 0.5 : 0.872
+required_gold <= 1.5 : 0.87
+required_gold <= 2.5 : 0.87
+required_gold <= 3.5 : 0.871
+required_gold <= 4.5 : 0.873
+x <= 1.5 : 0.64
+x <= 2.5 : 0.681
+y <= 1.5 : 0.797
+y <= 2.5 : 0.828
+y <= 3.5 : 0.813
+y <= 4.5 : 0.854"];
+120 [label="right"];
+119 -> 120 [label="True"];
+121 [label="gem <= 0.5
+--------------
+
+gem <= 0.5 : 0.868
+required_gem <= 0.5 : 0.975
+required_gem <= 1.5 : 0.967
+required_gem <= 2.5 : 0.974
+required_gem <= 3.5 : 0.98
+required_gem <= 4.5 : 0.986
+required_gold <= 0.5 : 0.987
+required_gold <= 1.5 : 0.983
+required_gold <= 2.5 : 0.983
+required_gold <= 3.5 : 0.984
+required_gold <= 4.5 : 0.988
+x <= 2.5 : 0.882
+y <= 1.5 : 0.888
+y <= 2.5 : 0.921
+y <= 3.5 : 0.882
+y <= 4.5 : 0.956"];
+122 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.724
+required_gem <= 1.5 : 0.676
+required_gem <= 2.5 : 0.697
+required_gem <= 3.5 : 0.724
+required_gem <= 4.5 : 0.737
+required_gold <= 0.5 : 0.751
+required_gold <= 1.5 : 0.74
+required_gold <= 2.5 : 0.747
+required_gold <= 3.5 : 0.761
+required_gold <= 4.5 : 0.781
+x <= 2.5 : 0.785
+y <= 1.5 : 0.767
+y <= 2.5 : 0.792
+y <= 3.5 : 0.785
+y <= 4.5 : 0.807"];
+123 [label="x <= 2.5
+--------------
+
+required_gem <= 0.5 : 0.958
+required_gold <= 0.5 : 0.883
+required_gold <= 1.5 : 0.876
+required_gold <= 2.5 : 0.942
+required_gold <= 3.5 : 0.969
+required_gold <= 4.5 : 0.984
+x <= 2.5 : 0.811
+y <= 1.5 : 0.855
+y <= 2.5 : 0.883
+y <= 3.5 : 0.811
+y <= 4.5 : 0.927"];
+124 [label="y <= 3.5
+--------------
+
+required_gem <= 0.5 : 0.898
+required_gold <= 0.5 : 0.857
+required_gold <= 1.5 : 0.861
+required_gold <= 2.5 : 0.891
+required_gold <= 3.5 : 0.902
+required_gold <= 4.5 : 0.908
+y <= 1.5 : 0.781
+y <= 2.5 : 0.596
+y <= 3.5 : 0.274
+y <= 4.5 : 0.722"];
+125 [label="right"];
+124 -> 125 [label="True"];
+126 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.501
+required_gold <= 0.5 : 0.426
+required_gold <= 1.5 : 0.25
+required_gold <= 2.5 : 0.441
+required_gold <= 3.5 : 0.549
+required_gold <= 4.5 : 0.625
+y <= 4.5 : 0.684"];
+127 [label="required_gem <= 0.5
+--------------
+
+required_gem <= 0.5 : 0.0
+required_gold <= 0.5 : 0.667
+y <= 4.5 : 0.918"];
+128 [label="down"];
+127 -> 128 [label="True"];
+129 [label="right"];
+127 -> 129 [style="dashed", label="False"];
+126 -> 127 [label="True"];
+130 [label="down"];
+126 -> 130 [style="dashed", label="False"];
+124 -> 126 [style="dashed", label="False"];
+123 -> 124 [label="True"];
+131 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.501
+required_gold <= 0.5 : 0.426
+required_gold <= 1.5 : 0.25
+required_gold <= 2.5 : 0.441
+required_gold <= 3.5 : 0.549
+required_gold <= 4.5 : 0.625
+y <= 2.5 : 0.684
+y <= 3.5 : 0.684
+y <= 4.5 : 0.684"];
+132 [label="required_gem <= 0.5
+--------------
+
+required_gem <= 0.5 : 0.0
+required_gold <= 0.5 : 0.667
+y <= 2.5 : 0.918
+y <= 3.5 : 0.918
+y <= 4.5 : 0.918"];
+133 [label="down"];
+132 -> 133 [label="True"];
+134 [label="right"];
+132 -> 134 [style="dashed", label="False"];
+131 -> 132 [label="True"];
+135 [label="down"];
+131 -> 135 [style="dashed", label="False"];
+123 -> 131 [style="dashed", label="False"];
+122 -> 123 [label="True"];
+136 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 2.5 : 0.509
+required_gem <= 3.5 : 0.5
+required_gem <= 4.5 : 0.477
+required_gold <= 0.5 : 0.496
+required_gold <= 1.5 : 0.454
+required_gold <= 2.5 : 0.398
+required_gold <= 3.5 : 0.418
+required_gold <= 4.5 : 0.455
+x <= 2.5 : 0.527
+y <= 1.5 : 0.509
+y <= 2.5 : 0.525
+y <= 3.5 : 0.527
+y <= 4.5 : 0.529"];
+137 [label="right"];
+136 -> 137 [label="True"];
+138 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 2.5 : 0.746
+required_gem <= 3.5 : 0.727
+required_gem <= 4.5 : 0.679
+required_gold <= 3.5 : 0.76
+required_gold <= 4.5 : 0.755
+x <= 2.5 : 0.788
+y <= 1.5 : 0.749
+y <= 2.5 : 0.785
+y <= 3.5 : 0.788
+y <= 4.5 : 0.793"];
+139 [label="y <= 1.5
+--------------
+
+required_gem <= 2.5 : 0.881
+required_gem <= 3.5 : 0.889
+required_gold <= 3.5 : 0.852
+required_gold <= 4.5 : 0.842
+x <= 2.5 : 0.893
+y <= 1.5 : 0.839
+y <= 2.5 : 0.889
+y <= 3.5 : 0.893
+y <= 4.5 : 0.901"];
+140 [label="right"];
+139 -> 140 [label="True"];
+141 [label="required_gold <= 4.5
+--------------
+
+required_gem <= 2.5 : 0.914
+required_gem <= 3.5 : 0.924
+required_gold <= 3.5 : 0.88
+required_gold <= 4.5 : 0.867
+x <= 2.5 : 0.941
+y <= 2.5 : 0.943
+y <= 3.5 : 0.941
+y <= 4.5 : 0.943"];
+142 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 2.5 : 0.696
+required_gem <= 3.5 : 0.636
+required_gold <= 3.5 : 0.784
+x <= 2.5 : 0.811
+y <= 2.5 : 0.811
+y <= 3.5 : 0.811
+y <= 4.5 : 0.811"];
+143 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 2.5 : 0.906
+required_gold <= 3.5 : 0.906
+x <= 2.5 : 0.954
+y <= 2.5 : 0.954
+y <= 3.5 : 0.954
+y <= 4.5 : 0.954"];
+144 [label="required_gold <= 3.5
+--------------
+
+required_gold <= 3.5 : 1.0
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+145 [label="x <= 2.5
+--------------
+
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+146 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+147 [label="right"];
+146 -> 147 [label="True"];
+148 [label="down"];
+146 -> 148 [style="dashed", label="False"];
+145 -> 146 [label="True"];
+149 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+150 [label="down"];
+149 -> 150 [label="True"];
+151 [label="right"];
+149 -> 151 [style="dashed", label="False"];
+145 -> 149 [style="dashed", label="False"];
+144 -> 145 [label="True"];
+152 [label="x <= 2.5
+--------------
+
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+153 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+154 [label="right"];
+153 -> 154 [label="True"];
+155 [label="down"];
+153 -> 155 [style="dashed", label="False"];
+152 -> 153 [label="True"];
+156 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+157 [label="down"];
+156 -> 157 [label="True"];
+158 [label="right"];
+156 -> 158 [style="dashed", label="False"];
+152 -> 156 [style="dashed", label="False"];
+144 -> 152 [style="dashed", label="False"];
+143 -> 144 [label="True"];
+159 [label="required_gold <= 3.5
+--------------
+
+required_gold <= 3.5 : 0.5
+x <= 2.5 : 0.811
+y <= 2.5 : 0.811
+y <= 3.5 : 0.811
+y <= 4.5 : 0.811"];
+160 [label="right"];
+159 -> 160 [label="True"];
+161 [label="x <= 2.5
+--------------
+
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+162 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+163 [label="right"];
+162 -> 163 [label="True"];
+164 [label="down"];
+162 -> 164 [style="dashed", label="False"];
+161 -> 162 [label="True"];
+165 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+166 [label="down"];
+165 -> 166 [label="True"];
+167 [label="right"];
+165 -> 167 [style="dashed", label="False"];
+161 -> 165 [style="dashed", label="False"];
+159 -> 161 [style="dashed", label="False"];
+143 -> 159 [style="dashed", label="False"];
+142 -> 143 [label="True"];
+168 [label="right"];
+142 -> 168 [style="dashed", label="False"];
+141 -> 142 [label="True"];
+169 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 2.5 : 0.97
+required_gem <= 3.5 : 0.937
+x <= 2.5 : 0.959
+y <= 2.5 : 0.973
+y <= 3.5 : 0.959
+y <= 4.5 : 0.973"];
+170 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 2.5 : 1.0
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+171 [label="x <= 2.5
+--------------
+
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+172 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+173 [label="right"];
+172 -> 173 [label="True"];
+174 [label="down"];
+172 -> 174 [style="dashed", label="False"];
+171 -> 172 [label="True"];
+175 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+176 [label="down"];
+175 -> 176 [label="True"];
+177 [label="right"];
+175 -> 177 [style="dashed", label="False"];
+171 -> 175 [style="dashed", label="False"];
+170 -> 171 [label="True"];
+178 [label="x <= 2.5
+--------------
+
+x <= 2.5 : 1.0
+y <= 2.5 : 1.0
+y <= 3.5 : 1.0
+y <= 4.5 : 1.0"];
+179 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+180 [label="right"];
+179 -> 180 [label="True"];
+181 [label="down"];
+179 -> 181 [style="dashed", label="False"];
+178 -> 179 [label="True"];
+182 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+183 [label="down"];
+182 -> 183 [label="True"];
+184 [label="right"];
+182 -> 184 [style="dashed", label="False"];
+178 -> 182 [style="dashed", label="False"];
+170 -> 178 [style="dashed", label="False"];
+169 -> 170 [label="True"];
+185 [label="x <= 2.5
+--------------
+
+x <= 2.5 : 0.5
+y <= 2.5 : 0.738
+y <= 3.5 : 0.5
+y <= 4.5 : 0.689"];
+186 [label="y <= 3.5
+--------------
+
+y <= 2.5 : 0.689
+y <= 3.5 : 0.0
+y <= 4.5 : 0.689"];
+187 [label="right"];
+186 -> 187 [label="True"];
+188 [label="down"];
+186 -> 188 [style="dashed", label="False"];
+185 -> 186 [label="True"];
+189 [label="down"];
+185 -> 189 [style="dashed", label="False"];
+169 -> 185 [style="dashed", label="False"];
+141 -> 169 [style="dashed", label="False"];
+139 -> 141 [style="dashed", label="False"];
+138 -> 139 [label="True"];
+190 [label="right"];
+138 -> 190 [style="dashed", label="False"];
+136 -> 138 [style="dashed", label="False"];
+122 -> 136 [style="dashed", label="False"];
+121 -> 122 [label="True"];
+191 [label="x <= 2.5
+--------------
+
+required_gem <= 0.5 : 0.918
+required_gem <= 1.5 : 0.918
+required_gem <= 2.5 : 0.918
+required_gem <= 3.5 : 0.918
+required_gem <= 4.5 : 0.918
+required_gold <= 0.5 : 0.918
+required_gold <= 1.5 : 0.918
+required_gold <= 2.5 : 0.918
+required_gold <= 3.5 : 0.918
+required_gold <= 4.5 : 0.918
+x <= 2.5 : 0.539
+y <= 1.5 : 0.721
+y <= 2.5 : 0.739
+y <= 3.5 : 0.539
+y <= 4.5 : 0.766"];
+192 [label="y <= 3.5
+--------------
+
+required_gem <= 0.5 : 0.971
+required_gem <= 1.5 : 0.971
+required_gem <= 2.5 : 0.971
+required_gem <= 3.5 : 0.971
+required_gem <= 4.5 : 0.971
+required_gold <= 0.5 : 0.971
+required_gold <= 1.5 : 0.971
+required_gold <= 2.5 : 0.971
+required_gold <= 3.5 : 0.971
+required_gold <= 4.5 : 0.971
+y <= 1.5 : 0.8
+y <= 2.5 : 0.551
+y <= 3.5 : 0.0
+y <= 4.5 : 0.649"];
+193 [label="right"];
+192 -> 193 [label="True"];
+194 [label="down"];
+192 -> 194 [style="dashed", label="False"];
+191 -> 192 [label="True"];
+195 [label="down"];
+191 -> 195 [style="dashed", label="False"];
+121 -> 191 [style="dashed", label="False"];
+119 -> 121 [style="dashed", label="False"];
+1 -> 119 [style="dashed", label="False"];
+0 -> 1 [label="True"];
+196 [label="gem <= 0.5
+--------------
+
+gem <= 0.5 : 1.277
+gold <= 0.5 : 1.739
+required_gem <= 0.5 : 1.725
+required_gem <= 1.5 : 1.754
+required_gem <= 2.5 : 1.761
+required_gem <= 3.5 : 1.766
+required_gem <= 4.5 : 1.769
+required_gold <= 0.5 : 1.762
+required_gold <= 1.5 : 1.764
+required_gold <= 2.5 : 1.766
+required_gold <= 3.5 : 1.768
+required_gold <= 4.5 : 1.77
+x <= 4.5 : 1.519
+y <= 1.5 : 1.71
+y <= 2.5 : 1.622
+y <= 3.5 : 1.46
+y <= 4.5 : 1.567"];
+197 [label="x <= 4.5
+--------------
+
+gold <= 0.5 : 1.833
+required_gem <= 0.5 : 1.721
+required_gem <= 1.5 : 1.78
+required_gem <= 2.5 : 1.804
+required_gem <= 3.5 : 1.823
+required_gem <= 4.5 : 1.837
+required_gold <= 0.5 : 1.815
+required_gold <= 1.5 : 1.83
+required_gold <= 2.5 : 1.836
+required_gold <= 3.5 : 1.843
+required_gold <= 4.5 : 1.851
+x <= 4.5 : 1.257
+y <= 1.5 : 1.807
+y <= 2.5 : 1.724
+y <= 3.5 : 1.537
+y <= 4.5 : 1.532"];
+198 [label="required_gem <= 0.5
+--------------
+
+gold <= 0.5 : 1.105
+required_gem <= 0.5 : 0.775
+required_gem <= 1.5 : 0.968
+required_gem <= 2.5 : 1.052
+required_gem <= 3.5 : 1.108
+required_gem <= 4.5 : 1.15
+required_gold <= 0.5 : 1.118
+required_gold <= 1.5 : 1.152
+required_gold <= 2.5 : 1.163
+required_gold <= 3.5 : 1.172
+required_gold <= 4.5 : 1.181
+y <= 1.5 : 1.184
+y <= 2.5 : 1.17
+y <= 3.5 : 1.15
+y <= 4.5 : 1.115"];
+199 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.846
+required_gold <= 1.5 : 1.522
+required_gold <= 2.5 : 1.522
+required_gold <= 3.5 : 1.522
+required_gold <= 4.5 : 1.522
+y <= 1.5 : 1.449
+y <= 2.5 : 1.351
+y <= 3.5 : 1.2
+y <= 4.5 : 1.325"];
+200 [label="y <= 4.5
+--------------
+
+required_gold <= 1.5 : 0.722
+required_gold <= 2.5 : 0.722
+required_gold <= 3.5 : 0.722
+required_gold <= 4.5 : 0.722
+y <= 1.5 : 0.649
+y <= 2.5 : 0.551
+y <= 3.5 : 0.4
+y <= 4.5 : 0.0"];
+201 [label="top"];
+200 -> 201 [label="True"];
+202 [label="left"];
+200 -> 202 [style="dashed", label="False"];
+199 -> 200 [label="True"];
+203 [label="y <= 3.5
+--------------
+
+required_gold <= 1.5 : 0.971
+required_gold <= 2.5 : 0.971
+required_gold <= 3.5 : 0.971
+required_gold <= 4.5 : 0.971
+y <= 1.5 : 0.8
+y <= 2.5 : 0.551
+y <= 3.5 : 0.0
+y <= 4.5 : 0.649"];
+204 [label="left"];
+203 -> 204 [label="True"];
+205 [label="down"];
+203 -> 205 [style="dashed", label="False"];
+199 -> 203 [style="dashed", label="False"];
+198 -> 199 [label="True"];
+206 [label="y <= 4.5
+--------------
+
+gold <= 0.5 : 0.65
+required_gem <= 1.5 : 0.634
+required_gem <= 2.5 : 0.635
+required_gem <= 3.5 : 0.638
+required_gem <= 4.5 : 0.64
+required_gold <= 0.5 : 0.602
+required_gold <= 1.5 : 0.608
+required_gold <= 2.5 : 0.616
+required_gold <= 3.5 : 0.624
+required_gold <= 4.5 : 0.634
+y <= 1.5 : 0.65
+y <= 2.5 : 0.65
+y <= 3.5 : 0.644
+y <= 4.5 : 0.582"];
+207 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.369
+required_gem <= 1.5 : 0.448
+required_gem <= 2.5 : 0.447
+required_gem <= 3.5 : 0.45
+required_gem <= 4.5 : 0.446
+required_gold <= 0.5 : 0.453
+required_gold <= 1.5 : 0.417
+required_gold <= 2.5 : 0.428
+required_gold <= 3.5 : 0.44
+required_gold <= 4.5 : 0.455
+y <= 1.5 : 0.473
+y <= 2.5 : 0.45
+y <= 3.5 : 0.436"];
+208 [label="right"];
+207 -> 208 [label="True"];
+209 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.658
+required_gem <= 2.5 : 0.658
+required_gem <= 3.5 : 0.668
+required_gem <= 4.5 : 0.662
+required_gold <= 0.5 : 0.676
+required_gold <= 1.5 : 0.597
+required_gold <= 2.5 : 0.617
+required_gold <= 3.5 : 0.641
+required_gold <= 4.5 : 0.675
+y <= 1.5 : 0.717
+y <= 2.5 : 0.666
+y <= 3.5 : 0.639"];
+210 [label="right"];
+209 -> 210 [label="True"];
+211 [label="y <= 3.5
+--------------
+
+required_gem <= 1.5 : 0.745
+required_gem <= 2.5 : 0.755
+required_gem <= 3.5 : 0.777
+required_gem <= 4.5 : 0.772
+required_gold <= 2.5 : 0.864
+required_gold <= 3.5 : 0.853
+required_gold <= 4.5 : 0.858
+y <= 1.5 : 0.858
+y <= 2.5 : 0.772
+y <= 3.5 : 0.735"];
+212 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.674
+required_gem <= 2.5 : 0.751
+required_gem <= 3.5 : 0.796
+required_gem <= 4.5 : 0.799
+required_gold <= 2.5 : 0.93
+required_gold <= 3.5 : 0.912
+required_gold <= 4.5 : 0.918
+y <= 1.5 : 0.97
+y <= 2.5 : 0.937"];
+213 [label="left"];
+212 -> 213 [label="True"];
+214 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 2.5 : 0.783
+required_gem <= 3.5 : 0.762
+required_gem <= 4.5 : 0.708
+required_gold <= 2.5 : 0.708
+required_gold <= 3.5 : 0.704
+required_gold <= 4.5 : 0.732
+y <= 1.5 : 0.823
+y <= 2.5 : 0.749"];
+215 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 2.5 : 0.23
+required_gem <= 3.5 : 0.325
+required_gem <= 4.5 : 0.377
+required_gold <= 2.5 : 0.325
+y <= 1.5 : 0.406
+y <= 2.5 : 0.362"];
+216 [label="required_gold <= 2.5
+--------------
+
+required_gold <= 2.5 : 0.459
+y <= 1.5 : 0.874
+y <= 2.5 : 0.667"];
+217 [label="right"];
+216 -> 217 [label="True"];
+218 [label="y <= 2.5
+--------------
+
+y <= 1.5 : 0.667
+y <= 2.5 : 0.0"];
+219 [label="left"];
+218 -> 219 [label="True"];
+220 [label="right"];
+218 -> 220 [style="dashed", label="False"];
+216 -> 218 [style="dashed", label="False"];
+215 -> 216 [label="True"];
+221 [label="right"];
+215 -> 221 [style="dashed", label="False"];
+214 -> 215 [label="True"];
+222 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 2.5 : 0.953
+required_gem <= 3.5 : 0.865
+required_gem <= 4.5 : 0.723
+required_gold <= 4.5 : 0.949
+y <= 1.5 : 0.954
+y <= 2.5 : 0.817"];
+223 [label="y <= 2.5
+--------------
+
+required_gem <= 2.5 : 0.959
+required_gem <= 3.5 : 0.946
+required_gold <= 4.5 : 0.878
+y <= 1.5 : 0.883
+y <= 2.5 : 0.65"];
+224 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 2.5 : 0.541
+required_gem <= 3.5 : 0.333
+required_gold <= 4.5 : 0.459
+y <= 1.5 : 0.65"];
+225 [label="left"];
+224 -> 225 [label="True"];
+226 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0
+y <= 1.5 : 1.0"];
+227 [label="right"];
+226 -> 227 [label="True"];
+228 [label="left"];
+226 -> 228 [style="dashed", label="False"];
+224 -> 226 [style="dashed", label="False"];
+223 -> 224 [label="True"];
+229 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 2.5 : 0.541
+required_gem <= 3.5 : 0.333
+required_gold <= 4.5 : 0.459"];
+230 [label="right"];
+229 -> 230 [label="True"];
+231 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0"];
+232 [label="right"];
+231 -> 232 [label="True"];
+233 [label="left"];
+231 -> 233 [style="dashed", label="False"];
+229 -> 231 [style="dashed", label="False"];
+223 -> 229 [style="dashed", label="False"];
+222 -> 223 [label="True"];
+234 [label="right"];
+222 -> 234 [style="dashed", label="False"];
+214 -> 222 [style="dashed", label="False"];
+212 -> 214 [style="dashed", label="False"];
+211 -> 212 [label="True"];
+235 [label="right"];
+211 -> 235 [style="dashed", label="False"];
+209 -> 211 [style="dashed", label="False"];
+207 -> 209 [style="dashed", label="False"];
+206 -> 207 [label="True"];
+236 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.325
+required_gem <= 1.5 : 0.98
+required_gem <= 2.5 : 0.98
+required_gem <= 3.5 : 0.98
+required_gem <= 4.5 : 0.98
+required_gold <= 0.5 : 0.833
+required_gold <= 1.5 : 0.937
+required_gold <= 2.5 : 0.959
+required_gold <= 3.5 : 0.97
+required_gold <= 4.5 : 0.976"];
+237 [label="required_gold <= 0.5
+--------------
+
+required_gem <= 1.5 : 0.65
+required_gem <= 2.5 : 0.65
+required_gem <= 3.5 : 0.65
+required_gem <= 4.5 : 0.65
+required_gold <= 0.5 : 0.0
+required_gold <= 1.5 : 0.333
+required_gold <= 2.5 : 0.459
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.602"];
+238 [label="right"];
+237 -> 238 [label="True"];
+239 [label="left"];
+237 -> 239 [style="dashed", label="False"];
+236 -> 237 [label="True"];
+240 [label="right"];
+236 -> 240 [style="dashed", label="False"];
+206 -> 236 [style="dashed", label="False"];
+198 -> 206 [style="dashed", label="False"];
+197 -> 198 [label="True"];
+241 [label="y <= 4.0
+--------------
+
+gold <= 0.5 : 1.29
+required_gem <= 0.5 : 1.182
+required_gem <= 1.5 : 1.219
+required_gem <= 2.5 : 1.243
+required_gem <= 3.5 : 1.27
+required_gem <= 4.5 : 1.29
+required_gold <= 0.5 : 1.298
+required_gold <= 1.5 : 1.308
+required_gold <= 2.5 : 1.312
+required_gold <= 3.5 : 1.319
+required_gold <= 4.5 : 1.326
+y <= 1.5 : 1.223
+y <= 2.5 : 1.052
+y <= 4.0 : 0.604"];
+242 [label="required_gem <= 0.5
+--------------
+
+gold <= 0.5 : 0.587
+required_gem <= 0.5 : 0.533
+required_gem <= 1.5 : 0.559
+required_gem <= 2.5 : 0.58
+required_gem <= 3.5 : 0.607
+required_gem <= 4.5 : 0.627
+required_gold <= 0.5 : 0.637
+required_gold <= 1.5 : 0.644
+required_gold <= 2.5 : 0.649
+required_gold <= 3.5 : 0.659
+required_gold <= 4.5 : 0.668
+y <= 1.5 : 0.68
+y <= 2.5 : 0.679"];
+243 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.459
+required_gold <= 1.5 : 0.918
+required_gold <= 2.5 : 0.918
+required_gold <= 3.5 : 0.918
+required_gold <= 4.5 : 0.918
+y <= 1.5 : 0.874
+y <= 2.5 : 0.667"];
+244 [label="y <= 2.5
+--------------
+
+required_gold <= 1.5 : 0.918
+required_gold <= 2.5 : 0.918
+required_gold <= 3.5 : 0.918
+required_gold <= 4.5 : 0.918
+y <= 1.5 : 0.667
+y <= 2.5 : 0.0"];
+245 [label="top"];
+244 -> 245 [label="True"];
+246 [label="left"];
+244 -> 246 [style="dashed", label="False"];
+243 -> 244 [label="True"];
+247 [label="left"];
+243 -> 247 [style="dashed", label="False"];
+242 -> 243 [label="True"];
+248 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.361
+required_gem <= 1.5 : 0.444
+required_gem <= 2.5 : 0.435
+required_gem <= 3.5 : 0.436
+required_gem <= 4.5 : 0.435
+required_gold <= 0.5 : 0.441
+required_gold <= 1.5 : 0.407
+required_gold <= 2.5 : 0.414
+required_gold <= 3.5 : 0.432
+required_gold <= 4.5 : 0.446
+y <= 1.5 : 0.452
+y <= 2.5 : 0.407"];
+249 [label="top"];
+248 -> 249 [label="True"];
+250 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.663
+required_gem <= 2.5 : 0.644
+required_gem <= 3.5 : 0.65
+required_gem <= 4.5 : 0.649
+required_gold <= 0.5 : 0.663
+required_gold <= 1.5 : 0.588
+required_gold <= 2.5 : 0.601
+required_gold <= 3.5 : 0.636
+required_gold <= 4.5 : 0.667
+y <= 1.5 : 0.684
+y <= 2.5 : 0.588"];
+251 [label="top"];
+250 -> 251 [label="True"];
+252 [label="y <= 2.5
+--------------
+
+required_gem <= 1.5 : 0.774
+required_gem <= 2.5 : 0.747
+required_gem <= 3.5 : 0.76
+required_gem <= 4.5 : 0.764
+required_gold <= 2.5 : 0.846
+required_gold <= 3.5 : 0.846
+required_gold <= 4.5 : 0.851
+y <= 1.5 : 0.815
+y <= 2.5 : 0.662"];
+253 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 1.5 : 0.717
+required_gem <= 2.5 : 0.721
+required_gem <= 3.5 : 0.768
+required_gem <= 4.5 : 0.791
+required_gold <= 2.5 : 0.928
+required_gold <= 3.5 : 0.926
+required_gold <= 4.5 : 0.931
+y <= 1.5 : 0.985"];
+254 [label="left"];
+253 -> 254 [label="True"];
+255 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 2.5 : 0.792
+required_gem <= 3.5 : 0.772
+required_gem <= 4.5 : 0.735
+required_gold <= 2.5 : 0.735
+required_gold <= 3.5 : 0.772
+required_gold <= 4.5 : 0.792
+y <= 1.5 : 0.883"];
+256 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 2.5 : 0.916
+required_gem <= 3.5 : 0.937
+required_gold <= 2.5 : 0.743
+required_gold <= 3.5 : 0.784
+required_gold <= 4.5 : 0.802
+y <= 1.5 : 0.959"];
+257 [label="top"];
+256 -> 257 [label="True"];
+258 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 2.5 : 0.87
+required_gem <= 3.5 : 0.918
+required_gold <= 3.5 : 0.918
+required_gold <= 4.5 : 0.87
+y <= 1.5 : 0.955"];
+259 [label="y <= 1.5
+--------------
+
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.541
+y <= 1.5 : 0.459"];
+260 [label="left"];
+259 -> 260 [label="True"];
+261 [label="required_gold <= 3.5
+--------------
+
+required_gold <= 3.5 : 0.667
+required_gold <= 4.5 : 0.667"];
+262 [label="left"];
+261 -> 262 [label="True"];
+263 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0"];
+264 [label="top"];
+263 -> 264 [label="True"];
+265 [label="left"];
+263 -> 265 [style="dashed", label="False"];
+261 -> 263 [style="dashed", label="False"];
+259 -> 261 [style="dashed", label="False"];
+258 -> 259 [label="True"];
+266 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.959
+required_gold <= 3.5 : 0.636
+required_gold <= 4.5 : 0.811
+y <= 1.5 : 0.959"];
+267 [label="top"];
+266 -> 267 [label="True"];
+268 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.906
+required_gold <= 4.5 : 0.906
+y <= 1.5 : 0.906"];
+269 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.5
+y <= 1.5 : 0.5"];
+270 [label="left"];
+269 -> 270 [label="True"];
+271 [label="y <= 1.5
+--------------
+
+y <= 1.5 : 0.0"];
+272 [label="left"];
+271 -> 272 [label="True"];
+273 [label="top"];
+271 -> 273 [style="dashed", label="False"];
+269 -> 271 [style="dashed", label="False"];
+268 -> 269 [label="True"];
+274 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0
+y <= 1.5 : 1.0"];
+275 [label="top"];
+274 -> 275 [label="True"];
+276 [label="left"];
+274 -> 276 [style="dashed", label="False"];
+268 -> 274 [style="dashed", label="False"];
+266 -> 268 [style="dashed", label="False"];
+258 -> 266 [style="dashed", label="False"];
+256 -> 258 [style="dashed", label="False"];
+255 -> 256 [label="True"];
+277 [label="top"];
+255 -> 277 [style="dashed", label="False"];
+253 -> 255 [style="dashed", label="False"];
+252 -> 253 [label="True"];
+278 [label="top"];
+252 -> 278 [style="dashed", label="False"];
+250 -> 252 [style="dashed", label="False"];
+248 -> 250 [style="dashed", label="False"];
+242 -> 248 [style="dashed", label="False"];
+241 -> 242 [label="True"];
+279 [label="required_gem <= 0.5
+--------------
+
+gold <= 0.5 : 0.296
+required_gem <= 0.5 : 0.143
+required_gem <= 1.5 : 0.243
+required_gem <= 2.5 : 0.293
+required_gem <= 3.5 : 0.326
+required_gem <= 4.5 : 0.351
+required_gold <= 0.5 : 0.355
+required_gold <= 1.5 : 0.368
+required_gold <= 2.5 : 0.37
+required_gold <= 3.5 : 0.37
+required_gold <= 4.5 : 0.371"];
+280 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.0
+required_gold <= 1.5 : 1.0
+required_gold <= 2.5 : 1.0
+required_gold <= 3.5 : 1.0
+required_gold <= 4.5 : 1.0"];
+281 [label="left"];
+280 -> 281 [label="True"];
+282 [label="down"];
+280 -> 282 [style="dashed", label="False"];
+279 -> 280 [label="True"];
+283 [label="down"];
+279 -> 283 [style="dashed", label="False"];
+241 -> 279 [style="dashed", label="False"];
+197 -> 241 [style="dashed", label="False"];
+196 -> 197 [label="True"];
+284 [label="y <= 3.5
+--------------
+
+gold <= 0.5 : 0.68
+required_gem <= 0.5 : 0.731
+required_gem <= 1.5 : 0.739
+required_gem <= 2.5 : 0.743
+required_gem <= 3.5 : 0.746
+required_gem <= 4.5 : 0.749
+required_gold <= 0.5 : 0.741
+required_gold <= 1.5 : 0.746
+required_gold <= 2.5 : 0.748
+required_gold <= 3.5 : 0.749
+required_gold <= 4.5 : 0.75
+x <= 4.5 : 0.718
+y <= 1.5 : 0.67
+y <= 2.5 : 0.587
+y <= 3.5 : 0.454
+y <= 4.5 : 0.602"];
+285 [label="required_gem <= 0.5
+--------------
+
+gold <= 0.5 : 0.081
+required_gem <= 0.5 : 0.059
+required_gem <= 1.5 : 0.073
+required_gem <= 2.5 : 0.081
+required_gem <= 3.5 : 0.086
+required_gem <= 4.5 : 0.09
+required_gold <= 0.5 : 0.091
+required_gold <= 1.5 : 0.093
+required_gold <= 2.5 : 0.093
+required_gold <= 3.5 : 0.093
+required_gold <= 4.5 : 0.093
+x <= 4.5 : 0.081
+y <= 1.5 : 0.074
+y <= 2.5 : 0.086"];
+286 [label="y <= 1.5
+--------------
+
+gold <= 0.5 : 0.325
+required_gold <= 1.5 : 0.414
+required_gold <= 2.5 : 0.414
+required_gold <= 3.5 : 0.414
+required_gold <= 4.5 : 0.414
+x <= 4.5 : 0.325
+y <= 1.5 : 0.27
+y <= 2.5 : 0.362"];
+287 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.5
+required_gold <= 1.5 : 0.811
+required_gold <= 2.5 : 0.811
+required_gold <= 3.5 : 0.811
+required_gold <= 4.5 : 0.811
+x <= 4.5 : 0.5"];
+288 [label="x <= 4.5
+--------------
+
+required_gold <= 1.5 : 1.0
+required_gold <= 2.5 : 1.0
+required_gold <= 3.5 : 1.0
+required_gold <= 4.5 : 1.0
+x <= 4.5 : 0.0"];
+289 [label="top"];
+288 -> 289 [label="True"];
+290 [label="left"];
+288 -> 290 [style="dashed", label="False"];
+287 -> 288 [label="True"];
+291 [label="left"];
+287 -> 291 [style="dashed", label="False"];
+286 -> 287 [label="True"];
+292 [label="left"];
+286 -> 292 [style="dashed", label="False"];
+285 -> 286 [label="True"];
+293 [label="left"];
+285 -> 293 [style="dashed", label="False"];
+284 -> 285 [label="True"];
+294 [label="gold <= 0.5
+--------------
+
+gold <= 0.5 : 0.744
+required_gem <= 0.5 : 0.992
+required_gem <= 1.5 : 0.992
+required_gem <= 2.5 : 0.992
+required_gem <= 3.5 : 0.993
+required_gem <= 4.5 : 0.994
+required_gold <= 0.5 : 0.956
+required_gold <= 1.5 : 0.975
+required_gold <= 2.5 : 0.982
+required_gold <= 3.5 : 0.987
+required_gold <= 4.5 : 0.991
+x <= 4.5 : 0.902
+y <= 4.5 : 0.963"];
+295 [label="required_gold <= 0.5
+--------------
+
+required_gem <= 0.5 : 0.633
+required_gem <= 1.5 : 0.645
+required_gem <= 2.5 : 0.65
+required_gem <= 3.5 : 0.656
+required_gem <= 4.5 : 0.665
+required_gold <= 0.5 : 0.471
+required_gold <= 1.5 : 0.541
+required_gold <= 2.5 : 0.57
+required_gold <= 3.5 : 0.594
+required_gold <= 4.5 : 0.623
+x <= 4.5 : 0.617
+y <= 4.5 : 0.671"];
+296 [label="x <= 4.5
+--------------
+
+required_gem <= 1.5 : 0.811
+required_gem <= 2.5 : 0.811
+required_gem <= 3.5 : 0.811
+required_gem <= 4.5 : 0.811
+x <= 4.5 : 0.5
+y <= 4.5 : 0.5"];
+297 [label="down"];
+296 -> 297 [label="True"];
+298 [label="y <= 4.5
+--------------
+
+required_gem <= 1.5 : 1.0
+required_gem <= 2.5 : 1.0
+required_gem <= 3.5 : 1.0
+required_gem <= 4.5 : 1.0
+y <= 4.5 : 0.0"];
+299 [label="left"];
+298 -> 299 [label="True"];
+300 [label="down"];
+298 -> 300 [style="dashed", label="False"];
+296 -> 298 [style="dashed", label="False"];
+295 -> 296 [label="True"];
+301 [label="x <= 4.5
+--------------
+
+required_gem <= 0.5 : 0.391
+required_gem <= 1.5 : 0.362
+required_gem <= 2.5 : 0.366
+required_gem <= 3.5 : 0.377
+required_gem <= 4.5 : 0.393
+required_gold <= 1.5 : 0.4
+required_gold <= 2.5 : 0.39
+required_gold <= 3.5 : 0.385
+required_gold <= 4.5 : 0.386
+x <= 4.5 : 0.325
+y <= 4.5 : 0.325"];
+302 [label="y <= 4.5
+--------------
+
+required_gem <= 0.5 : 0.602
+required_gem <= 1.5 : 0.541
+required_gem <= 2.5 : 0.546
+required_gem <= 3.5 : 0.568
+required_gem <= 4.5 : 0.603
+required_gold <= 1.5 : 0.619
+required_gold <= 2.5 : 0.597
+required_gold <= 3.5 : 0.587
+required_gold <= 4.5 : 0.591
+y <= 4.5 : 0.459"];
+303 [label="required_gem <= 2.5
+--------------
+
+required_gem <= 0.5 : 0.809
+required_gem <= 1.5 : 0.667
+required_gem <= 2.5 : 0.662
+required_gem <= 3.5 : 0.7
+required_gem <= 4.5 : 0.783
+required_gold <= 1.5 : 0.833
+required_gold <= 2.5 : 0.782
+required_gold <= 3.5 : 0.766
+required_gold <= 4.5 : 0.784"];
+304 [label="required_gold <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.313
+required_gem <= 1.5 : 0.241
+required_gold <= 1.5 : 0.184
+required_gold <= 2.5 : 0.26
+required_gold <= 3.5 : 0.302
+required_gold <= 4.5 : 0.331"];
+305 [label="required_gem <= 1.5
+--------------
+
+required_gem <= 0.5 : 0.667
+required_gem <= 1.5 : 0.0"];
+306 [label="left"];
+305 -> 306 [label="True"];
+307 [label="down"];
+305 -> 307 [style="dashed", label="False"];
+304 -> 305 [label="True"];
+308 [label="left"];
+304 -> 308 [style="dashed", label="False"];
+303 -> 304 [label="True"];
+309 [label="required_gold <= 2.5
+--------------
+
+required_gem <= 3.5 : 0.911
+required_gem <= 4.5 : 0.907
+required_gold <= 1.5 : 0.8
+required_gold <= 2.5 : 0.551
+required_gold <= 3.5 : 0.562
+required_gold <= 4.5 : 0.649"];
+310 [label="down"];
+309 -> 310 [label="True"];
+311 [label="required_gem <= 3.5
+--------------
+
+required_gem <= 3.5 : 0.667
+required_gem <= 4.5 : 0.739
+required_gold <= 3.5 : 0.739
+required_gold <= 4.5 : 0.667"];
+312 [label="left"];
+311 -> 312 [label="True"];
+313 [label="required_gold <= 3.5
+--------------
+
+required_gem <= 4.5 : 0.918
+required_gold <= 3.5 : 0.541
+required_gold <= 4.5 : 0.541"];
+314 [label="down"];
+313 -> 314 [label="True"];
+315 [label="required_gem <= 4.5
+--------------
+
+required_gem <= 4.5 : 0.5
+required_gold <= 4.5 : 0.5"];
+316 [label="left"];
+315 -> 316 [label="True"];
+317 [label="required_gold <= 4.5
+--------------
+
+required_gold <= 4.5 : 0.0"];
+318 [label="down"];
+317 -> 318 [label="True"];
+319 [label="left"];
+317 -> 319 [style="dashed", label="False"];
+315 -> 317 [style="dashed", label="False"];
+313 -> 315 [style="dashed", label="False"];
+311 -> 313 [style="dashed", label="False"];
+309 -> 311 [style="dashed", label="False"];
+303 -> 309 [style="dashed", label="False"];
+302 -> 303 [label="True"];
+320 [label="left"];
+302 -> 320 [style="dashed", label="False"];
+301 -> 302 [label="True"];
+321 [label="left"];
+301 -> 321 [style="dashed", label="False"];
+295 -> 301 [style="dashed", label="False"];
+294 -> 295 [label="True"];
+322 [label="x <= 4.5
+--------------
+
+required_gem <= 0.5 : 0.811
+required_gem <= 1.5 : 0.811
+required_gem <= 2.5 : 0.811
+required_gem <= 3.5 : 0.811
+required_gem <= 4.5 : 0.811
+required_gold <= 0.5 : 0.811
+required_gold <= 1.5 : 0.811
+required_gold <= 2.5 : 0.811
+required_gold <= 3.5 : 0.811
+required_gold <= 4.5 : 0.811
+x <= 4.5 : 0.5
+y <= 4.5 : 0.5"];
+323 [label="down"];
+322 -> 323 [label="True"];
+324 [label="y <= 4.5
+--------------
+
+required_gem <= 0.5 : 1.0
+required_gem <= 1.5 : 1.0
+required_gem <= 2.5 : 1.0
+required_gem <= 3.5 : 1.0
+required_gem <= 4.5 : 1.0
+required_gold <= 0.5 : 1.0
+required_gold <= 1.5 : 1.0
+required_gold <= 2.5 : 1.0
+required_gold <= 3.5 : 1.0
+required_gold <= 4.5 : 1.0
+y <= 4.5 : 0.0"];
+325 [label="left"];
+324 -> 325 [label="True"];
+326 [label="down"];
+324 -> 326 [style="dashed", label="False"];
+322 -> 324 [style="dashed", label="False"];
+294 -> 322 [style="dashed", label="False"];
+284 -> 294 [style="dashed", label="False"];
+196 -> 284 [style="dashed", label="False"];
+0 -> 196 [style="dashed", label="False"];
+
+}
