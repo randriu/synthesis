@@ -143,11 +143,10 @@ class StormPOMDPControl:
         logger.info("Storm POMDP analysis completed")
 
         value = result.upper_bound if self.quotient.specification.optimality.minimizing else result.lower_bound
-        size = self.get_belief_controller_size(result, self.paynt_fsc_size)
-
+        self.belief_controller_size = self.get_belief_controller_size(result, self.paynt_fsc_size)
 
         print(f'-----------Storm-----------')
-        print(f'Value = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {size}', flush=True)
+        print(f'Value = {value} | Time elapsed = {round(storm_timer.read(),1)}s | FSC size = {self.belief_controller_size}', flush=True)
         if self.get_result is not None:
             # TODO not important for the paper but it would be nice to have correct FSC here as well
             if self.storm_options == "overapp":
@@ -157,7 +156,6 @@ class StormPOMDPControl:
                 pass
             # else:
                 # print(f'FSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
-            exit()
 
         # print(f'\nFSC (dot) = {result.induced_mc_from_scheduler.to_dot()}\n', flush=True)
 
