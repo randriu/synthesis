@@ -8,11 +8,13 @@
 #include "storm/adapters/RationalNumberAdapter.h"
 
 namespace synthesis {
-   
+
 template<typename ValueType>
-PomdpManager<ValueType>::PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp)
+PomdpManager<ValueType>::PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp, bool requireCanoninc)
 : pomdp(pomdp) {
-    STORM_LOG_THROW(pomdp.isCanonic(), storm::exceptions::InvalidArgumentException, "POMDP must be canonic");
+    if (requireCanoninc) {
+        STORM_LOG_THROW(pomdp.isCanonic(), storm::exceptions::InvalidArgumentException, "POMDP must be canonic");
+    }
 
     auto num_prototype_states = pomdp.getNumberOfStates();
     auto num_prototype_rows = pomdp.getNumberOfChoices();
@@ -23,10 +25,10 @@ PomdpManager<ValueType>::PomdpManager(storm::models::sparse::Pomdp<ValueType> co
 
     std::vector<std::set<uint64_t>> observation_successor_sets;
     observation_successor_sets.resize(num_observations);
-    
+
     for(uint64_t prototype_state = 0; prototype_state < num_prototype_states; prototype_state++) {
         auto observation = pomdp.getObservation(prototype_state);
-        
+
         auto const& row_group_indices = pomdp.getTransitionMatrix().getRowGroupIndices();
         uint64_t row_index = 0;
         for (
@@ -41,9 +43,9 @@ PomdpManager<ValueType>::PomdpManager(storm::models::sparse::Pomdp<ValueType> co
                 auto dst = entry.getColumn();
                 auto dst_obs = this->pomdp.getObservation(dst);
                 observation_successor_sets[observation].insert(dst_obs);
-            } 
+            }
         }
-        
+
         if(this->observation_actions[observation] != 0) {
             continue;
         }
@@ -59,7 +61,7 @@ PomdpManager<ValueType>::PomdpManager(storm::models::sparse::Pomdp<ValueType> co
 
     this->observation_memory_size.resize(num_observations, 1);
     this->prototype_duplicates.resize(num_prototype_states);
-    
+
     this->max_successor_memory_size.resize(num_observations);
 }
 
@@ -110,7 +112,7 @@ void PomdpManager<ValueType>::buildTransitionMatrixSpurious() {
     this->row_groups.resize(this->num_states+1);
     this->row_prototype.clear();
     this->row_memory.clear();
-    
+
     // TODO can simplify this: state (s,x) will have the same rows as state (s,0)
     for(uint64_t state = 0; state < this->num_states; state++) {
         this->row_groups[state] = this->row_prototype.size();
@@ -159,7 +161,7 @@ void PomdpManager<ValueType>::resetDesignSpace() {
 template<typename ValueType>
 void PomdpManager<ValueType>::buildDesignSpaceSpurious() {
     this->resetDesignSpace();
-    
+
     // for each (z,n) create an action and a memory hole (if necessary)
     // store hole range
     // ? inverse mapping ?
@@ -209,9 +211,9 @@ void PomdpManager<ValueType>::buildDesignSpaceSpurious() {
                 this->row_memory_hole[row] = this->num_holes;
             }
             // std::cout << "row " << row << ": A[" << row_action_hole[row] << "]=" << row_action_option[row] << ", N[" << row_memory_hole[row] << "]=" << row_memory_option[row] << std::endl;
-        }   
+        }
     }
-}            
+}
 
 
 template<typename ValueType>
@@ -238,7 +240,7 @@ storm::models::sparse::StateLabeling PomdpManager<ValueType>::constructStateLabe
     storm::models::sparse::StateLabeling labeling(this->num_states);
     for (auto const& label : pomdp.getStateLabeling().getLabels()) {
         storm::storage::BitVector label_flags(this->num_states, false);
-        
+
         if (label == "init") {
             // init label is only assigned to states with the initial memory state
             for (auto const& prototype : pomdp.getStateLabeling().getStates(label)) {

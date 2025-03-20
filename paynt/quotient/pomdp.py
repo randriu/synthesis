@@ -21,7 +21,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
 
-    def __init__(self, pomdp, specification, decpomdp_manager=None):
+    def __init__(self, pomdp, specification, decpomdp_manager=None, make_canonic=True):
         super().__init__(specification=specification)
 
         # unfolded POMDP
@@ -59,9 +59,12 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.is_action_hole = None
 
         # construct the quotient POMDP
-        self.pomdp = stormpy.pomdp.make_canonic(pomdp)
-        # ^ this also asserts that states with the same observation have the
-        # same number and the same order of available actions
+        if make_canonic:
+            self.pomdp = stormpy.pomdp.make_canonic(pomdp)
+            # ^ this also asserts that states with the same observation have the
+            # same number and the same order of available actions
+        else:
+            self.pomdp = pomdp
 
         logger.info(f"constructed {'exact' if self.pomdp.is_exact else ''} POMDP having {self.observations} observations.")
 
@@ -123,7 +126,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.pomdp_manager = payntbind.synthesis.ExactPomdpManagerAposteriori(self.pomdp)
         else:
             if not PomdpQuotient.posterior_aware:
-                self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp)
+                self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp, make_canonic)
             else:
                 self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
 
@@ -741,7 +744,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         fsc.fill_implicit_actions_and_updates()
         fsc.check(observation_to_actions)
         return fsc
-    
+
 
 
     def get_induced_dtmc_from_fsc(self, fsc):
@@ -817,7 +820,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                     current_reward[reward_name] += reward_model.state_action_rewards[choice_index]*action_prob
 
                 for selected_update, update_prob in selected_updates.items():
-                    
+
 
                     for entry in self.pomdp.transition_matrix.get_row(choice_index):
                         next_state = entry.column
@@ -830,7 +833,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
             for reward_name in self.pomdp.reward_models.keys():
                 state_action_rewards[reward_name].append(current_reward[reward_name])
 
-                
+
 
             for next_state_index, next_state_prob in next_state_prob_map.items():
                 dtmc_tm_builder.add_next_value(dtmc_state, next_state_index, next_state_prob)

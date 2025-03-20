@@ -10,7 +10,7 @@ class SynthesizerPomdpPolicyTree(paynt.synthesizer.policy_tree.SynthesizerPolicy
     def solve_singleton(self, family, prop):
         mdp = family.mdp
 
-        quotient_state_to_observation = self.quotient.state_to_observation
+        quotient_state_to_observation = self.quotient.unfolded_state_to_observation
         state_to_observation = []
         for quotient_state in mdp.quotient_state_map:
             observation = quotient_state_to_observation[quotient_state]
@@ -19,6 +19,8 @@ class SynthesizerPomdpPolicyTree(paynt.synthesizer.policy_tree.SynthesizerPolicy
         pomdp = self.quotient.pomdp_from_mdp(mdp.model, state_to_observation)
 
         specification = paynt.verification.property.Specification([prop])
+        # the pomdp was already unfolded in PomdpFamilyQuotient init, so set mem to 1 to prevent another unfold
+        paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = 1
         quotient = paynt.quotient.pomdp.PomdpQuotient(pomdp, specification)
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(quotient)
         assignment = synthesizer.synthesize(print_stats=False)
