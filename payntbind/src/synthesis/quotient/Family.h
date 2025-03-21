@@ -20,6 +20,7 @@ public:
     uint64_t numHoles() const;
     uint64_t addHole(uint64_t num_options);
 
+    void holeSetOption(uint64_t hole, uint64_t option);
     void holeSetOptions(uint64_t hole, std::vector<uint64_t> const& options);
     void holeSetOptions(uint64_t hole, BitVector const& options);
     // void holeSetOptions(uint64_t hole, BitVector&& options);
@@ -39,8 +40,8 @@ public:
     bool includesAssignment(std::vector<std::pair<uint64_t,uint64_t>> const& hole_to_option) const;
 
     // iterator over hole options
-    std::vector<BitVector>::iterator begin();
-    std::vector<BitVector>::iterator end();
+    std::vector<BitVector>::const_iterator begin() const;
+    std::vector<BitVector>::const_iterator end() const;
 
     // choice operations
     void setChoices(BitVector const& choices);

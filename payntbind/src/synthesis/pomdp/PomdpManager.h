@@ -10,19 +10,19 @@ template<typename ValueType>
 class PomdpManager {
 
 public:
-    
-    PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp);
+
+    PomdpManager(storm::models::sparse::Pomdp<ValueType> const& pomdp, bool requireCanonic=true);
 
     // number of actions available at this observation
     std::vector<uint64_t> observation_actions;
     // for each observation, a list of successor observations
     std::vector<std::vector<uint64_t>> observation_successors;
-    
+
     /** Memory manipulation . */
 
     // for each observation contains the number of allocated memory states (initially 1)
     std::vector<uint64_t> observation_memory_size;
-    
+
     // set memory size to a selected observation
     void setObservationMemorySize(uint64_t obs, uint64_t memory_size);
     // set memory size to all observations
@@ -30,7 +30,7 @@ public:
 
     // unfold memory model (a priori memory update) into the POMDP
     std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
-    
+
     /** Design space associated with this POMDP. */
 
     // total number of holes
@@ -52,6 +52,9 @@ public:
     // for each state contains its memory index
     std::vector<uint64_t> state_memory;
 
+    // for each row contains index of the prototype row
+    std::vector<uint64_t> row_prototype;
+
     // for each row, the corresponding action hole
     std::vector<uint64_t> row_action_hole;
     // for each row, the corresponding option of the action hole
@@ -64,17 +67,17 @@ public:
     // for each observation contains the maximum memory size of a destination
     // across all rows of a prototype state having this observation
     std::vector<uint64_t> max_successor_memory_size;
-    
+
 
 private:
-    
+
     /**
      * Build the state space:
      * - compute total number of states (@num_states)
      * - associate prototype states with their duplicates (@prototype_duplicates)
      * - for each state, remember its prototype (@state_prototype)
      * - for each state, remember its memory (@state_memory)
-     */ 
+     */
     void buildStateSpace();
 
     /**
@@ -104,12 +107,12 @@ private:
     storm::models::sparse::StateLabeling constructStateLabeling();
     storm::storage::SparseMatrix<ValueType> constructTransitionMatrix();
     storm::models::sparse::StandardRewardModel<ValueType> constructRewardModel(storm::models::sparse::StandardRewardModel<ValueType> const& reward_model);
-    
+
     // original POMDP
     storm::models::sparse::Pomdp<ValueType> const& pomdp;
     // for each row of a POMDP contains its index in its row group
     std::vector<uint64_t> prototype_row_index;
-    
+
     // number of states in an unfolded MDP
     uint64_t num_states;
     // for each prototype state contains a list of its duplicates (including itself)
@@ -119,9 +122,7 @@ private:
     uint64_t num_rows;
     // row groups of the resulting transition matrix
     std::vector<uint64_t> row_groups;
-    // for each row contains index of the prototype row
-    std::vector<uint64_t> row_prototype;
-    // for each row contains a memory update associated with it 
+    // for each row contains a memory update associated with it
     std::vector<uint64_t> row_memory;
 };
 

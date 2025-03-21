@@ -17,20 +17,22 @@ class DrnParser:
     WHITESPACES = ' \t\n\v\f\r'
 
     @classmethod
-    def parse_drn(cls, sketch_path):
+    def parse_drn(cls, sketch_path, use_exact=False):
         # try to read a drn file and return POSMG or POMDP based on the type
         # ValueError if file is not dnr or the model is of unsupported type
         explicit_model = None
         try:
             type = DrnParser.decide_type_of_drn(sketch_path)
             if type == 'POSMG':
+                if use_exact:
+                    raise ValueError('Exact synthesis is not supported for POSMG models')
                 pomdp_path = sketch_path + '.tmp'
                 state_player_indications = DrnParser.pomdp_from_posmg(sketch_path, pomdp_path)
                 pomdp = DrnParser.read_drn(pomdp_path)
                 explicit_model = payntbind.synthesis.posmg_from_pomdp(pomdp, state_player_indications)
                 os.remove(pomdp_path)
             else:
-                explicit_model = DrnParser.read_drn(sketch_path)
+                explicit_model = DrnParser.read_drn(sketch_path, use_exact)
         except Exception as e:
             print(e)
             raise ValueError('Failed to read sketch file in a .drn format')
@@ -91,10 +93,13 @@ class DrnParser:
         return string[:start_idx] + string[end_idx+1:]
 
     @classmethod
-    def read_drn(cls, sketch_path):
+    def read_drn(cls, sketch_path, use_exact=False):
         builder_options = stormpy.core.DirectEncodingParserOptions()
         builder_options.build_choice_labels = True
-        return stormpy.build_model_from_drn(sketch_path, builder_options)
+        if use_exact:
+            return stormpy.core._build_sparse_exact_model_from_drn(sketch_path, builder_options)
+        else:
+            return stormpy.build_model_from_drn(sketch_path, builder_options)
 
     @staticmethod
     def parse_posmg_specification(properties_path):

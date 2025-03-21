@@ -5,6 +5,7 @@
 #include "storm/storage/sparse/ModelComponents.h"
 #include "storm/storage/SparseMatrix.h"
 #include "storm/models/sparse/StandardRewardModel.h"
+#include "storm/adapters/RationalNumberAdapter.h"
 
 namespace synthesis {
         
@@ -257,4 +258,5 @@ namespace synthesis {
     }
 
     template class PomdpManagerAposteriori<double>;
+    template class PomdpManagerAposteriori<storm::RationalNumber>;
 }

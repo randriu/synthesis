@@ -1,5 +1,8 @@
 #include "PosmgManager.h"
 
+#include "storm/exceptions/NotSupportedException.h"
+
+
 namespace synthesis {
 
     template<typename ValueType>
@@ -254,9 +257,9 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    storm::storage::SparseMatrix<double> PosmgManager<ValueType>::constructTransitionMatrix()
+    storm::storage::SparseMatrix<ValueType> PosmgManager<ValueType>::constructTransitionMatrix()
     {
-        storm::storage::SparseMatrixBuilder<double> builder(
+        storm::storage::SparseMatrixBuilder<ValueType> builder(
             this->rowCount, this->stateCount, 0, true, true, this->stateCount
         );
         for (uint64_t state = 0; state < this->stateCount; state++)
@@ -307,6 +310,28 @@ namespace synthesis {
         }
 
         return labeling;
+    }
+
+    template<typename ValueType>
+    storm::models::sparse::StandardRewardModel<ValueType> PosmgManager<ValueType>::constructRewardModel(
+        storm::models::sparse::StandardRewardModel<ValueType> const& rewardModel
+    ) {
+        std::optional<std::vector<ValueType>> stateRewards, actionRewards;
+        STORM_LOG_THROW(!rewardModel.hasStateRewards(), storm::exceptions::NotSupportedException, "state rewards are currently not supported.");
+        STORM_LOG_THROW(!rewardModel.hasTransitionRewards(), storm::exceptions::NotSupportedException, "transition rewards are currently not supported.");
+        if (not rewardModel.hasStateActionRewards()) {
+            STORM_LOG_WARN("Reward model exists but has no state-action value vector associated with it.");
+            return storm::models::sparse::StandardRewardModel<ValueType>(std::move(stateRewards), std::move(actionRewards));
+        }
+
+        actionRewards = std::vector<ValueType>();
+        for (uint64_t row = 0; row < this->rowCount; row++) {
+            auto prototype = this->rowPrototype[row];
+            auto reward = rewardModel.getStateActionReward(prototype);
+            actionRewards->push_back(reward);
+        }
+
+        return storm::models::sparse::StandardRewardModel<ValueType>(std::move(stateRewards), std::move(actionRewards));
     }
 
     template<typename ValueType>
@@ -418,7 +443,7 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    std::shared_ptr<storm::models::sparse::Mdp<double>> PosmgManager<ValueType>::constructMdp()
+    std::shared_ptr<storm::models::sparse::Mdp<ValueType>> PosmgManager<ValueType>::constructMdp()
     {
         this->buildStateSpace();
         this->buildTransitionMatrixSpurious();
@@ -426,8 +451,12 @@ namespace synthesis {
         storm::storage::sparse::ModelComponents<ValueType> components;
         components.transitionMatrix = this->constructTransitionMatrix();
         components.stateLabeling = this->constructStateLabeling();
-        this->mdp = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
+        for (auto const& rewardModel : this->posmg.getRewardModels()) {
+            auto constructed = this->constructRewardModel(rewardModel.second);
+            components.rewardModels.emplace(rewardModel.first, constructed);
+        }
 
+        this->mdp = std::make_shared<storm::models::sparse::Mdp<ValueType>>(std::move(components));
         this->buildDesignSpaceSpurious();
 
         return this->mdp;
@@ -452,5 +481,6 @@ namespace synthesis {
     }
 
     template class PosmgManager<double>;
+    template class PosmgManager<storm::RationalNumber>;
 
 } // namespace synthesis

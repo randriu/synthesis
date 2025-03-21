@@ -1,3 +1,4 @@
+import paynt.quotient.pomdp
 import stormpy
 import payntbind
 
@@ -127,7 +128,9 @@ class GameAbstractionSolver():
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         assignment = synthesizer.synthesize(print_stats=False)
 
-        assert assignment is not None
+        # TODO modify for rewards
+        #   assignment can be None even for optimality property if the value is infinity
+        assert assignment is not None, 'The model contains a non-goal sink state. For such case, the reward model checking returns infinity (=non valid result)'
 
         self.game_iterations = synthesizer.stat.iterations_game
 
@@ -173,26 +176,43 @@ class GameAbstractionSolver():
 
 
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
+    # TODO set based on fsc_memory_size cli option?
+    MAX_MEMORY = 2
 
     def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
-        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
         self.obs_evaluator = obs_evaluator
+        self.unfolded_state_to_observation = None
 
-        # for each observation, a list of actions (indices) available
-        self.observation_to_actions = None
-        # POMDP manager used for unfolding the memory model into the quotient POMDP
-        self.fsc_unfolder = None
+        # for each memory size (1 ... MAX_MEMORY) a choice mask enabling corresponding memory updates in the quotient mdp
+        self.restricted_choices = None
 
-        # identify actions available at each observation
-        self.observation_to_actions = [None] * self.num_observations
-        state_to_observation = self.state_to_observation
-        for state,available_actions in enumerate(self.state_to_actions):
-            obs = state_to_observation[state]
-            if self.observation_to_actions[obs] is not None:
-                assert self.observation_to_actions[obs] == available_actions,\
-                    f"two states in observation cla ss {obs} differ in available actions"
-                continue
-            self.observation_to_actions[obs] = available_actions
+        if self.MAX_MEMORY > 1:
+            quotient_mdp, self.unfolded_state_to_observation, coloring, self.restricted_choices = self.unfold_quotient(
+                quotient_mdp, self.state_to_observation, specification, self.MAX_MEMORY, family, coloring)
+        else: # max memory is 1
+            self.unfolded_state_to_observation = self.state_to_observation
+            self.restricted_choices = {self.MAX_MEMORY: stormpy.storage.BitVector(quotient_mdp.nr_choices, True)}
+
+        super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
+
+        # The code below has been currently commented, because of the changes in observations.
+        # Uncomment and fix according to new unfolded observations if needed.
+
+        # # for each observation, a list of actions (indices) available
+        # self.observation_to_actions = None
+        # # POMDP manager used for unfolding the memory model into the quotient POMDP
+        # self.fsc_unfolder = None
+
+        # # identify actions available at each observation
+        # self.observation_to_actions = [None] * self.num_observations
+        # state_to_observation = self.state_to_observation
+        # for state,available_actions in enumerate(self.state_to_actions):
+        #     obs = state_to_observation[state]
+        #     if self.observation_to_actions[obs] is not None:
+        #         assert self.observation_to_actions[obs] == available_actions,\
+        #             f"two states in observation cla ss {obs} differ in available actions"
+        #         continue
+        #     self.observation_to_actions[obs] = available_actions
 
 
     @property
@@ -206,12 +226,123 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
+    # construct the quotient for the family
+    # the family is a intersection of policy tree family and memory family
+    def build(self, family):
+        # TODO decide which memory size to use
+        memory_size = self.MAX_MEMORY
+
+        member_selection_choices = self.coloring.selectCompatibleChoices(family.family)
+        memory_selection_choices = self.restricted_choices[memory_size]
+        choices = member_selection_choices & memory_selection_choices
+        family.mdp = self.build_from_choice_mask(choices)
+        family.selected_choices = choices
+        family.mdp.family = family
+
+    # restrict the options of all memory holes to only 0 ... max_memory
+    # family - family of unfolded quotient
+    # max_memory - maximum memory
+    def restrict_family_to_memory(self, family, max_memory):
+        # do I need parent info?
+        # should I copy the family?
+        restricted_family = family.copy()
+        permited_options = [memory for memory in range(max_memory)]
+        for hole, name in enumerate(family.hole_to_name):
+            if name[0] == 'M': # it is a memory hole
+                restricted_family.hole_set_options(hole, permited_options)
+
+        return restricted_family
+
+    def calculate_restricted_choices(self, family, coloring, max_memory):
+        restricted_choices = {}
+
+        for memory in range(1, max_memory):
+            restricted_family = self.restrict_family_to_memory(family, memory)
+            choices = coloring.selectCompatibleChoices(restricted_family.family)
+            restricted_choices[memory] = choices
+
+        choices = coloring.selectCompatibleChoices(family.family) # should be all '1's
+        restricted_choices[max_memory] = choices
+
+        return restricted_choices
+
+    # unfold the quotient pomdp (represented as mdp + observation map) to maximum memory
+    def unfold_quotient(self, quotient_mdp, state_to_observation, specification, max_memory, family, coloring):
+        new_quotient_mdp = None
+        new_state_to_observation = None
+        new_coloring = None
+        restricted_choices = None
+
+        # unfolding is done in the __init__ of PomdpQuotient
+        paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = max_memory
+        pomdp = self.pomdp_from_mdp(quotient_mdp, state_to_observation)
+        pomdpQuotient = paynt.quotient.pomdp.PomdpQuotient(pomdp, specification, make_canonic=False)
+
+        unfolded_quotient = pomdpQuotient.quotient_mdp
+        state_prototypes = pomdpQuotient.pomdp_manager.state_prototype
+        choice_prototypes = pomdpQuotient.pomdp_manager.row_prototype
+
+        # Update state to observation mapping. Create new observations for states with memory>1
+        state_memory = pomdpQuotient.pomdp_manager.state_memory
+        observation_count = pomdpQuotient.observations
+        new_state_to_observation = []
+        for state in range(unfolded_quotient.nr_states):
+            state_prototype = state_prototypes[state]
+            observation = state_to_observation[state_prototype]
+            memory = state_memory[state]
+            new_observation = memory * observation_count + observation
+            new_state_to_observation.append(new_observation)
+
+        # Update choice labeling. Append the memory update to each choice label.
+        # (choice labeling of a model cannot be modified. therefore a new model is created)
+        transition_matrix = unfolded_quotient.transition_matrix
+        state_labeling = unfolded_quotient.labeling
+        reward_models = unfolded_quotient.reward_models
+        components = stormpy.SparseModelComponents(
+            transition_matrix=transition_matrix,
+            state_labeling=state_labeling,
+            reward_models=reward_models)
+
+        choice_memory_update = pomdpQuotient.pomdp_manager.row_memory_option
+        choice_labeling = stormpy.storage.ChoiceLabeling(unfolded_quotient.nr_choices)
+        for choice in range(unfolded_quotient.nr_choices):
+            memory_update = choice_memory_update[choice]
+            choice_prototype = choice_prototypes[choice]
+            labels = quotient_mdp.choice_labeling.get_labels_of_choice(choice_prototype)
+
+            for label in labels:
+                new_label = f'{label}_{memory_update}'
+                if not choice_labeling.contains_label(new_label):
+                    choice_labeling.add_label(new_label)
+                choice_labeling.add_label_to_choice(new_label, choice)
+        components.choice_labeling = choice_labeling
+
+        new_quotient_mdp = stormpy.storage.SparseMdp(components)
+
+        # Update coloring.
+        choice_to_hole_options = coloring.getChoiceToAssignment()
+        new_choice_to_hole_options = []
+        for choice in range(new_quotient_mdp.nr_choices):
+            choice_prototype = choice_prototypes[choice]
+            hole_options = choice_to_hole_options[choice_prototype]
+            new_choice_to_hole_options.append(hole_options)
+
+        new_coloring = payntbind.synthesis.Coloring(
+            family.family, new_quotient_mdp.nondeterministic_choice_indices, new_choice_to_hole_options)
+
+        restricted_choices = self.calculate_restricted_choices(pomdpQuotient.family, pomdpQuotient.coloring, max_memory)
+
+        return new_quotient_mdp, new_state_to_observation, new_coloring, restricted_choices
+
+
     def pomdp_from_mdp(self, mdp, observability_classes):
         transition_matrix = mdp.transition_matrix
         state_labeling = mdp.labeling
+        reward_models = mdp.reward_models
         components = stormpy.SparseModelComponents(
             transition_matrix=transition_matrix,
-            state_labeling=state_labeling)
+            state_labeling=state_labeling,
+            reward_models=reward_models)
 
         components.observability_classes=observability_classes
 
@@ -221,7 +352,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         return stormpy.storage.SparsePomdp(components)
 
     def build_game_abstraction_solver(self, prop):
-        return GameAbstractionSolver(self.quotient_mdp, self.state_to_observation, prop, len(self.action_labels), self.choice_to_action)
+        return GameAbstractionSolver(self.quotient_mdp, self.unfolded_state_to_observation, prop, len(self.action_labels), self.choice_to_action)
 
     # mdp - SubMdp, represents one pomdp from the pomdp family
     # pomodp_quotient - quotient used for pomdp synthesis
@@ -248,10 +379,12 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
-
         choices = self.coloring.selectCompatibleChoices(family.family)
         mdp,state_map,choice_map = self.restrict_quotient(choices)
         pomdp = self.obs_evaluator.add_observations_to_submdp(mdp,state_map)
+        # for state,quotient_state in enumerate(state_map):
+        #     assert pomdp.observations[state] == self.state_to_observation[quotient_state]
+        # assert pomdp.nr_observations == self.num_observations
         return SubPomdp(pomdp,self,state_map,choice_map)
 
 

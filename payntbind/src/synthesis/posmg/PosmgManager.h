@@ -14,7 +14,7 @@ class PosmgManager {
         /**
          * @brief unfold memory
          */
-        std::shared_ptr<storm::models::sparse::Mdp<double>> constructMdp();
+        std::shared_ptr<storm::models::sparse::Mdp<ValueType>> constructMdp();
 
         std::vector<uint64_t> getObservationMapping();
 
@@ -136,9 +136,11 @@ class PosmgManager {
          */
         uint64_t translateState(uint64_t prototype, uint64_t memory);
 
-        storm::storage::SparseMatrix<double> constructTransitionMatrix();
+        storm::storage::SparseMatrix<ValueType> constructTransitionMatrix();
 
         storm::models::sparse::StateLabeling constructStateLabeling();
+
+        storm::models::sparse::StandardRewardModel<ValueType> constructRewardModel(storm::models::sparse::StandardRewardModel<ValueType> const& reward_model);
 
         void resetDesignSpace();
 

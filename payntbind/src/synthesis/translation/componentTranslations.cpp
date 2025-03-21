@@ -1,6 +1,7 @@
 #include "componentTranslations.h"
 #include "src/synthesis/posmg/Posmg.h"
 
+#include <storm/adapters/RationalNumberAdapter.h>
 #include <storm/models/sparse/Pomdp.h>
 #include <storm/models/sparse/Smg.h>
 #include <storm/utility/builder.h>
@@ -211,4 +212,44 @@ template std::vector<uint32_t> translateObservabilityClasses<double>(
     storm::models::sparse::Model<double> const& model,
     std::vector<uint64_t> const& translated_to_original_state);
 
+
+
+
+template storm::storage::sparse::ModelComponents<storm::RationalNumber> componentsFromModel<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model);
+
+template storm::models::sparse::StateLabeling translateStateLabeling<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    std::vector<uint64_t> const& translated_to_original_state,
+    uint64_t translated_initial_state);
+
+template void translateTransitionMatrixRow<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    storm::storage::SparseMatrixBuilder<storm::RationalNumber> & builder,
+    std::vector<uint64_t> const& original_to_translated_state,
+    std::vector<uint64_t> const& original_to_translated_choice,
+    uint64_t choice);
+template void translateTransitionMatrixRowGroup<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    storm::storage::SparseMatrixBuilder<storm::RationalNumber> & builder,
+    std::vector<uint64_t> const& original_to_translated_state,
+    std::vector<uint64_t> const& original_to_translated_choice,
+    uint64_t state);
+
+template storm::models::sparse::ChoiceLabeling translateChoiceLabeling<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    std::vector<uint64_t> const& translated_to_original_choice,
+    storm::storage::BitVector const& translated_choice_mask);
+template storm::models::sparse::StandardRewardModel<storm::RationalNumber> translateRewardModel(
+    storm::models::sparse::StandardRewardModel<storm::RationalNumber> const& reward_model,
+    std::vector<uint64_t> const& translated_to_original_choice,
+    storm::storage::BitVector const& translated_choice_mask);
+template std::unordered_map<std::string,storm::models::sparse::StandardRewardModel<storm::RationalNumber>> translateRewardModels(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    std::vector<uint64_t> const& translated_to_original_choice,
+    storm::storage::BitVector const& translated_choice_mask);
+
+template std::vector<uint32_t> translateObservabilityClasses<storm::RationalNumber>(
+    storm::models::sparse::Model<storm::RationalNumber> const& model,
+    std::vector<uint64_t> const& translated_to_original_state);
 }
