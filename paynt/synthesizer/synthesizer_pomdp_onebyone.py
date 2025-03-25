@@ -12,13 +12,28 @@ class SynthesizerPomdpOneByOne(paynt.synthesizer.synthesizer.Synthesizer):
         sat = 0
         unsat = 0
 
+        paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = 1
+
         for pomdp_combinations in family.all_combinations():
+            # create family
             combination = list(pomdp_combinations)
             pomdp_singleton_suboptions = [[option] for option in combination]
             pomdp_singleton_family = family.assume_options_copy(pomdp_singleton_suboptions)
-            pomdp = self.quotient.build_pomdp(pomdp_singleton_family)
+            self.quotient.build(pomdp_singleton_family)
 
-            pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(pomdp.model, self.quotient.specification)
+            # create pomdp
+            mdp = pomdp_singleton_family.mdp
+
+            quotient_state_to_observation = self.quotient.unfolded_state_to_observation
+            state_to_observation = []
+            for quotient_state in mdp.quotient_state_map:
+                observation = quotient_state_to_observation[quotient_state]
+                state_to_observation.append(observation)
+
+            pomdp = self.quotient.pomdp_from_mdp(mdp.model, state_to_observation)
+
+            # solve singleton
+            pomdp_quotient = paynt.quotient.pomdp.PomdpQuotient(pomdp, self.quotient.specification)
             print(f"synthesizing for family {pomdp_singleton_family}")
             synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(pomdp_quotient)
             res = synthesizer.synthesize(print_stats = False)
