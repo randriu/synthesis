@@ -120,6 +120,8 @@ class GameAbstractionSolver():
         posmg = payntbind.synthesis.posmg_from_smg(smg_abstraction.smg,smg_state_observation)
 
         # solve posmg
+            # the unfolding (if looking for k-FSCs) was already done in PomdpFamilyQuotient init, so set mem to 1 to prevent another unfold
+        paynt.quotient.posmg.PosmgQuotient.initial_memory_size = 1
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         assignment = synthesizer.synthesize(print_stats=False)
@@ -170,8 +172,7 @@ class GameAbstractionSolver():
 
 
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
-    # TODO set based on fsc_memory_size cli option?
-    MAX_MEMORY = 2
+    MAX_MEMORY = 1
 
     def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
         self.obs_evaluator = obs_evaluator
