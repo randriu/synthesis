@@ -21,7 +21,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
     # if True, posterior-aware unfolding will be applied
     posterior_aware = False
 
-    def __init__(self, pomdp, specification, decpomdp_manager=None, make_canonic=True):
+    def __init__(self, pomdp, specification, decpomdp_manager=None):
         super().__init__(specification=specification)
 
         # unfolded POMDP
@@ -59,12 +59,9 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
         self.is_action_hole = None
 
         # construct the quotient POMDP
-        if make_canonic:
-            self.pomdp = stormpy.pomdp.make_canonic(pomdp)
-            # ^ this also asserts that states with the same observation have the
-            # same number and the same order of available actions
-        else:
-            self.pomdp = pomdp
+        self.pomdp = stormpy.pomdp.make_canonic(pomdp)
+        # ^ this also asserts that states with the same observation have the
+        # same number and the same order of available actions
 
         logger.info(f"constructed {'exact' if self.pomdp.is_exact else ''} POMDP having {self.observations} observations.")
 
@@ -126,7 +123,7 @@ class PomdpQuotient(paynt.quotient.quotient.Quotient):
                 self.pomdp_manager = payntbind.synthesis.ExactPomdpManagerAposteriori(self.pomdp)
         else:
             if not PomdpQuotient.posterior_aware:
-                self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp, make_canonic)
+                self.pomdp_manager = payntbind.synthesis.PomdpManager(self.pomdp)
             else:
                 self.pomdp_manager = payntbind.synthesis.PomdpManagerAposteriori(self.pomdp)
 

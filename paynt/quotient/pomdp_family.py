@@ -124,6 +124,8 @@ class GameAbstractionSolver():
         posmg = payntbind.synthesis.posmg_from_smg(smg_abstraction.smg,smg_state_observation)
 
         # solve posmg
+            # the unfolding (if looking for k-FSCs) was already done in PomdpFamilyQuotient init, so set mem to 1 to prevent another unfold
+        paynt.quotient.posmg.PosmgQuotient.initial_memory_size = 1
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         assignment = synthesizer.synthesize(print_stats=False)
@@ -176,8 +178,7 @@ class GameAbstractionSolver():
 
 
 class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
-    # TODO set based on fsc_memory_size cli option?
-    MAX_MEMORY = 2
+    MAX_MEMORY = 1
 
     def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
         self.obs_evaluator = obs_evaluator
@@ -239,32 +240,34 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         family.selected_choices = choices
         family.mdp.family = family
 
-    # restrict the options of all memory holes to only 0 ... max_memory
-    # family - family of unfolded quotient
-    # max_memory - maximum memory
-    def restrict_family_to_memory(self, family, max_memory):
-        # do I need parent info?
-        # should I copy the family?
-        restricted_family = family.copy()
-        permited_options = [memory for memory in range(max_memory)]
-        for hole, name in enumerate(family.hole_to_name):
-            if name[0] == 'M': # it is a memory hole
-                restricted_family.hole_set_options(hole, permited_options)
+    # disallow all choices which update memory to more than max_memory
+    # choices - bit vector to be restricted
+    # choice_memory_update - memory update associated with each choice
+    # max_memory - highest allowed memory update
+    def restrict_choices(self, choices, choice_memory_update, max_memory):
+        permitted_memory_updates = [memory for memory in range(max_memory)]
 
-        return restricted_family
+        for choice in range(len(choices)):
+            memory_update = choice_memory_update[choice]
+            if memory_update not in permitted_memory_updates:
+                choices[choice] = False
 
-    def calculate_restricted_choices(self, family, coloring, max_memory):
-        restricted_choices = {}
+        return choices
+
+    # for memory = 1..max_memory calculate corresponding restricted choices
+    def calculate_restricted_choices(self, choice_memory_update, max_memory):
+        mem_restricted_choices = {}
+        choice_count = len(choice_memory_update)
 
         for memory in range(1, max_memory):
-            restricted_family = self.restrict_family_to_memory(family, memory)
-            choices = coloring.selectCompatibleChoices(restricted_family.family)
-            restricted_choices[memory] = choices
+            all_choices = stormpy.storage.BitVector(choice_count,  True)
+            restricted_choices = self.restrict_choices(all_choices, choice_memory_update, memory)
+            mem_restricted_choices[memory] = restricted_choices
 
-        choices = coloring.selectCompatibleChoices(family.family) # should be all '1's
-        restricted_choices[max_memory] = choices
+        # for max memory, all choices are permitted
+        mem_restricted_choices[max_memory] = stormpy.storage.BitVector(choice_count, True)
 
-        return restricted_choices
+        return mem_restricted_choices
 
     # unfold the quotient pomdp (represented as mdp + observation map) to maximum memory
     def unfold_quotient(self, quotient_mdp, state_to_observation, specification, max_memory, family, coloring):
@@ -273,18 +276,30 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         new_coloring = None
         restricted_choices = None
 
-        # unfolding is done in the __init__ of PomdpQuotient
-        paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = max_memory
+        # create pomdp manager
         pomdp = self.pomdp_from_mdp(quotient_mdp, state_to_observation)
-        pomdpQuotient = paynt.quotient.pomdp.PomdpQuotient(pomdp, specification, make_canonic=False)
+        pomdp_manager = payntbind.synthesis.PomdpManager(pomdp, False)
 
-        unfolded_quotient = pomdpQuotient.quotient_mdp
-        state_prototypes = pomdpQuotient.pomdp_manager.state_prototype
-        choice_prototypes = pomdpQuotient.pomdp_manager.row_prototype
+
+        # set imperfect memory size for each observation
+        observation_count = max(state_to_observation)+1
+
+        observation_states = [0 for obs in range(observation_count)]
+        for state in range(pomdp.nr_states):
+            obs = pomdp.get_observation(state)
+            observation_states[obs] += 1
+
+        for obs in range(observation_count):
+            memory_size = max_memory if observation_states[obs] > 1 else 1
+            pomdp_manager.set_observation_memory_size(obs, memory_size)
+
+        # create unfolded quotient
+        unfolded_quotient = pomdp_manager.construct_mdp()
+        state_prototypes = pomdp_manager.state_prototype
+        choice_prototypes = pomdp_manager.row_prototype
 
         # Update state to observation mapping. Create new observations for states with memory>1
-        state_memory = pomdpQuotient.pomdp_manager.state_memory
-        observation_count = pomdpQuotient.observations
+        state_memory = pomdp_manager.state_memory
         new_state_to_observation = []
         for state in range(unfolded_quotient.nr_states):
             state_prototype = state_prototypes[state]
@@ -303,7 +318,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             state_labeling=state_labeling,
             reward_models=reward_models)
 
-        choice_memory_update = pomdpQuotient.pomdp_manager.row_memory_option
+        choice_memory_update = pomdp_manager.row_memory_option
         choice_labeling = stormpy.storage.ChoiceLabeling(unfolded_quotient.nr_choices)
         for choice in range(unfolded_quotient.nr_choices):
             memory_update = choice_memory_update[choice]
@@ -330,7 +345,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         new_coloring = payntbind.synthesis.Coloring(
             family.family, new_quotient_mdp.nondeterministic_choice_indices, new_choice_to_hole_options)
 
-        restricted_choices = self.calculate_restricted_choices(pomdpQuotient.family, pomdpQuotient.coloring, max_memory)
+        restricted_choices = self.calculate_restricted_choices(choice_memory_update, max_memory)
 
         return new_quotient_mdp, new_state_to_observation, new_coloring, restricted_choices
 
