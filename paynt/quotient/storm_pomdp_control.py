@@ -60,12 +60,10 @@ class StormPOMDPControl:
         self.s_queue = None
 
         self.saynt_timer = None
-        self.export_fsc_storm = None
-        self.export_fsc_paynt = None
 
     def set_options(self,
         storm_options, get_storm_result, iterative_storm, use_storm_cutoffs,
-        unfold_strategy_storm, prune_storm, export_fsc_storm, export_fsc_paynt
+        unfold_strategy_storm, prune_storm
     ):
         self.storm_options = storm_options
         if get_storm_result is not None:
@@ -74,8 +72,6 @@ class StormPOMDPControl:
             self.iteration_timeout, self.paynt_timeout, self.storm_timeout = iterative_storm
         self.use_cutoffs = use_storm_cutoffs
         self.unfold_strategy_storm = unfold_strategy_storm
-        self.export_fsc_storm = export_fsc_storm
-        self.export_fsc_paynt = export_fsc_paynt
 
         self.incomplete_exploration = False
         if prune_storm:
@@ -102,7 +98,9 @@ class StormPOMDPControl:
             self.storm_bounds = self.latest_storm_result.upper_bound
         else:
             self.storm_bounds = self.latest_storm_result.lower_bound
-        self.saynt_fsc = self.belief_controller_to_fsc(self.latest_storm_result, self.latest_paynt_result_fsc)
+
+        if (self.storm_control.iteration_timeout is not None) or (self.storm_control.get_result is not None):
+            self.saynt_fsc = self.belief_controller_to_fsc(self.latest_storm_result, self.latest_paynt_result_fsc)
 
     # run Storm POMDP analysis for given model and specification
     # TODO: discuss Storm options
@@ -213,12 +211,6 @@ class StormPOMDPControl:
 
             print(f'-----------Storm----------- \
               \nValue = {value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {size}\n', flush=True)
-            
-            if self.export_fsc_storm is not None:
-                makedirs(self.export_fsc_storm, exist_ok=True)
-                with open(self.export_fsc_storm + "/storm.fsc", "w") as text_file:
-                    print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
-                    text_file.close()
 
             self.store_storm_result(result)
             self.parse_results(self.quotient)
@@ -262,12 +254,6 @@ class StormPOMDPControl:
 
         print(f'-----------Storm----------- \
               \nValue = {value} | Time elapsed = {round(self.saynt_timer.read(),1)}s | FSC size = {size}\n', flush=True)
-        
-        if self.export_fsc_storm is not None:
-            makedirs(self.export_fsc_storm, exist_ok=True)
-            with open(self.export_fsc_storm + "/storm.fsc", "w") as text_file:
-                print(result.induced_mc_from_scheduler.to_dot(), file=text_file)
-                text_file.close()
 
         self.store_storm_result(result)
         self.parse_results(self.quotient)

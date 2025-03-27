@@ -4,6 +4,7 @@ from .statistic import Statistic
 import paynt.synthesizer.synthesizer_ar
 import paynt.synthesizer.synthesizer_hybrid
 import paynt.synthesizer.synthesizer_ar_storm
+import paynt.synthesizer.synthesizer
 
 import paynt.quotient.quotient
 import paynt.quotient.pomdp
@@ -274,6 +275,24 @@ class SynthesizerPomdp:
 
             #break
 
+    def export_fsc(self, export_filename_base):
+
+        fsc_json = None
+        if self.storm_control.saynt_fsc is not None:
+            fsc_json = self.storm_control.saynt_fsc.__str__()
+        elif self.storm_control.latest_paynt_result_fsc is not None:
+            fsc_json = self.storm_control.latest_paynt_result_fsc.__str__()
+        else:
+            # TODO add export option for pure PAYNT synthesis
+            pass
+        
+        assert fsc_json is not None, "No FSC to export"
+
+        with open(export_filename_base + ".fsc.json", "w") as f:
+            f.write(fsc_json)
+
+        logger.info(f"Exported FSC to {export_filename_base}.fsc.json")
+
     def run(self, optimum_threshold=None):
         if self.storm_control is None:
             # Pure PAYNT POMDP synthesis
@@ -303,3 +322,6 @@ class SynthesizerPomdp:
             self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.storm_control.unfold_storm)
 
         self.print_synthesized_controllers()
+
+        if paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base is not None:
+            self.export_fsc(paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base)
