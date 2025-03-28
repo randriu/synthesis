@@ -17,8 +17,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
 
     # label for action executing a random action selection
     DONT_CARE_ACTION_LABEL = "__random__"
-    # if true, an explicit action executing a random choice of an available action will be added to each state
-    add_dont_care_action = False
+
     # if true, irrelevant states will not be considered for tree mapping
     filter_deterministic_states = True # TODO: change to false
 
@@ -48,7 +47,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         return state_to_actions
 
     
-    def __init__(self, quotient_mdp, family, coloring, specification):
+    def __init__(self, quotient_mdp, family, coloring, specification, tree_helper_path=None):
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
 
         # number of distinct actions in the quotient
@@ -63,6 +62,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_to_actions = None
         # dict of irrelevant variables, filled by extract_policies call with their defaults
         self.irrelevant_variables = None
+        # path to the tree helper for DTNest
+        self.tree_helper_path = tree_helper_path
 
         # identify relevant states
         self.state_is_relevant = [True for state in range(quotient_mdp.nr_states)]
@@ -77,9 +78,12 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
 
         action_labels,_ = payntbind.synthesis.extractActionLabels(quotient_mdp)
-        if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL not in action_labels and MdpFamilyQuotient.add_dont_care_action:
-            logger.debug("adding explicit don't-care action to relevant states...")
-            quotient_mdp = payntbind.synthesis.addDontCareAction(quotient_mdp,self.state_is_relevant_bv)
+        # if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL not in action_labels and MdpFamilyQuotient.add_dont_care_action:
+        # LADA TODO: adding don't care must come later to single mdp
+        #     logger.debug("adding explicit don't-care action to relevant states...")
+        #     quotient_mdp = payntbind.synthesis.addDontCareAction(quotient_mdp,self.state_is_relevant_bv)
+
+        self.quotient_mdp = quotient_mdp
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.num_actions = len(self.action_labels)
@@ -115,6 +119,30 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_valuations = state_valuations
         self.relevant_state_valuations = state_valuations
         self.state_is_relevant_bv_backup = self.copy_bitvector(self.state_is_relevant_bv)
+        
+        # used to set coloring according to new mdp_quotient ( due to DONT_CARE_ACTION_LABEL )
+        # self.reset_tree(0)
+        #        payntbind.synthesis.Coloring(family.family, quotient_mdp.nondeterministic_choice_indices,
+        #                                     jani_unfolder.choice_to_hole_options)
+        
+    # gets all choices that represent random action, used to compute the value of uniformly random scheduler
+    def get_random_choices(self):
+        nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        state_to_choice = self.empty_scheduler()
+        random_action = self.action_labels.index(MdpFamilyQuotient.DONT_CARE_ACTION_LABEL)
+        for state in range(self.quotient_mdp.nr_states):
+            # find a choice that executes this action
+            for choice in range(nci[state], nci[state + 1]):
+                if self.choice_to_action[choice] == random_action:
+                    state_to_choice[state] = choice
+                    break
+        for state, choice in enumerate(state_to_choice):
+            if choice is None:
+                state_to_choice[state] = nci[state]
+
+        choices = self.state_to_choice_to_choices(state_to_choice)
+
+        return choices
 
     @staticmethod
     def copy_bitvector(bitvector):
@@ -381,3 +409,79 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             if not relevant:
                 self.state_is_relevant_bv.set(j,False)
         return True
+    
+    def build_tree_helper_tree(self, tree_helper=None):
+        if tree_helper is None:
+            tree_helper = self.tree_helper
+        helper_tree = paynt.quotient.utils.decision_tree.DecisionTree(self, self.variables)
+        helper_tree.build_from_tree_helper(tree_helper)
+        return helper_tree
+    
+    def get_submdp_from_unfixed_states(self, unfixed_states=None):
+        if unfixed_states is None:
+            unfixed_states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, False)
+        selected_choices = self.get_selected_choices_from_tree_helper(unfixed_states)
+        submdp = self.build_from_choice_mask(selected_choices)
+        return submdp
+    
+    def get_selected_choices_from_tree_helper(self, state_to_exclude):
+        # LADA TODO: emror here- returns None
+        selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
+        mdp_nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
+        for state in range(self.quotient_mdp.nr_states):
+            if state_to_exclude.get(state) or self.state_is_relevant_bv.get(state) == False:
+                for choice in range(mdp_nci[state], mdp_nci[state + 1]):
+                    selected_choices.set(choice, True)
+                continue
+            chosen_action_label = self.get_chosen_action_for_state_from_tree_helper(state)
+            action_index = self.action_labels.index(chosen_action_label)
+            for choice in range(mdp_nci[state], mdp_nci[state + 1]):
+                if self.choice_to_action[choice] == action_index:
+                    selected_choices.set(choice, True)
+                    break
+            else:
+                # TODO as far as I know this happens only because of unreachable states not being included in the tree
+                # for now we will treat this by using the __random__ action but it can lead to strange behaviour
+                for choice in range(mdp_nci[state], mdp_nci[state + 1]):
+                    if self.action_labels[self.choice_to_action[choice]] == "__random__":
+                        selected_choices.set(choice, True)
+                        break
+                continue
+                assert False, f"no choice for state {state} even though action {chosen_action_label} was chosen"
+
+        return selected_choices
+
+    def get_chosen_action_for_state_from_tree_helper(self, state):
+        state_valuation = self.relevant_state_valuations[state]
+        current_node = self.tree_helper_tree.root
+        while not current_node.is_terminal:
+            bound = self.variables[current_node.variable].domain[current_node.variable_bound]
+            if state_valuation[current_node.variable] <= bound:
+                current_node = current_node.child_true
+            else:
+                current_node = current_node.child_false
+        return self.action_labels[current_node.action]
+    
+    def get_state_space_for_tree_helper_node(self, node_id):
+        node = self.tree_helper_tree.collect_nodes(lambda node: node.identifier == node_id)[0]
+        current_node = node
+        states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, True)
+        while current_node.parent is not None:
+            parent_node = current_node.parent
+            if parent_node.child_true.identifier == current_node.identifier:
+                states = self.get_states_satisfying_predicate(parent_node, states, leq=True)
+            else:
+                states = self.get_states_satisfying_predicate(parent_node, states, leq=False)
+            current_node = parent_node
+        return states
+    
+    def get_states_satisfying_predicate(self, node, current_states, leq=True):
+        bound = self.variables[node.variable].domain[node.variable_bound]
+        for state, state_valuation in enumerate(self.relevant_state_valuations):
+            if not current_states.get(state):
+                continue
+            if leq and state_valuation[node.variable] > bound:
+                current_states.set(state, False)
+            elif not leq and state_valuation[node.variable] <= bound:
+                current_states.set(state, False)
+        return current_states

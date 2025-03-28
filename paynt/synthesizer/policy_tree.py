@@ -584,6 +584,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_solver.solve_sg(family.selected_choices)
         # game_solver.solve_smg(family.selected_choices)
 
+        # [1, 2, 4, 6, 8, 10, 13, 14, 17, 18, 19, 21]
+        # bit vector(16/22) [0 1 2 4 6 7 8 9 10 13 14 16 17 18 19 20 ]
+        # LADA TODO: maybe endstate self loop missing?
         game_value = game_solver.solution_value
         self.stat.iteration_game(family.mdp.states)
         game_sat = prop.satisfies_threshold_within_precision(game_value)
@@ -595,6 +598,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if action < self.quotient.num_actions:
                 game_policy_fixed[state] = action
         game_policy = game_policy_fixed
+        
+        mdp_fixed_choices = game_solver.environment_choice_mask
 
         if game_sat:
             # logger.debug("debug: state to destination")
@@ -608,12 +613,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if self.ldokoupi_flag:
                 self.ldok_postprocessing_times.start()
                 # order is important - cut most diverging paths first
-                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
-                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
+                # LADA TODO: skip for now
+                # game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
+                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
                 # game_policy = self.post_process_bruteforce(game_policy, game_solver, family, prop)
                 self.ldok_postprocessing_times.stop()
 
-        return game_policy,game_sat
+        return game_policy,game_sat,mdp_fixed_choices
 
     
     def post_process_game_policy_gradient(self, game_policy, game_solver, family, prop, check_granularity=4):
@@ -792,13 +798,15 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
 
+        mdp_fixed_choices = None
         if family.candidate_policy is None or self.ldokoupi_flag:
-            game_policy,game_sat = self.solve_game_abstraction(family,prop,game_solver)
+            game_policy,game_sat,mdp_fixed_choices = self.solve_game_abstraction(family,prop,game_solver)
         else:
             game_policy = family.candidate_policy
             game_sat = False
 
         mdp_family_result.game_policy = game_policy
+        mdp_family_result.mdp_fixed_choices = mdp_fixed_choices
         if game_sat:
             mdp_family_result.policy = game_policy
             return mdp_family_result
@@ -914,6 +922,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             #     return None
 
             policy_tree_node = undecided_leaves.pop(-1)
+            policy_tree_node.mdp_fixed_choices = None
             family = policy_tree_node.family
             result = self.verify_family(family,game_solver,prop)
             family.candidate_policy = None
@@ -927,6 +936,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 else:
                     policy_tree_node.sat = True
                     policy_tree_node.policy_index = policy_tree.new_policy(result.policy)
+                    policy_tree_node.mdp_fixed_choices = result.mdp_fixed_choices
                 continue
 
             # refine
@@ -948,7 +958,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.stat.num_policies = len(policy_tree.policies)
         postprocessing_time = policy_tree.postprocess(self.quotient, prop)
         policy_tree.print_stats()
-        self.stat.postprocessing_time = postprocessing_time
+        # self.stat.postprocessing_time = postprocessing_time
         self.stat.num_nodes_merged = len(policy_tree.collect_all())
         self.stat.num_leaves_merged = len(policy_tree.collect_leaves())
         self.stat.num_policies_merged = len(policy_tree.policies)
@@ -958,7 +968,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         evaluations = []
         for node in policy_tree.collect_leaves():
             policy = policy_tree.policies[node.policy_index] if node.sat else None
-            evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(node.family,None,node.sat,policy=policy)
+            evaluation = paynt.synthesizer.synthesizer.FamilyEvaluation(node.family,None,node.sat,policy=policy, mdp_fixed_choices=node.mdp_fixed_choices)
             evaluations.append(evaluation)
         return evaluations
 

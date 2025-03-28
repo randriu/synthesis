@@ -148,13 +148,6 @@ class Sketch:
         assert filetype is not None, "unknown format of input file"
         logger.info("sketch parsing OK")
 
-        tree_helper = None
-        if tree_helper_path and os.path.exists(tree_helper_path):
-            # LADA TODO: use this later
-            tree_helper = paynt.utils.tree_helper.parse_tree_helper(tree_helper_path)
-            logger.info("tree helper loaded")
-
-
         paynt.verification.property.Property.initialize()
         updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
         paynt.verification.property.Property.initialize(use_exact)
@@ -185,7 +178,7 @@ class Sketch:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
                 quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification)
+                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification, tree_helper_path)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
         else:
@@ -195,7 +188,7 @@ class Sketch:
             elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
                 quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
             elif not explicit_quotient.is_partially_observable:
-                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification, tree_helper)
+                quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification, tree_helper_path)
             else:
                 quotient_container = paynt.quotient.pomdp.PomdpQuotient(explicit_quotient, specification, decpomdp_manager)
         return quotient_container

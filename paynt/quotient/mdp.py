@@ -34,7 +34,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
             state_valuations.append(valuation)
         return variable_name, state_valuations
 
-    def __init__(self, mdp, specification, tree_helper=None):
+    def __init__(self, mdp, specification, tree_helper_path=None):
         super().__init__(specification=specification)
 
         # mask of relevant states: non-absorbing states with more than one action
@@ -108,7 +108,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         self.family = None
         self.splitter_count = None
 
-        self.tree_helper = tree_helper
+        self.tree_helper_path = tree_helper_path
 
     def get_variable_id(self, var):
         for id, variable in enumerate(self.variables):
@@ -391,7 +391,7 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
         return submdp
 
     def create_uniform_random_tree(self):
-        decision_tree = DecisionTree(self, self.variables)
+        decision_tree = paynt.quotient.utils.decision_tree.DecisionTree(self, self.variables)
         decision_tree.random_tree()
         return decision_tree
 

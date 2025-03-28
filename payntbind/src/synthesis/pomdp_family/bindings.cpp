@@ -53,6 +53,8 @@ void bindings_pomdp_family(py::module& m) {
         .def_property_readonly("state_is_target", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.state_is_target;})
         .def_property_readonly("solution_state_to_player1_action", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_player1_action;})
         .def_property_readonly("solution_state_to_quotient_choice", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_quotient_choice;})
+        .def_property_readonly("environment_choice_mask", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.environment_choice_mask;})
+        //.def_property_readonly("state_action_to_player2_state", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.state_action_to_player2_state;})
         .def("enable_profiling", &synthesis::GameAbstractionSolver<double>::enableProfiling)
         .def("print_profiling", &synthesis::GameAbstractionSolver<double>::printProfiling)
         ;
@@ -68,4 +70,24 @@ void bindings_pomdp_family(py::module& m) {
         .def_readonly("state_to_quotient_state_action", &synthesis::SmgAbstraction<double>::state_to_quotient_state_action)
         .def_readonly("choice_to_quotient_choice", &synthesis::SmgAbstraction<double>::choice_to_quotient_choice)
         ;
+//
+//    py::class_<synthesis::ItemTranslator>(m, "ItemTranslator")
+//            .def(py::init<>()) // Default constructor
+//            .def(py::init<uint64_t>(), py::arg("num_items")) // Constructor with num_items
+//            .def("clear", &synthesis::ItemTranslator::clear) // Method to clear translations
+//            .def("numTranslations", &synthesis::ItemTranslator::numTranslations) // Method to get number of translations
+//            .def("hasTranslation", &synthesis::ItemTranslator::hasTranslation, py::arg("item")) // Method to check if item has translation
+//            .def("translate", &synthesis::ItemTranslator::translate, py::arg("item")) // Method to translate item
+//            .def("retrieve", &synthesis::ItemTranslator::retrieve, py::arg("translation")) // Method to retrieve item by translation
+//            .def_property_readonly("item_to_translation", &synthesis::ItemTranslator::itemToTranslation) // Property to get item to translation mapping
+//            .def_property_readonly("translation_to_item", &synthesis::ItemTranslator::translationToItem) // Property to get translation to item mapping
+//            ;
+//    py::class_<synthesis::ItemKeyTranslator<uint64_t>>(m, "ItemKeyTranslator")
+//            .def(py::init<uint64_t>(), py::arg("num_items")) // Constructor with num_items
+//            .def("translate", &synthesis::ItemKeyTranslator<uint64_t>::translate, py::arg("item"), py::arg("key")) // Method to translate item
+//            .def("retrieve", &synthesis::ItemKeyTranslator<uint64_t>::retrieve, py::arg("key")) // Method to retrieve item by key
+//            .def_property_readonly("numTranslations", &synthesis::ItemKeyTranslator<uint64_t>::numTranslations) // Property to get number of translations
+//            .def_property_readonly("translationToItem", &synthesis::ItemKeyTranslator<uint64_t>::translationToItem) // Property to get translation to item mapping
+//            .def_property_readonly("translationToItemKey", &synthesis::ItemKeyTranslator<uint64_t>::translationToItemKey) // Property to get translation to item key mapping
+//            ;
 }

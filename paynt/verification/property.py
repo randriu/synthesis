@@ -4,6 +4,7 @@ import math
 import operator
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -12,11 +13,11 @@ def construct_property(prop, relative_error, use_exact=False):
     player_index = None
     if rf.is_reward_operator and use_exact:
         raise ValueError("exact synthesis is not supported for reward properties")
-    
+
     if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
         if use_exact:
             raise ValueError("exact synthesis is not supported for game properties")
-        
+
         player_index = extract_player_index(rf)
         game_rf = rf
         rf = rf.subformula
@@ -42,7 +43,7 @@ def extract_player_index(formula):
     string = formula.__str__()
     l_idx = string.index('<<')
     r_idx = string.index('>>')
-    player_num = string[l_idx + len('<<') : r_idx]
+    player_num = string[l_idx + len('<<'): r_idx]
     return int(player_num)
 
 def construct_reward_property(reward_name, minimizing, target_label):
@@ -95,14 +96,13 @@ class Property:
     def above_model_checking_precision(a, b):
         if isinstance(a, stormpy.Rational):
             return True
-        return abs(a-b) > Property.model_checking_precision
-
+        return abs(a - b) > Property.model_checking_precision
 
     def __init__(self, prop, use_exact=False):
         self.property = prop
         rf = prop.raw_formula
 
-        self.game_optimizing_player = None # player index for game properties
+        self.game_optimizing_player = None  # player index for game properties
         self.game_formula = None
 
         self.use_exact = use_exact
@@ -111,10 +111,10 @@ class Property:
         comparison_type = rf.comparison_type
         self.minimizing = comparison_type in [stormpy.ComparisonType.LESS, stormpy.ComparisonType.LEQ]
         self.op = {
-            stormpy.ComparisonType.LESS:    operator.lt,
-            stormpy.ComparisonType.LEQ:     operator.le,
+            stormpy.ComparisonType.LESS: operator.lt,
+            stormpy.ComparisonType.LEQ: operator.le,
             stormpy.ComparisonType.GREATER: operator.gt,
-            stormpy.ComparisonType.GEQ:     operator.ge
+            stormpy.ComparisonType.GEQ: operator.ge
         }[comparison_type]
 
         # set threshold
@@ -134,9 +134,50 @@ class Property:
         self.formula.remove_bound()
         if self.minimizing:
             self.formula.set_optimality_type(stormpy.OptimizationDirection.Minimize)
+            self.minimizing = True
+            self.op = operator.lt
         else:
             self.formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
+            self.minimizing = False
+            self.op = operator.gt
         self.formula_alt = Property.alt_formula(self.formula)
+
+        # make DTNest work 
+        self.epsilon = 0.0
+        self.optimum = None
+        
+        # self._reset()
+
+    def _reset(self):
+        self.optimum = None
+        if self.minimizing:
+            self.threshold = math.inf
+        else:
+            self.threshold = self.threshold
+
+    def meets_op(self, a, b):
+        ''' For optimality objective, we want to accept improvements above model checking precision. '''
+        return b is None or (Property.above_model_checking_precision(a, b) and self.op(a, b))
+
+    def satisfies_threshold(self, value):
+        return self.result_valid(value) and self.meets_op(value, self.threshold)
+
+    def improves_optimum(self, value):
+        return self.result_valid(value) and self.meets_op(value, self.optimum)
+
+    def update_optimum(self, optimum):
+        self.optimum = optimum
+        if self.minimizing:
+            self.threshold = optimum * (1 - self.epsilon)
+        else:
+            self.threshold = optimum * (1 + self.epsilon)
+
+    def suboptimal_value(self):
+        assert self.optimum is not None
+        if self.minimizing:
+            return self.optimum * (1 + self.model_checking_precision)
+        else:
+            return self.optimum * (1 - self.model_checking_precision)
 
     @staticmethod
     def alt_formula(formula):
@@ -207,10 +248,10 @@ class Property:
     def negate(self):
         negated_formula = self.property.raw_formula.clone()
         negated_formula.comparison_type = {
-            stormpy.ComparisonType.LESS:    stormpy.ComparisonType.GEQ,
-            stormpy.ComparisonType.LEQ:     stormpy.ComparisonType.GREATER,
+            stormpy.ComparisonType.LESS: stormpy.ComparisonType.GEQ,
+            stormpy.ComparisonType.LEQ: stormpy.ComparisonType.GREATER,
             stormpy.ComparisonType.GREATER: stormpy.ComparisonType.LEQ,
-            stormpy.ComparisonType.GEQ:     stormpy.ComparisonType.LESS
+            stormpy.ComparisonType.GEQ: stormpy.ComparisonType.LESS
         }[negated_formula.comparison_type]
         stormpy_property_negated = stormpy.core.Property("", negated_formula)
         property_negated = Property(stormpy_property_negated)
@@ -223,7 +264,8 @@ class Property:
         elif isinstance(target, stormpy.logic.AtomicExpressionFormula):
             target_label = str(target)
         else:
-            raise ValueError(f"unknown type of target expression {str(target)}, expected atomic label or atomic expression")
+            raise ValueError(
+                f"unknown type of target expression {str(target)}, expected atomic label or atomic expression")
         return target_label
 
     def get_reward_name(self):
@@ -246,17 +288,17 @@ class Property:
         return formula
 
 
-
 class OptimalityProperty(Property):
     '''
     Optimality property can remember current optimal value and adapt the
     corresponding threshold wrt epsilon.
     '''
+
     def __init__(self, prop, epsilon=0, use_exact=False):
         self.property = prop
         rf = prop.raw_formula
 
-        self.game_optimizing_player = None # player index for game properties
+        self.game_optimizing_player = None  # player index for game properties
         self.game_formula = None
 
         self.use_exact = use_exact
@@ -282,7 +324,6 @@ class OptimalityProperty(Property):
 
         self.reset()
 
-
     def __str__(self):
         eps = f"[eps = {self.epsilon}]" if self.epsilon > 0 else ""
         return f"{str(self.formula)} {eps}"
@@ -294,18 +335,18 @@ class OptimalityProperty(Property):
         self.optimum = None
         if self.minimizing:
             if self.use_exact:
-                self.threshold = stormpy.Rational(2) # TODO: does not work for rewards
+                self.threshold = stormpy.Rational(2)  # TODO: does not work for rewards
             else:
                 self.threshold = math.inf
         else:
             if self.use_exact:
-                self.threshold = stormpy.Rational(-1) # TODO: does not work for rewards
+                self.threshold = stormpy.Rational(-1)  # TODO: does not work for rewards
             else:
                 self.threshold = -math.inf
 
     def meets_op(self, a, b):
         ''' For optimality objective, we want to accept improvements above model checking precision. '''
-        return b is None or (Property.above_model_checking_precision(a,b) and self.op(a,b))
+        return b is None or (Property.above_model_checking_precision(a, b) and self.op(a, b))
 
     def satisfies_threshold(self, value):
         return self.result_valid(value) and self.meets_op(value, self.threshold)
@@ -337,17 +378,17 @@ class OptimalityProperty(Property):
 
     @property
     def can_be_improved(self):
-        return not( not self.reward and self.minimizing and self.threshold == 0 )
+        return not (not self.reward and self.minimizing and self.threshold == 0)
 
     def negate(self):
         negated_formula = self.property.raw_formula.clone()
         negate_optimality_type = {
-            stormpy.OptimizationDirection.Minimize:    stormpy.OptimizationDirection.Maximize,
-            stormpy.OptimizationDirection.Maximize:    stormpy.OptimizationDirection.Minimize
+            stormpy.OptimizationDirection.Minimize: stormpy.OptimizationDirection.Maximize,
+            stormpy.OptimizationDirection.Maximize: stormpy.OptimizationDirection.Minimize
         }[negated_formula.optimality_type]
         negated_formula.set_optimality_type(negate_optimality_type)
         stormpy_property_negated = stormpy.core.Property("", negated_formula)
-        property_negated = OptimalityProperty(stormpy_property_negated,self.epsilon)
+        property_negated = OptimalityProperty(stormpy_property_negated, self.epsilon)
         return property_negated
 
 
@@ -364,9 +405,13 @@ class Specification:
                 self.constraints.append(p)
             if type(p) == OptimalityProperty:
                 optimalities.append(p)
-        assert len(optimalities) <=1, "multiple optimality objectives were specified"
+        assert len(optimalities) <= 1, "multiple optimality objectives were specified"
         if optimalities:
             self.optimality = optimalities[0]
+        # LADA TODO: not optimal way to assign -> make it based on ldok flag
+        if not self.optimality:
+            self.optimality = self.constraints[0]
+            self.constraints = []
 
     def __str__(self):
         s = ""
@@ -417,7 +462,6 @@ class Specification:
     def transform_until_to_eventually(self):
         for p in self.all_properties():
             p.transform_until_to_eventually()
-
 
     def check(self):
         # TODO

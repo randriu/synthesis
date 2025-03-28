@@ -4,6 +4,8 @@
 #include <storm/environment/Environment.h>
 #include <storm/utility/Stopwatch.h>
 #include <storm/logic/GameFormula.h>
+#include "src/synthesis/translation/ItemKeyTranslator.h"
+#include "src/synthesis/translation/ItemTranslator.h"
 
 namespace synthesis {
 
@@ -71,6 +73,12 @@ namespace synthesis {
 
         /** Identification of target states. */
         storm::storage::BitVector state_is_target;
+
+        /** Player 2 choices from matching original quotient choices. */
+        storm::storage::BitVector environment_choice_mask;
+
+        /** For each state-action pair, the corresponding state of Player 2. */
+        ItemKeyTranslator<uint64_t> state_action_to_player2_state;
     private:
 
         storm::models::sparse::Model<ValueType> const& quotient;

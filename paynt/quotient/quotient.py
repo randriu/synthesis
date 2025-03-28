@@ -1,3 +1,5 @@
+import os
+
 import stormpy
 import payntbind
 
@@ -357,3 +359,9 @@ class Quotient:
             return stormpy.BitVector(model.nr_states,False)
         target_label = prop.get_target_label()
         return model.labeling.get_states(target_label)
+
+    def load_tree_helper(self):
+        """ Load tree helper from file. used by MDPQuotient and MDPFamilyQuotient """
+        if self.tree_helper_path and os.path.exists(self.tree_helper_path):
+            self.tree_helper = paynt.utils.tree_helper.parse_tree_helper(self.tree_helper_path)
+            logger.info("tree helper loaded")

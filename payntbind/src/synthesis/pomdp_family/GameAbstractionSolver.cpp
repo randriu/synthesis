@@ -54,6 +54,8 @@ namespace synthesis {
         this->solution_state_values = std::vector<double>(quotient_num_states,0);
         this->solution_state_to_player1_action = std::vector<uint64_t>(quotient_num_states,quotient_num_actions);
         this->solution_state_to_quotient_choice = std::vector<uint64_t>(quotient_num_states,quotient_num_choices);
+        this->environment_choice_mask = storm::storage::BitVector(quotient_num_choices,false);
+        this->state_action_to_player2_state = ItemKeyTranslator<uint64_t>(quotient_num_states);
     }
 
     
@@ -89,7 +91,6 @@ namespace synthesis {
         uint64_t quotient_initial_state = *(this->quotient.getInitialStates().begin());
 
         ItemTranslator state_to_player1_state(quotient_num_states);
-        ItemKeyTranslator<uint64_t> state_action_to_player2_state(quotient_num_states);
         std::vector<std::set<uint64_t>> player1_state_to_actions;
         std::vector<std::vector<uint64_t>> player2_state_to_choices;
         
@@ -109,8 +110,8 @@ namespace synthesis {
                 }
                 uint64_t action = choice_to_action[choice];
                 player1_state_to_actions[player1_state].insert(action);
-                uint64_t player2_state = state_action_to_player2_state.translate(state,action);
-                player2_state_to_choices.resize(state_action_to_player2_state.numTranslations());
+                uint64_t player2_state = this->state_action_to_player2_state.translate(state,action);
+                player2_state_to_choices.resize(this->state_action_to_player2_state.numTranslations());
                 player2_state_to_choices[player2_state].push_back(choice);
                 for(uint64_t state_dst: this->choice_to_destinations[choice]) {
                     if(state_is_encountered[state_dst]) {
@@ -122,7 +123,7 @@ namespace synthesis {
             }
         }
         uint64_t player1_num_states = state_to_player1_state.numTranslations();
-        uint64_t player2_num_states = state_action_to_player2_state.numTranslations();
+        uint64_t player2_num_states = this->state_action_to_player2_state.numTranslations();
         
         // add fresh target states
         uint64_t player1_target_state = player1_num_states++;
@@ -137,7 +138,7 @@ namespace synthesis {
             uint64_t state = state_to_player1_state.retrieve(player1_state);
             for(uint64_t action: player1_state_to_actions[player1_state]) {
                 player1_choice_to_action.push_back(action);
-                uint64_t player2_state = state_action_to_player2_state.translate(state,action);
+                uint64_t player2_state = this->state_action_to_player2_state.translate(state,action);
                 player1_matrix_builder.addNextValue(player1_num_rows,player2_state,1);
                 player1_num_rows++;
             }
@@ -157,7 +158,7 @@ namespace synthesis {
         uint64_t player2_num_rows = 0;
         for(uint64_t player2_state=0; player2_state<player2_num_states-1; player2_state++) {
             player2_matrix_builder.newRowGroup(player2_num_rows);
-            auto [state,action] = state_action_to_player2_state.retrieve(player2_state);
+            auto [state,action] = this->state_action_to_player2_state.retrieve(player2_state);
             if(state_is_target[state]) {
                 // target state, transition to the target state of Player 1 and gain unit reward
                 player2_matrix_builder.addNextValue(player2_num_rows,player1_target_state,1);
@@ -208,6 +209,7 @@ namespace synthesis {
         std::fill(this->solution_state_to_player1_action.begin(),this->solution_state_to_player1_action.end(),quotient_num_actions);
         std::fill(this->solution_state_to_quotient_choice.begin(),this->solution_state_to_quotient_choice.end(),quotient_num_choices);
 
+        //LADA TODO: this is the only wat unfortunately
         auto const& player1_matrix_row_group_indices = player1_matrix.getRowGroupIndices();
         auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
 
@@ -232,6 +234,26 @@ namespace synthesis {
             auto quotient_choice = player2_choice_to_quotient_choice[player2_choice];
             this->solution_state_to_quotient_choice[state] = quotient_choice;
         }
+        ////LADA TODO: this is the only wat unfortunately -ended  here
+        ////iterate over all player 2 states and print its corresponding choices ( with state and action)
+        //for(uint64_t player2_state=0; player2_state<player2_num_states-1; player2_state++) {
+        //    auto [state,action] = this->state_action_to_player2_state.retrieve(player2_state);
+        //    std::cout << "player2_state: " << player2_state << " state: " << state << " action: " << action << std::endl;
+        //    for(auto choice: player2_state_to_choices[player2_state]) {
+        //        std::cout << "choice: " << choice << std::endl;
+        //    }
+        //}
+
+        for(uint64_t player2_state = 0; player2_state < player2_num_states; ++player2_state) {
+            uint64_t player2_choice = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
+            uint64_t quotient_choice = player2_choice_to_quotient_choice[player2_choice];
+            environment_choice_mask.set(quotient_choice,true);
+        }
+        // add choice for last state ( last choice )
+        environment_choice_mask.set(quotient_num_choices-1,true);
+
+
+
 
         if(profiling_enabled) {
             this->timer_total.stop();

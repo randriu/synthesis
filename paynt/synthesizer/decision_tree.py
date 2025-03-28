@@ -17,6 +17,10 @@ import subprocess
 
 import logging
 from datetime import datetime
+
+from paynt.verification.property import Specification
+from paynt.verification.property_result import PropertyResult, SpecificationResult
+
 logger = logging.getLogger(__name__)
 
 class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
@@ -99,24 +103,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
     def compute_normalized_value(self, value, opt, random):
         return (value-random)/(opt-random) if opt-random != 0 else 1.0
-
-    def counters_reset(self):
-        self.num_families_considered = 0
-        self.num_families_skipped = 0
-        self.num_families_model_checked = 0
-        self.num_schedulers_preserved = 0
-        self.num_harmonizations = 0
-        self.num_harmonization_succeeded = 0
-
-        # integration stats
-        self.dtcontrol_calls = 0
-        self.dtcontrol_successes = 0
-        self.dtcontrol_recomputed_calls = 0
-        self.dtcontrol_recomputed_successes = 0
-        self.paynt_calls = 0
-        self.paynt_successes_smaller = 0
-        self.paynt_tree_found = 0
-        self.all_larger = 0
 
     def counters_print(self):
         logger.info(f"families considered: {self.num_families_considered}")
@@ -473,24 +459,26 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             logger.info(f"tree did not induce dtmc?")
         # assert dtmc.model.nr_states == dtmc.model.nr_choices, "tree did not induce dtmc"
         result = dtmc.check_specification(self.quotient.specification)
-        result_negate = dtmc.check_specification(self.quotient.specification.negate())
+        # result_negate = dtmc.check_specification(self.quotient.specification.negate())
 
         print(result)
-        print(result_negate)
+        # print(result_negate)
         print()
 
-        # TODO find out why this would not hold????
+        # this doesn't hold for reachability probabilities ( unlike rewards)
         if opt_result_value < eps_optimum_threshold:
             assert result.optimality_result.value <= eps_optimum_threshold, f"optimum value {result.optimality_result.value} is not below threshold {eps_optimum_threshold}"
+            res_val = result.optimality_result.value
         else:
             assert result.optimality_result.value >= eps_optimum_threshold, f"optimum value {result.optimality_result.value} is not above threshold {eps_optimum_threshold}"
+            res_val = result.optimality_result.value
 
         self.best_tree = self.quotient.tree_helper_tree
-        self.best_tree_value = result.optimality_result.value
+        self.best_tree_value = res_val
 
-        logger.info(f'final tree has value {result.optimality_result.value} with depth {self.quotient.tree_helper_tree.get_depth()} and {len(self.quotient.tree_helper_tree.collect_nonterminals())} nodes')
+        logger.info(f'final tree has value {res_val} with depth {self.quotient.tree_helper_tree.get_depth()} and {len(self.quotient.tree_helper_tree.collect_nonterminals())} nodes')
 
-        print(result.optimality_result.value, round(self.synthesis_timer.read(), 2), self.quotient.tree_helper_tree.get_depth(), len(self.quotient.tree_helper_tree.collect_nonterminals()))
+        print(res_val, round(self.synthesis_timer.read(), 2), self.quotient.tree_helper_tree.get_depth(), len(self.quotient.tree_helper_tree.collect_nonterminals()))
 
         # exit()
 
@@ -590,13 +578,11 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
         # self.counters_print()
 
-    def run(self, optimum_threshold=None, policy=None):
+    def run(self, optimum_threshold=None):
 
         scheduler_choices = None
-        if policy is not None:
-            scheduler_choices = self.quotient.policy_to_policy_vector(policy)
-            mc_result = None
-        elif SynthesizerDecisionTree.scheduler_path is None:
+        if SynthesizerDecisionTree.scheduler_path is None:
+            #LADA TODO: may need to restrict MDP here?
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
             mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         else:
@@ -641,7 +627,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 optimum_threshold = opt_result_value * (1 + epsilon)
             # self.set_optimality_threshold(optimum_threshold)
 
-            if self.quotient.tree_helper is not None:
+            if self.quotient.tree_helper_path is not None:
+                self.quotient.load_tree_helper()
                 self.synthesize_subtrees(opt_result_value, random_result_value)
             elif not SynthesizerDecisionTree.tree_enumeration:
                 self.synthesize_tree(SynthesizerDecisionTree.tree_depth)
