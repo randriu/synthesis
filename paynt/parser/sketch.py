@@ -86,7 +86,7 @@ class Sketch:
         filetype = None
         try:
             logger.info(f"assuming sketch in PRISM format...")
-            prism, explicit_quotient, specification, family, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
+            prism, explicit_quotient, specification, specification_alt, family, coloring, jani_unfolder, obs_evaluator = PrismParser.read_prism(
                         sketch_path, properties_path, relative_error, use_exact)
             filetype = "prism"
         except SyntaxError:
@@ -178,7 +178,7 @@ class Sketch:
             if prism.model_type == stormpy.storage.PrismModelType.DTMC:
                 quotient_container = paynt.quotient.quotient.Quotient(explicit_quotient, family, coloring, specification)
             elif prism.model_type == stormpy.storage.PrismModelType.MDP:
-                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification, tree_helper_path)
+                quotient_container = paynt.quotient.mdp_family.MdpFamilyQuotient(explicit_quotient, family, coloring, specification, specification_alt, tree_helper_path)
             elif prism.model_type == stormpy.storage.PrismModelType.POMDP:
                 quotient_container = paynt.quotient.pomdp_family.PomdpFamilyQuotient(explicit_quotient, family, coloring, specification, obs_evaluator)
         else:

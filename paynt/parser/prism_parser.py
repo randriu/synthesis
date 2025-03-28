@@ -41,7 +41,13 @@ class PrismParser:
             prism, hole_expressions, family = PrismParser.parse_holes(prism, expression_parser, hole_definitions)
         prism = prism.label_unlabelled_commands({})
 
+        # alternative optimalityProperty for policyTree minimization
         specification = PrismParser.parse_specification(properties_path, relative_error, prism, use_exact=use_exact)
+        properties_dir = os.path.dirname(properties_path)
+        alt_properties_path = os.path.join(properties_dir, 'sketch_alt.props')
+        specification_alt = None
+        if os.path.exists(alt_properties_path):
+            specification_alt = PrismParser.parse_specification(alt_properties_path, relative_error, prism,use_exact=use_exact)
 
         # construct the quotient
         coloring = None
@@ -60,7 +66,7 @@ class PrismParser:
         else:
             quotient_mdp = paynt.models.model_builder.ModelBuilder.from_prism(prism, specification, use_exact)
 
-        return prism, quotient_mdp, specification, family, coloring, jani_unfolder, obs_evaluator
+        return prism, quotient_mdp, specification, specification_alt, family, coloring, jani_unfolder, obs_evaluator
 
     
     @classmethod

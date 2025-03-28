@@ -8,6 +8,7 @@ import payntbind
 
 import paynt.synthesizer.statistic
 import paynt.utils.timer
+from paynt.parser.prism_parser import PrismParser
 from paynt.quotient.mdp_family import MdpFamilyQuotient
 
 logger = logging.getLogger(__name__)
@@ -278,11 +279,12 @@ class Synthesizer:
                     self.quotient.choice_destinations = payntbind.synthesis.computeChoiceDestinations(self.quotient.quotient_mdp)
                     self.quotient.action_labels, self.quotient.choice_to_action = payntbind.synthesis.extractActionLabels(self.quotient.quotient_mdp)
                     logger.info(f"MDP has {len(self.quotient.action_labels)} actions")
-                
-                
-                dt_map_synthetiser.run() # policy got via dtcontrol
-                
-                # LADA TODO: only tring 1st policy for now
+
+                self.quotient.state_is_relevant_bv = self.quotient.state_is_relevant_bv_backup
+                self.quotient.specification = self.quotient.specification_alt
+                dt_map_synthetiser.run()  # policy got via dtcontrol
+
+                # LADA TODO: only trying 1st policy for now
                 break
 
         if print_stats:

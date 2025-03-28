@@ -47,8 +47,9 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         return state_to_actions
 
     
-    def __init__(self, quotient_mdp, family, coloring, specification, tree_helper_path=None):
+    def __init__(self, quotient_mdp, family, coloring, specification, specification_alt, tree_helper_path=None):
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
+        self.specification_alt = specification_alt
 
         # number of distinct actions in the quotient
         self.num_actions = None
@@ -419,7 +420,7 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     
     def get_submdp_from_unfixed_states(self, unfixed_states=None):
         if unfixed_states is None:
-            unfixed_states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, False)
+            unfixed_states = stormpy.storage.BitVector(self.quotient_mdp.nr_states, True)
         selected_choices = self.get_selected_choices_from_tree_helper(unfixed_states)
         submdp = self.build_from_choice_mask(selected_choices)
         return submdp

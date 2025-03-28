@@ -4,7 +4,6 @@ import math
 import operator
 
 import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -134,50 +133,9 @@ class Property:
         self.formula.remove_bound()
         if self.minimizing:
             self.formula.set_optimality_type(stormpy.OptimizationDirection.Minimize)
-            self.minimizing = True
-            self.op = operator.lt
         else:
             self.formula.set_optimality_type(stormpy.OptimizationDirection.Maximize)
-            self.minimizing = False
-            self.op = operator.gt
         self.formula_alt = Property.alt_formula(self.formula)
-
-        # make DTNest work 
-        self.epsilon = 0.0
-        self.optimum = None
-        
-        # self._reset()
-
-    def _reset(self):
-        self.optimum = None
-        if self.minimizing:
-            self.threshold = math.inf
-        else:
-            self.threshold = self.threshold
-
-    def meets_op(self, a, b):
-        ''' For optimality objective, we want to accept improvements above model checking precision. '''
-        return b is None or (Property.above_model_checking_precision(a, b) and self.op(a, b))
-
-    def satisfies_threshold(self, value):
-        return self.result_valid(value) and self.meets_op(value, self.threshold)
-
-    def improves_optimum(self, value):
-        return self.result_valid(value) and self.meets_op(value, self.optimum)
-
-    def update_optimum(self, optimum):
-        self.optimum = optimum
-        if self.minimizing:
-            self.threshold = optimum * (1 - self.epsilon)
-        else:
-            self.threshold = optimum * (1 + self.epsilon)
-
-    def suboptimal_value(self):
-        assert self.optimum is not None
-        if self.minimizing:
-            return self.optimum * (1 + self.model_checking_precision)
-        else:
-            return self.optimum * (1 - self.model_checking_precision)
 
     @staticmethod
     def alt_formula(formula):
@@ -264,8 +222,7 @@ class Property:
         elif isinstance(target, stormpy.logic.AtomicExpressionFormula):
             target_label = str(target)
         else:
-            raise ValueError(
-                f"unknown type of target expression {str(target)}, expected atomic label or atomic expression")
+            raise ValueError(f"unknown type of target expression {str(target)}, expected atomic label or atomic expression")
         return target_label
 
     def get_reward_name(self):
@@ -293,7 +250,6 @@ class OptimalityProperty(Property):
     Optimality property can remember current optimal value and adapt the
     corresponding threshold wrt epsilon.
     '''
-
     def __init__(self, prop, epsilon=0, use_exact=False):
         self.property = prop
         rf = prop.raw_formula
@@ -408,10 +364,6 @@ class Specification:
         assert len(optimalities) <= 1, "multiple optimality objectives were specified"
         if optimalities:
             self.optimality = optimalities[0]
-        # LADA TODO: not optimal way to assign -> make it based on ldok flag
-        if not self.optimality:
-            self.optimality = self.constraints[0]
-            self.constraints = []
 
     def __str__(self):
         s = ""
@@ -477,4 +429,3 @@ class Specification:
     def negate(self):
         properties_negated = [p.negate() for p in self.all_properties()]
         return Specification(properties_negated)
-

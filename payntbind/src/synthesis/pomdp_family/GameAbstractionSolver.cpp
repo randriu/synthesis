@@ -234,23 +234,22 @@ namespace synthesis {
             auto quotient_choice = player2_choice_to_quotient_choice[player2_choice];
             this->solution_state_to_quotient_choice[state] = quotient_choice;
         }
-        ////LADA TODO: this is the only wat unfortunately -ended  here
-        ////iterate over all player 2 states and print its corresponding choices ( with state and action)
-        //for(uint64_t player2_state=0; player2_state<player2_num_states-1; player2_state++) {
-        //    auto [state,action] = this->state_action_to_player2_state.retrieve(player2_state);
-        //    std::cout << "player2_state: " << player2_state << " state: " << state << " action: " << action << std::endl;
-        //    for(auto choice: player2_state_to_choices[player2_state]) {
-        //        std::cout << "choice: " << choice << std::endl;
-        //    }
-        //}
 
         for(uint64_t player2_state = 0; player2_state < player2_num_states; ++player2_state) {
             uint64_t player2_choice = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
             uint64_t quotient_choice = player2_choice_to_quotient_choice[player2_choice];
             environment_choice_mask.set(quotient_choice,true);
         }
-        // add choice for last state ( last choice )
-        environment_choice_mask.set(quotient_num_choices-1,true);
+
+        // add choice for the target state
+        for (uint64_t state = 0; state < quotient_num_states; ++state) {
+            if (state_is_target[state]) {
+                uint64_t choice = quotient_row_group_indices[state];
+                std::cout << "target state choice: " << choice << std::endl;
+                environment_choice_mask.set(choice, true);
+                break; // exit the loop as we found the target state
+            }
+        }
 
 
 
