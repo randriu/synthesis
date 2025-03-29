@@ -590,7 +590,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_value = game_solver.solution_value
         self.stat.iteration_game(family.mdp.states)
         game_sat = prop.satisfies_threshold_within_precision(game_value)
-        # logger.debug("game solved, value is {}".format(game_value))
+        logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action
         # fix irrelevant choices
         game_policy_fixed = self.quotient.empty_policy()

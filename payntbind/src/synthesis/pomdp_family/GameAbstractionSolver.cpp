@@ -55,6 +55,7 @@ namespace synthesis {
         this->solution_state_to_player1_action = std::vector<uint64_t>(quotient_num_states,quotient_num_actions);
         this->solution_state_to_quotient_choice = std::vector<uint64_t>(quotient_num_states,quotient_num_choices);
         this->environment_choice_mask = storm::storage::BitVector(quotient_num_choices,false);
+        this->environment_choice_mask2 = storm::storage::BitVector(quotient_num_choices,true);
         this->state_action_to_player2_state = ItemKeyTranslator<uint64_t>(quotient_num_states);
     }
 
@@ -245,8 +246,35 @@ namespace synthesis {
         for (uint64_t state = 0; state < quotient_num_states; ++state) {
             if (state_is_target[state]) {
                 uint64_t choice = quotient_row_group_indices[state];
-                std::cout << "target state choice: " << choice << std::endl;
                 environment_choice_mask.set(choice, true);
+                break; // exit the loop as we found the target state
+            }
+        }
+
+        ////LADA TODO: this is the only wat unfortunately -ended  here
+        // Initialize the no_play_mask
+        storm::storage::BitVector no_play_mask(quotient_num_choices, false);
+
+        // Iterate over all Player 2 states and restrict the choices
+        for (uint64_t player2_state = 0; player2_state < player2_num_states - 1; ++player2_state) {
+            auto [state, action] = this->state_action_to_player2_state.retrieve(player2_state);
+            for (auto choice : player2_state_to_choices[player2_state]) {
+                // If the action is not the one picked by Player 2, block the choice
+                if (this->solution_state_to_player1_action[state] != action) {
+                    no_play_mask.set(choice, true);
+                }
+            }
+        }
+        //block out environment_choice_mask2 based on no_play_mask
+        for (uint64_t choice = 0; choice < quotient_num_choices; ++choice) {
+            if (no_play_mask[choice]) {
+                environment_choice_mask2.set(choice, false);
+            }
+        }
+        for (uint64_t state = 0; state < quotient_num_states; ++state) {
+            if (state_is_target[state]) {
+                uint64_t choice = quotient_row_group_indices[state];
+                environment_choice_mask2.set(choice, true);
                 break; // exit the loop as we found the target state
             }
         }

@@ -54,6 +54,7 @@ void bindings_pomdp_family(py::module& m) {
         .def_property_readonly("solution_state_to_player1_action", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_player1_action;})
         .def_property_readonly("solution_state_to_quotient_choice", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.solution_state_to_quotient_choice;})
         .def_property_readonly("environment_choice_mask", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.environment_choice_mask;})
+        .def_property_readonly("environment_choice_mask2", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.environment_choice_mask2;})
         //.def_property_readonly("state_action_to_player2_state", [](synthesis::GameAbstractionSolver<double>& solver) {return solver.state_action_to_player2_state;})
         .def("enable_profiling", &synthesis::GameAbstractionSolver<double>::enableProfiling)
         .def("print_profiling", &synthesis::GameAbstractionSolver<double>::printProfiling)

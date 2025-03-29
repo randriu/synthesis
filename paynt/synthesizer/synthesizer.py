@@ -197,9 +197,33 @@ class Synthesizer:
             for counter, (policy, family) in enumerate(all_policies_and_families):
                 # TODO: iterate over evaluations 
                 eval_choice = eval_choices[counter]
-                
+
+
+                #LADA TODO: maybe  now i get bad opt_value for the policy :/
+                #remove irrelevant choices (multiple choices for one state action in eval_choice)
+                for actions in self.quotient.state_action_choices:
+                    for choices in actions:
+                        seen_choice = False
+                        # if multiple choices from eval_choices are present keep only first one
+
+                        count_eval_choices = 0
+                        for choice in choices:
+                            if choice in eval_choice:
+                                count_eval_choices += 1
+                        if count_eval_choices <= 1:
+                            continue
+                        
+                        for choice in choices:
+                            if choice in eval_choice:
+                                if seen_choice:
+                                    eval_choice.set(choice, False)
+                                else:
+                                    seen_choice = True
+                print("post:", eval_choice)
+
                 # update quotient_mdp with fixed choices
-                self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
+                self.quotient.quotient_mdp_pre = self.quotient.quotient_mdp
+                self.quotient.quotient_mdp = self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
 
                 # we need to convert action to choice
 

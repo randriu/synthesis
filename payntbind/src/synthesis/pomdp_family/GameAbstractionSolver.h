@@ -76,6 +76,7 @@ namespace synthesis {
 
         /** Player 2 choices from matching original quotient choices. */
         storm::storage::BitVector environment_choice_mask;
+        storm::storage::BitVector environment_choice_mask2;
 
         /** For each state-action pair, the corresponding state of Player 2. */
         ItemKeyTranslator<uint64_t> state_action_to_player2_state;
