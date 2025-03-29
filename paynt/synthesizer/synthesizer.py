@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import subprocess
@@ -192,19 +193,20 @@ class Synthesizer:
             
             # create backup hardcopy of current quotient_mdp
             
-            self.quotient_bp = self.quotient.quotient_mdp
+            self.quotient_bp = self.quotient.return_copy()
 
             for counter, (policy, family) in enumerate(all_policies_and_families):
+                self.quotient = self.quotient_bp.return_copy()
+
                 # TODO: iterate over evaluations 
                 eval_choice = eval_choices[counter]
 
-
-                #LADA TODO: maybe  now i get bad opt_value for the policy :/
-                #remove irrelevant choices (multiple choices for one state action in eval_choice)
+                #LADA TODO: maybe now i get bad opt_value for the policy :/
+                # remove irrelevant choices (multiple choices for one state action in eval_choice)
                 for actions in self.quotient.state_action_choices:
                     for choices in actions:
                         seen_choice = False
-                        # if multiple choices from eval_choices are present keep only first one
+                        #  if multiple choices from eval_choices are present keep only first one
 
                         count_eval_choices = 0
                         for choice in choices:
@@ -212,18 +214,18 @@ class Synthesizer:
                                 count_eval_choices += 1
                         if count_eval_choices <= 1:
                             continue
-                        
+
                         for choice in choices:
                             if choice in eval_choice:
                                 if seen_choice:
-                                    eval_choice.set(choice, False)
+                                    assert False, "multiple choices for one action"
+                                    # eval_choice.set(choice, False)
                                 else:
                                     seen_choice = True
                 print("post:", eval_choice)
 
                 # update quotient_mdp with fixed choices
-                self.quotient.quotient_mdp_pre = self.quotient.quotient_mdp
-                self.quotient.quotient_mdp = self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
+                self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
 
                 # we need to convert action to choice
 
@@ -309,7 +311,7 @@ class Synthesizer:
                 dt_map_synthetiser.run()  # policy got via dtcontrol
 
                 # LADA TODO: only trying 1st policy for now
-                break
+                # break
 
         if print_stats:
             self.stat.print()

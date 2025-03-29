@@ -8,6 +8,7 @@ import paynt.synthesizer.synthesizer
 
 import paynt.quotient.quotient
 import paynt.verification.property_result
+from paynt.quotient.mdp_family import MdpFamilyQuotient
 from paynt.verification.property import Property
 import paynt.utils.timer
 
@@ -599,6 +600,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 game_policy_fixed[state] = action
         game_policy = game_policy_fixed
         
+        # hard copy of the choice mask
+        #mdp_fixed_choices = MdpFamilyQuotient.copy_bitvector(game_solver.environment_choice_mask)
         mdp_fixed_choices = game_solver.environment_choice_mask
 
         if game_sat:

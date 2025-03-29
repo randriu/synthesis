@@ -486,3 +486,13 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             elif not leq and state_valuation[node.variable] <= bound:
                 current_states.set(state, False)
         return current_states
+
+    def return_copy(self):
+        return MdpFamilyQuotient(
+            self.quotient_mdp,
+            self.family,
+            self.coloring,
+            self.specification,
+            self.specification_alt,
+            tree_helper_path=self.tree_helper_path
+        )

@@ -94,6 +94,7 @@ namespace synthesis {
         ItemTranslator state_to_player1_state(quotient_num_states);
         std::vector<std::set<uint64_t>> player1_state_to_actions;
         std::vector<std::vector<uint64_t>> player2_state_to_choices;
+        this->environment_choice_mask = storm::storage::BitVector(quotient_num_choices,false);
         
         std::queue<uint64_t> unexplored_states;
         storm::storage::BitVector state_is_encountered(quotient_num_states);
