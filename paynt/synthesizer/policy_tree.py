@@ -126,6 +126,8 @@ class PolicyTreeNode:
         self.sat = child_node.sat
         self.policy_index = child_node.policy_index
         self.splitter = None
+        if not self.mdp_fixed_choices:
+            self.mdp_fixed_choices = child_node.mdp_fixed_choices
         self.suboptions = []
         self.child_nodes = []
 
@@ -222,7 +224,6 @@ class PolicyTreeNode:
         if self.is_leaf:
             return
         i = len(self.child_nodes) - 1
-        # LDOK TODO: is reverse order ok ask roman
         # imo should be fine, this way i'm applying one policy to as many families as possible,
         # then repeating with next policy
         while i >= 0 and self.child_nodes:
@@ -466,6 +467,7 @@ class PolicyTree:
         logger.info("merging SAT siblings solved by non-exclusively compatible policies...")
         PolicyTreeNode.mdps_model_checked = 0
         nodes_before = self.root.num_nodes()
+        # LADA TODO: need to set eval_choices otherwise i get None
         for node in reversed(self.collect_all()):
             node.merge_children_having_compatible_policies(quotient, prop, self.policies)
         self.discard_unused_policies()
@@ -611,8 +613,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if self.ldokoupi_flag:
                 self.ldok_postprocessing_times.start()
                 # order is important - cut most diverging paths first
-                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
-                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
+                # game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
+                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
                 self.ldok_postprocessing_times.stop()
 
         return game_policy,game_sat,mdp_fixed_choices

@@ -176,32 +176,32 @@ class Synthesizer:
 
         callDTNest = True
         if callDTNest:
+
             self.counters_reset()
             # call the synthesizer to generate the decision tree for every policy from policy tree
 
-            # filter empty policies
-            all_policies_and_families = [(evaluation.policy[0], evaluation.family) for evaluation in evaluations if
-                                         evaluation.policy is not None]
-            
-            eval_choices = [evaluation.mdp_fixed_choices for evaluation in evaluations if
-                                         evaluation.policy is not None]
-            
-            
             base_export_name = self.export_synthesis_filename_base
-            
-            family_args_len = len(all_policies_and_families[0][1].hole_to_name)
-            
+            dt_nest_save_path = base_export_name + "_dtNest.storm.json"
+
+            if os.path.exists(dt_nest_save_path):
+                os.remove(dt_nest_save_path)
+
+            family_args_len = None
             # create backup hardcopy of current quotient_mdp
-            
             self.quotient_bp = self.quotient.return_copy()
 
-            for counter, (policy, family) in enumerate(all_policies_and_families):
+            counter = -1
+            for evaluation in evaluations:
+                if not evaluation.policy:
+                    continue  # filter ∅ policies
+
+                policy = evaluation.policy[0]
+                family = evaluation.family
+                eval_choice = evaluation.mdp_fixed_choices
+                counter += 1
+
                 self.quotient = self.quotient_bp.return_copy()
 
-                # TODO: iterate over evaluations 
-                eval_choice = eval_choices[counter]
-
-                #LADA TODO: maybe now i get bad opt_value for the policy :/
                 # remove irrelevant choices (multiple choices for one state action in eval_choice)
                 for actions in self.quotient.state_action_choices:
                     for choices in actions:
@@ -218,15 +218,13 @@ class Synthesizer:
                         for choice in choices:
                             if choice in eval_choice:
                                 if seen_choice:
-                                    assert False, "multiple choices for one action"
-                                    # eval_choice.set(choice, False)
+                                    # assert False, "multiple choices for one action" LADA TODO seems to work
+                                    eval_choice.set(choice, False)
                                 else:
                                     seen_choice = True
 
                 # update quotient_mdp with fixed choices
                 self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
-
-                # we need to convert action to choice
 
                 # get all actions with no_label choice (to later discard)
                 no_label_choices = []
@@ -242,19 +240,16 @@ class Synthesizer:
                 ]
                 assert all(choice is not None for choice in choices)
 
-                # if there are multiple choices executing one action pick the first one
-                choices = [choice[0] if choice else None for choice in choices]
-
-                # Remove no_label_choices
-                choices = [choice for choice in choices if choice not in no_label_choices]
-
                 self.quotient.state_is_relevant_bv = MdpFamilyQuotient.copy_bitvector(self.quotient.state_is_relevant_bv_backup)
                 irrelevant_variables = self.quotient.irrelevant_variables
                 if irrelevant_variables:
                     self.quotient.mark_irrelevant_states(irrelevant_variables)
                 import json
 
-                # filter relevant data from {base_export_name}.storm.json and sav it in model dir as scheduler.storm.json
+                if not family_args_len:
+                    family_args_len = len(family.hole_to_name)
+
+                # filter relevant data from {base_export_name}.storm.json and save it in model dir as scheduler.storm.json
                 with open(f"{base_export_name}.storm.json", "r") as f:
                     storm_json = json.loads(f.read())
 
@@ -271,33 +266,25 @@ class Synthesizer:
                 with open(scheduler_path, "w") as f:
                     f.write(json.dumps(storm_json, indent=4))
 
-                # os.path.normpath(os.path.join(self.quotient.tree_helper_path, *([".."] * 4))
-                os.path.basename(model_dir)
+                skip_dtNest = False # LADA TODO: now for benchmarking
+                if skip_dtNest:
+                    continue
+
                 self.dtcontrol_calls += 1
 
                 command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input",
                            "scheduler.storm.json", "-r", "--use-preset", "default"]
                 subprocess.run(command, cwd=f"{model_dir}")
-                # perhaps save to model dir and run dtcontrol from there
-
-                # get family for the policy
-                #family = self.quotient.build_family(choices)
 
                 dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
                 self.use_dtcontrol = True
+
                 # unique export name for each policy
                 dt_map_synthetiser.export_synthesis_filename_base = base_export_name + f"_p{counter}" if base_export_name else None
-                #dt_map_synthetiser.run(policy=choices)
-                
-                #1a) create MDP restricting min player
-                #1b) add random choices
-                #2) make mapping between dtcoutput to my vars
 
                 if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL not in self.quotient.action_labels and MdpFamilyQuotient.add_dont_care_action:
-                # LADA TODO: adding don't care must come later to single mdp
                     # identify relevant states again
                     state_relevant_bp = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, True)
-
 
                     logger.debug("adding explicit don't-care action to relevant states...")
                     self.quotient.quotient_mdp = payntbind.synthesis.addDontCareAction(self.quotient.quotient_mdp,state_relevant_bp)
@@ -307,8 +294,53 @@ class Synthesizer:
 
                 self.quotient.state_is_relevant_bv = self.quotient.state_is_relevant_bv_backup
                 self.quotient.specification = self.quotient.specification_alt
-                # dt_map_synthetiser.run()  # policy got via dtcontrol
 
+                dt_map_synthetiser.run()  # policy got via dtcontrol
+
+                # Load final dtnest scheduler.storm.json
+                with open(scheduler_path, "r") as f:
+                    storm_json = json.loads(f.read())
+
+                # Check if the modified file exists and load its content if it does
+                if os.path.exists(dt_nest_save_path):
+                    with open(dt_nest_save_path, "r") as f:
+                        existing_data = json.loads(f.read())
+                else:
+                    existing_data = []
+
+                # Append new data to the existing data
+                reconstructed_policy = [None] * len(self.quotient.state_valuations)
+
+                for entry in storm_json:
+                    state_valuation = entry['s']
+                    action_info = entry['c'][0]  # assuming single action per state
+                    action_label = action_info['labels'][0]  # assuming single label per action
+
+                    # Find the corresponding state index
+                    for state_index, valuation in enumerate(self.quotient.state_valuations):
+                        if all(state_valuation[var.name] == valuation[i] for i, var in enumerate(self.quotient.variables)):
+                            action_index = self.quotient.action_labels.index(action_label) -1 # due to the dont care action
+                            if self.quotient_bp.action_labels[action_index].startswith('_'):
+                                continue # Skip irrelevant actions
+                            reconstructed_policy[state_index] = action_index
+                            break
+
+                # filter irrelevant data from storm_json calling policy_to_state_valuation_actions
+                storm_json = self.quotient_bp.policy_to_state_valuation_actions((reconstructed_policy, None), family)
+
+                storm_json_new = []
+                for s_point,c_point in storm_json:
+                    # Filter out irrelevant data
+                    storm_json_datapoint = {}
+                    storm_json_datapoint['s'] = s_point
+                    storm_json_datapoint["c"] = [{"origin": {"action-label": c_point}}]
+                    storm_json_new.append(storm_json_datapoint)
+
+                storm_json = storm_json_new
+                # Save the updated data to scheduler_modified.storm.json
+                existing_data.extend(storm_json)
+                with open(dt_nest_save_path, "w") as f:
+                    f.write(json.dumps(existing_data, indent=4))
 
         if print_stats:
             self.stat.print()

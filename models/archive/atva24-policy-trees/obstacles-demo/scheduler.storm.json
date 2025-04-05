@@ -2,392 +2,1122 @@
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 3,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 1,
-            "y": 1,
-            "OX": 2,
-            "OY": 3
+            "y": 1
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 7,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 1,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 9,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 2,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 11,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 1,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 15,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 2,
-            "y": 1,
-            "OX": 2,
-            "OY": 3
+            "y": 1
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "down"
-                }
+                "index": 21,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 1,
-            "y": 2,
-            "OX": 2,
-            "OY": 3
+            "y": 2
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 25,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 3,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 27,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 2,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 29,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 1,
+            "y": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 33,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 3,
-            "y": 1,
-            "OX": 2,
-            "OY": 3
+            "y": 1
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 45,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 1,
+            "y": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 49,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 4,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 51,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 3,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 53,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 2,
+            "y": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 55,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 1,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 59,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 4,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 65,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 3,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 71,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 2,
-            "y": 2,
-            "OX": 2,
-            "OY": 3
+            "y": 3
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "down"
-                }
+                "index": 81,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
-            "clk": 0,
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 5,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 85,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 3,
+            "y": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 87,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 2,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 89,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
             "crash": false,
             "x": 1,
-            "y": 3,
-            "OX": 2,
-            "OY": 3
+            "y": 5
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 93,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 5,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 99,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 4,
-            "y": 1,
-            "OX": 2,
-            "OY": 3
+            "y": 2
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 105,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 3,
-            "y": 2,
-            "OX": 2,
-            "OY": 3
+            "y": 3
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "down"
-                }
+                "index": 109,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": true,
+            "x": 2,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 113,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 1,
+            "y": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 119,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 5,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 123,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 3,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 127,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 1,
+            "y": 6
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 129,
+                "labels": [
+                    "down"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 6,
+            "y": 1
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 137,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 5,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 143,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 4,
+            "y": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 149,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 3,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 155,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 2,
-            "y": 3,
-            "OX": 2,
-            "OY": 3
+            "y": 5
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "down"
-                }
+                "index": 161,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 1,
-            "y": 4,
-            "OX": 2,
-            "OY": 3
+            "y": 6
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 164,
+                "labels": [
+                    "crash"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
-            "clk": 0,
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 6,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 167,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
             "crash": false,
             "x": 5,
-            "y": 1,
-            "OX": 2,
-            "OY": 3
+            "y": 3
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 171,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 3,
+            "y": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 177,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 6,
+            "y": 2
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 189,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 4,
-            "y": 2,
-            "OX": 2,
-            "OY": 3
+            "y": 4
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 195,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 3,
-            "y": 3,
-            "OX": 2,
-            "OY": 3
+            "y": 5
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "up"
-                }
+                "index": 201,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 2,
+            "y": 6
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 205,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 6,
+            "y": 3
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 207,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 5,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 209,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 4,
+            "y": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 211,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 3,
+            "y": 6
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 215,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 6,
-            "y": 1,
-            "OX": 2,
-            "OY": 3
+            "y": 3
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 221,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 5,
-            "y": 2,
-            "OX": 2,
-            "OY": 3
+            "y": 4
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "right"
-                }
+                "index": 233,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 3,
+            "y": 6
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 239,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 5,
+            "y": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 241,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
+            "crash": false,
+            "x": 4,
+            "y": 6
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 246,
+                "labels": [
+                    "up"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 6,
+            "y": 4
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 251,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 0,
+            "crash": false,
+            "x": 5,
+            "y": 5
+        }
+    },
+    {
+        "c": [
+            {
+                "index": 257,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
+            }
+        ],
+        "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 4,
-            "y": 3,
-            "OX": 2,
-            "OY": 3
+            "y": 6
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "up"
-                }
+                "index": 261,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
-            "clk": 0,
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
             "crash": false,
             "x": 6,
-            "y": 2,
-            "OX": 2,
-            "OY": 3
+            "y": 5
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "up"
-                }
+                "index": 262,
+                "labels": [
+                    "crash"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
-            "clk": 0,
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
             "crash": false,
             "x": 5,
-            "y": 3,
-            "OX": 2,
-            "OY": 3
+            "y": 6
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "up"
-                }
+                "index": 267,
+                "labels": [
+                    "right"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
             "clk": 0,
             "crash": false,
             "x": 6,
-            "y": 3,
-            "OX": 2,
-            "OY": 3
+            "y": 5
         }
     },
     {
         "c": [
             {
-                "origin": {
-                    "action-label": "up"
-                }
+                "index": 277,
+                "labels": [
+                    "__random__"
+                ],
+                "prob": 1.0
             }
         ],
         "s": {
-            "clk": 0,
-            "crash": false,
-            "x": 5,
-            "y": 4,
-            "OX": 2,
-            "OY": 3
-        }
-    },
-    {
-        "c": [
-            {
-                "origin": {
-                    "action-label": "up"
-                }
-            }
-        ],
-        "s": {
-            "clk": 0,
+            "_loc_prism2jani_agent_": 0,
+            "_loc_prism2jani_clock_": 0,
+            "clk": 1,
             "crash": false,
             "x": 6,
-            "y": 4,
-            "OX": 2,
-            "OY": 3
-        }
-    },
-    {
-        "c": [
-            {
-                "origin": {
-                    "action-label": "right"
-                }
-            }
-        ],
-        "s": {
-            "clk": 0,
-            "crash": false,
-            "x": 5,
-            "y": 5,
-            "OX": 2,
-            "OY": 3
-        }
-    },
-    {
-        "c": [
-            {
-                "origin": {
-                    "action-label": "up"
-                }
-            }
-        ],
-        "s": {
-            "clk": 0,
-            "crash": false,
-            "x": 6,
-            "y": 5,
-            "OX": 2,
-            "OY": 3
+            "y": 6
         }
     }
 ]

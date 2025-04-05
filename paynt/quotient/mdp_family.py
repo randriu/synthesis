@@ -434,7 +434,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         return submdp
     
     def get_selected_choices_from_tree_helper(self, state_to_exclude):
-        # LADA TODO: emror here- returns None
         selected_choices = stormpy.storage.BitVector(self.quotient_mdp.nr_choices, False)
         mdp_nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
         for state in range(self.quotient_mdp.nr_states):
@@ -449,7 +448,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
                     selected_choices.set(choice, True)
                     break
             else:
-                # TODO as far as I know this happens only because of unreachable states not being included in the tree
                 # for now we will treat this by using the __random__ action but it can lead to strange behaviour
                 for choice in range(mdp_nci[state], mdp_nci[state + 1]):
                     if self.action_labels[self.choice_to_action[choice]] == "__random__":

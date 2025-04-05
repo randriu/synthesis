@@ -187,7 +187,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         return helper_node_stats
     
 
-    def synthesize_subtrees(self, opt_result_value, random_result_value=None):
+    def synthesize_subtrees(self, opt_result_value, random_result_value=None, work_dir=None):
 
         # SETTINGS
         subtree_depth = 7
@@ -223,6 +223,12 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         current_iter = 0
         current_depth = subtree_depth
         # current_value = opt_result_value
+
+        if not work_dir:
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
+            work_dir = "subtree_test" + timestamp
+            shutil.rmtree(f"{work_dir}")
+            os.makedirs(work_dir, exist_ok=True)
 
         # TODO think about this fine tuning more...
         while (depth_fine_tuning and current_depth > 1) or (current_depth == subtree_depth):
@@ -331,10 +337,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
                     # calling dtcontrol
                     if use_dtcontrol:
-                        timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                        temp_file_name = "subtree_test" + timestamp
-                        os.makedirs(temp_file_name, exist_ok=True)
-                        open(f"{temp_file_name}/scheduler.storm.json", "w").write(paynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states))
+                        open(f"{work_dir}/scheduler.storm.json", "w").write(paynt_subtree_helper_tree_copy.to_scheduler_json(reachable_states))
 
                         for setting in dtcontrol_settings:
                             self.dtcontrol_calls += 1
@@ -343,22 +346,17 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                                 command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
                             else:
                                 command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
-                            subprocess.run(command, cwd=f"{temp_file_name}")
+                            subprocess.run(command, cwd=f"{work_dir}")
 
                             logger.info(f"parsing new dtcontrol tree for setting {setting}")
-                            new_dtcontrol_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/{setting}/scheduler/{setting}.json")
+                            new_dtcontrol_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{work_dir}/decision_trees/{setting}/scheduler/{setting}.json")
                             new_dtcontrol_tree_helper_tree = self.quotient.build_tree_helper_tree(new_dtcontrol_tree_helper)
                             logger.info(f'new dtcontrol tree ({setting}) has depth {new_dtcontrol_tree_helper_tree.get_depth()} and {len(new_dtcontrol_tree_helper_tree.collect_nonterminals())} nodes')
 
                             dtcontrol_trees[setting] = (new_dtcontrol_tree_helper, new_dtcontrol_tree_helper_tree)
 
-                        shutil.rmtree(f"{temp_file_name}")
-
                         if recompute_scheduler:
-                            timestamp = datetime.now().strftime("%Y%m%d%H%M%S%f")
-                            temp_file_name = "subtree_test" + timestamp
-                            os.makedirs(temp_file_name, exist_ok=True)
-                            open(f"{temp_file_name}/scheduler.storm.json", "w").write(recomputed_json_str)
+                            open(f"{work_dir}/scheduler.storm.json", "w").write(recomputed_json_str)
 
                             for setting in dtcontrol_settings:
                                 self.dtcontrol_recomputed_calls += 1
@@ -367,16 +365,14 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                                     command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", "default"]
                                 else:
                                     command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input", "scheduler.storm.json", "-r", "--use-preset", setting, "--config", "../prerequisites/dtcontrol/user-config.yml"]
-                                subprocess.run(command, cwd=f"{temp_file_name}")
+                                subprocess.run(command, cwd=f"{work_dir}")
 
                                 logger.info(f"parsing new dtcontrol tree for recomputed scheduler for setting {setting}")
-                                recomputed_scheduler_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{temp_file_name}/decision_trees/{setting}/scheduler/{setting}.json")
+                                recomputed_scheduler_tree_helper = paynt.utils.tree_helper.parse_tree_helper(f"{work_dir}/decision_trees/{setting}/scheduler/{setting}.json")
                                 recomputed_scheduler_tree_helper_tree = self.quotient.build_tree_helper_tree(recomputed_scheduler_tree_helper)
                                 logger.info(f'new dtcontrol tree ({setting}) based on recomputed scheduler has depth {recomputed_scheduler_tree_helper_tree.get_depth()} and {len(recomputed_scheduler_tree_helper_tree.collect_nonterminals())} nodes')
 
                                 recomputed_dtcontrol_trees[setting] = (recomputed_scheduler_tree_helper, recomputed_scheduler_tree_helper_tree)
-
-                            shutil.rmtree(f"{temp_file_name}")
 
                     # current_normalized_value = self.compute_normalized_value(current_value, opt_result_value, random_result_value)
                     # paynt_subtree_normalized_value = self.compute_normalized_value(paynt_subtree_value, opt_result_value, random_result_value)
@@ -582,7 +578,6 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
         scheduler_choices = None
         if SynthesizerDecisionTree.scheduler_path is None:
-            #LADA TODO: may need to restrict MDP here?
             paynt_mdp = paynt.models.models.Mdp(self.quotient.quotient_mdp)
             mc_result = paynt_mdp.model_check_property(self.quotient.get_property())
         else:
@@ -629,7 +624,8 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
 
             if self.quotient.tree_helper_path is not None:
                 self.quotient.load_tree_helper()
-                self.synthesize_subtrees(opt_result_value, random_result_value)
+                work_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(self.quotient.tree_helper_path))))
+                self.synthesize_subtrees(opt_result_value, random_result_value,work_dir)
             elif not SynthesizerDecisionTree.tree_enumeration:
                 self.synthesize_tree(SynthesizerDecisionTree.tree_depth)
             else:
