@@ -585,13 +585,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_solver.solve_sg(family.selected_choices)
         # game_solver.solve_smg(family.selected_choices)
 
-        # [1, 2, 4, 6, 8, 10, 13, 14, 17, 18, 19, 21]
-        # bit vector(16/22) [0 1 2 4 6 7 8 9 10 13 14 16 17 18 19 20 ]
-        # LADA TODO: maybe endstate self loop missing?
         game_value = game_solver.solution_value
         self.stat.iteration_game(family.mdp.states)
         game_sat = prop.satisfies_threshold_within_precision(game_value)
-        logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action
         # fix irrelevant choices
         game_policy_fixed = self.quotient.empty_policy()
@@ -600,9 +596,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 game_policy_fixed[state] = action
         game_policy = game_policy_fixed
         
-        # hard copy of the choice mask
-        #mdp_fixed_choices = MdpFamilyQuotient.copy_bitvector(game_solver.environment_choice_mask)
-        mdp_fixed_choices = game_solver.environment_choice_mask
+        # due to storm::bitvector dealocation magic, I must receive data in form for bool vector and transform it here
+        mdp_fixed_choices = MdpFamilyQuotient.create_bitvector_from_vector(game_solver.environment_choice_mask)
 
         if game_sat:
             # logger.debug("debug: state to destination")
@@ -800,6 +795,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # logger.info("investigating family of size {}".format(family.size))
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
+        mdp_family_result.mdp_fixed_choices = None
 
         mdp_fixed_choices = None
         if family.candidate_policy is None or self.ldokoupi_flag:

@@ -54,8 +54,7 @@ namespace synthesis {
         this->solution_state_values = std::vector<double>(quotient_num_states,0);
         this->solution_state_to_player1_action = std::vector<uint64_t>(quotient_num_states,quotient_num_actions);
         this->solution_state_to_quotient_choice = std::vector<uint64_t>(quotient_num_states,quotient_num_choices);
-        this->environment_choice_mask = storm::storage::BitVector(quotient_num_choices,false);
-        this->environment_choice_mask2 = storm::storage::BitVector(quotient_num_choices,true);
+        this->environment_choice_mask = std::vector<bool>(quotient_num_choices,false);
         this->state_action_to_player2_state = ItemKeyTranslator<uint64_t>(quotient_num_states);
     }
 
@@ -94,8 +93,7 @@ namespace synthesis {
         ItemTranslator state_to_player1_state(quotient_num_states);
         std::vector<std::set<uint64_t>> player1_state_to_actions;
         std::vector<std::vector<uint64_t>> player2_state_to_choices;
-        this->environment_choice_mask = storm::storage::BitVector(quotient_num_choices,false);
-        
+
         std::queue<uint64_t> unexplored_states;
         storm::storage::BitVector state_is_encountered(quotient_num_states);
         unexplored_states.push(quotient_initial_state);
@@ -210,8 +208,8 @@ namespace synthesis {
         std::fill(this->solution_state_values.begin(),this->solution_state_values.end(),0);
         std::fill(this->solution_state_to_player1_action.begin(),this->solution_state_to_player1_action.end(),quotient_num_actions);
         std::fill(this->solution_state_to_quotient_choice.begin(),this->solution_state_to_quotient_choice.end(),quotient_num_choices);
+        std::fill(this->environment_choice_mask.begin(),this->environment_choice_mask.end(),false);
 
-        //LADA TODO: this is the only wat unfortunately
         auto const& player1_matrix_row_group_indices = player1_matrix.getRowGroupIndices();
         auto const& player2_matrix_row_group_indices = player2_matrix.getRowGroupIndices();
 
@@ -227,6 +225,7 @@ namespace synthesis {
             if(this->state_is_target[state]) {
                 auto state_only_choice = quotient_row_group_indices[state];
                 this->solution_state_to_quotient_choice[state] = state_only_choice;
+                this->environment_choice_mask[state_only_choice] = true;
                 continue;
             }
 
@@ -240,48 +239,8 @@ namespace synthesis {
         for(uint64_t player2_state = 0; player2_state < player2_num_states; ++player2_state) {
             uint64_t player2_choice = player2_matrix_row_group_indices[player2_state]+player2_choices[player2_state];
             uint64_t quotient_choice = player2_choice_to_quotient_choice[player2_choice];
-            environment_choice_mask.set(quotient_choice,true);
+            this->environment_choice_mask[quotient_choice] = true;
         }
-
-        // add choice for the target state
-        for (uint64_t state = 0; state < quotient_num_states; ++state) {
-            if (state_is_target[state]) {
-                uint64_t choice = quotient_row_group_indices[state];
-                environment_choice_mask.set(choice, true);
-                break; // exit the loop as we found the target state
-            }
-        }
-
-        ////LADA TODO: this is the only wat unfortunately -ended  here
-        // Initialize the no_play_mask
-        storm::storage::BitVector no_play_mask(quotient_num_choices, false);
-
-        // Iterate over all Player 2 states and restrict the choices
-        for (uint64_t player2_state = 0; player2_state < player2_num_states - 1; ++player2_state) {
-            auto [state, action] = this->state_action_to_player2_state.retrieve(player2_state);
-            for (auto choice : player2_state_to_choices[player2_state]) {
-                // If the action is not the one picked by Player 2, block the choice
-                if (this->solution_state_to_player1_action[state] != action) {
-                    no_play_mask.set(choice, true);
-                }
-            }
-        }
-        //block out environment_choice_mask2 based on no_play_mask
-        for (uint64_t choice = 0; choice < quotient_num_choices; ++choice) {
-            if (no_play_mask[choice]) {
-                environment_choice_mask2.set(choice, false);
-            }
-        }
-        for (uint64_t state = 0; state < quotient_num_states; ++state) {
-            if (state_is_target[state]) {
-                uint64_t choice = quotient_row_group_indices[state];
-                environment_choice_mask2.set(choice, true);
-                break; // exit the loop as we found the target state
-            }
-        }
-
-
-
 
         if(profiling_enabled) {
             this->timer_total.stop();

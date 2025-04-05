@@ -153,6 +153,14 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
             new_bitvector.set(i, bitvector.get(i))
         return new_bitvector
 
+    @staticmethod
+    def create_bitvector_from_vector(vec):
+        new_bitvector = stormpy.BitVector(len(vec))
+        for i, value in enumerate(vec):
+            if value:
+                new_bitvector.set(i, True)
+        return new_bitvector
+
     def empty_policy(self):
         return self.empty_scheduler()
 
