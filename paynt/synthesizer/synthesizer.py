@@ -222,7 +222,6 @@ class Synthesizer:
                                     # eval_choice.set(choice, False)
                                 else:
                                     seen_choice = True
-                print("post:", eval_choice)
 
                 # update quotient_mdp with fixed choices
                 self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
@@ -308,10 +307,8 @@ class Synthesizer:
 
                 self.quotient.state_is_relevant_bv = self.quotient.state_is_relevant_bv_backup
                 self.quotient.specification = self.quotient.specification_alt
-                dt_map_synthetiser.run()  # policy got via dtcontrol
+                # dt_map_synthetiser.run()  # policy got via dtcontrol
 
-                # LADA TODO: only trying 1st policy for now
-                # break
 
         if print_stats:
             self.stat.print()

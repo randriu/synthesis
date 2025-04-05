@@ -71,6 +71,9 @@ endmodule
 module battery
 	increased_energy : bool init false;
 	empty: bool init false;
+
+    //noop drain energy
+	[_stay_] empty -> (empty'=true);
 	
 	[task1_start] !empty -> 0.5 : (increased_energy' = false) + (0.5) : (increased_energy' = true);
 	[task2_start] !empty -> 0.5 : (increased_energy' = false) + (0.5) : (increased_energy' = true);

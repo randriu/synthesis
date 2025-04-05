@@ -33,6 +33,9 @@ module operator
 	t:[0..2] init 0; // workload level
 	s:[0..2] init 0; // status of image processing, 0: init, 1: good, 2: bad
 	c:[0..3] init 0; // choices at the check point
+	
+	// noop increasing fatigue level
+	[_stay_] !stop -> (k'=k+1);
 
 	// image processing, the workload may increase due to other unknown tasks
 	[image] !stop & t=0 & s=0 -> 1-p_hole*0.1:(t'=1) & (s'=0) + p_hole*0.1:(t'=2) & (s'=0);
