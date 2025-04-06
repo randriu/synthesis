@@ -163,7 +163,7 @@ class Synthesizer:
         pass
 
     def synthesize(
-        self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True, timeout=None
+        self, family=None, optimum_threshold=None, keep_optimum=False, return_all=False, print_stats=True, timeout=None, threshold=0
     ):
         '''
         :param family family of assignment to search in
@@ -186,7 +186,8 @@ class Synthesizer:
         self.stat = paynt.synthesizer.statistic.Statistic(self)
         self.explored = 0
         self.stat.start(family)
-        self.synthesize_one(family)
+        # self.synthesize_one(family)
+        self.synthesize_one(family, threshold)
         if self.best_assignment is not None and self.best_assignment.size > 1 and not return_all:
             self.best_assignment = self.best_assignment.pick_any()
         self.stat.finished_synthesis()
