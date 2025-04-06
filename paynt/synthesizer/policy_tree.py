@@ -467,7 +467,6 @@ class PolicyTree:
         logger.info("merging SAT siblings solved by non-exclusively compatible policies...")
         PolicyTreeNode.mdps_model_checked = 0
         nodes_before = self.root.num_nodes()
-        # LADA TODO: need to set eval_choices otherwise i get None
         for node in reversed(self.collect_all()):
             node.merge_children_having_compatible_policies(quotient, prop, self.policies)
         self.discard_unused_policies()

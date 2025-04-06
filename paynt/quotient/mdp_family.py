@@ -79,11 +79,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
 
         action_labels,_ = payntbind.synthesis.extractActionLabels(quotient_mdp)
-        # if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL not in action_labels and MdpFamilyQuotient.add_dont_care_action:
-        # LADA TODO: adding don't care must come later to single mdp
-        #     logger.debug("adding explicit don't-care action to relevant states...")
-        #     quotient_mdp = payntbind.synthesis.addDontCareAction(quotient_mdp,self.state_is_relevant_bv)
-
         self.quotient_mdp = quotient_mdp
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)

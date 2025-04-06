@@ -200,8 +200,6 @@ def paynt_run(
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
     tree_helper_path = os.path.join(project, f"decision_trees/{dt_setting}/scheduler/{dt_setting}.json")
-    #LADA TODO: move later in code on DTNEST invocation
-    #assert os.path.exists(tree_helper_path), f"Tree helper path {tree_helper_path} does not exist."
     quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, tree_helper_path, exact)
     synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
     synthesizer.run(optimum_threshold)

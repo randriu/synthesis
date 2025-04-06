@@ -218,13 +218,19 @@ class Synthesizer:
                         for choice in choices:
                             if choice in eval_choice:
                                 if seen_choice:
-                                    # assert False, "multiple choices for one action" LADA TODO seems to work
+                                    # assert False, "multiple choices for one action"
+                                    # seems to be rare occasion, but doesn't cause troubles
                                     eval_choice.set(choice, False)
                                 else:
                                     seen_choice = True
 
                 # update quotient_mdp with fixed choices
-                self.quotient.quotient_mdp = self.quotient.build_from_choice_mask(eval_choice).model
+                working_mdp = self.quotient.build_from_choice_mask(eval_choice)
+                self.quotient.quotient_mdp = working_mdp.model
+                new_state_valuations = []
+                for i in working_mdp.quotient_state_map:
+                    new_state_valuations.append( self.quotient.state_valuations[i])
+                self.quotient.relevant_state_valuations = new_state_valuations.copy()
 
                 # get all actions with no_label choice (to later discard)
                 no_label_choices = []
@@ -240,10 +246,6 @@ class Synthesizer:
                 ]
                 assert all(choice is not None for choice in choices)
 
-                self.quotient.state_is_relevant_bv = MdpFamilyQuotient.copy_bitvector(self.quotient.state_is_relevant_bv_backup)
-                irrelevant_variables = self.quotient.irrelevant_variables
-                if irrelevant_variables:
-                    self.quotient.mark_irrelevant_states(irrelevant_variables)
                 import json
 
                 if not family_args_len:
@@ -292,7 +294,7 @@ class Synthesizer:
                     self.quotient.action_labels, self.quotient.choice_to_action = payntbind.synthesis.extractActionLabels(self.quotient.quotient_mdp)
                     logger.info(f"MDP has {len(self.quotient.action_labels)} actions")
 
-                self.quotient.state_is_relevant_bv = self.quotient.state_is_relevant_bv_backup
+                self.quotient.state_is_relevant_bv = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, True)
                 self.quotient.specification = self.quotient.specification_alt
 
                 dt_map_synthetiser.run()  # policy got via dtcontrol
@@ -319,9 +321,9 @@ class Synthesizer:
                     # Find the corresponding state index
                     for state_index, valuation in enumerate(self.quotient.state_valuations):
                         if all(state_valuation[var.name] == valuation[i] for i, var in enumerate(self.quotient.variables)):
-                            action_index = self.quotient.action_labels.index(action_label) -1 # due to the dont care action
+                            action_index = self.quotient.action_labels.index(action_label) -1  # due to the dont care action
                             if self.quotient_bp.action_labels[action_index].startswith('_'):
-                                continue # Skip irrelevant actions
+                                continue  # Skip irrelevant/random actions
                             reconstructed_policy[state_index] = action_index
                             break
 

@@ -197,7 +197,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
         depth_fine_tuning = True # decreases sub-tree depth once all subtrees of the current depth have been explored
         break_on_small_tree = True # PAYNT synthesis ends when a implementable tree with good enough value if found
         use_dtcontrol = True
-        recompute_scheduler = True # recomputes scheduler for the subtree outside of the replaced subtree
+        recompute_scheduler = False # recomputes scheduler for the subtree outside of the replaced subtree
         dtcontrol_settings = ["default"] # this defines the different settings we run dtcontrol with
         # dtcontrol_settings = ["default", "gini", "entropy", "maxminority"]
         use_states_for_node_priority = False # this is super slow for some models but should mean better prioritization
