@@ -1,0 +1,71 @@
+pomdp
+
+// arena definition
+const int WIDTH = 5;
+const int HEIGHT = 3;
+
+const int xMIN = 0;
+const int xMAX = WIDTH-1;
+const int yMIN = 0;
+const int yMAX = HEIGHT-1;
+
+// holes
+hole double hHigh in {0.7, 0.8, 0.9};
+hole double hLow in {0.1, 0.2, 0.3};
+
+const int oy = 1;
+const int o1x = 1;
+const int o2x = 3;
+
+// goal
+formula goal = x=xMAX & y=yMIN & traped=false;
+label "goal" = goal;
+
+// movement
+formula canGoRight = x<xMAX & traped=false;
+formula canGoDown  = y>yMIN & traped=false;
+
+formula leftOfObstacle = y=1 & (x=o1x-1|x=o2x-1);
+formula aboveObstacle = y=2 & (x=o1x|x=o2x);
+
+formula goRight = leftOfObstacle ? x : min(x+1, xMAX);
+formula goDown  = aboveObstacle ? y : max(y-1, yMIN);
+
+formula noTrap = (x!=1 | y!=2) & (x!=3 | y!=2) & (x!=1 | y!=0) & (x!=3 | y!= 0);
+
+// agent
+module agent
+    x : [xMIN..xMAX] init xMIN;
+    y : [yMIN..yMAX] init yMAX;
+    traped : bool init false;
+
+    [r] !traped & noTrap -> (x'=goRight);
+    [d] !traped & noTrap -> (y'=goDown);
+
+    [r] !traped & x=1&y=2 -> hHigh : (x'=goRight)&(traped'=true) + 1-hHigh : (x'=goRight);
+    [d] !traped & x=1&y=2 -> hHigh : (y'=goDown)&(traped'=true) + 1-hHigh : (y'=goDown);
+
+    [r] !traped & x=3&y=2 -> hLow : (x'=goRight)&(traped'=true) + 1-hLow : (x'=goRight);
+    [d] !traped & x=3&y=2 -> hLow : (y'=goDown)&(traped'=true) + 1-hLow : (y'=goDown);
+
+    [r] !traped & x=1&y=0 -> hLow : (x'=goRight)&(traped'=true) + 1-hLow : (x'=goRight);
+    [d] !traped & x=1&y=0 -> hLow : (y'=goDown)&(traped'=true) + 1-hLow : (y'=goDown);
+
+    [r] !traped & x=3&y=0 -> hHigh : (x'=goRight)&(traped'=true) + 1-hHigh : (x'=goRight);
+    [d] !traped & x=3&y=0 -> hHigh : (y'=goDown)&(traped'=true) + 1-hHigh : (y'=goDown);
+
+    [p] traped -> 1 : (traped'=false);
+
+endmodule
+
+// observables
+observable "finished" = goal;
+observable "traped" = traped;
+observable "canGoRight" = canGoRight;
+observable "canGoDown" = canGoDown;
+
+// rewards
+rewards "penalty"
+    true : 1;
+    [p] true : 100;
+endrewards
