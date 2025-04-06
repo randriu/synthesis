@@ -1,0 +1,36 @@
+pomdp
+
+observable "goal" = goal;
+observable "decision" = s=0 | s=3;
+
+hole int h1 in {1, 2};
+
+module state_space
+    s : [0..6] init 0;
+
+    [a] s=0 -> 1 : (s'=h1);
+    [b] s=0 -> 1 : (s'=h1);
+
+    [c] s=1 -> 1 : (s'=3);
+    [c] s=2 -> 1 : (s'=3);
+
+    [a] s=3 -> 1 : (s'= 4);
+    [b] s=3 -> 1 : (s'= 5);
+
+    [c] s=4 -> 1 : (s'=6);
+    [c] s=5 -> 1 : (s'=6);
+
+    [] s=6 -> true;
+endmodule
+
+formula goal = s=6;
+
+label "done" = goal;
+
+rewards "rew"
+    [c] s=1 : 10;
+    [c] s=2 : 5;
+
+    [c] s=4 : 5;
+    [c] s=5 : 10;
+endrewards
