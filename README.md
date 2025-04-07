@@ -83,8 +83,7 @@ SAYNT [6] and Storm associated options (pomdp-api branch of Storm and Stormpy ar
 - ``--prune-storm``: if enabled Storm results are used to prune the family of FSCs
 - ``--unfold-strategy-storm [paynt|storm|cutoff]``: sets how the memory is unfolded [default: ``storm``]
 - ``--use-storm-cutoffs``: if enabled the actions from cut-offs are considered in the prioritization and unfolding
-- ``--export-fsc-paynt PATH``: stores the best found FSC from PAYNT to specified file
-- ``--export-fsc-storm PATH``: stores the best found FSC from Storm to specified file
+- ``--export-synthesis PATH``: stores the synthesis result to speciefied PATH
 
 Other options:
 - ``--help``: shows the help message of the PAYNT and aborts

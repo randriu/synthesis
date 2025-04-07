@@ -14,36 +14,73 @@ on:
   pull_request:
 
 env:
-  GIT_URL: "${{ github.server_url }}/${{ github.repository }}.git"
-  BRANCH: "${{ github.ref }}"
-  # GitHub runners currently have two cores
-  NR_JOBS: "2"
+  # GitHub runners currently have 4 cores
+  NR_JOBS: "4"
 
 jobs:
 
-  deploy:
-    name: Deploy on latest (${{ matrix.buildType.name }})
+  latestTest:
+    name: Test on latest (${{ matrix.buildType.name }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         buildType:
-          - {name: "Release", imageName : "randriu/paynt", dockerTag: "latest", setupArgs: ""}
+          - {name: "Release", imageName : "randriu/paynt", dockerTag: "latest", stormpyTag: "ci", setupArgs: ""}
+          - {name: "Debug", imageName : "randriu/paynt", dockerTag: "latest-debug", stormpyTag: "ci-debug", setupArgs: "--debug"}
       fail-fast: false
-    if: github.ref == 'refs/heads/master'
+
     steps:
       - name: Git clone
         uses: actions/checkout@v4
       - name: Build paynt image from Dockerfile
-        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS}
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS} --build-arg base_image=movesrwth/stormpy:${{ matrix.buildType.stormpyTag }}
+
+      - name: Run Docker
+        run: docker run -d -it --name ci randriu/paynt:${{ matrix.buildType.dockerTag }}
+      - name: Build payntbind
+        shell: bash {0}
+        run: |
+          docker exec ci bash -c "cd /opt/paynt/payntbind; python setup.py build_ext ${{ matrix.buildType.setupArgs }} -j ${NR_JOBS} develop"
+          status=$?
+          exit $status
+      - name: Run PAYNT tests
+        run: docker exec ci bash -c "cd /opt/paynt; pip install -e '.[test]'; pytest tests"
+      - name: Run Payntbind tests
+        run: docker exec ci bash -c "cd /opt/paynt/payntbind; pytest tests"
+
+
+  deploy:
+    name: Test and Deploy on latest (${{ matrix.buildType.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildType:
+          - {name: "Release", imageName : "randriu/paynt", dockerTag: "latest", stormpyTag: "ci", setupArgs: ""}
+          - {name: "Debug", imageName : "randriu/paynt", dockerTag: "latest-debug", stormpyTag: "ci-debug", setupArgs: "--debug"}
+      fail-fast: false
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v4
+      - name: Build paynt image from Dockerfile
+        run: docker build -t ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }} . --build-arg setup_args=${{ matrix.buildType.setupArgs }} --build-arg setup_args_pycarl=${{ matrix.buildType.setupArgs }} --build-arg no_threads=${NR_JOBS} --build-arg base_image=movesrwth/stormpy:${{ matrix.buildType.stormpyTag }}
+      
+      - name: Run Docker
+        run: docker run -d -it --name ci randriu/paynt:${{ matrix.buildType.dockerTag }}
+      - name: Run PAYNT tests
+        run: docker exec ci bash -c "cd /opt/paynt; pip install -e '.[test]'; pytest tests"
+      - name: Run Payntbind tests
+        run: docker exec ci bash -c "cd /opt/paynt/payntbind; pytest tests"
+
       - name: Login into docker
         # Only login if using master on original repo (and not for pull requests or forks)
-        if: github.repository_owner == 'randriu'
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
         run: echo '${{ secrets.STORMPY_CI_DOCKER_PASSWORD }}' | docker login -u randriu --password-stdin
       - name: Deploy paynt image
         # Only deploy if using master on original repo (and not for pull requests or forks)
-        if: github.repository_owner == 'randriu'
+        if: github.repository_owner == 'randriu' && github.ref == 'refs/heads/master'
         run: docker push ${{ matrix.buildType.imageName }}:${{ matrix.buildType.dockerTag }}
 
+  # TODO remove this eventually
   deploy-mdp:
     name: Deploy on branch (mdp) (${{ matrix.buildType.name }})
     runs-on: ubuntu-latest

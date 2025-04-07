@@ -1,0 +1,22 @@
+smg
+
+player circle
+    [c1], [c2]
+endplayer
+
+player square
+    [s1], [s2]
+endplayer
+
+module state_space
+    s : [0..2];
+
+    [c1] s=0 -> (s'=1);
+
+    [s1] s=1 -> (s'=1);
+    [s2] s=1 -> (s'=2);
+
+    [c2] s=2 -> (s'=2);
+endmodule
+
+label "goal" = s=2;

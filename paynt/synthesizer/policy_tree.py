@@ -103,7 +103,7 @@ class PolicyTreeNode:
             result = self.family.mdp.model_check_property(prop)
             assert not result.sat
         else:
-            SynthesizerPolicyTree.double_check_policy(quotient, self.family, prop, policies[self.policy_index])
+            SynthesizerPolicyTree.double_check_policy(quotient, self.family, prop, policies[self.policy_index][0])
 
 
     def merge_children_indices(self, indices):
@@ -313,7 +313,7 @@ class PolicyTree:
         leaves = self.collect_leaves()
         logger.info("double-checking {} families...".format(len(leaves)))
         for leaf in leaves:
-            leaf.double_check(quotient,prop)
+            leaf.double_check(quotient,prop,self.policies)
         logger.info("all solutions are OK")
 
     
@@ -495,7 +495,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         _,mdp = quotient.fix_and_apply_policy_to_family(family, policy)
         if family.size == 1:
             quotient.assert_mdp_is_deterministic(mdp, family)
-        
         DOUBLE_CHECK_PRECISION = 1e-6
         default_precision = Property.model_checking_precision
         Property.set_model_checking_precision(DOUBLE_CHECK_PRECISION)

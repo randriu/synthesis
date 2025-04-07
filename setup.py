@@ -76,7 +76,11 @@ setup(
     "PAYNT (Probabilistic progrAm sYNThesizer) is a tool for automated synthesis of probabilistic programs.",
     packages=find_packages(),
     install_requires=['click', 'stormpy', 'z3-solver'],
-    extras_require={},
+    extras_require={
+        "numpy": ["numpy"],
+        "plot": ["matplotlib", "numpy", "scipy"],
+        "test": ["pytest", "nbval", "numpy"],
+    },
     package_data={
         'paynt': [],
     },

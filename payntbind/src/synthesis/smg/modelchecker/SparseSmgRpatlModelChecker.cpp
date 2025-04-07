@@ -1,6 +1,8 @@
 /**
  * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
  * Storm version.
+ *
+ * Methods to support reward computation were added.
  */
 
 #include "SparseSmgRpatlModelChecker.h"
@@ -31,6 +33,7 @@ namespace synthesis {
 
         rpatl.setGameFormulasAllowed(true);
         rpatl.setRewardOperatorsAllowed(true);
+        rpatl.setReachabilityRewardFormulasAllowed(true);
         rpatl.setLongRunAverageRewardFormulasAllowed(true);
         rpatl.setLongRunAverageOperatorsAllowed(true);
 
@@ -93,7 +96,14 @@ namespace synthesis {
     template<typename ModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::checkProbabilityOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::ProbabilityOperatorFormula, ValueType> const& checkTask) {
         storm::logic::ProbabilityOperatorFormula const& stateFormula = checkTask.getFormula();
-        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeProbabilities(env, checkTask.substituteFormula(stateFormula.getSubformula()));
+
+        // when checking a qualitative property (i.e. bound is set), the optimization direction for SGs must opposite to the optimization direction for MDPs
+        auto newCheckTask = checkTask.substituteFormula(stateFormula.getSubformula());
+        if (newCheckTask.isBoundSet()) {
+            newCheckTask.setOptimizationDirection(storm::solver::invert(checkTask.getOptimizationDirection()));
+        }
+
+        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeProbabilities(env, newCheckTask);
 
         if (checkTask.isBoundSet()) {
             STORM_LOG_THROW(result->isQuantitative(), storm::exceptions::InvalidOperationException, "Unable to perform comparison operation on non-quantitative result.");
@@ -106,8 +116,21 @@ namespace synthesis {
     template<typename ModelType>
     std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::checkRewardOperatorFormula(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::RewardOperatorFormula, ValueType> const& checkTask) {
         storm::logic::RewardOperatorFormula const& formula = checkTask.getFormula();
-        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeRewards(env, checkTask.substituteFormula(formula.getSubformula()));
-        return result;
+
+        // when checking a qualitative property (i.e. bound is set), the optimization direction for SGs must opposite to the optimization direction for MDPs
+        auto newCheckTask = checkTask.substituteFormula(formula.getSubformula());
+        if (newCheckTask.isBoundSet()) {
+            newCheckTask.setOptimizationDirection(storm::solver::invert(checkTask.getOptimizationDirection()));
+        }
+
+        std::unique_ptr<storm::modelchecker::CheckResult> result = this->computeRewards(env, newCheckTask);
+
+        if (checkTask.isBoundSet()) {
+            STORM_LOG_THROW(result->isQuantitative(), storm::exceptions::InvalidOperationException, "Unable to perform comparison operation on non-quantitative result.");
+            return result->asQuantitativeCheckResult<ValueType>().compareAgainstBound(checkTask.getBoundComparisonType(), checkTask.getBoundThreshold());
+        } else {
+            return result;
+        }
     }
 
     template<typename ModelType>
@@ -139,6 +162,8 @@ namespace synthesis {
         storm::logic::Formula const& rewardFormula = checkTask.getFormula();
         if (rewardFormula.isLongRunAverageRewardFormula()) {
             return this->computeLongRunAverageRewards(env, checkTask.substituteFormula(rewardFormula.asLongRunAverageRewardFormula()));
+        } else if (rewardFormula.isReachabilityRewardFormula()) {
+            return this->computeReachabilityRewards(env, checkTask.substituteFormula(rewardFormula.asReachabilityRewardFormula()));
         }
         STORM_LOG_THROW(false, storm::exceptions::InvalidArgumentException, "The given formula '" << rewardFormula << "' cannot (yet) be handled.");
     }
@@ -203,6 +228,28 @@ namespace synthesis {
 
         auto ret = synthesis::SparseSmgRpatlHelper<ValueType>::computeBoundedUntilProbabilities(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), leftResult.getTruthValuesVector(), rightResult.getTruthValuesVector(), checkTask.isQualitativeSet(), statesOfCoalition, checkTask.isProduceSchedulersSet(), checkTask.getHint(), pathFormula.getNonStrictLowerBound<uint64_t>(), pathFormula.getNonStrictUpperBound<uint64_t>());
         std::unique_ptr<storm::modelchecker::CheckResult> result(new storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>(std::move(ret.values)));
+        return result;
+    }
+
+    template<typename ModelType>
+    std::unique_ptr<storm::modelchecker::CheckResult> SparseSmgRpatlModelChecker<ModelType>::computeReachabilityRewards(storm::Environment const& env, storm::modelchecker::CheckTask<storm::logic::EventuallyFormula, ValueType> const& checkTask) {
+        storm::logic::EventuallyFormula const& eventuallyFormula = checkTask.getFormula();
+        STORM_LOG_THROW(checkTask.isOptimizationDirectionSet(), storm::exceptions::InvalidPropertyException,
+                    "Formula needs to specify whether minimal or maximal values are to be computed on nondeterministic model.");
+
+        // find target states
+        std::unique_ptr<storm::modelchecker::CheckResult> subResultPointer = this->check(env, eventuallyFormula.getSubformula()); // subformula is atomic label/expression formula
+        storm::modelchecker::ExplicitQualitativeCheckResult const& subResult = subResultPointer->asExplicitQualitativeCheckResult();
+
+        // if hasRewardAccumulation removes certain types of rewards (e.g. state rewards)
+        auto rewardModel = storm::utility::createFilteredRewardModel(this->getModel(), checkTask);
+
+        auto ret = synthesis::SparseSmgRpatlHelper<ValueType>::computeReachabilityRewards(env, storm::solver::SolveGoal<ValueType>(this->getModel(), checkTask), this->getModel().getTransitionMatrix(), this->getModel().getBackwardTransitions(), rewardModel.get(), subResult.getTruthValuesVector(), checkTask.isQualitativeSet(), statesOfCoalition, checkTask.isProduceSchedulersSet(), checkTask.getHint());
+
+        std::unique_ptr<storm::modelchecker::CheckResult> result(new storm::modelchecker::ExplicitQuantitativeCheckResult<ValueType>(std::move(ret.values)));
+        if (checkTask.isProduceSchedulersSet() && ret.scheduler) {
+            result->asExplicitQuantitativeCheckResult<ValueType>().setScheduler(std::move(ret.scheduler));
+        }
         return result;
     }
 
