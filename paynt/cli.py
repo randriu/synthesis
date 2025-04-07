@@ -128,6 +128,9 @@ def setup_logger(log_path = None):
 @click.option("--add-dont-care-action", is_flag=True, default=False,
     help="decision tree synthesis: # if set, an explicit action executing a random choice of an available action will be added to each state")
 
+@click.option("--dt-reduction", is_flag=True, default=False,
+    help="this flag runs the DT reduction procedure from CAV Q4 section")
+
 @click.option(
     "--constraint-bound", type=click.FLOAT, help="bound for creating constrained POMDP for Cassandra models",
 )
@@ -155,6 +158,7 @@ def paynt_run(
     export_fsc_storm, export_fsc_paynt, export_synthesis,
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
+    dt_reduction,
     constraint_bound,
     dt_setting,
     ce_generator,
@@ -195,8 +199,11 @@ def paynt_run(
 
     sketch_path = os.path.join(project, sketch)
     properties_path = os.path.join(project, props)
-    tree_helper_path = os.path.join(project, f"decision_trees/{dt_setting}/scheduler/{dt_setting}.json")
-    assert os.path.exists(tree_helper_path), f"Tree helper path {tree_helper_path} does not exist."
+    if dt_reduction:
+        tree_helper_path = os.path.join(project, f"decision_trees/{dt_setting}/scheduler/{dt_setting}.json")
+        assert os.path.exists(tree_helper_path), f"Tree helper path {tree_helper_path} does not exist."
+    else:
+        tree_helper_path = None
     quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, properties_path, export, relative_error, precision, constraint_bound, tree_helper_path, exact)
     synthesizer = paynt.synthesizer.synthesizer.Synthesizer.choose_synthesizer(quotient, method, fsc_synthesis, storm_control)
     synthesizer.run(optimum_threshold)
