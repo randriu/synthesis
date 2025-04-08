@@ -176,7 +176,6 @@ class Synthesizer:
 
         callDTNest = True
         if callDTNest:
-
             self.counters_reset()
             # call the synthesizer to generate the decision tree for every policy from policy tree
 
@@ -267,10 +266,6 @@ class Synthesizer:
                     os.remove(scheduler_path)
                 with open(scheduler_path, "w") as f:
                     f.write(json.dumps(storm_json, indent=4))
-
-                skip_dtNest = False # LADA TODO: now for benchmarking
-                if skip_dtNest:
-                    continue
 
                 self.dtcontrol_calls += 1
 

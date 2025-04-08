@@ -665,7 +665,7 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
             # logger.info(f"printing the PRISM module below:")
             # print(self.best_tree.to_prism())
 
-        if self.export_synthesis_filename_base is not None:
+        if self.export_synthesis_filename_base is not None and not self.ldokoupi_flag:
             self.export_decision_tree(self.best_tree, self.export_synthesis_filename_base)
 
         time_total = round(paynt.utils.timer.GlobalTimer.read(),2)

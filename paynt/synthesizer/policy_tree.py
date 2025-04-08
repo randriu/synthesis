@@ -688,7 +688,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return game_policy
 
 
-    def post_process_game_policy_prob(self, game_policy, game_solver, family, prop, check_granularity=1):
+    def post_process_game_policy_prob(self, game_policy, game_solver, family, prop, check_granularity=4):
         """ DFS only on max probability path until reaching the target
         then verify if the policy satisfies the property based on check_granularity
         if set to -1 then check every multiple of shortest path from init to end state
@@ -956,7 +956,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         self.stat.num_policies = len(policy_tree.policies)
         postprocessing_time = policy_tree.postprocess(self.quotient, prop)
         policy_tree.print_stats()
-        # self.stat.postprocessing_time = postprocessing_time
+        self.stat.postprocessing_time = postprocessing_time
         self.stat.num_nodes_merged = len(policy_tree.collect_all())
         self.stat.num_leaves_merged = len(policy_tree.collect_leaves())
         self.stat.num_policies_merged = len(policy_tree.policies)
