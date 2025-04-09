@@ -612,8 +612,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if self.ldokoupi_flag:
                 self.ldok_postprocessing_times.start()
                 # order is important - cut most diverging paths first
-                # game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
-                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
+                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
+                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
                 self.ldok_postprocessing_times.stop()
 
         return game_policy,game_sat,mdp_fixed_choices

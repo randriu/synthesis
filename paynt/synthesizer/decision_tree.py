@@ -264,7 +264,13 @@ class SynthesizerDecisionTree(paynt.synthesizer.synthesizer_ar.SynthesizerAR):
                 submdp = self.quotient.get_submdp_from_unfixed_states(node_states)
                 logger.info(f"subtree quotient has {submdp.model.nr_states} states and {submdp.model.nr_choices} choices")
                 subtree_spec = self.quotient.specification.copy()
-                subtree_quotient = paynt.quotient.mdp.MdpQuotient(submdp.model, subtree_spec)
+                try:
+                    subtree_quotient = paynt.quotient.mdp.MdpQuotient(submdp.model, subtree_spec)
+                except:
+                    continue # model may be empty
+                if not subtree_quotient.variables or len(subtree_quotient.variables) == 0:
+                    continue
+
                 # if subtree_quotient.self.state_is_relevant_bv.number_of_set_bits() == 0:
                 #     logger.info(f"no relevant states in subtree quotient")
                 #     continue

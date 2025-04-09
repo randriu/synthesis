@@ -260,6 +260,9 @@ class Synthesizer:
                         hole_value = family.holes_options[i][0] # first is candidate
                         storm_json =  [entry for entry in storm_json if entry['s'].get(hole_name) == hole_value]
 
+                if not storm_json:
+                    continue # multiple mapping to single family, only one is relevant
+
                 model_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(self.quotient.tree_helper_path))))
                 scheduler_path = os.path.join(model_dir, "scheduler.storm.json")
                 if os.path.exists(scheduler_path):
@@ -311,7 +314,11 @@ class Synthesizer:
                 for entry in storm_json:
                     state_valuation = entry['s']
                     action_info = entry['c'][0]  # assuming single action per state
-                    action_label = action_info['labels'][0]  # assuming single label per action
+                    # if DTnest fails to improve old json structure can still be present
+                    try:
+                        action_label = action_info['labels'][0]  # assuming single label per action
+                    except KeyError:
+                        action_label = action_info['origin']['action-label']
 
                     # Find the corresponding state index
                     for state_index, valuation in enumerate(self.quotient.state_valuations):
