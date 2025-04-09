@@ -1,6 +1,10 @@
 import pytest
+from helpers.helper import get_sketch_paths
 
 import paynt.quotient.ipomdp
+import paynt.synthesizer.synthesizer_ipomdp
+import paynt.parser.sketch
+import paynt.utils.timer
 import payntbind
 
 import stormpy
@@ -54,9 +58,9 @@ class TestIpomdp:
         assert ga.get_observations() == [0, 1, 2, 3]
 
 
-    def test_create_abstraction_simple2(self):
+    def test_create_abstraction_simple3(self):
         # setup
-        ipomdp = stormpy.build_interval_model_from_drn('models/ipomdp/simple2/sketch.templ')
+        ipomdp = stormpy.build_interval_model_from_drn('models/ipomdp/simple3/sketch.templ')
 
         # test
         quotient = paynt.quotient.ipomdp.IpomdpQuotient(ipomdp, None)
@@ -108,3 +112,29 @@ class TestIpomdp:
 
         with pytest.raises(AssertionError):
             quotient = paynt.quotient.ipomdp.IpomdpQuotient(ipomdp, None)
+
+    def test_solve_simple1_ipomdp(self):
+        # setup
+        paynt.utils.timer.GlobalTimer.start()
+        sketch_path, prop_path = get_sketch_paths('ipomdp/simple1')
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, prop_path)
+        synthesizer = paynt.synthesizer.synthesizer_ipomdp.SynthesizerIpomdp(quotient)
+
+        # test
+        value = synthesizer.run()
+
+        # assert
+        assert value == 0.4
+
+    def test_solve_simple2_ipomdp(self):
+        # setup
+        paynt.utils.timer.GlobalTimer.start()
+        sketch_path, prop_path = get_sketch_paths('ipomdp/simple2')
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, prop_path)
+        synthesizer = paynt.synthesizer.synthesizer_ipomdp.SynthesizerIpomdp(quotient)
+
+        # test
+        value = synthesizer.run()
+
+        # assert
+        assert value == 0.2
