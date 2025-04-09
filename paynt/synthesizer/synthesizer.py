@@ -28,6 +28,7 @@ class Synthesizer:
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
         import paynt.quotient.posmg
+        import paynt.quotient.ipomdp
         import paynt.synthesizer.synthesizer_onebyone
         import paynt.synthesizer.synthesizer_ar
         import paynt.synthesizer.synthesizer_cegis
@@ -36,9 +37,12 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.synthesizer_posmg
+        import paynt.synthesizer.synthesizer_ipomdp
         import paynt.synthesizer.policy_tree
         import paynt.synthesizer.decision_tree
 
+        if isinstance(quotient, paynt.quotient.ipomdp.IpomdpQuotient):
+            return paynt.synthesizer.synthesizer_ipomdp.SynthesizerIpomdp(quotient)
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             logger.info("nothing to do with the POMDP sketch, aborting...")
             exit(0)
