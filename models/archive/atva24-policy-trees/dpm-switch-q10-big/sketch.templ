@@ -44,6 +44,7 @@ module CLOCK
     [tick01] c=0 -> (c'=1);
     [tick02] c=0 -> (c'=1);
     [tick1] c=1 -> (c'=0);
+    [_stay_] c=0 -> true;
 endmodule
 
 
