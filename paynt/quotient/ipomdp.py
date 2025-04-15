@@ -94,7 +94,8 @@ class IpomdpQuotient(): # todo derive from Quotient?
         new_transition_matrix = matrix_builder.build()
 
         new_states = [state for state in range(original_state_count, new_state)]
-        return new_transition_matrix, new_states
+        new_choices = [choice for choice in range(transition_matrix.nr_rows, new_transition_matrix.nr_rows)]
+        return new_transition_matrix, new_states, new_choices
 
     def resize_bit_vector(self, bit_vector, new_size):
         new_bit_vector = stormpy.storage.BitVector(new_size, False)
@@ -123,6 +124,25 @@ class IpomdpQuotient(): # todo derive from Quotient?
 
         return new_labeling
 
+    def create_reward_models(self, original_reward_models, p2_choice_count):
+        new_reward_models = {}
+        for name, original_reward_model in original_reward_models.items():
+            assert original_reward_model.has_state_action_rewards and \
+                not original_reward_model.has_state_rewards and \
+                not original_reward_model.has_transition_rewards, \
+                'Only state action rewards are supported.'
+            original_state_action_rewards = original_reward_model.state_action_rewards
+
+            assert all([interval.isPointInterval() for interval in original_state_action_rewards]), \
+                'Interval rewards are not supported.'
+            new_state_action_rewards = [interval.lower() for interval in original_state_action_rewards]
+            new_state_action_rewards += [0 for choice in range(p2_choice_count)] # all actions of player 2 have reward 0
+
+            new_reward_model = stormpy.SparseRewardModel(optional_state_action_reward_vector=new_state_action_rewards)
+            new_reward_models[name] = new_reward_model
+
+        return new_reward_models
+
     def create_state_player_indications(self, p1_state_count, p2_state_count):
         return [0 for p1s in range(p1_state_count)] + [1 for p2s in range(p2_state_count)]
 
@@ -132,12 +152,12 @@ class IpomdpQuotient(): # todo derive from Quotient?
 
 
     def create_game_abstraction(self):
-        transition_matrix, p2states = self.build_transition_matrix(self.ipomdp.transition_matrix)
+        transition_matrix, p2states, p2choices = self.build_transition_matrix(self.ipomdp.transition_matrix)
         new_state_count = transition_matrix.nr_columns
         new_choice_count = transition_matrix.nr_rows
 
         state_labeling = self.create_state_labeling(self.ipomdp.labeling, new_state_count)
-        reward_models = self.ipomdp.reward_models
+        reward_models = self.create_reward_models(self.ipomdp.reward_models, len(p2choices))
 
         components = stormpy.SparseModelComponents(
             transition_matrix=transition_matrix,
