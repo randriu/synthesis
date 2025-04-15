@@ -104,8 +104,36 @@ class TestIpomdp:
         assert ga.get_observations() == [0, 0, 1, 2, 1, 1, 1, 1, 1, 3, 3, 3, 3]
 
     def test_create_abstraction_rewards(self):
-        pass
-        # todo
+        # setup
+        ipomdp = stormpy.build_interval_model_from_drn('models/ipomdp/simple-rewards/sketch.templ')
+
+        # test
+        quotient = paynt.quotient.ipomdp.IpomdpQuotient(ipomdp, None)
+        ga = quotient.game_abstraction
+
+        # assert
+        assert type(ga) == payntbind.synthesis.Posmg
+        assert ga.nr_states == 5, f"Expected 5 states, but got {ga.nr_states}"
+        assert ga.nr_choices == 7, f"Expected 7 choices, but got {ga.nr_choices}"
+        assert ga.nr_transitions == 10, f"Expected 10 transitions, but got {ga.nr_transitions}"
+        mat = [
+            (0, 4, 1),
+            (1, 1, 0.1), (1, 2, 0.9),
+            (2, 3, 1),
+            (3, 3, 1),
+            (4, 3, 1),
+            (5, 1, 0.7), (5, 2, 0.3),
+            (6, 1, 0.2), (6, 2, 0.8)
+        ]
+        assert matrices_are_same(ga.transition_matrix, mat)
+        assert ga.labeling.get_labels_of_state(0) == {'init'}
+        assert ga.labeling.get_labels_of_state(3) == {'goal'}
+        assert ga.reward_models
+        assert ga.reward_models['penalty']
+        assert ga.reward_models['penalty'].state_action_rewards == [0, 0, 50, 100, 0.0, 0, 0]
+        assert not ga.has_choice_labeling()
+        assert ga.get_state_player_indications() == [0, 0, 0, 0, 1]
+        assert ga.get_observations() == [0, 1, 1, 2, 3]
 
     def test_wrong_interval_definition(self):
         ipomdp = stormpy.build_interval_model_from_drn('models/ipomdp/wrong_intervals/sketch.templ')
@@ -138,3 +166,16 @@ class TestIpomdp:
 
         # assert
         assert value == 0.2
+
+    def test_solve_simple_rewards_ipomdp(self):
+                # setup
+        paynt.utils.timer.GlobalTimer.start()
+        sketch_path, prop_path = get_sketch_paths('ipomdp/simple-rewards')
+        quotient = paynt.parser.sketch.Sketch.load_sketch(sketch_path, prop_path)
+        synthesizer = paynt.synthesizer.synthesizer_ipomdp.SynthesizerIpomdp(quotient)
+
+        # test
+        value = synthesizer.run()
+
+        # assert
+        assert value == pytest.approx(90)
