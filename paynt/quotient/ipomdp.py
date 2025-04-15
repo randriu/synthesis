@@ -10,6 +10,8 @@ class IpomdpQuotient(): # todo derive from Quotient?
         self.ipomdp = ipomdp
         self.specification = specification
 
+        logger.debug(f'ipomdp has {max(self.ipomdp.observations)+1} observations')
+
         self.game_abstraction = self.create_game_abstraction()
 
     def row_has_interval(self, row):
@@ -177,6 +179,7 @@ class IpomdpQuotient(): # todo derive from Quotient?
         assert len(observations) == new_state_count, 'Each state must have an observation'
 
         posmg = payntbind.synthesis.posmg_from_smg(smg, observations)
+        logger.debug(f'constructed game abstraction having {posmg.nr_states} states and {posmg.nr_choices} choices.')
 
         return posmg
 

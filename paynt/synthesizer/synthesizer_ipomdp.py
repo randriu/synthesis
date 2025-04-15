@@ -1,8 +1,13 @@
+import paynt.utils.timer
 import stormpy
 
 import paynt.quotient.posmg
 import paynt.synthesizer.synthesizer_ar
 
+import logging
+logger = logging.getLogger(__name__)
+
+# TODO synthesis - gradually increase memory (replacing SynthesizerAR with SynthesizerPOSMG should be enough)
 class SynthesizerIpomdp:
     def __init__(self, quotient):
         self.quotient = quotient
@@ -26,13 +31,23 @@ class SynthesizerIpomdp:
         return result.optimality_result.value
 
     def synthesize(self):
+        logger.info('synthesis initiated')
+        synthesis_timer = paynt.utils.timer.Timer()
+        synthesis_timer.start()
+
         posmg = self.quotient.game_abstraction
         posmgSpecification = self.create_posmg_specification(self.quotient.specification.all_properties()[0])
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, posmgSpecification)
         posmgSynthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
         assignment = posmgSynthesizer.synthesize(print_stats=False)
+        value = self.get_value(posmgQuotient, assignment)
 
-        return self.get_value(posmgQuotient, assignment)
+        synthesis_timer.stop()
+        time = synthesis_timer.time
+        logger.info(f'synthesis completed, value: {round(value, 6)}, time: {round(time, 2)} s')
+        # better summary?? use Statistic class? (specification, game iterations, ...)
+
+        return value
 
     def run(self, optimum_threshold=None):
         return self.synthesize()
