@@ -30,7 +30,7 @@ class SynthesizerIpomdp:
         result = dtmc.check_specification(quotient.specification)
         return result.optimality_result.value
 
-    def synthesize(self):
+    def synthesize(self, optimum_threshold=None):
         logger.info('synthesis initiated')
         synthesis_timer = paynt.utils.timer.Timer()
         synthesis_timer.start()
@@ -39,7 +39,7 @@ class SynthesizerIpomdp:
         posmgSpecification = self.create_posmg_specification(self.quotient.specification.all_properties()[0])
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, posmgSpecification)
         posmgSynthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
-        assignment = posmgSynthesizer.synthesize(print_stats=False)
+        assignment = posmgSynthesizer.synthesize(print_stats=False, optimum_threshold=optimum_threshold)
         value = self.get_value(posmgQuotient, assignment)
 
         synthesis_timer.stop()
@@ -50,4 +50,4 @@ class SynthesizerIpomdp:
         return value
 
     def run(self, optimum_threshold=None):
-        return self.synthesize()
+        return self.synthesize(optimum_threshold=optimum_threshold)
