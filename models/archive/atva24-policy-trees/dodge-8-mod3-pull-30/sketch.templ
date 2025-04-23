@@ -33,7 +33,6 @@ module clk
 
     [place] !done & clk=-1 -> (clk'=clk_next);
 
-    [_stay_] !done & clk=0 -> (clk'=0);
     [left]  !done & clk=0 -> (clk'=clk_next);
     [right] !done & clk=0 -> (clk'=clk_next);
     [down]  !done & clk=0 -> (clk'=clk_next);

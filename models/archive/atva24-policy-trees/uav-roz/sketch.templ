@@ -27,8 +27,6 @@ module operator
 	s:[0..2] init 0; // status of image processing, 0: init, 1: good, 2: bad
 	c:[0..3] init 0; // choices at the check point
 
-    // noop action
-	[_stay1] !stop -> true;
 
 	// image processing, the workload may increase due to other unknown tasks
 	[image] !stop & t=0 & s=0 -> (1-p_hole*0.1):(t'=1) & (s'=0) + p_hole*0.1:(t'=2) & (s'=0);
@@ -88,8 +86,6 @@ module UAV
 	w5: bool init false;
 	w6: bool init false;
 	
-	// noop action
-	[_stay2] !stop -> true;
 
 	// at any waypoint:
 	// send image to human operator for analysis
@@ -288,8 +284,6 @@ module UAV
 endmodule
 
 module flight
-    // noop action
-	[_stay3] !stop -> true;
 
     [wait] !roz -> 0.99: true + 0.01: (stop'=true);
     [wait] roz -> 0.9: true + 0.1: (stop'=true); 

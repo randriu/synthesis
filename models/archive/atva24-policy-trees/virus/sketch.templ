@@ -26,8 +26,6 @@ hole int node2y in {1..2};
 module strategy
     step : [0..2] init 0;
     
-    //noop action
-    [_stay_] step=0 -> (step'=0);
 
     // Alternate between horizontal and vertical attack. Unclear how to start.
     [attack23_33] step=0 & s33 = 2 & s11 != 2 & s21 != 2 & s31 != 2 & s12 != 2 & s22 != 2 & s32 != 2 & s13 != 2 & s23 != 2 -> (step'=1);
