@@ -552,9 +552,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         # or payntbind build mdp w/ choices transformed
 
-        # or or add action to this MDP and choice
+        # or add action to this MDP and choice
 
-        # only if _stay action not present in model
+        # only if _noop action not present in model
         #if family.size == 1:
         #    # due to experimental state removal this may not hold in irrelevant states
         #    quotient.assert_mdp_is_deterministic(mdp, family)
@@ -622,7 +622,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 self.ldok_postprocessing_times.start()
 
                 working_quotient = self.quotient
-                if not [action for action in self.quotient.action_labels if action.startswith("_stay")]:
+                if not [action for action in self.quotient.action_labels if action.startswith("_noop")]:
                     # add self loops
                     working_quotient = self.get_quotient_with_noop()
 
@@ -652,7 +652,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 map_old_to_new[i] = quotient_copy.action_labels.index(action)
 
         # get action index of noop action
-        noop_index = next((i for i, action in enumerate(quotient_copy.action_labels) if action.startswith("_stay")), -1)
+        noop_index = next((i for i, action in enumerate(quotient_copy.action_labels) if action.startswith("_noop")), -1)
         map_old_to_new[None] = noop_index
 
         # other needed mappings
@@ -675,7 +675,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         """ DFS only on non-descending gradient path until reaching the target
         then verify if the policy satisfies the property based on check_granularity
         if negative check every shortest path from init to end state / check_granularity
-        This post is applicable iff self loop ( _stay_ ) action is in MDP
+        This post is applicable iff self loop ( _noop ) action is in MDP
         """
         # self loop works only against maximizing property
         prop = work_quotient.get_property()
@@ -683,7 +683,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             return game_policy
 
         # sanity check - noop present
-        if not [action for action in work_quotient.action_labels if action.startswith("_stay")]:
+        if not [action for action in work_quotient.action_labels if action.startswith("_noop")]:
             return game_policy
         # self loops serves as verification against worst case scenario -> any other action is better
 
@@ -695,7 +695,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_policy_post = self.quotient.empty_policy()
 
         # get index of noop action and init projected policy to it
-        noop_index = next((i for i, action in enumerate(work_quotient.action_labels) if action.startswith("_stay")), -1)
+        noop_index = next((i for i, action in enumerate(work_quotient.action_labels) if action.startswith("_noop")), -1)
         game_pol_projection = work_quotient.init_policy(noop_index)
 
         if hasattr(work_quotient, "map_old_to_new"):
@@ -754,7 +754,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         """ DFS only on max probability path until reaching the target
         then verify if the policy satisfies the property based on check_granularity
         if set to -1 then check every multiple of shortest path from init to end state
-        This post is applicable iff self loop ( _stay_ ) action is in MDP
+        This post is applicable iff self loop ( _noop ) action is in MDP
         """
 
         def getProbForChoice(choice, target):
@@ -771,7 +771,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             return game_policy
 
         # sanity check - noop present
-        if not [action for action in work_quotient.action_labels if action.startswith("_stay")]:
+        if not [action for action in work_quotient.action_labels if action.startswith("_noop")]:
             return game_policy
 
         if hasattr(work_quotient, "map_old_to_new"):
@@ -788,7 +788,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_policy_post = work_quotient.empty_policy()
 
         # get index of noop action and init projected policy to it
-        noop_index = next((i for i, action in enumerate(work_quotient.action_labels) if action.startswith("_stay")), -1)
+        noop_index = next((i for i, action in enumerate(work_quotient.action_labels) if action.startswith("_noop")), -1)
         game_pol_projection = work_quotient.init_policy(noop_index)
 
         explored_states = set() # avoid cycles

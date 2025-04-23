@@ -15,7 +15,7 @@ const std::string NO_ACTION_LABEL = "__no_label__";
 // label used for a choice that executes a random selection of available choice
     const std::string DONT_CARE_ACTION_LABEL = "__random__";
 // label used for a choice that executes a self loop
-const std::string NOOP_ACTION_LABEL = "_stay__";
+const std::string NOOP_ACTION_LABEL = "_noop_";
 
 /**
  * Return for each state a list of its state destinations.
