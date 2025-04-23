@@ -4,6 +4,7 @@ import heapq
 import os
 import stormpy
 import payntbind
+import subprocess
 
 import paynt.family.family
 import paynt.synthesizer.synthesizer
@@ -1098,7 +1099,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         logger.info(f"exported policy tree visualization to {tree_visualization_filename}")
 
     def run_dtnest_synthesis(self, evaluations):
-        """Run DTNest synthesis for all evaluated policies.
+        """Run DTNest synthesis for all evaluated policies separately.
         Args:
             evaluations: List of evaluation results
 
@@ -1108,19 +1109,22 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         import json
 
         self.counters_reset()
-        # Call the synthesizer to generate the decision tree for every policy from policy tree
-
         base_export_name = self.export_synthesis_filename_base
-        dt_nest_save_path = base_export_name + "_dtNest.storm.json"
+        storm_json_path = base_export_name + ".storm.json"
 
-        if os.path.exists(dt_nest_save_path):
-            os.remove(dt_nest_save_path)
+        if not os.path.exists(storm_json_path):
+            raise FileNotFoundError(f"Base Storm JSON file '{storm_json_path}' not found.")
 
-        family_args_len = None
         # Create backup hardcopy of current quotient_mdp
         self.quotient_bp = self.quotient.return_copy()
 
+        family_args_len = None
         counter = -1
+
+        # Load the base Storm JSON data
+        with open(storm_json_path, "r") as f:
+            storm_json = json.loads(f.read())
+
         for evaluation in evaluations:
             if not evaluation.policy:
                 continue  # Filter ∅ policies
@@ -1141,27 +1145,22 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             # Assert that the policy is valid
             self.assert_policy_choices(policy)
 
-            # Filter storm JSON for current family
-            with open(f"{base_export_name}.storm.json", "r") as f:
-                storm_json = json.loads(f.read())
-                storm_json = self.filter_storm_json_for_family(storm_json, family, family_args_len)
+            # Filter Storm JSON for the current family
+            filtered_storm_json = self.filter_storm_json_for_family(storm_json, family, family_args_len)
 
             if not family_args_len:
                 family_args_len = len(family.hole_to_name)
 
-            if not storm_json:
-                continue  # Multiple mapping to single family, only one is relevant
+            if not filtered_storm_json:
+                continue  # Skip if no relevant data for the family
 
             # Prepare and run DTControl
             model_dir = os.path.dirname(
                 os.path.dirname(os.path.dirname(os.path.dirname(self.quotient.tree_helper_path))))
             scheduler_path = os.path.join(model_dir, "scheduler.storm.json")
 
-            if os.path.exists(scheduler_path):
-                os.remove(scheduler_path)
-
             with open(scheduler_path, "w") as f:
-                f.write(json.dumps(storm_json, indent=4))
+                f.write(json.dumps(filtered_storm_json, indent=4))
 
             self.run_dtcontrol(scheduler_path, model_dir)
 
@@ -1173,26 +1172,186 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             self.prepare_quotient_for_dt_synthesis()
 
             # Run decision tree synthesis
-            dt_map_synthetiser.run()  # Policy got via dtcontrol
+            dt_map_synthetiser.run()
 
             # Process results
             with open(scheduler_path, "r") as f:
-                storm_json = json.loads(f.read())
-
-            # Load or initialize the aggregated data
-            if os.path.exists(dt_nest_save_path):
-                with open(dt_nest_save_path, "r") as f:
-                    existing_data = json.loads(f.read())
-            else:
-                existing_data = []
+                updated_storm_json = json.loads(f.read())
 
             # Reconstruct and process policy
-            reconstructed_policy = self.reconstruct_policy_from_storm_json(storm_json)
-            storm_json = self.create_storm_json_from_policy(reconstructed_policy, family)
+            reconstructed_policy = self.reconstruct_policy_from_storm_json(updated_storm_json)
+            new_storm_json = self.create_storm_json_from_policy(reconstructed_policy, family)
 
-            # Save the updated data
-            existing_data.extend(storm_json)
-            with open(dt_nest_save_path, "w") as f:
-                f.write(json.dumps(existing_data, indent=4))
+            # Update the base Storm JSON data
+            storm_json.extend(new_storm_json)
 
-        return dt_nest_save_path
+        # Overwrite base json file with the updated data
+        with open(storm_json_path, "w") as f:
+            f.write(json.dumps(storm_json, indent=4))
+
+    def run_dtcontrol(self, scheduler_path, model_dir):
+        self.dtcontrol_calls += 1
+
+        command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input",
+                   "scheduler.storm.json", "-r", "--use-preset", "default"]
+        subprocess.run(command, cwd=f"{model_dir}")
+
+    def prepare_quotient_for_dt_synthesis(self):
+        """Prepare the quotient for decision tree synthesis.
+
+        Adds don't-care actions if needed and sets relevance for all states.
+
+        Returns:
+            None, modifies quotient in place
+        """
+        if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL not in self.quotient.action_labels and MdpFamilyQuotient.add_dont_care_action:
+            # Identify relevant states again
+            state_relevant_bp = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, True)
+
+            logger.debug("adding explicit don't-care action to relevant states...")
+            self.quotient.quotient_mdp = payntbind.synthesis.addDontCareAction(self.quotient.quotient_mdp,
+                                                                               state_relevant_bp)
+            self.quotient.choice_destinations = payntbind.synthesis.computeChoiceDestinations(
+                self.quotient.quotient_mdp)
+            self.quotient.action_labels, self.quotient.choice_to_action = payntbind.synthesis.extractActionLabels(
+                self.quotient.quotient_mdp)
+            logger.info(f"MDP has {len(self.quotient.action_labels)} actions")
+
+        self.quotient.state_is_relevant_bv = stormpy.BitVector(self.quotient.quotient_mdp.nr_states, True)
+        self.quotient.specification = self.quotient.specification_alt
+
+    def clean_choice_mask(self, eval_choice):
+        """Remove redundant choices from the choice mask, keeping only one per state-action.
+
+        If multiple choices are present for a single state-action pair, only the first one is kept.
+
+        Args:
+            eval_choice: The choice mask to clean
+
+        Returns:
+            The cleaned choice mask
+        """
+        for actions in self.quotient.state_action_choices:
+            for choices in actions:
+                seen_choice = False
+
+                # Count how many choices from eval_choices are present
+                count_eval_choices = 0
+                for choice in choices:
+                    if choice in eval_choice:
+                        count_eval_choices += 1
+
+                # If there's only one choice or no choices, no cleaning needed
+                if count_eval_choices <= 1:
+                    continue
+
+                # Keep only the first choice
+                for choice in choices:
+                    if choice in eval_choice:
+                        if seen_choice:
+                            # Disable redundant choice
+                            eval_choice.set(choice, False)
+                        else:
+                            seen_choice = True
+
+        return eval_choice
+
+    def update_quotient_with_choices(self, eval_choice):
+        """Update the quotient MDP with fixed choices.
+
+        Args:
+            eval_choice: The choice mask to apply
+
+        Returns:
+            None, modifies quotient in place
+        """
+        working_mdp = self.quotient.build_from_choice_mask(eval_choice)
+        self.quotient.quotient_mdp = working_mdp.model
+
+        # Update state valuations
+        new_state_valuations = []
+        for i in working_mdp.quotient_state_map:
+            new_state_valuations.append(self.quotient.state_valuations[i])
+        self.quotient.relevant_state_valuations = new_state_valuations.copy()
+
+    def assert_policy_choices(self, policy):
+        #assert all states have a valid action
+
+        choices = [
+            self.quotient.state_action_choices[i][policy[i] or 0]
+            for i in range(len(self.quotient.state_valuations))
+        ]
+        assert all(choice is not None for choice in choices)
+
+    def filter_storm_json_for_family(self, storm_json, family, family_args_len):
+        """Filter the storm JSON data for a specific family.
+
+        Args:
+            storm_json: The JSON data to filter
+            family: The family to filter for
+            family_args_len: The length of family arguments
+
+        Returns:
+            The filtered storm JSON
+        """
+        if family_args_len is None:
+            family_args_len = len(family.hole_to_name)
+
+        # Filter data for current family
+        for i in range(family_args_len):
+            hole_name = family.hole_to_name[i]
+            hole_value = family.holes_options[i][0]  # First is candidate
+            storm_json = [entry for entry in storm_json if entry['s'].get(hole_name) == hole_value]
+
+        return storm_json
+
+    def reconstruct_policy_from_storm_json(self, storm_json):
+        """Reconstruct a policy from the storm JSON data.
+        Args:
+            storm_json: The JSON data containing the policy
+        Returns:
+            The reconstructed policy
+        """
+        reconstructed_policy = [None] * len(self.quotient.state_valuations)
+
+        for entry in storm_json:
+            state_valuation = entry['s']
+            action_info = entry['c'][0]  # Assuming single action per state
+
+            # If DTnest fails to improve, old JSON structure may still be present
+            try:
+                action_label = action_info['labels'][0]  # Assuming single label per action
+            except KeyError:
+                action_label = action_info['origin']['action-label']
+
+            # Find the corresponding state index
+            for state_index, valuation in enumerate(self.quotient.state_valuations):
+                if all(state_valuation[var.name] == valuation[i] for i, var in enumerate(self.quotient.variables)):
+                    action_index = self.quotient.action_labels.index(action_label) - 1  # Due to the don't care action
+                    if self.quotient_bp.action_labels[action_index].startswith('_'):
+                        continue  # Skip irrelevant/random actions
+                    reconstructed_policy[state_index] = action_index
+                    break
+
+        return reconstructed_policy
+
+    def create_storm_json_from_policy(self, policy, family):
+        """Create storm JSON data from a policy.
+        Args:
+            policy: The policy to convert
+            family: The family for the policy
+        Returns:
+            The storm JSON data
+        """
+        # Filter irrelevant data from storm_json by calling policy_to_state_valuation_actions
+        storm_json = self.quotient_bp.policy_to_state_valuation_actions((policy, None), family)
+
+        # Format the data properly
+        storm_json_new = []
+        for s_point, c_point in storm_json:
+            # Filter out irrelevant data
+            storm_json_datapoint = {'s': s_point, "c": [{"origin": {"action-label": c_point}}]}
+            storm_json_new.append(storm_json_datapoint)
+
+        return storm_json_new
+
