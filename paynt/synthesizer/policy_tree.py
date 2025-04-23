@@ -688,8 +688,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # self loops serves as verification against worst case scenario -> any other action is better
 
         depth = -1
-        end_state = next((state for state in game_solver.state_is_target if state), -1)
-        assert end_state != -1
+        end_states = [state for state in game_solver.state_is_target if state]
+        assert end_states, "No valid end states found"
 
         assert len(self.quotient.quotient_mdp.initial_states) == 1
         game_policy_post = self.quotient.empty_policy()
@@ -728,9 +728,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if len(target_states) != 1:
                 depth += 1
 
-            if current_state == end_state:
+            if current_state in end_states:
                 bfs_flag = True
-            if current_state == end_state and check_granularity < 0:
+            if current_state in end_states and check_granularity < 0:
                 check_granularity = depth // abs(check_granularity)  # shortest path length
 
             # Push the sorted target states onto the stack - highest gradient goes out first
@@ -741,7 +741,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 for target_state in target_states:
                     que.append(target_state)
 
-            if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
+            if any(state in explored_states for state in end_states) and check_granularity > 0 and depth % check_granularity == 0:
                 sat = SynthesizerPolicyTree.double_check_policy(work_quotient, family, prop, game_pol_projection)
                 if sat:
                     return game_policy_post
@@ -781,8 +781,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             map_old_to_new = {i: i for i in range(len(work_quotient.action_labels))}
 
         depth = -1
-        end_state = next((state for state in game_solver.state_is_target if state), -1)
-        assert end_state != -1
+        end_states = [state for state in game_solver.state_is_target if state]
+        assert end_states, "No valid end states found"
 
         assert len(work_quotient.quotient_mdp.initial_states) == 1
         game_policy_post = work_quotient.empty_policy()
@@ -808,7 +808,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             target_states = work_quotient.choice_destinations[cur_choice]
 
             depth += 1
-            if current_state == end_state and check_granularity < 0:
+            if current_state in end_states and check_granularity < 0:
                 check_granularity = depth # shortest path length
 
             # Collect probabilities and corresponding target states
@@ -816,7 +816,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 prob = getProbForChoice(cur_choice, target_state)
                 heapq.heappush(state_stack, (-prob, target_state))
 
-            if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
+            if any(state in explored_states for state in end_states) and check_granularity > 0 and depth % check_granularity == 0:
                 sat = SynthesizerPolicyTree.double_check_policy(work_quotient, family, prop, game_pol_projection)
                 if sat:
                     return game_policy_post
