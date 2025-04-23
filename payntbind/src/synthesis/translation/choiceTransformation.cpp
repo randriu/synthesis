@@ -468,6 +468,95 @@ std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     return storm::utility::builder::buildModelFromComponents<ValueType,storm::models::sparse::StandardRewardModel<ValueType>>(model.getType(),std::move(components));
 }
 
+template<typename ValueType>
+std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>, std::vector<uint64_t>> addNoopAction(
+        storm::models::sparse::Model<ValueType> const& model,
+        storm::storage::BitVector const& state_mask
+) {
+    auto [action_labels, choice_to_action] = synthesis::extractActionLabels<ValueType>(model);
+    auto it = std::find(action_labels.begin(), action_labels.end(), NOOP_ACTION_LABEL);
+    STORM_LOG_THROW(it == action_labels.end(), storm::exceptions::UnexpectedException,
+                    "label " << NOOP_ACTION_LABEL << " is already defined");
+    uint64_t num_actions = action_labels.size();
+    uint64_t num_states = model.getNumberOfStates();
+    uint64_t num_choices = model.getNumberOfChoices();
+
+    // for each action, find any choice that corresponds to this action
+    std::vector<uint64_t> action_reference_choice(num_actions);
+    for(uint64_t choice = 0; choice < num_choices; ++choice) {
+        action_reference_choice[choice_to_action[choice]] = choice;
+    }
+
+    // translate choices
+    std::vector<uint64_t> translated_to_original_choice;
+    std::vector<uint64_t> row_groups_new;
+    std::vector<uint64_t> const& row_groups = model.getTransitionMatrix().getRowGroupIndices();
+
+    // Map from original choices to translated choices
+    std::vector<uint64_t> original_to_translated_choice(num_choices);
+
+    for(uint64_t state = 0; state < num_states; ++state) {
+        row_groups_new.push_back(translated_to_original_choice.size());
+        // copy existing choices
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+            uint64_t translated_idx = translated_to_original_choice.size();
+            translated_to_original_choice.push_back(choice);
+            original_to_translated_choice[choice] = translated_idx;
+        }
+        if(state_mask[state]) {
+            // add noop action (no need to map it to any original choice)
+            translated_to_original_choice.push_back(num_choices);
+        }
+    }
+    row_groups_new.push_back(translated_to_original_choice.size());
+    uint64_t num_translated_choices = translated_to_original_choice.size();
+    storm::storage::BitVector translated_choice_mask(num_translated_choices, false);
+    for(uint64_t translated_choice = 0; translated_choice < num_translated_choices; ++translated_choice) {
+        translated_choice_mask.set(translated_choice, translated_to_original_choice[translated_choice] < num_choices);
+    }
+
+    // build components
+    storm::storage::sparse::ModelComponents<ValueType> components = componentsFromModel(model);
+    components.choiceOrigins.reset();
+    auto choiceLabeling = synthesis::translateChoiceLabeling<ValueType>(model, translated_to_original_choice, translated_choice_mask);
+    choiceLabeling.addLabel(NOOP_ACTION_LABEL, ~translated_choice_mask);
+    components.choiceLabeling = choiceLabeling;
+    storm::storage::SparseMatrixBuilder<ValueType> builder(num_translated_choices, num_states, 0, true, true, num_states);
+    for(uint64_t state = 0; state < num_states; ++state) {
+        builder.newRowGroup(row_groups_new[state]);
+        // copy existing choices
+        uint64_t translated_choice = row_groups_new[state];
+        for(uint64_t choice = row_groups[state]; choice < row_groups[state+1]; ++choice) {
+            for(auto entry: model.getTransitionMatrix().getRow(choice)) {
+                builder.addNextValue(translated_choice, entry.getColumn(), entry.getValue());
+            }
+            ++translated_choice;
+        }
+        if(state_mask[state]) {
+            // add noop action as a self-loop with probability 1
+            builder.addNextValue(translated_choice, state, ValueType(1.0));
+        }
+    }
+    components.transitionMatrix = builder.build();
+
+    auto rewardModels = synthesis::translateRewardModels(model, translated_to_original_choice, translated_choice_mask);
+    for(auto & [name, reward_model]: rewardModels) {
+        std::vector<ValueType> & choice_reward = reward_model.getStateActionRewardVector();
+        for(uint64_t state = 0; state < num_states; ++state) {
+            if(not state_mask[state]) {
+                continue;
+            }
+            // Set zero reward for noop action
+            uint64_t noop_translated_choice = row_groups_new[state+1]-1;
+            choice_reward[noop_translated_choice] = ValueType(0);
+        }
+    }
+    components.rewardModels = rewardModels;
+    auto result_model = storm::utility::builder::buildModelFromComponents<ValueType, storm::models::sparse::StandardRewardModel<ValueType>>(
+            model.getType(), std::move(components));
+
+    return std::make_pair(result_model, original_to_translated_choice);
+}
 
 
 template<typename ValueType>
@@ -625,6 +714,10 @@ template std::shared_ptr<storm::models::sparse::Model<double>> restoreActionsInA
 template std::shared_ptr<storm::models::sparse::Model<double>> addDontCareAction<double>(
     storm::models::sparse::Model<double> const& model,
     storm::storage::BitVector const& state_mask);
+template std::pair<std::shared_ptr<storm::models::sparse::Model<double>>, std::vector<uint64_t>> addNoopAction<double>(
+        storm::models::sparse::Model<double> const& model,
+        storm::storage::BitVector const& state_mask
+);
 template std::shared_ptr<storm::models::sparse::Model<double>> createModelUnion(
     std::vector<std::shared_ptr<storm::models::sparse::Model<double>>> const&
 );
@@ -652,6 +745,9 @@ template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> re
 template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> addDontCareAction<storm::RationalNumber>(
     storm::models::sparse::Model<storm::RationalNumber> const& model,
     storm::storage::BitVector const& state_mask);
+template std::pair<std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>>, std::vector<uint64_t>> addNoopAction<storm::RationalNumber>(
+        storm::models::sparse::Model<storm::RationalNumber> const& model,
+        storm::storage::BitVector const& state_mask);
 template std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>> createModelUnion(
     std::vector<std::shared_ptr<storm::models::sparse::Model<storm::RationalNumber>>> const&
 );

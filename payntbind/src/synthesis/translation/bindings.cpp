@@ -15,6 +15,10 @@ void bindings_translation_vt(py::module& m, std::string const& vtSuffix) {
     m.def(("enableAllActions" + vtSuffix).c_str(), py::overload_cast<storm::models::sparse::Model<ValueType> const&>(&synthesis::enableAllActions<ValueType>));
     m.def(("restoreActionsInAbsorbingStates" + vtSuffix).c_str(), &synthesis::restoreActionsInAbsorbingStates<ValueType>);
     m.def(("addDontCareAction" + vtSuffix).c_str(), &synthesis::addDontCareAction<ValueType>);
+    m.def(("addNoopAction" + vtSuffix).c_str(), [](storm::models::sparse::Model<ValueType> const& model, storm::storage::BitVector const& state_mask) {
+        auto [model_result, actions] = synthesis::addNoopAction<ValueType>(model, state_mask);
+        return py::make_tuple(model_result, actions);
+    });
     m.def(("createModelUnion" + vtSuffix).c_str(), &synthesis::createModelUnion<ValueType>);
 
     py::class_<synthesis::SubPomdpBuilder<ValueType>, std::shared_ptr<synthesis::SubPomdpBuilder<ValueType>>>(m, ("SubPomdpBuilder" + vtSuffix).c_str())

@@ -174,7 +174,7 @@ class Synthesizer:
         if self.export_synthesis_filename_base is not None:
             self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
 
-        callDTNest = True
+        callDTNest = False
         if callDTNest:
             self.run_dtnest_synthesis(evaluations)
 

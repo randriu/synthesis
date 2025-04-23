@@ -1,3 +1,4 @@
+import copy
 import heapq
 
 import stormpy
@@ -546,6 +547,14 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     @staticmethod
     def double_check_policy(quotient, family, prop, policy):
         _,mdp = quotient.fix_and_apply_policy_to_family(family, policy)
+        # here goes MDP CE generator
+        # lower bound? exists, filip
+
+        # or payntbind build mdp w/ choices transformed
+
+        # or or add action to this MDP and choice
+
+        # only if _stay action not present in model
         #if family.size == 1:
         #    # due to experimental state removal this may not hold in irrelevant states
         #    quotient.assert_mdp_is_deterministic(mdp, family)
@@ -597,7 +606,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 game_policy_fixed[state] = action
         game_policy = game_policy_fixed
         
-        # due to storm::bitvector dealocation magic, I must receive data in form for bool vector and transform it here
+        # due to storm::bitvector deallocation magic, I must receive data in form for bool vector and transform it here
         mdp_fixed_choices = MdpFamilyQuotient.create_bitvector_from_vector(game_solver.environment_choice_mask)
 
         if game_sat:
@@ -611,29 +620,71 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
             if self.ldokoupi_flag:
                 self.ldok_postprocessing_times.start()
+
+                working_quotient = self.quotient
+                if not [action for action in self.quotient.action_labels if action.startswith("_stay")]:
+                    # add self loops
+                    working_quotient = self.get_quotient_with_noop()
+
                 # order is important - cut most diverging paths first
-                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, prop)
-                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, prop)
+                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
+                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
                 self.ldok_postprocessing_times.stop()
 
         return game_policy,game_sat,mdp_fixed_choices
 
-    
-    def post_process_game_policy_gradient(self, game_policy, game_solver, family, prop, check_granularity=4):
+    def get_quotient_with_noop(self):
+        quotient_copy = self.quotient.return_copy()
+
+        logger.debug("adding explicit noop action to relevant states...")
+        state_bv = stormpy.BitVector(len(quotient_copy.state_valuations), True)
+
+        # invoke paytnbind to add noop action
+        quotient_copy.quotient_mdp, quotient_copy.mappings = payntbind.synthesis.addNoopAction(quotient_copy.quotient_mdp, state_bv)
+        # get new action labels and choice to action mapping
+        quotient_copy.action_labels, quotient_copy.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_copy.quotient_mdp)
+
+        # map old actions to new ones
+        action_labels_old = self.quotient.action_labels
+        map_old_to_new = {}
+        for i, action in enumerate(action_labels_old):
+            if action in quotient_copy.action_labels:
+                map_old_to_new[i] = quotient_copy.action_labels.index(action)
+
+        # get action index of noop action
+        noop_index = next((i for i, action in enumerate(quotient_copy.action_labels) if action.startswith("_stay")), -1)
+        map_old_to_new[None] = noop_index
+
+        # other needed mappings
+        quotient_copy.map_old_to_new = map_old_to_new
+        quotient_copy.num_actions = len(quotient_copy.action_labels)
+        quotient_copy.state_action_choices = copy.deepcopy(
+            MdpFamilyQuotient.map_state_action_to_choices(quotient_copy.quotient_mdp,
+                                                          quotient_copy.num_actions,
+                                                          quotient_copy.choice_to_action))
+
+        # add stay action to family
+        quotient_copy.add_fam_choices = stormpy.BitVector(len(quotient_copy.choice_to_action), False)
+        for state in range(len(quotient_copy.state_valuations)):
+            for j in quotient_copy.state_action_choices[state][1]:
+                quotient_copy.add_fam_choices.set(j, True)
+
+        return quotient_copy
+
+    def post_process_game_policy_gradient(self, game_policy, game_solver, family, work_quotient, check_granularity=1):
         """ DFS only on non-descending gradient path until reaching the target
         then verify if the policy satisfies the property based on check_granularity
         if negative check every shortest path from init to end state / check_granularity
-        This post is applicable iff self loop ( _stay_ ) is first action in MDP
+        This post is applicable iff self loop ( _stay_ ) action is in MDP
         """
-        # LDOK TODO: need to account for minimizing properties -> non-increasing gradient
+        # self loop works only against maximizing property
+        prop = work_quotient.get_property()
+        if not work_quotient.get_property().maximizing:
+            return game_policy
 
-        # self loop has to be first applicable action
-        if self.quotient.action_labels[0] == "__no_label__":
-            if not self.quotient.action_labels[1].startswith("_stay"):
-                return game_policy
-        else:
-            if not self.quotient.action_labels[0].startswith("_stay"):
-                return game_policy
+        # sanity check - noop present
+        if not [action for action in work_quotient.action_labels if action.startswith("_stay")]:
+            return game_policy
         # self loops serves as verification against worst case scenario -> any other action is better
 
         depth = -1
@@ -643,8 +694,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         assert len(self.quotient.quotient_mdp.initial_states) == 1
         game_policy_post = self.quotient.empty_policy()
 
+        # get index of noop action and init projected policy to it
+        noop_index = next((i for i, action in enumerate(work_quotient.action_labels) if action.startswith("_stay")), -1)
+        game_pol_projection = work_quotient.init_policy(noop_index)
+
+        if hasattr(work_quotient, "map_old_to_new"):
+            map_old_to_new = work_quotient.map_old_to_new
+        else:
+            # stay was already present make identity mapping
+            map_old_to_new = {i: i for i in range(len(work_quotient.action_labels))}
+
         explored_states = set()  # avoid cycles
-        current_state = self.quotient.quotient_mdp.initial_states[0]
+        current_state = work_quotient.quotient_mdp.initial_states[0]
         state_stack = [(game_solver.solution_state_values[current_state], current_state)]
         bfs_flag = False
         que = []
@@ -658,10 +719,11 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             if current_state in explored_states:
                 continue
             game_policy_post[current_state] = game_policy[current_state]
+            game_pol_projection[current_state] = map_old_to_new[game_policy[current_state]]
             explored_states.add(current_state)
 
             cur_choice = game_solver.solution_state_to_quotient_choice[current_state]
-            target_states = self.quotient.choice_destinations[cur_choice]
+            target_states = work_quotient.choice_destinations[cur_choice]
 
             if len(target_states) != 1:
                 depth += 1
@@ -680,7 +742,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     que.append(target_state)
 
             if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
-                sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+                sat = SynthesizerPolicyTree.double_check_policy(work_quotient, family, prop, game_pol_projection)
                 if sat:
                     return game_policy_post
 
@@ -688,39 +750,49 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return game_policy
 
 
-    def post_process_game_policy_prob(self, game_policy, game_solver, family, prop, check_granularity=4):
+    def post_process_game_policy_prob(self, game_policy, game_solver, family, work_quotient, check_granularity=1):
         """ DFS only on max probability path until reaching the target
         then verify if the policy satisfies the property based on check_granularity
         if set to -1 then check every multiple of shortest path from init to end state
-        This post is applicable iff self loop ( _stay_ ) is first action in MDP
+        This post is applicable iff self loop ( _stay_ ) action is in MDP
         """
 
         def getProbForChoice(choice, target):
-            choices_transition_matrix = self.quotient.quotient_mdp.transition_matrix
+            choices_transition_matrix = work_quotient.quotient_mdp.transition_matrix
             for entry in choices_transition_matrix.get_row(choice):
                 dst, prob = entry.column, entry.value()  # entry.getColumn(), entry.getValue()
                 if dst == target:
                     return prob
             return 0.0
 
-        # self loop has to be first applicable action
-        if self.quotient.action_labels[0] == "__no_label__":
-            if not self.quotient.action_labels[1].startswith("_stay"):
-                return game_policy
+        # self loop works only against maximizing property
+        prop = work_quotient.get_property()
+        if not work_quotient.get_property().maximizing:
+            return game_policy
+
+        # sanity check - noop present
+        if not [action for action in work_quotient.action_labels if action.startswith("_stay")]:
+            return game_policy
+
+        if hasattr(work_quotient, "map_old_to_new"):
+            map_old_to_new = work_quotient.map_old_to_new
         else:
-            if not self.quotient.action_labels[0].startswith("_stay"):
-                return game_policy
-        # self loops serves as verification against worst case scenario -> any other action is better
+            # stay was already present make identity mapping
+            map_old_to_new = {i: i for i in range(len(work_quotient.action_labels))}
 
         depth = -1
         end_state = next((state for state in game_solver.state_is_target if state), -1)
         assert end_state != -1
 
-        assert len(self.quotient.quotient_mdp.initial_states) == 1
-        game_policy_post = self.quotient.empty_policy()
+        assert len(work_quotient.quotient_mdp.initial_states) == 1
+        game_policy_post = work_quotient.empty_policy()
+
+        # get index of noop action and init projected policy to it
+        noop_index = next((i for i, action in enumerate(work_quotient.action_labels) if action.startswith("_stay")), -1)
+        game_pol_projection = work_quotient.init_policy(noop_index)
 
         explored_states = set() # avoid cycles
-        current_state = self.quotient.quotient_mdp.initial_states[0]
+        current_state = work_quotient.quotient_mdp.initial_states[0]
         state_stack = [(-1.0, current_state)]
 
         while state_stack:
@@ -729,10 +801,11 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 continue
 
             game_policy_post[current_state] = game_policy[current_state]
+            game_pol_projection[current_state] = map_old_to_new[game_policy[current_state]]
             explored_states.add(current_state)
 
             cur_choice = game_solver.solution_state_to_quotient_choice[current_state]
-            target_states = self.quotient.choice_destinations[cur_choice]
+            target_states = work_quotient.choice_destinations[cur_choice]
 
             depth += 1
             if current_state == end_state and check_granularity < 0:
@@ -744,7 +817,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 heapq.heappush(state_stack, (-prob, target_state))
 
             if end_state in explored_states and check_granularity > 0 and depth % check_granularity == 0:
-                sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+                sat = SynthesizerPolicyTree.double_check_policy(work_quotient, family, prop, game_pol_projection)
                 if sat:
                     return game_policy_post
 
@@ -752,12 +825,13 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return game_policy
 
 
-    def post_process_bruteforce(self, game_policy, game_solver, family, prop):
+    def post_process_bruteforce(self, game_policy, game_solver, family, work_quotient):
         """ Brute force approach to find the pseudo smallest policy
         for totally correct results all permutations would be needed to check
         """
 
-        game_policy_post = self.quotient.empty_policy()
+        prop = work_quotient.get_property()
+        game_policy_post = work_quotient.empty_policy()
         for state in range(len(game_policy)):
             game_policy_post[state] = game_policy[state]
 
@@ -770,7 +844,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 # try set none and verify if fail, revert
                 old_action = game_policy_post[state]
                 game_policy_post[state] = None
-                sat = SynthesizerPolicyTree.double_check_policy(self.quotient, family, prop, game_policy_post)
+                sat = SynthesizerPolicyTree.double_check_policy(work_quotient, family, prop, game_policy_post)
                 if not sat:
                     game_policy_post[state] = old_action
                 else:

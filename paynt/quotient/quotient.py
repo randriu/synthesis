@@ -114,6 +114,9 @@ class Quotient:
     def empty_scheduler(self):
         return [None] * self.quotient_mdp.nr_states
 
+    def init_scheduler(self, action):
+        return [action] * self.quotient_mdp.nr_states
+
     def discard_unreachable_choices(self, state_to_choice):
         state_to_choice_reachable = self.empty_scheduler()
         state_visited = [False]*self.quotient_mdp.nr_states

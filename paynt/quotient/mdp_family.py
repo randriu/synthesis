@@ -6,6 +6,7 @@ import paynt.quotient.quotient
 import paynt.models.models
 import paynt.quotient.utils.variable
 import paynt.quotient.utils.decision_tree
+import payntbind
 
 import json
 
@@ -78,7 +79,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         [self.state_is_relevant_bv.set(state,value) for state,value in enumerate(self.state_is_relevant)]
         logger.debug(f"MDP has {self.state_is_relevant_bv.number_of_set_bits()}/{self.state_is_relevant_bv.size()} relevant states")
 
-        action_labels,_ = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.quotient_mdp = quotient_mdp
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
@@ -159,6 +159,9 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     def empty_policy(self):
         return self.empty_scheduler()
 
+    def init_policy(self, state):
+        return self.init_scheduler(state)
+
     def scheduler_to_policy(self, scheduler, mdp):
         state_to_choice = self.scheduler_to_state_to_choice(mdp,scheduler)
         policy = self.empty_policy()
@@ -190,8 +193,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
 
         num_actions = len(self.action_labels)
         dont_care_action = num_actions
-        if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL in self.action_labels:
-            dont_care_action = self.action_labels.index(MdpFamilyQuotient.DONT_CARE_ACTION_LABEL)
+        #if MdpFamilyQuotient.DONT_CARE_ACTION_LABEL in self.action_labels:
+        #    dont_care_action = self.action_labels.index(MdpFamilyQuotient.DONT_CARE_ACTION_LABEL)
 
         self.decision_tree = paynt.quotient.utils.decision_tree.DecisionTree(self,self.variables)
         self.decision_tree.set_depth(depth)
@@ -333,7 +336,20 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         policy_choices = []
         for state,action in enumerate(policy):
             policy_choices += self.state_action_choices[state][action]
-        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, family.selected_choices)
+        new_family_choices = stormpy.BitVector(self.quotient_mdp.nr_choices, False)
+
+        if hasattr(self, "mappings"):
+            for choice in family.selected_choices:
+                # policy_choices.append(choice)
+                new_family_choices.set(self.mappings[choice], True)
+        else:
+            new_family_choices = family.selected_choices
+
+        if hasattr(self,"add_fam_choices"):
+            for i in self.add_fam_choices:
+                new_family_choices.set(i, True)
+
+        choices = payntbind.synthesis.policyToChoicesForFamily(policy_choices, new_family_choices)
 
         # build MDP and keep only reachable states in policy
         mdp = self.build_from_choice_mask(choices)
@@ -344,7 +360,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         mask = [state for state,action in enumerate(policy_fixed) if action is not None]
         policy_fixed = (policy_fixed,mask)
         return policy_fixed,mdp
-    
 
     def apply_policy_to_family(self, family, policy):
         policy_choices = []

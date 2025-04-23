@@ -13,7 +13,9 @@ namespace synthesis {
 // label used for choices that do not have an explicit one
 const std::string NO_ACTION_LABEL = "__no_label__";
 // label used for a choice that executes a random selection of available choice
-const std::string DONT_CARE_ACTION_LABEL = "__random__";
+    const std::string DONT_CARE_ACTION_LABEL = "__random__";
+// label used for a choice that executes a self loop
+const std::string NOOP_ACTION_LABEL = "_stay__";
 
 /**
  * Return for each state a list of its state destinations.
@@ -111,6 +113,15 @@ template<typename ValueType>
 std::shared_ptr<storm::models::sparse::Model<ValueType>> addDontCareAction(
     storm::models::sparse::Model<ValueType> const& model,
     storm::storage::BitVector const& state_mask
+);
+/**
+ * To every state in \p state_mask, add an explicit action that executes a self loop.
+ * @return the updated model and a mapping from translated choices to actions
+ */
+template<typename ValueType>
+std::pair<std::shared_ptr<storm::models::sparse::Model<ValueType>>, std::vector<uint64_t>> addNoopAction(
+        storm::models::sparse::Model<ValueType> const& model,
+        storm::storage::BitVector const& state_mask
 );
 
 /**
