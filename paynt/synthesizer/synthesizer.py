@@ -1,6 +1,5 @@
 import copy
 import logging
-import os
 import subprocess
 
 import stormpy
@@ -173,10 +172,6 @@ class Synthesizer:
 
         if self.export_synthesis_filename_base is not None:
             self.export_evaluation_result(evaluations, self.export_synthesis_filename_base)
-
-        callDTNest = False
-        if callDTNest:
-            self.run_dtnest_synthesis(evaluations)
 
         if print_stats:
             self.stat.print()
@@ -427,105 +422,3 @@ class Synthesizer:
             storm_json_new.append(storm_json_datapoint)
 
         return storm_json_new
-
-
-    def run_dtnest_synthesis(self, evaluations):
-        """Run DTNest synthesis for all evaluated policies.
-
-        Args:
-            evaluations: List of evaluation results
-
-        Returns:
-            None
-        """
-        import json
-
-        self.counters_reset()
-        # Call the synthesizer to generate the decision tree for every policy from policy tree
-
-        base_export_name = self.export_synthesis_filename_base
-        dt_nest_save_path = base_export_name + "_dtNest.storm.json"
-
-        if os.path.exists(dt_nest_save_path):
-            os.remove(dt_nest_save_path)
-
-        family_args_len = None
-        # Create backup hardcopy of current quotient_mdp
-        self.quotient_bp = self.quotient.return_copy()
-
-        counter = -1
-        for evaluation in evaluations:
-            if not evaluation.policy:
-                continue  # Filter ∅ policies
-
-            policy = evaluation.policy[0]
-            family = evaluation.family
-            eval_choice = evaluation.mdp_fixed_choices
-            counter += 1
-
-            self.quotient = self.quotient_bp.return_copy()
-
-            # Clean up the choice mask
-            eval_choice = self.clean_choice_mask(eval_choice)
-
-            # Update quotient with fixed choices
-            self.update_quotient_with_choices(eval_choice)
-
-            # Assert that the policy is valid
-            self.assert_policy_choices(policy)
-
-            # Filter storm JSON for current family
-            with open(f"{base_export_name}.storm.json", "r") as f:
-                storm_json = json.loads(f.read())
-                storm_json = self.filter_storm_json_for_family(storm_json, family, family_args_len)
-
-            if not family_args_len:
-                family_args_len = len(family.hole_to_name)
-
-            if not storm_json:
-                continue  # Multiple mapping to single family, only one is relevant
-
-            # Prepare and run DTControl
-            model_dir = os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.dirname(self.quotient.tree_helper_path))))
-            scheduler_path = os.path.join(model_dir, "scheduler.storm.json")
-
-            if os.path.exists(scheduler_path):
-                os.remove(scheduler_path)
-
-            with open(scheduler_path, "w") as f:
-                f.write(json.dumps(storm_json, indent=4))
-
-            self.run_dtcontrol(scheduler_path, model_dir)
-
-            # Set up decision tree synthesizer
-            dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
-            dt_map_synthetiser.export_synthesis_filename_base = base_export_name + f"_p{counter}" if base_export_name else None
-
-            # Prepare quotient for synthesis
-            self.prepare_quotient_for_dt_synthesis()
-
-            # Run decision tree synthesis
-            dt_map_synthetiser.run()  # Policy got via dtcontrol
-
-            # Process results
-            with open(scheduler_path, "r") as f:
-                storm_json = json.loads(f.read())
-
-            # Load or initialize the aggregated data
-            if os.path.exists(dt_nest_save_path):
-                with open(dt_nest_save_path, "r") as f:
-                    existing_data = json.loads(f.read())
-            else:
-                existing_data = []
-
-            # Reconstruct and process policy
-            reconstructed_policy = self.reconstruct_policy_from_storm_json(storm_json)
-            storm_json = self.create_storm_json_from_policy(reconstructed_policy, family)
-
-            # Save the updated data
-            existing_data.extend(storm_json)
-            with open(dt_nest_save_path, "w") as f:
-                f.write(json.dumps(existing_data, indent=4))
-
-        return dt_nest_save_path
