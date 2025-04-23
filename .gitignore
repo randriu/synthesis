@@ -11,3 +11,8 @@ prerequisites/
 
 build/
 subtree_test*
+
+.*
+!.gitignore
+**/*.json
+**/*.html
