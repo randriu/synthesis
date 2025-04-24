@@ -629,8 +629,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     working_quotient = self.get_quotient_with_noop()
 
                 # order is important - cut most diverging paths first
-                # game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
-                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
+                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
+                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
                 self.ldok_postprocessing_times.stop()
 
         return game_policy,game_sat,mdp_fixed_choices
@@ -1050,7 +1050,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def run(self, optimum_threshold=None):
         evaluations = self.evaluate()
 
-        callDTNest = True
+        callDTNest = False
         if callDTNest:
             self.run_dtnest_synthesis(evaluations)
 
