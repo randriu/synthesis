@@ -9,10 +9,10 @@ const int yMAX = N;
 hole int OX in {1..4};
 hole int OY in {2..3};
 
-formula goal = (y=yMAX);
+formula goal = (x=xMAX & y=yMAX);
 formula done = goal | crash;
 
-const double slip = 0.09;
+const double slip = 0.0;
 
 formula xright  = min(x+1,xMAX);
 formula xleft   = max(x-1,xMIN);
