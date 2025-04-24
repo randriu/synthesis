@@ -629,8 +629,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     working_quotient = self.get_quotient_with_noop()
 
                 # order is important - cut most diverging paths first
-                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
-                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
+                # game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
+                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
                 self.ldok_postprocessing_times.stop()
 
         return game_policy,game_sat,mdp_fixed_choices
@@ -1050,7 +1050,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def run(self, optimum_threshold=None):
         evaluations = self.evaluate()
 
-        callDTNest = False
+        callDTNest = True
         if callDTNest:
             self.run_dtnest_synthesis(evaluations)
 
@@ -1124,6 +1124,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # Load the base Storm JSON data
         with open(storm_json_path, "r") as f:
             storm_json = json.loads(f.read())
+        os.remove(storm_json_path)
 
         for evaluation in evaluations:
             if not evaluation.policy:
@@ -1159,6 +1160,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 os.path.dirname(os.path.dirname(os.path.dirname(self.quotient.tree_helper_path))))
             scheduler_path = os.path.join(model_dir, "scheduler.storm.json")
 
+            if os.path.exists(scheduler_path):
+                os.remove(scheduler_path)
+
             with open(scheduler_path, "w") as f:
                 f.write(json.dumps(filtered_storm_json, indent=4))
 
@@ -1182,12 +1186,18 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             reconstructed_policy = self.reconstruct_policy_from_storm_json(updated_storm_json)
             new_storm_json = self.create_storm_json_from_policy(reconstructed_policy, family)
 
+            # Load or initialize the aggregated data
+            if os.path.exists(storm_json_path):
+                with open(storm_json_path, "r") as f:
+                    existing_data = json.loads(f.read())
+            else:
+                existing_data = []
             # Update the base Storm JSON data
-            storm_json.extend(new_storm_json)
+            existing_data.extend(new_storm_json)
 
-        # Overwrite base json file with the updated data
-        with open(storm_json_path, "w") as f:
-            f.write(json.dumps(storm_json, indent=4))
+            # Overwrite base json file with the updated data
+            with open(storm_json_path, "w") as f:
+                f.write(json.dumps(existing_data, indent=4))
 
     def run_dtcontrol(self, scheduler_path, model_dir):
         self.dtcontrol_calls += 1
