@@ -6,7 +6,7 @@ import sys
 output_csv = "summary.csv"
 
 # Define the column headers
-headers = ["model", "nr states", "nr actions", "mem size", "total members", "sat members", "time"]
+headers = ["model", "nr states", "nr actions", "mem size", "total members", "sat members", "sat FSCs", "time"]
 
 # Function to parse the content of the file and extract required information
 def parse_file_content(file_path):
@@ -19,6 +19,7 @@ def parse_file_content(file_path):
         nr_actions = None
         sat_members = None
         total_members = None
+        sat_fscs = None
         time = None
 
         for line in lines:
@@ -33,6 +34,8 @@ def parse_file_content(file_path):
                 total_members = int(line.split("satisfied")[1].split("/")[1].split("members")[0].strip())
             elif "time:" in line:
                 time = float(line.split("time:")[1].strip().split(" ")[0])
+            elif " solvable leaves:" in line:
+                sat_fscs = int(line.split("solvable leaves:")[1].split("(")[0].strip())
 
         return [
             os.path.splitext(os.path.basename(file_path))[0],
@@ -41,6 +44,7 @@ def parse_file_content(file_path):
             file_path[-5],
             total_members if total_members is not None else "",
             sat_members if sat_members is not None else "",
+            sat_fscs if sat_fscs is not None else "",
             time if time is not None else ""
         ]
     except Exception as e:
