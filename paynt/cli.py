@@ -143,8 +143,13 @@ def setup_logger(log_path = None):
 )
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
-@click.option("--ldokoupi", is_flag=True, default=False,
-    help="ldokoupi DIP experiments")
+@click.option(
+    "--ldokoupi",
+    type=click.Choice(["baseline", "prune", "dtNESt"]),
+    default=None,
+    show_default=True,
+    help="ldokoupi DIP experiment choices"
+)
 
 def paynt_run(
     project, sketch, props, relative_error, optimum_threshold, precision, exact, timeout,

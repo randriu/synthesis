@@ -22,7 +22,7 @@ class Synthesizer:
     # base filename (i.e. without extension) to export synthesis result
     export_synthesis_filename_base = None
     # ldokoupi flag for 2024-5 DIP experiments
-    ldokoupi_flag = False
+    ldokoupi_flag = None # value is set in cli.py
 
     @staticmethod
     def choose_synthesizer(quotient, method, fsc_synthesis=False, storm_control=None):

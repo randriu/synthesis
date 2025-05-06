@@ -540,7 +540,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     double_check_policy_tree_leaves = False
     # if True, unreachable choices will be discarded from the splitting scheduler
     discard_unreachable_choices = False
-    ldok_postprocessing_times = paynt.utils.timer.Timer()
+    prune_postprocess_time = paynt.utils.timer.Timer()
     
     @property
     def method_name(self):
@@ -620,8 +620,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             #     logger.debug("{}:{} [{:.2f}] -> {}".format(n,state,prob,self.quotient.choice_destinations[game_solver.solution_state_to_quotient_choice[n]]))
             # logger.debug("debug: state to destination end")
 
-            if self.ldokoupi_flag:
-                self.ldok_postprocessing_times.start()
+            if self.ldokoupi_flag == "prune":
+                self.prune_postprocess_time.start()
 
                 working_quotient = self.quotient
                 if not [action for action in self.quotient.action_labels if action.startswith("_noop")]:
@@ -629,9 +629,9 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                     working_quotient = self.get_quotient_with_noop()
 
                 # order is important - cut most diverging paths first
-                # game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
-                # game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
-                self.ldok_postprocessing_times.stop()
+                game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
+                game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
+                self.prune_postprocess_time.stop()
 
         return game_policy,game_sat,mdp_fixed_choices
 
@@ -1020,7 +1020,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policy_tree_node.split(result.splitter,suboptions,subfamilies)
             undecided_leaves += policy_tree_node.child_nodes
 
-        logger.debug(f"LDOKOUPI: postprocessing took {int(self.ldok_postprocessing_times.read())} s")
+        # logger.debug(f"policy prunning postprocessing took {int(self.prune_postprocess_time.read())} s")
         if SynthesizerPolicyTree.double_check_policy_tree_leaves:
             policy_tree.double_check(self.quotient, prop)
         policy_tree.print_stats()
@@ -1050,7 +1050,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def run(self, optimum_threshold=None):
         evaluations = self.evaluate()
 
-        callDTNest = True
+        callDTNest = (self.ldokoupi_flag == "dtNESt")
         if callDTNest:
             self.run_dtnest_synthesis(evaluations)
 
@@ -1059,20 +1059,17 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     def export_evaluation_result(self, evaluations, export_filename_base):
         import json
-        flag_bp = self.ldokoupi_flag
         # second export is in DTControl format
         for flag in [False, True]:
             if not self.ldokoupi_flag and flag is True:
-                continue
-            self.ldokoupi_flag = flag
+                continue # skip DTControl export if not experimental
 
-            policies = self.policy_tree.extract_policies(self.quotient, keep_family=self.ldokoupi_flag)
-            policies_json = [] if self.ldokoupi_flag else {}
+            policies = self.policy_tree.extract_policies(self.quotient, keep_family=flag)
+            policies_json = [] if flag else {}
             for index,key_value in enumerate(policies.items()):
                 policy_id,policy = key_value
-                policy_json = self.quotient.policy_to_json(policy, dt_control=self.ldokoupi_flag)
-
-                if not self.ldokoupi_flag:
+                policy_json = self.quotient.policy_to_json(policy, dt_control=flag)
+                if not flag:
                     policies_json[policy_id] = policy_json
                 else:
                     # for merging policy tree & DTs create long list as classification problem for DTCONTROL
@@ -1083,7 +1080,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             policies_filename = export_filename_base + ".json" if not flag else export_filename_base + ".storm.json"
             with open(policies_filename, 'w') as file:
                 file.write(policies_string)
-            self.ldokoupi_flag = flag_bp
             logger.info(f"exported policies to {policies_filename}")
 
         tree = self.policy_tree.extract_policy_tree(self.quotient)
@@ -1092,8 +1088,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
             file.write(tree.source)
         logger.info(f"exported policy tree to {tree_filename}")
 
-        if self.ldokoupi_flag:
-            return  # omit png
         tree_visualization_filename = export_filename_base + ".png"
         tree.render(export_filename_base, format="png", cleanup=True) # using export_filename_base since graphviz appends .png by default
         logger.info(f"exported policy tree visualization to {tree_visualization_filename}")
@@ -1202,6 +1196,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def run_dtcontrol(self, scheduler_path, model_dir):
         self.dtcontrol_calls += 1
 
+        # LADA TODO: put just dtcontrol in command
         command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input",
                    "scheduler.storm.json", "-r", "--use-preset", "default"]
         subprocess.run(command, cwd=f"{model_dir}")

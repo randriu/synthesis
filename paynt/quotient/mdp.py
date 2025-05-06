@@ -543,13 +543,6 @@ class MdpQuotient(paynt.quotient.quotient.Quotient):
 
     def are_choices_consistent(self, choices, family):
         ''' Separate method for profiling purposes. '''
-        # relevant_choices = stormpy.BitVector(choices)
-        # # TODO add more ways to determine relevant choices
-        # nci = self.quotient_mdp.nondeterministic_choice_indices.copy()
-        # for state in range(self.quotient_mdp.nr_states):
-        #     if self.quotient_mdp.get_nr_available_actions(state) <= 1:
-        #         for choice in range(nci[state],nci[state+1]):
-        #             relevant_choices.set(choice, False)
         return self.coloring.areChoicesConsistent(choices, family.family)
 
     def scheduler_is_consistent(self, mdp, prop, result):
