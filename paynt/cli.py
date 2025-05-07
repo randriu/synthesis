@@ -145,7 +145,7 @@ def setup_logger(log_path = None):
     help="run profiling")
 @click.option(
     "--ldokoupi",
-    type=click.Choice(["baseline", "prune", "dtNESt"]),
+    type=click.Choice(["unpruned", "prune", "dtNESt"]),
     default=None,
     show_default=True,
     help="ldokoupi DIP experiment choices"
