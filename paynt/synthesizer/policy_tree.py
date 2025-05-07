@@ -5,6 +5,7 @@ import os
 import stormpy
 import payntbind
 import subprocess
+import json
 
 import paynt.family.family
 import paynt.synthesizer.synthesizer
@@ -632,8 +633,57 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 game_policy = self.post_process_game_policy_gradient(game_policy, game_solver, family, working_quotient)
                 game_policy = self.post_process_game_policy_prob(game_policy, game_solver, family, working_quotient)
                 self.prune_postprocess_time.stop()
+            # elif self.ldokoupi_flag == "dtNESt":
+            #     game_policy = self._per_policy_dtNest(game_policy, mdp_fixed_choices, family)
 
         return game_policy,game_sat,mdp_fixed_choices
+
+    def _per_policy_dtNest(self,game_policy,mdp_fixed_choices,family):
+        """
+        invoking dtNest before postprocessing was considered, but rejected
+        due to fewer policies being present afterwards
+        combined with time complexity of dtNest
+        """
+        if not hasattr(self, 'quotient_bp') or self.quotient_bp is None:
+            self.counters_reset()
+            self.quotient_bp = self.quotient.return_copy()
+
+        # Clean up the choice mask and update quotient with fixed choices
+        choices = self.clean_choice_mask(mdp_fixed_choices)
+        working_quotient = self.quotient_bp.return_copy()
+        self.quotient = working_quotient
+        self.update_quotient_with_choices(choices)
+
+        # Prepare quotient for decision tree synthesis
+        self.prepare_quotient_for_dt_synthesis()
+
+        # Generate temporary file for DTControl
+        model_dir = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.dirname(self.quotient.tree_helper_path))))
+        scheduler_path = os.path.join(model_dir, "scheduler.storm.json")
+
+        # Export policy to JSON for DTControl
+        storm_json = self.create_storm_json_from_policy(game_policy, family)
+        with open(scheduler_path, "w") as f:
+            f.write(json.dumps(storm_json, indent=4))
+
+        # Run DTControl to get first policy
+        self.run_dtcontrol(scheduler_path, model_dir)
+
+        # Set up and run decision tree synthesizer
+        dt_map_synthetiser = paynt.synthesizer.decision_tree.SynthesizerDecisionTree(self.quotient)
+        dt_map_synthetiser.run()
+
+        # Load the optimized policy
+        with open(scheduler_path, "r") as f:
+            updated_storm_json = json.loads(f.read())
+
+        # Reconstruct policy from storm JSON
+        optimized_policy = self.reconstruct_policy_from_storm_json(updated_storm_json)
+
+        # Restore original quotient
+        self.quotient = self.quotient_bp
+        return optimized_policy
 
     def get_quotient_with_noop(self):
         quotient_copy = self.quotient.return_copy()
@@ -1056,9 +1106,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
         return evaluations
 
-    # LADA TODO: try dtNest before post
     def export_evaluation_result(self, evaluations, export_filename_base):
-        import json
         # second export is in DTControl format
         for flag in [False, True]:
             if not self.ldokoupi_flag and flag is True:
@@ -1100,8 +1148,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         Returns:
             None
         """
-        import json
-
         self.counters_reset()
         base_export_name = self.export_synthesis_filename_base
         storm_json_path = base_export_name + ".storm.json"
