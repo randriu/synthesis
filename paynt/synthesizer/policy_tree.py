@@ -278,18 +278,32 @@ class PolicyTreeNode:
     def node_id(self):
         return str(self.family).replace(' ','').replace(':','=')
 
-    def add_nodes_to_graphviz_tree(self, graphviz_tree):
+    def add_nodes_to_graphviz_tree(self, graphviz_tree, candidate_map_tree=False):
+        def format_candidate_str():
+            """Add candidate map to node label, represented by family infimum"""
+            if not hasattr(self.family, "holes_options") or not candidate_map_tree:
+                return ""
+
+            candidate_values = []
+            for hole_idx, options in enumerate(self.family.holes_options):
+                    hole_name = self.family.hole_to_name[hole_idx] if hasattr(self.family,
+                                                                              "hole_to_name") else f"h{hole_idx}"
+                    candidate_values.append(f"{hole_name}={options[0]}")
+
+            if candidate_values:
+                return f" [{','.join(candidate_values)}]"
+            return ""
+
         node_label = ""
         if self.sat is False:
             node_label = "∅"
-            # node_label = "X"
         elif self.sat is True:
-            # node_label = "✓"
-            node_label = f"p{self.policy_index}"
+            candidate_str = format_candidate_str()
+            node_label = f"p{self.policy_index} & {candidate_str}"
         graphviz_tree.node(self.node_id, label=node_label, shape="ellipse", width="0.15", height="0.15")
         # enumerating in reverse to print policies in ascending order, from left to right
         for child in reversed(self.child_nodes):
-            child.add_nodes_to_graphviz_tree(graphviz_tree)
+            child.add_nodes_to_graphviz_tree(graphviz_tree, candidate_map_tree)
 
     def get_policy_family_from_index(self, index: int):
         if self.policy_index == index:
@@ -518,7 +532,7 @@ class PolicyTree:
         logging.getLogger("graphviz").setLevel(logging.WARNING)
         logging.getLogger("graphviz.sources").setLevel(logging.ERROR)
         graphviz_tree = graphviz.Digraph(comment="policy_tree")
-        self.root.add_nodes_to_graphviz_tree(graphviz_tree)
+        self.root.add_nodes_to_graphviz_tree(graphviz_tree,quotient.ldokoupi_flag)
         self.root.add_edges_to_graphviz_tree(graphviz_tree)
         return graphviz_tree
 
@@ -1107,8 +1121,8 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return evaluations
 
     def export_evaluation_result(self, evaluations, export_filename_base):
-        # second export is in DTControl format
-        for flag in [False, True]:
+        # second export is in DTControl format, add False for original policy json
+        for flag in [True]:
             if not self.ldokoupi_flag and flag is True:
                 continue # skip DTControl export if not experimental
 
@@ -1130,7 +1144,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
                 file.write(policies_string)
             logger.info(f"exported policies to {policies_filename}")
 
-        tree = self.policy_tree.extract_policy_tree(self.quotient)
+        tree = self.policy_tree.extract_policy_tree(self)
         tree_filename = export_filename_base + ".dot"
         with open(tree_filename, 'w') as file:
             file.write(tree.source)
