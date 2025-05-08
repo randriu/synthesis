@@ -1256,8 +1256,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
     def run_dtcontrol(self, scheduler_path, model_dir):
         self.dtcontrol_calls += 1
 
-        # LADA TODO: put just dtcontrol in command
-        command = ["/home/lada/repo/diplomka/PAYNT/.venv_fpmk/bin/dtcontrol", "--input",
+        command = ["dtcontrol", "--input",
                    "scheduler.storm.json", "-r", "--use-preset", "default"]
         subprocess.run(command, cwd=f"{model_dir}")
 
