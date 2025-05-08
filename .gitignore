@@ -6,6 +6,8 @@ prerequisites/
 .vscode
 .idea
 
+experiments/
+
 # OSX
 .DS_Store
 

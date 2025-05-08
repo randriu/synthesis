@@ -1,0 +1,26 @@
+pomdp
+
+hole int h in {0, 1};
+
+formula goal = s=3;
+
+module state_space
+    s : [0..3] init 0;
+
+    [a] s=0 -> 1-h : (s'=1) + h : (s'=2);
+
+    [a] s=1 -> 1 : (s'=3);
+    [a] s=2 -> 1 : (s'=3);
+
+    []  s=3 -> true;
+endmodule
+
+observable "finished" = goal;
+
+label "goal" = goal;
+
+rewards "rew"
+    [a] s=0 : 0;
+    [a] s=1 : 100;
+    [a] s=2 : 20;
+endrewards

@@ -32,3 +32,6 @@ class SynthesizerPomdpPolicyTree(paynt.synthesizer.policy_tree.SynthesizerPolicy
 
             return policy
 
+    def log_game_stats(self, states, game_solver):
+        self.stat.iteration_game(states)
+        self.stat.add_smg_iterations(game_solver.game_iterations)
