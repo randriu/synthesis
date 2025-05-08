@@ -27,6 +27,7 @@ class Synthesizer:
         import paynt.quotient.pomdp
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
+        import paynt.quotient.pomdp_family
         import paynt.quotient.posmg
         import paynt.synthesizer.synthesizer_onebyone
         import paynt.synthesizer.synthesizer_ar
@@ -37,11 +38,12 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.synthesizer_posmg
         import paynt.synthesizer.policy_tree
+        import paynt.synthesizer.pomdp_policy_tree
         import paynt.synthesizer.decision_tree
 
+        # Policy Tree synthesis for family of POMDPs
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
-            logger.info("nothing to do with the POMDP sketch, aborting...")
-            exit(0)
+            return paynt.synthesizer.pomdp_policy_tree.SynthesizerPomdpPolicyTree(quotient)
         if isinstance(quotient, paynt.quotient.mdp.MdpQuotient):
             return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient)
         # FSC synthesis for POMDPs

@@ -1,0 +1,76 @@
+pomdp
+
+const int N = 4;
+const int gMIN = 1;
+const int gMAX = N;
+
+
+// maze definition
+formula u = y<4 & !(x=2 & y=1) & !(x=3 & y=2);
+formula r = x<4 & !(x=1 & y=2) & !(x=2 & y=3);
+formula d = y>1 & !(x=2 & y=3) & !(x=3 & y=4);
+formula l = x>1 & !(x=3 & y=2) & !(x=4 & y=3);
+
+// updates of coordinates (if possible)
+formula yu = u ? (y+1) : y;
+formula xr = r ? (x+1) : x;
+formula yd = d ? (y-1) : y;
+formula xl = l ? (x-1) : x;
+
+
+observable "clk" = clk;
+observable "goal" = goal;
+observable "crash" = crash;
+observable "up" = u;
+observable "right" = r;
+
+hole int upper in {0,1};
+hole int corner in {0,1};
+hole double fail_p in {0.0..1.0:0.1};
+
+formula at1 = upper = 1 ? (corner = 1 ? (x=1 & y=4) : (x=2 & y=3)) : (corner = 1 ? (x=4 & y=1) : (x=3 & y=2));
+
+formula near1 = (x<3 & y>2) | (x>2 & y<3);
+
+formula crash = visit1;
+formula goal = (x=gMAX & y=gMAX);
+formula done = goal | crash;
+label "goal" = goal;
+
+const NUM_OBS = 1;
+formula clk_next = mod(clk+1,NUM_OBS+1);
+module clk
+    clk : [-1..NUM_OBS] init 0;
+
+    [up] !done & clk=0 -> (clk'=clk_next);
+    [do] !done & clk=0 -> (clk'=clk_next);
+    [le] !done & clk=0 -> (clk'=clk_next);
+    [ri] !done & clk=0 -> (clk'=clk_next);
+    
+    [detect1] !done & clk=1 -> (clk'=clk_next);
+endmodule
+
+
+hole double slip in {0.0..0.5:0.05};
+
+module agent
+    x : [gMIN..gMAX] init gMIN;
+    y : [gMIN..gMAX] init gMIN;
+
+    [up] true -> 1-slip : (y'=yu) + slip : (y'=y);
+    [do] true -> 1-slip : (y'=yd) + slip : (y'=y);
+    [le] true -> 1-slip : (x'=xl) + slip : (x'=x);
+    [ri] true -> 1-slip : (x'=xr) + slip : (x'=x);
+endmodule
+
+module visit1
+    visit1 : bool init false;
+    [detect1] !near1 -> true;
+    [detect1]  near1 -> fail_p: (visit1'=at1) + 1-fail_p: (visit1'=false);
+
+    [up] true -> (visit1'=false);
+    [do] true -> (visit1'=false);
+    [le] true -> (visit1'=false);
+    [ri] true -> (visit1'=false);
+endmodule
+
