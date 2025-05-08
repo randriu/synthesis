@@ -280,26 +280,35 @@ class PolicyTreeNode:
 
     def add_nodes_to_graphviz_tree(self, graphviz_tree, candidate_map_tree=False):
         def format_candidate_str():
-            """Add candidate map to node label, represented by family infimum"""
+            """Extract candidate values from family domain."""
             if not hasattr(self.family, "holes_options") or not candidate_map_tree:
                 return ""
 
             candidate_values = []
             for hole_idx, options in enumerate(self.family.holes_options):
-                    hole_name = self.family.hole_to_name[hole_idx] if hasattr(self.family,
-                                                                              "hole_to_name") else f"h{hole_idx}"
-                    candidate_values.append(f"{hole_name}={options[0]}")
+                hole_name = self.family.hole_to_name[hole_idx] if hasattr(self.family, "hole_to_name") else f"h{hole_idx}"
+                candidate_values.append(f"{hole_name}={options[0]}")
 
             if candidate_values:
                 return f" [{','.join(candidate_values)}]"
             return ""
 
+        # Create the policy-to-candidate map if it doesn't exist
+        if not hasattr(graphviz_tree, 'policy_candidate_map'):
+            graphviz_tree.policy_candidate_map = {}
+
         node_label = ""
         if self.sat is False:
             node_label = "∅"
         elif self.sat is True:
-            candidate_str = format_candidate_str()
-            node_label = f"p{self.policy_index} & {candidate_str}"
+            # Get or create candidate string for this policy
+            policy_idx = self.policy_index
+            if policy_idx not in graphviz_tree.policy_candidate_map:
+                graphviz_tree.policy_candidate_map[policy_idx] = format_candidate_str()
+
+            candidate_str = graphviz_tree.policy_candidate_map[policy_idx]
+            node_label = f"p{policy_idx}{candidate_str}"
+
         graphviz_tree.node(self.node_id, label=node_label, shape="ellipse", width="0.15", height="0.15")
         # enumerating in reverse to print policies in ascending order, from left to right
         for child in reversed(self.child_nodes):
