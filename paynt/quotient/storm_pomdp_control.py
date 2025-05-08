@@ -99,7 +99,7 @@ class StormPOMDPControl:
         else:
             self.storm_bounds = self.latest_storm_result.lower_bound
 
-        if (self.storm_control.iteration_timeout is not None) or (self.storm_control.get_result is not None):
+        if (self.iteration_timeout is not None) or (self.get_result is not None):
             self.saynt_fsc = self.belief_controller_to_fsc(self.latest_storm_result, self.latest_paynt_result_fsc)
 
     # run Storm POMDP analysis for given model and specification
