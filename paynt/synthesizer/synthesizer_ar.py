@@ -115,7 +115,7 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
         if isinstance(self.quotient, paynt.quotient.pomdp.PomdpQuotient):
             self.stat.new_fsc_found(family.analysis_result.improving_value, ia, self.quotient.policy_size(ia))
 
-    def synthesize_one(self, family, threshold=0):
+    def synthesize_one(self, family):
         families = [family]
         while families:
             if self.resource_limit_reached():
@@ -126,8 +126,6 @@ class SynthesizerAR(paynt.synthesizer.synthesizer.Synthesizer):
             if not self.quotient.specification.has_optimality and self.best_assignment is not None:
                 break
             # break
-            if self.best_assignment_value is not None and self.best_assignment_value <= threshold:
-                break
             if family.analysis_result.can_improve is False:
                 self.explore(family)
                 continue

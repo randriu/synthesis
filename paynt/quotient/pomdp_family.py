@@ -42,7 +42,6 @@ class GameAbstractionSolver():
         self.game_iterations = None
 
         self.posmg_specification = self.create_posmg_specification(prop)
-        self.threshold = prop.threshold
 
     def specify_target_with_label(self, labeling, prop):
         '''
@@ -129,7 +128,7 @@ class GameAbstractionSolver():
         paynt.quotient.posmg.PosmgQuotient.initial_memory_size = 1
         posmgQuotient = paynt.quotient.posmg.PosmgQuotient(posmg, self.posmg_specification)
         synthesizer = paynt.synthesizer.synthesizer_ar.SynthesizerAR(posmgQuotient)
-        assignment = synthesizer.synthesize(print_stats=False, threshold=self.threshold)
+        assignment = synthesizer.synthesize(print_stats=False)
 
         # TODO modify for rewards
         #   assignment can be None even for optimality property if the value is infinity
