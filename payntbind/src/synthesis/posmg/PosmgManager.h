@@ -140,6 +140,8 @@ class PosmgManager {
 
         storm::models::sparse::StateLabeling constructStateLabeling();
 
+        storm::models::sparse::StandardRewardModel<ValueType> constructRewardModel(storm::models::sparse::StandardRewardModel<ValueType> const& reward_model);
+
         void resetDesignSpace();
 
         void buildDesignSpaceSpurious();
