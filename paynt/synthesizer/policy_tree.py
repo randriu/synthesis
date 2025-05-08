@@ -562,10 +562,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
 
     def verify_family(self, family, game_solver, prop):
         # logger.info("investigating family of size {}".format(family.size))
-        if family.size < self.max_family_size / 64:
-            self.quotient.set_memory_size(self.quotient.MAX_MEMORY)
-        else:
-            self.quotient.set_memory_size(1)
         self.quotient.build(family)
         mdp_family_result = MdpFamilyResult()
 
@@ -681,8 +677,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         game_solver = self.quotient.build_game_abstraction_solver(prop)
         family.candidate_policy = None
         policy_tree = PolicyTree(family)
-
-        self.max_family_size = family.size
 
         undecided_leaves = [policy_tree.root]
         while undecided_leaves:

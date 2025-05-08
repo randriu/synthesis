@@ -186,7 +186,6 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         # for each memory size (1 ... MAX_MEMORY) a choice mask enabling corresponding memory updates in the quotient mdp
         self.restricted_choices = None
-        self.memory_size = self.MAX_MEMORY
 
         if self.MAX_MEMORY > 1:
             quotient_mdp, self.unfolded_state_to_observation, coloring, self.restricted_choices = self.unfold_quotient(
@@ -228,15 +227,11 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
-    def set_memory_size(self, memory_size):
-        assert memory_size <= self.MAX_MEMORY
-        self.memory_size = memory_size
-
     # construct the quotient for the family
     # the family is a intersection of policy tree family and memory family
     def build(self, family):
         # TODO decide which memory size to use
-        memory_size = self.memory_size
+        memory_size = self.MAX_MEMORY
 
         member_selection_choices = self.coloring.selectCompatibleChoices(family.family)
         memory_selection_choices = self.restricted_choices[memory_size]
