@@ -29,6 +29,7 @@ class Synthesizer:
         import paynt.quotient.mdp_family
         import paynt.quotient.pomdp_family
         import paynt.quotient.posmg
+        import paynt.quotient.ipomdp
         import paynt.synthesizer.synthesizer_onebyone
         import paynt.synthesizer.synthesizer_pomdp_onebyone
         import paynt.synthesizer.synthesizer_ar
@@ -38,10 +39,14 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_pomdp
         import paynt.synthesizer.synthesizer_decpomdp
         import paynt.synthesizer.synthesizer_posmg
+        import paynt.synthesizer.synthesizer_ipomdp
         import paynt.synthesizer.policy_tree
         import paynt.synthesizer.pomdp_policy_tree
         import paynt.synthesizer.decision_tree
 
+        # FSC synthesis to IPOMDPs
+        if isinstance(quotient, paynt.quotient.ipomdp.IpomdpQuotient):
+            return paynt.synthesizer.synthesizer_ipomdp.SynthesizerIpomdp(quotient)
         # Policy Tree synthesis for family of POMDPs
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
             if method == "onebyone":
