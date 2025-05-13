@@ -4,7 +4,16 @@ from datetime import datetime
 import sys
 
 # List of models
-posmg_model = ["attacker-defender", "attacker-one-defender", "dice-and-coin", "dice-and-coin2", "dodge-6-lines", "dodge-6-lines-position", "dodge-8", "grid-walls", "test-game", "test-game2"]
+posmg_model = [
+    "attacker-defender",
+    "attacker-one-defender",
+    "dice-and-coin",
+    "dice-and-coin2",
+    "dodge-6-lines",
+    "dodge-6-lines-position",
+    "grid-walls",
+    "test-game",
+    "test-game2"]
 
 # Create experiments folder if it doesn't exist
 experiments_dir = "experiments"
@@ -28,7 +37,7 @@ for model in posmg_model:
         print(f"Skipping {model}, log file already exists.")
         continue
 
-    command = f"gtimeout 600 python3 paynt.py models/posmg/{model} --fsc-synthesis"
+    command = f"gtimeout 3600 python3 paynt.py models/posmg/{model} --fsc-synthesis"
 
     with open(log_file, "w") as log:
         process = subprocess.Popen(command, shell=True, stdout=log, stderr=log)
