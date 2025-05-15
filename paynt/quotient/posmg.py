@@ -1,3 +1,10 @@
+# Contributions of
+# BACHELORS'S THESIS
+# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+# by Antonin Masopust
+#
+# This whole file was created by me. It contains code for creating the quotient for the os-POSG.
+
 import paynt.models
 import paynt.models.models
 import payntbind

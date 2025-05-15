@@ -1,3 +1,12 @@
+# Contributions of
+# BACHELORS'S THESIS
+# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+# by Antonin Masopust
+#
+# added GameAbstractionSolver class for solving the game abstraction for POMDP family
+# extended PomdpFamilyQuotient class (until the divider)
+#   added functions to unfold the quotient into more memory
+
 import paynt.quotient.pomdp
 import stormpy
 import payntbind
@@ -389,7 +398,9 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         return policy
 
+# my work
 ################################################################################
+# not my work
 
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''

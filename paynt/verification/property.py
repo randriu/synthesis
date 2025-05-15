@@ -1,3 +1,10 @@
+# Contributions of
+# BACHELORS'S THESIS
+# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+# by Antonin Masopust
+#
+# added game formula and optimizing player attributes to Property classes.
+
 import stormpy
 import payntbind
 import math
@@ -12,11 +19,11 @@ def construct_property(prop, relative_error, use_exact=False):
     player_index = None
     if rf.is_reward_operator and use_exact:
         raise ValueError("exact synthesis is not supported for reward properties")
-    
+
     if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
         if use_exact:
             raise ValueError("exact synthesis is not supported for game properties")
-        
+
         player_index = extract_player_index(rf)
         game_rf = rf
         rf = rf.subformula

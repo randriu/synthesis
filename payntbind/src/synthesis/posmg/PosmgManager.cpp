@@ -1,3 +1,10 @@
+// Contributions of
+// BACHELORS'S THESIS
+// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+// by Antonin Masopust
+//
+// This whole file was created by me. It contains the code to create the quotient fo os-POSG.
+
 #include "PosmgManager.h"
 
 #include "storm/exceptions/NotSupportedException.h"

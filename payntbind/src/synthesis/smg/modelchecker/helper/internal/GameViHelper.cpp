@@ -1,3 +1,10 @@
+// Contributions of
+// BACHELORS'S THESIS
+// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+// by Antonin Masopust
+//
+// the checkConvergence method was modified according to literature
+
 /*
  * code in this file was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
 

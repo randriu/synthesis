@@ -1,3 +1,10 @@
+# Contributions of
+# BACHELORS'S THESIS
+# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+# by Antonin Masopust
+#
+# This whole file was created by me. It contains code to solve interval POMDPs. (i.e. obtain the lower-bound value and an FSC)
+
 import paynt.utils.timer
 import stormpy
 

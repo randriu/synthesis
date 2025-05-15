@@ -1,3 +1,10 @@
+// Contributions of
+// BACHELORS'S THESIS
+// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
+// by Antonin Masopust
+//
+// This whole file was created by me. It is the header file of PosmgManager.cpp
+
 #pragma once
 
 #include "Posmg.h"
