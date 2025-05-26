@@ -41,6 +41,10 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
 
     
     def __init__(self, quotient_mdp, family, coloring, specification):
+
+        if MdpFamilyQuotient.initial_memory_size > 1:
+            quotient_mdp, family, coloring = self.unfold_scheduler_memory(quotient_mdp, family, coloring)
+
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
 
         # number of distinct actions in the quotient
@@ -53,9 +57,6 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_action_choices = None
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
-
-        if MdpFamilyQuotient.initial_memory_size > 1:
-            quotient_mdp, family, coloring = self.unfold_scheduler_memory(quotient_mdp, family, coloring)
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.num_actions = len(self.action_labels)
@@ -215,18 +216,23 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         :returns a new quotient MDP with unfolded scheduler memory
         '''
 
-        logger.debug(f"Unfolding scheduler memory to {self.initial_memory_size}...")
+        logger.info(f"unfolding scheduler memory of {self.initial_memory_size} into the model.")
 
-        print(quotient_mdp)
-
-        unfolded_mdp = payntbind.synthesis.constructUnfoldedModel(
-            quotient_mdp, MdpFamilyQuotient.initial_memory_size
+        # unfold the scheduler memory into the model
+        memory_unfolder = payntbind.synthesis.MemoryUnfolder(
+            quotient_mdp
         )
+        unfolded_mdp = memory_unfolder.construct_unfolded_model(MdpFamilyQuotient.initial_memory_size)
 
-        print(unfolded_mdp)
+        # create new coloring
+        choice_to_hole_options = []
+        original_choice_to_hole_options = coloring.getChoiceToAssignment()
+        for choice in range(unfolded_mdp.nr_choices):
+            original_choice = memory_unfolder.choice_map[choice]
+            choice_to_hole_options.append(original_choice_to_hole_options[original_choice])
+     
+        new_coloring = payntbind.synthesis.Coloring(family.family, unfolded_mdp.nondeterministic_choice_indices, choice_to_hole_options)
 
+        logger.info(f"unfolded model has {unfolded_mdp.nr_states} states and {unfolded_mdp.nr_choices} choices.")
 
-
-
-
-        exit()
+        return unfolded_mdp, family, new_coloring
