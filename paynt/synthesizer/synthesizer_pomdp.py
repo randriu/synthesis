@@ -297,31 +297,30 @@ class SynthesizerPomdp:
         if self.storm_control is None:
             # Pure PAYNT POMDP synthesis
             self.strategy_iterative(unfold_imperfect_only=True)
-            return
-
-        # SAYNT
-        logger.info("Storm POMDP option enabled")
-        logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
-                    (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
-                    self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs
-        ))
-        # start SAYNT
-        if self.storm_control.iteration_timeout is not None:
-            self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
-                                      paynt_timeout=self.storm_control.paynt_timeout,
-                                      storm_timeout=self.storm_control.storm_timeout,
-                                      iteration_limit=0)
-        # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
-        elif self.storm_control.get_result is not None:
-            if self.storm_control.get_result:
-                self.run_synthesis_timeout(self.storm_control.get_result)
-            self.storm_control.run_storm_analysis()
-        # run Storm and then use the obtained result to enhance PAYNT synthesis
         else:
-            self.storm_control.get_storm_result()
-            self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.storm_control.unfold_storm)
+            # SAYNT
+            logger.info("Storm POMDP option enabled")
+            logger.info("Storm settings: iterative - {}, get_storm_result - {}, storm_options - {}, prune_storm - {}, unfold_strategy - {}, use_storm_cutoffs - {}".format(
+                        (self.storm_control.iteration_timeout, self.storm_control.paynt_timeout, self.storm_control.storm_timeout), self.storm_control.get_result,
+                        self.storm_control.storm_options, self.storm_control.incomplete_exploration, (self.storm_control.unfold_storm, self.storm_control.unfold_cutoff), self.storm_control.use_cutoffs
+            ))
+            # start SAYNT
+            if self.storm_control.iteration_timeout is not None:
+                self.iterative_storm_loop(timeout=self.storm_control.iteration_timeout,
+                                        paynt_timeout=self.storm_control.paynt_timeout,
+                                        storm_timeout=self.storm_control.storm_timeout,
+                                        iteration_limit=0)
+            # run PAYNT for a time given by 'self.storm_control.get_result' and then run Storm using the best computed FSC at cut-offs
+            elif self.storm_control.get_result is not None:
+                if self.storm_control.get_result:
+                    self.run_synthesis_timeout(self.storm_control.get_result)
+                self.storm_control.run_storm_analysis()
+            # run Storm and then use the obtained result to enhance PAYNT synthesis
+            else:
+                self.storm_control.get_storm_result()
+                self.strategy_storm(unfold_imperfect_only=True, unfold_storm=self.storm_control.unfold_storm)
 
-        self.print_synthesized_controllers()
+            self.print_synthesized_controllers()
 
         if paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base is not None:
             self.export_fsc(paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base)
