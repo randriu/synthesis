@@ -227,8 +227,9 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         # create new coloring
         choice_to_hole_options = []
         original_choice_to_hole_options = coloring.getChoiceToAssignment()
+        choice_map = list(memory_unfolder.choice_map)
         for choice in range(unfolded_mdp.nr_choices):
-            original_choice = memory_unfolder.choice_map[choice]
+            original_choice = choice_map[choice]
             choice_to_hole_options.append(original_choice_to_hole_options[original_choice])
      
         new_coloring = payntbind.synthesis.Coloring(family.family, unfolded_mdp.nondeterministic_choice_indices, choice_to_hole_options)
