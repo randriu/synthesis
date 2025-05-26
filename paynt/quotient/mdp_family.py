@@ -6,11 +6,16 @@ import paynt.models.models
 
 import json
 
+import stormpy
+
 import logging
 logger = logging.getLogger(__name__)
 
 
 class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
+
+    # implicit size for scheduler memory unfolding
+    initial_memory_size = 1
 
     @staticmethod
     def map_state_action_to_choices(mdp, num_actions, choice_to_action):
@@ -48,6 +53,9 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         self.state_action_choices = None
         # for each state of the quotient, a list of available actions
         self.state_to_actions = None
+
+        if MdpFamilyQuotient.initial_memory_size > 1:
+            quotient_mdp, family, coloring = self.unfold_scheduler_memory(quotient_mdp, family, coloring)
 
         self.action_labels,self.choice_to_action = payntbind.synthesis.extractActionLabels(quotient_mdp)
         self.num_actions = len(self.action_labels)
@@ -200,3 +208,25 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         choices = self.coloring.selectCompatibleChoices(family.family)
         model,state_map,choice_map = self.restrict_quotient(choices)
         return paynt.models.models.SubMdp(model,state_map,choice_map)
+    
+    def unfold_scheduler_memory(self, quotient_mdp, family, coloring):
+        '''
+        Unfold the scheduler memory of the quotient MDP to the initial_memory_size.
+        :returns a new quotient MDP with unfolded scheduler memory
+        '''
+
+        logger.debug(f"Unfolding scheduler memory to {self.initial_memory_size}...")
+
+        print(quotient_mdp)
+
+        unfolded_mdp = payntbind.synthesis.constructUnfoldedModel(
+            quotient_mdp, MdpFamilyQuotient.initial_memory_size
+        )
+
+        print(unfolded_mdp)
+
+
+
+
+
+        exit()
