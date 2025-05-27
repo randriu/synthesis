@@ -12,13 +12,12 @@ def construct_property(prop, relative_error, use_exact=False):
     player_index = None
     if rf.is_reward_operator and use_exact:
         raise ValueError("exact synthesis is not supported for reward properties")
-    
+
     if not (rf.is_reward_operator or rf.is_probability_operator) and rf.is_game_formula:
         if use_exact:
             raise ValueError("exact synthesis is not supported for game properties")
-        
+
         player_index = extract_player_index(rf)
-        game_rf = rf
         rf = rf.subformula
         prop = stormpy.core.Property("", rf)
     assert rf.has_bound != rf.has_optimality_type, \
@@ -30,12 +29,15 @@ def construct_property(prop, relative_error, use_exact=False):
 
     if player_index is not None:
         prop.game_optimizing_player = player_index
-        prop.game_formula = game_rf
-        alt_formula_str = f"<<{prop.game_optimizing_player}>> " + prop.formula_alt.__str__()
-        formulas = stormpy.parse_properties(alt_formula_str)
-        prop.game_formula_alt = formulas[0].raw_formula
+        prop.game_formula = create_game_formula(player_index, prop.formula)
+        prop.game_formula_alt = create_game_formula(player_index, prop.formula_alt)
 
     return prop
+
+def create_game_formula(optimizing_player_index, formula):
+    game_formula_string = f"<<{optimizing_player_index}>> {formula}"
+    formulas = stormpy.parse_properties(game_formula_string)
+    return formulas[0].raw_formula
 
 def extract_player_index(formula):
     # TODO add support for multiple players in coalition
