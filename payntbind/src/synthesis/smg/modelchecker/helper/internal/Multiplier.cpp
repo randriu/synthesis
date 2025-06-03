@@ -123,8 +123,8 @@ namespace synthesis {
         // Adjust the multiplier type if an eqsolver was specified but not a multiplier
         if (!env.solver().isLinearEquationSolverTypeSetFromDefaultValue() && env.solver().multiplier().isTypeSetFromDefault()) {
             bool changed = false;
-            if (env.solver().getLinearEquationSolverType() == storm::solver::EquationSolverType::Gmmxx && type != storm::solver::MultiplierType::Gmmxx) {
-                type = storm::solver::MultiplierType::Gmmxx;
+            if (env.solver().getLinearEquationSolverType() == storm::solver::EquationSolverType::Gmmxx && type != storm::solver::MultiplierType::ViOperator) {
+                type = storm::solver::MultiplierType::ViOperator;
                 changed = true;
             } else if (env.solver().getLinearEquationSolverType() == storm::solver::EquationSolverType::Native && type != storm::solver::MultiplierType::Native) {
                 type = storm::solver::MultiplierType::Native;
@@ -134,7 +134,7 @@ namespace synthesis {
         }
 
         switch (type) {
-            case storm::solver::MultiplierType::Gmmxx:
+            case storm::solver::MultiplierType::ViOperator:
                 return std::make_unique<synthesis::GmmxxMultiplier<ValueType>>(matrix);
             case storm::solver::MultiplierType::Native:
                 return std::make_unique<synthesis::NativeMultiplier<ValueType>>(matrix);
