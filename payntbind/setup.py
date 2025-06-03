@@ -82,12 +82,13 @@ class CMakeBuild(build_ext):
             sys.exit(42)  # Custom exit code which can be used for incompatible checks
 
         # Set pybind version
-        from pycarl._config import PYBIND_VERSION as pycarl_pybind_version
+        from stormpy.info._config import stormpy_pybind_version
+
         pybind_version = self.config.get_as_string("pybind_version")
         if pybind_version == "":
-            pybind_version = pycarl_pybind_version
-        elif Version(pybind_version) != Version(pycarl_pybind_version):
-            print("Stormpy - WARNING: Given pybind11 version {} differs from pycarl pybind11 version {}!".format(pybind_version, pycarl_pybind_version))
+            pybind_version = stormpy_pybind_version
+        elif Version(pybind_version) != Version(stormpy_pybind_version):
+            print("Stormpy - WARNING: Given pybind11 version {} differs from stormpy pybind11 version {}!".format(pybind_version, stormpy_pybind_version))
 
         # Print build info
         print("Stormpy - Using storm {} from {}".format(storm_version, storm_dir))
@@ -179,8 +180,8 @@ setup(
                  ],
     cmdclass={'build_ext': CMakeBuild},
     zip_safe=False,
-    install_requires=['pycarl>=2.2.0'],
-    setup_requires=['pycarl>=2.2.0', # required to check pybind version used for pycarl
+    install_requires=['stormpy>=1.9.0'],
+    setup_requires=['stormpy>=1.9.0', # required to check pybind version used for pycarl
                    'pytest-runner',
                    'packaging'
                    ],
