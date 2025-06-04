@@ -1,10 +1,3 @@
-// Contributions of
-// BACHELORS'S THESIS
-// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-// by Antonin Masopust
-//
-// This whole file was created by me. It contains the POSG model class and functions to create it
-
 #include "Posmg.h"
 
 #include "src/synthesis/translation/componentTranslations.h"

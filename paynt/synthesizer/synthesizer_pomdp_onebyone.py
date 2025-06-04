@@ -1,11 +1,3 @@
-# Contributions of
-# BACHELORS'S THESIS
-# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-# by Antonin Masopust
-#
-# This whole file was created by me. It contains the code for solving families of POMDPs with the one-by-one method.
-# It is used in the experiments to compare it to the game-abstraction method.
-
 import paynt.synthesizer.synthesizer
 import paynt.quotient.pomdp
 import paynt.synthesizer.synthesizer_ar

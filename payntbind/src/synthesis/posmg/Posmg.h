@@ -1,10 +1,3 @@
-// Contributions of
-// BACHELORS'S THESIS
-// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-// by Antonin Masopust
-//
-// This whole file was created by me. It is the header file for Posmg.cpp
-
 #pragma once
 
 #include <storm/models/sparse/StandardRewardModel.h>

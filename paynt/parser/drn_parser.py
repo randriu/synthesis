@@ -1,10 +1,3 @@
-# Contributions of
-# BACHELORS'S THESIS
-# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-# by Antonin Masopust
-#
-# added code to enable parsing POSGs and interval POMDPs from DRN files.
-
 import stormpy
 import payntbind
 

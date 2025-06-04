@@ -1,10 +1,3 @@
-# Contributions of
-# BACHELORS'S THESIS
-# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-# by Antonin Masopust
-#
-# This whole file was created by me. It contains the code for synthesizing FSCs for POSGs with increasing memory size.
-
 import stormpy
 
 from .statistic import Statistic

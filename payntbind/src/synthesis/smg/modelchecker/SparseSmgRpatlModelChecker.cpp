@@ -1,10 +1,3 @@
-// Contributions of
-// BACHELORS'S THESIS
-// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-// by Antonin Masopust
-//
-// added checkRewardOperatorFormula, computeRewards and computeReachabilityRewards methods to support reward properties
-
 /**
  * The code below was taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis) and adapted to the latest
  * Storm version.

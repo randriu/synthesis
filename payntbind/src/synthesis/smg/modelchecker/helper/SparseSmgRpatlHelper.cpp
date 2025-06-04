@@ -1,13 +1,3 @@
-// Contributions of
-// BACHELORS'S THESIS
-// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-// by Antonin Masopust
-//
-// added computeReachabilityRewardsHelper method to support reward properties
-// added computeQualitativeStateSetsReachabilityRewards to compute infinity and zero states
-// reimplemented prob1 and prob1step to compute infinity states
-// add fillChoiceValuesVectorRewards and extendScheduler to get the scheduler
-
 /*
  * methods to compute***Probabilites were taken from TEMPEST (https://github.com/PrangerStefan/TempestSynthesis)
  */

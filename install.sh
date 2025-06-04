@@ -15,7 +15,7 @@ sudo apt install -y build-essential git cmake libboost-all-dev libcln-dev libgmp
 sudo apt install -y maven uuid-dev python3-dev python3-venv python3-pip
 
 # prerequisites
-# mkdir -p ${PREREQUISITES}
+mkdir -p ${PREREQUISITES}
 
 # build cvc5 (optional)
 # cd ${PREREQUISITES}
@@ -30,7 +30,7 @@ sudo apt install -y maven uuid-dev python3-dev python3-venv python3-pip
 
 # build storm
 cd ${PREREQUISITES}
-# git clone https://github.com/moves-rwth/storm.git storm
+git clone https://github.com/moves-rwth/storm.git storm
 # git clone --branch stable https://github.com/moves-rwth/storm.git storm
 mkdir -p ${PREREQUISITES}/storm/build
 cd ${PREREQUISITES}/storm/build
@@ -45,14 +45,14 @@ pip3 install wheel
 
 # build pycarl
 cd ${PREREQUISITES}
-# git clone https://github.com/moves-rwth/pycarl.git pycarl
+git clone https://github.com/moves-rwth/pycarl.git pycarl
 cd ${PREREQUISITES}/pycarl
 python3 setup.py develop
 #[TEST] python3 setup.py test
 
 # build stormpy
 cd ${PREREQUISITES}
-# git clone https://github.com/moves-rwth/stormpy.git stormpy
+git clone https://github.com/moves-rwth/stormpy.git stormpy
 # git clone --branch stable https://github.com/moves-rwth/stormpy.git stormpy
 cd ${PREREQUISITES}/stormpy
 python3 setup.py develop

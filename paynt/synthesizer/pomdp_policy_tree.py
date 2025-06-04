@@ -1,12 +1,3 @@
-# Contributions of
-# BACHELORS'S THESIS
-# STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-# by Antonin Masopust
-#
-# This whole file was created by me. It implements the changes to SynthesizerPolicyTree to support POMDPs
-#
-# added the solve_singleton function to solve nodes with only one POMDP
-# added the log_game_stats for logging
 
 import paynt.quotient.pomdp
 import paynt.synthesizer.policy_tree

@@ -1,10 +1,3 @@
-// Contributions of
-// BACHELORS'S THESIS
-// STRATEGY SYNTHESIS FOR PARTIALLY OBSERVABLE STOCHASTIC GAMES
-// by Antonin Masopust
-//
-// This whole file was created by me. It contains binding of C++ code into python
-
 #include "../synthesis.h"
 
 #include "Posmg.h"
