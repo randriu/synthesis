@@ -42,6 +42,8 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
     
     def __init__(self, quotient_mdp, family, coloring, specification):
 
+        self.memory_unfolder = None
+
         if MdpFamilyQuotient.initial_memory_size > 1:
             quotient_mdp, family, coloring = self.unfold_scheduler_memory(quotient_mdp, family, coloring)
 
@@ -219,15 +221,15 @@ class MdpFamilyQuotient(paynt.quotient.quotient.Quotient):
         logger.info(f"unfolding scheduler memory of {self.initial_memory_size} into the model.")
 
         # unfold the scheduler memory into the model
-        memory_unfolder = payntbind.synthesis.MemoryUnfolder(
+        self.memory_unfolder = payntbind.synthesis.MemoryUnfolder(
             quotient_mdp
         )
-        unfolded_mdp = memory_unfolder.construct_unfolded_model(MdpFamilyQuotient.initial_memory_size)
+        unfolded_mdp = self.memory_unfolder.construct_unfolded_model(MdpFamilyQuotient.initial_memory_size)
 
         # create new coloring
         choice_to_hole_options = []
         original_choice_to_hole_options = coloring.getChoiceToAssignment()
-        choice_map = list(memory_unfolder.choice_map)
+        choice_map = list(self.memory_unfolder.choice_map)
         for choice in range(unfolded_mdp.nr_choices):
             original_choice = choice_map[choice]
             choice_to_hole_options.append(original_choice_to_hole_options[original_choice])
