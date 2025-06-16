@@ -80,6 +80,15 @@ namespace synthesis {
     }
 
     template<typename ValueType>
+    std::vector<uint32_t> ObservationEvaluator<ValueType>::observationValuation(uint32_t obs_class) {
+        std::vector<uint32_t> valuation(this->num_obs_expressions);
+        for(uint32_t e = 0; e < num_obs_expressions; ++e) {
+            valuation[e] = observationClassValue(obs_class,e);
+        }
+        return valuation;
+    }
+
+    template<typename ValueType>
     std::shared_ptr<storm::models::sparse::Pomdp<ValueType>> ObservationEvaluator<ValueType>::addObservationsToSubMdp(
         storm::models::sparse::Mdp<ValueType> const& sub_mdp,
         std::vector<uint64_t> state_sub_to_full
