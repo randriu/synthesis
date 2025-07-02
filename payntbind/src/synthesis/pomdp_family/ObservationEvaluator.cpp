@@ -75,8 +75,17 @@ namespace synthesis {
     }
 
     template<typename ValueType>
-    uint32_t ObservationEvaluator<ValueType>::observationClassValue(uint32_t obs_class, uint32_t obs_expr) {
-        return this->obs_class_to_evaluation[obs_class].getAsInt(OBS_EXPR_VALUE_SIZE*obs_expr,OBS_EXPR_VALUE_SIZE);
+    int64_t ObservationEvaluator<ValueType>::observationClassValue(uint32_t obs_class, uint32_t obs_expr) {
+        return static_cast<int64_t>(this->obs_class_to_evaluation[obs_class].getAsInt(OBS_EXPR_VALUE_SIZE*obs_expr,OBS_EXPR_VALUE_SIZE));
+    }
+
+    template<typename ValueType>
+    std::vector<int64_t> ObservationEvaluator<ValueType>::observationValuation(uint32_t obs_class) {
+        std::vector<int64_t> valuation(this->num_obs_expressions);
+        for(uint32_t e = 0; e < num_obs_expressions; ++e) {
+            valuation[e] = observationClassValue(obs_class,e);
+        }
+        return valuation;
     }
 
     template<typename ValueType>

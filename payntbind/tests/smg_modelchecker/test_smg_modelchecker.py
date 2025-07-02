@@ -416,12 +416,9 @@ class TestSmgModelchecker:
         assert result.scheduler.get_choice(3).get_deterministic_choice() == 0
 
 
-    # the behavious is weird, but is the same as in storm and prism-games
-    # in state 2, the maximizing player chooses an action that does not guarantee maximal reward
-    # is is probably a bug in computing optimal choices in infinity states
-    def test_weird_inf_state_choice(self):
+    def test_stay_in_inf_state(self):
         # setup
-        smg_file, props_file = get_sketch_paths('smg/weird-inf-state-choice', props_name='circle-min.props')
+        smg_file, props_file = get_sketch_paths('smg/stay-in-inf-state', props_name='circle-min.props')
         prop = read_first_line(props_file)
         program = stormpy.parse_prism_program(smg_file)
         properties = stormpy.parse_properties_for_prism_program(prop, program, None)
@@ -443,7 +440,7 @@ class TestSmgModelchecker:
         assert result.scheduler.memoryless
         assert result.scheduler.get_choice(0).get_deterministic_choice() == 0
         assert result.scheduler.get_choice(1).get_deterministic_choice() == 0
-        assert result.scheduler.get_choice(2).get_deterministic_choice() == 0
+        assert result.scheduler.get_choice(2).get_deterministic_choice() == 1
         assert result.scheduler.get_choice(3).get_deterministic_choice() == 0
 
     # model taken from prism examples

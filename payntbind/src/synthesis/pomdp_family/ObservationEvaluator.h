@@ -31,7 +31,13 @@ namespace synthesis {
         std::vector<uint32_t> state_to_obs_class;
 
         /** Get the value of the observation expression in the given observation class. */
-        uint32_t observationClassValue(uint32_t obs_class, uint32_t obs_expr);
+        int64_t observationClassValue(uint32_t obs_class, uint32_t obs_expr);
+
+        /**
+         * Collect an observation valuation to a vector. Boolean expressions are represented as 0/1.
+         * @note this is an observation valuation placeholder
+         */
+        std::vector<int64_t> observationValuation(uint32_t obs_class);
 
         /**
          * Create a sub-POMDP from the given sub-MDP by associating its states with observations.
@@ -42,8 +48,6 @@ namespace synthesis {
             storm::models::sparse::Mdp<ValueType> const& sub_mdp,
             std::vector<uint64_t> state_sub_to_full
         );
-
-        // TODO observation valuations
 
     private:
         /** Bitwidth of observation expression value size. */

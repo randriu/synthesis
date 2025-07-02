@@ -1,3 +1,4 @@
+import paynt.quotient.mdp_family
 from . import version
 
 import paynt.utils.timer
@@ -167,6 +168,8 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.posmg.PosmgQuotient.initial_memory_size = fsc_memory_size
+
+    paynt.quotient.mdp_family.MdpFamilyQuotient.initial_memory_size = fsc_memory_size
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
 

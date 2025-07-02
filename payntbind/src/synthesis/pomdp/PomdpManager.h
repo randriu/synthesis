@@ -52,6 +52,11 @@ public:
     // for each state contains its memory index
     std::vector<uint64_t> state_memory;
 
+    // for each row contains index of the prototype row
+    std::vector<uint64_t> row_prototype;
+    // for each row contains a memory update associated with it
+    std::vector<uint64_t> row_memory;
+
     // for each row, the corresponding action hole
     std::vector<uint64_t> row_action_hole;
     // for each row, the corresponding option of the action hole
@@ -119,10 +124,6 @@ private:
     uint64_t num_rows;
     // row groups of the resulting transition matrix
     std::vector<uint64_t> row_groups;
-    // for each row contains index of the prototype row
-    std::vector<uint64_t> row_prototype;
-    // for each row contains a memory update associated with it 
-    std::vector<uint64_t> row_memory;
 };
 
 }

@@ -29,6 +29,14 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
     def __init__(self, quotient_mdp, family, coloring, specification, obs_evaluator):
         super().__init__(quotient_mdp = quotient_mdp, family = family, coloring = coloring, specification = specification)
+
+        # if memory was unfolded we need to update obs_evaluator
+        if paynt.quotient.mdp_family.MdpFamilyQuotient.initial_memory_size > 1:
+            prototype_states = list(self.memory_unfolder.state_prototype)
+            state_to_obs_class = list(obs_evaluator.state_to_obs_class)
+            new_obs_classes_map = [state_to_obs_class[prototype_states[state]] for state in range(self.quotient_mdp.nr_states)]
+            obs_evaluator.state_to_obs_class = new_obs_classes_map
+
         self.obs_evaluator = obs_evaluator
 
         # for each observation, a list of actions (indices) available
