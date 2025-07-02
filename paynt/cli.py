@@ -9,7 +9,6 @@ import paynt.quotient.decpomdp
 import paynt.quotient.posmg
 import paynt.quotient.storm_pomdp_control
 import paynt.quotient.mdp
-import paynt.quotient.pomdp_family
 
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
@@ -168,7 +167,6 @@ def paynt_run(
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.posmg.PosmgQuotient.initial_memory_size = fsc_memory_size
-    paynt.quotient.pomdp_family.PomdpFamilyQuotient.MAX_MEMORY = fsc_memory_size
 
     paynt.synthesizer.policy_tree.SynthesizerPolicyTree.discard_unreachable_choices = mdp_discard_unreachable_choices
 

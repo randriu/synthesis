@@ -27,7 +27,6 @@ class Synthesizer:
         import paynt.quotient.pomdp
         import paynt.quotient.decpomdp
         import paynt.quotient.mdp_family
-        import paynt.quotient.pomdp_family
         import paynt.quotient.posmg
         import paynt.quotient.ipomdp
         import paynt.synthesizer.synthesizer_onebyone
@@ -41,18 +40,14 @@ class Synthesizer:
         import paynt.synthesizer.synthesizer_posmg
         import paynt.synthesizer.synthesizer_ipomdp
         import paynt.synthesizer.policy_tree
-        import paynt.synthesizer.pomdp_policy_tree
         import paynt.synthesizer.decision_tree
 
         # FSC synthesis to IPOMDPs
         if isinstance(quotient, paynt.quotient.ipomdp.IpomdpQuotient):
             return paynt.synthesizer.synthesizer_ipomdp.SynthesizerIpomdp(quotient)
-        # Policy Tree synthesis for family of POMDPs
         if isinstance(quotient, paynt.quotient.pomdp_family.PomdpFamilyQuotient):
-            if method == "onebyone":
-                return paynt.synthesizer.synthesizer_pomdp_onebyone.SynthesizerPomdpOneByOne(quotient)
-            else:
-                return paynt.synthesizer.pomdp_policy_tree.SynthesizerPomdpPolicyTree(quotient)
+            logger.info("nothing to do with the POMDP sketch, aborting...")
+            exit(0)
         if isinstance(quotient, paynt.quotient.mdp.MdpQuotient):
             return paynt.synthesizer.decision_tree.SynthesizerDecisionTree(quotient)
         # FSC synthesis for POMDPs

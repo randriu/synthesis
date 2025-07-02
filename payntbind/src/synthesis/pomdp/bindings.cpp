@@ -9,12 +9,11 @@ template<typename ValueType>
 void bindings_pomdp_vt(py::module& m, std::string const& vtSuffix) {
 
     py::class_<synthesis::PomdpManager<ValueType>>(m, (vtSuffix + "PomdpManager").c_str(), "POMDP manager")
-        .def(py::init<storm::models::sparse::Pomdp<ValueType> const&, bool>(), "Constructor.", py::arg("pomdp"), py::arg("require_canonic")=true)
+        .def(py::init<storm::models::sparse::Pomdp<ValueType> const&>(), "Constructor.", py::arg("pomdp"))
         .def("set_observation_memory_size", &synthesis::PomdpManager<ValueType>::setObservationMemorySize, "Set memory size to a selected observation.", py::arg("observation"), py::arg("memory_size"))
         .def("set_global_memory_size", &synthesis::PomdpManager<ValueType>::setGlobalMemorySize, "Set memory size to all observations.", py::arg("memory_size"))
         .def("construct_mdp", &synthesis::PomdpManager<ValueType>::constructMdp, "Unfold memory model (a priori memory update) into the POMDP.")
         .def_property_readonly("state_prototype", [](synthesis::PomdpManager<ValueType>& manager) {return manager.state_prototype;})
-        .def_property_readonly("row_prototype", [](synthesis::PomdpManager<ValueType>& manager) {return manager.row_prototype;})
         .def_property_readonly("state_memory", [](synthesis::PomdpManager<ValueType>& manager) {return manager.state_memory;})
         .def_property_readonly("observation_memory_size", [](synthesis::PomdpManager<ValueType>& manager) {return manager.observation_memory_size;})
         .def_property_readonly("observation_actions", [](synthesis::PomdpManager<ValueType>& manager) {return manager.observation_actions;})
