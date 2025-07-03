@@ -30,7 +30,6 @@ class Synthesizer:
         import paynt.quotient.posmg
         import paynt.quotient.ipomdp
         import paynt.synthesizer.synthesizer_onebyone
-        import paynt.synthesizer.synthesizer_pomdp_onebyone
         import paynt.synthesizer.synthesizer_ar
         import paynt.synthesizer.synthesizer_cegis
         import paynt.synthesizer.synthesizer_hybrid

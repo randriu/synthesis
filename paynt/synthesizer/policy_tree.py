@@ -524,9 +524,6 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         return policy
 
 
-    def log_game_stats(self, states, game_solver):
-        self.stat.iteration_game(states)
-
     def solve_game_abstraction(self, family, prop, game_solver):
         # construct and solve the game abstraction
         # logger.debug("solving game abstraction...")
@@ -535,7 +532,7 @@ class SynthesizerPolicyTree(paynt.synthesizer.synthesizer.Synthesizer):
         # game_solver.solve_smg(family.selected_choices)
 
         game_value = game_solver.solution_value
-        self.log_game_stats(family.mdp.states, game_solver)
+        self.stat.iteration_game(family.mdp.states)
         game_sat = prop.satisfies_threshold_within_precision(game_value)
         # logger.debug("game solved, value is {}".format(game_value))
         game_policy = game_solver.solution_state_to_player1_action

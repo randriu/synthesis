@@ -100,8 +100,7 @@ class Family:
         for hole in range(self.num_holes):
             options = self.hole_options(hole)
             hole_str = self.hole_options_to_string(hole,options)
-            if not '(P1,' in hole_str:
-                hole_strings.append(hole_str)
+            hole_strings.append(hole_str)
         return ", ".join(hole_strings)
 
     def copy(self):
