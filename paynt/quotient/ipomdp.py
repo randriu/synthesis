@@ -4,7 +4,7 @@ import stormpy
 import logging
 logger = logging.getLogger(__name__)
 
-class IpomdpQuotient(): # todo derive from Quotient?
+class IpomdpQuotient():
 
     def __init__(self, ipomdp, specification):
         self.ipomdp = ipomdp
@@ -51,8 +51,6 @@ class IpomdpQuotient(): # todo derive from Quotient?
     # these rows will be replaced with a single transition leading to the corresponding new state with probability 1
     # the new states will have new action representing combinations of lower and upper bound of the interval
     # new states (and their actions) will be at the end of the matrix
-    # IDEA use p1state,p2state,choice(action),destination,transition,probability or originalState,newState,row,column,entry,value?
-    # IDEA return just new state count instead of new states
     def build_transition_matrix(self, transition_matrix):
         matrix_builder = stormpy.SparseMatrixBuilder(has_custom_row_grouping=True)
 
