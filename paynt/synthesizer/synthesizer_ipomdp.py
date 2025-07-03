@@ -17,9 +17,9 @@ class SynthesizerIpomdp:
     def create_posmg_specification(self, prop):
         formula_str = prop.formula.__str__()
         optimizing_player = 0 # hard coded. Has to correspond with state_player_indications
-        game_fromula_str = f"<<{optimizing_player}>> " + formula_str
+        game_formula_str = f"<<{optimizing_player}>> " + formula_str
 
-        storm_property = stormpy.parse_properties(game_fromula_str)[0]
+        storm_property = stormpy.parse_properties(game_formula_str)[0]
         property = paynt.verification.property.construct_property(storm_property, 0)
         specification = paynt.verification.property.Specification([property])
 
