@@ -7,6 +7,7 @@ import paynt.quotient.mdp
 import paynt.quotient.pomdp
 import paynt.quotient.decpomdp
 import paynt.quotient.posmg
+import paynt.quotient.ipomdp
 import paynt.quotient.mdp_family
 import paynt.quotient.pomdp_family
 import paynt.verification.property
@@ -135,13 +136,16 @@ class Sketch:
         logger.info("sketch parsing OK")
 
         paynt.verification.property.Property.initialize(use_exact)
-        if explicit_quotient.is_exact:
-            updated = payntbind.synthesis.addMissingChoiceLabelsExact(explicit_quotient)
-        else:
-            updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
-        if updated is not None: explicit_quotient = updated
-        if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
-            logger.warning("WARNING: choice labeling for the quotient is not canonic")
+        # TEMPORARY FIX
+        # the addMissingChoiceLabels method does not support interval models
+        if not isinstance(explicit_quotient, stormpy.storage.SparseIntervalPomdp):
+            if explicit_quotient.is_exact:
+                updated = payntbind.synthesis.addMissingChoiceLabelsExact(explicit_quotient)
+            else:
+                updated = payntbind.synthesis.addMissingChoiceLabels(explicit_quotient)
+            if updated is not None: explicit_quotient = updated
+            if not payntbind.synthesis.assertChoiceLabelingIsCanonic(explicit_quotient.nondeterministic_choice_indices,explicit_quotient.choice_labeling,False):
+                logger.warning("WARNING: choice labeling for the quotient is not canonic")
 
 
         make_rewards_action_based(explicit_quotient)
@@ -171,6 +175,8 @@ class Sketch:
                 quotient_container = paynt.quotient.decpomdp.DecPomdpQuotient(decpomdp_manager, specification)
             elif isinstance(explicit_quotient, payntbind.synthesis.Posmg):
                 quotient_container = paynt.quotient.posmg.PosmgQuotient(explicit_quotient, specification)
+            elif isinstance(explicit_quotient, stormpy.storage.SparseIntervalPomdp):
+                quotient_container = paynt.quotient.ipomdp.IpomdpQuotient(explicit_quotient, specification)
             elif not explicit_quotient.is_partially_observable:
                 quotient_container = paynt.quotient.mdp.MdpQuotient(explicit_quotient, specification)
             else:
