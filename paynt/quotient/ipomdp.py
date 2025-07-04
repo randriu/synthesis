@@ -10,7 +10,7 @@ class IpomdpQuotient():
         self.ipomdp = ipomdp
         self.specification = specification
 
-        logger.debug(f'ipomdp has {max(self.ipomdp.observations)+1} observations')
+        logger.debug(f'ipomdp has {len(set(self.ipomdp.observations))} observations')
 
         self.game_abstraction = self.create_game_abstraction()
 
