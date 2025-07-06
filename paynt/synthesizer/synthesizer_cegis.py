@@ -12,6 +12,9 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
     # CLI argument selecting conflict generator
     conflict_generator_type = None
 
+    # CLI argument for setting initial constraint on the design space
+    constraint = None
+
     def __init__(self, quotient):
         super().__init__(quotient)
 
@@ -92,7 +95,7 @@ class SynthesizerCEGIS(paynt.synthesizer.synthesizer.Synthesizer):
         self.conflict_generator.initialize()
 
         # use sketch design space as a SAT baseline (TODO why?)
-        smt_solver = paynt.family.smt.SmtSolver(self.quotient.family)
+        smt_solver = paynt.family.smt.SmtSolver(self.quotient, self.constraint)
         
         # CEGIS loop
         assignment = smt_solver.pick_assignment(family)

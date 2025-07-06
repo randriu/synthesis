@@ -1,4 +1,3 @@
-import paynt.quotient.mdp_family
 from . import version
 
 import paynt.utils.timer
@@ -10,11 +9,14 @@ import paynt.quotient.decpomdp
 import paynt.quotient.posmg
 import paynt.quotient.storm_pomdp_control
 import paynt.quotient.mdp
+import paynt.quotient.mdp_family
 
 import paynt.synthesizer.synthesizer
 import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
 import paynt.synthesizer.decision_tree
+
+import paynt.family.constraints.tree
 
 import click
 import sys
@@ -133,6 +135,16 @@ def setup_logger(log_path = None):
     "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
     help="counterexample generator",
 )
+
+@click.option("--constraint",
+    type=click.Choice(['prob1', 'prob0', 'tree']),
+    default=None , show_default=True,
+    help="constraint type for CEGIS"
+)
+@click.option("--tree-nodes", default=None, type=int,
+    help="constraint tree: number of nodes in the decision tree (only for --constraint tree)")
+
+
 @click.option("--profiling", is_flag=True, default=False,
     help="run profiling")
 
@@ -148,7 +160,7 @@ def paynt_run(
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
-    ce_generator,
+    ce_generator, constraint, tree_nodes,
     profiling
 ):
 
@@ -164,6 +176,7 @@ def paynt_run(
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
     paynt.synthesizer.synthesizer.Synthesizer.export_synthesis_filename_base = export_synthesis
     paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.conflict_generator_type = ce_generator
+    paynt.synthesizer.synthesizer_cegis.SynthesizerCEGIS.constraint = constraint
     paynt.quotient.pomdp.PomdpQuotient.initial_memory_size = fsc_memory_size
     paynt.quotient.pomdp.PomdpQuotient.posterior_aware = posterior_aware
     paynt.quotient.decpomdp.DecPomdpQuotient.initial_memory_size = fsc_memory_size
@@ -177,6 +190,10 @@ def paynt_run(
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.tree_enumeration = tree_enumeration
     paynt.synthesizer.decision_tree.SynthesizerDecisionTree.scheduler_path = tree_map_scheduler
     paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
+
+    if constraint == "tree":
+        paynt.family.constraints.tree.DecisionTreeConstraint.tree_depth = tree_depth
+        paynt.family.constraints.tree.DecisionTreeConstraint.tree_nodes = tree_nodes
 
     storm_control = None
     if storm_pomdp:
