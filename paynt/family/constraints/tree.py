@@ -62,12 +62,12 @@ class DecisionTreeConstraint():
         # create a function
         max_action_size = max([len(quotient.family.hole_options(hole)) for hole in range(len(variables))])
         decision_func = z3.Function(
-            "decision", *[z3.IntSort()] * num_properties, z3.BitVecSort(max_action_size)
-        )
-
-        decision_func_int = z3.Function(
             "decision", *[z3.IntSort()] * num_properties, z3.IntSort()
         )
+
+        # decision_func_int = z3.Function(
+        #     "decision", *[z3.IntSort()] * num_properties, z3.IntSort()
+        # )
 
         constraints = []
 
@@ -79,7 +79,7 @@ class DecisionTreeConstraint():
 
         num_nodes = 2**tree_depth - 1
         leaf_values = [
-            z3.BitVec(f"leaf_{i}", max_action_size) for i in range(num_nodes + 1)
+            z3.Int(f"leaf_{i}") for i in range(num_nodes + 1)
         ]
 
         # make weight nodes for constraints
@@ -147,6 +147,6 @@ class DecisionTreeConstraint():
 
         for variable in variables:
             property_values = get_property_values(str(variable))
-            constraints.append(variable == decision_func_int(*property_values))
+            constraints.append(variable == decision_func(*property_values))
         return constraints
 
