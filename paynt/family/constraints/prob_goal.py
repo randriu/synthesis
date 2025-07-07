@@ -35,15 +35,16 @@ class ProbGoalConstraint():
             reachability_vars.append(reach_var)
 
         if not self.prob0:
-            max_step_vars = []
+            min_step_vars = []
             for state in range(transition_matrix.nr_columns):
-                max_step_var = z3.Int(f"max_step_{state}")
-                max_step_vars.append(max_step_var)
-                assertions.append(max_step_var >= 0)
+                min_step_var = z3.Int(f"min_step_{state}")
+                min_step_vars.append(min_step_var)
+                assertions.append(min_step_var >= 0)
 
             for state in range(transition_matrix.nr_columns):
                 if target_states.get(state):
                     assertions.append(reachability_vars[state])
+                    assertions.append(min_step_vars[state] == 0)
                     continue
                 
                 statement_for_state = []
@@ -52,12 +53,12 @@ class ProbGoalConstraint():
                 for row in rows:
                     assignment = choice_to_assignment[row]
                     assignment_as_z3 = z3.And([
-                        variables[var] == x
+                        variables[var] == z3.IntVal(x)
                         for var, x in assignment
                     ])
 
                     reachability_vars_of_row = []
-                    max_step_vars_of_row = []
+                    min_step_vars_of_row = []
 
                     for entry in transition_matrix.get_row(row):
                         value = entry.value()
@@ -68,17 +69,20 @@ class ProbGoalConstraint():
                         if to_state == state:
                             continue
                         reachability_vars_of_row.append(reachability_vars[to_state])
-                        max_step_vars_of_row.append(max_step_vars[to_state])
+                        min_step_vars_of_row.append(min_step_vars[to_state])
                     statement_for_state.append(z3.Implies(assignment_as_z3, z3.And(reachability_vars_of_row)))
                     assertions.append(
                         z3.Implies(
-                            assignment_as_z3,
-                            z3.Or([max_step_vars[state] == x + 1 for x in max_step_vars_of_row])
+                            z3.And(reachability_vars[state], assignment_as_z3),
+                            z3.And(
+                                z3.Or([min_step_vars[state] == x + 1 for x in min_step_vars_of_row]),
+                                z3.And([min_step_vars[state] <= x + 1 for x in min_step_vars_of_row])
+                            )
                         )
                     )
                 assertions.append(z3.Implies(reachability_vars[state], z3.And(statement_for_state)))
-
-                assertions.append(z3.Implies(reachability_vars[state], max_step_vars[state] < transition_matrix.nr_columns))
+        else:
+            assert False, "prob0 not implemented."
 
 
                 # else:
