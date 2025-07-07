@@ -1,5 +1,5 @@
 
-from paynt.family.constraints.tree import DecisionTreeConstraint
+from paynt.family.constraints.flexibletree import DecisionTreeConstraint
 from paynt.family.constraints.prob_goal import ProbGoalConstraint
 
 class Constraints:
@@ -11,7 +11,6 @@ class Constraints:
         elif constraint_type == "prob0":
             return ProbGoalConstraint(prob=0)
         elif constraint_type == "tree":
-            # TODO add tree size
             return DecisionTreeConstraint()
         else:            
             raise ValueError(f"Unknown constraint type: {constraint_type}")

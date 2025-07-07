@@ -16,7 +16,7 @@ import paynt.synthesizer.synthesizer_cegis
 import paynt.synthesizer.policy_tree
 import paynt.synthesizer.decision_tree
 
-import paynt.family.constraints.tree
+import paynt.family.constraints.flexibletree
 
 import click
 import sys
@@ -192,8 +192,7 @@ def paynt_run(
     paynt.quotient.mdp.MdpQuotient.add_dont_care_action = add_dont_care_action
 
     if constraint == "tree":
-        paynt.family.constraints.tree.DecisionTreeConstraint.tree_depth = tree_depth
-        paynt.family.constraints.tree.DecisionTreeConstraint.tree_nodes = tree_nodes
+        paynt.family.constraints.flexibletree.DecisionTreeConstraint.tree_nodes = tree_nodes
 
     storm_control = None
     if storm_pomdp:

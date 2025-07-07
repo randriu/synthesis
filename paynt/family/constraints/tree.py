@@ -26,7 +26,7 @@ def get_property_values(variable_name):
     ]
 
 
-class DecisionTreeConstraint():
+class DecisionTreeConstraintOld():
 
     tree_depth: int
 
