@@ -17,6 +17,7 @@ import paynt.synthesizer.policy_tree
 import paynt.synthesizer.decision_tree
 
 import paynt.family.constraints.flexibletree
+import paynt.family.constraints.costs
 
 import click
 import sys
@@ -137,12 +138,14 @@ def setup_logger(log_path = None):
 )
 
 @click.option("--constraint",
-    type=click.Choice(['prob1', 'prob0', 'tree']),
+    type=click.Choice(['prob1', 'prob0', 'tree', 'costs']),
     default=None , show_default=True,
     help="constraint type for CEGIS"
 )
 @click.option("--tree-nodes", default=None, type=int,
     help="constraint tree: number of nodes in the decision tree (only for --constraint tree)")
+@click.option("--costs-threshold", default=None, type=int,
+    help="costs constraint: threshold for costs (only for --constraint costs)")
 
 
 @click.option("--profiling", is_flag=True, default=False,
@@ -160,7 +163,7 @@ def paynt_run(
     mdp_discard_unreachable_choices,
     tree_depth, tree_enumeration, tree_map_scheduler, add_dont_care_action,
     constraint_bound,
-    ce_generator, constraint, tree_nodes,
+    ce_generator, constraint, tree_nodes, costs_threshold,
     profiling
 ):
 
@@ -193,6 +196,9 @@ def paynt_run(
 
     if constraint == "tree":
         paynt.family.constraints.flexibletree.DecisionTreeConstraint.tree_nodes = tree_nodes
+    elif constraint == "costs":
+        paynt.family.constraints.costs.CostsConstraint.costs_threshold = costs_threshold
+        paynt.family.constraints.costs.CostsConstraint.model_folder = project
 
     storm_control = None
     if storm_pomdp:

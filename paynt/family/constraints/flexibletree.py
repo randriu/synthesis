@@ -40,7 +40,11 @@ class DecisionTreeConstraint():
         self.right_child_ranges = None
 
 
-    def build_constraint(self, variables, quotient):
+    def build_constraint(
+        self,
+        variables,
+        quotient
+    ) -> z3.ExprRef:
         self.variables = variables
         num_nodes = self.tree_nodes
 
