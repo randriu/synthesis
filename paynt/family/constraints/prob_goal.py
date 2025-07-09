@@ -16,7 +16,7 @@ class ProbGoalConstraint():
         self,
         variables,
         quotient
-    ) -> z3.ExprRef:
+    ):
 
         # We build the quotient here
         quotient.build(quotient.family)

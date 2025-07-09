@@ -19,7 +19,7 @@ class CostsConstraint():
         self,
         variables,
         quotient
-    ) -> z3.ExprRef:
+    ):
         # We build the quotient here
 
         assertions = []

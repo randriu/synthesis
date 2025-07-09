@@ -44,7 +44,7 @@ class DecisionTreeConstraint():
         self,
         variables,
         quotient
-    ) -> z3.ExprRef:
+    ):
         self.variables = variables
         num_nodes = self.tree_nodes
 
