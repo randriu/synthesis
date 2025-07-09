@@ -45,7 +45,7 @@ class CostsConstraint():
                 assertions.append(
                     z3.If(
                         variables[hole] == option,
-                        cost_var == cost_value,
+                        cost_var == int(cost_value),
                         cost_var == 0
                     )
                 )
