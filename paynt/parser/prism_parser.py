@@ -78,17 +78,22 @@ class PrismParser:
         for line in sketch_lines:
 
             # Treat observation definition via "observables" keyword
+            if line.startswith("observables"):
+                observables_line = True
+                line = line.split('//')[0].strip()  # remove comments
+                if len(line) > len("observables"):
+                    line = line[len("observables"):].strip()
+                else:
+                    continue
             if observables_line:
                 if line.startswith("endobservables"):
                     observables_line = False
                     continue
+                line = line.split('//')[0].strip()  # remove comments
                 observables = line.strip().split(",")
                 observables = [obs.strip() for obs in observables]
                 for obs in observables:
                     sketch_output.append(f"observable \"{obs}\" = {obs};\n")
-                continue
-            if line.startswith("observables"):
-                observables_line = True
                 continue
             
 
