@@ -53,6 +53,7 @@ class FamilyEncoding():
 
         if smt_solver.constraint is not None:
 
+            logger.info(f"Adding constraint {smt_solver.constraint} to the encoding.")
             constraint = Constraints.create_constraint(smt_solver.constraint)
 
             constraint_smt_clauses = constraint.build_constraint(

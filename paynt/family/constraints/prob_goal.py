@@ -29,6 +29,9 @@ class ProbGoalConstraint():
 
         assertions = []
 
+        initial_state = quotient.family.mdp.model.initial_states[0]
+        assert len(quotient.family.mdp.model.initial_states) == 1, "ProbGoal only supports single initial states."
+
         reachability_vars = []
         for state in range(transition_matrix.nr_columns):
             reach_var = z3.Bool(f"reach_{state}")
@@ -82,32 +85,48 @@ class ProbGoalConstraint():
                     )
                 assertions.append(z3.Implies(reachability_vars[state], z3.And(statement_for_state)))
         else:
-            assert False, "prob0 not implemented."
+            backwards_assertions = [[] for _ in range(transition_matrix.nr_columns)]
+            target_state_assertions = []
+            for state in range(transition_matrix.nr_columns):
+                if target_states.get(state):
+                    target_state_assertions.append(reachability_vars[state])
+                    continue
+                
+                statement_for_state = []
+                
+                rows = transition_matrix.get_rows_for_group(state)
+                for row in rows:
+                    assignment = choice_to_assignment[row]
+                    assignment_as_z3 = z3.And([
+                        variables[var] == z3.IntVal(x)
+                        for var, x in assignment
+                    ])
 
+                    reachability_vars_of_row = []
 
-                # else:
-                #     assertions.append(
-                #         z3.Implies(
-                #             z3.And(reachability_vars[to_state], assignment_as_z3),
-                #             z3.And(reachability_vars[state])
-                #         )
-                #     )
-                #     max_step_vars_of_row.append(max_step_vars[to_state])
-
-                # if not self.prob0:
-                #     assertions.append(
-                #         z3.Implies(
-                #             reachability_vars[state],
-                #             z3.Or([max_step_vars[state] > x for x in max_step_vars_of_row])
-                #         )
-                #     )
-
-        initial_state = quotient.family.mdp.model.initial_states[0]
-        assert len(quotient.family.mdp.model.initial_states) == 1, "ProbGoal only supports single initial states."
+                    for entry in transition_matrix.get_row(row):
+                        value = entry.value()
+                        if value == 0:
+                            continue
+                        assert value > 0, "Transition probabilities must be positive."
+                        to_state = entry.column
+                        if to_state == state:
+                            continue
+                        reachability_vars_of_row.append(reachability_vars[to_state])
+                        backwards_assertions[to_state].append(
+                            z3.And(assignment_as_z3, reachability_vars[state])
+                        )
+            for to_state, x in enumerate(backwards_assertions):
+                if to_state == initial_state:
+                    continue
+                assertions.append(
+                    z3.Implies(
+                        reachability_vars[to_state],
+                        z3.Or(x)
+                    )
+                )
+            assertions.append(z3.Or(target_state_assertions))
 
         assertions.append(reachability_vars[initial_state])
         logger.info("Done building assertions for ProbGoal.")
         return assertions
-
-    # def show_result(self, model, solver, **args):
-    #     print([(x, model[x]) for x in model if x.name().startswith("reach_")])
