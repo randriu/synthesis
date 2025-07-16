@@ -238,9 +238,11 @@ class PosmgQuotient(paynt.quotient.quotient.Quotient):
 
         transition_matrix = mdp.model.transition_matrix
         state_labeling = mdp.model.labeling
+        reward_models = mdp.model.reward_models
         components = stormpy.SparseModelComponents(
             transition_matrix=transition_matrix,
-            state_labeling=state_labeling)
+            state_labeling=state_labeling,
+            reward_models=reward_models)
 
         if mdp.model.has_choice_labeling():
             components.choice_labeling = mdp.model.choice_labeling
