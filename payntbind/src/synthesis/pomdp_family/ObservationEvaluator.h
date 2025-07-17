@@ -30,6 +30,15 @@ namespace synthesis {
         /** For each state its observation class. */
         std::vector<uint32_t> state_to_obs_class;
 
+        /** Get the state to observation class mapping. */
+        std::vector<uint32_t> get_state_to_obs_class() const {
+            return state_to_obs_class;
+        }
+        /** Set the state to observation class mapping. */
+        void set_state_to_obs_class(std::vector<uint32_t> const& new_state_to_obs_class) {
+            state_to_obs_class = new_state_to_obs_class;
+        }
+
         /** Get the value of the observation expression in the given observation class. */
         int64_t observationClassValue(uint32_t obs_class, uint32_t obs_expr);
 
