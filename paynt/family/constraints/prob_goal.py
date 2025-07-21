@@ -85,11 +85,16 @@ class ProbGoalConstraint():
                     )
                 assertions.append(z3.Implies(reachability_vars[state], z3.And(statement_for_state)))
         else:
-            backwards_assertions = [[] for _ in range(transition_matrix.nr_columns)]
-            target_state_assertions = []
+            min_step_vars = []
+            for state in range(transition_matrix.nr_columns):
+                min_step_var = z3.Int(f"min_step_{state}")
+                min_step_vars.append(min_step_var)
+                assertions.append(min_step_var >= 0)
+
             for state in range(transition_matrix.nr_columns):
                 if target_states.get(state):
-                    target_state_assertions.append(reachability_vars[state])
+                    assertions.append(reachability_vars[state])
+                    assertions.append(min_step_vars[state] == 0)
                     continue
                 
                 statement_for_state = []
@@ -103,6 +108,7 @@ class ProbGoalConstraint():
                     ])
 
                     reachability_vars_of_row = []
+                    min_step_vars_of_row = []
 
                     for entry in transition_matrix.get_row(row):
                         value = entry.value()
@@ -113,19 +119,18 @@ class ProbGoalConstraint():
                         if to_state == state:
                             continue
                         reachability_vars_of_row.append(reachability_vars[to_state])
-                        backwards_assertions[to_state].append(
-                            z3.And(assignment_as_z3, reachability_vars[state])
+                        min_step_vars_of_row.append(min_step_vars[to_state])
+                    statement_for_state.append(z3.Implies(assignment_as_z3, z3.Or(reachability_vars_of_row)))
+                    assertions.append(
+                        z3.Implies(
+                            z3.And(reachability_vars[state], assignment_as_z3),
+                            z3.And(
+                                z3.Or([min_step_vars[state] == x + 1 for x in min_step_vars_of_row]),
+                                z3.And([min_step_vars[state] <= x + 1 for x in min_step_vars_of_row])
+                            )
                         )
-            for to_state, x in enumerate(backwards_assertions):
-                if to_state == initial_state:
-                    continue
-                assertions.append(
-                    z3.Implies(
-                        reachability_vars[to_state],
-                        z3.Or(x)
                     )
-                )
-            assertions.append(z3.Or(target_state_assertions))
+                assertions.append(z3.Implies(reachability_vars[state], z3.Or(statement_for_state)))
 
         assertions.append(reachability_vars[initial_state])
         logger.info("Done building assertions for ProbGoal.")
