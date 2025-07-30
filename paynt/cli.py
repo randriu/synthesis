@@ -133,7 +133,7 @@ def setup_logger(log_path = None):
 )
 
 @click.option(
-    "--ce-generator", type=click.Choice(["dtmc", "mdp"]), default="dtmc", show_default=True,
+    "--ce-generator", type=click.Choice(["dtmc", "mdp", "none"]), default="dtmc", show_default=True,
     help="counterexample generator",
 )
 
