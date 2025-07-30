@@ -67,7 +67,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
     def observation_is_trivial(self, obs):
         return len(self.observation_to_actions[obs])==1
 
-    
+
     def build_pomdp(self, family):
         ''' Construct the sub-POMDP from the given hole assignment. '''
         assert family.size == 1, "expecting family of size 1"
@@ -88,7 +88,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         # create the product
         fsc.check_action_function(self.observation_to_actions)
 
-        
+
         self.fsc_unfolder = payntbind.synthesis.FscUnfolder(
             self.quotient_mdp, self.state_to_observation, self.num_actions, self.choice_to_action
         )
@@ -98,7 +98,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
 
         # the product inherits the design space
         product_family = self.family.copy()
-        
+
         # the choices of the product inherit colors of the quotient
         product_choice_to_hole_options = []
         quotient_num_choces = self.quotient_mdp.nr_choices
@@ -111,7 +111,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
                 hole_options = [(hole,option) for hole,option in choice_to_hole_assignment[choice]]
             product_choice_to_hole_options.append(hole_options)
         product_coloring = payntbind.synthesis.Coloring(product_family.family, product.nondeterministic_choice_indices, product_choice_to_hole_options)
-        
+
         # copy the specification
         product_specification = self.specification.copy()
         if negate_specification:
@@ -168,7 +168,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             if choice == invalid_choice:
                 # randomized FSC: we are in the intermediate state, move on to the next one
                 continue
-            
+
             product_state = dtmc.quotient_state_map[dtmc_state]
             state = self.product_pomdp_fsc.product_state_to_state[product_state]
             obs = self.state_to_observation[state]
@@ -183,8 +183,8 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             assert action in self.observation_to_actions[obs], "invalid trace"
 
         return trace
-    
-    
+
+
     def compute_witnessing_traces(self, dtmc_sketch, satisfying_assignment, num_traces, trace_max_length):
         '''
         Generate witnessing paths in the DTMC induced by the DTMC sketch and a satisfying assignment.
@@ -207,7 +207,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         if prop.is_reward:
             logger.warning("WARNING: specification is a reward property, but generated traces \
                 will be based on transition probabilities")
-        
+
         target_label = self.extract_target_label()
         target_states = dtmc.model.labeling.get_states(target_label)
 

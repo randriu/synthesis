@@ -14,6 +14,7 @@ class DrnParser:
     COMMENT_PREFIX = '//'
     TYPE_PREFIX = '@type: '
     STATE_PREFIX = 'state '
+    INTERVAL_BEGINNING = ': ['
     WHITESPACES = ' \t\n\v\f\r'
 
     @classmethod
@@ -32,7 +33,8 @@ class DrnParser:
                 explicit_model = payntbind.synthesis.posmg_from_pomdp(pomdp, state_player_indications)
                 os.remove(pomdp_path)
             else:
-                explicit_model = DrnParser.read_drn(sketch_path, use_exact)
+                is_interval_model = type == 'IPOMDP'
+                explicit_model = DrnParser.read_drn(sketch_path, use_exact, is_interval_model)
         except Exception as e:
             print(e)
             raise ValueError('Failed to read sketch file in a .drn format')
@@ -44,15 +46,22 @@ class DrnParser:
         # path - path to drn file
         # return - string representation of type (e.g. 'POMDP')
         # ValueError if not valid drn file
+        is_interval_model = False
+
         with open(path) as file:
-            while True:
-                line = file.readline()
+            for line in file:
                 if line.isspace() or line.lstrip(cls.WHITESPACES).startswith(cls.COMMENT_PREFIX):
                     continue
                 if line.startswith(cls.TYPE_PREFIX):
                     type = line.removeprefix(cls.TYPE_PREFIX).removesuffix('\n')
-                    return type
-                raise ValueError
+                if cls.INTERVAL_BEGINNING in line:
+                    is_interval_model = True
+                    break
+
+        if type == 'POMDP' and is_interval_model:
+            type = 'IPOMDP'
+
+        return type
 
     @classmethod
     def pomdp_from_posmg(cls, old_path: str, new_path) -> list:
@@ -93,11 +102,13 @@ class DrnParser:
         return string[:start_idx] + string[end_idx+1:]
 
     @classmethod
-    def read_drn(cls, sketch_path, use_exact=False):
+    def read_drn(cls, sketch_path, use_exact=False, is_interval_model=False):
         builder_options = stormpy.core.DirectEncodingParserOptions()
         builder_options.build_choice_labels = True
         if use_exact:
             return stormpy.core._build_sparse_exact_model_from_drn(sketch_path, builder_options)
+        elif is_interval_model:
+            return stormpy.build_interval_model_from_drn(sketch_path, builder_options)
         else:
             return stormpy.build_model_from_drn(sketch_path, builder_options)
 
