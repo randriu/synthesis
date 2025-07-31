@@ -44,10 +44,10 @@ source ${PREREQUISITES}/venv/bin/activate
 pip3 install wheel
 
 # build pycarl
-cd ${PREREQUISITES}
-git clone https://github.com/moves-rwth/pycarl.git pycarl
-cd ${PREREQUISITES}/pycarl
-python3 setup.py develop
+# cd ${PREREQUISITES}
+# git clone https://github.com/moves-rwth/pycarl.git pycarl
+# cd ${PREREQUISITES}/pycarl
+# python3 setup.py develop
 #[TEST] python3 setup.py test
 
 # build stormpy
