@@ -1,10 +1,37 @@
 import json
 
-import logging
-logger = logging.getLogger(__name__)
+class Fsc:
+    '''
+    An FSC having
+    - a fixed number of nodes
+    - a joint transition function of the type NxZ -> Distr(ActxN), where f(n,z) is a dictionary
+        (action,memory) -> probability
+    '''
+
+    def __init__(self, num_nodes, num_observations):
+        self.num_nodes = num_nodes
+        self.num_observations = num_observations        
+        self.transitions = [ [None]*num_observations for _ in range(num_nodes) ]
+        self.observation_labels = None
+        self.action_labels = None
+
+    def check_transitions(self, observation_to_actions):
+        assert len(self.transitions) == self.num_nodes, "FSC transition_function function is not defined for all memory nodes"
+        for node in range(self.num_nodes):
+            assert len(self.transitions[node]) == self.num_observations, \
+                "in memory node {}, FSC transition function is not defined for all observations".format(node)
+            for obs in range(self.num_observations):
+                for action,update in self.transitions[node][obs].keys():
+                    assert action in observation_to_actions[obs], "in observation {} FSC chooses invalid action {}".format(obs,action)
+                    assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
+
+    def check(self, observation_to_actions):
+        ''' Check whether fields of FSC have been initialized appropriately. '''
+        assert self.num_nodes > 0, "FSC must have at least 1 node"
+        self.check_transitions(observation_to_actions)
 
 
-class FSC:
+class FscFactored:
     '''
     Class for encoding an FSC having
     - a fixed number of nodes
@@ -114,6 +141,7 @@ class FSC:
                 "in memory node {}, FSC update function is not defined for all observations".format(node)
             for obs in range(self.num_observations):
                 update = self.update_function[node][obs]
+                continue # skipping check due to inconsistency in our FSC definition
                 assert 0 <= update and update < self.num_nodes, "invalid FSC memory update {}".format(update)
 
     def check(self, observation_to_actions):

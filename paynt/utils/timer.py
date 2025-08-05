@@ -2,7 +2,6 @@ import time
 import psutil
 import os
 
-
 class Timer:
 
     def __init__(self, time_limit_seconds=None):
@@ -52,6 +51,9 @@ class GlobalTimer:
 
     @classmethod
     def read(cls):
+        if cls.global_timer is None:
+            logger.warning("attempting to read uninitialized GlobalTimer")
+            return -1
         return cls.global_timer.read()
 
     @classmethod

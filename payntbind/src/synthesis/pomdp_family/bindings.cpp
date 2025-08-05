@@ -26,7 +26,8 @@ void bindings_pomdp_family(py::module& m) {
             uint64_t,
             std::vector<uint64_t> const&>()
         )
-        .def("apply_fsc", &synthesis::FscUnfolder<double>::applyFsc, py::arg("action_function"), py::arg("udate_function"))
+        .def("applyFsc", &synthesis::FscUnfolder<double>::applyFsc, py::arg("transitions"))
+        .def("applyFscFactored", &synthesis::FscUnfolder<double>::applyFscFactored, py::arg("action_function"), py::arg("udate_function"))
         .def_property_readonly("product", [](synthesis::FscUnfolder<double>& m) {return m.product;} )
         .def_property_readonly("product_choice_to_choice", [](synthesis::FscUnfolder<double>& m) {return m.product_choice_to_choice;} )
         // .def_property_readonly("product_state_to_state", [](synthesis::FscUnfolder<double>& m) {return m.product_state_to_state;} )

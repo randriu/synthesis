@@ -25,12 +25,21 @@ namespace synthesis {
 
         /**
          * Create a product of the quotient POMDP and the given FSC.
+         * @param transitions for each node in the FSC and for each observation class, a dictionary of
+         *  (action,update) -> probability
+         */
+        void applyFsc(
+            std::vector<std::vector<std::map<std::pair<uint64_t,uint64_t>,double>>> transitions
+        );
+
+        /**
+         * Create a product of the quotient POMDP and the given FSC.
          * @param action_function for each node in the FSC and for each observation class, a dictionary containing
          *  entries (action,probability)
          * @param action_function for each node in the FSC and for each observation class, a dictionary
          *  containing entries (memory,probability)
          */
-        void applyFsc(
+        void applyFscFactored(
             std::vector<std::vector<std::map<uint64_t,double>>> action_function,
             std::vector<std::vector<std::map<uint64_t,double>>> update_function
         );
@@ -71,6 +80,14 @@ namespace synthesis {
         uint64_t numberOfTranslatedStates();
         uint64_t numberOfTranslatedChoices();
 
+        void buildStateSpace(
+            std::vector<std::vector<std::map<uint64_t,double>>> action_prob,
+            std::vector<std::vector<std::map<std::pair<uint64_t,uint64_t>,double>>> transitions
+        );
+        storm::storage::SparseMatrix<ValueType> buildTransitionMatrix(
+            std::vector<std::vector<std::map<uint64_t,double>>> action_prob,
+            std::vector<std::vector<std::map<std::pair<uint64_t,uint64_t>,double>>> transitions
+        );
         void buildStateSpace(
             std::vector<std::vector<std::map<uint64_t,double>>> action_function,
             std::vector<std::vector<std::map<uint64_t,double>>> update_function
