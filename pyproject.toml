@@ -58,10 +58,8 @@ test = [
 [tool.scikit-build]
 cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
-wheel.install-dir = "paynt-install"
-cmake.args = [
-]
-wheel.packages = ["paynt"]
+cmake.args = []
+wheel.packages = ["paynt", "payntbind/lib/payntbind"]
 
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
@@ -78,6 +76,9 @@ target-version = [
     "py312",
     "py313",
 ]
+
+[project.scripts]
+paynt = "paynt.cli:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
