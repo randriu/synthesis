@@ -58,8 +58,9 @@ test = [
 [tool.scikit-build]
 cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
+# wheel.install-dir = "paynt"
 cmake.args = []
-wheel.packages = ["paynt", "payntbind/lib/payntbind"]
+wheel.packages = ["paynt", "payntbind_src/lib/payntbind"]
 
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"

@@ -112,40 +112,6 @@ SET(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 
 # Set configurations
 set(STORM_VERSION ${storm_VERSION})
-# Set number types from Carl
-# set_variable_string(STORM_USE_CLN_EA_BOOL ${STORM_USE_CLN_EA})
-# set_variable_string(STORM_USE_CLN_RF_BOOL ${STORM_USE_CLN_RF})
-# if (STORM_USE_CLN_EA)
-#     set(PYCARL_EA_PACKAGE "cln")
-# else()
-#     set(PYCARL_EA_PACKAGE "gmp")
-# endif()
-# if (STORM_USE_CLN_RF)
-#     set(PYCARL_RF_PACKAGE "cln")
-# else()
-#     set(PYCARL_RF_PACKAGE "gmp")
-# endif()
-# set(PYCARL_IMPORTS "from stormpy import pycarl")
-# if (STORM_USE_CLN_EA OR STORM_USE_CLN_RF)
-#     set(PYCARL_IMPORTS "${PYCARL_IMPORTS}\nfrom stormpy.pycarl import cln")
-# endif()
-# if (NOT STORM_USE_CLN_EA OR NOT STORM_USE_CLN_RF)
-#     set(PYCARL_IMPORTS "${PYCARL_IMPORTS}\nfrom stormpy.pycarl import gmp")
-# endif()
-# # Check support for carl-parser
-# if(USE_PARSER AND carlparser_FOUND)
-#     set(PYCARL_HAS_PARSE ON)
-# else()
-#     set(PYCARL_HAS_PARSE OFF)
-# endif()
-# set_variable_string(CARL_WITH_PARSER ${PYCARL_HAS_PARSE})
-# # Check support for CLN
-# if(STORM_USE_CLN_EA OR STORM_USE_CLN_RF)
-#     set(PYCARL_HAS_CLN ON)
-# else()
-#     set(PYCARL_HAS_CLN OFF)
-# endif()
-# set_variable_string(CARL_WITH_CLN ${PYCARL_HAS_CLN})
 
 # Helper functions
 function(build_module MOD_NAME # Module name
