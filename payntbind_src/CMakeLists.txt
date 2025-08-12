@@ -13,6 +13,8 @@ MARK_AS_ADVANCED(PYBIND_VERSION)
 set(STORM_DIR_HINT "" CACHE STRING "A hint where the Storm library can be found.")
 option(ALLOW_STORM_SYSTEM "Allow finding a storm version on the system" ON)
 option(ALLOW_STORM_FETCH "Allow fetching storm" ON)
+option(COMPILE_WITH_CCACHE "Compile using CCache (if found)" ON)
+mark_as_advanced(COMPILE_WITH_CCACHE)
 
 #+
 if (DEFINED DISABLE_SMG)
@@ -110,6 +112,21 @@ SET(CMAKE_INSTALL_RPATH "${RELPOS_STRING}/../../../lib/storm;${RELPOS_STRING}/..
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 SET(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 
+# CCache
+if(COMPILE_WITH_CCACHE)
+    find_program(CCACHE_FOUND ccache)
+    mark_as_advanced(CCACHE_FOUND)
+    if(CCACHE_FOUND)
+        message(STATUS "PAYNT - Using ccache")
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+    else()
+        message(STATUS "PAYNT - Could not find ccache.")
+    endif()
+else()
+    message(STATUS "PAYNT - Disabled use of ccache.")
+endif()
+
 # Set configurations
 set(STORM_VERSION ${storm_VERSION})
 
@@ -124,7 +141,7 @@ function(build_module MOD_NAME # Module name
     target_include_directories(${MOD_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/src)
     # Parse the additional includes and libs properly
     if(ADDITIONAL_INCLUDES)
-        target_include_directories(${MOD_NAME} PUBLIC ${ADDITIONAL_INCLUDES})
+        target_include_directories(${MOD_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${ADDITIONAL_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR}/src)
     endif()
     if(ADDITIONAL_LIBS)
         target_link_libraries(${MOD_NAME} PRIVATE ${ADDITIONAL_LIBS})
@@ -139,8 +156,8 @@ function(payntbind_module MOD_NAME)
     build_module("${MOD_NAME}"
                  "${MOD_NAME}" "${MOD_NAME}"
                  "mod_${MOD_NAME}.cpp" "${MOD_NAME}/*.cpp"
-                 "${storm_INCLUDE_DIR};${storm-parsers_INCLUDE_DIR};${storm-counterexamples_INCLUDE_DIR};${storm-version-info_INCLUDE_DIR}"
-                 "storm;storm-parsers;storm-counterexamples;storm-version-info")
+                 "${storm_INCLUDE_DIR};${storm-pomdp_INCLUDE_DIR};${storm-parsers_INCLUDE_DIR};${storm-counterexamples_INCLUDE_DIR};${storm-version-info_INCLUDE_DIR}"
+                 "storm;storm-pomdp;storm-parsers;storm-counterexamples;storm-version-info")
 endfunction(payntbind_module)
 
 # Generate definitions used during compilation
@@ -153,4 +170,3 @@ target_include_directories(synthesis
   src/synthesis/decpomdp/madp/include/
   src/synthesis/decpomdp/madp/parser/
 )
-target_link_libraries(synthesis PUBLIC storm storm-pomdp)
