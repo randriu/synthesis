@@ -94,10 +94,10 @@ class DrnParser:
 
     @classmethod
     def read_drn(cls, sketch_path, use_exact=False):
-        builder_options = stormpy.core.DirectEncodingParserOptions()
+        builder_options = stormpy._core.DirectEncodingParserOptions()
         builder_options.build_choice_labels = True
         if use_exact:
-            return stormpy.core._build_sparse_exact_model_from_drn(sketch_path, builder_options)
+            return stormpy._core._build_sparse_exact_model_from_drn(sketch_path, builder_options)
         else:
             return stormpy.build_model_from_drn(sketch_path, builder_options)
 

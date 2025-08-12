@@ -20,7 +20,7 @@ def construct_property(prop, relative_error, use_exact=False):
         player_index = extract_player_index(rf)
         game_rf = rf
         rf = rf.subformula
-        prop = stormpy.core.Property("", rf)
+        prop = stormpy._core.Property("", rf)
     assert rf.has_bound != rf.has_optimality_type, \
         "optimizing formula contains a bound or a comparison formula does not"
     if rf.has_bound:
@@ -182,11 +182,11 @@ class Property:
             return
         logger.info("converting until formula to eventually...")
         formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
-        prop = stormpy.core.Property("", formula)
+        prop = stormpy._core.Property("", formula)
         self.__init__(prop, self.use_exact)
 
     def property_copy(self):
-        return stormpy.core.Property("", self.property.raw_formula.clone())
+        return stormpy._core.Property("", self.property.raw_formula.clone())
 
     def copy(self):
         return Property(self.property_copy())
@@ -212,7 +212,7 @@ class Property:
             stormpy.ComparisonType.GREATER: stormpy.ComparisonType.LEQ,
             stormpy.ComparisonType.GEQ:     stormpy.ComparisonType.LESS
         }[negated_formula.comparison_type]
-        stormpy_property_negated = stormpy.core.Property("", negated_formula)
+        stormpy_property_negated = stormpy._core.Property("", negated_formula)
         property_negated = Property(stormpy_property_negated)
         return property_negated
 
@@ -332,7 +332,7 @@ class OptimalityProperty(Property):
             return
         logger.info("converting until formula to eventually...")
         formula = payntbind.synthesis.transform_until_to_eventually(self.property.raw_formula)
-        prop = stormpy.core.Property("", formula)
+        prop = stormpy._core.Property("", formula)
         self.__init__(prop, self.epsilon, self.use_exact)
 
     @property
@@ -346,7 +346,7 @@ class OptimalityProperty(Property):
             stormpy.OptimizationDirection.Maximize:    stormpy.OptimizationDirection.Minimize
         }[negated_formula.optimality_type]
         negated_formula.set_optimality_type(negate_optimality_type)
-        stormpy_property_negated = stormpy.core.Property("", negated_formula)
+        stormpy_property_negated = stormpy._core.Property("", negated_formula)
         property_negated = OptimalityProperty(stormpy_property_negated,self.epsilon)
         return property_negated
 
