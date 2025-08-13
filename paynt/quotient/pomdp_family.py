@@ -219,7 +219,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
         if target_states.number_of_set_bits()==0:
             # target is not reachable: use Stormpy simulator to obtain some random walk in a DTMC
             logger.debug("target is not reachable, generating random traces...")
-            simulator = stormpy._core._DiscreteTimeSparseModelSimulatorDouble(dtmc.model)
+            simulator = stormpy._DiscreteTimeSparseModelSimulatorDouble(dtmc.model)
             for _ in range(num_traces):
                 simulator.reset_to_initial_state()
                 path = [simulator.get_current_state()]
@@ -239,7 +239,7 @@ class PomdpFamilyQuotient(paynt.quotient.mdp_family.MdpFamilyQuotient):
             else:
                 logger.debug("...BSCCs from which target states are unreachable...")
                 phi_states = stormpy.storage.BitVector(dtmc.model.nr_states,True)
-                states0,_ = stormpy._core._compute_prob01states_double(dtmc.model,phi_states,target_states)
+                states0,_ = stormpy._compute_prob01states_double(dtmc.model,phi_states,target_states)
                 shortest_paths_generator = stormpy.utility.ShortestPathsGenerator(dtmc.model, states0)
             for k in range(1,num_traces+1):
                 path = shortest_paths_generator.get_path_as_list(k)
