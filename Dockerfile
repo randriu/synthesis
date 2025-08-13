@@ -15,15 +15,8 @@ WORKDIR /opt/
 # install dependencies
 RUN apt-get update -qq
 RUN apt-get install -y graphviz
-RUN pip install click z3-solver psutil graphviz
 
-# build paynt
+# install paynt
 WORKDIR /opt/paynt
 COPY . .
-WORKDIR /opt/paynt/payntbind
-RUN python setup.py build_ext $setup_args -j $no_threads develop
-
-WORKDIR /opt/paynt
-
-# (optional) install paynt
-RUN pip install -e .
+RUN pip install .
