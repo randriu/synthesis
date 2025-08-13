@@ -11,6 +11,6 @@ option(ALLOW_STORM_FETCH "Allow fetching storm" ON)
 
 find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development)
 
-add_subdirectory(payntbind_src)
+add_subdirectory(payntbind)
 
 add_subdirectory(paynt)

@@ -60,7 +60,7 @@ cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}"
 # wheel.install-dir = "paynt"
 cmake.args = []
-wheel.packages = ["paynt", "payntbind_src/lib/payntbind"]
+wheel.packages = ["paynt", "payntbind/lib/payntbind"]
 
 [tool.scikit-build.cmake.define]
 STORM_DIR_HINT=""

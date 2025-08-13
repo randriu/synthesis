@@ -1,1 +1,0 @@
-# payntbind - C++ bindings for PAYNT
