@@ -1,6 +1,8 @@
 import sys
 import z3
 
+from paynt.family.constraints.constraints import Constraints
+
 # import pycvc5 if installed
 import importlib
 if importlib.util.find_spec('pycvc5') is not None:
@@ -49,6 +51,18 @@ class FamilyEncoding():
             else:
                 pass
 
+        if smt_solver.constraint is not None:
+
+            logger.info(f"Adding constraint {smt_solver.constraint} to the encoding.")
+            constraint = Constraints.create_constraint(smt_solver.constraint)
+
+            constraint_smt_clauses = constraint.build_constraint(
+                self.smt_solver.solver_vars,
+                self.smt_solver.quotient
+            )
+
+            encoding = z3.And(encoding, *constraint_smt_clauses)
+
         self.hole_clauses = hole_clauses
         self.encoding = encoding
 
@@ -86,7 +100,7 @@ class FamilyEncoding():
         
 class SmtSolver():
 
-    def __init__(self, family):
+    def __init__(self, quotient, constraint=None):
 
         # SMT solver containing description of the unexplored design space
         self.solver = None
@@ -103,8 +117,14 @@ class SmtSolver():
         # current depth of push/pop solving
         self.solver_depth = 0
 
+        # initial constraint for the design space
+        self.constraint = constraint
+
+        self.quotient = quotient
+        family = quotient.family
+
         # choose solver
-        if "pycvc5" in sys.modules:
+        if "pycvc5" in sys.modules and self.constraint is None:
             logger.debug("using CVC5 for SMT solving.")
             self.use_cvc = True
         else:
@@ -115,7 +135,7 @@ class SmtSolver():
         self.solver_clauses = []
         if self.use_python_z3:
             self.solver = z3.Solver()
-            self.solver_vars = [z3.Int(hole) for hole in range(family.num_holes)]
+            self.solver_vars = [z3.Int(family.hole_name(hole)) for hole in range(family.num_holes)]
         elif self.use_cvc:
             self.solver = pycvc5.Solver()
             self.solver.setOption("produce-models", "true")
