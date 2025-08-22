@@ -28,7 +28,21 @@ endif()
 
 # Configure Storm settings based on stormpy configuration
 if(STORMPY_FROM_SYSTEM STREQUAL "True")
-    message(STATUS "PAYNT - StormPy uses system Storm - configuring PAYNT to use system Storm")
+    execute_process(
+        COMMAND "${Python_EXECUTABLE}" -c "import stormpy.info; print(stormpy.info.storm_directory())"
+        RESULT_VARIABLE _directory_result
+        OUTPUT_VARIABLE STORM_DIRECTORY_INFO
+        ERROR_VARIABLE _origin_error
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(NOT _directory_result EQUAL 0)
+        message(FATAL_ERROR "PAYNT - Failed to query stormpy.info.storm_directory(): ${_origin_error}")
+    endif()
+
+    message(STATUS "PAYNT - StormPy uses system Storm from: ${STORM_DIRECTORY_INFO} - configuring PAYNT to use the same system Storm")
+
+    set(STORM_DIR_HINT "${STORM_DIRECTORY_INFO}")
     set(ALLOW_STORM_SYSTEM ON)
     set(ALLOW_STORM_FETCH OFF)
 else()
@@ -48,9 +62,8 @@ else()
     endif()
     
     # Parse repo and tag
-    string(REPLACE ";" "\\;" STORM_ORIGIN_INFO_ESC "${STORM_ORIGIN_INFO}")
-    list(GET STORM_ORIGIN_INFO_ESC 0 STORM_ORIGIN_REPO)
-    list(GET STORM_ORIGIN_INFO_ESC 1 STORM_ORIGIN_TAG)
+    list(GET STORM_ORIGIN_INFO 0 STORM_ORIGIN_REPO)
+    list(GET STORM_ORIGIN_INFO 1 STORM_ORIGIN_TAG)
     
     message(STATUS "PAYNT - Storm origin repo: ${STORM_ORIGIN_REPO}")
     message(STATUS "PAYNT - Storm origin tag: ${STORM_ORIGIN_TAG}")
@@ -77,6 +90,7 @@ endif()
 # TODO REMOVE AFTER EVERYTHING IS TESTED
 # Debug output
 # message(STATUS "Final Storm configuration:")
+# message(STATUS "  STORM_DIR_HINT: ${STORM_DIR_HINT}")
 # message(STATUS "  ALLOW_STORM_SYSTEM: ${ALLOW_STORM_SYSTEM}")
 # message(STATUS "  ALLOW_STORM_FETCH: ${ALLOW_STORM_FETCH}")
 # if(DEFINED STORM_GIT_REPO AND NOT STORM_GIT_REPO STREQUAL "")
