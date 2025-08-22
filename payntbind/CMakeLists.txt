@@ -13,10 +13,16 @@ MARK_AS_ADVANCED(PYBIND_VERSION)
 set(STORM_DIR_HINT "" CACHE STRING "A hint where the Storm library can be found.")
 option(ALLOW_STORM_SYSTEM "Allow finding a storm version on the system" ON)
 option(ALLOW_STORM_FETCH "Allow fetching storm" ON)
+set(STORM_GIT_REPO "" CACHE STRING  "Git repo used for fetching storm")
+set(STORM_GIT_TAG "" CACHE STRING "Git repo tag used for fetching storm")
 option(COMPILE_WITH_CCACHE "Compile using CCache (if found)" ON)
 mark_as_advanced(COMPILE_WITH_CCACHE)
 
-#+
+# Check whether inputs are sane.
+if (NOT ALLOW_STORM_SYSTEM AND NOT ALLOW_STORM_FETCH)
+    message(FATAL_ERROR "PAYNT - Storm must be either fetched or used from system, yet ALLOW_STORM_SYSTEM=OFF and ALLOW_STORM_FETCH=OFF was set.")
+endif()
+
 if (DEFINED DISABLE_SMG)
     add_definitions(-DDISABLE_SMG)
 endif()
@@ -48,12 +54,18 @@ endfunction(check_hint)
 
 if(ALLOW_STORM_SYSTEM)
     set(STORM_MIN_VERSION "1.10.0")
-    find_package(storm REQUIRED HINTS ${STORM_DIR_HINT})
+    if (ALLOW_STORM_FETCH)
+        find_package(storm HINTS ${STORM_DIR_HINT}) # NOT REQUIRED, can be fetched.
+    else()
+        find_package(storm REQUIRED HINTS ${STORM_DIR_HINT}) # REQUIRED, cannot be fetched.
+    endif()
     check_hint("Storm" ${storm_DIR} "${STORM_DIR_HINT}" ${storm_VERSION})
     # Check Storm version
     if (${storm_VERSION} VERSION_LESS ${STORM_MIN_VERSION})
         MESSAGE(FATAL_ERROR "PAYNT - Storm version ${storm_VERSION} from ${storm_DIR} is not supported anymore!\nPAYNT requires at least Storm version >= ${STORM_MIN_VERSION}.")
     endif()
+
+    message(WARNING "PAYNT - When using system version of Storm, it's up to the user to ensure StormPy was built against the same version!")
 
     # Set dependency variables
     set_dependency_var(SPOT)
@@ -70,8 +82,8 @@ if (NOT storm_FOUND AND ALLOW_STORM_FETCH)
     SET(STORM_BUILD_EXECUTABLES OFF)
     FetchContent_Declare(
             storm
-            GIT_REPOSITORY https://github.com/moves-rwth/storm.git
-            GIT_TAG        master
+            GIT_REPOSITORY ${STORM_GIT_REPO}
+            GIT_TAG        ${STORM_GIT_TAG}
     )
     FETCHCONTENT_MAKEAVAILABLE(storm)
     include(${storm_BINARY_DIR}/stormOptions.cmake)
@@ -85,7 +97,6 @@ if (NOT storm_FOUND AND ALLOW_STORM_FETCH)
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/payntbind")
-
 
 # This sets interprocedural optimization off as this leads to some problems on some systems
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
