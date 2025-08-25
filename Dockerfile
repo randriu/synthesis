@@ -19,4 +19,5 @@ RUN apt-get install -y graphviz
 # install paynt
 WORKDIR /opt/paynt
 COPY . .
-RUN pip install .
+RUN pip install -r build-requirements.txt
+RUN pip install . --no-build-isolation

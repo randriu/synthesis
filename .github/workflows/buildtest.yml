@@ -96,7 +96,7 @@ jobs:
         # Build PAYNT explicitly to catch exit code
         shell: bash {0} // Deactivate fast-fail to handle exit code for incompatibility
         run: |
-          docker exec ci bash -c "cd /opt/paynt; pip install -v --config-settings=cmake.define.CMAKE_BUILD_PARALLEL_LEVEL=${NR_JOBS} --config-settings=cmake.build-type=${{ matrix.build_type.build_type }} ${{ matrix.build_type.setup_args }} .${{ matrix.build_type.optional_libs }}"
+          docker exec ci bash -c "cd /opt/paynt; pip install -r build-requirements.txt ; pip install -v --no-build-isolation --config-settings=cmake.define.CMAKE_BUILD_PARALLEL_LEVEL=${NR_JOBS} --config-settings=cmake.build-type=${{ matrix.build_type.build_type }} ${{ matrix.build_type.setup_args }} .${{ matrix.build_type.optional_libs }}"
           status=$?
           if [ $status -eq 1 ]; then
             # Warn about possible incompatibility but do not handle as failure
