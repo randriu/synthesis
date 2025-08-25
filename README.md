@@ -11,7 +11,7 @@ PAYNT is described in
 
 ## Installation
 
-### For users
+### a) For users
 
 To download and install PAYNT, use:
 
@@ -28,16 +28,16 @@ python3 -m venv venv && source venv/bin/activate
 pip install .
 ```
 
-### For developers
+### b) For developers
 
-PAYNT depends on [Storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy). For developers we recommend having local installations of both Storm and stormpy. If you have stormpy installed in your developer environment you can use:
+PAYNT depends on [Storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy). For developers we recommend having local installations of both Storm and stormpy (see [section below](#installing-storm-and-stormpy)). If you have stormpy installed in your developer environment you can use:
 
 ```shell
 pip install -r build-requirements.txt
 pip install . --no-build-isolation
 ```
 
-which build PAYNT from source and installs it into your environment. **Note that the Storm backend used by PAYNT and stormpy need to be the same.** We implemented a series of checks that should ensure this is the case, however, it's still up to the developer to make sure.
+which builds PAYNT from source and installs it into your environment. **Note that the Storm backend used by PAYNT and stormpy need to be the same.** We implemented a series of checks that should ensure the backend compatibility, however, it's still up to the developer to make sure.
 
 PAYNT is also available as a docker image:
 
@@ -45,6 +45,22 @@ PAYNT is also available as a docker image:
 docker pull randriu/paynt
 docker run --rm -it randriu/paynt
 python3 paynt.py --help
+```
+
+#### Installing Storm and stormpy
+
+Please refer to [Storm documentation](https://www.stormchecker.org/documentation/obtain-storm/build.html) and [stormpy documentation](https://moves-rwth.github.io/stormpy/installation.html) for more information. Here we provide a list of commands that build master branch of Storm and stormpy in virtual environment without further explanation:
+
+```shell
+python3 -m venv venv && source venv/bin/activate
+mkdir prerequisites && cd prerequisites
+git clone
+git clone
+mkdir storm/build && cd storm/build
+cmake ..
+make storm storm-cli storm-pomdp
+cd - && cd stormpy
+pip install . --config-settings=cmake.define.USE_STORM_DFT=OFF --config-settings=cmake.define.USE_STORM_GSPN=OFF
 ```
 
 ## Running PAYNT
