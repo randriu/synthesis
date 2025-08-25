@@ -3,6 +3,8 @@ __pycache__/
 
 prerequisites/
 
+venv/
+
 .vscode
 .idea
 
