@@ -1,46 +1,43 @@
 # PAYNT
 
-PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs and Dec-POMDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [Stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
+[![Build Status](https://github.com/randriu/synthesis/workflows/Build%20Test/badge.svg)](https://github.com/moves-rwth/stormpy/actions)
+
+PAYNT (Probabilistic progrAm sYNThesizer) is a tool for the automated synthesis of probabilistic programs. PAYNT takes a program with holes (a so-called sketch) and a PCTL specification, and outputs a concrete hole assignment that yields a satisfying program, if such an assignment exists. PAYNT also supports the synthesis of finite-state controllers for POMDPs, Dec-POMDPs and one-sided POSMGs, synthesis of decision trees for MDPs and synthesis of policy trees for families of MDPs. Internally, PAYNT interprets the incomplete probabilistic program as a family of Markov chains and uses state-of-the-art synthesis methods on top of the model checker [Storm](https://github.com/moves-rwth/storm) to identify satisfying realization. PAYNT is implemented in Python and uses [stormpy](https://github.com/moves-rwth/stormpy), Python bindings for Storm. PAYNT is hosted on [github](https://github.com/randriu/synthesis).
 
 PAYNT is described in 
-- [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky
-
-Most of the algorithms are described in 
-- [2] Inductive Synthesis for Probabilistic Programs Reaches New Horizons by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, TACAS 2021
-- [3] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen, FM 2019.
-- [4] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen, TACAS 2019
-- [5] Inductive Synthesis of Finite-State Controllers for POMDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, UAI 2022.
-- [6] Search and Explore: Symbiotic Policy Synthesis in POMDPs by Roman Andriushchenko, Alexander Bork, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, Filip Macak, CAV 2023.
+- [1] PAYNT: A Tool for Inductive Synthesis of Probabilistic Programs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Simon Stupinsky. In: CAV'21.
+- [2] An Oracle-Guided Approach to Constrained Policy Synthesis Under Uncertainty by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen and Filip Macak. Journal of Artificial Intelligence Research (2025).
 
 
 ## Installation
 
-To download PAYNT, use
+### For users
+
+To download and install PAYNT, use:
 
 ```shell
-git clone https://github.com/randriu/synthesis.git synthesis
+pip install paynt
+```
+
+Alternatively, if you want to build PAYNT from source, use:
+
+```shell
+git clone https://github.com/randriu/synthesis.git
 cd synthesis
+python3 -m venv venv && source venv/bin/activate
+pip install .
 ```
 
-PAYNT requires [Storm](https://github.com/moves-rwth/storm) and [Stormpy](https://github.com/moves-rwth/stormpy). If you have Stormpy installed (e.g. within a Python environment), PAYNT and its dependencies can be installed by
+### For developers
+
+PAYNT depends on [Storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy). For developers we recommend having local installations of both Storm and stormpy. If you have stormpy installed in your developer environment you can use:
 
 ```shell
-sudo apt install -y graphviz
-source ${VIRTUAL_ENV}/bin/activate
-pip3 install click z3-solver psutil graphviz
-cd payntbind
-python3 setup.py develop
-cd ..
-python3 paynt.py --help
+pip install -r build-requirements.txt
+pip install . --no-build-isolation
 ```
 
-If you do not have Stormpy installed, you can run the installation script `install.sh` to install Storm, Stormpy and other required dependencies. Complete compilation might take up to an hour. The Python environment will be available in `prerequisistes/venv`:
-
-```shell
-./install.sh
-source prerequisistes/venv/bin/activate
-python3 paynt.py --help
-```
+which build PAYNT from source and installs it into your environment. **Note that the Storm backend used by PAYNT and stormpy need to be the same.** We implemented a series of checks that should ensure this is the case, however, it's still up to the developer to make sure.
 
 PAYNT is also available as a docker image:
 
@@ -50,25 +47,17 @@ docker run --rm -it randriu/paynt
 python3 paynt.py --help
 ```
 
-
 ## Running PAYNT
-
-Upon enabling the Python environment, e.g.
-
-```shell
-source ${VIRTUAL_ENV}/bin/activate
-```
 
 PAYNT can be executed using the command in the following form:
 
 ```shell
-python3 paynt.py PROJECT [OPTIONS]
+python3 -m paynt PROJECT [OPTIONS]
 ```
 where ``PROJECT`` is the path to the benchmark folder and the most important options are:
 - ``--sketch SKETCH``: the file in the ``PROJECT`` folder containing the template description or a POMDP program [default: ``sketch.templ``]
-- ``--constants STRING``: the values of constants that are undefined in the sketch and are not holes, in the form: ``c1=0,c2=1``
 - ``--props PROPS``: the file in the ``PROJECT`` folder containing synthesis specification [default: ``sketch.props``]
-- ``--method [onebyone|ar|cegis|hybrid|ar_multicore]``: the synthesis method  [default: ``ar``]
+- ``--method [ar|cegis|hybrid]``: the synthesis method  [default: ``ar``]
 
 Options associated with the synthesis of finite-state controllers (FSCs) for a POMDP include:
 - ``--fsc-memory-size INTEGER``    implicit memory size for (Dec-)POMDP FSCs [default: 1]
@@ -353,3 +342,17 @@ python3 -m pytest --cov=./../paynt/ --cov-report term-missing test_synthesis.py 
 ```
 This command prints the coverage report, displaying the resulting coverage for individual source files.
 Our tests currently cover more than `90%` of the source code lines, even though the result shows `82%` because `~10%` of the source code is only temporary functions for debugging purposes that have no functionality.
+
+
+---
+
+# References
+
+Most of the algorithms are described in:
+- [3] Inductive Synthesis for Probabilistic Programs Reaches New Horizons by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen. In: TACAS'21.
+- [4] Counterexample-Driven Synthesis for Probabilistic Program Sketches by Milan Ceska, Christian Hensel, Sebastian Junges, Joost-Pieter Katoen. In: FM'19.
+- [5] Shepherding Hordes of Markov Chains by Milan Ceska, Nils Jansen, Sebastian Junges, Joost-Pieter Katoen. In: TACAS'19.
+- [6] Inductive Synthesis of Finite-State Controllers for POMDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen. In: UAI'22.
+- [7] Search and Explore: Symbiotic Policy Synthesis in POMDPs by Roman Andriushchenko, Alexander Bork, Milan Ceska, Sebastian Junges, Joost-Pieter Katoen, Filip Macak. In: CAV'23.
+- [8] Policies Grow on Trees: Model Checking Families of MDPs by Roman Andriushchenko, Milan Ceska, Sebastian Junges, and Filip Macak. In: ATVA'24.
+- [9] Small Decision Trees for MDPs with Deductive Synthesis by by Roman Andriushchenko, Milan Ceska, Sebastian Junges, and Filip Macak. In: CAV'25.
