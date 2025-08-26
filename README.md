@@ -44,7 +44,7 @@ PAYNT is also available as a docker image:
 ```shell
 docker pull randriu/paynt
 docker run --rm -it randriu/paynt
-python3 paynt.py --help
+python3 -m paynt --help
 ```
 
 #### Installing Storm and stormpy
@@ -97,14 +97,14 @@ Other options:
 
 Here are various PAYNT calls:
 ```shell
-python3 paynt.py models/archive/cav21-paynt/maze --props hard.props
-python3 paynt.py models/archive/cav21-paynt/maze --props hard.props --method hybrid
-python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0
-python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
-python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
-timeout 10s python3 paynt.py models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
-python3 paynt.py models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
-python3 paynt.py models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
+python3 -m paynt models/archive/cav21-paynt/maze --props hard.props
+python3 -m paynt models/archive/cav21-paynt/maze --props hard.props --method hybrid
+python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0
+python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 2
+python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-memory-size 5
+timeout 10s python3 -m paynt models/archive/uai22-pomdp/grid-avoid-4-0 --fsc-synthesis
+python3 -m paynt models/archive/cav23-saynt/4x3-95 --fsc-synthesis --storm-pomdp --iterative-storm 180 60 10
+python3 -m paynt models/archive/cav23-saynt/rocks-12 --fsc-synthesis --storm-pomdp --get-storm-result 0
 ```
 
 The Python environment can be deactivated by running
@@ -126,7 +126,7 @@ paynt() {
 For instance, here is a simple PAYNT call:
 
 ```shell
-python3 paynt.py models/archive/cav21-paynt/grid --props easy.props hybrid
+python3 -m paynt models/archive/cav21-paynt/grid --props easy.props hybrid
 ```
 
 Now we will investigate the __Grid__ model discussed in [1].
@@ -141,7 +141,7 @@ Having the tool installed, you can quickly test it by navigating to the tool fol
 ```sh
 cd /home/cav21/synthesis
 source env/bin/activate
-python3 paynt.py models/archive/cav21-paynt/dpm-demo --method hybrid
+python3 -m paynt models/archive/cav21-paynt/dpm-demo --method hybrid
 ```
 
 The syntax of the command is described in more detail in the following chapters of this README.
@@ -180,7 +180,7 @@ Running PAYNT produces a sequence of log and a summary printed at the end of the
 For instance, if we run
 
 ```sh
-python3 paynt.py models/archive/cav21-paynt/dpm-demo --method hybrid
+python3 -m paynt models/archive/cav21-paynt/dpm-demo --method hybrid
 ```
 we obtain the following summary:
 
@@ -334,7 +334,7 @@ from which we can see that PAYNT indeed proved non-existence of a better solutio
 We might further consider a more complex program sketch __Grid__ (discussed in [1]), where we synthesize controller for a robot in an unpredictable environment.
 
 ```shell
-python3 paynt.py models/archive/cav21-paynt/grid --props easy.props --method hybrid
+python3 -m paynt models/archive/cav21-paynt/grid --props easy.props --method hybrid
 ```
 
 This sketch describes a family of 65K members, where each member has, on average 1225 states.
@@ -342,7 +342,7 @@ Even though this is a much larger family with much larger chains than in the ske
 Meanwhile, one-by-one enumeration
 
 ```shell
-python3 paynt.py models/archive/cav21-paynt/grid --props easy.props --method onebyone
+python3 -m paynt models/archive/cav21-paynt/grid --props easy.props --method onebyone
 ```
 might take up to 20 minutes.
 
