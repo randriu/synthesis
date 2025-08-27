@@ -19,7 +19,7 @@ To download and install PAYNT, use:
 pip install paynt
 ```
 
-Alternatively, if you may build PAYNT from source:
+Alternatively, you may build PAYNT from source:
 
 ```shell
 git clone https://github.com/randriu/synthesis.git
