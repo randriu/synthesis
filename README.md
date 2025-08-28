@@ -54,8 +54,8 @@ Please refer to [Storm documentation](https://www.stormchecker.org/documentation
 ```shell
 python3 -m venv venv && source venv/bin/activate
 mkdir prerequisites && cd prerequisites
-git clone
-git clone
+git clone https://github.com/moves-rwth/storm.git
+git clone https://github.com/moves-rwth/stormpy.git
 mkdir storm/build && cd storm/build
 cmake ..
 make storm storm-cli storm-pomdp
