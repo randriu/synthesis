@@ -67,6 +67,10 @@ if(ALLOW_STORM_SYSTEM)
 
     message(WARNING "PAYNT - When using system version of Storm, it's up to the user to ensure StormPy was built against the same version!")
 
+    set(STORM_FROM_SYSTEM TRUE)
+    get_filename_component(STORM_DIR_PATH ${storm_DIR} ABSOLUTE)
+    set(STORM_DIR "\"${STORM_DIR_PATH}\"")
+
     # Set dependency variables
     set_dependency_var(SPOT)
     set_dependency_var(XERCES)
@@ -94,6 +98,16 @@ if (NOT storm_FOUND AND ALLOW_STORM_FETCH)
     # Set dependency variables
     set_dependency_var(SPOT)
     set_dependency_var(XERCES)
+    if (FETCHCONTENT_SOURCE_DIR_storm)
+        # We are setting the Storm source to be something local from the outside.
+        set(STORM_FETCHED_FROM_REPO ${FETCHCONTENT_SOURCE_DIR_storm})
+        set(STORM_FETCHED_FROM_TAG "__local-source-dir__")
+    else()
+        set(STORM_FETCHED_FROM_REPO ${STORM_GIT_REPO})
+        set(STORM_FETCHED_FROM_TAG ${STORM_GIT_TAG})
+    endif()
+    set(STORM_FROM_SYSTEM FALSE)
+    set(STORM_DIR "None")
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/payntbind")
@@ -171,8 +185,32 @@ function(payntbind_module MOD_NAME)
                  "storm;storm-pomdp;storm-parsers;storm-counterexamples;storm-version-info")
 endfunction(payntbind_module)
 
+set_variable_string(STORM_USE_CLN_EA_BOOL ${STORM_USE_CLN_EA})
+set_variable_string(STORM_USE_CLN_RF_BOOL ${STORM_USE_CLN_RF})
+set_variable_string(STORM_DEVELOPER_VERSION ${STORM_VERSION_DEV})
+if (STORM_FETCHED_FROM_REPO)
+    set(STORM_ORIGIN_REPO "\"${STORM_FETCHED_FROM_REPO}\"")
+else()
+    set(STORM_ORIGIN_REPO "None")
+endif()
+if(STORM_FETCHED_FROM_TAG)
+    set(STORM_ORIGIN_TAG "\"${STORM_FETCHED_FROM_TAG}\"")
+else()
+    set(STORM_ORIGIN_TAG "None")
+endif()
+set_variable_string(STORM_FROM_SYSTEM ${STORM_FROM_SYSTEM})
+
+# Set optional library variables
+set_optional_lib_var(DFT)
+set_optional_lib_var(GSPN)
+set_optional_lib_var(PARS)
+set_optional_lib_var(POMDP)
+
 # Generate definitions used during compilation
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/config.h)
+
+payntbind_module(info)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.py.in ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/info/_config.py @ONLY)
 
 payntbind_module(synthesis)
 target_include_directories(synthesis
