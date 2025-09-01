@@ -11,7 +11,7 @@ PAYNT is described in
 
 ## Installation
 
-### a) For users
+### (a) For users
 
 To download and install PAYNT, use:
 
@@ -19,7 +19,7 @@ To download and install PAYNT, use:
 pip install paynt
 ```
 
-Alternatively, if you want to build PAYNT from source, use:
+Alternatively, you may build PAYNT from source:
 
 ```shell
 git clone https://github.com/randriu/synthesis.git
@@ -28,16 +28,16 @@ python3 -m venv venv && source venv/bin/activate
 pip install .
 ```
 
-### b) For developers
+### (b) For developers
 
-PAYNT depends on [Storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy). For developers we recommend having local installations of both Storm and stormpy (see [section below](#installing-storm-and-stormpy)). If you have stormpy installed in your developer environment you can use:
+PAYNT depends on [Storm](https://github.com/moves-rwth/storm) and [stormpy](https://github.com/moves-rwth/stormpy). For developers, we recommend having local installations of both Storm and stormpy (see [section below](#installing-storm-and-stormpy)). If you have stormpy installed in your developer environment, you can use:
 
 ```shell
 pip install -r build-requirements.txt
 pip install . --no-build-isolation
 ```
 
-which builds PAYNT from source and installs it into your environment. **Note that the Storm backend used by PAYNT and stormpy need to be the same.** We implemented a series of checks that should ensure the backend compatibility, however, it's still up to the developer to make sure.
+which builds and installs PAYNT directly into your environment. **Note that the Storm backends used by both PAYNT and stormpy need to be the same.** While we implemented several routines that check the backend compatibility, it is up to the developer to make sure of it.
 
 PAYNT is also available as a docker image:
 
@@ -54,8 +54,8 @@ Please refer to [Storm documentation](https://www.stormchecker.org/documentation
 ```shell
 python3 -m venv venv && source venv/bin/activate
 mkdir prerequisites && cd prerequisites
-git clone
-git clone
+git clone https://github.com/moves-rwth/storm.git
+git clone https://github.com/moves-rwth/stormpy.git
 mkdir storm/build && cd storm/build
 cmake ..
 make storm storm-cli storm-pomdp

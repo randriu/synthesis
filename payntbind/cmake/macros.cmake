@@ -36,7 +36,7 @@ endfunction(set_dependency_var)
 # which can be checked with HAVE_STORM_XYZ and optiona USE_STORM_XYZ
 # Sets variable STORM_WITH_XYZ_BOOL
 function(set_optional_lib_var NAME)
-    if ((USE_STORM_${NAME}) AND (HAVE_STORM_${NAME}))
+    if (HAVE_STORM_${NAME})
         set(STORM_WITH_${NAME}_BOOL "True" PARENT_SCOPE)
     else()
         set(STORM_WITH_${NAME}_BOOL "False" PARENT_SCOPE)

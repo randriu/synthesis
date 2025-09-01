@@ -2,6 +2,7 @@ import paynt.quotient.mdp_family
 from . import version
 
 import paynt.utils.timer
+import paynt.utils.version_check
 import paynt.parser.sketch
 
 import paynt.quotient.quotient
@@ -159,6 +160,7 @@ def paynt_run(
     paynt.utils.timer.GlobalTimer.start(timeout)
 
     logger.info("This is Paynt version {}.".format(version()))
+    paynt.utils.version_check.check_stormpy_compatibility()
 
     # set CLI parameters
     paynt.quotient.quotient.Quotient.disable_expected_visits = disable_expected_visits
