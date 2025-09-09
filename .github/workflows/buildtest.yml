@@ -117,6 +117,7 @@ jobs:
     name: Linux Test (Fetch, ${{ matrix.config.name }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         config:
           - {name: "Debian 12, Debug",
@@ -161,9 +162,10 @@ jobs:
         run: docker exec ci bash -c "cd /opt/paynt/payntbind; pytest tests"
 
   
-  macFetchTests:
+  macTests:
     name: Mac Tests (Fetch, ${{ matrix.config.name }})
     strategy:
+      fail-fast: false
       matrix:
         config:
           - {name: "XCode 16.3, ARM, Debug",
